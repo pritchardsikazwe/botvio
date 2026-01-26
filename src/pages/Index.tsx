@@ -1,19 +1,47 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/trading/Header";
 import { PriceDisplay } from "@/components/trading/PriceDisplay";
-import { SignalCard } from "@/components/trading/SignalCard";
 import { SupportResistanceLevels } from "@/components/trading/SupportResistanceLevels";
 import { TokenInput } from "@/components/trading/TokenInput";
 import { PairSelector } from "@/components/trading/PairSelector";
 import { SniperEntry } from "@/components/trading/SniperEntry";
 import { StrategyPanel } from "@/components/trading/StrategyPanel";
-import { Signal, SupportResistance, MarketData } from "@/types/trading";
-import { TrendingUp, History, Zap } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HauzaSniperPanel } from "@/components/trading/HauzaSniperPanel";
+import { PerformancePanel } from "@/components/trading/PerformancePanel";
+import { SupportResistance, MarketData } from "@/types/trading";
+import { useAuth } from "@/contexts/AuthContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { GraduationCap, Target, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const { user, settings } = useAuth();
+  const navigate = useNavigate();
   const [selectedPair, setSelectedPair] = useState("XAUUSD");
-  const [isConnected, setIsConnected] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Use user's saved settings
+  useEffect(() => {
+    if (settings?.default_pair) {
+      setSelectedPair(settings.default_pair);
+    }
+  }, [settings]);
+
+  // Show onboarding for new users (check localStorage to show only once)
+  useEffect(() => {
+    if (user) {
+      const hasSeenOnboarding = localStorage.getItem('hauza_onboarding_seen');
+      if (!hasSeenOnboarding) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [user]);
+
+  const handleCloseOnboarding = () => {
+    localStorage.setItem('hauza_onboarding_seen', 'true');
+    setShowOnboarding(false);
+  };
 
   // Mock market data - would come from API
   const [marketData, setMarketData] = useState<MarketData>({
@@ -37,34 +65,6 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Mock signals
-  const signals: Signal[] = [
-    {
-      id: '1',
-      type: 'BUY',
-      pair: 'XAUUSD',
-      entry: 2345.50,
-      stopLoss: 2340.00,
-      takeProfit: [2355.00, 2365.00, 2380.00],
-      confidence: 92,
-      timestamp: new Date(),
-      strategy: 'Hauza Sniper Entry',
-      status: 'ACTIVE',
-    },
-    {
-      id: '2',
-      type: 'SELL',
-      pair: 'XAUUSD',
-      entry: 2368.00,
-      stopLoss: 2375.00,
-      takeProfit: [2355.00, 2340.00],
-      confidence: 78,
-      timestamp: new Date(Date.now() - 3600000),
-      strategy: 'S/R Resistance Break',
-      status: 'CLOSED',
-    },
-  ];
-
   // Mock S/R levels
   const srLevels: SupportResistance[] = [
     { level: 2380.00, type: 'RESISTANCE', strength: 'STRONG', touches: 5 },
@@ -74,7 +74,8 @@ const Index = () => {
   ];
 
   const handleTokenSubmit = (token: string) => {
-    setIsConnected(true);
+    // Token is handled by the TokenInput component
+    console.log('Token submitted');
   };
 
   return (
@@ -99,73 +100,84 @@ const Index = () => {
             <PriceDisplay data={marketData} />
             <SniperEntry pair={selectedPair} currentPrice={marketData.price} />
 
+            {/* Hauza Sniper Signals Panel */}
             <div className="glass-card p-6">
-              <Tabs defaultValue="active" className="w-full">
-                <TabsList className="w-full grid grid-cols-3 bg-secondary/50">
-                  <TabsTrigger value="active" className="flex items-center gap-2">
-                    <Zap className="w-4 h-4" />
-                    Active
-                  </TabsTrigger>
-                  <TabsTrigger value="pending" className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
-                    Pending
-                  </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center gap-2">
-                    <History className="w-4 h-4" />
-                    History
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="active" className="mt-4 space-y-4">
-                  {signals.filter(s => s.status === 'ACTIVE').map(signal => (
-                    <SignalCard key={signal.id} signal={signal} />
-                  ))}
-                </TabsContent>
-                
-                <TabsContent value="pending" className="mt-4">
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No pending signals</p>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="history" className="mt-4 space-y-4">
-                  {signals.filter(s => s.status === 'CLOSED').map(signal => (
-                    <SignalCard key={signal.id} signal={signal} />
-                  ))}
-                </TabsContent>
-              </Tabs>
+              <HauzaSniperPanel 
+                symbol={selectedPair} 
+                timeframe={settings?.default_timeframe || "M5"} 
+              />
             </div>
           </div>
 
           {/* Right Sidebar */}
           <div className="lg:col-span-3 space-y-6">
             <SupportResistanceLevels levels={srLevels} currentPrice={marketData.price} />
-            
-            {/* Quick Stats */}
-            <div className="glass-card p-6">
-              <span className="data-label mb-4 block">Performance</span>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-success/10 rounded-xl">
-                  <p className="text-2xl font-bold text-success">87%</p>
-                  <p className="text-xs text-muted-foreground">Win Rate</p>
-                </div>
-                <div className="text-center p-4 bg-primary/10 rounded-xl">
-                  <p className="text-2xl font-bold text-primary">156</p>
-                  <p className="text-xs text-muted-foreground">Total Trades</p>
-                </div>
-                <div className="text-center p-4 bg-secondary rounded-xl">
-                  <p className="text-2xl font-bold">2.3</p>
-                  <p className="text-xs text-muted-foreground">Risk Ratio</p>
-                </div>
-                <div className="text-center p-4 bg-secondary rounded-xl">
-                  <p className="text-2xl font-bold text-success">+$12.4K</p>
-                  <p className="text-xs text-muted-foreground">Profit</p>
-                </div>
-              </div>
-            </div>
+            <PerformancePanel />
           </div>
         </div>
       </main>
+
+      {/* Onboarding Dialog */}
+      <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
+        <DialogContent className="glass-card border-border sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Target className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl">Welcome to Hauza Sniper!</DialogTitle>
+                <DialogDescription>XAUUSD Trading Strategy</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Hauza Sniper is a precise trading strategy that combines:
+            </p>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center gap-2">
+                <span className="text-success">✓</span>
+                Support & Resistance zone detection
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-success">✓</span>
+                Wick rejection analysis for sniper entries
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-success">✓</span>
+                EMA 20 trend confirmation filter
+              </li>
+            </ul>
+
+            <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+              <AlertTriangle className="w-4 h-4 text-warning mt-0.5" />
+              <p className="text-xs text-muted-foreground">
+                Trading involves risk. Past performance does not guarantee future results. 
+                Only trade with money you can afford to lose.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-4">
+            <Button 
+              variant="gold" 
+              className="flex-1"
+              onClick={() => {
+                handleCloseOnboarding();
+                navigate('/learn');
+              }}
+            >
+              <GraduationCap className="w-4 h-4 mr-2" />
+              View Full Training
+            </Button>
+            <Button variant="outline" onClick={handleCloseOnboarding}>
+              Start Trading
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

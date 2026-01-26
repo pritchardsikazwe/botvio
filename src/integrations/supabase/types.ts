@@ -14,13 +14,245 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      broker_tokens: {
+        Row: {
+          broker_name: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          token_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          broker_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          token_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          broker_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          token_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      education_lessons: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          id: string
+          lesson_number: number
+          slug: string
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          lesson_number: number
+          slug: string
+          title: string
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          lesson_number?: number
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trading_signals: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          direction: string
+          entry_price: number
+          id: string
+          reason: string | null
+          status: string | null
+          stop_loss: number | null
+          strategy_name: string
+          symbol: string
+          take_profit: number | null
+          timeframe: string
+          zone_max: number | null
+          zone_min: number | null
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          direction: string
+          entry_price: number
+          id?: string
+          reason?: string | null
+          status?: string | null
+          stop_loss?: number | null
+          strategy_name?: string
+          symbol?: string
+          take_profit?: number | null
+          timeframe?: string
+          zone_max?: number | null
+          zone_min?: number | null
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          direction?: string
+          entry_price?: number
+          id?: string
+          reason?: string | null
+          status?: string | null
+          stop_loss?: number | null
+          strategy_name?: string
+          symbol?: string
+          take_profit?: number | null
+          timeframe?: string
+          zone_max?: number | null
+          zone_min?: number | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          default_pair: string | null
+          default_timeframe: string | null
+          id: string
+          notifications_enabled: boolean | null
+          risk_per_trade: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_pair?: string | null
+          default_timeframe?: string | null
+          id?: string
+          notifications_enabled?: boolean | null
+          risk_per_trade?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_pair?: string | null
+          default_timeframe?: string | null
+          id?: string
+          notifications_enabled?: boolean | null
+          risk_per_trade?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_trades: {
+        Row: {
+          closed_at: string | null
+          direction: string
+          entry_price: number
+          exit_price: number | null
+          id: string
+          lot_size: number | null
+          opened_at: string
+          profit_loss: number | null
+          signal_id: string | null
+          status: string | null
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          direction: string
+          entry_price: number
+          exit_price?: number | null
+          id?: string
+          lot_size?: number | null
+          opened_at?: string
+          profit_loss?: number | null
+          signal_id?: string | null
+          status?: string | null
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          direction?: string
+          entry_price?: number
+          exit_price?: number | null
+          id?: string
+          lot_size?: number | null
+          opened_at?: string
+          profit_loss?: number | null
+          signal_id?: string | null
+          status?: string | null
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_trades_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_owner: { Args: { record_user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
