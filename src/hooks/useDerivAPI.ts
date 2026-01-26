@@ -135,21 +135,76 @@ export const useDerivAPI = () => {
       // Close existing connection
       if (wsRef.current) {
         wsRef.current.close();
+        wsRef.current = null;
       }
 
+      console.log("🔄 Connecting to Deriv WebSocket...");
       const ws = new WebSocket(DERIV_WS_URL);
       wsRef.current = ws;
 
-      ws.onopen = async () => {
-        console.log("✅ Connected to Deriv WebSocket");
+      // Set up message handler BEFORE connection opens
+      ws.onmessage = (event: MessageEvent) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("📨 Received:", data.msg_type || data.error?.code);
+          
+          // Handle req_id responses
+          if (data.req_id && handlersRef.current.has(data.req_id.toString())) {
+            handlersRef.current.get(data.req_id.toString())?.(data);
+            return;
+          }
+
+          // Handle tick updates
+          if (data.msg_type === "tick" && data.tick) {
+            updateState({
+              lastTick: {
+                symbol: data.tick.symbol,
+                quote: data.tick.quote,
+                epoch: data.tick.epoch,
+              },
+            });
+          }
+
+          // Handle balance updates
+          if (data.msg_type === "balance" && data.balance) {
+            updateState({
+              balance: {
+                balance: data.balance.balance,
+                currency: data.balance.currency,
+                loginid: data.balance.loginid,
+              },
+            });
+          }
+        } catch (err) {
+          console.error("Failed to parse WebSocket message:", err);
+        }
+      };
+
+      ws.onopen = () => {
+        console.log("✅ WebSocket connected, authorizing...");
         updateState({ connected: true });
 
-        try {
-          // Authorize with token
-          const authResponse = await send({ authorize: apiToken });
+        // Send authorize request directly (not using send() to avoid race condition)
+        const reqId = Date.now().toString();
+        const authRequest = { authorize: apiToken, req_id: reqId };
+
+        handlersRef.current.set(reqId, (data) => {
+          handlersRef.current.delete(reqId);
           
-          if (authResponse.authorize) {
-            const auth = authResponse.authorize;
+          if (data.error) {
+            console.error("❌ Auth error:", data.error.message);
+            updateState({ 
+              error: data.error.message, 
+              loading: false,
+              authorized: false,
+            });
+            reject(new Error(data.error.message));
+            return;
+          }
+
+          if (data.authorize) {
+            console.log("✅ Authorized as:", data.authorize.fullname || data.authorize.loginid);
+            const auth = data.authorize;
             const balanceData: DerivBalance = {
               balance: auth.balance,
               currency: auth.currency,
@@ -164,37 +219,41 @@ export const useDerivAPI = () => {
             });
 
             // Subscribe to balance updates
-            send({ balance: 1, subscribe: 1 }).catch(console.error);
+            if (wsRef.current?.readyState === WebSocket.OPEN) {
+              wsRef.current.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+            }
 
             resolve(balanceData);
           }
-        } catch (err: any) {
-          updateState({ 
-            error: err.message, 
-            loading: false,
-            authorized: false,
-          });
-          reject(err);
-        }
+        });
+
+        // Timeout after 15 seconds
+        setTimeout(() => {
+          if (handlersRef.current.has(reqId)) {
+            handlersRef.current.delete(reqId);
+            updateState({ error: "Authorization timeout", loading: false });
+            reject(new Error("Authorization timeout"));
+          }
+        }, 15000);
+
+        ws.send(JSON.stringify(authRequest));
       };
 
-      ws.onmessage = handleMessage;
-
       ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
+        console.error("❌ WebSocket error:", error);
         updateState({ error: "Connection error", loading: false });
         reject(new Error("Connection error"));
       };
 
-      ws.onclose = () => {
-        console.log("🔌 WebSocket closed");
+      ws.onclose = (event) => {
+        console.log("🔌 WebSocket closed:", event.code, event.reason);
         updateState({ 
           connected: false, 
           authorized: false,
         });
       };
     });
-  }, [send, handleMessage, updateState]);
+  }, [updateState]);
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
