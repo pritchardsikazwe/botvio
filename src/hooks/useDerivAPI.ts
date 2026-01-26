@@ -2,7 +2,8 @@ import { useState, useCallback, useRef, useEffect } from "react";
 
 // Deriv App ID - this is public
 const DERIV_APP_ID = "123162";
-const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
+// Official Deriv WebSocket URL from https://developers.deriv.com/docs/getting-started
+const DERIV_WS_URL = `wss://ws.deriv.com/websockets/v3?app_id=${DERIV_APP_ID}`;
 
 export interface DerivBalance {
   balance: number;
@@ -40,12 +41,10 @@ interface DerivAPIState {
   lastTick: DerivTick | null;
 }
 
-type MessageHandler = (data: any) => void;
-
 export const useDerivAPI = () => {
   const wsRef = useRef<WebSocket | null>(null);
-  const handlersRef = useRef<Map<string, MessageHandler>>(new Map());
   const tokenRef = useRef<string>("");
+  const reconnectTimeoutRef = useRef<number | null>(null);
   
   const [state, setState] = useState<DerivAPIState>({
     connected: false,
@@ -60,77 +59,57 @@ export const useDerivAPI = () => {
     setState(prev => ({ ...prev, ...partial }));
   }, []);
 
-  const send = useCallback((request: any): Promise<any> => {
+  // Simple send that returns a promise - following official Deriv pattern
+  const sendMessage = useCallback((ws: WebSocket, message: object): Promise<any> => {
     return new Promise((resolve, reject) => {
-      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        reject(new Error("WebSocket not connected"));
+      if (ws.readyState !== WebSocket.OPEN) {
+        reject(new Error("WebSocket not open"));
         return;
       }
 
-      const reqId = Date.now().toString();
-      const requestWithId = { ...request, req_id: reqId };
-
-      handlersRef.current.set(reqId, (data) => {
-        handlersRef.current.delete(reqId);
-        if (data.error) {
-          reject(new Error(data.error.message));
-        } else {
-          resolve(data);
+      const handler = (event: MessageEvent) => {
+        try {
+          const data = JSON.parse(event.data);
+          // Match response by msg_type or specific keys
+          const msgKeys = Object.keys(message);
+          const isMatch = msgKeys.some(key => 
+            data.msg_type === key || data[key] !== undefined
+          );
+          
+          if (isMatch || data.error) {
+            ws.removeEventListener("message", handler);
+            if (data.error) {
+              reject(new Error(data.error.message));
+            } else {
+              resolve(data);
+            }
+          }
+        } catch (err) {
+          // Ignore parse errors for non-matching messages
         }
-      });
+      };
 
-      wsRef.current.send(JSON.stringify(requestWithId));
+      ws.addEventListener("message", handler);
+      ws.send(JSON.stringify(message));
 
-      // Timeout after 30 seconds
+      // Timeout
       setTimeout(() => {
-        if (handlersRef.current.has(reqId)) {
-          handlersRef.current.delete(reqId);
-          reject(new Error("Request timeout"));
-        }
+        ws.removeEventListener("message", handler);
+        reject(new Error("Request timeout"));
       }, 30000);
     });
   }, []);
-
-  const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data);
-      
-      // Handle req_id responses
-      if (data.req_id && handlersRef.current.has(data.req_id)) {
-        handlersRef.current.get(data.req_id)?.(data);
-        return;
-      }
-
-      // Handle tick updates
-      if (data.msg_type === "tick" && data.tick) {
-        updateState({
-          lastTick: {
-            symbol: data.tick.symbol,
-            quote: data.tick.quote,
-            epoch: data.tick.epoch,
-          },
-        });
-      }
-
-      // Handle balance updates
-      if (data.msg_type === "balance" && data.balance) {
-        updateState({
-          balance: {
-            balance: data.balance.balance,
-            currency: data.balance.currency,
-            loginid: data.balance.loginid,
-          },
-        });
-      }
-    } catch (err) {
-      console.error("Failed to parse WebSocket message:", err);
-    }
-  }, [updateState]);
 
   const connect = useCallback(async (apiToken: string): Promise<DerivBalance> => {
     return new Promise((resolve, reject) => {
       updateState({ loading: true, error: null });
       tokenRef.current = apiToken;
+
+      // Clear any reconnect timeout
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
 
       // Close existing connection
       if (wsRef.current) {
@@ -138,78 +117,48 @@ export const useDerivAPI = () => {
         wsRef.current = null;
       }
 
-      console.log("🔄 Connecting to Deriv WebSocket...");
+      console.log("🔄 Connecting to Deriv API...", DERIV_WS_URL);
+      
       const ws = new WebSocket(DERIV_WS_URL);
       wsRef.current = ws;
 
-      // Set up message handler BEFORE connection opens
-      ws.onmessage = (event: MessageEvent) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log("📨 Received:", data.msg_type || data.error?.code);
-          
-          // Handle req_id responses
-          if (data.req_id && handlersRef.current.has(data.req_id.toString())) {
-            handlersRef.current.get(data.req_id.toString())?.(data);
-            return;
-          }
-
-          // Handle tick updates
-          if (data.msg_type === "tick" && data.tick) {
-            updateState({
-              lastTick: {
-                symbol: data.tick.symbol,
-                quote: data.tick.quote,
-                epoch: data.tick.epoch,
-              },
-            });
-          }
-
-          // Handle balance updates
-          if (data.msg_type === "balance" && data.balance) {
-            updateState({
-              balance: {
-                balance: data.balance.balance,
-                currency: data.balance.currency,
-                loginid: data.balance.loginid,
-              },
-            });
-          }
-        } catch (err) {
-          console.error("Failed to parse WebSocket message:", err);
-        }
-      };
+      let isResolved = false;
 
       ws.onopen = () => {
-        console.log("✅ WebSocket connected, authorizing...");
+        console.log("🔗 Connected to Deriv API, sending authorize...");
         updateState({ connected: true });
 
-        // Send authorize request directly (not using send() to avoid race condition)
-        const reqId = Date.now().toString();
-        const authRequest = { authorize: apiToken, req_id: reqId };
+        // Send authorize request - following official pattern
+        ws.send(JSON.stringify({
+          authorize: apiToken
+        }));
+      };
 
-        handlersRef.current.set(reqId, (data) => {
-          handlersRef.current.delete(reqId);
-          
+      ws.onmessage = (msg) => {
+        try {
+          const data = JSON.parse(msg.data);
+          console.log("📩 Deriv Response:", data.msg_type || "unknown", data.error?.code || "");
+
+          // Handle errors
           if (data.error) {
-            console.error("❌ Auth error:", data.error.message);
-            updateState({ 
-              error: data.error.message, 
-              loading: false,
-              authorized: false,
-            });
-            reject(new Error(data.error.message));
+            console.error("❌ Deriv Error:", data.error.message);
+            if (!isResolved && data.msg_type === "authorize") {
+              isResolved = true;
+              updateState({ error: data.error.message, loading: false, authorized: false });
+              reject(new Error(data.error.message));
+            }
             return;
           }
 
+          // Handle authorize response
           if (data.authorize) {
-            console.log("✅ Authorized as:", data.authorize.fullname || data.authorize.loginid);
-            const auth = data.authorize;
+            console.log("✅ User Authorized:", data.authorize.loginid);
+            
             const balanceData: DerivBalance = {
-              balance: auth.balance,
-              currency: auth.currency,
-              loginid: auth.loginid,
-              fullname: auth.fullname,
+              balance: data.authorize.balance,
+              currency: data.authorize.currency,
+              loginid: data.authorize.loginid,
+              fullname: data.authorize.fullname,
             };
 
             updateState({
@@ -218,48 +167,97 @@ export const useDerivAPI = () => {
               loading: false,
             });
 
-            // Subscribe to balance updates
-            if (wsRef.current?.readyState === WebSocket.OPEN) {
-              wsRef.current.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+            // Request balance subscription
+            ws.send(JSON.stringify({
+              balance: 1,
+              account: "current",
+              subscribe: 1
+            }));
+
+            if (!isResolved) {
+              isResolved = true;
+              resolve(balanceData);
             }
-
-            resolve(balanceData);
+            return;
           }
-        });
 
-        // Timeout after 15 seconds
-        setTimeout(() => {
-          if (handlersRef.current.has(reqId)) {
-            handlersRef.current.delete(reqId);
-            updateState({ error: "Authorization timeout", loading: false });
-            reject(new Error("Authorization timeout"));
+          // Handle balance response/updates
+          if (data.balance) {
+            console.log("💰 Balance:", data.balance.balance, data.balance.currency);
+            updateState({
+              balance: {
+                balance: data.balance.balance,
+                currency: data.balance.currency,
+                loginid: data.balance.loginid,
+              },
+            });
+            return;
           }
-        }, 15000);
 
-        ws.send(JSON.stringify(authRequest));
+          // Handle tick updates
+          if (data.tick) {
+            updateState({
+              lastTick: {
+                symbol: data.tick.symbol,
+                quote: data.tick.quote,
+                epoch: data.tick.epoch,
+              },
+            });
+            return;
+          }
+        } catch (err) {
+          console.error("Failed to parse message:", err);
+        }
       };
 
-      ws.onerror = (error) => {
-        console.error("❌ WebSocket error:", error);
-        updateState({ error: "Connection error", loading: false });
-        reject(new Error("Connection error"));
+      ws.onerror = (err) => {
+        console.error("❌ WebSocket Error:", err);
+        if (!isResolved) {
+          isResolved = true;
+          updateState({ error: "Connection error", loading: false });
+          reject(new Error("Connection error"));
+        }
       };
 
       ws.onclose = (event) => {
-        console.log("🔌 WebSocket closed:", event.code, event.reason);
+        console.log("🔌 Connection Closed:", event.code, event.reason);
         updateState({ 
           connected: false, 
           authorized: false,
         });
+        
+        if (!isResolved) {
+          isResolved = true;
+          updateState({ error: "Connection closed", loading: false });
+          reject(new Error("Connection closed"));
+        }
       };
+
+      // Connection timeout
+      setTimeout(() => {
+        if (!isResolved && ws.readyState !== WebSocket.OPEN) {
+          isResolved = true;
+          ws.close();
+          updateState({ error: "Connection timeout", loading: false });
+          reject(new Error("Connection timeout"));
+        }
+      }, 10000);
     });
   }, [updateState]);
 
   const disconnect = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
+    
+    tokenRef.current = "";
+    
     updateState({
       connected: false,
       authorized: false,
@@ -271,20 +269,27 @@ export const useDerivAPI = () => {
   }, [updateState]);
 
   const subscribeTicks = useCallback(async (symbol: string) => {
-    try {
-      await send({ ticks: symbol, subscribe: 1 });
-    } catch (err) {
-      console.error("Failed to subscribe to ticks:", err);
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      console.error("Cannot subscribe: WebSocket not connected");
+      return;
     }
-  }, [send]);
+    
+    console.log("📊 Subscribing to ticks:", symbol);
+    wsRef.current.send(JSON.stringify({
+      ticks: symbol,
+      subscribe: 1
+    }));
+  }, []);
 
   const unsubscribeTicks = useCallback(async (symbol: string) => {
-    try {
-      await send({ forget_all: "ticks" });
-    } catch (err) {
-      console.error("Failed to unsubscribe from ticks:", err);
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      return;
     }
-  }, [send]);
+    
+    wsRef.current.send(JSON.stringify({
+      forget_all: "ticks"
+    }));
+  }, []);
 
   const getProposal = useCallback(async (params: {
     symbol: string;
@@ -295,7 +300,11 @@ export const useDerivAPI = () => {
     basis?: "stake" | "payout";
     currency?: string;
   }): Promise<DerivProposal> => {
-    const response = await send({
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      throw new Error("Not connected to Deriv");
+    }
+
+    const response = await sendMessage(wsRef.current, {
       proposal: 1,
       amount: params.amount,
       basis: params.basis || "stake",
@@ -312,10 +321,14 @@ export const useDerivAPI = () => {
       payout: response.proposal.payout,
       longcode: response.proposal.longcode,
     };
-  }, [send]);
+  }, [sendMessage]);
 
   const buyContract = useCallback(async (proposalId: string, price: number): Promise<DerivContract> => {
-    const response = await send({
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      throw new Error("Not connected to Deriv");
+    }
+
+    const response = await sendMessage(wsRef.current, {
       buy: proposalId,
       price: price,
     });
@@ -326,7 +339,7 @@ export const useDerivAPI = () => {
       payout: response.buy.payout,
       longcode: response.buy.longcode,
     };
-  }, [send]);
+  }, [sendMessage]);
 
   const placeTrade = useCallback(async (params: {
     symbol: string;
@@ -347,6 +360,9 @@ export const useDerivAPI = () => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
       if (wsRef.current) {
         wsRef.current.close();
       }
