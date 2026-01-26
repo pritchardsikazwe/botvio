@@ -8,8 +8,11 @@ import { SniperEntry } from "@/components/trading/SniperEntry";
 import { StrategyPanel } from "@/components/trading/StrategyPanel";
 import { HauzaSniperPanel } from "@/components/trading/HauzaSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
+import { DerivWalletBalance } from "@/components/trading/DerivWalletBalance";
+import { QuickTrade } from "@/components/trading/QuickTrade";
 import { SupportResistance, MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDeriv } from "@/contexts/DerivContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Target, AlertTriangle } from "lucide-react";
@@ -17,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { user, settings } = useAuth();
+  const { authorized, lastTick, subscribeTicks, unsubscribeTicks } = useDeriv();
   const navigate = useNavigate();
   const [selectedPair, setSelectedPair] = useState("XAUUSD");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -38,12 +42,24 @@ const Index = () => {
     }
   }, [user]);
 
+  // Subscribe to ticks when connected to Deriv
+  useEffect(() => {
+    if (authorized && selectedPair) {
+      subscribeTicks(selectedPair);
+    }
+    return () => {
+      if (authorized) {
+        unsubscribeTicks(selectedPair);
+      }
+    };
+  }, [authorized, selectedPair, subscribeTicks, unsubscribeTicks]);
+
   const handleCloseOnboarding = () => {
     localStorage.setItem('hauza_onboarding_seen', 'true');
     setShowOnboarding(false);
   };
 
-  // Mock market data - would come from API
+  // Market data - use live Deriv data when connected
   const [marketData, setMarketData] = useState<MarketData>({
     pair: "XAUUSD",
     price: 2347.85,
@@ -53,8 +69,21 @@ const Index = () => {
     volume: 125400000,
   });
 
-  // Simulate price updates
+  // Update market data from Deriv ticks
   useEffect(() => {
+    if (lastTick && lastTick.symbol === selectedPair) {
+      setMarketData(prev => ({
+        ...prev,
+        pair: lastTick.symbol,
+        price: lastTick.quote,
+      }));
+    }
+  }, [lastTick, selectedPair]);
+
+  // Fallback: Simulate price updates when not connected
+  useEffect(() => {
+    if (authorized) return; // Don't simulate when connected
+    
     const interval = setInterval(() => {
       setMarketData(prev => ({
         ...prev,
@@ -63,7 +92,7 @@ const Index = () => {
       }));
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [authorized]);
 
   // Mock S/R levels
   const srLevels: SupportResistance[] = [
@@ -74,8 +103,7 @@ const Index = () => {
   ];
 
   const handleTokenSubmit = (token: string) => {
-    // Token is handled by the TokenInput component
-    console.log('Token submitted');
+    console.log('Connected to Deriv');
   };
 
   return (
@@ -92,6 +120,8 @@ const Index = () => {
             </div>
             
             <TokenInput onTokenSubmit={handleTokenSubmit} />
+            <DerivWalletBalance />
+            <QuickTrade symbol={selectedPair} />
             <StrategyPanel />
           </div>
 
