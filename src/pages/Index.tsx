@@ -10,6 +10,7 @@ import { HauzaSniperPanel } from "@/components/trading/HauzaSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
 import { DerivWalletBalance } from "@/components/trading/DerivWalletBalance";
 import { QuickTrade } from "@/components/trading/QuickTrade";
+import { DerivPanel } from "@/components/trading/DerivPanel";
 import { SupportResistance, MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
@@ -120,6 +121,7 @@ const Index = () => {
             </div>
             
             <TokenInput onTokenSubmit={handleTokenSubmit} />
+            <DerivPanel />
             <DerivWalletBalance />
             <QuickTrade symbol={selectedPair} />
             <StrategyPanel />
