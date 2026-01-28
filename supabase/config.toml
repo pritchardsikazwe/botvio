@@ -1,1 +1,7 @@
 project_id = "tqqkzeblmjapgbnsbtgw"
+
+[functions.hauza-sniper]
+verify_jwt = false
+
+[functions.provider-execute-copy]
+verify_jwt = false

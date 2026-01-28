@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Bell, Settings, User, LogOut, GraduationCap } from "lucide-react";
+import { Bot, Bell, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -42,8 +42,8 @@ export const Header = () => {
                 <Bot className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="font-bold text-lg gold-text">HAUZA</h1>
-                <p className="text-xs text-muted-foreground">Trading Robot</p>
+                <h1 className="font-bold text-lg gold-text">BOTVIO</h1>
+                <p className="text-xs text-muted-foreground">Trading Platform</p>
               </div>
             </div>
 
@@ -56,6 +56,34 @@ export const Header = () => {
               >
                 Signals
               </Button>
+              {user && (
+                <>
+                  <Button 
+                    variant={location.pathname === '/dashboard' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/dashboard')}
+                  >
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                  <Button 
+                    variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/bots')}
+                  >
+                    <Bot className="w-4 h-4 mr-2" />
+                    Bots
+                  </Button>
+                  <Button 
+                    variant={location.pathname === '/providers' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/providers')}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Copy Trade
+                  </Button>
+                </>
+              )}
               <Button 
                 variant={location.pathname.startsWith('/learn') ? 'secondary' : 'ghost'} 
                 size="sm"
@@ -100,6 +128,23 @@ export const Header = () => {
                       {user.email}
                     </p>
                   </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/accounts')}>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Trading Accounts
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
+                    <Users className="w-4 h-4 mr-2" />
+                    Provider Panel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/billing')}>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Billing
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/learn')}>
                     <GraduationCap className="w-4 h-4 mr-2" />

@@ -1,0 +1,314 @@
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTradingAccounts, useAddTradingAccount, useDeleteTradingAccount } from "@/hooks/useBotvio";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/components/trading/Header";
+import { useNavigate } from "react-router-dom";
+import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
+
+const Accounts = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { data: accounts, isLoading } = useTradingAccounts();
+  const addAccount = useAddTradingAccount();
+  const deleteAccount = useDeleteTradingAccount();
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+  const [formData, setFormData] = useState({
+    broker: "deriv" as "deriv" | "binance",
+    label: "",
+    api_key: "",
+    api_secret: "",
+    login_id: "",
+  });
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Please sign in to manage accounts</h1>
+          <Button onClick={() => navigate("/")}>Go to Home</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.label || !formData.api_key) {
+      toast.error("Please fill in required fields");
+      return;
+    }
+
+    try {
+      await addAccount.mutateAsync({
+        broker: formData.broker,
+        label: formData.label,
+        api_key: formData.api_key,
+        api_secret: formData.broker === "binance" ? formData.api_secret : undefined,
+        login_id: formData.login_id || undefined,
+      });
+      
+      toast.success("Account connected successfully!");
+      setIsDialogOpen(false);
+      setFormData({
+        broker: "deriv",
+        label: "",
+        api_key: "",
+        api_secret: "",
+        login_id: "",
+      });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to connect account");
+    }
+  };
+
+  const handleDelete = async (accountId: string, label: string) => {
+    if (!confirm(`Are you sure you want to remove "${label}"?`)) return;
+    
+    try {
+      await deleteAccount.mutateAsync(accountId);
+      toast.success("Account removed successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to remove account");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Trading Accounts</h1>
+            <p className="text-muted-foreground">
+              Connect your broker accounts to enable automated trading
+            </p>
+          </div>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Connect Account
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Connect Trading Account</DialogTitle>
+                <DialogDescription>
+                  Add your broker API credentials to enable trading
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Broker</Label>
+                  <Select
+                    value={formData.broker}
+                    onValueChange={(v: "deriv" | "binance") => setFormData({ ...formData, broker: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="deriv">Deriv</SelectItem>
+                      <SelectItem value="binance" disabled>Binance (Coming Soon)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="label">Account Label *</Label>
+                  <Input
+                    id="label"
+                    placeholder="e.g., My Trading Account"
+                    value={formData.label}
+                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="api_key">
+                    {formData.broker === "deriv" ? "API Token *" : "API Key *"}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="api_key"
+                      type={showToken ? "text" : "password"}
+                      placeholder={formData.broker === "deriv" ? "Your Deriv API token" : "Your API key"}
+                      value={formData.api_key}
+                      onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0"
+                      onClick={() => setShowToken(!showToken)}
+                    >
+                      {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                {formData.broker === "binance" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="api_secret">API Secret *</Label>
+                    <Input
+                      id="api_secret"
+                      type="password"
+                      placeholder="Your API secret"
+                      value={formData.api_secret}
+                      onChange={(e) => setFormData({ ...formData, api_secret: e.target.value })}
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="login_id">Login ID (Optional)</Label>
+                  <Input
+                    id="login_id"
+                    placeholder="e.g., CR1234567"
+                    value={formData.login_id}
+                    onChange={(e) => setFormData({ ...formData, login_id: e.target.value })}
+                  />
+                </div>
+
+                {formData.broker === "deriv" && (
+                  <div className="p-3 rounded-lg bg-muted/50 text-sm">
+                    <p className="font-medium mb-2">How to get your Deriv API Token:</p>
+                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                      <li>Log in to Deriv.com</li>
+                      <li>Go to Settings → API Token</li>
+                      <li>Create a token with <strong>Trade</strong> permission</li>
+                      <li>Copy and paste the token above</li>
+                    </ol>
+                    <a
+                      href="https://app.deriv.com/account/api-token"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary mt-2 hover:underline"
+                    >
+                      Open Deriv API Token page <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
+
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={addAccount.isPending}>
+                    {addAccount.isPending ? "Connecting..." : "Connect Account"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Accounts List */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Skeleton className="h-40" />
+            <Skeleton className="h-40" />
+          </div>
+        ) : accounts && accounts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {accounts.map((account) => (
+              <Card key={account.id} className="glass-card">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Wallet className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{account.label}</CardTitle>
+                        <CardDescription className="capitalize">{account.broker}</CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant={account.is_active ? "default" : "secondary"}>
+                      {account.is_active ? (
+                        <>
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Active
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Inactive
+                        </>
+                      )}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    {account.login_id && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Login ID:</span>
+                        <span className="font-mono">{account.login_id}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Token:</span>
+                      <span className="font-mono">••••••••{account.api_key_encrypted.slice(-4)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Connected:</span>
+                      <span>{new Date(account.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      Test Connection
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDelete(account.id, account.label)}
+                      disabled={deleteAccount.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="glass-card">
+            <CardContent className="py-12 text-center">
+              <Wallet className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No accounts connected</h3>
+              <p className="text-muted-foreground mb-4">
+                Connect your Deriv or Binance account to start automated trading
+              </p>
+              <Button onClick={() => setIsDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Connect Your First Account
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default Accounts;
