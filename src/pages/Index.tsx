@@ -2,15 +2,13 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/trading/Header";
 import { PriceDisplay } from "@/components/trading/PriceDisplay";
 import { SupportResistanceLevels } from "@/components/trading/SupportResistanceLevels";
-import { TokenInput } from "@/components/trading/TokenInput";
+import { DerivConnection } from "@/components/trading/DerivConnection";
 import { PairSelector } from "@/components/trading/PairSelector";
 import { SniperEntry } from "@/components/trading/SniperEntry";
 import { StrategyPanel } from "@/components/trading/StrategyPanel";
 import { HauzaSniperPanel } from "@/components/trading/HauzaSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
-import { DerivWalletBalance } from "@/components/trading/DerivWalletBalance";
 import { QuickTrade } from "@/components/trading/QuickTrade";
-import { DerivPanel } from "@/components/trading/DerivPanel";
 import { SupportResistance, MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
@@ -72,14 +70,22 @@ const Index = () => {
 
   // Update market data from Deriv ticks
   useEffect(() => {
-    if (lastTick && lastTick.symbol === selectedPair) {
+    if (lastTick) {
+      // Map Deriv symbol back to display name
+      let displayPair = lastTick.symbol;
+      if (lastTick.symbol.startsWith("frx")) {
+        displayPair = lastTick.symbol.replace("frx", "");
+      } else if (lastTick.symbol.startsWith("cry")) {
+        displayPair = lastTick.symbol.replace("cry", "");
+      }
+      
       setMarketData(prev => ({
         ...prev,
-        pair: lastTick.symbol,
+        pair: displayPair,
         price: lastTick.quote,
       }));
     }
-  }, [lastTick, selectedPair]);
+  }, [lastTick]);
 
   // Fallback: Simulate price updates when not connected
   useEffect(() => {
@@ -103,8 +109,15 @@ const Index = () => {
     { level: 2320.00, type: 'SUPPORT', strength: 'WEAK', touches: 2 },
   ];
 
-  const handleTokenSubmit = (token: string) => {
-    console.log('Connected to Deriv');
+  const handleSymbolChange = (derivSymbol: string) => {
+    // Map Deriv symbol to display pair for UI
+    let displayPair = derivSymbol;
+    if (derivSymbol.startsWith("frx")) {
+      displayPair = derivSymbol.replace("frx", "");
+    } else if (derivSymbol.startsWith("cry")) {
+      displayPair = derivSymbol.replace("cry", "");
+    }
+    setSelectedPair(displayPair);
   };
 
   return (
@@ -120,9 +133,9 @@ const Index = () => {
               <PairSelector selectedPair={selectedPair} onPairChange={setSelectedPair} />
             </div>
             
-            <TokenInput onTokenSubmit={handleTokenSubmit} />
-            <DerivPanel />
-            <DerivWalletBalance />
+            {/* Single unified Deriv connection panel */}
+            <DerivConnection onSymbolChange={handleSymbolChange} />
+            
             <QuickTrade symbol={selectedPair} />
             <StrategyPanel />
           </div>
