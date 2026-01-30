@@ -13,9 +13,11 @@ interface TradeRequest {
   provider_id: string;
   symbol: string;
   direction: "BUY" | "SELL";
+  contract_type?: string; // CALL, PUT, DIGITOVER, DIGITUNDER, etc.
   stake: number;
   duration?: number;
   duration_unit?: string;
+  barrier?: number;
 }
 
 interface CopyResult {
@@ -78,7 +80,9 @@ async function placeDerivTrade(
   direction: "BUY" | "SELL",
   stake: number,
   duration: number = 5,
-  durationUnit: string = "t"
+  durationUnit: string = "t",
+  contractType?: string,
+  barrier?: number
 ): Promise<{ contract_id: string; buy_price: number }> {
   const ws = await createDerivConnection();
 
@@ -89,20 +93,30 @@ async function placeDerivTrade(
       throw new Error("Authorization failed");
     }
 
+    // Determine contract type - default to CALL/PUT based on direction
+    const derivContractType = contractType || (direction === "BUY" ? "CALL" : "PUT");
+    
+    // Build parameters
+    const parameters: Record<string, unknown> = {
+      amount: stake,
+      basis: "stake",
+      contract_type: derivContractType,
+      currency: "USD",
+      duration: duration,
+      duration_unit: durationUnit,
+      symbol: symbol,
+    };
+    
+    // Add barrier for digit contracts
+    if (barrier !== undefined && ["DIGITOVER", "DIGITUNDER", "DIGITMATCH", "DIGITDIFF"].includes(derivContractType)) {
+      parameters.barrier = barrier.toString();
+    }
+
     // Place trade
-    const contractType = direction === "BUY" ? "CALL" : "PUT";
     const buyRes = await sendDerivRequest(ws, {
       buy: 1,
       price: stake,
-      parameters: {
-        amount: stake,
-        basis: "stake",
-        contract_type: contractType,
-        currency: "USD",
-        duration: duration,
-        duration_unit: durationUnit,
-        symbol: symbol,
-      },
+      parameters,
     });
 
     if (!buyRes.buy) {
@@ -161,7 +175,7 @@ serve(async (req) => {
     }
 
     const body: TradeRequest = await req.json();
-    const { provider_id, symbol, direction, stake, duration = 5, duration_unit = "t" } = body;
+    const { provider_id, symbol, direction, contract_type, stake, duration = 5, duration_unit = "t", barrier } = body;
 
     // Validate provider ownership
     const { data: provider, error: providerError } = await supabaseClient
@@ -205,7 +219,9 @@ serve(async (req) => {
         direction,
         stake,
         duration,
-        duration_unit
+        duration_unit,
+        contract_type,
+        barrier
       );
     } catch (tradeErr: any) {
       // Log error to audit
@@ -295,7 +311,9 @@ serve(async (req) => {
           direction,
           subscriberStake,
           duration,
-          duration_unit
+          duration_unit,
+          contract_type,
+          barrier
         );
 
         // Insert copied trade record
