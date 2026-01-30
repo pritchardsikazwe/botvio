@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePricingPlans, useMySubscription } from "@/hooks/useBotvio";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Header } from "@/components/trading/Header";
+import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { useNavigate } from "react-router-dom";
-import { Check, Zap, Crown, Rocket } from "lucide-react";
+import { Check, Zap, Crown, Rocket, Clock, Users, Bot, Copy, Star } from "lucide-react";
 import { toast } from "sonner";
 
 const Billing = () => {
@@ -14,6 +17,8 @@ const Billing = () => {
   const navigate = useNavigate();
   const { data: plans, isLoading: plansLoading } = usePricingPlans();
   const { data: mySubscription, isLoading: subLoading } = useMySubscription();
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const currentPlanCode = mySubscription?.pricing_plan?.code || "starter";
 
@@ -29,9 +34,19 @@ const Billing = () => {
     );
   }
 
-  const handleUpgrade = (planCode: string) => {
-    // For now, just show a message. In production, integrate with payment provider
-    toast.info(`Upgrade to ${planCode} coming soon! Contact support for early access.`);
+  const handleUpgrade = (plan: any) => {
+    if (plan.price_usd === 0) {
+      toast.info("You're already on the free plan!");
+      return;
+    }
+    setSelectedPlan(plan);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentInitiated = (method: string, details: any) => {
+    console.log("Payment initiated:", method, details);
+    toast.success("Payment initiated! You'll receive confirmation shortly.");
+    setShowPaymentModal(false);
   };
 
   const getPlanIcon = (code: string) => {
@@ -60,6 +75,55 @@ const Billing = () => {
     }
   };
 
+  const getPlanDuration = (code: string) => {
+    switch (code) {
+      case "starter":
+        return "2 days trial";
+      case "pro":
+        return "15 days";
+      case "vip":
+        return "30 days";
+      default:
+        return "monthly";
+    }
+  };
+
+  const getPlanFeatures = (plan: any) => {
+    const features = [];
+    
+    features.push({
+      label: `${plan.max_accounts >= 999 ? "Unlimited" : plan.max_accounts} connected accounts`,
+      icon: <Users className="h-4 w-4" />,
+      enabled: true,
+    });
+    
+    features.push({
+      label: `${plan.max_bot_instances >= 999 ? "Unlimited" : plan.max_bot_instances} bot instances`,
+      icon: <Bot className="h-4 w-4" />,
+      enabled: true,
+    });
+    
+    features.push({
+      label: "Copy trading",
+      icon: <Copy className="h-4 w-4" />,
+      enabled: plan.allow_copy_trading,
+    });
+    
+    features.push({
+      label: "Premium bots",
+      icon: <Star className="h-4 w-4" />,
+      enabled: plan.allow_premium_bots,
+    });
+    
+    features.push({
+      label: "Become a signal provider",
+      icon: <Crown className="h-4 w-4" />,
+      enabled: plan.allow_provider_listing,
+    });
+    
+    return features;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -68,7 +132,7 @@ const Billing = () => {
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-2">Pricing Plans</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your trading needs. Upgrade anytime to unlock more features.
+            Choose the plan that fits your trading needs. All plans include copy trading!
           </p>
         </div>
 
@@ -81,7 +145,9 @@ const Billing = () => {
                   <p className="text-sm text-muted-foreground">Current Plan</p>
                   <p className="text-xl font-bold">{mySubscription.pricing_plan?.name}</p>
                 </div>
-                <Badge variant="outline">Active</Badge>
+                <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+                  Active
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -99,17 +165,24 @@ const Billing = () => {
             {plans?.map((plan) => {
               const isCurrentPlan = plan.code === currentPlanCode;
               const isPro = plan.code === "pro";
+              const isVip = plan.code === "vip";
+              const features = getPlanFeatures(plan);
               
               return (
                 <Card 
                   key={plan.id} 
                   className={`glass-card relative overflow-hidden ${
-                    isPro ? "border-primary ring-2 ring-primary/20" : ""
-                  }`}
+                    isPro ? "border-primary ring-2 ring-primary/20 scale-105" : ""
+                  } ${isVip ? "border-amber-500/50" : ""}`}
                 >
                   {isPro && (
-                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg">
-                      Popular
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
+                      Most Popular
+                    </div>
+                  )}
+                  {isVip && (
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                      Best Value
                     </div>
                   )}
                   
@@ -118,55 +191,41 @@ const Billing = () => {
                       {getPlanIcon(plan.code)}
                     </div>
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                    <CardDescription>
-                      {plan.code === "starter" && "Get started for free"}
-                      {plan.code === "pro" && "For serious traders"}
-                      {plan.code === "vip" && "Maximum power"}
+                    <CardDescription className="flex items-center justify-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {getPlanDuration(plan.code)}
                     </CardDescription>
                   </CardHeader>
                   
                   <CardContent className="text-center">
                     <div className="mb-6">
                       <span className="text-4xl font-bold">${plan.price_usd}</span>
-                      <span className="text-muted-foreground">/month</span>
+                      {plan.code !== "starter" && (
+                        <span className="text-muted-foreground">/{getPlanDuration(plan.code)}</span>
+                      )}
                       {plan.price_zmw > 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          or K{plan.price_zmw}/month
+                        <p className="text-sm text-muted-foreground mt-1">
+                          or K{plan.price_zmw}
                         </p>
                       )}
                     </div>
 
                     <ul className="space-y-3 mb-6 text-left">
-                      <li className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-success flex-shrink-0" />
-                        <span className="text-sm">
-                          {plan.max_bot_instances >= 999 ? "Unlimited" : plan.max_bot_instances} bot instances
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-success flex-shrink-0" />
-                        <span className="text-sm">
-                          {plan.max_accounts >= 10 ? "Unlimited" : plan.max_accounts} connected accounts
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className={`h-4 w-4 flex-shrink-0 ${plan.allow_copy_trading ? "text-success" : "text-muted-foreground"}`} />
-                        <span className={`text-sm ${!plan.allow_copy_trading ? "text-muted-foreground" : ""}`}>
-                          Copy trading
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className={`h-4 w-4 flex-shrink-0 ${plan.allow_premium_bots ? "text-success" : "text-muted-foreground"}`} />
-                        <span className={`text-sm ${!plan.allow_premium_bots ? "text-muted-foreground" : ""}`}>
-                          Premium bots
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className={`h-4 w-4 flex-shrink-0 ${plan.allow_provider_listing ? "text-success" : "text-muted-foreground"}`} />
-                        <span className={`text-sm ${!plan.allow_provider_listing ? "text-muted-foreground" : ""}`}>
-                          Become a provider
-                        </span>
-                      </li>
+                      {features.map((feature, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <div className={`p-1 rounded-full ${feature.enabled ? "bg-success/10" : "bg-muted"}`}>
+                            {feature.enabled ? (
+                              <Check className="h-3 w-3 text-success" />
+                            ) : (
+                              <span className="h-3 w-3 block" />
+                            )}
+                          </div>
+                          <span className={`text-sm flex items-center gap-2 ${!feature.enabled ? "text-muted-foreground line-through" : ""}`}>
+                            {feature.icon}
+                            {feature.label}
+                          </span>
+                        </li>
+                      ))}
                     </ul>
 
                     {isCurrentPlan ? (
@@ -179,9 +238,9 @@ const Billing = () => {
                       </Button>
                     ) : (
                       <Button 
-                        className="w-full" 
+                        className={`w-full ${isVip ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" : ""}`}
                         variant={isPro ? "default" : "outline"}
-                        onClick={() => handleUpgrade(plan.code)}
+                        onClick={() => handleUpgrade(plan)}
                       >
                         Upgrade to {plan.name}
                       </Button>
@@ -192,6 +251,25 @@ const Billing = () => {
             })}
           </div>
         )}
+
+        {/* Payment Methods Info */}
+        <div className="mt-12 text-center">
+          <h3 className="text-lg font-semibold mb-4">We Accept</h3>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Badge variant="outline" className="px-4 py-2">
+              <span className="mr-2">💳</span> Visa / Mastercard
+            </Badge>
+            <Badge variant="outline" className="px-4 py-2">
+              <span className="mr-2">₿</span> Bitcoin / USDT
+            </Badge>
+            <Badge variant="outline" className="px-4 py-2">
+              <span className="mr-2">📱</span> M-Pesa / Airtel Money
+            </Badge>
+            <Badge variant="outline" className="px-4 py-2">
+              <span className="mr-2">📱</span> MTN MoMo / EcoCash
+            </Badge>
+          </div>
+        </div>
 
         {/* FAQ */}
         <div className="mt-16 max-w-2xl mx-auto">
@@ -215,7 +293,18 @@ const Billing = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  We accept Visa, Mastercard, mobile money (Airtel, MTN, Zamtel), and bank transfers for Zambian users.
+                  We accept Visa, Mastercard, cryptocurrency (BTC, USDT, ETH, LTC), and mobile money including M-Pesa, Airtel Money, MTN MoMo, EcoCash, and more across Africa.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Can I become a copy trading provider for free?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Yes! The free Starter plan allows you to become a signal provider and connect up to 2 accounts. Upgrade to Pro or VIP for more accounts and features.
                 </p>
               </CardContent>
             </Card>
@@ -226,13 +315,30 @@ const Billing = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Yes, you'll need a Deriv or Binance account to connect and trade. We don't hold your funds - all trading happens directly on your broker account.
+                  Yes, you'll need a Deriv or other supported broker account to connect and trade. We don't hold your funds - all trading happens directly on your broker account.
                 </p>
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
+
+      {/* Payment Modal */}
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Complete Your Upgrade</DialogTitle>
+          </DialogHeader>
+          {selectedPlan && (
+            <PaymentMethodSelector
+              planCode={selectedPlan.code}
+              planName={selectedPlan.name}
+              amount={selectedPlan.price_usd}
+              onPaymentInitiated={handlePaymentInitiated}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
