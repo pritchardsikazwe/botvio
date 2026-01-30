@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/trading/Header";
 import { ProviderApplicationForm } from "@/components/trading/ProviderApplicationForm";
+import { ProviderPerformancePanel } from "@/components/trading/ProviderPerformancePanel";
 import { useNavigate, Link } from "react-router-dom";
 import { 
   Users, TrendingUp, DollarSign, Target, ArrowUp, ArrowDown, 
@@ -308,6 +309,7 @@ const ProviderDashboard = () => {
         <Tabs defaultValue="trade" className="space-y-6">
           <TabsList>
             <TabsTrigger value="trade">Trade Panel</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="history">Trade History</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -583,6 +585,10 @@ const ProviderDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <ProviderPerformancePanel providerId={myProvider?.id} />
           </TabsContent>
 
           <TabsContent value="history">

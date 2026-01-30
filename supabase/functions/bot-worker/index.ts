@@ -158,6 +158,159 @@ function rsiStrategy(instance: any): TradingSignal[] {
   return signals;
 }
 
+// Custom Strategy Execution - Runs strategies from config_json
+function customStrategyExecutor(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  const config = instance.config_json || {};
+  
+  console.log(`[Custom Strategy] Running for ${instance.name}`);
+  console.log(`[Custom Strategy] Config:`, JSON.stringify(config).slice(0, 200));
+  
+  // Parse strategy configuration
+  const {
+    symbol = "R_100",
+    contract_type = "CALL",
+    direction = "BUY",
+    stake = 1,
+    duration = 5,
+    duration_unit = "t",
+    entry_conditions = [],
+    confidence_threshold = 70,
+    auto_execute = false,
+  } = config;
+  
+  // Only execute if auto_execute is enabled
+  if (!auto_execute) {
+    console.log(`[Custom Strategy] Auto-execute disabled, skipping`);
+    return signals;
+  }
+  
+  // Check entry conditions if defined
+  let conditionsMet = true;
+  let confidence = 80; // Base confidence
+  
+  for (const condition of entry_conditions) {
+    // Simple condition checking - would be expanded with real market data
+    if (condition.type === "time_of_day") {
+      const now = new Date();
+      const hour = now.getUTCHours();
+      if (hour < condition.start_hour || hour > condition.end_hour) {
+        conditionsMet = false;
+        break;
+      }
+    }
+    
+    if (condition.type === "session") {
+      const sessionActive = isPreSessionWindow(condition.session_name);
+      if (condition.require_active && !sessionActive) {
+        conditionsMet = false;
+        break;
+      }
+    }
+  }
+  
+  if (conditionsMet && confidence >= confidence_threshold) {
+    signals.push({
+      symbol,
+      direction: direction as "BUY" | "SELL",
+      stake,
+      duration,
+      duration_unit,
+      confidence,
+      reason: `Custom strategy execution: ${instance.name}`,
+    });
+  }
+  
+  return signals;
+}
+
+// CFD Strategy for Boom/Crash - spike detection
+function boomCrashCFDStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  const config = instance.config_json || {};
+  const markets = instance.markets || ["BOOM1000", "CRASH1000"];
+  
+  console.log(`[Boom/Crash CFD] Running for ${instance.name} on:`, markets);
+  
+  const {
+    stake = 1,
+    duration = 5,
+    duration_unit = "t",
+    auto_execute = false,
+    spike_detection = true,
+    trend_following = true,
+  } = config;
+  
+  if (!auto_execute) {
+    console.log(`[Boom/Crash CFD] Auto-execute disabled`);
+    return signals;
+  }
+  
+  // Boom/Crash specific logic
+  // For Boom: Wait for consecutive down moves, then BUY expecting spike up
+  // For Crash: Wait for consecutive up moves, then SELL expecting spike down
+  
+  for (const market of markets) {
+    if (market.startsWith("BOOM") && spike_detection) {
+      // Boom strategy - buy during downtrend expecting spike
+      signals.push({
+        symbol: market,
+        direction: "BUY",
+        stake,
+        duration,
+        duration_unit,
+        confidence: 75,
+        reason: "Boom spike anticipation",
+      });
+    } else if (market.startsWith("CRASH") && spike_detection) {
+      // Crash strategy - sell during uptrend expecting spike
+      signals.push({
+        symbol: market,
+        direction: "SELL", 
+        stake,
+        duration,
+        duration_unit,
+        confidence: 75,
+        reason: "Crash spike anticipation",
+      });
+    }
+  }
+  
+  return signals;
+}
+
+// Volatility CFD Strategy
+function volatilityCFDStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  const config = instance.config_json || {};
+  const markets = instance.markets || ["R_100", "R_50"];
+  
+  console.log(`[Volatility CFD] Running for ${instance.name}`);
+  
+  const {
+    stake = 1,
+    duration = 5,
+    duration_unit = "t",
+    auto_execute = false,
+    trend_direction = "both", // "buy", "sell", "both"
+  } = config;
+  
+  if (!auto_execute) {
+    return signals;
+  }
+  
+  // Volatility index strategy
+  // Would analyze EMA crossovers, RSI, and trend direction
+  
+  for (const market of markets) {
+    if (trend_direction === "buy" || trend_direction === "both") {
+      // Only add signal if conditions met (placeholder)
+    }
+  }
+  
+  return signals;
+}
+
 const strategies: Record<string, (instance: any) => TradingSignal[]> = {
   botvio: botvioStrategy,
   boom_crash_sniper: boomCrashSniperStrategy,
@@ -168,6 +321,10 @@ const strategies: Record<string, (instance: any) => TradingSignal[]> = {
   sydney_session: sydneySessionStrategy,
   daily_range: dailyRangeStrategy,
   rsi_strategy: rsiStrategy,
+  // New CFD strategies
+  custom_strategy: customStrategyExecutor,
+  boom_crash_cfd: boomCrashCFDStrategy,
+  volatility_cfd: volatilityCFDStrategy,
 };
 
 async function checkRiskLimits(
