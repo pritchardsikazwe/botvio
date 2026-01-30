@@ -23,7 +23,7 @@ const Lesson = () => {
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const category = searchParams.get("category") || "hauza-sniper";
+  const category = searchParams.get("category") || "botvio-sniper";
 
   useEffect(() => {
     const fetchLessons = async () => {

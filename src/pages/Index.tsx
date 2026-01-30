@@ -6,7 +6,7 @@ import { DerivConnection } from "@/components/trading/DerivConnection";
 import { PairSelector } from "@/components/trading/PairSelector";
 import { SniperEntry } from "@/components/trading/SniperEntry";
 import { StrategyPanel } from "@/components/trading/StrategyPanel";
-import { HauzaSniperPanel } from "@/components/trading/HauzaSniperPanel";
+import { BotvioSniperPanel } from "@/components/trading/BotvioSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
 import { QuickTrade } from "@/components/trading/QuickTrade";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
@@ -162,9 +162,9 @@ const Index = () => {
             <PriceDisplay data={marketData} />
             <SniperEntry pair={selectedPair} currentPrice={marketData.price} />
 
-            {/* Hauza Sniper Signals Panel */}
+            {/* Botvio Sniper Signals Panel */}
             <div className="glass-card p-6">
-              <HauzaSniperPanel 
+              <BotvioSniperPanel 
                 symbol={selectedPair} 
                 timeframe={settings?.default_timeframe || "M5"} 
               />
@@ -267,15 +267,15 @@ const Index = () => {
                 <Target className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <DialogTitle className="text-xl">Welcome to Hauza Sniper!</DialogTitle>
-                <DialogDescription>XAUUSD Trading Strategy</DialogDescription>
+                <DialogTitle className="text-xl">Welcome to Botvio!</DialogTitle>
+                <DialogDescription>AI Trading Platform</DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
           <div className="space-y-4">
             <p className="text-muted-foreground">
-              Hauza Sniper is a precise trading strategy that combines:
+              Botvio Sniper is a precise trading strategy that combines:
             </p>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">

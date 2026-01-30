@@ -31,7 +31,7 @@ interface AnalysisResult {
   analysisTime: string;
 }
 
-export const useHauzaSignals = (symbol: string = "XAUUSD", timeframe: string = "M5") => {
+export const useBotvioSignals = (symbol: string = "XAUUSD", timeframe: string = "M5") => {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -44,7 +44,7 @@ export const useHauzaSignals = (symbol: string = "XAUUSD", timeframe: string = "
       const { data, error: fetchError } = await supabase
         .from("trading_signals")
         .select("*")
-        .eq("strategy_name", "Hauza Sniper")
+        .eq("strategy_name", "Botvio Sniper")
         .eq("symbol", symbol)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -65,13 +65,13 @@ export const useHauzaSignals = (symbol: string = "XAUUSD", timeframe: string = "
     }
   }, [symbol]);
 
-  // Run Hauza Sniper analysis via edge function
+  // Run Botvio Sniper analysis via edge function
   const runAnalysis = useCallback(async (candles?: any[]) => {
     setAnalyzing(true);
     setError(null);
 
     try {
-      const { data, error: funcError } = await supabase.functions.invoke("hauza-sniper", {
+      const { data, error: funcError } = await supabase.functions.invoke("botvio-sniper", {
         body: { symbol, timeframe, candles },
       });
 

@@ -40,8 +40,8 @@ interface StrategyCategory {
 
 const strategyCategories: StrategyCategory[] = [
   {
-    id: "hauza-sniper",
-    name: "Hauza Sniper",
+    id: "botvio-sniper",
+    name: "Botvio Sniper",
     description: "Master the XAUUSD sniper strategy with precise entries",
     icon: Target,
     color: "text-primary",
@@ -116,7 +116,7 @@ const Learn = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
-  const activeCategory = searchParams.get("category") || "hauza-sniper";
+  const activeCategory = searchParams.get("category") || "botvio-sniper";
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -330,7 +330,7 @@ const Learn = () => {
               <ul className="space-y-2 text-sm mb-4">
                 <li className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-success" />
-                  Perfect for Hauza Sniper & VIX strategies
+                  Perfect for Botvio Sniper & VIX strategies
                 </li>
                 <li className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-success" />

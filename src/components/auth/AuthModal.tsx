@@ -59,7 +59,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     } else {
       toast({
         title: "Account created!",
-        description: "Welcome to Hauza Trading. You are now signed in.",
+        description: "Welcome to Botvio. Please check your email to verify your account.",
       });
       onOpenChange(false);
       setEmail("");
@@ -75,7 +75,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <User className="w-5 h-5 text-primary" />
-            Hauza Trading Account
+            Botvio Account
           </DialogTitle>
         </DialogHeader>
 

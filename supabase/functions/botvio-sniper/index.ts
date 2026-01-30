@@ -116,8 +116,8 @@ function buildSupportResistanceZones(
   return { support, resistance };
 }
 
-// Main Hauza Sniper detection
-function detectHauzaSniperSignal(
+// Main Botvio Sniper detection
+function detectBotvioSniperSignal(
   candles: Candle[],
   options: {
     symbol?: string;
@@ -200,7 +200,7 @@ function detectHauzaSniperSignal(
       direction: "BUY",
       price,
       time: last.time,
-      reason: "Support + long lower wick + EMA up (Hauza Sniper Buy)",
+      reason: "Support + long lower wick + EMA up (Botvio Sniper Buy)",
       zone: refZone,
       stopLoss: levels.stopLoss,
       takeProfit: levels.takeProfit,
@@ -222,7 +222,7 @@ function detectHauzaSniperSignal(
       direction: "SELL",
       price,
       time: last.time,
-      reason: "Resistance + long upper wick + EMA down (Hauza Sniper Sell)",
+      reason: "Resistance + long upper wick + EMA down (Botvio Sniper Sell)",
       zone: refZone,
       stopLoss: levels.stopLoss,
       takeProfit: levels.takeProfit,
@@ -273,20 +273,20 @@ serve(async (req) => {
     if (!candles || !Array.isArray(candles) || candles.length < 50) {
       return new Response(
         JSON.stringify({
-          error: "Need at least 50 candles for Hauza Sniper analysis",
+          error: "Need at least 50 candles for Botvio Sniper analysis",
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const signal = detectHauzaSniperSignal(candles, { symbol, timeframe });
+    const signal = detectBotvioSniperSignal(candles, { symbol, timeframe });
 
     // If we have a valid signal, save it to the database
     if (signal) {
       const { error: insertError } = await supabaseClient
         .from("trading_signals")
         .insert({
-          strategy_name: "Hauza Sniper",
+          strategy_name: "Botvio Sniper",
           symbol: signal.symbol,
           timeframe: signal.timeframe,
           direction: signal.direction,
@@ -320,7 +320,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    console.error("Hauza sniper error:", error);
+    console.error("Botvio sniper error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: errorMessage }),
