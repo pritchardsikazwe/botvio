@@ -21,15 +21,317 @@ interface TradingSignal {
   reason: string;
 }
 
+interface TickData {
+  symbol: string;
+  quote: number;
+  epoch: number;
+}
+
+interface MarketData {
+  symbol: string;
+  ticks: TickData[];
+  ema20?: number;
+  ema50?: number;
+  rsi14?: number;
+  trend?: "bullish" | "bearish" | "sideways";
+  volatility?: number;
+  lastSpike?: { direction: "up" | "down"; epoch: number } | null;
+}
+
+// Cache for market data across strategy runs
+const marketDataCache = new Map<string, MarketData>();
+
 // Forex session times (UTC)
 const FOREX_SESSIONS = {
-  sydney: { open: 22, close: 7 },   // 22:00 - 07:00 UTC
-  tokyo: { open: 0, close: 9 },     // 00:00 - 09:00 UTC
-  london: { open: 8, close: 17 },   // 08:00 - 17:00 UTC
-  newyork: { open: 13, close: 22 }, // 13:00 - 22:00 UTC
+  sydney: { open: 22, close: 7 },
+  tokyo: { open: 0, close: 9 },
+  london: { open: 8, close: 17 },
+  newyork: { open: 13, close: 22 },
 };
 
-// Check if we're 3 minutes before session open
+// ============= REAL-TIME MARKET DATA INTEGRATION =============
+
+/**
+ * Fetch live tick history from Deriv WebSocket
+ */
+async function fetchTickHistory(
+  symbol: string,
+  count = 100
+): Promise<TickData[]> {
+  return new Promise((resolve, reject) => {
+    const ticks: TickData[] = [];
+    let timeoutId: number;
+    
+    try {
+      const ws = new WebSocket(DERIV_WS_URL);
+      
+      timeoutId = setTimeout(() => {
+        ws.close();
+        console.log(`[MarketData] Timeout fetching ${symbol}, returning cached or empty`);
+        resolve(ticks);
+      }, 15000);
+
+      ws.onopen = () => {
+        console.log(`[MarketData] Fetching ${count} ticks for ${symbol}`);
+        ws.send(JSON.stringify({
+          ticks_history: symbol,
+          adjust_start_time: 1,
+          count: count,
+          end: "latest",
+          style: "ticks",
+        }));
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.error) {
+          console.error(`[MarketData] Error for ${symbol}:`, data.error.message);
+          clearTimeout(timeoutId);
+          ws.close();
+          resolve([]);
+          return;
+        }
+
+        if (data.msg_type === "history" && data.history) {
+          const prices = data.history.prices || [];
+          const times = data.history.times || [];
+          
+          for (let i = 0; i < prices.length; i++) {
+            ticks.push({
+              symbol,
+              quote: prices[i],
+              epoch: times[i],
+            });
+          }
+          
+          console.log(`[MarketData] Received ${ticks.length} ticks for ${symbol}`);
+          clearTimeout(timeoutId);
+          ws.close();
+          resolve(ticks);
+        }
+      };
+
+      ws.onerror = () => {
+        clearTimeout(timeoutId);
+        console.error(`[MarketData] WebSocket error for ${symbol}`);
+        resolve([]);
+      };
+
+      ws.onclose = () => {
+        clearTimeout(timeoutId);
+      };
+    } catch (error) {
+      console.error(`[MarketData] Exception fetching ${symbol}:`, error);
+      resolve([]);
+    }
+  });
+}
+
+/**
+ * Subscribe to live ticks and collect for a short period
+ */
+async function fetchLiveTicks(
+  symbol: string,
+  durationMs = 5000
+): Promise<TickData[]> {
+  return new Promise((resolve) => {
+    const ticks: TickData[] = [];
+    
+    try {
+      const ws = new WebSocket(DERIV_WS_URL);
+      
+      const timeout = setTimeout(() => {
+        ws.close();
+        resolve(ticks);
+      }, durationMs);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({
+          ticks: symbol,
+          subscribe: 1,
+        }));
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.msg_type === "tick" && data.tick) {
+          ticks.push({
+            symbol: data.tick.symbol,
+            quote: data.tick.quote,
+            epoch: data.tick.epoch,
+          });
+        }
+      };
+
+      ws.onerror = () => {
+        clearTimeout(timeout);
+        resolve(ticks);
+      };
+    } catch {
+      resolve([]);
+    }
+  });
+}
+
+// ============= TECHNICAL INDICATORS =============
+
+/**
+ * Calculate Exponential Moving Average
+ */
+function calculateEMA(prices: number[], period: number): number {
+  if (prices.length < period) return prices[prices.length - 1] || 0;
+  
+  const multiplier = 2 / (period + 1);
+  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  
+  for (let i = period; i < prices.length; i++) {
+    ema = (prices[i] - ema) * multiplier + ema;
+  }
+  
+  return ema;
+}
+
+/**
+ * Calculate Relative Strength Index
+ */
+function calculateRSI(prices: number[], period = 14): number {
+  if (prices.length < period + 1) return 50;
+  
+  let gains = 0;
+  let losses = 0;
+  
+  for (let i = prices.length - period; i < prices.length; i++) {
+    const change = prices[i] - prices[i - 1];
+    if (change > 0) gains += change;
+    else losses -= change;
+  }
+  
+  const avgGain = gains / period;
+  const avgLoss = losses / period;
+  
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
+/**
+ * Calculate volatility (standard deviation of returns)
+ */
+function calculateVolatility(prices: number[], period = 20): number {
+  if (prices.length < period) return 0;
+  
+  const returns: number[] = [];
+  for (let i = 1; i < prices.length; i++) {
+    returns.push((prices[i] - prices[i - 1]) / prices[i - 1]);
+  }
+  
+  const recentReturns = returns.slice(-period);
+  const mean = recentReturns.reduce((a, b) => a + b, 0) / recentReturns.length;
+  const squaredDiffs = recentReturns.map(r => Math.pow(r - mean, 2));
+  const variance = squaredDiffs.reduce((a, b) => a + b, 0) / squaredDiffs.length;
+  
+  return Math.sqrt(variance) * 100; // Return as percentage
+}
+
+/**
+ * Detect spike patterns for Boom/Crash markets
+ */
+function detectSpike(
+  ticks: TickData[],
+  threshold = 0.001
+): { direction: "up" | "down"; epoch: number } | null {
+  if (ticks.length < 10) return null;
+  
+  const recentTicks = ticks.slice(-10);
+  
+  for (let i = 1; i < recentTicks.length; i++) {
+    const priceChange = (recentTicks[i].quote - recentTicks[i - 1].quote) / recentTicks[i - 1].quote;
+    
+    if (Math.abs(priceChange) > threshold) {
+      return {
+        direction: priceChange > 0 ? "up" : "down",
+        epoch: recentTicks[i].epoch,
+      };
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Determine trend direction
+ */
+function determineTrend(
+  ema20: number,
+  ema50: number,
+  currentPrice: number
+): "bullish" | "bearish" | "sideways" {
+  const emaDiff = (ema20 - ema50) / ema50;
+  const priceVsEma = (currentPrice - ema20) / ema20;
+  
+  if (ema20 > ema50 && priceVsEma > 0.001) return "bullish";
+  if (ema20 < ema50 && priceVsEma < -0.001) return "bearish";
+  return "sideways";
+}
+
+/**
+ * Analyze market and build comprehensive data
+ */
+async function analyzeMarket(symbol: string): Promise<MarketData> {
+  // Check cache first (valid for 30 seconds)
+  const cached = marketDataCache.get(symbol);
+  if (cached && cached.ticks.length > 0) {
+    const lastTick = cached.ticks[cached.ticks.length - 1];
+    if (Date.now() / 1000 - lastTick.epoch < 30) {
+      console.log(`[MarketData] Using cached data for ${symbol}`);
+      return cached;
+    }
+  }
+
+  console.log(`[MarketData] Analyzing ${symbol}...`);
+  
+  // Fetch historical ticks
+  const ticks = await fetchTickHistory(symbol, 100);
+  
+  if (ticks.length === 0) {
+    console.log(`[MarketData] No data available for ${symbol}`);
+    return { symbol, ticks: [] };
+  }
+
+  const prices = ticks.map(t => t.quote);
+  const currentPrice = prices[prices.length - 1];
+  
+  // Calculate indicators
+  const ema20 = calculateEMA(prices, 20);
+  const ema50 = calculateEMA(prices, 50);
+  const rsi14 = calculateRSI(prices, 14);
+  const volatility = calculateVolatility(prices, 20);
+  const trend = determineTrend(ema20, ema50, currentPrice);
+  const lastSpike = detectSpike(ticks);
+
+  const marketData: MarketData = {
+    symbol,
+    ticks,
+    ema20,
+    ema50,
+    rsi14,
+    trend,
+    volatility,
+    lastSpike,
+  };
+
+  // Update cache
+  marketDataCache.set(symbol, marketData);
+  
+  console.log(`[MarketData] ${symbol}: Price=${currentPrice.toFixed(5)}, EMA20=${ema20.toFixed(5)}, RSI=${rsi14.toFixed(1)}, Trend=${trend}`);
+  
+  return marketData;
+}
+
+// ============= STRATEGY HELPERS =============
+
 function isPreSessionWindow(sessionName: string): boolean {
   const now = new Date();
   const utcHour = now.getUTCHours();
@@ -38,138 +340,205 @@ function isPreSessionWindow(sessionName: string): boolean {
   
   if (!session) return false;
   
-  // Check if we're within 3 minutes before session open
   const preSessionMinutes = session.open * 60 - 3;
   const currentMinutes = utcHour * 60 + utcMinutes;
   
   return currentMinutes >= preSessionMinutes && currentMinutes < session.open * 60;
 }
 
-// Bot strategy modules
-function botvioStrategy(instance: any): TradingSignal[] {
-  // Botvio Sniper Strategy implementation
-  // H1 EMA50 trend bias + H1 swing S/R zones + M15 EMA20 rejection
-  
-  const signals: TradingSignal[] = [];
-  console.log(`[Botvio] Running strategy for ${instance.name} on markets:`, instance.markets);
-  
-  return signals;
-}
+// ============= STRATEGY MODULES WITH LIVE DATA =============
 
-function boomCrashSniperStrategy(instance: any): TradingSignal[] {
+async function botvioStrategy(instance: any): Promise<TradingSignal[]> {
   const signals: TradingSignal[] = [];
-  console.log(`[Boom/Crash] Running strategy for ${instance.name}`);
-  return signals;
-}
-
-function volatilityTrendStrategy(instance: any): TradingSignal[] {
-  const signals: TradingSignal[] = [];
-  console.log(`[Volatility Trend] Running strategy for ${instance.name}`);
-  return signals;
-}
-
-// London Session Strategy - 3 min before London open
-function londonSessionStrategy(instance: any): TradingSignal[] {
-  const signals: TradingSignal[] = [];
+  const markets = instance.markets || ["R_100"];
   
-  if (!isPreSessionWindow("london")) {
-    console.log(`[London Session] Not in pre-session window, skipping`);
-    return signals;
+  console.log(`[Botvio] Running strategy with live data for ${instance.name}`);
+  
+  for (const symbol of markets) {
+    const data = await analyzeMarket(symbol);
+    
+    if (!data.ticks.length || !data.ema20 || !data.rsi14) continue;
+    
+    const currentPrice = data.ticks[data.ticks.length - 1].quote;
+    
+    // H1 EMA50 trend bias + M15 EMA20 rejection + RSI confirmation
+    if (data.trend === "bullish" && data.rsi14 < 70 && currentPrice > data.ema20) {
+      // Price above EMA20 in bullish trend, not overbought
+      signals.push({
+        symbol,
+        direction: "BUY",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "m",
+        confidence: 75 + (70 - data.rsi14) * 0.3, // Higher confidence when RSI is lower
+        reason: `Botvio: Bullish trend, RSI=${data.rsi14.toFixed(1)}, Price above EMA20`,
+      });
+    } else if (data.trend === "bearish" && data.rsi14 > 30 && currentPrice < data.ema20) {
+      signals.push({
+        symbol,
+        direction: "SELL",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "m",
+        confidence: 75 + (data.rsi14 - 30) * 0.3,
+        reason: `Botvio: Bearish trend, RSI=${data.rsi14.toFixed(1)}, Price below EMA20`,
+      });
+    }
   }
   
-  console.log(`[London Session] Running strategy for ${instance.name}`);
-  console.log(`[London Session] Analyzing previous session S/R, breakouts, rejections on M15`);
-  
-  // Strategy: Check previous Asian session key levels
-  // Look for rejection wicks, breakout patterns, and key S/R on M15
-  
   return signals;
 }
 
-// New York Session Strategy
-function newyorkSessionStrategy(instance: any): TradingSignal[] {
+async function boomCrashSniperStrategy(instance: any): Promise<TradingSignal[]> {
   const signals: TradingSignal[] = [];
+  const markets = instance.markets || ["BOOM1000", "CRASH1000"];
   
-  if (!isPreSessionWindow("newyork")) {
-    console.log(`[New York Session] Not in pre-session window, skipping`);
-    return signals;
+  console.log(`[Boom/Crash] Running with live spike detection`);
+  
+  for (const symbol of markets) {
+    const data = await analyzeMarket(symbol);
+    
+    if (!data.ticks.length) continue;
+    
+    const isBoom = symbol.includes("BOOM");
+    const isCrash = symbol.includes("CRASH");
+    
+    // Check for consecutive moves against spike direction
+    const recentTicks = data.ticks.slice(-20);
+    let consecutiveDown = 0;
+    let consecutiveUp = 0;
+    
+    for (let i = 1; i < recentTicks.length; i++) {
+      if (recentTicks[i].quote < recentTicks[i - 1].quote) {
+        consecutiveDown++;
+        consecutiveUp = 0;
+      } else {
+        consecutiveUp++;
+        consecutiveDown = 0;
+      }
+    }
+    
+    // Boom: After many consecutive down ticks, expect spike up
+    if (isBoom && consecutiveDown >= 8) {
+      signals.push({
+        symbol,
+        direction: "BUY",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "t",
+        confidence: 70 + Math.min(consecutiveDown, 15),
+        reason: `Boom spike anticipation: ${consecutiveDown} consecutive down ticks`,
+      });
+    }
+    
+    // Crash: After many consecutive up ticks, expect spike down
+    if (isCrash && consecutiveUp >= 8) {
+      signals.push({
+        symbol,
+        direction: "SELL",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "t",
+        confidence: 70 + Math.min(consecutiveUp, 15),
+        reason: `Crash spike anticipation: ${consecutiveUp} consecutive up ticks`,
+      });
+    }
   }
   
-  console.log(`[New York Session] Running strategy for ${instance.name}`);
-  console.log(`[New York Session] Analyzing London session S/R and key levels`);
-  
   return signals;
 }
 
-// Tokyo Session Strategy
-function tokyoSessionStrategy(instance: any): TradingSignal[] {
+async function volatilityTrendStrategy(instance: any): Promise<TradingSignal[]> {
   const signals: TradingSignal[] = [];
+  const markets = instance.markets || ["R_100", "R_50", "R_75"];
   
-  if (!isPreSessionWindow("tokyo")) {
-    console.log(`[Tokyo Session] Not in pre-session window, skipping`);
-    return signals;
+  console.log(`[Volatility Trend] Running with live EMA crossover detection`);
+  
+  for (const symbol of markets) {
+    const data = await analyzeMarket(symbol);
+    
+    if (!data.ema20 || !data.ema50 || !data.rsi14) continue;
+    
+    const currentPrice = data.ticks[data.ticks.length - 1]?.quote;
+    if (!currentPrice) continue;
+    
+    // EMA crossover strategy with RSI filter
+    const emaCrossUp = data.ema20 > data.ema50 && data.rsi14 < 65;
+    const emaCrossDown = data.ema20 < data.ema50 && data.rsi14 > 35;
+    
+    // Only trade in direction of trend with confirmation
+    if (emaCrossUp && data.trend === "bullish") {
+      signals.push({
+        symbol,
+        direction: "BUY",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "t",
+        confidence: 75,
+        reason: `EMA20 above EMA50, RSI=${data.rsi14.toFixed(1)}, Trend=bullish`,
+      });
+    } else if (emaCrossDown && data.trend === "bearish") {
+      signals.push({
+        symbol,
+        direction: "SELL",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "t",
+        confidence: 75,
+        reason: `EMA20 below EMA50, RSI=${data.rsi14.toFixed(1)}, Trend=bearish`,
+      });
+    }
   }
   
-  console.log(`[Tokyo Session] Running strategy for ${instance.name}`);
-  
   return signals;
 }
 
-// Sydney Session Strategy
-function sydneySessionStrategy(instance: any): TradingSignal[] {
+async function rsiStrategy(instance: any): Promise<TradingSignal[]> {
   const signals: TradingSignal[] = [];
+  const markets = instance.markets || ["R_100", "frxEURUSD"];
   
-  if (!isPreSessionWindow("sydney")) {
-    console.log(`[Sydney Session] Not in pre-session window, skipping`);
-    return signals;
+  console.log(`[RSI Strategy] Running with live RSI calculation`);
+  
+  for (const symbol of markets) {
+    const data = await analyzeMarket(symbol);
+    
+    if (!data.rsi14) continue;
+    
+    // RSI oversold/overbought with trend confirmation
+    if (data.rsi14 < 30 && data.trend !== "bearish") {
+      signals.push({
+        symbol,
+        direction: "BUY",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "m",
+        confidence: 80 + (30 - data.rsi14),
+        reason: `RSI oversold: ${data.rsi14.toFixed(1)}`,
+      });
+    } else if (data.rsi14 > 70 && data.trend !== "bullish") {
+      signals.push({
+        symbol,
+        direction: "SELL",
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "m",
+        confidence: 80 + (data.rsi14 - 70),
+        reason: `RSI overbought: ${data.rsi14.toFixed(1)}`,
+      });
+    }
   }
   
-  console.log(`[Sydney Session] Running strategy for ${instance.name}`);
-  
   return signals;
 }
 
-// Daily Range Strategy - Lowest/Highest of day notifications
-function dailyRangeStrategy(instance: any): TradingSignal[] {
-  const signals: TradingSignal[] = [];
-  
-  console.log(`[Daily Range] Monitoring for daily high/low extremes`);
-  console.log(`[Daily Range] Markets: ${instance.markets?.join(", ")}`);
-  
-  // This strategy monitors for new daily highs/lows and sends notifications
-  // No direct trading signals, but triggers alerts
-  
-  return signals;
-}
-
-// RSI Universal Strategy - Works on all markets
-function rsiStrategy(instance: any): TradingSignal[] {
-  const signals: TradingSignal[] = [];
-  
-  console.log(`[RSI Strategy] Running on markets: ${instance.markets?.join(", ")}`);
-  
-  // RSI Strategy Logic:
-  // - RSI below 30: Oversold condition, potential BUY
-  // - RSI above 70: Overbought condition, potential SELL
-  // - Combine with price action for confirmation
-  
-  // Would analyze RSI on M15 and H1 timeframes
-  
-  return signals;
-}
-
-// Custom Strategy Execution - Runs strategies from config_json
-function customStrategyExecutor(instance: any): TradingSignal[] {
+async function customStrategyExecutor(instance: any): Promise<TradingSignal[]> {
   const signals: TradingSignal[] = [];
   const config = instance.config_json || {};
   
   console.log(`[Custom Strategy] Running for ${instance.name}`);
-  console.log(`[Custom Strategy] Config:`, JSON.stringify(config).slice(0, 200));
   
-  // Parse strategy configuration
   const {
     symbol = "R_100",
-    contract_type = "CALL",
     direction = "BUY",
     stake = 1,
     duration = 5,
@@ -177,20 +546,24 @@ function customStrategyExecutor(instance: any): TradingSignal[] {
     entry_conditions = [],
     confidence_threshold = 70,
     auto_execute = false,
+    use_live_data = true,
   } = config;
   
-  // Only execute if auto_execute is enabled
   if (!auto_execute) {
     console.log(`[Custom Strategy] Auto-execute disabled, skipping`);
     return signals;
   }
   
-  // Check entry conditions if defined
+  // Get live market data if enabled
+  let marketData: MarketData | null = null;
+  if (use_live_data) {
+    marketData = await analyzeMarket(symbol);
+  }
+  
   let conditionsMet = true;
-  let confidence = 80; // Base confidence
+  let confidence = 80;
   
   for (const condition of entry_conditions) {
-    // Simple condition checking - would be expanded with real market data
     if (condition.type === "time_of_day") {
       const now = new Date();
       const hour = now.getUTCHours();
@@ -207,6 +580,38 @@ function customStrategyExecutor(instance: any): TradingSignal[] {
         break;
       }
     }
+    
+    // Live data conditions
+    if (marketData && condition.type === "rsi_below" && marketData.rsi14) {
+      if (marketData.rsi14 >= condition.value) {
+        conditionsMet = false;
+        break;
+      }
+      confidence += 5;
+    }
+    
+    if (marketData && condition.type === "rsi_above" && marketData.rsi14) {
+      if (marketData.rsi14 <= condition.value) {
+        conditionsMet = false;
+        break;
+      }
+      confidence += 5;
+    }
+    
+    if (marketData && condition.type === "trend_is") {
+      if (marketData.trend !== condition.value) {
+        conditionsMet = false;
+        break;
+      }
+      confidence += 10;
+    }
+    
+    if (marketData && condition.type === "volatility_above") {
+      if (!marketData.volatility || marketData.volatility < condition.value) {
+        conditionsMet = false;
+        break;
+      }
+    }
   }
   
   if (conditionsMet && confidence >= confidence_threshold) {
@@ -216,29 +621,27 @@ function customStrategyExecutor(instance: any): TradingSignal[] {
       stake,
       duration,
       duration_unit,
-      confidence,
-      reason: `Custom strategy execution: ${instance.name}`,
+      confidence: Math.min(confidence, 95),
+      reason: `Custom strategy: ${instance.name}${marketData ? ` (RSI=${marketData.rsi14?.toFixed(1)}, Trend=${marketData.trend})` : ""}`,
     });
   }
   
   return signals;
 }
 
-// CFD Strategy for Boom/Crash - spike detection
-function boomCrashCFDStrategy(instance: any): TradingSignal[] {
+async function boomCrashCFDStrategy(instance: any): Promise<TradingSignal[]> {
   const signals: TradingSignal[] = [];
   const config = instance.config_json || {};
   const markets = instance.markets || ["BOOM1000", "CRASH1000"];
   
-  console.log(`[Boom/Crash CFD] Running for ${instance.name} on:`, markets);
+  console.log(`[Boom/Crash CFD] Running with live data`);
   
   const {
     stake = 1,
     duration = 5,
     duration_unit = "t",
     auto_execute = false,
-    spike_detection = true,
-    trend_following = true,
+    min_consecutive = 6,
   } = config;
   
   if (!auto_execute) {
@@ -246,32 +649,38 @@ function boomCrashCFDStrategy(instance: any): TradingSignal[] {
     return signals;
   }
   
-  // Boom/Crash specific logic
-  // For Boom: Wait for consecutive down moves, then BUY expecting spike up
-  // For Crash: Wait for consecutive up moves, then SELL expecting spike down
-  
   for (const market of markets) {
-    if (market.startsWith("BOOM") && spike_detection) {
-      // Boom strategy - buy during downtrend expecting spike
+    const data = await analyzeMarket(market);
+    
+    if (!data.ticks.length) continue;
+    
+    const isBoom = market.includes("BOOM");
+    
+    // Analyze tick direction pattern
+    const recentTicks = data.ticks.slice(-30);
+    let consecutiveAgainst = 0;
+    
+    for (let i = 1; i < recentTicks.length; i++) {
+      const priceUp = recentTicks[i].quote > recentTicks[i - 1].quote;
+      
+      if (isBoom && !priceUp) {
+        consecutiveAgainst++;
+      } else if (!isBoom && priceUp) {
+        consecutiveAgainst++;
+      } else {
+        consecutiveAgainst = 0;
+      }
+    }
+    
+    if (consecutiveAgainst >= min_consecutive) {
       signals.push({
         symbol: market,
-        direction: "BUY",
+        direction: isBoom ? "BUY" : "SELL",
         stake,
         duration,
         duration_unit,
-        confidence: 75,
-        reason: "Boom spike anticipation",
-      });
-    } else if (market.startsWith("CRASH") && spike_detection) {
-      // Crash strategy - sell during uptrend expecting spike
-      signals.push({
-        symbol: market,
-        direction: "SELL", 
-        stake,
-        duration,
-        duration_unit,
-        confidence: 75,
-        reason: "Crash spike anticipation",
+        confidence: 70 + Math.min(consecutiveAgainst * 2, 20),
+        reason: `${market} spike anticipation: ${consecutiveAgainst} consecutive ticks against`,
       });
     }
   }
@@ -279,39 +688,201 @@ function boomCrashCFDStrategy(instance: any): TradingSignal[] {
   return signals;
 }
 
-// Volatility CFD Strategy
-function volatilityCFDStrategy(instance: any): TradingSignal[] {
+async function volatilityCFDStrategy(instance: any): Promise<TradingSignal[]> {
   const signals: TradingSignal[] = [];
   const config = instance.config_json || {};
   const markets = instance.markets || ["R_100", "R_50"];
   
-  console.log(`[Volatility CFD] Running for ${instance.name}`);
+  console.log(`[Volatility CFD] Running with live EMA/RSI analysis`);
   
   const {
     stake = 1,
     duration = 5,
     duration_unit = "t",
     auto_execute = false,
-    trend_direction = "both", // "buy", "sell", "both"
+    trend_direction = "both",
+    min_rsi_diff = 10,
   } = config;
   
-  if (!auto_execute) {
-    return signals;
-  }
+  if (!auto_execute) return signals;
   
-  // Volatility index strategy
-  // Would analyze EMA crossovers, RSI, and trend direction
-  
-  for (const market of markets) {
-    if (trend_direction === "buy" || trend_direction === "both") {
-      // Only add signal if conditions met (placeholder)
+  for (const symbol of markets) {
+    const data = await analyzeMarket(symbol);
+    
+    if (!data.ema20 || !data.ema50 || !data.rsi14) continue;
+    
+    // Only trade when RSI is not neutral
+    const rsiSignal = data.rsi14 < (50 - min_rsi_diff) ? "BUY" : 
+                      data.rsi14 > (50 + min_rsi_diff) ? "SELL" : null;
+    
+    if (!rsiSignal) continue;
+    
+    // Confirm with trend
+    if (rsiSignal === "BUY" && (trend_direction === "buy" || trend_direction === "both")) {
+      if (data.trend === "bullish" || data.trend === "sideways") {
+        signals.push({
+          symbol,
+          direction: "BUY",
+          stake,
+          duration,
+          duration_unit,
+          confidence: 75,
+          reason: `Volatility CFD: RSI=${data.rsi14.toFixed(1)}, Trend=${data.trend}`,
+        });
+      }
+    }
+    
+    if (rsiSignal === "SELL" && (trend_direction === "sell" || trend_direction === "both")) {
+      if (data.trend === "bearish" || data.trend === "sideways") {
+        signals.push({
+          symbol,
+          direction: "SELL",
+          stake,
+          duration,
+          duration_unit,
+          confidence: 75,
+          reason: `Volatility CFD: RSI=${data.rsi14.toFixed(1)}, Trend=${data.trend}`,
+        });
+      }
     }
   }
   
   return signals;
 }
 
-const strategies: Record<string, (instance: any) => TradingSignal[]> = {
+// Session strategies (keep sync for now, fetch data only when session active)
+async function londonSessionStrategy(instance: any): Promise<TradingSignal[]> {
+  if (!isPreSessionWindow("london")) return [];
+  
+  console.log(`[London Session] Running pre-session analysis`);
+  const data = await analyzeMarket("frxEURUSD");
+  
+  if (data.trend === "bullish" && data.rsi14 && data.rsi14 < 60) {
+    return [{
+      symbol: "frxEURUSD",
+      direction: "BUY",
+      stake: instance.max_stake || 1,
+      duration: 5,
+      duration_unit: "m",
+      confidence: 70,
+      reason: `London session: EUR bullish momentum building`,
+    }];
+  }
+  
+  return [];
+}
+
+async function newyorkSessionStrategy(instance: any): Promise<TradingSignal[]> {
+  if (!isPreSessionWindow("newyork")) return [];
+  
+  console.log(`[New York Session] Running pre-session analysis`);
+  const data = await analyzeMarket("frxEURUSD");
+  
+  if (data.trend && data.rsi14) {
+    const direction = data.trend === "bullish" ? "BUY" : data.trend === "bearish" ? "SELL" : null;
+    if (direction) {
+      return [{
+        symbol: "frxEURUSD",
+        direction,
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "m",
+        confidence: 70,
+        reason: `NY session: ${data.trend} continuation`,
+      }];
+    }
+  }
+  
+  return [];
+}
+
+async function tokyoSessionStrategy(instance: any): Promise<TradingSignal[]> {
+  if (!isPreSessionWindow("tokyo")) return [];
+  
+  console.log(`[Tokyo Session] Running pre-session analysis`);
+  const data = await analyzeMarket("frxUSDJPY");
+  
+  if (data.trend && data.rsi14) {
+    const direction = data.trend === "bullish" ? "BUY" : data.trend === "bearish" ? "SELL" : null;
+    if (direction) {
+      return [{
+        symbol: "frxUSDJPY",
+        direction,
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "m",
+        confidence: 70,
+        reason: `Tokyo session: ${data.trend} bias on JPY`,
+      }];
+    }
+  }
+  
+  return [];
+}
+
+async function sydneySessionStrategy(instance: any): Promise<TradingSignal[]> {
+  if (!isPreSessionWindow("sydney")) return [];
+  
+  console.log(`[Sydney Session] Running pre-session analysis`);
+  const data = await analyzeMarket("frxAUDUSD");
+  
+  if (data.trend && data.rsi14) {
+    const direction = data.trend === "bullish" ? "BUY" : data.trend === "bearish" ? "SELL" : null;
+    if (direction) {
+      return [{
+        symbol: "frxAUDUSD",
+        direction,
+        stake: instance.max_stake || 1,
+        duration: 5,
+        duration_unit: "m",
+        confidence: 70,
+        reason: `Sydney session: ${data.trend} bias on AUD`,
+      }];
+    }
+  }
+  
+  return [];
+}
+
+async function dailyRangeStrategy(instance: any): Promise<TradingSignal[]> {
+  console.log(`[Daily Range] Monitoring for extremes with live data`);
+  
+  const markets = instance.markets || ["frxXAUUSD"];
+  const signals: TradingSignal[] = [];
+  
+  for (const symbol of markets) {
+    const data = await analyzeMarket(symbol);
+    
+    if (!data.ticks.length || !data.rsi14) continue;
+    
+    // Detect extreme RSI for potential reversal
+    if (data.rsi14 < 20) {
+      signals.push({
+        symbol,
+        direction: "BUY",
+        stake: instance.max_stake || 1,
+        duration: 15,
+        duration_unit: "m",
+        confidence: 75,
+        reason: `Daily extreme: RSI=${data.rsi14.toFixed(1)} severely oversold`,
+      });
+    } else if (data.rsi14 > 80) {
+      signals.push({
+        symbol,
+        direction: "SELL",
+        stake: instance.max_stake || 1,
+        duration: 15,
+        duration_unit: "m",
+        confidence: 75,
+        reason: `Daily extreme: RSI=${data.rsi14.toFixed(1)} severely overbought`,
+      });
+    }
+  }
+  
+  return signals;
+}
+
+const strategies: Record<string, (instance: any) => Promise<TradingSignal[]>> = {
   botvio: botvioStrategy,
   boom_crash_sniper: boomCrashSniperStrategy,
   volatility_trend: volatilityTrendStrategy,
@@ -321,17 +892,17 @@ const strategies: Record<string, (instance: any) => TradingSignal[]> = {
   sydney_session: sydneySessionStrategy,
   daily_range: dailyRangeStrategy,
   rsi_strategy: rsiStrategy,
-  // New CFD strategies
   custom_strategy: customStrategyExecutor,
   boom_crash_cfd: boomCrashCFDStrategy,
   volatility_cfd: volatilityCFDStrategy,
 };
 
+// ============= RISK MANAGEMENT =============
+
 async function checkRiskLimits(
   supabase: any,
   instance: any
 ): Promise<{ canTrade: boolean; reason: string }> {
-  // Check if risk session exists and is not stopped
   const today = new Date().toISOString().split("T")[0];
   
   const { data: riskSession } = await supabase
@@ -346,7 +917,6 @@ async function checkRiskLimits(
     return { canTrade: false, reason: riskSession.reason || "Daily loss limit reached" };
   }
 
-  // Check open trades count
   const { count: openTradesCount } = await supabase
     .from("bot_trades")
     .select("*", { count: "exact", head: true })
@@ -358,7 +928,6 @@ async function checkRiskLimits(
     return { canTrade: false, reason: `Max open trades (${maxOpenTrades}) reached` };
   }
 
-  // Calculate daily PnL
   const { data: todayTrades } = await supabase
     .from("bot_trades")
     .select("pnl")
@@ -371,7 +940,6 @@ async function checkRiskLimits(
   const lossPercent = Math.abs(Math.min(0, dailyPnL)) / startBalance * 100;
 
   if (lossPercent >= maxDailyLossPercent) {
-    // Update risk session to stop trading
     await supabase
       .from("risk_sessions")
       .upsert({
@@ -388,6 +956,8 @@ async function checkRiskLimits(
 
   return { canTrade: true, reason: "" };
 }
+
+// ============= TRADE EXECUTION =============
 
 async function executeDerivTrade(
   token: string,
@@ -411,7 +981,6 @@ async function executeDerivTrade(
             return;
           }
 
-          // Place the trade
           const contractType = signal.direction === "BUY" ? "CALL" : "PUT";
           
           ws.send(JSON.stringify({
@@ -448,7 +1017,6 @@ async function executeDerivTrade(
         resolve({ success: false, error: "WebSocket connection failed" });
       };
 
-      // Timeout after 30 seconds
       setTimeout(() => {
         if (ws.readyState === WebSocket.OPEN) {
           ws.close();
@@ -461,6 +1029,8 @@ async function executeDerivTrade(
   });
 }
 
+// ============= BOT INSTANCE PROCESSING =============
+
 async function processBotInstance(
   supabase: any,
   instance: any
@@ -470,12 +1040,10 @@ async function processBotInstance(
   
   console.log(`Processing bot instance: ${botName} (${botCode})`);
 
-  // Check risk limits
   const riskCheck = await checkRiskLimits(supabase, instance);
   if (!riskCheck.canTrade) {
     console.log(`[${botName}] Cannot trade: ${riskCheck.reason}`);
     
-    // Log to audit
     await supabase.from("audit_logs").insert({
       user_id: instance.user_id,
       action_type: "BOT_RISK_BLOCK",
@@ -488,15 +1056,14 @@ async function processBotInstance(
     return;
   }
 
-  // Get strategy function
   const strategyFn = strategies[botCode];
   if (!strategyFn) {
     console.log(`[${botName}] No strategy found for code: ${botCode}`);
     return;
   }
 
-  // Run strategy to get signals
-  const signals = strategyFn(instance);
+  // Run strategy to get signals (now async with live data)
+  const signals = await strategyFn(instance);
 
   if (signals.length === 0) {
     console.log(`[${botName}] No trading signals generated`);
@@ -506,16 +1073,13 @@ async function processBotInstance(
   const apiKey = instance.trading_accounts?.api_key_encrypted;
   const maxStake = instance.max_stake || 10;
 
-  // Execute trades for each signal
   for (const signal of signals) {
-    // Enforce max stake
     const stake = Math.min(signal.stake, maxStake);
 
-    console.log(`[${botName}] Executing trade: ${signal.direction} ${signal.symbol} @ $${stake}`);
+    console.log(`[${botName}] Executing trade: ${signal.direction} ${signal.symbol} @ $${stake} (Confidence: ${signal.confidence.toFixed(1)}%)`);
 
     const result = await executeDerivTrade(apiKey, { ...signal, stake });
 
-    // Log trade result
     if (result.success) {
       await supabase.from("bot_trades").insert({
         bot_instance_id: instance.id,
@@ -532,6 +1096,25 @@ async function processBotInstance(
         payload_json: {
           bot_instance_id: instance.id,
           signal,
+          contract_id: result.contract_id,
+          market_data: {
+            confidence: signal.confidence,
+            reason: signal.reason,
+          },
+        },
+      });
+
+      // Create notification for user
+      await supabase.from("notifications").insert({
+        user_id: instance.user_id,
+        type: "trade",
+        title: `Trade Executed: ${signal.symbol}`,
+        message: `${signal.direction} $${stake} - ${signal.reason}`,
+        metadata: {
+          symbol: signal.symbol,
+          direction: signal.direction,
+          stake,
+          confidence: signal.confidence,
           contract_id: result.contract_id,
         },
       });
@@ -553,8 +1136,9 @@ async function processBotInstance(
   }
 }
 
+// ============= MAIN HANDLER =============
+
 serve(async (req) => {
-  // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -565,9 +1149,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    console.log("Bot Worker starting...");
+    console.log("Bot Worker starting with live market data integration...");
 
-    // Fetch all active bot instances with their bot config and trading account
     const { data: instances, error: fetchError } = await supabase
       .from("bot_instances")
       .select(`
@@ -591,7 +1174,6 @@ serve(async (req) => {
 
     console.log(`Found ${instances.length} active bot instances`);
 
-    // Process each bot instance
     const results = [];
     for (const instance of instances) {
       try {
@@ -607,11 +1189,15 @@ serve(async (req) => {
       }
     }
 
+    // Clear cache after run
+    marketDataCache.clear();
+
     return new Response(
       JSON.stringify({
         success: true,
         processed: results.length,
         results,
+        market_data_fetched: true,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
