@@ -27,10 +27,13 @@ import {
   Wallet,
   AlertOctagon,
   Eye,
-  Ban
+  Ban,
+  Signal
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
+import { useManualSignals, useUpdateSignalStatus, ManualSignal } from "@/hooks/useManualSignals";
 
 interface Provider {
   id: string;
@@ -99,6 +102,104 @@ interface FraudFlag {
   severity: 'low' | 'medium' | 'high';
   created_at: string;
 }
+
+// Signals Management Component
+const SignalsManagement = () => {
+  const { data: signals, isLoading, refetch } = useManualSignals({ status: "all" });
+  const updateStatus = useUpdateSignalStatus();
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    await updateStatus.mutateAsync({ id, status: newStatus });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Post New Signal Form */}
+      <AdminSignalForm onSuccess={() => refetch()} />
+      
+      {/* Existing Signals */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Signal className="h-5 w-5" />
+            Posted Signals
+          </CardTitle>
+          <CardDescription>
+            Manage and update signal statuses
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">Loading signals...</div>
+          ) : signals && signals.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Symbol</TableHead>
+                  <TableHead>Direction</TableHead>
+                  <TableHead>Entry</TableHead>
+                  <TableHead>TP</TableHead>
+                  <TableHead>SL</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Posted</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {signals.map((signal) => (
+                  <TableRow key={signal.id}>
+                    <TableCell className="font-medium">{signal.symbol}</TableCell>
+                    <TableCell>
+                      <Badge variant={signal.direction === 'BUY' ? 'default' : 'destructive'}>
+                        {signal.direction}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono">{signal.entry_price}</TableCell>
+                    <TableCell className="font-mono text-success">{signal.take_profit || '-'}</TableCell>
+                    <TableCell className="font-mono text-destructive">{signal.stop_loss || '-'}</TableCell>
+                    <TableCell>
+                      <Badge variant={signal.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                        {signal.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {new Date(signal.created_at).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {signal.status === 'ACTIVE' ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleStatusChange(signal.id, 'CLOSED')}
+                          >
+                            Close
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleStatusChange(signal.id, 'ACTIVE')}
+                          >
+                            Reactivate
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No signals posted yet. Use the form above to create your first signal.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 const Admin = () => {
   const { user } = useAuth();
@@ -550,8 +651,12 @@ const Admin = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="providers" className="space-y-6">
+        <Tabs defaultValue="signals" className="space-y-6">
           <TabsList className="glass-card p-1 flex-wrap">
+            <TabsTrigger value="signals" className="flex items-center gap-2">
+              <Signal className="w-4 h-4" />
+              Signals
+            </TabsTrigger>
             <TabsTrigger value="providers" className="flex items-center gap-2">
               <UserCheck className="w-4 h-4" />
               Providers
@@ -582,6 +687,11 @@ const Admin = () => {
               )}
             </TabsTrigger>
           </TabsList>
+
+          {/* Signals Tab */}
+          <TabsContent value="signals">
+            <SignalsManagement />
+          </TabsContent>
 
           {/* Providers Tab */}
           <TabsContent value="providers">
