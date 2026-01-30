@@ -14,6 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_earnings: {
+        Row: {
+          amount_usd: number
+          approved_at: string | null
+          created_at: string
+          earning_type: string
+          id: string
+          order_id: string | null
+          referred_user_id: string | null
+          referrer_user_id: string
+          rule_id: string | null
+          status: string
+        }
+        Insert: {
+          amount_usd: number
+          approved_at?: string | null
+          created_at?: string
+          earning_type: string
+          id?: string
+          order_id?: string | null
+          referred_user_id?: string | null
+          referrer_user_id: string
+          rule_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount_usd?: number
+          approved_at?: string | null
+          created_at?: string
+          earning_type?: string
+          id?: string
+          order_id?: string | null
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          rule_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_earnings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_earnings_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_links: {
+        Row: {
+          clicks: number | null
+          code: string
+          conversions: number | null
+          created_at: string
+          id: string
+          target_id: string | null
+          type: string
+          user_id: string
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          clicks?: number | null
+          code: string
+          conversions?: number | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          type: string
+          user_id: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          clicks?: number | null
+          code?: string
+          conversions?: number | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          type?: string
+          user_id?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
+      affiliate_profiles: {
+        Row: {
+          affiliate_code: string
+          created_at: string
+          default_payout_method: string | null
+          status: string
+          total_clicks: number | null
+          total_earnings_usd: number | null
+          total_signups: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          affiliate_code: string
+          created_at?: string
+          default_payout_method?: string | null
+          status?: string
+          total_clicks?: number | null
+          total_earnings_usd?: number | null
+          total_signups?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          affiliate_code?: string
+          created_at?: string
+          default_payout_method?: string | null
+          status?: string
+          total_clicks?: number | null
+          total_earnings_usd?: number | null
+          total_signups?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action_type: string
@@ -262,6 +394,51 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_rules: {
+        Row: {
+          buyer_bonus_type: string | null
+          buyer_bonus_value: number | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          max_commission_usd: number | null
+          min_purchase_usd: number | null
+          name: string
+          referrer_type: string
+          referrer_value: number
+          scope_id: string | null
+          scope_type: string
+        }
+        Insert: {
+          buyer_bonus_type?: string | null
+          buyer_bonus_value?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_commission_usd?: number | null
+          min_purchase_usd?: number | null
+          name: string
+          referrer_type: string
+          referrer_value?: number
+          scope_id?: string | null
+          scope_type: string
+        }
+        Update: {
+          buyer_bonus_type?: string | null
+          buyer_bonus_value?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_commission_usd?: number | null
+          min_purchase_usd?: number | null
+          name?: string
+          referrer_type?: string
+          referrer_value?: number
+          scope_id?: string | null
+          scope_type?: string
+        }
+        Relationships: []
+      }
       copied_trades: {
         Row: {
           broker_trade_id: string | null
@@ -442,6 +619,131 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          currency: string | null
+          id: string
+          paid_at: string | null
+          product_id: string | null
+          product_type: string
+          referral_code: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          paid_at?: string | null
+          product_id?: string | null
+          product_type: string
+          referral_code?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          paid_at?: string | null
+          product_id?: string | null
+          product_type?: string
+          referral_code?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payout_methods: {
+        Row: {
+          created_at: string
+          crypto_address: string | null
+          crypto_network: string | null
+          id: string
+          is_default: boolean | null
+          mobile_network: string | null
+          mobile_number: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crypto_address?: string | null
+          crypto_network?: string | null
+          id?: string
+          is_default?: boolean | null
+          mobile_network?: string | null
+          mobile_number?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crypto_address?: string | null
+          crypto_network?: string | null
+          id?: string
+          is_default?: boolean | null
+          mobile_network?: string | null
+          mobile_number?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payout_requests: {
+        Row: {
+          admin_note: string | null
+          amount_usd: number
+          created_at: string
+          id: string
+          method_id: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          tx_reference: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_usd: number
+          created_at?: string
+          id?: string
+          method_id: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          tx_reference?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          method_id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          tx_reference?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_requests_method_id_fkey"
+            columns: ["method_id"]
+            isOneToOne: false
+            referencedRelation: "payout_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_plans: {
         Row: {
           allow_copy_trading: boolean | null
@@ -490,28 +792,34 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          country: string | null
           created_at: string
           display_name: string | null
           email: string | null
           id: string
+          language: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          language?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          language?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -670,6 +978,86 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_clicks: {
+        Row: {
+          code: string
+          country: string | null
+          created_at: string
+          device_fingerprint_hash: string | null
+          id: string
+          ip_hash: string | null
+          landing_path: string | null
+          referrer_user_id: string | null
+          user_agent_hash: string | null
+        }
+        Insert: {
+          code: string
+          country?: string | null
+          created_at?: string
+          device_fingerprint_hash?: string | null
+          id?: string
+          ip_hash?: string | null
+          landing_path?: string | null
+          referrer_user_id?: string | null
+          user_agent_hash?: string | null
+        }
+        Update: {
+          code?: string
+          country?: string | null
+          created_at?: string
+          device_fingerprint_hash?: string | null
+          id?: string
+          ip_hash?: string | null
+          landing_path?: string | null
+          referrer_user_id?: string | null
+          user_agent_hash?: string | null
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          affiliate_code: string
+          attributed_at: string
+          device_hash: string | null
+          first_click_id: string | null
+          id: string
+          ip_hash: string | null
+          referred_user_id: string
+          referrer_user_id: string
+          status: string
+        }
+        Insert: {
+          affiliate_code: string
+          attributed_at?: string
+          device_hash?: string | null
+          first_click_id?: string | null
+          id?: string
+          ip_hash?: string | null
+          referred_user_id: string
+          referrer_user_id: string
+          status?: string
+        }
+        Update: {
+          affiliate_code?: string
+          attributed_at?: string
+          device_hash?: string | null
+          first_click_id?: string | null
+          id?: string
+          ip_hash?: string | null
+          referred_user_id?: string
+          referrer_user_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_first_click_id_fkey"
+            columns: ["first_click_id"]
+            isOneToOne: false
+            referencedRelation: "referral_clicks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risk_sessions: {
         Row: {
           created_at: string
@@ -716,6 +1104,102 @@ export type Database = {
             columns: ["trading_account_id"]
             isOneToOne: false
             referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategies: {
+        Row: {
+          config_json: Json | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          downloads: number | null
+          id: string
+          is_public: boolean | null
+          market: string
+          owner_user_id: string
+          price_usd: number | null
+          pricing_type: string
+          rating: number | null
+          slug: string
+          symbols: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          config_json?: Json | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          downloads?: number | null
+          id?: string
+          is_public?: boolean | null
+          market: string
+          owner_user_id: string
+          price_usd?: number | null
+          pricing_type?: string
+          rating?: number | null
+          slug: string
+          symbols?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          config_json?: Json | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          downloads?: number | null
+          id?: string
+          is_public?: boolean | null
+          market?: string
+          owner_user_id?: string
+          price_usd?: number | null
+          pricing_type?: string
+          rating?: number | null
+          slug?: string
+          symbols?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      strategy_purchases: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string | null
+          strategy_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          strategy_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          strategy_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_purchases_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_purchases_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "strategies"
             referencedColumns: ["id"]
           },
         ]

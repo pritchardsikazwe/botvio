@@ -16,6 +16,7 @@ import Bots from "./pages/Bots";
 import Billing from "./pages/Billing";
 import Admin from "./pages/Admin";
 import P2P from "./pages/P2P";
+import Affiliate from "./pages/Affiliate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/billing" element={<Billing />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/p2p" element={<P2P />} />
+              <Route path="/affiliate" element={<Affiliate />} />
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/:slug" element={<Lesson />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
