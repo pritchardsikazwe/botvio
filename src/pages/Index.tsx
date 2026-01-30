@@ -24,7 +24,7 @@ const Index = () => {
   const { user, settings } = useAuth();
   const { authorized, lastTick, subscribeTicks, unsubscribeTicks } = useDeriv();
   const navigate = useNavigate();
-  const [selectedPair, setSelectedPair] = useState("XAUUSD");
+  const [selectedPair, setSelectedPair] = useState("");
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Use user's saved settings

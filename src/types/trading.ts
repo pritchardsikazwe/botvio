@@ -30,5 +30,5 @@ export interface MarketData {
 export interface TradingPair {
   symbol: string;
   name: string;
-  category: 'FOREX' | 'CRYPTO' | 'COMMODITIES';
+  category: 'FOREX' | 'CRYPTO' | 'COMMODITIES' | 'SYNTHETICS';
 }
