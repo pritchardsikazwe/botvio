@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
@@ -17,17 +17,20 @@ interface Lesson {
 
 const Lesson = () => {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const category = searchParams.get("category") || "hauza-sniper";
 
   useEffect(() => {
     const fetchLessons = async () => {
       const { data, error } = await supabase
         .from("education_lessons")
         .select("*")
-        .eq("category", "hauza-sniper")
+        .eq("category", category)
         .order("lesson_number", { ascending: true });
 
       if (!error && data) {
@@ -39,7 +42,7 @@ const Lesson = () => {
     };
 
     fetchLessons();
-  }, [slug]);
+  }, [slug, category]);
 
   const currentIndex = allLessons.findIndex(l => l.slug === slug);
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
@@ -131,7 +134,7 @@ const Lesson = () => {
         <Header />
         <div className="container mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Lesson Not Found</h1>
-          <Button onClick={() => navigate('/learn')}>Back to Academy</Button>
+          <Button onClick={() => navigate(`/learn?category=${category}`)}>Back to Academy</Button>
         </div>
       </div>
     );
@@ -144,7 +147,7 @@ const Lesson = () => {
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/learn')}>
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/learn?category=${category}`)}>
             <ChevronLeft className="w-4 h-4 mr-1" />
             Academy
           </Button>
@@ -169,7 +172,7 @@ const Lesson = () => {
           {prevLesson ? (
             <Button 
               variant="outline" 
-              onClick={() => navigate(`/learn/${prevLesson.slug}`)}
+              onClick={() => navigate(`/learn/${prevLesson.slug}?category=${category}`)}
             >
               <ChevronLeft className="w-4 h-4 mr-2" />
               {prevLesson.title}
@@ -180,14 +183,14 @@ const Lesson = () => {
 
           {nextLesson ? (
             <Button 
-              variant="gold" 
-              onClick={() => navigate(`/learn/${nextLesson.slug}`)}
+              variant="default" 
+              onClick={() => navigate(`/learn/${nextLesson.slug}?category=${category}`)}
             >
               {nextLesson.title}
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={() => navigate('/learn')}>
+            <Button onClick={() => navigate(`/learn?category=${category}`)}>
               Complete Course
             </Button>
           )}
