@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/trading/Header";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
+import { ChartUpload } from "@/components/signals/ChartUpload";
 import { useManualSignals } from "@/hooks/useManualSignals";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +20,13 @@ import {
   TrendingUp, 
   Filter,
   RefreshCw,
-  Bell
+  Bell,
+  ImageIcon,
+  Crown
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ManualSignal } from "@/hooks/useManualSignals";
+import { useQuery } from "@tanstack/react-query";
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
@@ -46,15 +51,35 @@ const STATUS_OPTIONS = [
 ];
 
 const Signals = () => {
+  const { user } = useAuth();
   const [category, setCategory] = useState("all");
   const [broker, setBroker] = useState("all");
   const [status, setStatus] = useState("ACTIVE");
+  const [activeTab, setActiveTab] = useState("signals");
 
   const { data: signals, isLoading, refetch } = useManualSignals({
     category,
     broker,
     status,
   });
+
+  // Check if user has premium subscription
+  const { data: subscription } = useQuery({
+    queryKey: ["user-subscription", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from("user_plan_subscriptions")
+        .select("*, pricing_plans(code, name)")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const isPremium = (subscription?.pricing_plans as any)?.code !== "free" && !!subscription;
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -93,13 +118,19 @@ const Signals = () => {
                 <Signal className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Manual Trading Signals</h1>
+                <h1 className="text-2xl font-bold">Trading Signals & AI Analysis</h1>
                 <p className="text-muted-foreground">
-                  Expert signals for Deriv, Weltrade & Exness
+                  Expert signals & AI-powered chart analysis
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {isPremium && (
+                <Badge className="bg-gradient-to-r from-warning to-amber-500 text-white py-2 px-4">
+                  <Crown className="h-4 w-4 mr-2" />
+                  Premium
+                </Badge>
+              )}
               <Badge variant="outline" className="text-lg py-2 px-4">
                 <TrendingUp className="h-4 w-4 mr-2 text-success" />
                 {activeCount} Active Signals
@@ -111,7 +142,25 @@ const Signals = () => {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Main Tabs - Signals vs Chart Analysis */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="grid grid-cols-2 w-full max-w-md">
+            <TabsTrigger value="signals" className="flex items-center gap-2">
+              <Signal className="h-4 w-4" />
+              Trading Signals
+            </TabsTrigger>
+            <TabsTrigger value="chart-analysis" className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4" />
+              AI Chart Analysis
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="chart-analysis" className="mt-6">
+            <ChartUpload isPremium={isPremium} />
+          </TabsContent>
+
+          <TabsContent value="signals" className="mt-6">
+            {/* Filters */}
         <Card className="glass-card mb-6">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -237,6 +286,8 @@ const Signals = () => {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

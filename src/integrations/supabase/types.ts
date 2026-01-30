@@ -394,6 +394,42 @@ export type Database = {
         }
         Relationships: []
       }
+      chart_analyses: {
+        Row: {
+          ai_response: string | null
+          analysis_result: Json | null
+          created_at: string
+          id: string
+          image_url: string
+          is_premium_analysis: boolean | null
+          symbol: string | null
+          timeframe: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_response?: string | null
+          analysis_result?: Json | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_premium_analysis?: boolean | null
+          symbol?: string | null
+          timeframe?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_response?: string | null
+          analysis_result?: Json | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_premium_analysis?: boolean | null
+          symbol?: string | null
+          timeframe?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       commission_rules: {
         Row: {
           buyer_bonus_type: string | null
