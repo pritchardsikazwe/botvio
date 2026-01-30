@@ -7,6 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Shield, 
   Users, 
@@ -18,7 +22,12 @@ import {
   AlertTriangle,
   CreditCard,
   Bot,
-  TrendingUp
+  TrendingUp,
+  DollarSign,
+  Wallet,
+  AlertOctagon,
+  Eye,
+  Ban
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,6 +62,44 @@ interface UserSubscription {
   } | null;
 }
 
+interface AffiliateProfile {
+  user_id: string;
+  affiliate_code: string;
+  status: string;
+  total_clicks: number;
+  total_signups: number;
+  total_earnings_usd: number;
+  created_at: string;
+}
+
+interface PayoutRequest {
+  id: string;
+  user_id: string;
+  amount_usd: number;
+  status: string;
+  tx_reference: string | null;
+  admin_note: string | null;
+  created_at: string;
+  method_id: string;
+  payout_methods?: {
+    type: string;
+    crypto_network: string | null;
+    crypto_address: string | null;
+    mobile_network: string | null;
+    mobile_number: string | null;
+  } | null;
+}
+
+interface FraudFlag {
+  id: string;
+  type: string;
+  description: string;
+  user_id: string;
+  affiliate_code: string;
+  severity: 'low' | 'medium' | 'high';
+  created_at: string;
+}
+
 const Admin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -60,11 +107,31 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
+  const [affiliates, setAffiliates] = useState<AffiliateProfile[]>([]);
+  const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
+  const [fraudFlags, setFraudFlags] = useState<FraudFlag[]>([]);
   const [stats, setStats] = useState({
     pendingProviders: 0,
     totalUsers: 0,
     activeSubscriptions: 0,
-    totalBotInstances: 0
+    totalBotInstances: 0,
+    pendingPayouts: 0,
+    totalAffiliates: 0,
+    pendingEarnings: 0,
+    fraudAlerts: 0
+  });
+
+  // Payout approval dialog
+  const [payoutDialog, setPayoutDialog] = useState<{
+    open: boolean;
+    payout: PayoutRequest | null;
+    txReference: string;
+    adminNote: string;
+  }>({
+    open: false,
+    payout: null,
+    txReference: "",
+    adminNote: ""
   });
 
   useEffect(() => {
@@ -116,7 +183,6 @@ const Admin = () => {
       .order("created_at", { ascending: false });
 
     if (subsData) {
-      // Fetch profiles separately and merge
       const userIds = subsData.map(s => s.user_id);
       const { data: profilesData } = await supabase
         .from("profiles")
@@ -131,9 +197,44 @@ const Admin = () => {
       setSubscriptions(mergedSubs as UserSubscription[]);
     }
 
+    // Fetch affiliate profiles
+    const { data: affiliatesData } = await supabase
+      .from("affiliate_profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (affiliatesData) {
+      setAffiliates(affiliatesData);
+    }
+
+    // Fetch payout requests with method details
+    const { data: payoutsData } = await supabase
+      .from("payout_requests")
+      .select(`
+        *,
+        payout_methods (type, crypto_network, crypto_address, mobile_network, mobile_number)
+      `)
+      .order("created_at", { ascending: false });
+
+    if (payoutsData) {
+      setPayouts(payoutsData as PayoutRequest[]);
+    }
+
+    // Detect fraud patterns
+    await detectFraudPatterns();
+
     // Calculate stats
     const pendingCount = providersData?.filter(p => p.status === 'pending').length || 0;
     const activeSubsCount = subsData?.filter(s => s.status === 'active').length || 0;
+    const pendingPayoutsCount = payoutsData?.filter(p => p.status === 'requested').length || 0;
+
+    // Get pending earnings
+    const { data: earningsData } = await supabase
+      .from("affiliate_earnings")
+      .select("amount_usd")
+      .eq("status", "pending");
+
+    const pendingEarningsSum = earningsData?.reduce((sum, e) => sum + Number(e.amount_usd), 0) || 0;
 
     const { count: botCount } = await supabase
       .from("bot_instances")
@@ -143,8 +244,91 @@ const Admin = () => {
       pendingProviders: pendingCount,
       totalUsers: subsData?.length || 0,
       activeSubscriptions: activeSubsCount,
-      totalBotInstances: botCount || 0
+      totalBotInstances: botCount || 0,
+      pendingPayouts: pendingPayoutsCount,
+      totalAffiliates: affiliatesData?.length || 0,
+      pendingEarnings: pendingEarningsSum,
+      fraudAlerts: fraudFlags.length
     });
+  };
+
+  const detectFraudPatterns = async () => {
+    const flags: FraudFlag[] = [];
+
+    // Check for self-referrals
+    const { data: referrals } = await supabase
+      .from("referrals")
+      .select("*");
+
+    referrals?.forEach(ref => {
+      if (ref.referrer_user_id === ref.referred_user_id) {
+        flags.push({
+          id: `self-${ref.id}`,
+          type: "Self-Referral",
+          description: "User attempted to refer themselves",
+          user_id: ref.referrer_user_id,
+          affiliate_code: ref.affiliate_code,
+          severity: "high",
+          created_at: ref.attributed_at
+        });
+      }
+    });
+
+    // Check for duplicate device patterns
+    const { data: clicks } = await supabase
+      .from("referral_clicks")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+
+    const deviceCounts: Record<string, { count: number; codes: Set<string> }> = {};
+    clicks?.forEach(click => {
+      if (click.device_fingerprint_hash) {
+        if (!deviceCounts[click.device_fingerprint_hash]) {
+          deviceCounts[click.device_fingerprint_hash] = { count: 0, codes: new Set() };
+        }
+        deviceCounts[click.device_fingerprint_hash].count++;
+        deviceCounts[click.device_fingerprint_hash].codes.add(click.code);
+      }
+    });
+
+    Object.entries(deviceCounts).forEach(([hash, data]) => {
+      if (data.count > 50 || data.codes.size > 5) {
+        flags.push({
+          id: `device-${hash.slice(0, 8)}`,
+          type: "Suspicious Device Activity",
+          description: `Device used ${data.count} times across ${data.codes.size} affiliate codes`,
+          user_id: "",
+          affiliate_code: Array.from(data.codes).join(", "),
+          severity: data.count > 100 ? "high" : "medium",
+          created_at: new Date().toISOString()
+        });
+      }
+    });
+
+    // Check for IP pattern abuse
+    const ipCounts: Record<string, number> = {};
+    clicks?.forEach(click => {
+      if (click.ip_hash) {
+        ipCounts[click.ip_hash] = (ipCounts[click.ip_hash] || 0) + 1;
+      }
+    });
+
+    Object.entries(ipCounts).forEach(([hash, count]) => {
+      if (count > 100) {
+        flags.push({
+          id: `ip-${hash.slice(0, 8)}`,
+          type: "IP Abuse",
+          description: `Same IP used ${count} times for referral clicks`,
+          user_id: "",
+          affiliate_code: "",
+          severity: count > 200 ? "high" : "medium",
+          created_at: new Date().toISOString()
+        });
+      }
+    });
+
+    setFraudFlags(flags);
   };
 
   const updateProviderStatus = async (providerId: string, newStatus: string, verified: boolean = false) => {
@@ -163,7 +347,6 @@ const Admin = () => {
   };
 
   const updateUserPlan = async (subscriptionId: string, newPlanCode: string) => {
-    // Get the plan ID
     const { data: planData } = await supabase
       .from("pricing_plans")
       .select("id")
@@ -189,16 +372,96 @@ const Admin = () => {
     await fetchData();
   };
 
+  const updateAffiliateStatus = async (userId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from("affiliate_profiles")
+      .update({ status: newStatus })
+      .eq("user_id", userId);
+
+    if (error) {
+      toast.error("Failed to update affiliate status");
+      return;
+    }
+
+    toast.success(`Affiliate ${newStatus === 'active' ? 'activated' : 'suspended'} successfully`);
+    await fetchData();
+  };
+
+  const openPayoutApproval = (payout: PayoutRequest) => {
+    setPayoutDialog({
+      open: true,
+      payout,
+      txReference: "",
+      adminNote: ""
+    });
+  };
+
+  const processPayoutApproval = async (approve: boolean) => {
+    if (!payoutDialog.payout) return;
+
+    const updates: Record<string, unknown> = {
+      status: approve ? 'paid' : 'rejected',
+      admin_note: payoutDialog.adminNote,
+      processed_at: new Date().toISOString(),
+      processed_by: user?.id
+    };
+
+    if (approve && payoutDialog.txReference) {
+      updates.tx_reference = payoutDialog.txReference;
+    }
+
+    const { error } = await supabase
+      .from("payout_requests")
+      .update(updates)
+      .eq("id", payoutDialog.payout.id);
+
+    if (error) {
+      toast.error("Failed to process payout");
+      return;
+    }
+
+    // If approved, mark related earnings as paid
+    if (approve) {
+      await supabase
+        .from("affiliate_earnings")
+        .update({ status: 'paid' })
+        .eq("referrer_user_id", payoutDialog.payout.user_id)
+        .eq("status", "approved");
+    }
+
+    toast.success(`Payout ${approve ? 'approved and paid' : 'rejected'}`);
+    setPayoutDialog({ open: false, payout: null, txReference: "", adminNote: "" });
+    await fetchData();
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
+      case 'requested':
         return <Badge variant="outline" className="border-warning text-warning"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
       case 'approved':
-        return <Badge variant="outline" className="border-success text-success"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>;
+      case 'active':
+        return <Badge variant="outline" className="border-success text-success"><CheckCircle className="w-3 h-3 mr-1" />Active</Badge>;
       case 'rejected':
-        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
+      case 'suspended':
+        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Suspended</Badge>;
+      case 'paid':
+        return <Badge variant="outline" className="border-success text-success"><DollarSign className="w-3 h-3 mr-1" />Paid</Badge>;
+      case 'processing':
+        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Processing</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case 'high':
+        return <Badge variant="destructive"><AlertOctagon className="w-3 h-3 mr-1" />High</Badge>;
+      case 'medium':
+        return <Badge variant="outline" className="border-warning text-warning"><AlertTriangle className="w-3 h-3 mr-1" />Medium</Badge>;
+      default:
+        return <Badge variant="secondary">Low</Badge>;
     }
   };
 
@@ -231,7 +494,7 @@ const Admin = () => {
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           </div>
           <p className="text-muted-foreground">
-            Manage providers, user subscriptions, and platform settings.
+            Manage providers, affiliates, payouts, and fraud detection.
           </p>
         </div>
 
@@ -253,8 +516,8 @@ const Admin = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-bold">{stats.totalUsers}</p>
+                  <p className="text-sm text-muted-foreground">Total Affiliates</p>
+                  <p className="text-2xl font-bold">{stats.totalAffiliates}</p>
                 </div>
                 <Users className="w-8 h-8 text-primary" />
               </div>
@@ -265,10 +528,10 @@ const Admin = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Subscriptions</p>
-                  <p className="text-2xl font-bold text-success">{stats.activeSubscriptions}</p>
+                  <p className="text-sm text-muted-foreground">Pending Payouts</p>
+                  <p className="text-2xl font-bold text-warning">{stats.pendingPayouts}</p>
                 </div>
-                <CreditCard className="w-8 h-8 text-success" />
+                <Wallet className="w-8 h-8 text-warning" />
               </div>
             </CardContent>
           </Card>
@@ -277,10 +540,10 @@ const Admin = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Bot Instances</p>
-                  <p className="text-2xl font-bold">{stats.totalBotInstances}</p>
+                  <p className="text-sm text-muted-foreground">Fraud Alerts</p>
+                  <p className="text-2xl font-bold text-destructive">{fraudFlags.length}</p>
                 </div>
-                <Bot className="w-8 h-8 text-primary" />
+                <AlertOctagon className="w-8 h-8 text-destructive" />
               </div>
             </CardContent>
           </Card>
@@ -288,17 +551,35 @@ const Admin = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="providers" className="space-y-6">
-          <TabsList className="glass-card p-1">
+          <TabsList className="glass-card p-1 flex-wrap">
             <TabsTrigger value="providers" className="flex items-center gap-2">
               <UserCheck className="w-4 h-4" />
-              Provider Applications
+              Providers
               {stats.pendingProviders > 0 && (
                 <Badge variant="destructive" className="ml-1">{stats.pendingProviders}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="subscriptions" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
-              User Subscriptions
+              Subscriptions
+            </TabsTrigger>
+            <TabsTrigger value="affiliates" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Affiliates
+            </TabsTrigger>
+            <TabsTrigger value="payouts" className="flex items-center gap-2">
+              <Wallet className="w-4 h-4" />
+              Payouts
+              {stats.pendingPayouts > 0 && (
+                <Badge variant="destructive" className="ml-1">{stats.pendingPayouts}</Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="fraud" className="flex items-center gap-2">
+              <AlertOctagon className="w-4 h-4" />
+              Fraud Detection
+              {fraudFlags.length > 0 && (
+                <Badge variant="destructive" className="ml-1">{fraudFlags.length}</Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -308,7 +589,7 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle>Provider Applications</CardTitle>
                 <CardDescription>
-                  Review and approve/reject provider applications. Approved providers can list in the marketplace.
+                  Review and approve/reject provider applications.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -391,15 +672,6 @@ const Admin = () => {
                                   Revoke
                                 </Button>
                               )}
-                              {provider.status === 'rejected' && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => updateProviderStatus(provider.id, 'approved', true)}
-                                >
-                                  Re-approve
-                                </Button>
-                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -417,7 +689,7 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle>User Subscriptions</CardTitle>
                 <CardDescription>
-                  Manage user subscription plans and billing status.
+                  Manage user subscription plans.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -469,30 +741,9 @@ const Admin = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => updateUserPlan(sub.id, 'starter')}
-                                disabled={sub.pricing_plans?.code === 'starter'}
-                              >
-                                Starter
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => updateUserPlan(sub.id, 'pro')}
-                                disabled={sub.pricing_plans?.code === 'pro'}
-                              >
-                                Pro
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="default"
-                                onClick={() => updateUserPlan(sub.id, 'vip')}
-                                disabled={sub.pricing_plans?.code === 'vip'}
-                              >
-                                VIP
-                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => updateUserPlan(sub.id, 'starter')} disabled={sub.pricing_plans?.code === 'starter'}>Starter</Button>
+                              <Button size="sm" variant="outline" onClick={() => updateUserPlan(sub.id, 'pro')} disabled={sub.pricing_plans?.code === 'pro'}>Pro</Button>
+                              <Button size="sm" variant="default" onClick={() => updateUserPlan(sub.id, 'vip')} disabled={sub.pricing_plans?.code === 'vip'}>VIP</Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -503,8 +754,319 @@ const Admin = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Affiliates Tab */}
+          <TabsContent value="affiliates">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Affiliate Management</CardTitle>
+                <CardDescription>
+                  View and manage affiliate accounts, suspend for fraud, track performance.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Affiliate Code</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Clicks</TableHead>
+                      <TableHead>Signups</TableHead>
+                      <TableHead>Earnings</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {affiliates.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          No affiliates found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      affiliates.map((affiliate) => (
+                        <TableRow key={affiliate.user_id}>
+                          <TableCell>
+                            <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
+                              {affiliate.affiliate_code}
+                            </code>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(affiliate.status)}</TableCell>
+                          <TableCell>{affiliate.total_clicks || 0}</TableCell>
+                          <TableCell>{affiliate.total_signups || 0}</TableCell>
+                          <TableCell className="font-medium text-success">
+                            ${(affiliate.total_earnings_usd || 0).toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(affiliate.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {affiliate.status === 'active' ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-destructive text-destructive"
+                                  onClick={() => updateAffiliateStatus(affiliate.user_id, 'suspended')}
+                                >
+                                  <Ban className="w-4 h-4 mr-1" />
+                                  Suspend
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-success text-success"
+                                  onClick={() => updateAffiliateStatus(affiliate.user_id, 'active')}
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  Activate
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Payouts Tab */}
+          <TabsContent value="payouts">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Payout Requests</CardTitle>
+                <CardDescription>
+                  Approve, reject payouts and add transaction references.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Method</TableHead>
+                      <TableHead>Details</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>TX Reference</TableHead>
+                      <TableHead>Requested</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payouts.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          No payout requests
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      payouts.map((payout) => (
+                        <TableRow key={payout.id}>
+                          <TableCell className="font-bold text-lg">
+                            ${payout.amount_usd.toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {payout.payout_methods?.type === 'crypto' ? '₿ Crypto' : '📱 Mobile'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {payout.payout_methods?.type === 'crypto' ? (
+                              <div>
+                                <p className="font-mono text-xs truncate max-w-[150px]">
+                                  {payout.payout_methods.crypto_address}
+                                </p>
+                                <p className="text-muted-foreground">{payout.payout_methods.crypto_network}</p>
+                              </div>
+                            ) : (
+                              <div>
+                                <p>{payout.payout_methods?.mobile_number}</p>
+                                <p className="text-muted-foreground">{payout.payout_methods?.mobile_network}</p>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(payout.status)}</TableCell>
+                          <TableCell className="font-mono text-xs max-w-[100px] truncate">
+                            {payout.tx_reference || '-'}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(payout.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            {payout.status === 'requested' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openPayoutApproval(payout)}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                Process
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Fraud Detection Tab */}
+          <TabsContent value="fraud">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertOctagon className="w-5 h-5 text-destructive" />
+                  Fraud Detection
+                </CardTitle>
+                <CardDescription>
+                  Automated detection of suspicious patterns: self-referrals, duplicate devices, IP abuse.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {fraudFlags.length === 0 ? (
+                  <div className="text-center py-12">
+                    <CheckCircle className="w-12 h-12 mx-auto text-success mb-4" />
+                    <h3 className="text-lg font-semibold">No Fraud Detected</h3>
+                    <p className="text-muted-foreground">All affiliate activity looks legitimate.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Affiliate Code</TableHead>
+                        <TableHead>Detected</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {fraudFlags.map((flag) => (
+                        <TableRow key={flag.id}>
+                          <TableCell className="font-medium">{flag.type}</TableCell>
+                          <TableCell>{getSeverityBadge(flag.severity)}</TableCell>
+                          <TableCell className="max-w-[250px]">{flag.description}</TableCell>
+                          <TableCell>
+                            <code className="bg-muted px-2 py-1 rounded text-xs font-mono">
+                              {flag.affiliate_code || 'N/A'}
+                            </code>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(flag.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            {flag.user_id && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => updateAffiliateStatus(flag.user_id, 'suspended')}
+                              >
+                                <Ban className="w-4 h-4 mr-1" />
+                                Suspend
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </main>
+
+      {/* Payout Approval Dialog */}
+      <Dialog open={payoutDialog.open} onOpenChange={(open) => setPayoutDialog(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Process Payout Request</DialogTitle>
+            <DialogDescription>
+              Review and approve or reject this payout request.
+            </DialogDescription>
+          </DialogHeader>
+
+          {payoutDialog.payout && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Amount</Label>
+                  <p className="text-2xl font-bold">${payoutDialog.payout.amount_usd.toFixed(2)}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Method</Label>
+                  <p className="font-medium">
+                    {payoutDialog.payout.payout_methods?.type === 'crypto' 
+                      ? `Crypto (${payoutDialog.payout.payout_methods.crypto_network})`
+                      : `Mobile Money (${payoutDialog.payout.payout_methods?.mobile_network})`
+                    }
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Destination</Label>
+                <p className="font-mono text-sm bg-muted p-2 rounded mt-1">
+                  {payoutDialog.payout.payout_methods?.type === 'crypto'
+                    ? payoutDialog.payout.payout_methods.crypto_address
+                    : payoutDialog.payout.payout_methods?.mobile_number
+                  }
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="txReference">Transaction Reference (required for approval)</Label>
+                <Input
+                  id="txReference"
+                  placeholder="Enter TX hash or reference number"
+                  value={payoutDialog.txReference}
+                  onChange={(e) => setPayoutDialog(prev => ({ ...prev, txReference: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="adminNote">Admin Note (optional)</Label>
+                <Textarea
+                  id="adminNote"
+                  placeholder="Add a note about this payout..."
+                  value={payoutDialog.adminNote}
+                  onChange={(e) => setPayoutDialog(prev => ({ ...prev, adminNote: e.target.value }))}
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPayoutDialog({ open: false, payout: null, txReference: "", adminNote: "" })}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => processPayoutApproval(false)}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              Reject
+            </Button>
+            <Button
+              onClick={() => processPayoutApproval(true)}
+              disabled={!payoutDialog.txReference}
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Approve & Pay
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
