@@ -277,6 +277,61 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Affiliate Broker Section */}
+        {connectedAccounts === 0 && (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="glass-card border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1">Start Trading on Deriv</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Trade synthetic indices 24/7. Boom, Crash, Volatility, and more with stakes as low as $0.35!
+                    </p>
+                    <a
+                      href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button variant="gold" size="sm">
+                        Create Deriv Account <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card border-success/30 bg-gradient-to-br from-success/5 to-transparent">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-success" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1">Trade Forex on Exness</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Ultra-tight spreads, instant withdrawals. Perfect for XAUUSD and NAS100 strategies!
+                    </p>
+                    <a
+                      href="https://one.exnesstrack.org/a/up2tpvqknx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button size="sm" className="bg-success hover:bg-success/90">
+                        Create Exness Account <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Quick Actions */}
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
           <Button variant="outline" className="h-auto py-4 flex-col" asChild>

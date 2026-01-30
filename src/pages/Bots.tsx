@@ -255,6 +255,41 @@ const Bots = () => {
                     </CardContent>
                   </Card>
                 ))}
+
+                {/* Affiliate CTA in Bot Marketplace */}
+                <Card className="glass-card border-dashed border-2 border-primary/30">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-warning/20 flex items-center justify-center mx-auto mb-4">
+                      <Zap className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">Need a Trading Account?</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Create a Deriv account to trade with our automated bots. Get access to Volatility Indices, Boom/Crash, and more!
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <a
+                        href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full"
+                      >
+                        <Button variant="gold" className="w-full">
+                          Open Deriv Account
+                        </Button>
+                      </a>
+                      <a
+                        href="https://one.exnesstrack.org/a/up2tpvqknx"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full"
+                      >
+                        <Button variant="outline" className="w-full">
+                          Open Exness Account
+                        </Button>
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </TabsContent>
@@ -329,6 +364,18 @@ const Bots = () => {
                   <p className="text-muted-foreground mb-4">
                     Browse the marketplace and activate your first trading bot
                   </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                    <a href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">
+                      <Button variant="gold">
+                        Create Deriv Account First
+                      </Button>
+                    </a>
+                    <Link to="/accounts">
+                      <Button variant="outline">
+                        Connect Existing Account
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             )}
