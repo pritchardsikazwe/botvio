@@ -386,9 +386,11 @@ export function useExecuteAndCopy() {
       provider_id: string;
       symbol: string;
       direction: "BUY" | "SELL";
+      contract_type?: string;
       stake: number;
       duration?: number;
       duration_unit?: string;
+      barrier?: number;
     }): Promise<ExecuteCopyResult> => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");

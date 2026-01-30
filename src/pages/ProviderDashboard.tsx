@@ -28,17 +28,68 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// All Deriv CFD symbols for copy trading
 const DERIV_SYMBOLS = [
-  { value: "R_100", label: "Volatility 100" },
-  { value: "R_75", label: "Volatility 75" },
-  { value: "R_50", label: "Volatility 50" },
-  { value: "R_25", label: "Volatility 25" },
-  { value: "R_10", label: "Volatility 10" },
-  { value: "BOOM1000", label: "Boom 1000" },
-  { value: "BOOM500", label: "Boom 500" },
-  { value: "CRASH1000", label: "Crash 1000" },
-  { value: "CRASH500", label: "Crash 500" },
-  { value: "frxXAUUSD", label: "Gold (XAUUSD)" },
+  // Volatility Indices
+  { value: "R_100", label: "Volatility 100 Index", category: "volatility" },
+  { value: "R_75", label: "Volatility 75 Index", category: "volatility" },
+  { value: "R_50", label: "Volatility 50 Index", category: "volatility" },
+  { value: "R_25", label: "Volatility 25 Index", category: "volatility" },
+  { value: "R_10", label: "Volatility 10 Index", category: "volatility" },
+  { value: "1HZ100V", label: "Volatility 100 (1s)", category: "volatility" },
+  { value: "1HZ50V", label: "Volatility 50 (1s)", category: "volatility" },
+  { value: "1HZ25V", label: "Volatility 25 (1s)", category: "volatility" },
+  // Boom & Crash
+  { value: "BOOM1000", label: "Boom 1000 Index", category: "boom_crash" },
+  { value: "BOOM500", label: "Boom 500 Index", category: "boom_crash" },
+  { value: "BOOM300N", label: "Boom 300 Index", category: "boom_crash" },
+  { value: "CRASH1000", label: "Crash 1000 Index", category: "boom_crash" },
+  { value: "CRASH500", label: "Crash 500 Index", category: "boom_crash" },
+  { value: "CRASH300N", label: "Crash 300 Index", category: "boom_crash" },
+  // Jump Indices
+  { value: "JD10", label: "Jump 10 Index", category: "jump" },
+  { value: "JD25", label: "Jump 25 Index", category: "jump" },
+  { value: "JD50", label: "Jump 50 Index", category: "jump" },
+  { value: "JD75", label: "Jump 75 Index", category: "jump" },
+  { value: "JD100", label: "Jump 100 Index", category: "jump" },
+  // Step Indices
+  { value: "stpRNG", label: "Step Index", category: "step" },
+  // Range Break
+  { value: "RDBEAR", label: "Range Break 100", category: "range" },
+  { value: "RDBULL", label: "Range Break 200", category: "range" },
+  // Forex
+  { value: "frxEURUSD", label: "EUR/USD", category: "forex" },
+  { value: "frxGBPUSD", label: "GBP/USD", category: "forex" },
+  { value: "frxUSDJPY", label: "USD/JPY", category: "forex" },
+  { value: "frxAUDUSD", label: "AUD/USD", category: "forex" },
+  { value: "frxUSDCAD", label: "USD/CAD", category: "forex" },
+  { value: "frxEURGBP", label: "EUR/GBP", category: "forex" },
+  // Commodities
+  { value: "frxXAUUSD", label: "Gold (XAU/USD)", category: "commodities" },
+  { value: "frxXAGUSD", label: "Silver (XAG/USD)", category: "commodities" },
+  // Crypto
+  { value: "cryBTCUSD", label: "Bitcoin (BTC/USD)", category: "crypto" },
+  { value: "cryETHUSD", label: "Ethereum (ETH/USD)", category: "crypto" },
+];
+
+// CFD Contract Types available on Deriv
+const CONTRACT_TYPES = [
+  { value: "CALL", label: "Rise / Call", description: "Price will rise" },
+  { value: "PUT", label: "Fall / Put", description: "Price will fall" },
+  { value: "DIGITOVER", label: "Over", description: "Last digit over" },
+  { value: "DIGITUNDER", label: "Under", description: "Last digit under" },
+  { value: "DIGITDIFF", label: "Differs", description: "Last digit differs" },
+  { value: "DIGITMATCH", label: "Matches", description: "Last digit matches" },
+  { value: "DIGITODD", label: "Odd", description: "Last digit odd" },
+  { value: "DIGITEVEN", label: "Even", description: "Last digit even" },
+];
+
+// Duration units
+const DURATION_UNITS = [
+  { value: "t", label: "Ticks", max: 10 },
+  { value: "s", label: "Seconds", max: 120 },
+  { value: "m", label: "Minutes", max: 60 },
+  { value: "h", label: "Hours", max: 24 },
 ];
 
 const ProviderDashboard = () => {
@@ -60,10 +111,14 @@ const ProviderDashboard = () => {
 
   const [tradeForm, setTradeForm] = useState({
     symbol: "R_100",
-    direction: "BUY" as "BUY" | "SELL",
+    contractType: "CALL" as string,
     stake: 1,
     duration: 5,
+    durationUnit: "t" as string,
+    barrier: undefined as number | undefined,
   });
+  
+  const [symbolCategory, setSymbolCategory] = useState<string>("all");
 
   const [lastResult, setLastResult] = useState<any>(null);
 
@@ -127,13 +182,18 @@ const ProviderDashboard = () => {
     }
 
     try {
+      // Map contract type to direction for backend
+      const direction = ["CALL", "DIGITOVER", "DIGITODD"].includes(tradeForm.contractType) ? "BUY" : "SELL";
+      
       const result = await executeAndCopy.mutateAsync({
         provider_id: myProvider.id,
         symbol: tradeForm.symbol,
-        direction: tradeForm.direction,
+        direction,
+        contract_type: tradeForm.contractType,
         stake: tradeForm.stake,
         duration: tradeForm.duration,
-        duration_unit: "t",
+        duration_unit: tradeForm.durationUnit,
+        barrier: tradeForm.barrier,
       });
 
       setLastResult(result);
@@ -298,6 +358,31 @@ const ProviderDashboard = () => {
                     </div>
                   ) : (
                     <form onSubmit={handleExecuteTrade} className="space-y-4">
+                      {/* Symbol Category Filter */}
+                      <div className="space-y-2">
+                        <Label>Market Category</Label>
+                        <Select
+                          value={symbolCategory}
+                          onValueChange={setSymbolCategory}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Markets</SelectItem>
+                            <SelectItem value="volatility">Volatility Indices</SelectItem>
+                            <SelectItem value="boom_crash">Boom & Crash</SelectItem>
+                            <SelectItem value="jump">Jump Indices</SelectItem>
+                            <SelectItem value="step">Step Index</SelectItem>
+                            <SelectItem value="range">Range Break</SelectItem>
+                            <SelectItem value="forex">Forex</SelectItem>
+                            <SelectItem value="commodities">Commodities</SelectItem>
+                            <SelectItem value="crypto">Crypto</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Symbol */}
                       <div className="space-y-2">
                         <Label>Symbol</Label>
                         <Select
@@ -308,37 +393,56 @@ const ProviderDashboard = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {DERIV_SYMBOLS.map((sym) => (
-                              <SelectItem key={sym.value} value={sym.value}>
-                                {sym.label}
-                              </SelectItem>
-                            ))}
+                            {DERIV_SYMBOLS
+                              .filter(sym => symbolCategory === "all" || sym.category === symbolCategory)
+                              .map((sym) => (
+                                <SelectItem key={sym.value} value={sym.value}>
+                                  {sym.label}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </div>
 
+                      {/* Contract Type */}
                       <div className="space-y-2">
-                        <Label>Direction</Label>
+                        <Label>Contract Type</Label>
                         <div className="grid grid-cols-2 gap-2">
                           <Button
                             type="button"
-                            variant={tradeForm.direction === "BUY" ? "default" : "outline"}
-                            className={tradeForm.direction === "BUY" ? "bg-success hover:bg-success/90" : ""}
-                            onClick={() => setTradeForm({ ...tradeForm, direction: "BUY" })}
+                            variant={tradeForm.contractType === "CALL" ? "default" : "outline"}
+                            className={tradeForm.contractType === "CALL" ? "bg-success hover:bg-success/90" : ""}
+                            onClick={() => setTradeForm({ ...tradeForm, contractType: "CALL" })}
                           >
                             <ArrowUp className="mr-2 h-4 w-4" />
-                            BUY (CALL)
+                            Rise / Call
                           </Button>
                           <Button
                             type="button"
-                            variant={tradeForm.direction === "SELL" ? "default" : "outline"}
-                            className={tradeForm.direction === "SELL" ? "bg-destructive hover:bg-destructive/90" : ""}
-                            onClick={() => setTradeForm({ ...tradeForm, direction: "SELL" })}
+                            variant={tradeForm.contractType === "PUT" ? "default" : "outline"}
+                            className={tradeForm.contractType === "PUT" ? "bg-destructive hover:bg-destructive/90" : ""}
+                            onClick={() => setTradeForm({ ...tradeForm, contractType: "PUT" })}
                           >
                             <ArrowDown className="mr-2 h-4 w-4" />
-                            SELL (PUT)
+                            Fall / Put
                           </Button>
                         </div>
+                        {/* Advanced contract types */}
+                        <Select
+                          value={tradeForm.contractType}
+                          onValueChange={(v) => setTradeForm({ ...tradeForm, contractType: v })}
+                        >
+                          <SelectTrigger className="mt-2">
+                            <SelectValue placeholder="More contract types..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CONTRACT_TYPES.map((ct) => (
+                              <SelectItem key={ct.value} value={ct.value}>
+                                {ct.label} - {ct.description}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -354,16 +458,35 @@ const ProviderDashboard = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="duration">Duration (ticks)</Label>
-                          <Input
-                            id="duration"
-                            type="number"
-                            min="1"
-                            max="10"
-                            value={tradeForm.duration}
-                            onChange={(e) => setTradeForm({ ...tradeForm, duration: parseInt(e.target.value) || 5 })}
-                          />
+                          <Label>Duration Unit</Label>
+                          <Select
+                            value={tradeForm.durationUnit}
+                            onValueChange={(v) => setTradeForm({ ...tradeForm, durationUnit: v })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DURATION_UNITS.map((unit) => (
+                                <SelectItem key={unit.value} value={unit.value}>
+                                  {unit.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="duration">Duration ({DURATION_UNITS.find(u => u.value === tradeForm.durationUnit)?.label || "Ticks"})</Label>
+                        <Input
+                          id="duration"
+                          type="number"
+                          min="1"
+                          max={DURATION_UNITS.find(u => u.value === tradeForm.durationUnit)?.max || 10}
+                          value={tradeForm.duration}
+                          onChange={(e) => setTradeForm({ ...tradeForm, duration: parseInt(e.target.value) || 5 })}
+                        />
                       </div>
 
                       <Button
