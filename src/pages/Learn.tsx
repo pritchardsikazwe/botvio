@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   GraduationCap, 
   BookOpen, 
@@ -12,7 +13,12 @@ import {
   TrendingUp, 
   Shield, 
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  Zap,
+  BarChart3,
+  LineChart,
+  Newspaper,
+  Clock
 } from "lucide-react";
 
 interface Lesson {
@@ -24,25 +30,101 @@ interface Lesson {
   category: string;
 }
 
-const lessonIcons: { [key: string]: any } = {
+interface StrategyCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+}
+
+const strategyCategories: StrategyCategory[] = [
+  {
+    id: "hauza-sniper",
+    name: "Hauza Sniper",
+    description: "Master the XAUUSD sniper strategy with precise entries",
+    icon: Target,
+    color: "text-primary",
+  },
+  {
+    id: "indices-trading",
+    name: "Indices Trading",
+    description: "Trade Boom, Crash & Volatility indices on Deriv",
+    icon: TrendingUp,
+    color: "text-success",
+  },
+  {
+    id: "volatility-index",
+    name: "Volatility Index (VIX)",
+    description: "VIX 75/50/25 strategies with M & W formations",
+    icon: Zap,
+    color: "text-warning",
+  },
+  {
+    id: "market-maker",
+    name: "Market Maker Method",
+    description: "Understand institutional trading & stop hunts",
+    icon: BarChart3,
+    color: "text-destructive",
+  },
+  {
+    id: "m-and-w",
+    name: "M & W Patterns",
+    description: "Master reversal patterns for consistent profits",
+    icon: LineChart,
+    color: "text-primary",
+  },
+  {
+    id: "news-trading",
+    name: "News Trading",
+    description: "Trade high-impact news events profitably",
+    icon: Newspaper,
+    color: "text-success",
+  },
+  {
+    id: "nas100",
+    name: "NAS100 Strategy",
+    description: "NASDAQ trading with rejection patterns",
+    icon: TrendingUp,
+    color: "text-warning",
+  },
+  {
+    id: "vit-veterans",
+    name: "VIT Veterans Strategy",
+    description: "Professional volatility index trading",
+    icon: Shield,
+    color: "text-primary",
+  },
+];
+
+const lessonIcons: { [key: string]: React.ComponentType<{ className?: string }> } = {
   "overview": GraduationCap,
   "support-resistance": Target,
   "candles-wicks": TrendingUp,
   "ema-trend": TrendingUp,
   "risk-management": Shield,
+  "m-formations": LineChart,
+  "w-formations": LineChart,
+  "rejections": Zap,
+  "news-events": Newspaper,
+  "stop-hunts": BarChart3,
 };
 
 const Learn = () => {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  const activeCategory = searchParams.get("category") || "hauza-sniper";
 
   useEffect(() => {
     const fetchLessons = async () => {
+      setLoading(true);
       const { data, error } = await supabase
         .from("education_lessons")
         .select("*")
-        .eq("category", "hauza-sniper")
+        .eq("category", activeCategory)
         .order("lesson_number", { ascending: true });
 
       if (!error && data) {
@@ -52,7 +134,14 @@ const Learn = () => {
     };
 
     fetchLessons();
-  }, []);
+  }, [activeCategory]);
+
+  const handleCategoryChange = (category: string) => {
+    setSearchParams({ category });
+  };
+
+  const activeCategoryInfo = strategyCategories.find(c => c.id === activeCategory);
+  const CategoryIcon = activeCategoryInfo?.icon || GraduationCap;
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,23 +154,27 @@ const Learn = () => {
           <div className="relative z-10">
             <Badge variant="outline" className="mb-4 border-primary text-primary">
               <GraduationCap className="w-3 h-3 mr-1" />
-              Hauza Sniper Academy
+              Botvio Trading Academy
             </Badge>
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              Master the Hauza Sniper Strategy
+              Master Multiple Trading Strategies
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mb-6">
-              Learn the complete Hauza Sniper XAUUSD trading strategy. 
-              From support/resistance to precise sniper entries with risk management.
+              Learn proven strategies for Forex, Indices, Volatility, and more. 
+              From beginner concepts to advanced techniques used by professionals.
             </p>
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-sm">
                 <BookOpen className="w-4 h-4 text-primary" />
-                <span>{lessons.length} Lessons</span>
+                <span>{strategyCategories.length} Strategy Courses</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Target className="w-4 h-4 text-success" />
-                <span>Beginner Friendly</span>
+                <span>All Skill Levels</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="w-4 h-4 text-warning" />
+                <span>Learn at Your Pace</span>
               </div>
             </div>
           </div>
@@ -99,10 +192,53 @@ const Learn = () => {
           </div>
         </div>
 
+        {/* Strategy Categories */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Choose a Strategy</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {strategyCategories.map((category) => {
+              const Icon = category.icon;
+              const isActive = activeCategory === category.id;
+              return (
+                <Card 
+                  key={category.id}
+                  className={`cursor-pointer transition-all ${
+                    isActive 
+                      ? 'border-primary bg-primary/5' 
+                      : 'glass-card hover:border-primary/50'
+                  }`}
+                  onClick={() => handleCategoryChange(category.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className={`w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3`}>
+                      <Icon className={`w-5 h-5 ${category.color}`} />
+                    </div>
+                    <h3 className="font-semibold text-sm mb-1">{category.name}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Active Category Info */}
+        <div className="glass-card p-6 mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className={`w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center`}>
+              <CategoryIcon className={`w-6 h-6 ${activeCategoryInfo?.color || 'text-primary'}`} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">{activeCategoryInfo?.name || 'Strategy'}</h2>
+              <p className="text-sm text-muted-foreground">{activeCategoryInfo?.description}</p>
+            </div>
+          </div>
+        </div>
+
         {/* Lessons Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {loading ? (
-            Array.from({ length: 5 }).map((_, i) => (
+            Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="glass-card animate-pulse">
                 <CardHeader>
                   <div className="h-6 bg-secondary rounded w-3/4" />
@@ -110,6 +246,14 @@ const Learn = () => {
                 </CardHeader>
               </Card>
             ))
+          ) : lessons.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
+              <p className="text-muted-foreground">
+                Lessons for {activeCategoryInfo?.name} are being prepared. Check back soon!
+              </p>
+            </div>
           ) : (
             lessons.map((lesson) => {
               const Icon = lessonIcons[lesson.slug] || BookOpen;
@@ -117,7 +261,7 @@ const Learn = () => {
                 <Card 
                   key={lesson.id} 
                   className="glass-card hover:border-primary/50 transition-all cursor-pointer group"
-                  onClick={() => navigate(`/learn/${lesson.slug}`)}
+                  onClick={() => navigate(`/learn/${lesson.slug}?category=${activeCategory}`)}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -149,14 +293,14 @@ const Learn = () => {
 
         {/* Quick Start Guide */}
         <div className="mt-12 glass-card p-8">
-          <h2 className="text-2xl font-bold mb-6">From Signal to Chart – Quick Guide</h2>
+          <h2 className="text-2xl font-bold mb-6">Trading Process – Quick Guide</h2>
           <div className="grid gap-4 md:grid-cols-5">
             {[
-              { step: 1, title: "Receive Signal", desc: "Get Hauza Sniper alert in app" },
-              { step: 2, title: "Open Chart", desc: "View on your broker/MT5/Deriv" },
-              { step: 3, title: "Find Zone", desc: "Locate support or resistance" },
-              { step: 4, title: "Confirm Setup", desc: "Check wick rejection + EMA" },
-              { step: 5, title: "Execute Trade", desc: "Place trade with SL and TP" },
+              { step: 1, title: "Learn Strategy", desc: "Study the complete course" },
+              { step: 2, title: "Demo Practice", desc: "Test on demo account first" },
+              { step: 3, title: "Find Setup", desc: "Wait for valid signals" },
+              { step: 4, title: "Risk Management", desc: "Set proper SL and position size" },
+              { step: 5, title: "Execute Trade", desc: "Enter and manage the trade" },
             ].map(({ step, title, desc }) => (
               <div key={step} className="text-center">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3">

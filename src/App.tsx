@@ -14,6 +14,7 @@ import Providers from "./pages/Providers";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import Bots from "./pages/Bots";
 import Billing from "./pages/Billing";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/provider-dashboard" element={<ProviderDashboard />} />
               <Route path="/bots" element={<Bots />} />
               <Route path="/billing" element={<Billing />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/:slug" element={<Lesson />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

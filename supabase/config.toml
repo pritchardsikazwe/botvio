@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.provider-execute-copy]
 verify_jwt = false
+
+[functions.bot-worker]
+verify_jwt = false
