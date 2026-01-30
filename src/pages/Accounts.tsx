@@ -11,8 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/trading/Header";
 import { useNavigate } from "react-router-dom";
-import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, Gift, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+
+// Affiliate links - Replace with your actual affiliate IDs
+const AFFILIATE_LINKS = {
+  deriv: "https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/",
+  exness: "https://one.exnesstrack.org/a/up2tpvqknx",
+};
 
 const Accounts = () => {
   const { user } = useAuth();
@@ -24,7 +30,7 @@ const Accounts = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [formData, setFormData] = useState({
-    broker: "deriv" as "deriv" | "binance",
+    broker: "deriv" as "deriv" | "binance" | "exness",
     label: "",
     api_key: "",
     api_secret: "",
@@ -53,7 +59,7 @@ const Accounts = () => {
 
     try {
       await addAccount.mutateAsync({
-        broker: formData.broker,
+        broker: formData.broker === "exness" ? "deriv" : formData.broker, // Map exness to deriv for now
         label: formData.label,
         api_key: formData.api_key,
         api_secret: formData.broker === "binance" ? formData.api_secret : undefined,
@@ -118,13 +124,14 @@ const Accounts = () => {
                   <Label>Broker</Label>
                   <Select
                     value={formData.broker}
-                    onValueChange={(v: "deriv" | "binance") => setFormData({ ...formData, broker: v })}
+                    onValueChange={(v: "deriv" | "binance" | "exness") => setFormData({ ...formData, broker: v })}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="deriv">Deriv</SelectItem>
+                      <SelectItem value="exness">Exness</SelectItem>
                       <SelectItem value="binance" disabled>Binance (Coming Soon)</SelectItem>
                     </SelectContent>
                   </Select>
@@ -207,6 +214,18 @@ const Accounts = () => {
                   </div>
                 )}
 
+                {formData.broker === "exness" && (
+                  <div className="p-3 rounded-lg bg-muted/50 text-sm">
+                    <p className="font-medium mb-2">How to get your Exness API Key:</p>
+                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                      <li>Log in to your Exness Personal Area</li>
+                      <li>Go to Settings → API Keys</li>
+                      <li>Create an API key with trading permissions</li>
+                      <li>Copy and paste the key above</li>
+                    </ol>
+                  </div>
+                )}
+
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
@@ -218,6 +237,77 @@ const Accounts = () => {
               </form>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* Affiliate Signup Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card className="glass-card border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Gift className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-1">Don't have a Deriv account?</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Sign up now and get access to Volatility Indices, Boom/Crash, and more. Trade 24/7 with as low as $1!
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Welcome Bonus
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">24/7 Trading</Badge>
+                    <Badge variant="secondary" className="text-xs">Low Minimums</Badge>
+                  </div>
+                  <a
+                    href={AFFILIATE_LINKS.deriv}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="gold" className="mt-4 w-full sm:w-auto">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Create Deriv Account
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card border-success/30 bg-gradient-to-br from-success/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                  <Gift className="h-6 w-6 text-success" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-1">Trade Forex with Exness</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Ultra-tight spreads, instant withdrawals, and professional trading conditions. Perfect for scalping!
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Tight Spreads
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">Instant Withdrawals</Badge>
+                    <Badge variant="secondary" className="text-xs">MT4/MT5</Badge>
+                  </div>
+                  <a
+                    href={AFFILIATE_LINKS.exness}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button className="mt-4 w-full sm:w-auto bg-success hover:bg-success/90">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Create Exness Account
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Accounts List */}
@@ -297,12 +387,20 @@ const Accounts = () => {
               <Wallet className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">No accounts connected</h3>
               <p className="text-muted-foreground mb-4">
-                Connect your Deriv or Binance account to start automated trading
+                Connect your Deriv or Exness account to start automated trading
               </p>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Connect Your First Account
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Connect Existing Account
+                </Button>
+                <a href={AFFILIATE_LINKS.deriv} target="_blank" rel="noopener noreferrer">
+                  <Button variant="gold">
+                    <Gift className="mr-2 h-4 w-4" />
+                    Create Deriv Account
+                  </Button>
+                </a>
+              </div>
             </CardContent>
           </Card>
         )}

@@ -312,6 +312,87 @@ const Learn = () => {
             ))}
           </div>
         </div>
+
+        {/* Affiliate Partner Section */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="glass-card border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge variant="outline" className="border-primary text-primary">
+                  Recommended Broker
+                </Badge>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Trade on Deriv</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Practice what you learn with Deriv's synthetic indices. Trade Boom, Crash, 
+                Volatility indices 24/7 with stakes as low as $0.35!
+              </p>
+              <ul className="space-y-2 text-sm mb-4">
+                <li className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-success" />
+                  Perfect for Hauza Sniper & VIX strategies
+                </li>
+                <li className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-success" />
+                  Boom/Crash indices for spike trading
+                </li>
+                <li className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-success" />
+                  Free demo account with $10,000 virtual funds
+                </li>
+              </ul>
+              <a
+                href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="gold" className="w-full">
+                  Open Deriv Account
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card border-success/30 bg-gradient-to-br from-success/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge variant="outline" className="border-success text-success">
+                  Forex & CFDs
+                </Badge>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Trade on Exness</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                For Forex pairs and NAS100 trading. Ultra-tight spreads, instant withdrawals, 
+                and professional-grade execution!
+              </p>
+              <ul className="space-y-2 text-sm mb-4">
+                <li className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-success" />
+                  Best for XAUUSD & News Trading strategies
+                </li>
+                <li className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-success" />
+                  NAS100 with tight spreads
+                </li>
+                <li className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-success" />
+                  Instant deposits & withdrawals
+                </li>
+              </ul>
+              <a
+                href="https://one.exnesstrack.org/a/up2tpvqknx"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="w-full bg-success hover:bg-success/90">
+                  Open Exness Account
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
