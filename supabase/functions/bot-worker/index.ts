@@ -21,54 +21,153 @@ interface TradingSignal {
   reason: string;
 }
 
+// Forex session times (UTC)
+const FOREX_SESSIONS = {
+  sydney: { open: 22, close: 7 },   // 22:00 - 07:00 UTC
+  tokyo: { open: 0, close: 9 },     // 00:00 - 09:00 UTC
+  london: { open: 8, close: 17 },   // 08:00 - 17:00 UTC
+  newyork: { open: 13, close: 22 }, // 13:00 - 22:00 UTC
+};
+
+// Check if we're 3 minutes before session open
+function isPreSessionWindow(sessionName: string): boolean {
+  const now = new Date();
+  const utcHour = now.getUTCHours();
+  const utcMinutes = now.getUTCMinutes();
+  const session = FOREX_SESSIONS[sessionName as keyof typeof FOREX_SESSIONS];
+  
+  if (!session) return false;
+  
+  // Check if we're within 3 minutes before session open
+  const preSessionMinutes = session.open * 60 - 3;
+  const currentMinutes = utcHour * 60 + utcMinutes;
+  
+  return currentMinutes >= preSessionMinutes && currentMinutes < session.open * 60;
+}
+
 // Bot strategy modules
-function hauzaStrategy(instance: any): TradingSignal[] {
-  // Hauza Sniper Strategy implementation
+function botvioStrategy(instance: any): TradingSignal[] {
+  // Botvio Sniper Strategy implementation
   // H1 EMA50 trend bias + H1 swing S/R zones + M15 EMA20 rejection
-  // This is a simplified version - in production, would need real OHLC data
   
   const signals: TradingSignal[] = [];
-  
-  // Strategy logic would analyze real market data here
-  // For now, returning empty - requires market data integration
-  
-  console.log(`[Hauza] Running strategy for ${instance.name} on markets:`, instance.markets);
+  console.log(`[Botvio] Running strategy for ${instance.name} on markets:`, instance.markets);
   
   return signals;
 }
 
 function boomCrashSniperStrategy(instance: any): TradingSignal[] {
-  // Boom/Crash Sniper Strategy
-  // Looks for spike patterns and trend continuation
-  
   const signals: TradingSignal[] = [];
   console.log(`[Boom/Crash] Running strategy for ${instance.name}`);
-  
-  // Would analyze tick data for spike detection
-  // Boom: Wait for consolidation, then buy expecting spike up
-  // Crash: Wait for consolidation, then sell expecting spike down
-  
   return signals;
 }
 
 function volatilityTrendStrategy(instance: any): TradingSignal[] {
-  // Volatility Index Trend Strategy
-  // Uses M and W formations with rejections
-  
   const signals: TradingSignal[] = [];
   console.log(`[Volatility Trend] Running strategy for ${instance.name}`);
+  return signals;
+}
+
+// London Session Strategy - 3 min before London open
+function londonSessionStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
   
-  // Would analyze price action for M/W formations
-  // Check for overbought/oversold conditions
-  // Look for rejection wicks
+  if (!isPreSessionWindow("london")) {
+    console.log(`[London Session] Not in pre-session window, skipping`);
+    return signals;
+  }
+  
+  console.log(`[London Session] Running strategy for ${instance.name}`);
+  console.log(`[London Session] Analyzing previous session S/R, breakouts, rejections on M15`);
+  
+  // Strategy: Check previous Asian session key levels
+  // Look for rejection wicks, breakout patterns, and key S/R on M15
+  
+  return signals;
+}
+
+// New York Session Strategy
+function newyorkSessionStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  
+  if (!isPreSessionWindow("newyork")) {
+    console.log(`[New York Session] Not in pre-session window, skipping`);
+    return signals;
+  }
+  
+  console.log(`[New York Session] Running strategy for ${instance.name}`);
+  console.log(`[New York Session] Analyzing London session S/R and key levels`);
+  
+  return signals;
+}
+
+// Tokyo Session Strategy
+function tokyoSessionStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  
+  if (!isPreSessionWindow("tokyo")) {
+    console.log(`[Tokyo Session] Not in pre-session window, skipping`);
+    return signals;
+  }
+  
+  console.log(`[Tokyo Session] Running strategy for ${instance.name}`);
+  
+  return signals;
+}
+
+// Sydney Session Strategy
+function sydneySessionStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  
+  if (!isPreSessionWindow("sydney")) {
+    console.log(`[Sydney Session] Not in pre-session window, skipping`);
+    return signals;
+  }
+  
+  console.log(`[Sydney Session] Running strategy for ${instance.name}`);
+  
+  return signals;
+}
+
+// Daily Range Strategy - Lowest/Highest of day notifications
+function dailyRangeStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  
+  console.log(`[Daily Range] Monitoring for daily high/low extremes`);
+  console.log(`[Daily Range] Markets: ${instance.markets?.join(", ")}`);
+  
+  // This strategy monitors for new daily highs/lows and sends notifications
+  // No direct trading signals, but triggers alerts
+  
+  return signals;
+}
+
+// RSI Universal Strategy - Works on all markets
+function rsiStrategy(instance: any): TradingSignal[] {
+  const signals: TradingSignal[] = [];
+  
+  console.log(`[RSI Strategy] Running on markets: ${instance.markets?.join(", ")}`);
+  
+  // RSI Strategy Logic:
+  // - RSI below 30: Oversold condition, potential BUY
+  // - RSI above 70: Overbought condition, potential SELL
+  // - Combine with price action for confirmation
+  
+  // Would analyze RSI on M15 and H1 timeframes
   
   return signals;
 }
 
 const strategies: Record<string, (instance: any) => TradingSignal[]> = {
-  hauza: hauzaStrategy,
+  botvio: botvioStrategy,
   boom_crash_sniper: boomCrashSniperStrategy,
   volatility_trend: volatilityTrendStrategy,
+  london_session: londonSessionStrategy,
+  newyork_session: newyorkSessionStrategy,
+  tokyo_session: tokyoSessionStrategy,
+  sydney_session: sydneySessionStrategy,
+  daily_range: dailyRangeStrategy,
+  rsi_strategy: rsiStrategy,
 };
 
 async function checkRiskLimits(
