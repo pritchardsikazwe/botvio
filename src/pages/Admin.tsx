@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals, useUpdateSignalStatus, ManualSignal } from "@/hooks/useManualSignals";
+import { useAdminPaymentRequests, useProcessPaymentRequest } from "@/hooks/useAdminBilling";
 
 interface Provider {
   id: string;
@@ -198,6 +199,173 @@ const SignalsManagement = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+// Billing Requests Management Component
+const BillingRequestsTab = () => {
+  const { data: paymentRequests, isLoading } = useAdminPaymentRequests();
+  const processRequest = useProcessPaymentRequest();
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [adminNote, setAdminNote] = useState("");
+  const [showDialog, setShowDialog] = useState(false);
+
+  const handleProcess = async (approve: boolean) => {
+    if (!selectedRequest) return;
+    
+    await processRequest.mutateAsync({
+      id: selectedRequest.id,
+      approve,
+      admin_note: adminNote,
+      plan_id: selectedRequest.plan_id,
+      user_id: selectedRequest.user_id
+    });
+    
+    setShowDialog(false);
+    setSelectedRequest(null);
+    setAdminNote("");
+  };
+
+  const pendingCount = paymentRequests?.filter(r => r.status === 'submitted').length || 0;
+
+  return (
+    <Card className="glass-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <DollarSign className="h-5 w-5" />
+          Payment Requests
+          {pendingCount > 0 && (
+            <Badge variant="destructive">{pendingCount} pending</Badge>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Review and approve offline payment requests
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-8">Loading payment requests...</div>
+        ) : paymentRequests && paymentRequests.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Method</TableHead>
+                <TableHead>Proof</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paymentRequests.map((request) => (
+                <TableRow key={request.id}>
+                  <TableCell className="text-sm">
+                    {new Date(request.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="font-bold">${request.amount_usd}</TableCell>
+                  <TableCell className="capitalize">
+                    {request.method.replace("_", " ")}
+                  </TableCell>
+                  <TableCell>
+                    {request.proof_upload_url ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(request.proof_upload_url!, '_blank')}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </Button>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">No proof</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      request.status === 'approved' ? 'default' :
+                      request.status === 'rejected' ? 'destructive' : 'secondary'
+                    }>
+                      {request.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {request.status === 'submitted' && (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-success text-success hover:bg-success hover:text-success-foreground"
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setShowDialog(true);
+                          }}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setAdminNote("Payment rejected.");
+                            processRequest.mutate({
+                              id: request.id,
+                              approve: false,
+                              admin_note: "Payment rejected.",
+                              user_id: request.user_id
+                            });
+                          }}
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            No payment requests yet
+          </div>
+        )}
+      </CardContent>
+
+      {/* Approval Dialog */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Approve Payment Request</DialogTitle>
+            <DialogDescription>
+              Confirm approval for ${selectedRequest?.amount_usd} payment
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="approvalNote">Admin Note (optional)</Label>
+              <Input
+                id="approvalNote"
+                placeholder="Add a note..."
+                value={adminNote}
+                onChange={(e) => setAdminNote(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => handleProcess(true)} disabled={processRequest.isPending}>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              {processRequest.isPending ? "Processing..." : "Approve & Activate"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 };
 
@@ -686,6 +854,10 @@ const Admin = () => {
                 <Badge variant="destructive" className="ml-1">{fraudFlags.length}</Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="billing" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Billing Requests
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1092,6 +1264,11 @@ const Admin = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Billing Requests Tab */}
+          <TabsContent value="billing">
+            <BillingRequestsTab />
           </TabsContent>
         </Tabs>
       </main>

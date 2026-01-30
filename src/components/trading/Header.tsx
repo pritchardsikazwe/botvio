@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -110,6 +110,14 @@ export const Header = () => {
                     <ArrowLeftRight className="w-4 h-4 mr-2" />
                     P2P
                   </Button>
+                  <Button 
+                    variant={location.pathname === '/affiliate' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/affiliate')}
+                  >
+                    <Gift className="w-4 h-4 mr-2" />
+                    Affiliate
+                  </Button>
                 </>
               )}
               <Button 
@@ -173,7 +181,11 @@ export const Header = () => {
                     <GraduationCap className="w-4 h-4 mr-2" />
                     Learn Strategy
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/affiliate')}>
+                    <Gift className="w-4 h-4 mr-2" />
+                    Affiliate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </DropdownMenuItem>
