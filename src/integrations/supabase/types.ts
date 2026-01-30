@@ -694,6 +694,57 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_options: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          currency: string | null
+          display_name: string
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          max_amount: number | null
+          method_type: string
+          min_amount: number | null
+          priority: number | null
+          provider_code: string
+          provider_name: string
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          currency?: string | null
+          display_name: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_amount?: number | null
+          method_type: string
+          min_amount?: number | null
+          priority?: number | null
+          provider_code: string
+          provider_name: string
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          currency?: string | null
+          display_name?: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_amount?: number | null
+          method_type?: string
+          min_amount?: number | null
+          priority?: number | null
+          provider_code?: string
+          provider_name?: string
+        }
+        Relationships: []
+      }
       payout_methods: {
         Row: {
           created_at: string
