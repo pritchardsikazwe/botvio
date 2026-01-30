@@ -147,7 +147,7 @@ const Bots = () => {
 
   const getBotIcon = (code: string) => {
     switch (code) {
-      case "hauza":
+      case "botvio":
         return <Zap className="h-6 w-6" />;
       case "boom_crash_sniper":
         return <TrendingUp className="h-6 w-6" />;

@@ -15,8 +15,8 @@ interface Strategy {
 export const StrategyPanel = () => {
   const [strategies, setStrategies] = useState<Strategy[]>([
     {
-      id: 'hauza',
-      name: 'Hauza Sniper',
+      id: 'botvio',
+      name: 'Botvio Sniper',
       description: 'Precision entry points with high accuracy',
       icon: <Brain className="w-5 h-5" />,
       enabled: true,

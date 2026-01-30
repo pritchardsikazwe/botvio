@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useHauzaSignals, Signal } from "@/hooks/useHauzaSignals";
+import { useBotvioSignals, Signal } from "@/hooks/useBotvioSignals";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,15 @@ import {
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 
-interface HauzaSniperPanelProps {
+interface BotvioSniperPanelProps {
   symbol: string;
   timeframe: string;
 }
 
-export const HauzaSniperPanel = ({ symbol, timeframe }: HauzaSniperPanelProps) => {
+export const BotvioSniperPanel = ({ symbol, timeframe }: BotvioSniperPanelProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { signals, loading, analyzing, lastAnalysis, runAnalysis } = useHauzaSignals(symbol, timeframe);
+  const { signals, loading, analyzing, lastAnalysis, runAnalysis } = useBotvioSignals(symbol, timeframe);
 
   const activeSignals = signals.filter(s => s.status === "ACTIVE");
   const closedSignals = signals.filter(s => s.status !== "ACTIVE");
@@ -98,7 +98,7 @@ export const HauzaSniperPanel = ({ symbol, timeframe }: HauzaSniperPanelProps) =
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold">Hauza Sniper – {symbol}</h3>
+          <h3 className="font-semibold">Botvio Sniper – {symbol}</h3>
         </div>
         <Button 
           variant="gold" 
