@@ -16,7 +16,7 @@ import { useCreateSignal } from "@/hooks/useManualSignals";
 import { Signal, Send, TrendingUp, TrendingDown } from "lucide-react";
 
 const SYMBOLS = [
-  // Synthetic Indices
+  // Synthetic Indices (Deriv)
   { value: "R_100", label: "Volatility 100 Index", category: "synthetic" },
   { value: "R_75", label: "Volatility 75 Index", category: "synthetic" },
   { value: "R_50", label: "Volatility 50 Index", category: "synthetic" },
@@ -29,18 +29,28 @@ const SYMBOLS = [
   { value: "STEPINDEX", label: "Step Index", category: "synthetic" },
   // Gold
   { value: "XAUUSD", label: "Gold (XAUUSD)", category: "gold" },
-  // Forex
+  // Forex - Major Pairs (Deriv, Weltrade, Exness)
   { value: "EURUSD", label: "EUR/USD", category: "forex" },
   { value: "GBPUSD", label: "GBP/USD", category: "forex" },
   { value: "USDJPY", label: "USD/JPY", category: "forex" },
   { value: "GBPJPY", label: "GBP/JPY", category: "forex" },
-  // NASDAQ
+  { value: "AUDUSD", label: "AUD/USD", category: "forex" },
+  { value: "USDCAD", label: "USD/CAD", category: "forex" },
+  { value: "USDCHF", label: "USD/CHF", category: "forex" },
+  { value: "NZDUSD", label: "NZD/USD", category: "forex" },
+  { value: "EURJPY", label: "EUR/JPY", category: "forex" },
+  { value: "EURGBP", label: "EUR/GBP", category: "forex" },
+  // NASDAQ / Indices
   { value: "NAS100", label: "NASDAQ 100", category: "nasdaq" },
   { value: "US30", label: "US30 (Dow Jones)", category: "nasdaq" },
   { value: "US500", label: "S&P 500", category: "nasdaq" },
+  { value: "DE40", label: "Germany 40 (DAX)", category: "nasdaq" },
+  { value: "UK100", label: "UK 100 (FTSE)", category: "nasdaq" },
   // Crypto
   { value: "BTCUSD", label: "Bitcoin (BTC/USD)", category: "crypto" },
   { value: "ETHUSD", label: "Ethereum (ETH/USD)", category: "crypto" },
+  { value: "XRPUSD", label: "Ripple (XRP/USD)", category: "crypto" },
+  { value: "LTCUSD", label: "Litecoin (LTC/USD)", category: "crypto" },
 ];
 
 const TIMEFRAMES = [
