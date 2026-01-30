@@ -137,8 +137,6 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
                   <SelectValue placeholder="Select symbol" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="" disabled>Select a symbol</SelectItem>
-                  
                   <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                     Synthetic Indices
                   </div>
