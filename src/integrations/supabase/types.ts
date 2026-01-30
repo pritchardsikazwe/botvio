@@ -146,6 +146,33 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action_type: string
@@ -592,6 +619,39 @@ export type Database = {
           },
         ]
       }
+      deriv_symbols_cache: {
+        Row: {
+          cached_at: string
+          display_name: string
+          id: string
+          is_active: boolean | null
+          market: string | null
+          pip_size: number | null
+          submarket: string | null
+          symbol: string
+        }
+        Insert: {
+          cached_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          market?: string | null
+          pip_size?: number | null
+          submarket?: string | null
+          symbol: string
+        }
+        Update: {
+          cached_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          market?: string | null
+          pip_size?: number | null
+          submarket?: string | null
+          symbol?: string
+        }
+        Relationships: []
+      }
       education_lessons: {
         Row: {
           category: string | null
@@ -744,6 +804,62 @@ export type Database = {
           provider_name?: string
         }
         Relationships: []
+      }
+      payment_requests: {
+        Row: {
+          admin_note: string | null
+          amount_usd: number
+          created_at: string
+          currency: string | null
+          id: string
+          method: string
+          plan_id: string | null
+          proof_upload_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_usd: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          method: string
+          plan_id?: string | null
+          proof_upload_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_usd?: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          method?: string
+          plan_id?: string | null
+          proof_upload_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_requests_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payout_methods: {
         Row: {
@@ -1395,6 +1511,44 @@ export type Database = {
           zone_min?: number | null
         }
         Relationships: []
+      }
+      trial_grants: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          plan_id: string | null
+          started_at: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          plan_id?: string | null
+          started_at?: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          plan_id?: string | null
+          started_at?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_grants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_plan_subscriptions: {
         Row: {

@@ -666,6 +666,19 @@ const ProviderDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Deriv Disclaimer */}
+        <div className="mt-8 p-4 rounded-lg bg-muted/50 border border-border text-center">
+          <p className="text-xs text-muted-foreground">
+            <strong>Powered by Deriv API</strong> — Botvio is not affiliated with, endorsed by, or sponsored by Deriv. 
+            Trading involves significant risk. Past performance is not indicative of future results.
+          </p>
+          <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+            <Link to="/terms" className="hover:text-primary underline">Terms of Service</Link>
+            <span>•</span>
+            <Link to="/privacy" className="hover:text-primary underline">Privacy Policy</Link>
+          </div>
+        </div>
       </main>
     </div>
   );
