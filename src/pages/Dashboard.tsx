@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
-import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCircle } from "lucide-react";
+import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCircle, BarChart3 } from "lucide-react";
 import { Header } from "@/components/trading/Header";
+import { MarketDataPanel } from "@/components/trading/MarketDataPanel";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -151,6 +152,11 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Live Market Data Panel */}
+        <div className="mb-8">
+          <MarketDataPanel />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Bot Instances */}
