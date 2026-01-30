@@ -14,10 +14,16 @@ import { useNavigate } from "react-router-dom";
 import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, Gift, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-// Affiliate links - Replace with your actual affiliate IDs
+// Affiliate links
 const AFFILIATE_LINKS = {
-  deriv: "https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/",
-  exness: "https://one.exnesstrack.org/a/up2tpvqknx",
+  deriv: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827",
+  exness: "https://one.exness-track.com/a/ts1kvs1k",
+  binance: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU",
+};
+
+const COMMUNITY_LINKS = {
+  whatsapp: "https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ",
+  telegram: "https://t.me/+AZjYpDncHEA5OTM0",
 };
 
 const Accounts = () => {
@@ -308,9 +314,65 @@ const Accounts = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Binance Card */}
+          <Card className="glass-card border-warning/30 bg-gradient-to-br from-warning/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <Gift className="h-6 w-6 text-warning" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-1">Trade Crypto on Binance</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    World's largest crypto exchange. Trade spot, futures, and earn with staking.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Low Fees
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">500+ Coins</Badge>
+                    <Badge variant="secondary" className="text-xs">Futures</Badge>
+                  </div>
+                  <a
+                    href={AFFILIATE_LINKS.binance}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button className="mt-4 w-full sm:w-auto bg-warning hover:bg-warning/90 text-warning-foreground">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Create Binance Account
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* Accounts List */}
+        
+        {/* Community Links */}
+        <Card className="glass-card mb-8">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-muted-foreground text-sm">Join our trading community for signals and support:</p>
+              <div className="flex gap-3">
+                <a href={COMMUNITY_LINKS.whatsapp} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="border-green-500 text-green-500 hover:bg-green-500/10">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    WhatsApp Group
+                  </Button>
+                </a>
+                <a href={COMMUNITY_LINKS.telegram} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="border-blue-500 text-blue-500 hover:bg-blue-500/10">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Telegram Group
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Skeleton className="h-40" />

@@ -21,8 +21,23 @@ import {
   Download,
   Signal,
   Wallet,
-  ChevronRight
+  ChevronRight,
+  MessageCircle,
+  Send,
+  ExternalLink
 } from "lucide-react";
+
+// Affiliate links
+const AFFILIATE_LINKS = {
+  deriv: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827",
+  exness: "https://one.exness-track.com/a/ts1kvs1k",
+  binance: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU",
+};
+
+const COMMUNITY_LINKS = {
+  whatsapp: "https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ",
+  telegram: "https://t.me/+AZjYpDncHEA5OTM0",
+};
 
 const Landing = () => {
   const { user } = useAuth();
@@ -92,9 +107,9 @@ const Landing = () => {
   ];
 
   const brokers = [
-    { name: "Deriv", markets: "Synthetic Indices, Forex, Crypto" },
-    { name: "Weltrade", markets: "Forex, Gold, Indices" },
-    { name: "Exness", markets: "Forex, Gold, Crypto" }
+    { name: "Deriv", markets: "Synthetic Indices, Forex, Crypto", link: AFFILIATE_LINKS.deriv },
+    { name: "Exness", markets: "Forex, Gold, Crypto", link: AFFILIATE_LINKS.exness },
+    { name: "Binance", markets: "Spot, Futures, Staking", link: AFFILIATE_LINKS.binance }
   ];
 
   const stats = [
@@ -204,11 +219,33 @@ const Landing = () => {
           <p className="text-center text-muted-foreground mb-6">Trade on leading brokers</p>
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
             {brokers.map((broker, i) => (
-              <div key={i} className="text-center">
+              <a 
+                key={i} 
+                href={broker.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-center hover:scale-105 transition-transform cursor-pointer"
+              >
                 <p className="text-xl font-bold">{broker.name}</p>
                 <p className="text-xs text-muted-foreground">{broker.markets}</p>
-              </div>
+              </a>
             ))}
+          </div>
+          
+          {/* Community Links */}
+          <div className="flex justify-center gap-4 mt-8">
+            <a href={COMMUNITY_LINKS.whatsapp} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                WhatsApp Group
+              </Button>
+            </a>
+            <a href={COMMUNITY_LINKS.telegram} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm">
+                <Send className="h-4 w-4 mr-2" />
+                Telegram Group
+              </Button>
+            </a>
           </div>
         </div>
       </section>
