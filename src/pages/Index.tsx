@@ -14,8 +14,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Target, AlertTriangle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
   const { user, settings } = useAuth();
@@ -109,6 +111,20 @@ const Index = () => {
     { level: 2320.00, type: 'SUPPORT', strength: 'WEAK', touches: 2 },
   ];
 
+  // Featured Bots
+  const featuredBots = [
+    { id: 1, name: "Hauza Sniper", description: "XAUUSD S/R strategy", winRate: 78, isPremium: false },
+    { id: 2, name: "V75 Scalper", description: "Volatility 75 scalping", winRate: 72, isPremium: true },
+    { id: 3, name: "Boom Catcher", description: "Boom/Crash spikes", winRate: 65, isPremium: false },
+  ];
+
+  // Featured Courses
+  const featuredCourses = [
+    { id: 1, title: "Hauza Sniper Mastery", category: "hauza-sniper", lessons: 8, slug: "hauza-sniper-intro" },
+    { id: 2, title: "VIX Trading Essentials", category: "vix", lessons: 5, slug: "vix-intro" },
+    { id: 3, title: "News Trading Strategy", category: "news-trading", lessons: 4, slug: "news-trading-intro" },
+  ];
+
   const handleSymbolChange = (derivSymbol: string) => {
     // Map Deriv symbol to display pair for UI
     let displayPair = derivSymbol;
@@ -158,6 +174,82 @@ const Index = () => {
           <div className="lg:col-span-3 space-y-6">
             <SupportResistanceLevels levels={srLevels} currentPrice={marketData.price} />
             <PerformancePanel />
+          </div>
+        </div>
+
+        {/* Featured Bots Section */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Bot className="h-5 w-5 text-primary" />
+              Featured Trading Bots
+            </h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/bots">
+                View All <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {featuredBots.map((bot) => (
+              <Card key={bot.id} className="glass-card hover:border-primary/50 transition-colors">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" />
+                      {bot.name}
+                    </CardTitle>
+                    {bot.isPremium && <Badge variant="secondary">Premium</Badge>}
+                  </div>
+                  <CardDescription>{bot.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-success" />
+                      <span className="text-success font-medium">{bot.winRate}% Win Rate</span>
+                    </div>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/bots">Activate</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured Courses Section */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Learn Trading Strategies
+            </h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/learn">
+                All Courses <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {featuredCourses.map((course) => (
+              <Card key={course.id} className="glass-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate(`/learn/${course.slug}`)}>
+                <CardHeader className="pb-2">
+                  <Badge variant="outline" className="w-fit mb-2">{course.category}</Badge>
+                  <CardTitle className="text-base">{course.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">{course.lessons} lessons</span>
+                    <Button size="sm" variant="gold">
+                      <GraduationCap className="h-4 w-4 mr-2" />
+                      Start
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </main>

@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/trading/Header";
+import { ProviderApplicationForm } from "@/components/trading/ProviderApplicationForm";
 import { useNavigate, Link } from "react-router-dom";
 import { 
   Users, TrendingUp, DollarSign, Target, ArrowUp, ArrowDown, 
@@ -148,59 +149,7 @@ const ProviderDashboard = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container mx-auto px-4 py-6 max-w-2xl">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Become a Signal Provider</CardTitle>
-              <CardDescription>
-                Share your trading signals and earn from your expertise
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!canBeProvider && (
-                <div className="mb-6 p-4 rounded-lg bg-warning/10 border border-warning/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="h-5 w-5 text-warning" />
-                    <span className="font-medium">VIP Plan Required</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Only VIP members can become signal providers. 
-                    <Link to="/billing" className="text-primary ml-1 hover:underline">
-                      Upgrade now
-                    </Link>
-                  </p>
-                </div>
-              )}
-
-              <form onSubmit={handleCreateProvider} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="display_name">Display Name *</Label>
-                  <Input
-                    id="display_name"
-                    placeholder="Your trader name"
-                    value={createForm.display_name}
-                    onChange={(e) => setCreateForm({ ...createForm, display_name: e.target.value })}
-                    disabled={!canBeProvider}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    placeholder="Tell subscribers about your trading experience and strategy..."
-                    value={createForm.bio}
-                    onChange={(e) => setCreateForm({ ...createForm, bio: e.target.value })}
-                    rows={4}
-                    disabled={!canBeProvider}
-                  />
-                </div>
-
-                <Button type="submit" className="w-full" disabled={!canBeProvider || createProvider.isPending}>
-                  {createProvider.isPending ? "Creating..." : "Apply to Become Provider"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <ProviderApplicationForm onSuccess={() => window.location.reload()} />
         </main>
       </div>
     );
