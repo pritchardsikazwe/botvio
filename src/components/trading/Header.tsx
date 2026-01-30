@@ -63,7 +63,7 @@ export const Header = () => {
               </div>
               <div>
                 <h1 className="font-bold text-lg gold-text">BOTVIO</h1>
-                <p className="text-xs text-muted-foreground">Trading Platform</p>
+                <p className="text-[10px] text-muted-foreground">powered by Deriv</p>
               </div>
             </div>
 

@@ -9,7 +9,7 @@ interface Strategy {
   description: string;
   icon: React.ReactNode;
   enabled: boolean;
-  winRate: number;
+  status: "active" | "testing" | "paused";
 }
 
 export const StrategyPanel = () => {
@@ -17,10 +17,10 @@ export const StrategyPanel = () => {
     {
       id: 'botvio',
       name: 'Botvio Sniper',
-      description: 'Precision entry points with high accuracy',
+      description: 'EMA crossover with RSI confirmation',
       icon: <Brain className="w-5 h-5" />,
       enabled: true,
-      winRate: 87,
+      status: "active",
     },
     {
       id: 'sr',
@@ -28,7 +28,7 @@ export const StrategyPanel = () => {
       description: 'Support & Resistance level breaks',
       icon: <BarChart3 className="w-5 h-5" />,
       enabled: true,
-      winRate: 72,
+      status: "active",
     },
     {
       id: 'momentum',
@@ -36,13 +36,13 @@ export const StrategyPanel = () => {
       description: 'High momentum continuation trades',
       icon: <TrendingUp className="w-5 h-5" />,
       enabled: false,
-      winRate: 65,
+      status: "paused",
     },
   ]);
 
   const toggleStrategy = (id: string) => {
     setStrategies(prev =>
-      prev.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s)
+      prev.map(s => s.id === id ? { ...s, enabled: !s.enabled, status: s.enabled ? "paused" : "active" } : s)
     );
   };
 
@@ -89,28 +89,25 @@ export const StrategyPanel = () => {
             {strategy.enabled && (
               <div className="mt-4 pt-4 border-t border-border/50">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Win Rate</span>
-                  <span className={`font-mono font-semibold ${
-                    strategy.winRate >= 80 ? 'text-success' : 
-                    strategy.winRate >= 60 ? 'text-warning' : 'text-muted-foreground'
+                  <span className="text-muted-foreground">Status</span>
+                  <span className={`font-medium ${
+                    strategy.status === "active" ? 'text-success' : 
+                    strategy.status === "testing" ? 'text-warning' : 'text-muted-foreground'
                   }`}>
-                    {strategy.winRate}%
+                    {strategy.status === "active" ? "Running" : 
+                     strategy.status === "testing" ? "Testing" : "Paused"}
                   </span>
-                </div>
-                <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all ${
-                      strategy.winRate >= 80 ? 'bg-success' : 
-                      strategy.winRate >= 60 ? 'bg-warning' : 'bg-muted-foreground'
-                    }`}
-                    style={{ width: `${strategy.winRate}%` }}
-                  />
                 </div>
               </div>
             )}
           </div>
         ))}
       </div>
+
+      {/* Disclaimer */}
+      <p className="text-xs text-muted-foreground mt-4 pt-4 border-t border-border/50">
+        Past performance does not guarantee future results. Trade responsibly.
+      </p>
     </div>
   );
 };

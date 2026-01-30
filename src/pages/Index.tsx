@@ -114,14 +114,14 @@ const Index = () => {
 
   // Featured Bots
   const featuredBots = [
-    { id: 1, name: "Hauza Sniper", description: "XAUUSD S/R strategy", winRate: 78, isPremium: false },
-    { id: 2, name: "V75 Scalper", description: "Volatility 75 scalping", winRate: 72, isPremium: true },
-    { id: 3, name: "Boom Catcher", description: "Boom/Crash spikes", winRate: 65, isPremium: false },
+    { id: 1, name: "Botvio Sniper", description: "XAUUSD S/R strategy", markets: "Forex, Gold", isPremium: false },
+    { id: 2, name: "V75 Scalper", description: "Volatility 75 scalping", markets: "Synthetic Indices", isPremium: true },
+    { id: 3, name: "Boom Catcher", description: "Boom/Crash spikes", markets: "Boom/Crash", isPremium: false },
   ];
 
   // Featured Courses
   const featuredCourses = [
-    { id: 1, title: "Hauza Sniper Mastery", category: "hauza-sniper", lessons: 8, slug: "hauza-sniper-intro" },
+    { id: 1, title: "Botvio Sniper Mastery", category: "botvio-sniper", lessons: 8, slug: "botvio-sniper-intro" },
     { id: 2, title: "VIX Trading Essentials", category: "vix", lessons: 5, slug: "vix-intro" },
     { id: 3, title: "News Trading Strategy", category: "news-trading", lessons: 4, slug: "news-trading-intro" },
   ];
@@ -210,8 +210,8 @@ const Index = () => {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-success" />
-                      <span className="text-success font-medium">{bot.winRate}% Win Rate</span>
+                      <TrendingUp className="h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground text-sm">{bot.markets}</span>
                     </div>
                     <Button size="sm" variant="outline" asChild>
                       <Link to="/bots">Activate</Link>
@@ -319,6 +319,18 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Disclaimer Footer */}
+      <footer className="border-t border-border/50 mt-8 py-6 px-4">
+        <div className="container mx-auto">
+          <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto mb-2">
+            <strong>Risk Warning:</strong> Trading binary options and CFDs involves significant risk. Past performance is not indicative of future results.
+          </p>
+          <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto">
+            Botvio is powered by Deriv API. Botvio is not affiliated with or endorsed by Deriv.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };

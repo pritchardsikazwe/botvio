@@ -100,7 +100,7 @@ const Landing = () => {
   const stats = [
     { value: "50K+", label: "Active Traders" },
     { value: "24/7", label: "Bot Uptime" },
-    { value: "85%", label: "Avg Win Rate" },
+    { value: "100+", label: "Trading Bots" },
     { value: "$2M+", label: "Monthly Volume" }
   ];
 
@@ -327,12 +327,13 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-12 px-4 border-t border-border/50">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <span className="font-bold">Botvio</span>
+              <span className="text-xs text-muted-foreground ml-2">powered by Deriv</span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
               <Link to="/signals" className="hover:text-foreground">Signals</Link>
@@ -343,6 +344,19 @@ const Landing = () => {
             </div>
             <p className="text-sm text-muted-foreground">
               © 2025 Botvio. All rights reserved.
+            </p>
+          </div>
+          
+          {/* Deriv Disclaimer */}
+          <div className="border-t border-border/50 pt-6">
+            <p className="text-xs text-muted-foreground text-center max-w-4xl mx-auto mb-4">
+              <strong>Risk Warning:</strong> Trading binary options and CFDs on Synthetic Indices, Forex, and Commodities involves significant risk of loss and may not be suitable for all investors. Past performance is not indicative of future results. You should never trade with money you cannot afford to lose.
+            </p>
+            <p className="text-xs text-muted-foreground text-center max-w-4xl mx-auto mb-4">
+              Botvio is an independent third-party platform powered by Deriv API. Botvio is not affiliated with, endorsed by, or sponsored by Deriv. Deriv is a registered trademark of Deriv Holdings Limited.
+            </p>
+            <p className="text-xs text-muted-foreground text-center max-w-4xl mx-auto">
+              The information on this platform does not constitute investment advice, financial advice, trading advice, or any other sort of advice. You should conduct your own research before making any investment decisions.
             </p>
           </div>
         </div>
