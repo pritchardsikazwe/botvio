@@ -9,6 +9,7 @@ import { StrategyPanel } from "@/components/trading/StrategyPanel";
 import { HauzaSniperPanel } from "@/components/trading/HauzaSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
 import { QuickTrade } from "@/components/trading/QuickTrade";
+import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { SupportResistance, MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
@@ -176,6 +177,9 @@ const Index = () => {
             <PerformancePanel />
           </div>
         </div>
+
+        {/* Latest Trading Signals */}
+        <HomeSignalsWidget />
 
         {/* Featured Bots Section */}
         <div className="mt-8">

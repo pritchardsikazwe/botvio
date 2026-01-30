@@ -1248,11 +1248,15 @@ export type Database = {
       }
       trading_signals: {
         Row: {
+          broker: string[] | null
+          category: string | null
           confidence: number | null
           created_at: string
           direction: string
           entry_price: number
           id: string
+          is_manual: boolean | null
+          posted_by: string | null
           reason: string | null
           status: string | null
           stop_loss: number | null
@@ -1264,11 +1268,15 @@ export type Database = {
           zone_min: number | null
         }
         Insert: {
+          broker?: string[] | null
+          category?: string | null
           confidence?: number | null
           created_at?: string
           direction: string
           entry_price: number
           id?: string
+          is_manual?: boolean | null
+          posted_by?: string | null
           reason?: string | null
           status?: string | null
           stop_loss?: number | null
@@ -1280,11 +1288,15 @@ export type Database = {
           zone_min?: number | null
         }
         Update: {
+          broker?: string[] | null
+          category?: string | null
           confidence?: number | null
           created_at?: string
           direction?: string
           entry_price?: number
           id?: string
+          is_manual?: boolean | null
+          posted_by?: string | null
           reason?: string | null
           status?: string | null
           stop_loss?: number | null

@@ -20,6 +20,7 @@ import Affiliate from "./pages/Affiliate";
 import Strategies from "./pages/Strategies";
 import StrategyDetail from "./pages/StrategyDetail";
 import ReferralRedirect from "./pages/ReferralRedirect";
+import Signals from "./pages/Signals";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/strategies" element={<Strategies />} />
               <Route path="/s/:slug" element={<StrategyDetail />} />
               <Route path="/r/:code" element={<ReferralRedirect />} />
+              <Route path="/signals" element={<Signals />} />
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/:slug" element={<Lesson />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
