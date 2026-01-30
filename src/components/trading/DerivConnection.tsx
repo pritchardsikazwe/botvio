@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
   Key,
@@ -19,6 +21,8 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
+  TestTube,
+  DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,6 +65,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [symbol, setSymbol] = useState("R_100");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const [isDemoAccount, setIsDemoAccount] = useState(true); // Default to demo for safety
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (line: string) => {
@@ -190,19 +195,34 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
             </p>
           </div>
         </div>
-        <Badge
-          variant="outline"
-          className={cn(
-            "text-xs",
-            authorized
-              ? "bg-success/10 text-success border-success/20"
-              : connected
-              ? "bg-primary/10 text-primary border-primary/20"
-              : "bg-muted text-muted-foreground"
+        <div className="flex items-center gap-2">
+          {authorized && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs",
+                isDemoAccount
+                  ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                  : "bg-success/10 text-success border-success/20"
+              )}
+            >
+              {isDemoAccount ? "Demo" : "Real"}
+            </Badge>
           )}
-        >
-          {authorized ? "Authorized" : connected ? "Connected" : "Disconnected"}
-        </Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-xs",
+              authorized
+                ? "bg-success/10 text-success border-success/20"
+                : connected
+                ? "bg-primary/10 text-primary border-primary/20"
+                : "bg-muted text-muted-foreground"
+            )}
+          >
+            {authorized ? "Authorized" : connected ? "Connected" : "Disconnected"}
+          </Badge>
+        </div>
       </div>
 
       {/* Authorized View */}
@@ -321,13 +341,61 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       ) : (
         /* Not Authorized View */
         <div className="space-y-4">
+          {/* Account Type Toggle */}
+          <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              {isDemoAccount ? (
+                <TestTube className="w-4 h-4 text-blue-500" />
+              ) : (
+                <DollarSign className="w-4 h-4 text-success" />
+              )}
+              <div>
+                <Label htmlFor="account-type" className="text-sm font-medium">
+                  {isDemoAccount ? "Demo Account" : "Real Account"}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {isDemoAccount 
+                    ? "Practice with virtual funds" 
+                    : "Trade with real money"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="account-type"
+              checked={!isDemoAccount}
+              onCheckedChange={(checked) => setIsDemoAccount(!checked)}
+            />
+          </div>
+
+          {/* Demo Account Notice */}
+          {isDemoAccount && (
+            <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <TestTube className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+              <div className="text-xs text-blue-500">
+                <p className="font-medium">Demo Mode Active</p>
+                <p className="text-blue-400">You're using virtual funds. Perfect for learning and testing strategies without risk.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Real Account Warning */}
+          {!isDemoAccount && (
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+              <div className="text-xs text-destructive">
+                <p className="font-medium">Real Money Trading</p>
+                <p>You will be trading with real funds. Losses are real. Trade responsibly.</p>
+              </div>
+            </div>
+          )}
+
           {/* Token Input */}
           <div className="relative">
             <Input
               type={showToken ? "text" : "password"}
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="Paste your Deriv API token..."
+              placeholder={isDemoAccount ? "Paste your Demo API token..." : "Paste your Real API token..."}
               className="pr-10 bg-secondary/50 border-border focus:border-primary"
               disabled={loading}
             />
@@ -352,12 +420,18 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
           <div className="flex items-start gap-2 p-3 bg-warning/5 border border-warning/20 rounded-lg">
             <AlertCircle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
             <div className="text-xs text-muted-foreground">
-              <p className="font-medium mb-1">Get your token from Deriv:</p>
+              <p className="font-medium mb-1">Get your {isDemoAccount ? "Demo" : "Real"} API token:</p>
               <ol className="list-decimal list-inside space-y-0.5">
-                <li>Log in to Deriv.com</li>
+                <li>Log in to <a href="https://deriv.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Deriv.com</a></li>
+                <li>Switch to your <strong>{isDemoAccount ? "Demo" : "Real"}</strong> account</li>
                 <li>Go to Settings → API Token</li>
                 <li>Create token with <strong>Trade</strong> permission</li>
               </ol>
+              {isDemoAccount && (
+                <p className="mt-2 text-primary">
+                  💡 New to Deriv? <a href="https://deriv.com" target="_blank" rel="noopener noreferrer" className="underline">Create a free demo account</a> to get started!
+                </p>
+              )}
             </div>
           </div>
 
