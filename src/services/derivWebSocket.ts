@@ -300,7 +300,7 @@ export class DerivWebSocketService {
   }
 
   /** send request with req_id and wait for matching response */
-  send<T = DerivMessage>(payload: Record<string, unknown>, timeoutMs = 15000): Promise<T> {
+  send<T = DerivMessage>(payload: Record<string, unknown>, timeoutMs = 30000): Promise<T> {
     this.ensureOpen();
     const req_id = this.reqId++;
     const message = { ...payload, req_id };
@@ -308,31 +308,45 @@ export class DerivWebSocketService {
     return new Promise<T>((resolve, reject) => {
       const timeout = window.setTimeout(() => {
         this.pending.delete(req_id);
-        reject(new Error("Request timeout"));
+        const errorMsg = `Request timeout after ${timeoutMs / 1000}s for ${Object.keys(payload)[0]}`;
+        this.emitError(errorMsg);
+        reject(new Error(errorMsg));
       }, timeoutMs);
       this.pending.set(req_id, { resolve, reject, timeout });
-      this.ws!.send(JSON.stringify(message));
+      try {
+        this.ws!.send(JSON.stringify(message));
+      } catch (e: any) {
+        window.clearTimeout(timeout);
+        this.pending.delete(req_id);
+        reject(new Error(`Failed to send: ${e.message}`));
+      }
     });
   }
 
   /**
    * Authorize with token.
    * Must be called after open().
+   * Extended timeout for slow connections.
    */
   async authorize(token: string): Promise<DerivBalance> {
     this.token = token;
-    const res: any = await this.send({ authorize: token }, 20000);
-    if (!res?.authorize) throw new Error("Authorization failed");
+    try {
+      const res: any = await this.send({ authorize: token }, 45000); // Extended to 45 seconds
+      if (!res?.authorize) throw new Error("Authorization failed - no response");
 
-    const balance: DerivBalance = {
-      balance: res.authorize.balance,
-      currency: res.authorize.currency,
-      loginid: res.authorize.loginid,
-      fullname: res.authorize.fullname,
-    };
-    this.lastBalance = balance;
-    this.loginid = balance.loginid;
-    return balance;
+      const balance: DerivBalance = {
+        balance: res.authorize.balance,
+        currency: res.authorize.currency,
+        loginid: res.authorize.loginid,
+        fullname: res.authorize.fullname,
+      };
+      this.lastBalance = balance;
+      this.loginid = balance.loginid;
+      return balance;
+    } catch (e: any) {
+      this.token = null;
+      throw new Error(`Authorization failed: ${e.message}`);
+    }
   }
 
   /** Subscribe ticks (stores subscription id from tick stream). */

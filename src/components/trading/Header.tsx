@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Bell, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { NotificationBell } from "@/components/trading/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
@@ -101,6 +102,14 @@ export const Header = () => {
                     <Users className="w-4 h-4 mr-2" />
                     Copy Trade
                   </Button>
+                  <Button 
+                    variant={location.pathname === '/p2p' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/p2p')}
+                  >
+                    <ArrowLeftRight className="w-4 h-4 mr-2" />
+                    P2P
+                  </Button>
                 </>
               )}
               <Button 
@@ -120,12 +129,7 @@ export const Header = () => {
               <span className="text-sm font-medium text-success">Live</span>
             </div>
             
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-[10px] font-bold flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            <NotificationBell />
             
             {user ? (
               <DropdownMenu>
