@@ -29,10 +29,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Share2, Copy, Users, MousePointerClick, DollarSign, 
   TrendingUp, Wallet, Plus, ExternalLink, CheckCircle,
-  Gift, ArrowRight, MessageCircle
+  Gift, ArrowRight, MessageCircle, Send, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+
+// Partner affiliate links
+const PARTNER_LINKS = {
+  deriv: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827",
+  exness: "https://one.exness-track.com/a/ts1kvs1k",
+  binance: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU",
+};
+
+const COMMUNITY_LINKS = {
+  whatsapp: "https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ",
+  telegram: "https://t.me/+AZjYpDncHEA5OTM0",
+};
 
 const Affiliate = () => {
   const { t } = useTranslation();
@@ -295,6 +307,78 @@ const Affiliate = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Partner Brokers Section */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Partner Brokers
+            </CardTitle>
+            <CardDescription>
+              Sign up through our partner links and earn bonuses
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <a href={PARTNER_LINKS.deriv} target="_blank" rel="noopener noreferrer">
+                <Card className="glass-card hover:border-primary/50 transition-all cursor-pointer">
+                  <CardContent className="p-4 text-center">
+                    <p className="font-bold text-lg">Deriv</p>
+                    <p className="text-xs text-muted-foreground mb-2">Synthetic Indices, Forex</p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <ExternalLink className="h-3 w-3 mr-2" />
+                      Sign Up
+                    </Button>
+                  </CardContent>
+                </Card>
+              </a>
+              <a href={PARTNER_LINKS.exness} target="_blank" rel="noopener noreferrer">
+                <Card className="glass-card hover:border-primary/50 transition-all cursor-pointer">
+                  <CardContent className="p-4 text-center">
+                    <p className="font-bold text-lg">Exness</p>
+                    <p className="text-xs text-muted-foreground mb-2">Forex, Gold, Crypto</p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <ExternalLink className="h-3 w-3 mr-2" />
+                      Sign Up
+                    </Button>
+                  </CardContent>
+                </Card>
+              </a>
+              <a href={PARTNER_LINKS.binance} target="_blank" rel="noopener noreferrer">
+                <Card className="glass-card hover:border-primary/50 transition-all cursor-pointer">
+                  <CardContent className="p-4 text-center">
+                    <p className="font-bold text-lg">Binance</p>
+                    <p className="text-xs text-muted-foreground mb-2">Crypto Spot & Futures</p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <ExternalLink className="h-3 w-3 mr-2" />
+                      Sign Up
+                    </Button>
+                  </CardContent>
+                </Card>
+              </a>
+            </div>
+            
+            {/* Community Links */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground">Join our community:</p>
+              <div className="flex gap-3">
+                <a href={COMMUNITY_LINKS.whatsapp} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    WhatsApp
+                  </Button>
+                </a>
+                <a href={COMMUNITY_LINKS.telegram} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm">
+                    <Send className="h-4 w-4 mr-2" />
+                    Telegram
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="earnings" className="space-y-6">
           <TabsList>

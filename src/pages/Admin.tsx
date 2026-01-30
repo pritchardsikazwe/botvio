@@ -370,10 +370,9 @@ const BillingRequestsTab = () => {
 };
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
   const [affiliates, setAffiliates] = useState<AffiliateProfile[]>([]);
@@ -404,32 +403,22 @@ const Admin = () => {
   });
 
   useEffect(() => {
-    checkAdminAccess();
-  }, [user]);
-
-  const checkAdminAccess = async () => {
+    if (authLoading) return;
+    
     if (!user) {
       navigate('/');
       return;
     }
 
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (error || !data) {
+    if (!isAdmin) {
       toast.error("Access denied. Admin privileges required.");
       navigate('/dashboard');
       return;
     }
 
-    setIsAdmin(true);
-    await fetchData();
-    setLoading(false);
-  };
+    // User is admin, fetch data
+    fetchData().finally(() => setDataLoading(false));
+  }, [user, authLoading, isAdmin, navigate]);
 
   const fetchData = async () => {
     // Fetch providers
@@ -734,7 +723,7 @@ const Admin = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || dataLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />

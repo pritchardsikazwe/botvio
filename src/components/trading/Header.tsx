@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { NotificationBell } from "@/components/trading/NotificationBell";
-import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,28 +15,10 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Header = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isAdmin } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!data);
-    };
-    checkAdmin();
-  }, [user]);
 
   const getInitials = () => {
     if (profile?.display_name) {
@@ -132,6 +113,20 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Community Links - visible on desktop */}
+            <div className="hidden lg:flex items-center gap-1">
+              <a href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ" target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+              </a>
+              <a href="https://t.me/+AZjYpDncHEA5OTM0" target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </a>
+            </div>
+            
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20">
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
               <span className="text-sm font-medium text-success">Live</span>
