@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePricingPlans, useMySubscription } from "@/hooks/useBotvio";
 import { useTrialStatus, useActivateTrial, usePaymentRequests, useCreatePaymentRequest, useUploadPaymentProof } from "@/hooks/useBilling";
+import { useMySubscriptionRequests, useCreateSubscriptionRequest } from "@/hooks/useSubscriptionRequests";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Header } from "@/components/trading/Header";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { useNavigate, Link } from "react-router-dom";
-import { Check, Zap, Crown, Rocket, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle } from "lucide-react";
+import { Check, Zap, Crown, Rocket, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle, Sparkles, Shield, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 const Billing = () => {
@@ -25,8 +26,10 @@ const Billing = () => {
   const { data: mySubscription, isLoading: subLoading } = useMySubscription();
   const { data: trialStatus } = useTrialStatus();
   const { data: paymentRequests } = usePaymentRequests();
+  const { data: subscriptionRequests } = useMySubscriptionRequests();
   const activateTrial = useActivateTrial();
   const createPaymentRequest = useCreatePaymentRequest();
+  const createSubscriptionRequest = useCreateSubscriptionRequest();
   const uploadProof = useUploadPaymentProof();
   
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
@@ -109,10 +112,16 @@ const Billing = () => {
     switch (code) {
       case "starter":
         return <Zap className="h-6 w-6" />;
+      case "basic":
+        return <Shield className="h-6 w-6" />;
+      case "standard":
+        return <TrendingUp className="h-6 w-6" />;
       case "pro":
         return <Rocket className="h-6 w-6" />;
-      case "vip":
+      case "elite":
         return <Crown className="h-6 w-6" />;
+      case "affiliate_partner":
+        return <Sparkles className="h-6 w-6" />;
       default:
         return <Zap className="h-6 w-6" />;
     }
@@ -122,25 +131,35 @@ const Billing = () => {
     switch (code) {
       case "starter":
         return "from-gray-500 to-gray-600";
-      case "pro":
+      case "basic":
+        return "from-green-500 to-green-600";
+      case "standard":
         return "from-blue-500 to-blue-600";
-      case "vip":
+      case "pro":
+        return "from-purple-500 to-purple-600";
+      case "elite":
         return "from-amber-500 to-amber-600";
+      case "affiliate_partner":
+        return "from-pink-500 to-pink-600";
       default:
         return "from-gray-500 to-gray-600";
     }
   };
 
   const getPlanDuration = (code: string) => {
+    if (code === "starter") return "Free";
+    return "30 days";
+  };
+
+  const getBotCount = (code: string) => {
     switch (code) {
-      case "starter":
-        return "Free";
-      case "pro":
-        return "15 days";
-      case "vip":
-        return "30 days";
-      default:
-        return "monthly";
+      case "starter": return "1 bot";
+      case "basic": return "2 bots";
+      case "standard": return "3 bots";
+      case "pro": return "5 bots";
+      case "elite": return "All bots";
+      case "affiliate_partner": return "10 bots + Affiliate perks";
+      default: return "1 bot";
     }
   };
 
@@ -154,7 +173,7 @@ const Billing = () => {
     });
     
     features.push({
-      label: `${plan.max_bot_instances >= 999 ? "Unlimited" : plan.max_bot_instances} bot instances`,
+      label: getBotCount(plan.code),
       icon: <Bot className="h-4 w-4" />,
       enabled: true,
     });
@@ -178,6 +197,26 @@ const Billing = () => {
     });
     
     return features;
+  };
+
+  // Check if user has a pending subscription request
+  const hasPendingRequest = subscriptionRequests?.some(r => r.status === "pending_approval");
+
+  const handleUpgradeRequest = async (plan: any) => {
+    if (hasPendingRequest) {
+      toast.error("You already have a pending upgrade request. Please wait for admin approval.");
+      return;
+    }
+    
+    try {
+      await createSubscriptionRequest.mutateAsync({
+        plan_id: plan.id,
+        amount_usd: plan.price_usd,
+        current_plan_id: mySubscription?.pricing_plan_id,
+      });
+    } catch (error) {
+      // Error handled by mutation
+    }
   };
 
   return (
@@ -257,43 +296,66 @@ const Billing = () => {
           </Card>
         )}
 
-        <Tabs defaultValue="plans" className="max-w-5xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+        {/* Pending Request Banner */}
+        {hasPendingRequest && (
+          <Card className="glass-card mb-8 max-w-2xl mx-auto border-warning/30 bg-warning/10">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-warning" />
+                <div>
+                  <p className="font-medium">Upgrade Request Pending</p>
+                  <p className="text-sm text-muted-foreground">
+                    Your subscription upgrade is awaiting admin approval
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Tabs defaultValue="plans" className="max-w-6xl mx-auto">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="plans">Pricing Plans</TabsTrigger>
+            <TabsTrigger value="requests">Upgrade Requests</TabsTrigger>
             <TabsTrigger value="history">Payment History</TabsTrigger>
           </TabsList>
           
           <TabsContent value="plans">
             {/* Plans Grid */}
             {plansLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Skeleton className="h-96" />
-                <Skeleton className="h-96" />
-                <Skeleton className="h-96" />
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="h-96" />
+                ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {plans?.map((plan) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{plans?.map((plan) => {
                   const isCurrentPlan = plan.code === currentPlanCode;
+                  const isElite = plan.code === "elite";
                   const isPro = plan.code === "pro";
-                  const isVip = plan.code === "vip";
+                  const isAffiliate = plan.code === "affiliate_partner";
                   const features = getPlanFeatures(plan);
                   
                   return (
                     <Card 
                       key={plan.id} 
                       className={`glass-card relative overflow-hidden ${
-                        isPro ? "border-primary ring-2 ring-primary/20 scale-105" : ""
-                      } ${isVip ? "border-amber-500/50" : ""}`}
+                        isElite ? "border-amber-500/50 ring-2 ring-amber-500/20" : ""
+                      } ${isPro ? "border-primary/50" : ""} ${isAffiliate ? "border-pink-500/50" : ""}`}
                     >
-                      {isPro && (
-                        <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
-                          Most Popular
-                        </div>
-                      )}
-                      {isVip && (
+                      {isElite && (
                         <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
                           Best Value
+                        </div>
+                      )}
+                      {isPro && (
+                        <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
+                          Popular
+                        </div>
+                      )}
+                      {isAffiliate && (
+                        <div className="absolute top-0 right-0 bg-gradient-to-r from-pink-500 to-pink-600 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                          Affiliate
                         </div>
                       )}
                       
@@ -350,11 +412,12 @@ const Billing = () => {
                         ) : (
                           <div className="space-y-2">
                             <Button 
-                              className={`w-full ${isVip ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" : ""}`}
+                              className={`w-full ${isElite ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" : ""}`}
                               variant={isPro ? "default" : "outline"}
-                              onClick={() => handleUpgrade(plan)}
+                              onClick={() => handleUpgradeRequest(plan)}
+                              disabled={hasPendingRequest || createSubscriptionRequest.isPending}
                             >
-                              Upgrade to {plan.name}
+                              {createSubscriptionRequest.isPending ? "Submitting..." : `Request ${plan.name}`}
                             </Button>
                             <Button
                               variant="ghost"
@@ -373,6 +436,56 @@ const Billing = () => {
                 })}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="requests">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Your Upgrade Requests</CardTitle>
+                <CardDescription>Track the status of your subscription upgrade requests</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {subscriptionRequests && subscriptionRequests.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Note</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {subscriptionRequests.map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell>{new Date(request.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{request.pricing_plans?.name || "Unknown"}</Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">${request.amount_usd}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              request.status === "approved" ? "default" :
+                              request.status === "rejected" ? "destructive" : "secondary"
+                            }>
+                              {request.status === "pending_approval" ? "Pending" : request.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {request.admin_note || "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No upgrade requests yet
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="history">

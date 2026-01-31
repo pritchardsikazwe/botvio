@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Shield, 
   Users, 
@@ -28,13 +30,16 @@ import {
   AlertOctagon,
   Eye,
   Ban,
-  Signal
+  Signal,
+  RefreshCw,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals, useUpdateSignalStatus, ManualSignal } from "@/hooks/useManualSignals";
 import { useAdminPaymentRequests, useProcessPaymentRequest } from "@/hooks/useAdminBilling";
+import { SubscriptionRequestsTab } from "@/components/admin/SubscriptionRequestsTab";
 
 interface Provider {
   id: string;
@@ -723,13 +728,14 @@ const Admin = () => {
     }
   };
 
-  if (authLoading || dataLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <p className="text-muted-foreground">Checking permissions...</p>
           </div>
         </div>
       </div>
@@ -737,7 +743,49 @@ const Admin = () => {
   }
 
   if (!isAdmin) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <Alert variant="destructive" className="max-w-md mx-auto">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Access denied. You need admin privileges to access this page.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="glass-card p-6 mb-8">
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="glass-card">
+                <CardContent className="p-4">
+                  <Skeleton className="h-6 w-24 mb-2" />
+                  <Skeleton className="h-8 w-16" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="flex justify-center">
+            <Button variant="outline" onClick={() => fetchData()}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry Loading
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -821,6 +869,10 @@ const Admin = () => {
                 <Badge variant="destructive" className="ml-1">{stats.pendingProviders}</Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="subscription_requests" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Subscription Requests
+            </TabsTrigger>
             <TabsTrigger value="subscriptions" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
               Subscriptions
@@ -852,6 +904,11 @@ const Admin = () => {
           {/* Signals Tab */}
           <TabsContent value="signals">
             <SignalsManagement />
+          </TabsContent>
+
+          {/* Subscription Requests Tab */}
+          <TabsContent value="subscription_requests">
+            <SubscriptionRequestsTab />
           </TabsContent>
 
           {/* Providers Tab */}

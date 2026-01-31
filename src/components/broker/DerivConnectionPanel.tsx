@@ -84,8 +84,8 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   };
 
   const handleOAuthConnect = () => {
-    // Deriv OAuth URL
-    const appId = "123162";
+    // Updated Deriv OAuth URL with correct App ID
+    const appId = "124208";
     const redirectUri = encodeURIComponent(window.location.origin + "/accounts");
     const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${appId}&redirect_uri=${redirectUri}`;
     
@@ -268,18 +268,36 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                 <div className="p-3 rounded-lg bg-muted/50 text-sm">
                   <p className="font-medium mb-2">How to get your API Token:</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                    <li>Log in to Deriv.com</li>
+                    <li>
+                      <a
+                        href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        Log in to Deriv
+                      </a>{" "}
+                      or{" "}
+                      <a
+                        href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        Create a free demo account
+                      </a>
+                    </li>
                     <li>Go to Settings → API Token</li>
                     <li>Create a token with <strong>Trade</strong> and <strong>Read</strong> permissions</li>
                     <li>Copy and paste the token above</li>
                   </ol>
                   <a
-                    href="https://app.deriv.com/account/api-token"
+                    href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary mt-2 hover:underline"
                   >
-                    Open Deriv API Token page <ExternalLink className="h-3 w-3" />
+                    Get your Demo API Token <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               </TabsContent>
