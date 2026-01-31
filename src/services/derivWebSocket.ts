@@ -70,6 +70,9 @@ export class DerivWebSocketService {
     this.reconnectMaxDelayMs = opts.reconnectMaxDelayMs ?? 15000;
     this.keepAlive = opts.keepAlive ?? true;
     this.pingIntervalMs = opts.pingIntervalMs ?? 25000;
+    
+    // Debug log for troubleshooting
+    console.log("[Deriv] WebSocket URL:", this.url, "| Host:", typeof window !== "undefined" ? window.location.hostname : "N/A");
   }
 
   get connectionStatus() {

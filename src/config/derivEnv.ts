@@ -17,7 +17,8 @@ export function resolveDerivEnv(): DerivEnv {
   if (typeof window === "undefined") return "dev";
   
   const host = window.location.hostname.toLowerCase();
-  if (host === "botvio.live") return "prod";
+  // Include www.botvio.live for production
+  if (host === "botvio.live" || host === "www.botvio.live") return "prod";
   return "dev";
 }
 
@@ -64,5 +65,10 @@ export function buildDerivOAuthUrl(): string {
 
 export function getDerivWebSocketUrl(): string {
   const { appId } = getDerivConfig();
-  return `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(String(appId))}`;
+  // Validate appId before using
+  if (!Number.isFinite(appId) || appId <= 0) {
+    console.error(`Invalid Deriv app_id resolved: ${appId}`);
+    throw new Error(`Invalid Deriv app_id: ${appId}`);
+  }
+  return `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
 }
