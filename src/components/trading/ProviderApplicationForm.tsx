@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle, Upload, TrendingUp, Users, Shield, ArrowRight } from "lucide-react";
+import { AlertCircle, CheckCircle, Upload, TrendingUp, Users, Shield, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -47,11 +47,13 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
   ];
 
   const markets = [
-    { value: "synthetics", label: "Synthetic Indices (V75, Boom, Crash)" },
-    { value: "forex", label: "Forex Majors (EUR, GBP, JPY)" },
-    { value: "gold", label: "Gold (XAUUSD)" },
-    { value: "indices", label: "Indices (NAS100, US30)" },
-    { value: "crypto", label: "Crypto (BTC, ETH)" },
+    { value: "synthetic_indices", label: "Synthetic Indices (V75, Boom, Crash)" },
+    { value: "forex_majors", label: "Forex Majors (EUR, GBP, JPY)" },
+    { value: "gold_xauusd", label: "Gold (XAUUSD)" },
+    { value: "indices_nas100_us30", label: "Indices (NAS100, US30)" },
+    { value: "crypto_btc_eth", label: "Crypto (BTC, ETH)" },
+    { value: "forex_metals", label: "Metals (Silver, Platinum)" },
+    { value: "energies", label: "Energies (Oil, Gas)" },
   ];
 
   const handleMarketToggle = (market: string) => {
@@ -76,6 +78,11 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
       return;
     }
 
+    if (form.primary_markets.length === 0) {
+      toast.error("Please select at least one primary market");
+      return;
+    }
+
     if (!form.agree_terms) {
       toast.error("Please agree to the terms and conditions");
       return;
@@ -88,6 +95,7 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
         user_id: user.id,
         display_name: form.display_name,
         bio: form.bio,
+        primary_market: form.primary_markets.join(", "),
         status: "pending",
       });
 
