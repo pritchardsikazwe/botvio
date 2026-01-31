@@ -32,7 +32,8 @@ import {
   Ban,
   Signal,
   RefreshCw,
-  FileText
+  FileText,
+  Settings
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +42,7 @@ import { useManualSignals, useUpdateSignalStatus, ManualSignal } from "@/hooks/u
 import { useAdminPaymentRequests, useProcessPaymentRequest } from "@/hooks/useAdminBilling";
 import { SubscriptionRequestsTab } from "@/components/admin/SubscriptionRequestsTab";
 import { AdminDerivConnectionsTab } from "@/components/admin/AdminDerivConnectionsTab";
+import { AdminPricingPlansTab } from "@/components/admin/AdminPricingPlansTab";
 
 interface Provider {
   id: string;
@@ -376,7 +378,7 @@ const BillingRequestsTab = () => {
 };
 
 const Admin = () => {
-  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { user, loading: authLoading, rolesLoading, isAdmin, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [dataLoading, setDataLoading] = useState(true);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -409,7 +411,8 @@ const Admin = () => {
   });
 
   useEffect(() => {
-    if (authLoading) return;
+    // Wait for both auth and roles to load
+    if (authLoading || rolesLoading) return;
     
     if (!user) {
       navigate('/');
@@ -424,7 +427,7 @@ const Admin = () => {
 
     // User is admin, fetch data
     fetchData().finally(() => setDataLoading(false));
-  }, [user, authLoading, isAdmin, navigate]);
+  }, [user, authLoading, rolesLoading, isAdmin, navigate]);
 
   const fetchData = async () => {
     // Fetch providers
@@ -729,7 +732,7 @@ const Admin = () => {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || rolesLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -903,6 +906,10 @@ const Admin = () => {
             <TabsTrigger value="deriv_connections" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Deriv Connections
+            </TabsTrigger>
+            <TabsTrigger value="pricing_plans" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Pricing Plans
             </TabsTrigger>
           </TabsList>
 
@@ -1325,6 +1332,11 @@ const Admin = () => {
           {/* Deriv Connections Tab */}
           <TabsContent value="deriv_connections">
             <AdminDerivConnectionsTab />
+          </TabsContent>
+
+          {/* Pricing Plans Tab */}
+          <TabsContent value="pricing_plans">
+            <AdminPricingPlansTab />
           </TabsContent>
         </Tabs>
       </main>

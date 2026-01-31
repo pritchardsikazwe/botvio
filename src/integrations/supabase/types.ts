@@ -2064,12 +2064,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
+      is_affiliate: { Args: never; Returns: boolean }
       is_bot_instance_owner: { Args: { instance_id: string }; Returns: boolean }
       is_owner: { Args: { record_user_id: string }; Returns: boolean }
       is_provider_owner: { Args: { provider_id: string }; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "super_admin" | "affiliate"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2197,7 +2200,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "super_admin", "affiliate"],
     },
   },
 } as const

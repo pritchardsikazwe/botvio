@@ -20,7 +20,7 @@ import { Check, Zap, Crown, Rocket, Clock, Users, Bot, Copy, Star, Upload, Gift,
 import { toast } from "sonner";
 
 const Billing = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { data: plans, isLoading: plansLoading } = usePricingPlans();
   const { data: mySubscription, isLoading: subLoading } = useMySubscription();
@@ -40,6 +40,22 @@ const Billing = () => {
   const [uploading, setUploading] = useState(false);
 
   const currentPlanCode = mySubscription?.pricing_plan?.code || "starter";
+
+  // Redirect admins to admin panel - they shouldn't see billing/upgrade UI
+  if (isAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Admin Access</h1>
+          <p className="text-muted-foreground mb-6">
+            As an admin, you have full access to the platform. Subscription plans are for regular users.
+          </p>
+          <Button onClick={() => navigate("/admin")}>Go to Admin Panel</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
