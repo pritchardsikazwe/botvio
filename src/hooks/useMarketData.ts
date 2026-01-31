@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { DerivWebSocketService } from "@/services/derivWebSocket";
 import type { DerivTick } from "@/types/deriv";
-
-const DEFAULT_APP_ID = "123162";
+// Removed hardcoded DEFAULT_APP_ID - now uses environment-aware config from DerivWebSocketService
 
 export interface MarketIndicators {
   symbol: string;
@@ -163,7 +162,8 @@ export function useMarketData(symbols: string[]) {
   useEffect(() => {
     if (symbols.length === 0) return;
 
-    const service = new DerivWebSocketService({ appId: DEFAULT_APP_ID });
+    // Use environment-aware WebSocket URL (no hardcoded appId)
+    const service = new DerivWebSocketService();
     serviceRef.current = service;
 
     const connect = async () => {
