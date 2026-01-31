@@ -1,13 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { DerivWebSocketService } from "@/services/derivWebSocket";
 import type { DerivBalance, DerivTick } from "@/types/deriv";
-
-// NOTE: In Vite, env vars must be prefixed with VITE_.
-// You can set these in your Lovable environment / secrets (not committed to code):
-// - VITE_DERIV_APP_ID
-// - VITE_DERIV_API_TOKEN (dev-only convenience; prefer user input)
-const DEFAULT_APP_ID = "123162";
-const ENV_APP_ID = (import.meta as any).env?.VITE_DERIV_APP_ID as string | undefined;
+import { getDerivConfig } from "@/config/derivEnv";
 
 export type DerivProposal = {
   id: string;
@@ -46,12 +40,14 @@ export const useDerivAPI = () => {
     setState(prev => ({ ...prev, ...partial }));
   }, []);
 
-  const appId = ENV_APP_ID || DEFAULT_APP_ID;
+  // Use environment-based configuration
+  const derivConfig = getDerivConfig();
 
   const service = useMemo(() => {
-    const s = new DerivWebSocketService({ appId });
+    // DerivWebSocketService now automatically uses environment-based config
+    const s = new DerivWebSocketService();
     return s;
-  }, [appId]);
+  }, [derivConfig.appId]);
 
   const [tickSubscriptions, setTickSubscriptions] = useState<Record<string, string>>({});
 

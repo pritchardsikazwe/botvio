@@ -619,6 +619,99 @@ export type Database = {
           },
         ]
       }
+      deriv_connection_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          env: string
+          event: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          env: string
+          event: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          env?: string
+          event?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      deriv_connections: {
+        Row: {
+          account_type: string | null
+          balance: number | null
+          connection_type: string
+          created_at: string
+          currency: string | null
+          env: string
+          expires_at: string | null
+          id: string
+          is_connected: boolean
+          last_error: string | null
+          last_verified_at: string | null
+          login_id: string | null
+          oauth_access_token: string | null
+          oauth_refresh_token: string | null
+          scope: string[] | null
+          token_hash: string | null
+          token_masked: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_type?: string | null
+          balance?: number | null
+          connection_type: string
+          created_at?: string
+          currency?: string | null
+          env: string
+          expires_at?: string | null
+          id?: string
+          is_connected?: boolean
+          last_error?: string | null
+          last_verified_at?: string | null
+          login_id?: string | null
+          oauth_access_token?: string | null
+          oauth_refresh_token?: string | null
+          scope?: string[] | null
+          token_hash?: string | null
+          token_masked?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_type?: string | null
+          balance?: number | null
+          connection_type?: string
+          created_at?: string
+          currency?: string | null
+          env?: string
+          expires_at?: string | null
+          id?: string
+          is_connected?: boolean
+          last_error?: string | null
+          last_verified_at?: string | null
+          login_id?: string | null
+          oauth_access_token?: string | null
+          oauth_refresh_token?: string | null
+          scope?: string[] | null
+          token_hash?: string | null
+          token_masked?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       deriv_symbols_cache: {
         Row: {
           cached_at: string

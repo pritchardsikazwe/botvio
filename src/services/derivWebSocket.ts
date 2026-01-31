@@ -1,12 +1,13 @@
 import type { DerivMessage, DerivTick, DerivBalance } from "@/types/deriv";
+import { getDerivWebSocketUrl } from "@/config/derivEnv";
 
 type ConnectionStatus = "idle" | "connecting" | "open" | "closed";
 
 type Listener<T> = (payload: T) => void;
 
 type DerivWebSocketOptions = {
-  appId: string;
-  /** Defaults to official Deriv endpoint */
+  appId?: string;
+  /** Defaults to official Deriv endpoint based on environment */
   url?: string;
   /** Auto-reconnect when dropped unexpectedly (default true) */
   autoReconnect?: boolean;
@@ -26,6 +27,7 @@ type DerivWebSocketOptions = {
  * - request/response routing using req_id
  * - tick subscriptions + unsubscribe by subscription id
  * - auto-reconnect with backoff
+ * - Uses environment-based configuration
  */
 export class DerivWebSocketService {
   private ws: WebSocket | null = null;
@@ -53,7 +55,6 @@ export class DerivWebSocketService {
 
   private tickSubscriptionBySymbol = new Map<string, string>();
 
-  private readonly appId: string;
   private readonly url: string;
   private readonly autoReconnect: boolean;
   private readonly reconnectBaseDelayMs: number;
@@ -61,10 +62,9 @@ export class DerivWebSocketService {
   private readonly keepAlive: boolean;
   private readonly pingIntervalMs: number;
 
-  constructor(opts: DerivWebSocketOptions) {
-    this.appId = opts.appId;
-    this.url =
-      opts.url ?? `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(this.appId)}`;
+  constructor(opts: DerivWebSocketOptions = {}) {
+    // Use environment-based URL by default
+    this.url = opts.url ?? getDerivWebSocketUrl();
     this.autoReconnect = opts.autoReconnect ?? true;
     this.reconnectBaseDelayMs = opts.reconnectBaseDelayMs ?? 1000;
     this.reconnectMaxDelayMs = opts.reconnectMaxDelayMs ?? 15000;

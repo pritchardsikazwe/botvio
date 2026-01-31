@@ -40,6 +40,7 @@ import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals, useUpdateSignalStatus, ManualSignal } from "@/hooks/useManualSignals";
 import { useAdminPaymentRequests, useProcessPaymentRequest } from "@/hooks/useAdminBilling";
 import { SubscriptionRequestsTab } from "@/components/admin/SubscriptionRequestsTab";
+import { AdminDerivConnectionsTab } from "@/components/admin/AdminDerivConnectionsTab";
 
 interface Provider {
   id: string;
@@ -899,6 +900,10 @@ const Admin = () => {
               <DollarSign className="w-4 h-4" />
               Billing Requests
             </TabsTrigger>
+            <TabsTrigger value="deriv_connections" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Deriv Connections
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1315,6 +1320,11 @@ const Admin = () => {
           {/* Billing Requests Tab */}
           <TabsContent value="billing">
             <BillingRequestsTab />
+          </TabsContent>
+
+          {/* Deriv Connections Tab */}
+          <TabsContent value="deriv_connections">
+            <AdminDerivConnectionsTab />
           </TabsContent>
         </Tabs>
       </main>

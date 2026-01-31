@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Loader2, CheckCircle, XCircle, ExternalLink, 
-  Key, User, Wifi, WifiOff, RefreshCw, Shield
+  Key, User, Wifi, WifiOff, RefreshCw, Shield, Globe
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { getDerivConfig, buildDerivOAuthUrl, resolveDerivEnv } from "@/config/derivEnv";
 
 interface DerivConnectionPanelProps {
   onConnected?: (balance: any) => void;
@@ -27,9 +28,77 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   const [connectionMethod, setConnectionMethod] = useState<"token" | "oauth">("token");
   const [apiToken, setApiToken] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveToAccount, setSaveToAccount] = useState(true);
   const [accountLabel, setAccountLabel] = useState("");
+  const [storedConnection, setStoredConnection] = useState<any>(null);
+
+  const derivConfig = getDerivConfig();
+  const currentEnv = resolveDerivEnv();
+
+  // Load existing connection from database
+  useEffect(() => {
+    const loadStoredConnection = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from("deriv_connections")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("env", currentEnv)
+        .single();
+      
+      if (data) {
+        setStoredConnection(data);
+      }
+    };
+    
+    loadStoredConnection();
+  }, [user, currentEnv]);
+
+  const handleTokenVerify = async () => {
+    if (!apiToken.trim()) {
+      toast.error("Please enter your API token");
+      return;
+    }
+
+    if (apiToken.length < 10) {
+      toast.error("Invalid token format");
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("deriv-verify-token", {
+        body: { token: apiToken, env: currentEnv },
+      });
+
+      if (fnError || !data?.ok) {
+        toast.error(data?.error || fnError?.message || "Verification failed");
+        return;
+      }
+
+      toast.success(`Token verified! Account: ${data.loginid}`);
+      
+      // Refresh stored connection
+      const { data: conn } = await supabase
+        .from("deriv_connections")
+        .select("*")
+        .eq("user_id", user?.id)
+        .eq("env", currentEnv)
+        .single();
+      
+      setStoredConnection(conn);
+      
+      // Now connect with the Deriv API
+      await handleTokenConnect();
+    } catch (e: any) {
+      toast.error(e.message || "Verification failed");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleTokenConnect = async () => {
     if (!apiToken.trim()) {
@@ -37,7 +106,6 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
       return;
     }
 
-    // Basic token validation
     if (apiToken.length < 10) {
       toast.error("Invalid token format");
       return;
@@ -84,23 +152,68 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   };
 
   const handleOAuthConnect = () => {
-    // Updated Deriv OAuth URL with correct App ID
-    const appId = "124208";
-    const redirectUri = encodeURIComponent(window.location.origin + "/accounts");
-    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${appId}&redirect_uri=${redirectUri}`;
-    
+    const oauthUrl = buildDerivOAuthUrl();
     window.open(oauthUrl, "_blank", "width=600,height=700");
     toast.info("Complete the login in the popup window");
   };
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
     disconnect();
     setApiToken("");
+    
+    // Update database
+    if (user) {
+      await supabase
+        .from("deriv_connections")
+        .update({ is_connected: false })
+        .eq("user_id", user.id)
+        .eq("env", currentEnv);
+      
+      setStoredConnection(null);
+    }
+    
     toast.info("Disconnected from Deriv");
   };
 
+  const handleHealthCheck = async () => {
+    if (!user) return;
+    
+    setIsVerifying(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("deriv-health-check", {
+        body: { env: currentEnv },
+      });
+
+      if (fnError || !data?.ok) {
+        toast.error(data?.error || fnError?.message || "Health check failed");
+        return;
+      }
+
+      const result = data.results?.[0];
+      if (result?.is_connected) {
+        toast.success("Connection is healthy!");
+      } else {
+        toast.warning(result?.last_error || "Connection needs re-verification");
+      }
+      
+      // Refresh stored connection
+      const { data: conn } = await supabase
+        .from("deriv_connections")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("env", currentEnv)
+        .single();
+      
+      setStoredConnection(conn);
+    } catch (e: any) {
+      toast.error(e.message || "Health check failed");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const getConnectionStatus = () => {
-    if (loading || isConnecting) return "connecting";
+    if (loading || isConnecting || isVerifying) return "connecting";
     if (authorized && connected) return "connected";
     if (connected && !authorized) return "connected_no_auth";
     if (error) return "error";
@@ -122,31 +235,65 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
               Connect your Deriv account to enable trading
             </CardDescription>
           </div>
-          <Badge
-            variant={status === "connected" ? "default" : status === "connecting" ? "secondary" : "outline"}
-            className={
-              status === "connected"
-                ? "bg-success text-success-foreground"
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Globe className="h-3 w-3" />
+              {currentEnv.toUpperCase()}
+            </Badge>
+            <Badge
+              variant={status === "connected" ? "default" : status === "connecting" ? "secondary" : "outline"}
+              className={
+                status === "connected"
+                  ? "bg-success text-success-foreground"
+                  : status === "error"
+                  ? "bg-destructive text-destructive-foreground"
+                  : ""
+              }
+            >
+              {status === "connected" && <Wifi className="h-3 w-3 mr-1" />}
+              {status === "disconnected" && <WifiOff className="h-3 w-3 mr-1" />}
+              {status === "connecting" && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+              {status === "error" && <XCircle className="h-3 w-3 mr-1" />}
+              {status === "connected"
+                ? "Connected"
+                : status === "connecting"
+                ? "Connecting..."
                 : status === "error"
-                ? "bg-destructive text-destructive-foreground"
-                : ""
-            }
-          >
-            {status === "connected" && <Wifi className="h-3 w-3 mr-1" />}
-            {status === "disconnected" && <WifiOff className="h-3 w-3 mr-1" />}
-            {status === "connecting" && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
-            {status === "error" && <XCircle className="h-3 w-3 mr-1" />}
-            {status === "connected"
-              ? "Connected"
-              : status === "connecting"
-              ? "Connecting..."
-              : status === "error"
-              ? "Error"
-              : "Disconnected"}
-          </Badge>
+                ? "Error"
+                : "Disconnected"}
+            </Badge>
+          </div>
+        </div>
+        
+        {/* Environment Info */}
+        <div className="mt-2 p-2 rounded bg-muted/50 text-xs text-muted-foreground">
+          <p>App ID: <strong>{derivConfig.appId}</strong> | Domain: <strong>{derivConfig.baseDomain}</strong></p>
         </div>
       </CardHeader>
       <CardContent>
+        {/* Stored Connection Info */}
+        {storedConnection && (
+          <div className="mb-4 p-3 rounded-lg bg-muted/30 border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Stored Connection</p>
+                <p className="text-xs text-muted-foreground">
+                  {storedConnection.login_id || "Unknown"} • {storedConnection.connection_type} • 
+                  {storedConnection.is_connected ? " Connected" : " Disconnected"}
+                </p>
+                {storedConnection.last_verified_at && (
+                  <p className="text-xs text-muted-foreground">
+                    Last verified: {new Date(storedConnection.last_verified_at).toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <Button size="sm" variant="outline" onClick={handleHealthCheck} disabled={isVerifying}>
+                {isVerifying ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {authorized ? (
           <div className="space-y-4">
             {/* Connected State */}
@@ -212,10 +359,10 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                     placeholder="Enter your Deriv API token"
                     value={apiToken}
                     onChange={(e) => setApiToken(e.target.value)}
-                    disabled={isConnecting}
+                    disabled={isConnecting || isVerifying}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Your token is encrypted and stored securely
+                    Your token is verified securely via our backend
                   </p>
                 </div>
 
@@ -228,7 +375,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                         placeholder="e.g., My Trading Account"
                         value={accountLabel}
                         onChange={(e) => setAccountLabel(e.target.value)}
-                        disabled={isConnecting}
+                        disabled={isConnecting || isVerifying}
                       />
                     </div>
 
@@ -247,23 +394,43 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   </>
                 )}
 
-                <Button
-                  className="w-full"
-                  onClick={handleTokenConnect}
-                  disabled={isConnecting || loading || !apiToken.trim()}
-                >
-                  {isConnecting || loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <Wifi className="h-4 w-4 mr-2" />
-                      Connect with Token
-                    </>
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleTokenVerify}
+                    disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
+                  >
+                    {isVerifying ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Verify Token
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={handleTokenConnect}
+                    disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
+                  >
+                    {isConnecting || loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <Wifi className="h-4 w-4 mr-2" />
+                        Connect
+                      </>
+                    )}
+                  </Button>
+                </div>
 
                 <div className="p-3 rounded-lg bg-muted/50 text-sm">
                   <p className="font-medium mb-2">How to get your API Token:</p>
