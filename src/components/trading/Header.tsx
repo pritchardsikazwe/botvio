@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -11,8 +11,18 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
@@ -48,15 +58,16 @@ export const Header = () => {
               </div>
             </div>
 
-            {/* Navigation */}
+            {/* Navigation - Desktop */}
             <nav className="hidden md:flex items-center gap-1">
               <Button 
                 variant={location.pathname === '/' ? 'secondary' : 'ghost'} 
                 size="sm"
                 onClick={() => navigate('/')}
               >
-                Signals
+                Home
               </Button>
+              
               {user && (
                 <>
                   <Button 
@@ -67,40 +78,81 @@ export const Header = () => {
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
                   </Button>
-                  <Button 
-                    variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/bots')}
-                  >
-                    <Bot className="w-4 h-4 mr-2" />
-                    Bots
-                  </Button>
-                  <Button 
-                    variant={location.pathname === '/providers' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/providers')}
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Copy Trade
-                  </Button>
-                  <Button 
-                    variant={location.pathname === '/p2p' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/p2p')}
-                  >
-                    <ArrowLeftRight className="w-4 h-4 mr-2" />
-                    P2P
-                  </Button>
-                  <Button 
-                    variant={location.pathname === '/affiliate' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/affiliate')}
-                  >
-                    <Gift className="w-4 h-4 mr-2" />
-                    Affiliate
-                  </Button>
+                  
+                  {/* Trading Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Trading
+                        <ChevronDown className="w-3 h-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 glass-card">
+                      <DropdownMenuLabel>Trading Tools</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/signals')}>
+                        <Signal className="w-4 h-4 mr-2" />
+                        Signals & AI Analysis
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/bots')}>
+                        <Bot className="w-4 h-4 mr-2" />
+                        Trading Bots
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/providers')}>
+                        <Users className="w-4 h-4 mr-2" />
+                        Copy Trading
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/strategies')}>
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Strategies
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
+                        <Users className="w-4 h-4 mr-2" />
+                        Become a Provider
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
+                  {/* More Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <Menu className="w-4 h-4 mr-2" />
+                        More
+                        <ChevronDown className="w-3 h-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 glass-card">
+                      <DropdownMenuLabel>Tools & Features</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/accounts')}>
+                        <Wallet className="w-4 h-4 mr-2" />
+                        Trading Accounts
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/p2p')}>
+                        <ArrowLeftRight className="w-4 h-4 mr-2" />
+                        P2P Trading
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/affiliate')}>
+                        <Gift className="w-4 h-4 mr-2" />
+                        Affiliate Program
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/billing')}>
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Billing & Plans
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/settings')}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Settings
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               )}
+              
               <Button 
                 variant={location.pathname.startsWith('/learn') ? 'secondary' : 'ghost'} 
                 size="sm"
@@ -129,7 +181,7 @@ export const Header = () => {
             
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20">
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              <span className="text-sm font-medium text-success">Live</span>
+              <span className="text-sm font-medium text-success">Real</span>
             </div>
             
             <NotificationBell />
@@ -158,6 +210,10 @@ export const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/signals')}>
+                    <Signal className="w-4 h-4 mr-2" />
+                    Signals & AI Analysis
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/accounts')}>
                     <Wallet className="w-4 h-4 mr-2" />
