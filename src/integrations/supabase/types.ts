@@ -754,6 +754,163 @@ export type Database = {
         }
         Relationships: []
       }
+      p2p_offers: {
+        Row: {
+          auto_reply: string | null
+          avg_release_time: number | null
+          completion_rate: number | null
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean | null
+          max_amount: number
+          min_amount: number
+          payment_methods: string[]
+          price: number
+          terms: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_reply?: string | null
+          avg_release_time?: number | null
+          completion_rate?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          max_amount?: number
+          min_amount?: number
+          payment_methods?: string[]
+          price: number
+          terms?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_reply?: string | null
+          avg_release_time?: number | null
+          completion_rate?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          max_amount?: number
+          min_amount?: number
+          payment_methods?: string[]
+          price?: number
+          terms?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      p2p_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewed_id: string
+          reviewer_id: string
+          trade_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewed_id: string
+          reviewer_id: string
+          trade_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewed_id?: string
+          reviewer_id?: string
+          trade_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "p2p_reviews_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "p2p_trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      p2p_trades: {
+        Row: {
+          admin_resolution: string | null
+          amount_fiat: number
+          amount_usd: number
+          buyer_confirmed_at: string | null
+          buyer_id: string
+          created_at: string
+          currency: string
+          dispute_reason: string | null
+          id: string
+          offer_id: string | null
+          payment_method: string
+          price: number
+          seller_id: string
+          seller_released_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_resolution?: string | null
+          amount_fiat: number
+          amount_usd: number
+          buyer_confirmed_at?: string | null
+          buyer_id: string
+          created_at?: string
+          currency: string
+          dispute_reason?: string | null
+          id?: string
+          offer_id?: string | null
+          payment_method: string
+          price: number
+          seller_id: string
+          seller_released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_resolution?: string | null
+          amount_fiat?: number
+          amount_usd?: number
+          buyer_confirmed_at?: string | null
+          buyer_id?: string
+          created_at?: string
+          currency?: string
+          dispute_reason?: string | null
+          id?: string
+          offer_id?: string | null
+          payment_method?: string
+          price?: number
+          seller_id?: string
+          seller_released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "p2p_trades_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "p2p_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_options: {
         Row: {
           country_code: string
@@ -1140,6 +1297,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          primary_market: string | null
           status: string | null
           total_profit: number | null
           total_subscribers: number | null
@@ -1155,6 +1313,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          primary_market?: string | null
           status?: string | null
           total_profit?: number | null
           total_subscribers?: number | null
@@ -1170,6 +1329,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          primary_market?: string | null
           status?: string | null
           total_profit?: number | null
           total_subscribers?: number | null
@@ -1407,17 +1567,88 @@ export type Database = {
           },
         ]
       }
+      subscription_requests: {
+        Row: {
+          admin_note: string | null
+          amount_usd: number
+          created_at: string
+          current_plan_id: string | null
+          expires_at: string | null
+          id: string
+          payment_method: string | null
+          plan_id: string | null
+          proof_upload_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_usd: number
+          created_at?: string
+          current_plan_id?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_method?: string | null
+          plan_id?: string | null
+          proof_upload_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_usd?: number
+          created_at?: string
+          current_plan_id?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_method?: string | null
+          plan_id?: string | null
+          proof_upload_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_requests_current_plan_id_fkey"
+            columns: ["current_plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_requests_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trading_accounts: {
         Row: {
           api_key_encrypted: string
           api_secret_encrypted: string | null
           broker: string
+          connection_status: string | null
+          connection_type: string | null
           created_at: string
+          deriv_account_id: string | null
           id: string
           is_active: boolean | null
+          is_virtual: boolean | null
           label: string
           login_id: string | null
           permissions_json: Json | null
+          token_scopes: string[] | null
           updated_at: string
           user_id: string
         }
@@ -1425,12 +1656,17 @@ export type Database = {
           api_key_encrypted: string
           api_secret_encrypted?: string | null
           broker: string
+          connection_status?: string | null
+          connection_type?: string | null
           created_at?: string
+          deriv_account_id?: string | null
           id?: string
           is_active?: boolean | null
+          is_virtual?: boolean | null
           label: string
           login_id?: string | null
           permissions_json?: Json | null
+          token_scopes?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -1438,12 +1674,17 @@ export type Database = {
           api_key_encrypted?: string
           api_secret_encrypted?: string | null
           broker?: string
+          connection_status?: string | null
+          connection_type?: string | null
           created_at?: string
+          deriv_account_id?: string | null
           id?: string
           is_active?: boolean | null
+          is_virtual?: boolean | null
           label?: string
           login_id?: string | null
           permissions_json?: Json | null
+          token_scopes?: string[] | null
           updated_at?: string
           user_id?: string
         }
@@ -1713,6 +1954,16 @@ export type Database = {
     }
     Functions: {
       auto_expire_signals: { Args: never; Returns: undefined }
+      get_p2p_trader_stats: {
+        Args: { trader_id: string }
+        Returns: {
+          avg_rating: number
+          completed_trades: number
+          completion_rate: number
+          total_trades: number
+          total_volume: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
