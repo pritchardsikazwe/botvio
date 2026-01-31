@@ -8,68 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { 
   ArrowLeftRight, Users, Shield, Clock, 
   ArrowUp, ArrowDown, MessageSquare, Star,
-  Wallet, TrendingUp, ArrowRight
+  Wallet, TrendingUp, ArrowRight, Plus, Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-interface P2POffer {
-  id: string;
-  type: "buy" | "sell";
-  trader: string;
-  rating: number;
-  trades: number;
-  price: number;
-  currency: string;
-  minAmount: number;
-  maxAmount: number;
-  paymentMethods: string[];
-  isOnline: boolean;
-}
-
-const mockOffers: P2POffer[] = [
-  {
-    id: "1",
-    type: "buy",
-    trader: "CryptoKing",
-    rating: 4.9,
-    trades: 256,
-    price: 27.5,
-    currency: "ZMW",
-    minAmount: 100,
-    maxAmount: 50000,
-    paymentMethods: ["Mobile Money", "Bank Transfer"],
-    isOnline: true,
-  },
-  {
-    id: "2",
-    type: "buy",
-    trader: "FastTrader",
-    rating: 4.7,
-    trades: 189,
-    price: 27.8,
-    currency: "ZMW",
-    minAmount: 50,
-    maxAmount: 25000,
-    paymentMethods: ["Mobile Money", "Airtel Money"],
-    isOnline: true,
-  },
-  {
-    id: "3",
-    type: "sell",
-    trader: "SafeExchange",
-    rating: 4.8,
-    trades: 412,
-    price: 26.9,
-    currency: "ZMW",
-    minAmount: 200,
-    maxAmount: 100000,
-    paymentMethods: ["Bank Transfer", "FNB"],
-    isOnline: false,
-  },
-];
+import { useP2POffers, useCreateP2POffer, useCreateP2PTrade, P2POffer } from "@/hooks/useP2P";
+import { toast } from "sonner";
 
 const P2P = () => {
   const { user } = useAuth();
@@ -77,8 +24,56 @@ const P2P = () => {
   const [selectedTab, setSelectedTab] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("ZMW");
+  const [showCreateOffer, setShowCreateOffer] = useState(false);
+  const [showTradeDialog, setShowTradeDialog] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<P2POffer | null>(null);
+  const [tradeAmount, setTradeAmount] = useState("");
 
-  const filteredOffers = mockOffers.filter(o => o.type === selectedTab);
+  const { data: offers, isLoading } = useP2POffers(selectedTab, selectedCurrency);
+  const createOffer = useCreateP2POffer();
+  const createTrade = useCreateP2PTrade();
+
+  const [newOffer, setNewOffer] = useState({
+    type: "sell" as "buy" | "sell",
+    price: "",
+    currency: "ZMW",
+    min_amount: "50",
+    max_amount: "50000",
+    payment_methods: ["Mobile Money"],
+    terms: "",
+  });
+
+  const handleCreateOffer = async () => {
+    if (!newOffer.price) {
+      toast.error("Please enter a price");
+      return;
+    }
+    await createOffer.mutateAsync({
+      ...newOffer,
+      price: parseFloat(newOffer.price),
+      min_amount: parseFloat(newOffer.min_amount),
+      max_amount: parseFloat(newOffer.max_amount),
+    });
+    setShowCreateOffer(false);
+  };
+
+  const handleInitiateTrade = async () => {
+    if (!selectedOffer || !tradeAmount) return;
+    const amountUsd = parseFloat(tradeAmount);
+    await createTrade.mutateAsync({
+      offer_id: selectedOffer.id,
+      seller_id: selectedOffer.user_id,
+      amount_usd: amountUsd,
+      amount_fiat: amountUsd * selectedOffer.price,
+      currency: selectedOffer.currency,
+      price: selectedOffer.price,
+      payment_method: selectedOffer.payment_methods[0],
+    });
+    setShowTradeDialog(false);
+    setTradeAmount("");
+  };
+
+  const filteredOffers = offers || [];
 
   if (!user) {
     return (
@@ -279,29 +274,35 @@ const P2P = () => {
               </TabsList>
 
               <TabsContent value="buy" className="space-y-4">
-                {filteredOffers.map((offer) => (
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                  </div>
+                ) : filteredOffers.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No offers available. Be the first to create one!
+                  </div>
+                ) : filteredOffers.map((offer) => (
                   <Card key={offer.id} className="glass-card hover:border-primary/50 transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center text-white font-bold">
-                            {offer.trader.charAt(0)}
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center text-primary-foreground font-bold">
+                            {offer.profiles?.display_name?.charAt(0) || "T"}
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold">{offer.trader}</span>
-                              {offer.isOnline && (
-                                <span className="w-2 h-2 rounded-full bg-success" />
-                              )}
+                              <span className="font-semibold">{offer.profiles?.display_name || "Trader"}</span>
+                              <span className="w-2 h-2 rounded-full bg-success" />
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                              <span>{offer.rating}</span>
+                              <Star className="h-3 w-3 text-warning fill-warning" />
+                              <span>{offer.trader_stats?.avg_rating?.toFixed(1) || "5.0"}</span>
                               <span>•</span>
-                              <span>{offer.trades} trades</span>
+                              <span>{offer.trader_stats?.total_trades || 0} trades</span>
                             </div>
                             <div className="flex flex-wrap gap-1 mt-2">
-                              {offer.paymentMethods.map((method) => (
+                              {offer.payment_methods.map((method) => (
                                 <Badge key={method} variant="secondary" className="text-xs">
                                   {method}
                                 </Badge>
@@ -316,9 +317,9 @@ const P2P = () => {
                           </p>
                           <p className="text-xs text-muted-foreground">per USD</p>
                           <p className="text-sm text-muted-foreground mt-1">
-                            Limit: {offer.minAmount} - {offer.maxAmount.toLocaleString()} {offer.currency}
+                            Limit: {offer.min_amount} - {offer.max_amount.toLocaleString()} {offer.currency}
                           </p>
-                          <Button className="mt-3" size="sm">
+                          <Button className="mt-3" size="sm" onClick={() => { setSelectedOffer(offer); setShowTradeDialog(true); }}>
                             Buy USD
                           </Button>
                         </div>
@@ -329,29 +330,35 @@ const P2P = () => {
               </TabsContent>
 
               <TabsContent value="sell" className="space-y-4">
-                {filteredOffers.map((offer) => (
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                  </div>
+                ) : filteredOffers.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No offers available. Be the first to create one!
+                  </div>
+                ) : filteredOffers.map((offer) => (
                   <Card key={offer.id} className="glass-card hover:border-primary/50 transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-success to-success/50 flex items-center justify-center text-white font-bold">
-                            {offer.trader.charAt(0)}
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-success to-success/50 flex items-center justify-center text-success-foreground font-bold">
+                            {offer.profiles?.display_name?.charAt(0) || "T"}
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold">{offer.trader}</span>
-                              {offer.isOnline && (
-                                <span className="w-2 h-2 rounded-full bg-success" />
-                              )}
+                              <span className="font-semibold">{offer.profiles?.display_name || "Trader"}</span>
+                              <span className="w-2 h-2 rounded-full bg-success" />
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                              <span>{offer.rating}</span>
+                              <Star className="h-3 w-3 text-warning fill-warning" />
+                              <span>{offer.trader_stats?.avg_rating?.toFixed(1) || "5.0"}</span>
                               <span>•</span>
-                              <span>{offer.trades} trades</span>
+                              <span>{offer.trader_stats?.total_trades || 0} trades</span>
                             </div>
                             <div className="flex flex-wrap gap-1 mt-2">
-                              {offer.paymentMethods.map((method) => (
+                              {offer.payment_methods.map((method) => (
                                 <Badge key={method} variant="secondary" className="text-xs">
                                   {method}
                                 </Badge>
@@ -366,9 +373,9 @@ const P2P = () => {
                           </p>
                           <p className="text-xs text-muted-foreground">per USD</p>
                           <p className="text-sm text-muted-foreground mt-1">
-                            Limit: {offer.minAmount} - {offer.maxAmount.toLocaleString()} {offer.currency}
+                            Limit: {offer.min_amount} - {offer.max_amount.toLocaleString()} {offer.currency}
                           </p>
-                          <Button variant="outline" className="mt-3" size="sm">
+                          <Button variant="outline" className="mt-3" size="sm" onClick={() => { setSelectedOffer(offer); setShowTradeDialog(true); }}>
                             Sell USD
                           </Button>
                         </div>
