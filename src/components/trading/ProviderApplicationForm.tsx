@@ -36,7 +36,8 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
     agree_terms: false,
   });
 
-  const canBeProvider = myPlan?.pricing_plan?.allow_provider_listing ?? false;
+  // Allow all users to apply as providers (no VIP restriction)
+  const canBeProvider = true;
 
   const tradingStyles = [
     { value: "scalper", label: "Scalper (Quick trades, small profits)" },

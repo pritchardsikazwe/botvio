@@ -123,7 +123,8 @@ const ProviderDashboard = () => {
 
   const [lastResult, setLastResult] = useState<any>(null);
 
-  const canBeProvider = myPlan?.pricing_plan?.allow_provider_listing ?? false;
+  // Allow all users to be providers (no VIP restriction)
+  const canBeProvider = true;
   const derivAccounts = accounts?.filter(a => a.broker === "deriv") || [];
   const hasProviderAccount = myProvider?.provider_accounts && myProvider.provider_accounts.length > 0;
 

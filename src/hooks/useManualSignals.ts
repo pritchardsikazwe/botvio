@@ -41,10 +41,10 @@ export const useManualSignals = (filters?: {
   return useQuery({
     queryKey: ["manual-signals", filters],
     queryFn: async () => {
+      // Show all signals (both manual and automated)
       let query = supabase
         .from("trading_signals")
         .select("*")
-        .eq("is_manual", true)
         .order("created_at", { ascending: false });
 
       if (filters?.category && filters.category !== "all") {
@@ -74,10 +74,10 @@ export const useLatestSignals = (limit: number = 3) => {
   return useQuery({
     queryKey: ["latest-signals", limit],
     queryFn: async () => {
+      // Show all active signals (manual and automated)
       const { data, error } = await supabase
         .from("trading_signals")
         .select("*")
-        .eq("is_manual", true)
         .eq("status", "ACTIVE")
         .order("created_at", { ascending: false })
         .limit(limit);
