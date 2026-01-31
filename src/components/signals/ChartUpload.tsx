@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -23,7 +23,12 @@ import {
   CheckCircle,
   TrendingUp,
   TrendingDown,
-  AlertCircle
+  AlertCircle,
+  Target,
+  Shield,
+  BarChart3,
+  Clock,
+  History
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -36,6 +41,9 @@ const SYMBOLS = [
   { value: "NAS100", label: "NASDAQ 100" },
   { value: "BTCUSD", label: "Bitcoin/USD" },
   { value: "Volatility_75_Index", label: "V75 Index" },
+  { value: "R_100", label: "Volatility 100" },
+  { value: "BOOM1000", label: "Boom 1000" },
+  { value: "CRASH1000", label: "Crash 1000" },
 ];
 
 const TIMEFRAMES = [
@@ -45,6 +53,13 @@ const TIMEFRAMES = [
   { value: "H1", label: "1 Hour" },
   { value: "H4", label: "4 Hours" },
   { value: "D1", label: "Daily" },
+];
+
+const ANALYSIS_TYPES = [
+  { value: "full", label: "Full Analysis", description: "Complete technical breakdown" },
+  { value: "quick", label: "Quick Scan", description: "Key levels & direction" },
+  { value: "entry", label: "Entry Points", description: "Optimal entry & exit" },
+  { value: "support_resistance", label: "S/R Levels", description: "Support & Resistance" },
 ];
 
 interface ChartUploadProps {
@@ -58,10 +73,12 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [symbol, setSymbol] = useState("");
   const [timeframe, setTimeframe] = useState("");
+  const [analysisType, setAnalysisType] = useState("full");
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [structuredResult, setStructuredResult] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("upload");
 
   // Check daily usage for non-premium users
   const { data: dailyUsage } = useQuery({
@@ -77,6 +94,23 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
         .gte("created_at", `${today}T00:00:00Z`);
 
       return { count: count || 0, canUpload: (count || 0) < 1 };
+    },
+    enabled: !!user,
+  });
+
+  // Fetch analysis history
+  const { data: analysisHistory } = useQuery({
+    queryKey: ["chart-history", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("chart_analyses")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data;
     },
     enabled: !!user,
   });
@@ -140,7 +174,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       setIsUploading(false);
       setIsAnalyzing(true);
 
-      // Call analysis edge function
+      // Call analysis edge function with analysis type
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
         "analyze-chart",
         {
@@ -149,6 +183,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             symbol,
             timeframe,
             userId: user.id,
+            analysisType,
           },
         }
       );
@@ -181,11 +216,21 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
     setPreviewUrl(null);
     setSymbol("");
     setTimeframe("");
+    setAnalysisType("full");
     setAnalysisResult(null);
     setStructuredResult(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const viewHistoricalAnalysis = (analysis: any) => {
+    setAnalysisResult(analysis.ai_response);
+    setStructuredResult(analysis.analysis_result);
+    setPreviewUrl(analysis.image_url);
+    setSymbol(analysis.symbol || "");
+    setTimeframe(analysis.timeframe || "");
+    setActiveTab("upload");
   };
 
   return (
@@ -219,183 +264,282 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Upload Area */}
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          className={`
-            border-2 border-dashed rounded-xl p-8 text-center cursor-pointer
-            transition-all duration-200 hover:border-primary/50 hover:bg-primary/5
-            ${previewUrl ? "border-primary/50" : "border-muted-foreground/30"}
-          `}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-          
-          {previewUrl ? (
-            <div className="space-y-3">
-              <img
-                src={previewUrl}
-                alt="Chart preview"
-                className="max-h-64 mx-auto rounded-lg shadow-lg"
+        {/* Tabs for Upload vs History */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              New Analysis
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              History
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upload" className="space-y-4 mt-4">
+            {/* Analysis Type Selection */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {ANALYSIS_TYPES.map((type) => (
+                <Button
+                  key={type.value}
+                  variant={analysisType === type.value ? "default" : "outline"}
+                  size="sm"
+                  className="h-auto py-2 flex flex-col items-start"
+                  onClick={() => setAnalysisType(type.value)}
+                >
+                  <span className="font-medium">{type.label}</span>
+                  <span className="text-xs text-muted-foreground">{type.description}</span>
+                </Button>
+              ))}
+            </div>
+
+            {/* Upload Area */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className={`
+                border-2 border-dashed rounded-xl p-8 text-center cursor-pointer
+                transition-all duration-200 hover:border-primary/50 hover:bg-primary/5
+                ${previewUrl ? "border-primary/50" : "border-muted-foreground/30"}
+              `}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
               />
-              <p className="text-sm text-muted-foreground">Click to change image</p>
+              
+              {previewUrl ? (
+                <div className="space-y-3">
+                  <img
+                    src={previewUrl}
+                    alt="Chart preview"
+                    className="max-h-64 mx-auto rounded-lg shadow-lg"
+                  />
+                  <p className="text-sm text-muted-foreground">Click to change image</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Drop your chart image here</p>
+                    <p className="text-sm text-muted-foreground">or click to browse (max 5MB)</p>
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                <Upload className="h-8 w-8 text-primary" />
+
+            {/* Symbol and Timeframe Selection */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Symbol (optional)</Label>
+                <Select value={symbol} onValueChange={setSymbol}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select symbol" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SYMBOLS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <p className="font-medium">Drop your chart image here</p>
-                <p className="text-sm text-muted-foreground">or click to browse (max 5MB)</p>
+              <div className="space-y-2">
+                <Label>Timeframe (optional)</Label>
+                <Select value={timeframe} onValueChange={setTimeframe}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select timeframe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIMEFRAMES.map((tf) => (
+                      <SelectItem key={tf.value} value={tf.value}>
+                        {tf.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Symbol and Timeframe Selection */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Symbol (optional)</Label>
-            <Select value={symbol} onValueChange={setSymbol}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select symbol" />
-              </SelectTrigger>
-              <SelectContent>
-                {SYMBOLS.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Timeframe (optional)</Label>
-            <Select value={timeframe} onValueChange={setTimeframe}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select timeframe" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMEFRAMES.map((tf) => (
-                  <SelectItem key={tf.value} value={tf.value}>
-                    {tf.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                onClick={handleAnalyze}
+                disabled={!selectedFile || isUploading || isAnalyzing || (!isPremium && !dailyUsage?.canUpload)}
+                className="flex-1"
+                variant="gold"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : isAnalyzing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing with AI...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Analyze Chart
+                  </>
+                )}
+              </Button>
+              {selectedFile && (
+                <Button variant="outline" onClick={resetForm}>
+                  Clear
+                </Button>
+              )}
+            </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          <Button
-            onClick={handleAnalyze}
-            disabled={!selectedFile || isUploading || isAnalyzing || (!isPremium && !dailyUsage?.canUpload)}
-            className="flex-1"
-            variant="gold"
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
-              </>
-            ) : isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing with AI...
-              </>
+            {/* Analysis Result */}
+            {analysisResult && (
+              <div className="space-y-4 pt-4 border-t border-border/50">
+                {/* Quick Stats */}
+                {structuredResult && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className={`
+                      p-3 rounded-lg border text-center
+                      ${structuredResult.trend === "BULLISH" 
+                        ? "bg-success/10 border-success/30 text-success" 
+                        : structuredResult.trend === "BEARISH"
+                        ? "bg-destructive/10 border-destructive/30 text-destructive"
+                        : "bg-muted/30 border-muted"}
+                    `}>
+                      {structuredResult.trend === "BULLISH" ? (
+                        <TrendingUp className="h-5 w-5 mx-auto mb-1" />
+                      ) : structuredResult.trend === "BEARISH" ? (
+                        <TrendingDown className="h-5 w-5 mx-auto mb-1" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 mx-auto mb-1" />
+                      )}
+                      <p className="text-xs font-medium">{structuredResult.trend || "Analyzing..."}</p>
+                    </div>
+                    <div className={`
+                      p-3 rounded-lg border text-center
+                      ${structuredResult.recommendation === "BUY" 
+                        ? "bg-success/10 border-success/30 text-success" 
+                        : structuredResult.recommendation === "SELL"
+                        ? "bg-destructive/10 border-destructive/30 text-destructive"
+                        : "bg-warning/10 border-warning/30 text-warning"}
+                    `}>
+                      <Target className="h-5 w-5 mx-auto mb-1" />
+                      <p className="text-xs font-medium">{structuredResult.recommendation || "HOLD"}</p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-primary/10 border-primary/30 text-center">
+                      <Shield className="h-5 w-5 mx-auto mb-1 text-primary" />
+                      <p className="text-xs font-medium text-primary">
+                        {structuredResult.risk_level || "Medium"} Risk
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-secondary text-center">
+                      <BarChart3 className="h-5 w-5 mx-auto mb-1" />
+                      <p className="text-xs font-medium">
+                        {structuredResult.confidence || "75"}% Confidence
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Levels */}
+                {structuredResult?.entry_price && (
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+                      <p className="text-xs text-muted-foreground">Entry</p>
+                      <p className="font-mono font-bold text-primary">{structuredResult.entry_price}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-success/10 border border-success/30">
+                      <p className="text-xs text-muted-foreground">Take Profit</p>
+                      <p className="font-mono font-bold text-success">{structuredResult.take_profit || "TBD"}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+                      <p className="text-xs text-muted-foreground">Stop Loss</p>
+                      <p className="font-mono font-bold text-destructive">{structuredResult.stop_loss || "TBD"}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Full Analysis */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    AI Analysis Report
+                  </Label>
+                  <div className="p-4 rounded-lg bg-muted/30 border border-border/50 max-h-80 overflow-y-auto">
+                    <div className="prose prose-sm prose-invert max-w-none">
+                      <pre className="whitespace-pre-wrap text-sm font-sans text-foreground/90">
+                        {analysisResult}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Premium Upsell for Free Users */}
+            {!isPremium && !dailyUsage?.canUpload && (
+              <div className="p-4 rounded-lg bg-gradient-to-r from-warning/10 to-amber-500/10 border border-warning/30">
+                <div className="flex items-center gap-3">
+                  <Crown className="h-8 w-8 text-warning" />
+                  <div>
+                    <p className="font-semibold text-warning">Upgrade to Premium</p>
+                    <p className="text-sm text-muted-foreground">
+                      Get unlimited chart analyses, priority AI processing, and more!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-4">
+            {analysisHistory && analysisHistory.length > 0 ? (
+              <div className="space-y-3">
+                {analysisHistory.map((analysis: any) => (
+                  <div
+                    key={analysis.id}
+                    className="flex items-center gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => viewHistoricalAnalysis(analysis)}
+                  >
+                    {analysis.image_url && (
+                      <img
+                        src={analysis.image_url}
+                        alt="Chart"
+                        className="w-16 h-12 object-cover rounded"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">
+                        {analysis.symbol || "Chart Analysis"}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {new Date(analysis.created_at).toLocaleDateString()}
+                        {analysis.timeframe && <span>• {analysis.timeframe}</span>}
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="shrink-0">
+                      View
+                    </Badge>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Analyze Chart
-              </>
-            )}
-          </Button>
-          {selectedFile && (
-            <Button variant="outline" onClick={resetForm}>
-              Clear
-            </Button>
-          )}
-        </div>
-
-        {/* Analysis Result */}
-        {analysisResult && (
-          <div className="space-y-4 pt-4 border-t border-border/50">
-            {/* Quick Stats */}
-            {structuredResult && (
-              <div className="grid grid-cols-3 gap-3">
-                <div className={`
-                  p-3 rounded-lg border text-center
-                  ${structuredResult.trend === "BULLISH" 
-                    ? "bg-success/10 border-success/30 text-success" 
-                    : structuredResult.trend === "BEARISH"
-                    ? "bg-destructive/10 border-destructive/30 text-destructive"
-                    : "bg-muted/30 border-muted"}
-                `}>
-                  {structuredResult.trend === "BULLISH" ? (
-                    <TrendingUp className="h-5 w-5 mx-auto mb-1" />
-                  ) : structuredResult.trend === "BEARISH" ? (
-                    <TrendingDown className="h-5 w-5 mx-auto mb-1" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 mx-auto mb-1" />
-                  )}
-                  <p className="text-xs font-medium">{structuredResult.trend}</p>
-                </div>
-                <div className={`
-                  p-3 rounded-lg border text-center
-                  ${structuredResult.recommendation === "BUY" 
-                    ? "bg-success/10 border-success/30 text-success" 
-                    : structuredResult.recommendation === "SELL"
-                    ? "bg-destructive/10 border-destructive/30 text-destructive"
-                    : "bg-warning/10 border-warning/30 text-warning"}
-                `}>
-                  <CheckCircle className="h-5 w-5 mx-auto mb-1" />
-                  <p className="text-xs font-medium">{structuredResult.recommendation}</p>
-                </div>
-                <div className="p-3 rounded-lg border bg-primary/10 border-primary/30 text-center">
-                  <Sparkles className="h-5 w-5 mx-auto mb-1 text-primary" />
-                  <p className="text-xs font-medium text-primary">AI Analyzed</p>
-                </div>
+              <div className="text-center py-8 text-muted-foreground">
+                <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No analysis history yet</p>
+                <p className="text-sm">Upload your first chart to get started</p>
               </div>
             )}
-
-            {/* Full Analysis */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                AI Analysis Report
-              </Label>
-              <div className="p-4 rounded-lg bg-muted/30 border border-border/50 max-h-80 overflow-y-auto">
-                <div className="prose prose-sm prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap text-sm font-sans text-foreground/90">
-                    {analysisResult}
-                  </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Premium Upsell for Free Users */}
-        {!isPremium && !dailyUsage?.canUpload && (
-          <div className="p-4 rounded-lg bg-gradient-to-r from-warning/10 to-amber-500/10 border border-warning/30">
-            <div className="flex items-center gap-3">
-              <Crown className="h-8 w-8 text-warning" />
-              <div>
-                <p className="font-semibold text-warning">Upgrade to Premium</p>
-                <p className="text-sm text-muted-foreground">
-                  Get unlimited chart analyses, priority AI processing, and more!
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

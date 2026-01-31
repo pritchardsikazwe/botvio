@@ -18,6 +18,7 @@ export interface ManualSignal {
   reason: string | null;
   is_manual: boolean;
   posted_by: string | null;
+  expires_at: string | null;
 }
 
 interface CreateSignalInput {
@@ -31,6 +32,7 @@ interface CreateSignalInput {
   broker: string[];
   confidence?: number;
   reason?: string;
+  expires_at?: string;
 }
 
 export const useManualSignals = (filters?: {
@@ -59,8 +61,18 @@ export const useManualSignals = (filters?: {
 
       if (error) throw error;
 
-      // Filter by broker if specified
-      let signals = data as ManualSignal[];
+      // Filter by broker if specified and auto-expire signals
+      let signals = (data as ManualSignal[]).map(signal => {
+        // Check if signal should be auto-expired
+        if (signal.status === 'ACTIVE' && signal.expires_at) {
+          const expiresAt = new Date(signal.expires_at);
+          if (expiresAt < new Date()) {
+            return { ...signal, status: 'EXPIRED' };
+          }
+        }
+        return signal;
+      });
+
       if (filters?.broker && filters.broker !== "all") {
         signals = signals.filter(s => s.broker?.includes(filters.broker!));
       }
@@ -113,6 +125,7 @@ export const useCreateSignal = () => {
           posted_by: userData.user.id,
           status: "ACTIVE",
           strategy_name: "Manual Signal",
+          expires_at: input.expires_at || null,
         })
         .select()
         .single();

@@ -48,6 +48,7 @@ const STATUS_OPTIONS = [
   { value: "all", label: "All Status" },
   { value: "ACTIVE", label: "Active" },
   { value: "CLOSED", label: "Closed" },
+  { value: "EXPIRED", label: "Expired" },
 ];
 
 const Signals = () => {

@@ -29,10 +29,66 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Share2, Copy, Users, MousePointerClick, DollarSign, 
   TrendingUp, Wallet, Plus, ExternalLink, CheckCircle,
-  Gift, ArrowRight, MessageCircle, Send, Sparkles
+  Gift, ArrowRight, MessageCircle, Send, Sparkles, Link2
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+
+// Campaign Link Form Component
+const CampaignLinkForm = ({ onSuccess }: { onSuccess: () => void }) => {
+  const [linkType, setLinkType] = useState<"campaign" | "generic">("campaign");
+  const [utmCampaign, setUtmCampaign] = useState("");
+  const [utmSource, setUtmSource] = useState("");
+  const [utmMedium, setUtmMedium] = useState("");
+  const createLink = useCreateAffiliateLink();
+
+  const handleCreate = async () => {
+    await createLink.mutateAsync({
+      type: linkType,
+      utm_campaign: utmCampaign || undefined,
+      utm_source: utmSource || undefined,
+      utm_medium: utmMedium || undefined,
+    });
+    setUtmCampaign("");
+    setUtmSource("");
+    setUtmMedium("");
+    onSuccess();
+  };
+
+  return (
+    <div className="space-y-4 py-4">
+      <div className="space-y-2">
+        <Label>Campaign Name</Label>
+        <Input
+          placeholder="e.g., facebook-ads, youtube-video"
+          value={utmCampaign}
+          onChange={(e) => setUtmCampaign(e.target.value)}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Source (optional)</Label>
+          <Input
+            placeholder="e.g., facebook, twitter"
+            value={utmSource}
+            onChange={(e) => setUtmSource(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Medium (optional)</Label>
+          <Input
+            placeholder="e.g., social, email"
+            value={utmMedium}
+            onChange={(e) => setUtmMedium(e.target.value)}
+          />
+        </div>
+      </div>
+      <Button onClick={handleCreate} disabled={createLink.isPending} className="w-full">
+        {createLink.isPending ? "Creating..." : "Create Botvio Link"}
+      </Button>
+    </div>
+  );
+};
 
 // Partner affiliate links
 const PARTNER_LINKS = {
@@ -237,7 +293,7 @@ const Affiliate = () => {
           <CardContent className="py-6">
             <div className="flex flex-col md:flex-row items-center gap-4">
               <div className="flex-1 w-full">
-                <Label className="text-sm text-muted-foreground mb-2 block">Your Affiliate Link</Label>
+                <Label className="text-sm text-muted-foreground mb-2 block">Your Botvio Affiliate Link</Label>
                 <div className="flex gap-2">
                   <Input value={affiliateLink} readOnly className="font-mono text-sm" />
                   <Button variant="outline" onClick={() => copyToClipboard(affiliateLink)}>
@@ -256,6 +312,57 @@ const Affiliate = () => {
                   <Share2 className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
+            
+            {/* Campaign Links Section */}
+            <div className="mt-6 pt-6 border-t border-border">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Link2 className="h-4 w-4" />
+                    Campaign Links
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Create unique links for different campaigns</p>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Link
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create Campaign Link</DialogTitle>
+                      <DialogDescription>
+                        Generate a unique Botvio referral link for tracking different campaigns
+                      </DialogDescription>
+                    </DialogHeader>
+                    <CampaignLinkForm onSuccess={() => {}} />
+                  </DialogContent>
+                </Dialog>
+              </div>
+              
+              {/* Existing Links */}
+              {links && links.length > 0 && (
+                <div className="space-y-2">
+                  {links.slice(0, 5).map((link: any) => (
+                    <div key={link.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {baseUrl}/r/{link.code}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {link.utm_campaign || link.type} • {link.clicks || 0} clicks • {link.conversions || 0} conversions
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(`${baseUrl}/r/${link.code}`)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

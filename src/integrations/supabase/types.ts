@@ -1457,6 +1457,7 @@ export type Database = {
           created_at: string
           direction: string
           entry_price: number
+          expires_at: string | null
           id: string
           is_manual: boolean | null
           posted_by: string | null
@@ -1477,6 +1478,7 @@ export type Database = {
           created_at?: string
           direction: string
           entry_price: number
+          expires_at?: string | null
           id?: string
           is_manual?: boolean | null
           posted_by?: string | null
@@ -1497,6 +1499,7 @@ export type Database = {
           created_at?: string
           direction?: string
           entry_price?: number
+          expires_at?: string | null
           id?: string
           is_manual?: boolean | null
           posted_by?: string | null
@@ -1709,6 +1712,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_expire_signals: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
