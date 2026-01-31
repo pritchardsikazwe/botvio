@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.bot-worker]
 verify_jwt = false
+
+[functions.deriv-verify-token]
+verify_jwt = false
+
+[functions.deriv-oauth-exchange]
+verify_jwt = false
+
+[functions.deriv-health-check]
+verify_jwt = false
