@@ -104,7 +104,7 @@ const COMMUNITY_LINKS = {
 
 const Affiliate = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { data: profile, isLoading: profileLoading } = useAffiliateProfile();
   const createProfile = useCreateAffiliateProfile();
@@ -183,6 +183,22 @@ const Affiliate = () => {
     setShowMethodDialog(false);
     setMethodForm({ type: "crypto", crypto_network: "", crypto_address: "", mobile_network: "", mobile_number: "" });
   };
+
+  // Redirect admins away from affiliate page - they manage affiliates, not become one
+  if (isAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Admin Access</h1>
+          <p className="text-muted-foreground mb-6">
+            As an admin, you manage affiliates from the Admin Panel. You cannot be an affiliate yourself.
+          </p>
+          <Button onClick={() => navigate("/admin")}>Go to Admin Panel</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
