@@ -115,6 +115,7 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
   const [selectedBrokers, setSelectedBrokers] = useState<string[]>(["deriv", "weltrade", "exness"]);
   const [confidence, setConfidence] = useState("");
   const [reason, setReason] = useState("");
+  const [expiresIn, setExpiresIn] = useState("24"); // Hours until expiration
 
   const createSignal = useCreateSignal();
 
@@ -136,6 +137,9 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
       return;
     }
 
+    // Calculate expiration time
+    const expiresAt = expiresIn ? new Date(Date.now() + parseInt(expiresIn) * 60 * 60 * 1000).toISOString() : undefined;
+
     await createSignal.mutateAsync({
       symbol,
       direction,
@@ -147,6 +151,7 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
       broker: selectedBrokers,
       confidence: confidence ? parseInt(confidence) : undefined,
       reason: reason || undefined,
+      expires_at: expiresAt,
     });
 
     // Reset form
@@ -156,6 +161,7 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
     setTakeProfit("");
     setConfidence("");
     setReason("");
+    setExpiresIn("24");
     
     onSuccess?.();
   };
@@ -279,8 +285,8 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
             </div>
           </div>
 
-          {/* Timeframe & Confidence */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Timeframe, Confidence & Expiration */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Timeframe</Label>
               <Select value={timeframe} onValueChange={setTimeframe}>
@@ -304,6 +310,25 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
                 value={confidence}
                 onChange={(e) => setConfidence(e.target.value)}
               />
+            </div>
+            <div>
+              <Label>Expires In (hours)</Label>
+              <Select value={expiresIn} onValueChange={setExpiresIn}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select expiration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 Hour</SelectItem>
+                  <SelectItem value="2">2 Hours</SelectItem>
+                  <SelectItem value="4">4 Hours</SelectItem>
+                  <SelectItem value="8">8 Hours</SelectItem>
+                  <SelectItem value="12">12 Hours</SelectItem>
+                  <SelectItem value="24">24 Hours</SelectItem>
+                  <SelectItem value="48">48 Hours</SelectItem>
+                  <SelectItem value="72">72 Hours</SelectItem>
+                  <SelectItem value="">No Expiration</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
