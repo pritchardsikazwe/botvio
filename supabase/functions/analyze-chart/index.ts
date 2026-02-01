@@ -13,14 +13,39 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, symbol, timeframe, userId, isAnonymous } = await req.json();
-
-    if (!imageUrl || !userId) {
+    const authHeader = req.headers.get("Authorization") || "";
+    if (!authHeader.startsWith("Bearer ")) {
       return new Response(
-        JSON.stringify({ error: "Image URL and user ID are required" }),
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { imageUrl, symbol, timeframe, analysisType } = await req.json();
+
+    if (!imageUrl) {
+      return new Response(
+        JSON.stringify({ error: "Image URL is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Validate caller JWT and extract user id
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const userId = claimsData.claims.sub;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -134,25 +159,21 @@ Provide actionable trading advice in a structured format.`;
       analyzed_at: new Date().toISOString(),
     };
 
-    // Save analysis to database (only for authenticated users)
-    if (!isAnonymous && userId && !userId.startsWith('anonymous_')) {
-      const { data: savedAnalysis, error: saveError } = await supabase
-        .from("chart_analyses")
-        .insert({
-          user_id: userId,
-          image_url: imageUrl,
-          symbol: symbol || null,
-          timeframe: timeframe || null,
-          analysis_result: analysisResult,
-          ai_response: analysisText,
-          is_premium_analysis: isPremium,
-        })
-        .select()
-        .single();
+    // Save analysis to database
+    const { error: saveError } = await supabase
+      .from("chart_analyses")
+      .insert({
+        user_id: userId,
+        image_url: imageUrl,
+        symbol: symbol || null,
+        timeframe: timeframe || null,
+        analysis_result: analysisResult,
+        ai_response: analysisText,
+        is_premium_analysis: isPremium,
+      });
 
-      if (saveError) {
-        console.error("Error saving analysis:", saveError);
-      }
+    if (saveError) {
+      console.error("Error saving analysis:", saveError);
     }
 
     return new Response(
