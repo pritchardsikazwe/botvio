@@ -775,6 +775,45 @@ export type Database = {
         }
         Relationships: []
       }
+      market_sessions: {
+        Row: {
+          close_time: string | null
+          created_at: string
+          id: string
+          is_24_7: boolean
+          is_active: boolean
+          market_name: string
+          market_type: string
+          open_days: number[]
+          open_time: string | null
+          timezone: string
+        }
+        Insert: {
+          close_time?: string | null
+          created_at?: string
+          id?: string
+          is_24_7?: boolean
+          is_active?: boolean
+          market_name: string
+          market_type: string
+          open_days?: number[]
+          open_time?: string | null
+          timezone?: string
+        }
+        Update: {
+          close_time?: string | null
+          created_at?: string
+          id?: string
+          is_24_7?: boolean
+          is_active?: boolean
+          market_name?: string
+          market_type?: string
+          open_days?: number[]
+          open_time?: string | null
+          timezone?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1242,6 +1281,117 @@ export type Database = {
         }
         Relationships: []
       }
+      product_purchases: {
+        Row: {
+          affiliate_code: string | null
+          id: string
+          order_id: string | null
+          product_id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          affiliate_code?: string | null
+          id?: string
+          order_id?: string | null
+          product_id: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          affiliate_code?: string | null
+          id?: string
+          order_id?: string | null
+          product_id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_purchases_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          bot_id: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_featured: boolean
+          metadata: Json | null
+          name: string
+          price_usd: number
+          short_description: string | null
+          slug: string
+          strategy_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          bot_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          metadata?: Json | null
+          name: string
+          price_usd?: number
+          short_description?: string | null
+          slug: string
+          strategy_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          bot_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          metadata?: Json | null
+          name?: string
+          price_usd?: number
+          short_description?: string | null
+          slug?: string
+          strategy_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_bot_id_fkey"
+            columns: ["bot_id"]
+            isOneToOne: false
+            referencedRelation: "bots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1564,6 +1714,47 @@ export type Database = {
           },
         ]
       }
+      signal_audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          old_status: string | null
+          performed_by: string | null
+          signal_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          performed_by?: string | null
+          signal_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          performed_by?: string | null
+          signal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_audit_logs_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strategies: {
         Row: {
           config_json: Json | null
@@ -1726,6 +1917,66 @@ export type Database = {
           },
         ]
       }
+      trade_execution_logs: {
+        Row: {
+          contract_id: string | null
+          created_at: string
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          request_payload: Json | null
+          request_type: string
+          response_payload: Json | null
+          signal_id: string | null
+          status: string
+          trading_account_id: string | null
+          user_id: string
+        }
+        Insert: {
+          contract_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          request_payload?: Json | null
+          request_type: string
+          response_payload?: Json | null
+          signal_id?: string | null
+          status: string
+          trading_account_id?: string | null
+          user_id: string
+        }
+        Update: {
+          contract_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          request_payload?: Json | null
+          request_type?: string
+          response_payload?: Json | null
+          signal_id?: string | null
+          status?: string
+          trading_account_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_execution_logs_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_execution_logs_trading_account_id_fkey"
+            columns: ["trading_account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trading_accounts: {
         Row: {
           api_key_encrypted: string
@@ -1785,6 +2036,8 @@ export type Database = {
       }
       trading_signals: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           broker: string[] | null
           category: string | null
           confidence: number | null
@@ -1796,6 +2049,7 @@ export type Database = {
           is_manual: boolean | null
           posted_by: string | null
           reason: string | null
+          rejection_reason: string | null
           status: string | null
           stop_loss: number | null
           strategy_name: string
@@ -1806,6 +2060,8 @@ export type Database = {
           zone_min: number | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           broker?: string[] | null
           category?: string | null
           confidence?: number | null
@@ -1817,6 +2073,7 @@ export type Database = {
           is_manual?: boolean | null
           posted_by?: string | null
           reason?: string | null
+          rejection_reason?: string | null
           status?: string | null
           stop_loss?: number | null
           strategy_name?: string
@@ -1827,6 +2084,8 @@ export type Database = {
           zone_min?: number | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           broker?: string[] | null
           category?: string | null
           confidence?: number | null
@@ -1838,6 +2097,7 @@ export type Database = {
           is_manual?: boolean | null
           posted_by?: string | null
           reason?: string | null
+          rejection_reason?: string | null
           status?: string | null
           stop_loss?: number | null
           strategy_name?: string
@@ -1951,30 +2211,51 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          admin_kill_switch: boolean | null
+          admin_kill_switch_reason: string | null
+          auto_trading_consent_at: string | null
+          auto_trading_enabled: boolean | null
           created_at: string
           default_pair: string | null
           default_timeframe: string | null
           id: string
+          kill_switch: boolean | null
+          max_daily_loss_usd: number | null
+          max_daily_trades: number | null
           notifications_enabled: boolean | null
           risk_per_trade: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_kill_switch?: boolean | null
+          admin_kill_switch_reason?: string | null
+          auto_trading_consent_at?: string | null
+          auto_trading_enabled?: boolean | null
           created_at?: string
           default_pair?: string | null
           default_timeframe?: string | null
           id?: string
+          kill_switch?: boolean | null
+          max_daily_loss_usd?: number | null
+          max_daily_trades?: number | null
           notifications_enabled?: boolean | null
           risk_per_trade?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_kill_switch?: boolean | null
+          admin_kill_switch_reason?: string | null
+          auto_trading_consent_at?: string | null
+          auto_trading_enabled?: boolean | null
           created_at?: string
           default_pair?: string | null
           default_timeframe?: string | null
           id?: string
+          kill_switch?: boolean | null
+          max_daily_loss_usd?: number | null
+          max_daily_trades?: number | null
           notifications_enabled?: boolean | null
           risk_per_trade?: number | null
           updated_at?: string

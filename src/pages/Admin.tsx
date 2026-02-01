@@ -33,7 +33,9 @@ import {
   Signal,
   RefreshCw,
   FileText,
-  Settings
+  Settings,
+  Package,
+  ClipboardCheck
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,6 +45,8 @@ import { useAdminPaymentRequests, useProcessPaymentRequest } from "@/hooks/useAd
 import { SubscriptionRequestsTab } from "@/components/admin/SubscriptionRequestsTab";
 import { AdminDerivConnectionsTab } from "@/components/admin/AdminDerivConnectionsTab";
 import { AdminPricingPlansTab } from "@/components/admin/AdminPricingPlansTab";
+import { SignalApprovalsTab } from "@/components/admin/SignalApprovalsTab";
+import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab";
 
 interface Provider {
   id: string;
@@ -911,11 +915,29 @@ const Admin = () => {
               <Settings className="w-4 h-4" />
               Pricing Plans
             </TabsTrigger>
+            <TabsTrigger value="signal_approvals" className="flex items-center gap-2">
+              <ClipboardCheck className="w-4 h-4" />
+              Signal Approvals
+            </TabsTrigger>
+            <TabsTrigger value="products" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Products
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
           <TabsContent value="signals">
             <SignalsManagement />
+          </TabsContent>
+
+          {/* Signal Approvals Tab */}
+          <TabsContent value="signal_approvals">
+            <SignalApprovalsTab />
+          </TabsContent>
+
+          {/* Products Tab */}
+          <TabsContent value="products">
+            <ProductsManagementTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}
