@@ -12,6 +12,7 @@ import { BotvioSniperPanel } from "@/components/trading/BotvioSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
 import { QuickTrade } from "@/components/trading/QuickTrade";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
+import { ChartUpload } from "@/components/signals/ChartUpload";
 import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
 import { SupportResistance, MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +20,7 @@ import { useDeriv } from "@/contexts/DerivContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package, HelpCircle } from "lucide-react";
+import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package, HelpCircle, MessageCircle, ExternalLink } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -198,6 +199,76 @@ const Index = () => {
           <div className="lg:col-span-3 space-y-6">
             <SupportResistanceLevels levels={srLevels} currentPrice={marketData.price} />
             <PerformancePanel />
+          </div>
+        </div>
+
+        {/* AI Chart Analysis Section */}
+        <div className="mt-8">
+          <ChartUpload />
+        </div>
+
+        {/* Affiliate & Community Links */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <ExternalLink className="h-5 w-5 text-primary" />
+              Quick Links
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Deriv Affiliate Link */}
+            <a 
+              href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="glass-card hover:border-primary/50 transition-all hover:scale-[1.02] cursor-pointer">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/30">
+                      <TrendingUp className="h-6 w-6 text-red-500" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Open Deriv Account</CardTitle>
+                      <CardDescription>Trade binary options & CFDs with Deriv</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Badge variant="outline" className="text-xs">
+                    Get started in minutes →
+                  </Badge>
+                </CardContent>
+              </Card>
+            </a>
+
+            {/* WhatsApp Community Link */}
+            <a 
+              href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="glass-card hover:border-success/50 transition-all hover:scale-[1.02] cursor-pointer">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-success/20 to-green-600/20 border border-success/30">
+                      <MessageCircle className="h-6 w-6 text-success" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Join WhatsApp Community</CardTitle>
+                      <CardDescription>Get signals, tips & connect with traders</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Badge variant="outline" className="text-xs text-success border-success/30">
+                    Join our trading group →
+                  </Badge>
+                </CardContent>
+              </Card>
+            </a>
           </div>
         </div>
 

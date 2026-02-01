@@ -80,23 +80,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const [structuredResult, setStructuredResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("upload");
 
-  // Check daily usage for non-premium users
-  const { data: dailyUsage } = useQuery({
-    queryKey: ["chart-usage", user?.id],
-    queryFn: async () => {
-      if (!user || isPremium) return { count: 0, canUpload: true };
-      
-      const today = new Date().toISOString().split("T")[0];
-      const { count } = await supabase
-        .from("chart_analyses")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .gte("created_at", `${today}T00:00:00Z`);
-
-      return { count: count || 0, canUpload: (count || 0) < 1 };
-    },
-    enabled: !!user,
-  });
+  // No limit on chart uploads - users can analyze unlimited charts
 
   // Fetch analysis history
   const { data: analysisHistory } = useQuery({
@@ -146,10 +130,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       return;
     }
 
-    if (!isPremium && !dailyUsage?.canUpload) {
-      toast.error("You've reached your daily limit. Upgrade to Premium for unlimited analyses!");
-      return;
-    }
+    // No limit check - unlimited uploads for all users
 
     try {
       setIsUploading(true);
@@ -256,11 +237,9 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
               </CardDescription>
             </div>
           </div>
-          {!isPremium && (
-            <Badge variant="outline" className="text-xs">
-              {dailyUsage?.canUpload ? "1 free analysis today" : "Limit reached"}
-            </Badge>
-          )}
+          <Badge variant="outline" className="text-xs text-success border-success/30">
+            Unlimited analyses
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -371,7 +350,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             <div className="flex gap-3">
               <Button
                 onClick={handleAnalyze}
-                disabled={!selectedFile || isUploading || isAnalyzing || (!isPremium && !dailyUsage?.canUpload)}
+                disabled={!selectedFile || isUploading || isAnalyzing}
                 className="flex-1"
                 variant="gold"
               >
@@ -483,20 +462,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
               </div>
             )}
 
-            {/* Premium Upsell for Free Users */}
-            {!isPremium && !dailyUsage?.canUpload && (
-              <div className="p-4 rounded-lg bg-gradient-to-r from-warning/10 to-amber-500/10 border border-warning/30">
-                <div className="flex items-center gap-3">
-                  <Crown className="h-8 w-8 text-warning" />
-                  <div>
-                    <p className="font-semibold text-warning">Upgrade to Premium</p>
-                    <p className="text-sm text-muted-foreground">
-                      Get unlimited chart analyses, priority AI processing, and more!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* No limit message removed - unlimited uploads for all users */}
           </TabsContent>
 
           <TabsContent value="history" className="mt-4">
