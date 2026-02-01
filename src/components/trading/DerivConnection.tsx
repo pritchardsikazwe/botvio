@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   Key,
@@ -23,8 +23,11 @@ import {
   Loader2,
   TestTube,
   DollarSign,
+  ExternalLink,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
+import { buildDerivOAuthUrl } from "@/config/derivEnv";
 
 // Deriv symbols for dropdown
 const DERIV_SYMBOLS = [
@@ -65,7 +68,8 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [symbol, setSymbol] = useState("R_100");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [isDemoAccount, setIsDemoAccount] = useState(true); // Default to demo for safety
+  const [isDemoAccount, setIsDemoAccount] = useState(true);
+  const [connectionMethod, setConnectionMethod] = useState<"oauth" | "token">("oauth");
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (line: string) => {
@@ -90,11 +94,17 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   // Validate token format (basic check)
   const isValidToken = (t: string) => {
     const trimmed = t.trim();
-    // Deriv tokens are typically 15+ alphanumeric characters
     return trimmed.length >= 10 && /^[a-zA-Z0-9]+$/.test(trimmed);
   };
 
-  const handleConnect = async () => {
+  const handleOAuthConnect = () => {
+    const oauthUrl = buildDerivOAuthUrl();
+    addLog("🔄 Opening Deriv login...");
+    window.open(oauthUrl, "_blank", "width=600,height=700");
+    toast.info("Complete the login in the popup window");
+  };
+
+  const handleTokenConnect = async () => {
     const trimmedToken = token.trim();
     
     if (!trimmedToken) {
@@ -175,6 +185,9 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     };
   }, [lastTick]);
 
+  // Determine if connected account is demo or real based on loginid
+  const isConnectedDemo = balance?.loginid?.startsWith("VRTC");
+
   return (
     <div className="glass-card p-5 space-y-4 animate-slide-up">
       {/* Header */}
@@ -200,13 +213,13 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
             <Badge
               variant="outline"
               className={cn(
-                "text-xs",
-                isDemoAccount
+                "text-xs font-medium",
+                isConnectedDemo
                   ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
                   : "bg-success/10 text-success border-success/20"
               )}
             >
-              {isDemoAccount ? "Demo" : "Real"}
+              {isConnectedDemo ? "🧪 Demo" : "💰 Real"}
             </Badge>
           )}
           <Badge
@@ -229,9 +242,14 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       {authorized && balanceDisplay ? (
         <div className="space-y-4">
           {/* Balance Card */}
-          <div className="p-4 bg-gradient-to-r from-success/10 to-primary/10 rounded-xl border border-success/20">
+          <div className={cn(
+            "p-4 rounded-xl border",
+            isConnectedDemo 
+              ? "bg-gradient-to-r from-blue-500/10 to-primary/10 border-blue-500/20"
+              : "bg-gradient-to-r from-success/10 to-primary/10 border-success/20"
+          )}>
             <div className="flex items-center gap-3 mb-2">
-              <Wallet className="w-5 h-5 text-success" />
+              <Wallet className={cn("w-5 h-5", isConnectedDemo ? "text-blue-500" : "text-success")} />
               <span className="text-sm text-muted-foreground">Account Balance</span>
             </div>
             <div className="flex items-baseline gap-2">
@@ -341,125 +359,174 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       ) : (
         /* Not Authorized View */
         <div className="space-y-4">
-          {/* Account Type Toggle */}
-          <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border border-border">
-            <div className="flex items-center gap-2">
-              {isDemoAccount ? (
-                <TestTube className="w-4 h-4 text-blue-500" />
-              ) : (
-                <DollarSign className="w-4 h-4 text-success" />
+          {/* Account Type Toggle - Clearer visual */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setIsDemoAccount(true)}
+              className={cn(
+                "flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all",
+                isDemoAccount
+                  ? "bg-blue-500/10 border-blue-500 text-blue-500"
+                  : "bg-secondary/30 border-border text-muted-foreground hover:border-blue-500/50"
               )}
-              <div>
-                <Label htmlFor="account-type" className="text-sm font-medium">
-                  {isDemoAccount ? "Demo Account" : "Real Account"}
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {isDemoAccount 
-                    ? "Practice with virtual funds" 
-                    : "Trade with real money"}
-                </p>
-              </div>
-            </div>
-            <Switch
-              id="account-type"
-              checked={!isDemoAccount}
-              onCheckedChange={(checked) => setIsDemoAccount(!checked)}
-            />
+            >
+              <TestTube className="w-4 h-4" />
+              <span className="font-medium">Demo</span>
+            </button>
+            <button
+              onClick={() => setIsDemoAccount(false)}
+              className={cn(
+                "flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all",
+                !isDemoAccount
+                  ? "bg-success/10 border-success text-success"
+                  : "bg-secondary/30 border-border text-muted-foreground hover:border-success/50"
+              )}
+            >
+              <DollarSign className="w-4 h-4" />
+              <span className="font-medium">Real</span>
+            </button>
           </div>
 
-          {/* Demo Account Notice */}
-          {isDemoAccount && (
+          {/* Account Type Info */}
+          {isDemoAccount ? (
             <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
               <TestTube className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
               <div className="text-xs text-blue-500">
-                <p className="font-medium">Demo Mode Active</p>
-                <p className="text-blue-400">You're using virtual funds. Perfect for learning and testing strategies without risk.</p>
+                <p className="font-medium">Demo Mode</p>
+                <p className="text-blue-400">Practice with virtual $10,000 USD. No risk!</p>
               </div>
             </div>
-          )}
-
-          {/* Real Account Warning */}
-          {!isDemoAccount && (
+          ) : (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
               <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
               <div className="text-xs text-destructive">
                 <p className="font-medium">Real Money Trading</p>
-                <p>You will be trading with real funds. Losses are real. Trade responsibly.</p>
+                <p>Profits and losses are real. Trade responsibly.</p>
               </div>
             </div>
           )}
 
-          {/* Token Input */}
-          <div className="relative">
-            <Input
-              type={showToken ? "text" : "password"}
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder={isDemoAccount ? "Paste your Demo API token..." : "Paste your Real API token..."}
-              className="pr-10 bg-secondary/50 border-border focus:border-primary"
-              disabled={loading}
-            />
-            <button
-              type="button"
-              onClick={() => setShowToken(!showToken)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
+          {/* Connection Method Tabs */}
+          <Tabs value={connectionMethod} onValueChange={(v) => setConnectionMethod(v as "oauth" | "token")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="oauth" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Login with Deriv
+              </TabsTrigger>
+              <TabsTrigger value="token" className="flex items-center gap-2">
+                <Key className="h-4 w-4" />
+                API Token
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Error Display */}
-          {error && (
-            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-              <p className="text-xs text-destructive">{error}</p>
-            </div>
-          )}
-
-          {/* Instructions */}
-          <div className="flex items-start gap-2 p-3 bg-warning/5 border border-warning/20 rounded-lg">
-            <AlertCircle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-            <div className="text-xs text-muted-foreground">
-              <p className="font-medium mb-1">Get your {isDemoAccount ? "Demo" : "Real"} API token:</p>
-              <ol className="list-decimal list-inside space-y-0.5">
-                <li>Log in to <a href="https://deriv.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Deriv.com</a></li>
-                <li>Switch to your <strong>{isDemoAccount ? "Demo" : "Real"}</strong> account</li>
-                <li>Go to Settings → API Token</li>
-                <li>Create token with <strong>Trade</strong> permission</li>
-              </ol>
-              {isDemoAccount && (
-                <p className="mt-2 text-primary">
-                  💡 New to Deriv? <a href="https://deriv.com" target="_blank" rel="noopener noreferrer" className="underline">Create a free demo account</a> to get started!
+            {/* OAuth Login Tab */}
+            <TabsContent value="oauth" className="space-y-4 mt-4">
+              <div className="text-center space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Login securely with your Deriv account. No token needed!
                 </p>
+                <Button
+                  onClick={handleOAuthConnect}
+                  disabled={loading}
+                  className="w-full"
+                  variant="gold"
+                  size="lg"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Login with Deriv
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-2">Don't have an account?</p>
+                <a
+                  href="https://deriv.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline text-sm inline-flex items-center gap-1"
+                >
+                  Create a free Deriv account <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </TabsContent>
+
+            {/* Token Input Tab */}
+            <TabsContent value="token" className="space-y-4 mt-4">
+              <div className="relative">
+                <Input
+                  type={showToken ? "text" : "password"}
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  placeholder={isDemoAccount ? "Paste your Demo API token..." : "Paste your Real API token..."}
+                  className="pr-10 bg-secondary/50 border-border focus:border-primary"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowToken(!showToken)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Error Display */}
+              {error && (
+                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+                  <p className="text-xs text-destructive">{error}</p>
+                </div>
               )}
-            </div>
-          </div>
+
+              {/* Instructions */}
+              <div className="flex items-start gap-2 p-3 bg-warning/5 border border-warning/20 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
+                <div className="text-xs text-muted-foreground">
+                  <p className="font-medium mb-1">Get your API token:</p>
+                  <ol className="list-decimal list-inside space-y-0.5">
+                    <li>Log in to <a href="https://deriv.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Deriv.com</a></li>
+                    <li>Go to Settings → API Token</li>
+                    <li>Create token with <strong>Trade</strong> permission</li>
+                  </ol>
+                </div>
+              </div>
+
+              {/* Connect Button */}
+              <Button
+                onClick={handleTokenConnect}
+                disabled={!token.trim() || loading}
+                className="w-full"
+                variant="gold"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Connect with Token
+                  </>
+                )}
+              </Button>
+            </TabsContent>
+          </Tabs>
 
           {/* Supported Markets */}
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground pt-2 border-t border-border/50">
             <p className="font-medium mb-1">Supported markets:</p>
             <p>Synthetic Indices, Forex, Gold (XAUUSD), Crypto, Boom/Crash</p>
           </div>
-
-          {/* Connect Button */}
-          <Button
-            onClick={handleConnect}
-            disabled={!token.trim() || loading}
-            className="w-full"
-            variant="gold"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Connecting...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Connect to Deriv
-              </>
-            )}
-          </Button>
 
           {/* Logs (minimal in disconnected state) */}
           {logs.length > 0 && (

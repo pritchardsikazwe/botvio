@@ -12,14 +12,14 @@ import { BotvioSniperPanel } from "@/components/trading/BotvioSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
 import { QuickTrade } from "@/components/trading/QuickTrade";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
+import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
 import { SupportResistance, MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package } from "lucide-react";
+import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package, HelpCircle } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -177,6 +177,7 @@ const Index = () => {
             
             <QuickTrade symbol={selectedPair} />
             <StrategyPanel />
+            <TradingHelpPanel />
           </div>
 
           {/* Main Content */}
@@ -284,67 +285,11 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Onboarding Dialog */}
-      <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-        <DialogContent className="glass-card border-border sm:max-w-lg">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Target className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl">Welcome to Botvio!</DialogTitle>
-                <DialogDescription>AI Trading Platform</DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Botvio Sniper is a precise trading strategy that combines:
-            </p>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="text-success">✓</span>
-                Support & Resistance zone detection
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-success">✓</span>
-                Wick rejection analysis for sniper entries
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-success">✓</span>
-                EMA 20 trend confirmation filter
-              </li>
-            </ul>
-
-            <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg">
-              <AlertTriangle className="w-4 h-4 text-warning mt-0.5" />
-              <p className="text-xs text-muted-foreground">
-                Trading involves risk. Past performance does not guarantee future results. 
-                Only trade with money you can afford to lose.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-3 mt-4">
-            <Button 
-              variant="gold" 
-              className="flex-1"
-              onClick={() => {
-                handleCloseOnboarding();
-                navigate('/learn');
-              }}
-            >
-              <GraduationCap className="w-4 h-4 mr-2" />
-              View Full Training
-            </Button>
-            <Button variant="outline" onClick={handleCloseOnboarding}>
-              Start Trading
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Trading Guide Onboarding */}
+      <TradingGuide 
+        showOnboarding={showOnboarding} 
+        onCloseOnboarding={handleCloseOnboarding} 
+      />
 
       {/* Disclaimer Footer */}
       <footer className="border-t border-border/50 mt-8 py-6 px-4">

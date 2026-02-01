@@ -2,13 +2,11 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePricingPlans, useMySubscription } from "@/hooks/useBotvio";
 import { useTrialStatus, useActivateTrial, usePaymentRequests, useCreatePaymentRequest, useUploadPaymentProof } from "@/hooks/useBilling";
-import { useMySubscriptionRequests, useCreateSubscriptionRequest } from "@/hooks/useSubscriptionRequests";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Header } from "@/components/trading/Header";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { useNavigate, Link } from "react-router-dom";
-import { Check, Zap, Crown, Rocket, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle, Sparkles, Shield, TrendingUp } from "lucide-react";
+import { Check, Crown, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle, Sparkles, Shield, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 const Billing = () => {
@@ -26,10 +24,8 @@ const Billing = () => {
   const { data: mySubscription, isLoading: subLoading } = useMySubscription();
   const { data: trialStatus } = useTrialStatus();
   const { data: paymentRequests } = usePaymentRequests();
-  const { data: subscriptionRequests } = useMySubscriptionRequests();
   const activateTrial = useActivateTrial();
   const createPaymentRequest = useCreatePaymentRequest();
-  const createSubscriptionRequest = useCreateSubscriptionRequest();
   const uploadProof = useUploadPaymentProof();
   
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
@@ -39,9 +35,9 @@ const Billing = () => {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const currentPlanCode = mySubscription?.pricing_plan?.code || "starter";
+  const currentPlanCode = mySubscription?.pricing_plan?.code || "trial";
 
-  // Redirect admins to admin panel - they shouldn't see billing/upgrade UI
+  // Redirect admins to admin panel
   if (isAdmin) {
     return (
       <div className="min-h-screen bg-background">
@@ -49,7 +45,7 @@ const Billing = () => {
         <div className="container mx-auto px-4 py-12 text-center">
           <h1 className="text-2xl font-bold mb-4">Admin Access</h1>
           <p className="text-muted-foreground mb-6">
-            As an admin, you have full access to the platform. Subscription plans are for regular users.
+            As an admin, you have full access to the platform.
           </p>
           <Button onClick={() => navigate("/admin")}>Go to Admin Panel</Button>
         </div>
@@ -69,18 +65,19 @@ const Billing = () => {
     );
   }
 
-  const handleUpgrade = (plan: any) => {
-    if (plan.price_usd === 0) {
-      toast.info("You're already on the free plan!");
-      return;
-    }
+  const handleActivateTrial = () => {
+    activateTrial.mutate();
+  };
+
+  const handleUpgradeToVIP = (plan: any) => {
     setSelectedPlan(plan);
     setShowPaymentModal(true);
   };
 
-  const handleOfflinePayment = (plan: any) => {
-    setSelectedPlan(plan);
-    setShowOfflineModal(true);
+  const handlePaymentInitiated = (method: string, details: any) => {
+    console.log("Payment initiated:", method, details);
+    toast.success("Payment initiated! You'll receive confirmation shortly.");
+    setShowPaymentModal(false);
   };
 
   const handleSubmitOfflinePayment = async () => {
@@ -114,126 +111,8 @@ const Billing = () => {
     }
   };
 
-  const handlePaymentInitiated = (method: string, details: any) => {
-    console.log("Payment initiated:", method, details);
-    toast.success("Payment initiated! You'll receive confirmation shortly.");
-    setShowPaymentModal(false);
-  };
-
-  const handleActivateTrial = () => {
-    activateTrial.mutate();
-  };
-
-  const getPlanIcon = (code: string) => {
-    switch (code) {
-      case "starter":
-        return <Zap className="h-6 w-6" />;
-      case "basic":
-        return <Shield className="h-6 w-6" />;
-      case "standard":
-        return <TrendingUp className="h-6 w-6" />;
-      case "pro":
-        return <Rocket className="h-6 w-6" />;
-      case "elite":
-        return <Crown className="h-6 w-6" />;
-      case "affiliate_partner":
-        return <Sparkles className="h-6 w-6" />;
-      default:
-        return <Zap className="h-6 w-6" />;
-    }
-  };
-
-  const getPlanColor = (code: string) => {
-    switch (code) {
-      case "starter":
-        return "from-gray-500 to-gray-600";
-      case "basic":
-        return "from-green-500 to-green-600";
-      case "standard":
-        return "from-blue-500 to-blue-600";
-      case "pro":
-        return "from-purple-500 to-purple-600";
-      case "elite":
-        return "from-amber-500 to-amber-600";
-      case "affiliate_partner":
-        return "from-pink-500 to-pink-600";
-      default:
-        return "from-gray-500 to-gray-600";
-    }
-  };
-
-  const getPlanDuration = (code: string) => {
-    if (code === "starter") return "Free";
-    return "30 days";
-  };
-
-  const getBotCount = (code: string) => {
-    switch (code) {
-      case "starter": return "1 bot";
-      case "basic": return "2 bots";
-      case "standard": return "3 bots";
-      case "pro": return "5 bots";
-      case "elite": return "All bots";
-      case "affiliate_partner": return "10 bots + Affiliate perks";
-      default: return "1 bot";
-    }
-  };
-
-  const getPlanFeatures = (plan: any) => {
-    const features = [];
-    
-    features.push({
-      label: `${plan.max_accounts >= 999 ? "Unlimited" : plan.max_accounts} connected accounts`,
-      icon: <Users className="h-4 w-4" />,
-      enabled: true,
-    });
-    
-    features.push({
-      label: getBotCount(plan.code),
-      icon: <Bot className="h-4 w-4" />,
-      enabled: true,
-    });
-    
-    features.push({
-      label: "Copy trading",
-      icon: <Copy className="h-4 w-4" />,
-      enabled: plan.allow_copy_trading,
-    });
-    
-    features.push({
-      label: "Premium bots",
-      icon: <Star className="h-4 w-4" />,
-      enabled: plan.allow_premium_bots,
-    });
-    
-    features.push({
-      label: "Become a signal provider",
-      icon: <Crown className="h-4 w-4" />,
-      enabled: plan.allow_provider_listing,
-    });
-    
-    return features;
-  };
-
-  // Check if user has a pending subscription request
-  const hasPendingRequest = subscriptionRequests?.some(r => r.status === "pending_approval");
-
-  const handleUpgradeRequest = async (plan: any) => {
-    if (hasPendingRequest) {
-      toast.error("You already have a pending upgrade request. Please wait for admin approval.");
-      return;
-    }
-    
-    try {
-      await createSubscriptionRequest.mutateAsync({
-        plan_id: plan.id,
-        amount_usd: plan.price_usd,
-        current_plan_id: mySubscription?.pricing_plan_id,
-      });
-    } catch (error) {
-      // Error handled by mutation
-    }
-  };
+  // Filter to only show active plans (Trial + VIP)
+  const activePlans = plans?.filter(p => p.is_active) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -241,9 +120,9 @@ const Billing = () => {
       
       <main className="container mx-auto px-4 py-6">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Pricing Plans</h1>
+          <h1 className="text-3xl font-bold mb-2">Subscription Plans</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your trading needs. All plans include copy trading!
+            Start with a free trial, then upgrade to VIP for unlimited access. Strategies can be purchased individually.
           </p>
         </div>
 
@@ -257,9 +136,9 @@ const Billing = () => {
                     <Gift className="h-6 w-6 text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">Free 2-Day VIP Trial!</h3>
+                    <h3 className="font-bold text-lg">Free 7-Day Trial!</h3>
                     <p className="text-sm text-muted-foreground">
-                      Try all VIP features for 48 hours. No payment required.
+                      Try all features for 1 week. No payment required.
                     </p>
                   </div>
                 </div>
@@ -283,9 +162,9 @@ const Billing = () => {
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-success" />
                   <div>
-                    <p className="font-medium">VIP Trial Active</p>
+                    <p className="font-medium">Trial Active</p>
                     <p className="text-sm text-muted-foreground">
-                      {trialStatus.hoursRemaining} hours remaining
+                      {trialStatus.hoursRemaining} hours remaining ({Math.ceil(trialStatus.hoursRemaining / 24)} days)
                     </p>
                   </div>
                 </div>
@@ -302,7 +181,7 @@ const Billing = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Current Plan</p>
-                  <p className="text-xl font-bold">{mySubscription.pricing_plan?.name}</p>
+                  <p className="text-xl font-bold">{mySubscription.pricing_plan?.name || "Trial"}</p>
                 </div>
                 <Badge variant="outline" className="bg-success/10 text-success border-success/20">
                   Active
@@ -312,139 +191,131 @@ const Billing = () => {
           </Card>
         )}
 
-        {/* Pending Request Banner */}
-        {hasPendingRequest && (
-          <Card className="glass-card mb-8 max-w-2xl mx-auto border-warning/30 bg-warning/10">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-warning" />
-                <div>
-                  <p className="font-medium">Upgrade Request Pending</p>
-                  <p className="text-sm text-muted-foreground">
-                    Your subscription upgrade is awaiting admin approval
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Tabs defaultValue="plans" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="plans">Pricing Plans</TabsTrigger>
-            <TabsTrigger value="requests">Upgrade Requests</TabsTrigger>
+        <Tabs defaultValue="plans" className="max-w-4xl mx-auto">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="plans">Plans</TabsTrigger>
             <TabsTrigger value="history">Payment History</TabsTrigger>
           </TabsList>
           
           <TabsContent value="plans">
-            {/* Plans Grid */}
+            {/* Plans Grid - Trial + VIP only */}
             {plansLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Skeleton key={i} className="h-96" />
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <Skeleton className="h-96" />
+                <Skeleton className="h-96" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{plans?.map((plan) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                {activePlans.map((plan) => {
+                  const isTrial = plan.code === "trial";
+                  const isVIP = plan.code === "vip";
                   const isCurrentPlan = plan.code === currentPlanCode;
-                  const isElite = plan.code === "elite";
-                  const isPro = plan.code === "pro";
-                  const isAffiliate = plan.code === "affiliate_partner";
-                  const features = getPlanFeatures(plan);
                   
                   return (
                     <Card 
                       key={plan.id} 
                       className={`glass-card relative overflow-hidden ${
-                        isElite ? "border-amber-500/50 ring-2 ring-amber-500/20" : ""
-                      } ${isPro ? "border-primary/50" : ""} ${isAffiliate ? "border-pink-500/50" : ""}`}
+                        isVIP ? "border-amber-500/50 ring-2 ring-amber-500/20" : ""
+                      }`}
                     >
-                      {isElite && (
+                      {isVIP && (
                         <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
                           Best Value
                         </div>
                       )}
-                      {isPro && (
-                        <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
-                          Popular
-                        </div>
-                      )}
-                      {isAffiliate && (
-                        <div className="absolute top-0 right-0 bg-gradient-to-r from-pink-500 to-pink-600 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
-                          Affiliate
-                        </div>
-                      )}
                       
                       <CardHeader className="text-center pb-2">
-                        <div className={`w-14 h-14 mx-auto rounded-xl bg-gradient-to-br ${getPlanColor(plan.code)} flex items-center justify-center text-white mb-4`}>
-                          {getPlanIcon(plan.code)}
+                        <div className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-white mb-4 ${
+                          isTrial 
+                            ? "bg-gradient-to-br from-blue-500 to-blue-600" 
+                            : "bg-gradient-to-br from-amber-500 to-amber-600"
+                        }`}>
+                          {isTrial ? <Zap className="h-6 w-6" /> : <Crown className="h-6 w-6" />}
                         </div>
                         <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                        <CardDescription className="flex items-center justify-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {getPlanDuration(plan.code)}
+                        <CardDescription>
+                          {isTrial ? "7 days free access" : "Unlimited monthly access"}
                         </CardDescription>
                       </CardHeader>
                       
                       <CardContent className="text-center">
                         <div className="mb-6">
-                          <span className="text-4xl font-bold">${plan.price_usd}</span>
-                          {plan.code !== "starter" && (
-                            <span className="text-muted-foreground">/{getPlanDuration(plan.code)}</span>
-                          )}
-                          {plan.price_zmw > 0 && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              or K{plan.price_zmw}
-                            </p>
+                          <span className="text-4xl font-bold">
+                            {plan.price_usd === 0 ? "Free" : `$${plan.price_usd}`}
+                          </span>
+                          {plan.price_usd > 0 && (
+                            <span className="text-muted-foreground">/month</span>
                           )}
                         </div>
 
                         <ul className="space-y-3 mb-6 text-left">
-                          {features.map((feature, idx) => (
-                            <li key={idx} className="flex items-center gap-2">
-                              <div className={`p-1 rounded-full ${feature.enabled ? "bg-success/10" : "bg-muted"}`}>
-                                {feature.enabled ? (
-                                  <Check className="h-3 w-3 text-success" />
-                                ) : (
-                                  <span className="h-3 w-3 block" />
-                                )}
-                              </div>
-                              <span className={`text-sm flex items-center gap-2 ${!feature.enabled ? "text-muted-foreground line-through" : ""}`}>
-                                {feature.icon}
-                                {feature.label}
-                              </span>
-                            </li>
-                          ))}
+                          <li className="flex items-center gap-2">
+                            <div className="p-1 rounded-full bg-success/10">
+                              <Check className="h-3 w-3 text-success" />
+                            </div>
+                            <span className="text-sm flex items-center gap-2">
+                              <Users className="h-4 w-4" />
+                              {plan.max_accounts >= 999 ? "Unlimited" : plan.max_accounts} accounts
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="p-1 rounded-full bg-success/10">
+                              <Check className="h-3 w-3 text-success" />
+                            </div>
+                            <span className="text-sm flex items-center gap-2">
+                              <Bot className="h-4 w-4" />
+                              {plan.max_bot_instances >= 999 ? "Unlimited" : plan.max_bot_instances} bots
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className={`p-1 rounded-full ${plan.allow_copy_trading ? "bg-success/10" : "bg-muted"}`}>
+                              {plan.allow_copy_trading ? <Check className="h-3 w-3 text-success" /> : <span className="h-3 w-3 block" />}
+                            </div>
+                            <span className={`text-sm flex items-center gap-2 ${!plan.allow_copy_trading ? "text-muted-foreground line-through" : ""}`}>
+                              <Copy className="h-4 w-4" />
+                              Copy trading
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className={`p-1 rounded-full ${plan.allow_premium_bots ? "bg-success/10" : "bg-muted"}`}>
+                              {plan.allow_premium_bots ? <Check className="h-3 w-3 text-success" /> : <span className="h-3 w-3 block" />}
+                            </div>
+                            <span className={`text-sm flex items-center gap-2 ${!plan.allow_premium_bots ? "text-muted-foreground line-through" : ""}`}>
+                              <Star className="h-4 w-4" />
+                              Premium bots
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className={`p-1 rounded-full ${plan.allow_provider_listing ? "bg-success/10" : "bg-muted"}`}>
+                              {plan.allow_provider_listing ? <Check className="h-3 w-3 text-success" /> : <span className="h-3 w-3 block" />}
+                            </div>
+                            <span className={`text-sm flex items-center gap-2 ${!plan.allow_provider_listing ? "text-muted-foreground line-through" : ""}`}>
+                              <Crown className="h-4 w-4" />
+                              Become a provider
+                            </span>
+                          </li>
                         </ul>
 
                         {isCurrentPlan ? (
                           <Button className="w-full" variant="outline" disabled>
                             Current Plan
                           </Button>
-                        ) : plan.code === "starter" ? (
-                          <Button className="w-full" variant="outline" disabled>
-                            Free Plan
+                        ) : isTrial ? (
+                          <Button 
+                            className="w-full" 
+                            variant="outline"
+                            onClick={handleActivateTrial}
+                            disabled={activateTrial.isPending || trialStatus?.hasUsedTrial}
+                          >
+                            {trialStatus?.hasUsedTrial ? "Trial Used" : "Start Trial"}
                           </Button>
                         ) : (
-                          <div className="space-y-2">
-                            <Button 
-                              className={`w-full ${isElite ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" : ""}`}
-                              variant={isPro ? "default" : "outline"}
-                              onClick={() => handleUpgradeRequest(plan)}
-                              disabled={hasPendingRequest || createSubscriptionRequest.isPending}
-                            >
-                              {createSubscriptionRequest.isPending ? "Submitting..." : `Request ${plan.name}`}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="w-full text-muted-foreground"
-                              onClick={() => handleOfflinePayment(plan)}
-                            >
-                              <Upload className="h-3 w-3 mr-2" />
-                              Pay Offline
-                            </Button>
-                          </div>
+                          <Button 
+                            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+                            onClick={() => handleUpgradeToVIP(plan)}
+                          >
+                            Upgrade to VIP
+                          </Button>
                         )}
                       </CardContent>
                     </Card>
@@ -452,54 +323,25 @@ const Billing = () => {
                 })}
               </div>
             )}
-          </TabsContent>
 
-          <TabsContent value="requests">
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Your Upgrade Requests</CardTitle>
-                <CardDescription>Track the status of your subscription upgrade requests</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {subscriptionRequests && subscriptionRequests.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Plan</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Note</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {subscriptionRequests.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell>{new Date(request.created_at).toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{request.pricing_plans?.name || "Unknown"}</Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">${request.amount_usd}</TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              request.status === "approved" ? "default" :
-                              request.status === "rejected" ? "destructive" : "secondary"
-                            }>
-                              {request.status === "pending_approval" ? "Pending" : request.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {request.admin_note || "-"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No upgrade requests yet
+            {/* Individual Strategies Note */}
+            <Card className="glass-card mt-8 max-w-2xl mx-auto">
+              <CardContent className="py-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-full bg-primary/10">
+                    <Sparkles className="h-6 w-6 text-primary" />
                   </div>
-                )}
+                  <div>
+                    <h3 className="font-bold text-lg mb-1">Buy Strategies Individually</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      You don't need a subscription to buy strategies! Each strategy can be purchased separately 
+                      and used forever.
+                    </p>
+                    <Button variant="outline" asChild>
+                      <Link to="/bots">Browse Strategies</Link>
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -508,7 +350,7 @@ const Billing = () => {
             <Card className="glass-card">
               <CardHeader>
                 <CardTitle>Payment History</CardTitle>
-                <CardDescription>Your payment requests and their status</CardDescription>
+                <CardDescription>Your recent payments and requests</CardDescription>
               </CardHeader>
               <CardContent>
                 {paymentRequests && paymentRequests.length > 0 ? (
@@ -519,207 +361,94 @@ const Billing = () => {
                         <TableHead>Amount</TableHead>
                         <TableHead>Method</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Note</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paymentRequests.map((request) => (
+                      {paymentRequests.map((request: any) => (
                         <TableRow key={request.id}>
                           <TableCell>{new Date(request.created_at).toLocaleDateString()}</TableCell>
-                          <TableCell className="font-medium">${request.amount_usd}</TableCell>
-                          <TableCell className="capitalize">{request.method.replace("_", " ")}</TableCell>
+                          <TableCell>${request.amount_usd}</TableCell>
+                          <TableCell className="capitalize">{request.method}</TableCell>
                           <TableCell>
                             <Badge variant={
                               request.status === "approved" ? "default" :
-                              request.status === "rejected" ? "destructive" : "secondary"
+                              request.status === "pending" ? "secondary" : "destructive"
                             }>
                               {request.status}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {request.admin_note || "-"}
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No payment history yet
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No payment history yet</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Payment Methods Info */}
-        <div className="mt-12 text-center">
-          <h3 className="text-lg font-semibold mb-4">We Accept</h3>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Badge variant="outline" className="px-4 py-2">
-              <span className="mr-2">💳</span> Visa / Mastercard
-            </Badge>
-            <Badge variant="outline" className="px-4 py-2">
-              <span className="mr-2">₿</span> Bitcoin / USDT
-            </Badge>
-            <Badge variant="outline" className="px-4 py-2">
-              <span className="mr-2">📱</span> M-Pesa / Airtel Money
-            </Badge>
-            <Badge variant="outline" className="px-4 py-2">
-              <span className="mr-2">📱</span> MTN MoMo / EcoCash
-            </Badge>
-          </div>
-        </div>
-
-        {/* Deriv Branding + Disclaimer */}
-        <div className="mt-12 text-center space-y-4">
-          <div className="flex items-center justify-center gap-2 text-muted-foreground">
-            <span className="text-sm">Powered by</span>
-            <span className="font-semibold">Deriv API</span>
-          </div>
-          <div className="max-w-2xl mx-auto p-4 rounded-lg bg-muted/50 border border-border">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-muted-foreground text-left">
-                <strong className="text-foreground">Risk Warning:</strong> Trading binary options, CFDs, and synthetic indices involves significant risk of loss. 
-                You may lose all of your invested capital. Botvio is powered by Deriv API but is not affiliated with, 
-                endorsed by, or sponsored by Deriv. Past performance is not indicative of future results.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-            <Link to="/terms" className="hover:text-primary underline">Terms of Service</Link>
-            <span>•</span>
-            <Link to="/privacy" className="hover:text-primary underline">Privacy Policy</Link>
-          </div>
-        </div>
-
-        {/* FAQ */}
-        <div className="mt-16 max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
-          
-          <div className="space-y-4">
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-lg">How do offline payments work?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Click "Pay Offline" and upload proof of payment (screenshot, receipt, or transaction hash). 
-                  Our admin team will review and approve your subscription within 24 hours.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Can I try before I buy?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Yes! Every new user gets a free 2-day VIP trial. No payment required. 
-                  Experience all premium features before deciding to subscribe.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Can I cancel anytime?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Yes! Subscriptions are not auto-renewed. Your access continues until the end of your billing period.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-lg">What payment methods do you accept?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  We accept Visa, Mastercard, cryptocurrency (BTC, USDT, ETH, LTC), and mobile money including M-Pesa, Airtel Money, MTN MoMo, EcoCash, and more across Africa.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </main>
 
-      {/* Online Payment Modal */}
+      {/* Payment Modal */}
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Complete Your Upgrade</DialogTitle>
+            <DialogTitle>Upgrade to {selectedPlan?.name}</DialogTitle>
+            <DialogDescription>
+              Choose your preferred payment method
+            </DialogDescription>
           </DialogHeader>
-          {selectedPlan && (
-            <PaymentMethodSelector
-              planCode={selectedPlan.code}
-              planName={selectedPlan.name}
-              amount={selectedPlan.price_usd}
-              onPaymentInitiated={handlePaymentInitiated}
-            />
-          )}
+          <PaymentMethodSelector
+            amount={selectedPlan?.price_usd || 0}
+            planCode={selectedPlan?.code || "vip"}
+            planName={selectedPlan?.name || "VIP"}
+            onPaymentInitiated={handlePaymentInitiated}
+          />
         </DialogContent>
       </Dialog>
 
       {/* Offline Payment Modal */}
       <Dialog open={showOfflineModal} onOpenChange={setShowOfflineModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Offline Payment</DialogTitle>
             <DialogDescription>
-              Pay ${selectedPlan?.price_usd} for {selectedPlan?.name} plan
+              Submit your payment proof for manual verification
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div>
               <Label>Payment Method</Label>
-              <Select value={offlineMethod} onValueChange={setOfflineMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mobile_money">Mobile Money (M-Pesa, Airtel, MTN)</SelectItem>
-                  <SelectItem value="crypto">Cryptocurrency (BTC, USDT)</SelectItem>
-                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                  <SelectItem value="cash">Cash Payment</SelectItem>
-                </SelectContent>
-              </Select>
+              <select 
+                className="w-full p-2 border rounded mt-1"
+                value={offlineMethod}
+                onChange={(e) => setOfflineMethod(e.target.value)}
+              >
+                <option value="">Select method...</option>
+                <option value="airtel_money">Airtel Money</option>
+                <option value="mtn_money">MTN Money</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="crypto_usdt">USDT (Crypto)</option>
+              </select>
             </div>
-
-            <div className="space-y-2">
-              <Label>Proof of Payment (Optional)</Label>
-              <Input
-                type="file"
+            <div>
+              <Label>Upload Proof (optional)</Label>
+              <Input 
+                type="file" 
                 accept="image/*,.pdf"
                 onChange={(e) => setProofFile(e.target.files?.[0] || null)}
               />
-              <p className="text-xs text-muted-foreground">
-                Upload screenshot, receipt, or transaction confirmation
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-muted/50 text-sm">
-              <p className="font-medium mb-1">Payment Instructions:</p>
-              <ul className="text-muted-foreground text-xs space-y-1">
-                <li>• Mobile Money: Send to +260 XXX XXX XXX</li>
-                <li>• Crypto: Send to wallet address (contact support)</li>
-                <li>• Include your email as reference</li>
-              </ul>
             </div>
           </div>
-          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowOfflineModal(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmitOfflinePayment} disabled={uploading || !offlineMethod}>
-              {uploading ? "Submitting..." : "Submit Payment Request"}
+            <Button onClick={handleSubmitOfflinePayment} disabled={uploading}>
+              {uploading ? "Submitting..." : "Submit Payment"}
             </Button>
           </DialogFooter>
         </DialogContent>
