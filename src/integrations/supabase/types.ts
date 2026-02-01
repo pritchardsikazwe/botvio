@@ -2112,6 +2112,7 @@ export type Database = {
       trial_grants: {
         Row: {
           created_at: string
+          duration_days: number | null
           ends_at: string
           id: string
           plan_id: string | null
@@ -2121,6 +2122,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          duration_days?: number | null
           ends_at: string
           id?: string
           plan_id?: string | null
@@ -2130,6 +2132,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          duration_days?: number | null
           ends_at?: string
           id?: string
           plan_id?: string | null
