@@ -29,7 +29,6 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
     bio: "",
     experience_years: "",
     trading_style: "",
-    primary_markets: [] as string[],
     avg_monthly_return: "",
     risk_management: "",
     social_proof_url: "",
@@ -46,25 +45,6 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
     { value: "signal", label: "Signal Provider (Entry/Exit alerts)" },
   ];
 
-  const markets = [
-    { value: "synthetic_indices", label: "Synthetic Indices (V75, Boom, Crash)" },
-    { value: "forex_majors", label: "Forex Majors (EUR, GBP, JPY)" },
-    { value: "gold_xauusd", label: "Gold (XAUUSD)" },
-    { value: "indices_nas100_us30", label: "Indices (NAS100, US30)" },
-    { value: "crypto_btc_eth", label: "Crypto (BTC, ETH)" },
-    { value: "forex_metals", label: "Metals (Silver, Platinum)" },
-    { value: "energies", label: "Energies (Oil, Gas)" },
-  ];
-
-  const handleMarketToggle = (market: string) => {
-    setForm(prev => ({
-      ...prev,
-      primary_markets: prev.primary_markets.includes(market)
-        ? prev.primary_markets.filter(m => m !== market)
-        : [...prev.primary_markets, market]
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -75,11 +55,6 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
 
     if (!form.display_name || !form.bio || !form.experience_years || !form.trading_style) {
       toast.error("Please fill in all required fields");
-      return;
-    }
-
-    if (form.primary_markets.length === 0) {
-      toast.error("Please select at least one primary market");
       return;
     }
 
@@ -95,7 +70,6 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
         user_id: user.id,
         display_name: form.display_name,
         bio: form.bio,
-        primary_market: form.primary_markets.join(", "),
         status: "pending",
       });
 
@@ -224,12 +198,12 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
                   setStep(2);
                 }}
               >
-                Continue to Trading Details
+                Continue to Trading Style
               </Button>
             </div>
           )}
 
-          {/* Step 2: Trading Details */}
+          {/* Step 2: Trading Style */}
           {step === 2 && (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -249,29 +223,6 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Primary Markets *</Label>
-                <div className="grid grid-cols-1 gap-2">
-                  {markets.map((market) => (
-                    <div
-                      key={market.value}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        form.primary_markets.includes(market.value)
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                      onClick={() => handleMarketToggle(market.value)}
-                    >
-                      <Checkbox
-                        checked={form.primary_markets.includes(market.value)}
-                        onCheckedChange={() => handleMarketToggle(market.value)}
-                      />
-                      <span className="text-sm">{market.label}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -305,8 +256,8 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
                   type="button"
                   className="flex-1"
                   onClick={() => {
-                    if (!form.trading_style || form.primary_markets.length === 0) {
-                      toast.error("Please select trading style and at least one market");
+                    if (!form.trading_style) {
+                      toast.error("Please select a trading style");
                       return;
                     }
                     setStep(3);
@@ -376,12 +327,6 @@ export const ProviderApplicationForm = ({ onSuccess }: ProviderApplicationFormPr
                   <div>{form.experience_years} years</div>
                   <div className="text-muted-foreground">Style:</div>
                   <div className="capitalize">{form.trading_style?.replace("_", " ")}</div>
-                  <div className="text-muted-foreground">Markets:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {form.primary_markets.map(m => (
-                      <Badge key={m} variant="secondary" className="text-xs">{m}</Badge>
-                    ))}
-                  </div>
                 </div>
               </div>
 
