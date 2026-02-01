@@ -28,6 +28,8 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import DerivCallback from "./pages/DerivCallback";
+import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
+import { AdminLogin } from "@/components/admin/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -49,7 +51,20 @@ const App = () => (
               <Route path="/provider-dashboard" element={<ProviderDashboard />} />
               <Route path="/bots" element={<Bots />} />
               <Route path="/billing" element={<Billing />} />
-              <Route path="/admin" element={<Admin />} />
+              
+              {/* Admin routes with role guard */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={
+                <RequireSuperAdmin>
+                  <Admin />
+                </RequireSuperAdmin>
+              } />
+              <Route path="/admin/*" element={
+                <RequireSuperAdmin>
+                  <Admin />
+                </RequireSuperAdmin>
+              } />
+              
               <Route path="/p2p" element={<P2P />} />
               <Route path="/affiliate" element={<Affiliate />} />
               <Route path="/strategies" element={<Strategies />} />

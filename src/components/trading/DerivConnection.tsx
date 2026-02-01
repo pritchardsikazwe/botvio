@@ -25,9 +25,12 @@ import {
   DollarSign,
   ExternalLink,
   User,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { buildDerivOAuthUrl } from "@/config/derivEnv";
+import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Deriv symbols for dropdown
 const DERIV_SYMBOLS = [
@@ -63,6 +66,8 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     unsubscribeTicks,
   } = useDeriv();
 
+  const { cooldownRemaining, isConnecting, canConnect, startOAuth, clearConnecting } = useOAuthCooldown();
+  
   const [token, setToken] = useState("");
   const [showToken, setShowToken] = useState(false);
   const [symbol, setSymbol] = useState("R_100");
@@ -70,6 +75,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [logs, setLogs] = useState<string[]>([]);
   const [isDemoAccount, setIsDemoAccount] = useState(true);
   const [connectionMethod, setConnectionMethod] = useState<"oauth" | "token">("oauth");
+  const [showBlockedError, setShowBlockedError] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (line: string) => {
@@ -81,6 +87,10 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   useEffect(() => {
     if (error) {
       addLog(`❌ Error: ${error}`);
+      // Detect blocked response error
+      if (error.includes("blocked") || error.includes("refused")) {
+        setShowBlockedError(true);
+      }
     }
   }, [error]);
 
@@ -91,6 +101,14 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     }
   }, [lastTick?.epoch]);
 
+  // Clear connecting state if we land here after OAuth callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("oauth") === "complete") {
+      clearConnecting();
+    }
+  }, [clearConnecting]);
+
   // Validate token format (basic check)
   const isValidToken = (t: string) => {
     const trimmed = t.trim();
@@ -98,11 +116,18 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   };
 
   const handleOAuthConnect = () => {
+    if (!canConnect) {
+      toast.error(`Please wait ${cooldownRemaining}s before trying again`);
+      return;
+    }
+
+    startOAuth();
+    setShowBlockedError(false);
     const oauthUrl = buildDerivOAuthUrl();
-    addLog("🔄 Opening Deriv login...");
-    // OAuth providers often block being embedded; force a top-level navigation.
-    window.open(oauthUrl, "_top");
-    toast.info("Redirecting to Deriv login...");
+    addLog("🔄 Redirecting to Deriv login...");
+    
+    // Force top-level navigation to bypass X-Frame-Options blocking
+    window.location.href = oauthUrl;
   };
 
   const handleTokenConnect = async () => {
@@ -422,21 +447,41 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
 
             {/* OAuth Login Tab */}
             <TabsContent value="oauth" className="space-y-4 mt-4">
+              {/* Blocked Error Alert */}
+              {showBlockedError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Deriv temporarily blocked the connection. This can happen due to rate limiting.
+                    {cooldownRemaining > 0 && (
+                      <span className="block mt-1 font-medium">
+                        You can retry in {cooldownRemaining} seconds.
+                      </span>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="text-center space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Login securely with your Deriv account. No token needed!
                 </p>
                 <Button
                   onClick={handleOAuthConnect}
-                  disabled={loading}
+                  disabled={loading || !canConnect || isConnecting}
                   className="w-full"
                   variant="gold"
                   size="lg"
                 >
-                  {loading ? (
+                  {loading || isConnecting ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Connecting...
+                    </>
+                  ) : cooldownRemaining > 0 ? (
+                    <>
+                      <Clock className="w-4 h-4 mr-2" />
+                      Wait {cooldownRemaining}s
                     </>
                   ) : (
                     <>

@@ -146,6 +146,57 @@ export type Database = {
         }
         Relationships: []
       }
+      analysis_jobs: {
+        Row: {
+          ai_response: string | null
+          analysis_type: string | null
+          completed_at: string | null
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          image_url: string
+          result_json: Json | null
+          started_at: string | null
+          status: string
+          symbol: string | null
+          timeframe: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_response?: string | null
+          analysis_type?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          image_url: string
+          result_json?: Json | null
+          started_at?: string | null
+          status?: string
+          symbol?: string | null
+          timeframe?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_response?: string | null
+          analysis_type?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          image_url?: string
+          result_json?: Json | null
+          started_at?: string | null
+          status?: string
+          symbol?: string | null
+          timeframe?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           description: string | null
@@ -742,6 +793,42 @@ export type Database = {
           pip_size?: number | null
           submarket?: string | null
           symbol?: string
+        }
+        Relationships: []
+      }
+      edge_logs: {
+        Row: {
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          function_name: string
+          id: string
+          request_payload: Json | null
+          response_status: number | null
+          stack_trace: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          function_name: string
+          id?: string
+          request_payload?: Json | null
+          response_status?: number | null
+          stack_trace?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          function_name?: string
+          id?: string
+          request_payload?: Json | null
+          response_status?: number | null
+          stack_trace?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

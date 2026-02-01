@@ -2,15 +2,20 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getDerivConfig } from "@/config/derivEnv";
-import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+
+const RETRY_COOLDOWN_KEY = "botvio_oauth_retry_at";
 
 export default function DerivCallbackPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Completing Deriv connection...");
   const [searchParams] = useSearchParams();
+  const [retryCountdown, setRetryCountdown] = useState(0);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -29,6 +34,30 @@ export default function DerivCallbackPage() {
         return;
       }
 
+      // Check if user is authenticated
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user) {
+        setStatus("error");
+        setMessage("Please log in to your Botvio account first, then reconnect Deriv.");
+        return;
+      }
+
+      // Check if already connected (idempotent)
+      const { data: existingConnection } = await supabase
+        .from("deriv_connections")
+        .select("id, is_connected, oauth_access_token")
+        .eq("user_id", sessionData.session.user.id)
+        .eq("is_connected", true)
+        .maybeSingle();
+
+      if (existingConnection?.oauth_access_token) {
+        // Already connected, just redirect
+        setStatus("success");
+        setMessage("Deriv account already connected!");
+        setTimeout(() => navigate("/accounts?oauth=complete"), 1500);
+        return;
+      }
+
       try {
         const cfg = getDerivConfig();
 
@@ -43,24 +72,52 @@ export default function DerivCallbackPage() {
         if (fnError || !data?.ok) {
           setStatus("error");
           setMessage(`OAuth failed: ${data?.error || fnError?.message || "Unknown error"}`);
+          // Set retry cooldown
+          localStorage.setItem(RETRY_COOLDOWN_KEY, (Date.now() + 60000).toString());
           return;
         }
 
         setStatus("success");
         setMessage("Connected to Deriv successfully!");
         
+        // Clear cooldown on success
+        localStorage.removeItem(RETRY_COOLDOWN_KEY);
+        
         // Redirect after short delay
         setTimeout(() => {
-          navigate("/accounts");
+          navigate("/accounts?oauth=complete");
         }, 2000);
       } catch (err: any) {
         setStatus("error");
         setMessage(`Connection failed: ${err.message}`);
+        localStorage.setItem(RETRY_COOLDOWN_KEY, (Date.now() + 60000).toString());
       }
     };
 
     handleOAuthCallback();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, user]);
+
+  // Retry countdown timer
+  useEffect(() => {
+    const checkRetry = () => {
+      const retryAt = localStorage.getItem(RETRY_COOLDOWN_KEY);
+      if (!retryAt) {
+        setRetryCountdown(0);
+        return;
+      }
+      const remaining = Math.max(0, Math.ceil((parseInt(retryAt, 10) - Date.now()) / 1000));
+      setRetryCountdown(remaining);
+    };
+
+    checkRetry();
+    const interval = setInterval(checkRetry, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleRetry = () => {
+    if (retryCountdown > 0) return;
+    navigate("/accounts");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -91,12 +148,26 @@ export default function DerivCallbackPage() {
           )}
           
           {status === "error" && (
-            <div className="space-y-2">
-              <Button onClick={() => navigate("/accounts")} variant="outline">
+            <div className="space-y-3">
+              <Button onClick={() => navigate("/accounts")} variant="outline" className="w-full">
                 Go to Accounts
               </Button>
-              <Button onClick={() => window.location.reload()}>
-                Try Again
+              <Button 
+                onClick={handleRetry} 
+                disabled={retryCountdown > 0}
+                className="w-full"
+              >
+                {retryCountdown > 0 ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retry in {retryCountdown}s
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Try Again
+                  </>
+                )}
               </Button>
             </div>
           )}

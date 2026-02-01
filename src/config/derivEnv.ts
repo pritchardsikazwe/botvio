@@ -33,6 +33,7 @@ export interface DerivConfig {
 export function getDerivConfig(): DerivConfig {
   const env = resolveDerivEnv();
 
+  // Production always uses botvio.live as the canonical domain
   const prod: DerivConfig = {
     env: "prod",
     appId: 99139,
@@ -41,11 +42,12 @@ export function getDerivConfig(): DerivConfig {
     oauthUrl: "https://oauth.deriv.com/oauth2/authorize",
   };
 
+  // Development uses lovable.app preview domain
   const dev: DerivConfig = {
     env: "dev",
     appId: 124208,
-    redirectUrl: "https://botvio.lovable.app/auth/deriv/callback",
-    baseDomain: "https://botvio.lovable.app",
+    redirectUrl: `${typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app"}/auth/deriv/callback`,
+    baseDomain: typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app",
     oauthUrl: "https://oauth.deriv.com/oauth2/authorize",
   };
 
