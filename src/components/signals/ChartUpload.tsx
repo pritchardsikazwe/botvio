@@ -1,9 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,18 +19,22 @@ import {
   Sparkles, 
   Crown,
   Loader2,
-  CheckCircle,
   TrendingUp,
   TrendingDown,
   AlertCircle,
   Target,
   Shield,
   BarChart3,
-  Clock,
-  History
+  History,
+  LogIn,
+  Clock
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { AuthModal } from "@/components/auth/AuthModal";
+
+const ANONYMOUS_UPLOAD_KEY = "botvio_anonymous_uploads";
+const MAX_ANONYMOUS_UPLOADS = 10;
 
 const SYMBOLS = [
   { value: "EURUSD", label: "EUR/USD" },
@@ -79,10 +82,21 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [structuredResult, setStructuredResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("upload");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [anonymousUploads, setAnonymousUploads] = useState(0);
 
-  // No limit on chart uploads - users can analyze unlimited charts
+  // Track anonymous uploads
+  useEffect(() => {
+    if (!user) {
+      const stored = localStorage.getItem(ANONYMOUS_UPLOAD_KEY);
+      setAnonymousUploads(stored ? parseInt(stored, 10) : 0);
+    }
+  }, [user]);
 
-  // Fetch analysis history
+  const canUploadAnonymously = !user && anonymousUploads < MAX_ANONYMOUS_UPLOADS;
+  const remainingAnonymousUploads = MAX_ANONYMOUS_UPLOADS - anonymousUploads;
+
+  // Fetch analysis history (only for logged in users)
   const { data: analysisHistory } = useQuery({
     queryKey: ["chart-history", user?.id],
     queryFn: async () => {
@@ -120,24 +134,27 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   };
 
   const handleAnalyze = async () => {
-    if (!user) {
-      toast.error("Please sign in to analyze charts");
-      return;
-    }
-
     if (!selectedFile) {
       toast.error("Please select a chart image");
       return;
     }
 
-    // No limit check - unlimited uploads for all users
+    // Check anonymous upload limit
+    if (!user) {
+      if (anonymousUploads >= MAX_ANONYMOUS_UPLOADS) {
+        setShowAuthModal(true);
+        toast.error("You've used all 10 free analyses. Sign up for unlimited access!");
+        return;
+      }
+    }
 
     try {
       setIsUploading(true);
 
-      // Upload image to storage
+      // For anonymous users, use a temporary ID
+      const userId = user?.id || `anonymous_${Date.now()}`;
       const fileExt = selectedFile.name.split(".").pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("charts")
@@ -163,8 +180,9 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             imageUrl,
             symbol,
             timeframe,
-            userId: user.id,
+            userId,
             analysisType,
+            isAnonymous: !user,
           },
         }
       );
@@ -172,17 +190,26 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       if (analysisError) throw analysisError;
 
       if (analysisData.error) {
-        if (analysisData.error === "Daily limit reached") {
-          toast.error(analysisData.message);
-        } else {
-          toast.error(analysisData.error);
-        }
+        toast.error(analysisData.error);
         return;
       }
 
       setAnalysisResult(analysisData.analysis);
       setStructuredResult(analysisData.structured);
       toast.success("Chart analyzed successfully!");
+
+      // Increment anonymous upload count
+      if (!user) {
+        const newCount = anonymousUploads + 1;
+        localStorage.setItem(ANONYMOUS_UPLOAD_KEY, newCount.toString());
+        setAnonymousUploads(newCount);
+        
+        if (newCount >= MAX_ANONYMOUS_UPLOADS) {
+          toast.info("That was your last free analysis! Sign up for unlimited access.", {
+            duration: 5000,
+          });
+        }
+      }
     } catch (error: any) {
       console.error("Analysis error:", error);
       toast.error(error.message || "Failed to analyze chart");
@@ -237,9 +264,15 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
               </CardDescription>
             </div>
           </div>
-          <Badge variant="outline" className="text-xs text-success border-success/30">
-            Unlimited analyses
-          </Badge>
+          {user ? (
+            <Badge variant="outline" className="text-xs text-success border-success/30">
+              Unlimited analyses
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs text-warning border-warning/30">
+              {remainingAnonymousUploads} free left
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -506,7 +539,35 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Sign up prompt for anonymous users */}
+        {!user && anonymousUploads > 0 && (
+          <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-sm">
+                  {remainingAnonymousUploads > 0 
+                    ? `${remainingAnonymousUploads} free analyses remaining`
+                    : "You've used all free analyses"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Sign up for unlimited AI chart analysis
+                </p>
+              </div>
+              <Button size="sm" onClick={() => setShowAuthModal(true)}>
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign Up Free
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal} 
+      />
     </Card>
   );
 };
