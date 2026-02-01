@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { PriceDisplay } from "@/components/trading/PriceDisplay";
 import { SupportResistanceLevels } from "@/components/trading/SupportResistanceLevels";
@@ -17,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen } from "lucide-react";
+import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -112,19 +114,39 @@ const Index = () => {
     { level: 2320.00, type: 'SUPPORT', strength: 'WEAK', touches: 2 },
   ];
 
-  // Featured Bots
-  const featuredBots = [
-    { id: 1, name: "Botvio Sniper", description: "XAUUSD S/R strategy", markets: "Forex, Gold", isPremium: false },
-    { id: 2, name: "V75 Scalper", description: "Volatility 75 scalping", markets: "Synthetic Indices", isPremium: true },
-    { id: 3, name: "Boom Catcher", description: "Boom/Crash spikes", markets: "Boom/Crash", isPremium: false },
+  // Fetch featured products from database
+  const { data: featuredProducts } = useQuery({
+    queryKey: ["featured-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .eq("is_featured", true)
+        .limit(6);
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60 * 1000, // 1 minute cache
+  });
+
+  // Fallback featured bots (used if no products in DB)
+  const defaultFeaturedBots = [
+    { id: "1", name: "Botvio Sniper", short_description: "XAUUSD S/R strategy", type: "bot", price_usd: 0 },
+    { id: "2", name: "V75 Scalper", short_description: "Volatility 75 scalping", type: "bot", price_usd: 29 },
+    { id: "3", name: "Boom Catcher", short_description: "Boom/Crash spikes", type: "bot", price_usd: 0 },
   ];
 
-  // Featured Courses
+  // Featured Courses (can also come from products table)
   const featuredCourses = [
     { id: 1, title: "Botvio Sniper Mastery", category: "botvio-sniper", lessons: 8, slug: "botvio-sniper-intro" },
     { id: 2, title: "VIX Trading Essentials", category: "vix", lessons: 5, slug: "vix-intro" },
     { id: 3, title: "News Trading Strategy", category: "news-trading", lessons: 4, slug: "news-trading-intro" },
   ];
+
+  const displayProducts = featuredProducts && featuredProducts.length > 0 
+    ? featuredProducts 
+    : defaultFeaturedBots;
 
   const handleSymbolChange = (derivSymbol: string) => {
     // Map Deriv symbol to display pair for UI
@@ -181,12 +203,12 @@ const Index = () => {
         {/* Latest Trading Signals */}
         <HomeSignalsWidget />
 
-        {/* Featured Bots Section */}
+        {/* Featured Products Section */}
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <Bot className="h-5 w-5 text-primary" />
-              Featured Trading Bots
+              <Package className="h-5 w-5 text-primary" />
+              Featured Products
             </h2>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/bots">
@@ -195,26 +217,30 @@ const Index = () => {
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {featuredBots.map((bot) => (
-              <Card key={bot.id} className="glass-card hover:border-primary/50 transition-colors">
+            {displayProducts.map((product) => (
+              <Card key={product.id} className="glass-card hover:border-primary/50 transition-colors">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Zap className="h-4 w-4 text-primary" />
-                      {bot.name}
+                      {product.name}
                     </CardTitle>
-                    {bot.isPremium && <Badge variant="secondary">Premium</Badge>}
+                    {product.price_usd > 0 && (
+                      <Badge variant="secondary">${product.price_usd}</Badge>
+                    )}
+                    {product.price_usd === 0 && (
+                      <Badge variant="outline">Free</Badge>
+                    )}
                   </div>
-                  <CardDescription>{bot.description}</CardDescription>
+                  <CardDescription>{product.short_description || "Trading strategy"}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-primary" />
-                      <span className="text-muted-foreground text-sm">{bot.markets}</span>
-                    </div>
+                    <Badge variant="outline" className="capitalize">
+                      {product.type?.replace("_", " ") || "Strategy"}
+                    </Badge>
                     <Button size="sm" variant="outline" asChild>
-                      <Link to="/bots">Activate</Link>
+                      <Link to="/bots">View</Link>
                     </Button>
                   </div>
                 </CardContent>
