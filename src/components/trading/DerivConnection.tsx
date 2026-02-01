@@ -100,8 +100,9 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const handleOAuthConnect = () => {
     const oauthUrl = buildDerivOAuthUrl();
     addLog("🔄 Opening Deriv login...");
-    window.open(oauthUrl, "_blank", "width=600,height=700");
-    toast.info("Complete the login in the popup window");
+    // OAuth providers often block being embedded; force a top-level navigation.
+    window.open(oauthUrl, "_top");
+    toast.info("Redirecting to Deriv login...");
   };
 
   const handleTokenConnect = async () => {
