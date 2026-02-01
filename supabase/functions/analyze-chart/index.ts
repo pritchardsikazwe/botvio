@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, symbol, timeframe, userId } = await req.json();
+    const { imageUrl, symbol, timeframe, userId, isAnonymous } = await req.json();
 
     if (!imageUrl || !userId) {
       return new Response(
@@ -134,23 +134,25 @@ Provide actionable trading advice in a structured format.`;
       analyzed_at: new Date().toISOString(),
     };
 
-    // Save analysis to database
-    const { data: savedAnalysis, error: saveError } = await supabase
-      .from("chart_analyses")
-      .insert({
-        user_id: userId,
-        image_url: imageUrl,
-        symbol: symbol || null,
-        timeframe: timeframe || null,
-        analysis_result: analysisResult,
-        ai_response: analysisText,
-        is_premium_analysis: isPremium,
-      })
-      .select()
-      .single();
+    // Save analysis to database (only for authenticated users)
+    if (!isAnonymous && userId && !userId.startsWith('anonymous_')) {
+      const { data: savedAnalysis, error: saveError } = await supabase
+        .from("chart_analyses")
+        .insert({
+          user_id: userId,
+          image_url: imageUrl,
+          symbol: symbol || null,
+          timeframe: timeframe || null,
+          analysis_result: analysisResult,
+          ai_response: analysisText,
+          is_premium_analysis: isPremium,
+        })
+        .select()
+        .single();
 
-    if (saveError) {
-      console.error("Error saving analysis:", saveError);
+      if (saveError) {
+        console.error("Error saving analysis:", saveError);
+      }
     }
 
     return new Response(
