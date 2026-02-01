@@ -1,5 +1,8 @@
 project_id = "tqqkzeblmjapgbnsbtgw"
 
+[functions.analyze-chart]
+verify_jwt = false
+
 [functions.hauza-sniper]
 verify_jwt = false
 
