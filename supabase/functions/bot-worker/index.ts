@@ -1136,6 +1136,26 @@ async function processBotInstance(
   }
 }
 
+// ============= USER STRATEGY SELECTIONS =============
+
+async function getUserEnabledStrategies(
+  supabase: any,
+  userId: string
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("user_strategy_selections")
+    .select("strategy_code")
+    .eq("user_id", userId)
+    .eq("enabled", true);
+
+  if (error || !data || data.length === 0) {
+    // Default: only botvio enabled
+    return ["botvio"];
+  }
+
+  return data.map((s: any) => s.strategy_code);
+}
+
 // ============= MAIN HANDLER =============
 
 serve(async (req) => {
@@ -1149,8 +1169,9 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    console.log("Bot Worker starting with live market data integration...");
+    console.log("Bot Worker starting with live market data + user strategy selections...");
 
+    // Fetch all active bot instances
     const { data: instances, error: fetchError } = await supabase
       .from("bot_instances")
       .select(`
@@ -1164,28 +1185,127 @@ serve(async (req) => {
       throw new Error(`Failed to fetch bot instances: ${fetchError.message}`);
     }
 
-    if (!instances || instances.length === 0) {
-      console.log("No active bot instances found");
-      return new Response(
-        JSON.stringify({ success: true, message: "No active bot instances" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Also check for users with enabled strategies who have trading accounts
+    const { data: usersWithStrategies } = await supabase
+      .from("user_strategy_selections")
+      .select("user_id")
+      .eq("enabled", true);
 
-    console.log(`Found ${instances.length} active bot instances`);
+    const userIds = [...new Set((usersWithStrategies || []).map((u: any) => u.user_id))];
+    
+    console.log(`Found ${instances?.length || 0} bot instances, ${userIds.length} users with strategies`);
 
     const results = [];
-    for (const instance of instances) {
+
+    // Process traditional bot instances
+    if (instances && instances.length > 0) {
+      for (const instance of instances) {
+        try {
+          await processBotInstance(supabase, instance);
+          results.push({ instance_id: instance.id, status: "processed" });
+        } catch (error) {
+          console.error(`Error processing instance ${instance.id}:`, error);
+          results.push({
+            instance_id: instance.id,
+            status: "error",
+            error: (error as Error).message,
+          });
+        }
+      }
+    }
+
+    // Process user strategy selections (for users without explicit bot instances)
+    for (const userId of userIds) {
       try {
-        await processBotInstance(supabase, instance);
-        results.push({ instance_id: instance.id, status: "processed" });
+        // Check if user already has an active bot instance
+        const hasInstance = instances?.some((i: any) => i.user_id === userId);
+        if (hasInstance) continue;
+
+        // Get user's trading account
+        const { data: accounts } = await supabase
+          .from("trading_accounts")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("is_active", true)
+          .limit(1);
+
+        if (!accounts || accounts.length === 0) continue;
+
+        const account = accounts[0];
+        const enabledStrategies = await getUserEnabledStrategies(supabase, userId);
+        
+        console.log(`[User ${userId}] Enabled strategies: ${enabledStrategies.join(", ")}`);
+
+        // Run each enabled strategy
+        for (const strategyCode of enabledStrategies) {
+          const strategyFn = strategies[strategyCode];
+          if (!strategyFn) continue;
+
+          // Create a virtual instance for the strategy
+          const virtualInstance = {
+            id: `virtual-${userId}-${strategyCode}`,
+            user_id: userId,
+            trading_account_id: account.id,
+            trading_accounts: account,
+            name: `${strategyCode} (auto)`,
+            markets: ["R_100", "frxEURUSD"], // Default markets
+            max_stake: 1,
+            max_open_trades: 3,
+            max_daily_loss_percent: 5,
+            config_json: { auto_execute: true },
+            bots: { code: strategyCode, name: strategyCode },
+          };
+
+          // Check risk limits
+          const riskCheck = await checkRiskLimits(supabase, virtualInstance);
+          if (!riskCheck.canTrade) {
+            console.log(`[${strategyCode}] User ${userId} blocked: ${riskCheck.reason}`);
+            continue;
+          }
+
+          // Get signals
+          const signals = await strategyFn(virtualInstance);
+          
+          if (signals.length === 0) continue;
+
+          // Execute trades
+          for (const signal of signals) {
+            const stake = Math.min(signal.stake, 1);
+            console.log(`[${strategyCode}] User ${userId}: ${signal.direction} ${signal.symbol} @ $${stake}`);
+
+            const result = await executeDerivTrade(account.api_key_encrypted, { ...signal, stake });
+
+            if (result.success) {
+              // Log trade
+              await supabase.from("bot_trades").insert({
+                bot_instance_id: virtualInstance.id,
+                symbol: signal.symbol,
+                side: signal.direction,
+                stake,
+                broker_trade_id: result.contract_id,
+                status: "open",
+              });
+
+              // Create notification
+              await supabase.from("notifications").insert({
+                user_id: userId,
+                type: "trade",
+                title: `Auto Trade: ${signal.symbol}`,
+                message: `${signal.direction} $${stake} via ${strategyCode} - ${signal.reason}`,
+                metadata: { signal, contract_id: result.contract_id },
+              });
+
+              console.log(`[${strategyCode}] Trade executed: ${result.contract_id}`);
+            } else {
+              console.error(`[${strategyCode}] Trade failed: ${result.error}`);
+            }
+          }
+        }
+
+        results.push({ user_id: userId, status: "processed" });
       } catch (error) {
-        console.error(`Error processing instance ${instance.id}:`, error);
-        results.push({
-          instance_id: instance.id,
-          status: "error",
-          error: (error as Error).message,
-        });
+        console.error(`Error processing user ${userId}:`, error);
+        results.push({ user_id: userId, status: "error", error: (error as Error).message });
       }
     }
 
