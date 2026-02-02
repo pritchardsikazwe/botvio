@@ -382,6 +382,7 @@ const BillingRequestsTab = () => {
 const Admin = () => {
   const { user } = useAuth();
   const [dataLoading, setDataLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
   const [affiliates, setAffiliates] = useState<AffiliateProfile[]>([]);
@@ -414,23 +415,46 @@ const Admin = () => {
   // Fetch data on mount - RequireSuperAdmin already verified auth
   useEffect(() => {
     if (user) {
-      fetchData().finally(() => setDataLoading(false));
+      setLoadError(null);
+      setDataLoading(true);
+      
+      // Timeout guard - if data doesn't load in 15 seconds, show error
+      const timeout = setTimeout(() => {
+        setLoadError("Admin dashboard loading timed out. Check console for RLS or query errors.");
+        setDataLoading(false);
+      }, 15000);
+
+      fetchData()
+        .catch((err) => {
+          console.error("[Admin] Data fetch error:", err);
+          setLoadError(err?.message || "Failed to load admin data. Check RLS policies.");
+        })
+        .finally(() => {
+          clearTimeout(timeout);
+          setDataLoading(false);
+        });
     }
   }, [user]);
 
   const fetchData = async () => {
+    const errors: string[] = [];
+
     // Fetch providers
-    const { data: providersData } = await supabase
+    const { data: providersData, error: providersError } = await supabase
       .from("providers")
       .select("*")
       .order("created_at", { ascending: false });
 
+    if (providersError) {
+      console.error("[Admin] Providers fetch error:", providersError);
+      errors.push(`Providers: ${providersError.message}`);
+    }
     if (providersData) {
       setProviders(providersData);
     }
 
     // Fetch user subscriptions with plan info
-    const { data: subsData } = await supabase
+    const { data: subsData, error: subsError } = await supabase
       .from("user_plan_subscriptions")
       .select(`
         *,
@@ -438,12 +462,22 @@ const Admin = () => {
       `)
       .order("created_at", { ascending: false });
 
-    if (subsData) {
+    if (subsError) {
+      console.error("[Admin] Subscriptions fetch error:", subsError);
+      errors.push(`Subscriptions: ${subsError.message}`);
+    }
+
+    if (subsData && subsData.length > 0) {
       const userIds = subsData.map(s => s.user_id);
-      const { data: profilesData } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, email, display_name")
         .in("user_id", userIds);
+
+      if (profilesError) {
+        console.error("[Admin] Profiles fetch error:", profilesError);
+        errors.push(`Profiles: ${profilesError.message}`);
+      }
 
       const mergedSubs = subsData.map(sub => ({
         ...sub,
@@ -451,20 +485,26 @@ const Admin = () => {
       }));
 
       setSubscriptions(mergedSubs as UserSubscription[]);
+    } else {
+      setSubscriptions([]);
     }
 
     // Fetch affiliate profiles
-    const { data: affiliatesData } = await supabase
+    const { data: affiliatesData, error: affiliatesError } = await supabase
       .from("affiliate_profiles")
       .select("*")
       .order("created_at", { ascending: false });
 
+    if (affiliatesError) {
+      console.error("[Admin] Affiliates fetch error:", affiliatesError);
+      errors.push(`Affiliates: ${affiliatesError.message}`);
+    }
     if (affiliatesData) {
       setAffiliates(affiliatesData);
     }
 
     // Fetch payout requests with method details
-    const { data: payoutsData } = await supabase
+    const { data: payoutsData, error: payoutsError } = await supabase
       .from("payout_requests")
       .select(`
         *,
@@ -472,6 +512,10 @@ const Admin = () => {
       `)
       .order("created_at", { ascending: false });
 
+    if (payoutsError) {
+      console.error("[Admin] Payouts fetch error:", payoutsError);
+      errors.push(`Payouts: ${payoutsError.message}`);
+    }
     if (payoutsData) {
       setPayouts(payoutsData as PayoutRequest[]);
     }
@@ -485,16 +529,26 @@ const Admin = () => {
     const pendingPayoutsCount = payoutsData?.filter(p => p.status === 'requested').length || 0;
 
     // Get pending earnings
-    const { data: earningsData } = await supabase
+    const { data: earningsData, error: earningsError } = await supabase
       .from("affiliate_earnings")
       .select("amount_usd")
       .eq("status", "pending");
 
+    if (earningsError) {
+      console.error("[Admin] Earnings fetch error:", earningsError);
+      errors.push(`Earnings: ${earningsError.message}`);
+    }
+
     const pendingEarningsSum = earningsData?.reduce((sum, e) => sum + Number(e.amount_usd), 0) || 0;
 
-    const { count: botCount } = await supabase
+    const { count: botCount, error: botError } = await supabase
       .from("bot_instances")
       .select("*", { count: 'exact', head: true });
+
+    if (botError) {
+      console.error("[Admin] Bot instances fetch error:", botError);
+      errors.push(`Bot instances: ${botError.message}`);
+    }
 
     setStats({
       pendingProviders: pendingCount,
@@ -506,6 +560,11 @@ const Admin = () => {
       pendingEarnings: pendingEarningsSum,
       fraudAlerts: fraudFlags.length
     });
+
+    // If any errors occurred, throw them to be caught by the caller
+    if (errors.length > 0) {
+      throw new Error(errors.join("; "));
+    }
   };
 
   const detectFraudPatterns = async () => {
@@ -721,6 +780,60 @@ const Admin = () => {
     }
   };
 
+  // Show error state if loading failed
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <Card className="max-w-2xl mx-auto border-destructive/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="w-6 h-6" />
+                Admin Dashboard Error
+              </CardTitle>
+              <CardDescription>
+                Failed to load admin data. This is usually caused by RLS policy restrictions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+                <p className="text-sm font-mono text-destructive whitespace-pre-wrap break-words">
+                  {loadError}
+                </p>
+              </div>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p className="font-medium">Common causes:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>RLS policies blocking admin access to tables</li>
+                  <li>Missing super_admin role in user_roles table</li>
+                  <li>Session expired - try logging out and back in</li>
+                </ul>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => {
+                    setLoadError(null);
+                    setDataLoading(true);
+                    fetchData()
+                      .catch((err) => setLoadError(err?.message || "Failed to load"))
+                      .finally(() => setDataLoading(false));
+                  }}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retry
+                </Button>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Reload Page
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   // Only show data loading state - auth is handled by RequireSuperAdmin
   if (dataLoading) {
     return (
@@ -728,8 +841,13 @@ const Admin = () => {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="glass-card p-6 mb-8">
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
+            <div className="flex items-center gap-3 mb-2">
+              <Shield className="w-8 h-8 text-primary" />
+              <div>
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Loading admin data...</p>
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[1, 2, 3, 4].map((i) => (
@@ -741,11 +859,8 @@ const Admin = () => {
               </Card>
             ))}
           </div>
-          <div className="flex justify-center">
-            <Button variant="outline" onClick={() => fetchData()}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retry Loading
-            </Button>
+          <div className="text-center text-sm text-muted-foreground">
+            <p>If this takes more than a few seconds, check browser console for errors.</p>
           </div>
         </div>
       </div>
