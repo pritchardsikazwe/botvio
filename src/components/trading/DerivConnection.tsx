@@ -90,7 +90,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [symbol, setSymbol] = useState("R_100");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [isDemoAccount, setIsDemoAccount] = useState(true);
+  const [isDemoAccount, setIsDemoAccount] = useState(false); // Default to Real account
   // Auto-switch to token if OAuth was previously blocked
   const [connectionMethod, setConnectionMethod] = useState<"oauth" | "token">(
     wasOAuthBlocked() ? "token" : "oauth"
@@ -414,20 +414,8 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       ) : (
         /* Not Authorized View */
         <div className="space-y-4">
-          {/* Account Type Toggle - Clearer visual */}
+          {/* Account Type Toggle - Real first, Demo second */}
           <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setIsDemoAccount(true)}
-              className={cn(
-                "flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all",
-                isDemoAccount
-                  ? "bg-blue-500/10 border-blue-500 text-blue-500"
-                  : "bg-secondary/30 border-border text-muted-foreground hover:border-blue-500/50"
-              )}
-            >
-              <TestTube className="w-4 h-4" />
-              <span className="font-medium">Demo</span>
-            </button>
             <button
               onClick={() => setIsDemoAccount(false)}
               className={cn(
@@ -439,6 +427,18 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
             >
               <DollarSign className="w-4 h-4" />
               <span className="font-medium">Real</span>
+            </button>
+            <button
+              onClick={() => setIsDemoAccount(true)}
+              className={cn(
+                "flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all",
+                isDemoAccount
+                  ? "bg-blue-500/10 border-blue-500 text-blue-500"
+                  : "bg-secondary/30 border-border text-muted-foreground hover:border-blue-500/50"
+              )}
+            >
+              <TestTube className="w-4 h-4" />
+              <span className="font-medium">Demo</span>
             </button>
           </div>
 
@@ -524,7 +524,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-2">Don't have an account?</p>
                 <a
-                  href="https://deriv.com"
+                  href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline text-sm inline-flex items-center gap-1"
