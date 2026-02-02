@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Super admin email - receives all signup notifications
-const SUPER_ADMIN_EMAIL = "pritchardsikazwe@gmail.com";
+const SUPER_ADMIN_EMAIL = "sifotech@gmail.com";
 
 interface SignupNotificationRequest {
   email: string;
