@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +11,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Shield, 
   Users, 
@@ -382,8 +380,7 @@ const BillingRequestsTab = () => {
 };
 
 const Admin = () => {
-  const { user, loading: authLoading, rolesLoading, isAdmin, isSuperAdmin } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [dataLoading, setDataLoading] = useState(true);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
@@ -414,24 +411,12 @@ const Admin = () => {
     adminNote: ""
   });
 
+  // Fetch data on mount - RequireSuperAdmin already verified auth
   useEffect(() => {
-    // Wait for both auth and roles to load
-    if (authLoading || rolesLoading) return;
-    
-    if (!user) {
-      navigate('/');
-      return;
+    if (user) {
+      fetchData().finally(() => setDataLoading(false));
     }
-
-    if (!isAdmin) {
-      toast.error("Access denied. Admin privileges required.");
-      navigate('/dashboard');
-      return;
-    }
-
-    // User is admin, fetch data
-    fetchData().finally(() => setDataLoading(false));
-  }, [user, authLoading, rolesLoading, isAdmin, navigate]);
+  }, [user]);
 
   const fetchData = async () => {
     // Fetch providers
@@ -736,36 +721,7 @@ const Admin = () => {
     }
   };
 
-  if (authLoading || rolesLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center justify-center h-64 gap-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-            <p className="text-muted-foreground">Checking permissions...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <Alert variant="destructive" className="max-w-md mx-auto">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Access denied. You need admin privileges to access this page.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </div>
-    );
-  }
-
+  // Only show data loading state - auth is handled by RequireSuperAdmin
   if (dataLoading) {
     return (
       <div className="min-h-screen bg-background">
