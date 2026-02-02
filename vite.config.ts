@@ -6,6 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: "/", // Critical: ensures absolute asset paths for deep routes like /admin
   server: {
     host: "::",
     port: 8080,

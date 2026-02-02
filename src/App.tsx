@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DerivProvider } from "@/contexts/DerivContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Landing from "./pages/Landing";
 import Install from "./pages/Install";
 import Index from "./pages/Index";
@@ -52,17 +53,25 @@ const App = () => (
               <Route path="/bots" element={<Bots />} />
               <Route path="/billing" element={<Billing />} />
               
-              {/* Admin routes with role guard */}
-              <Route path="/admin/login" element={<AdminLogin />} />
+              {/* Admin routes with role guard and error boundary */}
+              <Route path="/admin/login" element={
+                <ErrorBoundary>
+                  <AdminLogin />
+                </ErrorBoundary>
+              } />
               <Route path="/admin" element={
-                <RequireSuperAdmin>
-                  <Admin />
-                </RequireSuperAdmin>
+                <ErrorBoundary>
+                  <RequireSuperAdmin>
+                    <Admin />
+                  </RequireSuperAdmin>
+                </ErrorBoundary>
               } />
               <Route path="/admin/*" element={
-                <RequireSuperAdmin>
-                  <Admin />
-                </RequireSuperAdmin>
+                <ErrorBoundary>
+                  <RequireSuperAdmin>
+                    <Admin />
+                  </RequireSuperAdmin>
+                </ErrorBoundary>
               } />
               
               <Route path="/p2p" element={<P2P />} />
