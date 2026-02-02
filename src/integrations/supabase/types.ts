@@ -2353,6 +2353,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_strategy_selections: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          strategy_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          strategy_code: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          strategy_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_trades: {
         Row: {
           closed_at: string | null

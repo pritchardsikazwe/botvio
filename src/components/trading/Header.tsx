@@ -240,15 +240,7 @@ export const Header = () => {
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </DropdownMenuItem>
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/admin')}>
-                        <Shield className="w-4 h-4 mr-2" />
-                        Admin Panel
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  {/* Admin panel removed from tenant UI - access via /admin/login only */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut} className="text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />

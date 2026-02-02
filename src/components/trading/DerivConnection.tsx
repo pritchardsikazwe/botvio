@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { useDeriv } from "@/contexts/DerivContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,22 @@ import { buildDerivOAuthUrl } from "@/config/derivEnv";
 import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// OAuth blocked detection key
+const OAUTH_BLOCKED_KEY = "deriv_oauth_blocked";
+
+// Check if OAuth was previously blocked
+const wasOAuthBlocked = (): boolean => {
+  try {
+    const blocked = localStorage.getItem(OAUTH_BLOCKED_KEY);
+    if (!blocked) return false;
+    const data = JSON.parse(blocked);
+    // Consider blocked for 1 hour
+    return Date.now() - data.timestamp < 60 * 60 * 1000;
+  } catch {
+    return false;
+  }
+};
+
 // Deriv symbols for dropdown
 const DERIV_SYMBOLS = [
   { value: "R_100", label: "Volatility 100 Index" },
@@ -47,6 +63,7 @@ const DERIV_SYMBOLS = [
   { value: "BOOM500", label: "Boom 500 Index" },
   { value: "CRASH500", label: "Crash 500 Index" },
 ];
+
 
 interface DerivConnectionProps {
   onSymbolChange?: (symbol: string) => void;
@@ -74,25 +91,37 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [isDemoAccount, setIsDemoAccount] = useState(true);
-  const [connectionMethod, setConnectionMethod] = useState<"oauth" | "token">("oauth");
-  const [showBlockedError, setShowBlockedError] = useState(false);
+  // Auto-switch to token if OAuth was previously blocked
+  const [connectionMethod, setConnectionMethod] = useState<"oauth" | "token">(
+    wasOAuthBlocked() ? "token" : "oauth"
+  );
+  const [showBlockedError, setShowBlockedError] = useState(wasOAuthBlocked());
   const logsEndRef = useRef<HTMLDivElement>(null);
 
-  const addLog = (line: string) => {
+  const addLog = useCallback((line: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs((prev) => [`[${timestamp}] ${line}`, ...prev].slice(0, 20));
-  };
+  }, []);
+
+  // Detect OAuth blocked and auto-switch to token
+  const handleOAuthBlocked = useCallback(() => {
+    setShowBlockedError(true);
+    setConnectionMethod("token");
+    localStorage.setItem(OAUTH_BLOCKED_KEY, JSON.stringify({ timestamp: Date.now() }));
+    toast.error("Deriv login blocked. Please use API Token instead.");
+    addLog("⚠️ OAuth blocked - switch to API Token");
+  }, [addLog]);
 
   // Log errors
   useEffect(() => {
     if (error) {
       addLog(`❌ Error: ${error}`);
       // Detect blocked response error
-      if (error.includes("blocked") || error.includes("refused")) {
-        setShowBlockedError(true);
+      if (error.includes("blocked") || error.includes("refused") || error.includes("ERR_BLOCKED")) {
+        handleOAuthBlocked();
       }
     }
-  }, [error]);
+  }, [error, addLog, handleOAuthBlocked]);
 
   // Log ticks
   useEffect(() => {
