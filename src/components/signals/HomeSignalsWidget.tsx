@@ -1,11 +1,42 @@
 import { useLatestSignals } from "@/hooks/useManualSignals";
-import { ManualSignalCard } from "./ManualSignalCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Signal, ArrowRight, TrendingUp, TrendingDown, Clock } from "lucide-react";
+import { Signal, ArrowRight, TrendingUp, TrendingDown, Clock, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
+
+// Helper to check if signal is expired (5 min after creation)
+function isSignalExpired(signal: { created_at: string; expires_at?: string | null }): boolean {
+  const now = new Date();
+  if (signal.expires_at) {
+    return new Date(signal.expires_at) < now;
+  }
+  const createdAt = new Date(signal.created_at);
+  const fiveMinutesLater = new Date(createdAt.getTime() + 5 * 60 * 1000);
+  return fiveMinutesLater < now;
+}
+
+// Get time remaining for active signal
+function getTimeRemaining(signal: { created_at: string; expires_at?: string | null }): string {
+  const now = new Date();
+  let expiresAt: Date;
+  
+  if (signal.expires_at) {
+    expiresAt = new Date(signal.expires_at);
+  } else {
+    const createdAt = new Date(signal.created_at);
+    expiresAt = new Date(createdAt.getTime() + 5 * 60 * 1000);
+  }
+  
+  const diffMs = expiresAt.getTime() - now.getTime();
+  if (diffMs <= 0) return "Expired";
+  
+  const minutes = Math.floor(diffMs / 60000);
+  const seconds = Math.floor((diffMs % 60000) / 1000);
+  
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
 
 export const HomeSignalsWidget = () => {
   const { data: signals, isLoading } = useLatestSignals(3);
@@ -32,60 +63,36 @@ export const HomeSignalsWidget = () => {
     );
   }
 
-  // Show placeholder signals if no real signals exist
-  const displaySignals = signals && signals.length > 0 ? signals : [
-    {
-      id: "demo-1",
-      symbol: "XAUUSD",
-      direction: "BUY",
-      entry_price: 2345.50,
-      stop_loss: 2340.00,
-      take_profit: 2360.00,
-      timeframe: "M15",
-      category: "forex",
-      broker: ["deriv", "exness"],
-      confidence: 85,
-      status: "ACTIVE",
-      created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-      reason: "Strong support zone rejection with bullish engulfing",
-      is_manual: true,
-      posted_by: null,
-    },
-    {
-      id: "demo-2",
-      symbol: "EURUSD",
-      direction: "SELL",
-      entry_price: 1.0845,
-      stop_loss: 1.0870,
-      take_profit: 1.0800,
-      timeframe: "H1",
-      category: "forex",
-      broker: ["deriv", "exness"],
-      confidence: 78,
-      status: "ACTIVE",
-      created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-      reason: "Resistance rejection at key level",
-      is_manual: true,
-      posted_by: null,
-    },
-    {
-      id: "demo-3",
-      symbol: "V75",
-      direction: "BUY",
-      entry_price: 125890.50,
-      stop_loss: 125500.00,
-      take_profit: 126500.00,
-      timeframe: "M5",
-      category: "synthetics",
-      broker: ["deriv"],
-      confidence: 72,
-      status: "ACTIVE",
-      created_at: new Date(Date.now() - 120 * 60 * 1000).toISOString(),
-      reason: "Volatility breakout with momentum",
-      is_manual: true,
-      posted_by: null,
-    },
-  ];
+  // Only show signals that are actually active (not expired)
+  const activeSignals = (signals || []).filter(s => !isSignalExpired(s));
+
+  // If no active signals, show a message instead of placeholder demos
+  if (activeSignals.length === 0) {
+    return (
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Signal className="h-5 w-5 text-primary" />
+            Latest Trading Signals
+          </h2>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/signals">
+              View All <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        <Card className="glass-card">
+          <CardContent className="py-12 text-center">
+            <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+            <h3 className="font-semibold mb-1">No Active Signals</h3>
+            <p className="text-sm text-muted-foreground">
+              Signals expire 5 minutes after posting. Check back soon for new opportunities.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-8">
@@ -101,7 +108,7 @@ export const HomeSignalsWidget = () => {
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {displaySignals.map((signal) => (
+        {activeSignals.map((signal) => (
           <Card key={signal.id} className="glass-card hover:border-primary/50 transition-all">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -145,9 +152,11 @@ export const HomeSignalsWidget = () => {
               )}
               
               <div className="flex items-center justify-between pt-2 border-t border-border">
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {formatDistanceToNow(new Date(signal.created_at), { addSuffix: true })}
+                <div className="flex items-center gap-1 text-xs">
+                  <Clock className="h-3 w-3 text-warning" />
+                  <span className="text-warning font-medium">
+                    Expires: {getTimeRemaining(signal)}
+                  </span>
                 </div>
                 {signal.confidence && (
                   <Badge variant="outline" className="text-xs">
