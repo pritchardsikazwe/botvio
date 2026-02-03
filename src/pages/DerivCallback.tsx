@@ -2,12 +2,25 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getDerivConfig } from "@/config/derivEnv";
+import { setDerivOAuthToken } from "@/lib/derivAuth";
 import { Loader2, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const RETRY_COOLDOWN_KEY = "botvio_oauth_retry_at";
+
+// Parse token from hash or query params (Deriv uses various patterns)
+function parseDerivParams(): Record<string, string> {
+  const hash = window.location.hash.replace("#", "");
+  const query = window.location.search.replace("?", "");
+  const raw = hash || query;
+  const params = new URLSearchParams(raw);
+
+  const obj: Record<string, string> = {};
+  params.forEach((v, k) => (obj[k] = v));
+  return obj;
+}
 
 export default function DerivCallbackPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -19,8 +32,13 @@ export default function DerivCallbackPage() {
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
+      // First, try the standard code flow
       const code = searchParams.get("code");
       const error = searchParams.get("error");
+
+      // Also check for direct token flow (hash-based)
+      const hashParams = parseDerivParams();
+      const directToken = hashParams.token || hashParams.access_token || hashParams.token1 || "";
 
       if (error) {
         setStatus("error");
@@ -28,7 +46,19 @@ export default function DerivCallbackPage() {
         return;
       }
 
+      // Handle direct token flow (some Deriv flows return token directly)
+      if (directToken && !code) {
+        console.log("[DerivCallback] Direct token received, storing locally");
+        setDerivOAuthToken(directToken);
+        setStatus("success");
+        setMessage("Connected to Deriv successfully!");
+        localStorage.removeItem(RETRY_COOLDOWN_KEY);
+        setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
+        return;
+      }
+
       if (!code) {
+        console.log("[DerivCallback] Params received:", { ...hashParams, code });
         setStatus("error");
         setMessage("Missing OAuth authorization code. Please try again.");
         return;
@@ -75,6 +105,11 @@ export default function DerivCallbackPage() {
           // Set retry cooldown
           localStorage.setItem(RETRY_COOLDOWN_KEY, (Date.now() + 60000).toString());
           return;
+        }
+
+        // Also store token locally for WebSocket usage
+        if (data.token) {
+          setDerivOAuthToken(data.token);
         }
 
         setStatus("success");

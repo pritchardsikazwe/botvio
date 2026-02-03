@@ -35,10 +35,34 @@ interface CreateSignalInput {
   expires_at?: string;
 }
 
+// Helper to check if signal is expired (5 minutes after creation or expires_at)
+function isSignalExpired(signal: ManualSignal): boolean {
+  const now = new Date();
+  
+  // Check explicit expires_at first
+  if (signal.expires_at) {
+    return new Date(signal.expires_at) < now;
+  }
+  
+  // Default: expire 5 minutes after creation
+  const createdAt = new Date(signal.created_at);
+  const fiveMinutesLater = new Date(createdAt.getTime() + 5 * 60 * 1000);
+  return fiveMinutesLater < now;
+}
+
+// Helper to check if signal is too old for history (2 days)
+function isSignalTooOldForHistory(signal: ManualSignal): boolean {
+  const now = new Date();
+  const createdAt = new Date(signal.created_at);
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  return createdAt < twoDaysAgo;
+}
+
 export const useManualSignals = (filters?: {
   category?: string;
   broker?: string;
   status?: string;
+  includeHistory?: boolean;
 }) => {
   return useQuery({
     queryKey: ["manual-signals", filters],
@@ -53,26 +77,28 @@ export const useManualSignals = (filters?: {
         query = query.eq("category", filters.category);
       }
 
-      if (filters?.status && filters.status !== "all") {
-        query = query.eq("status", filters.status);
-      }
-
       const { data, error } = await query;
 
       if (error) throw error;
 
-      // Filter by broker if specified and auto-expire signals
+      // Process signals: auto-expire and filter
       let signals = (data as ManualSignal[]).map(signal => {
-        // Check if signal should be auto-expired
-        if (signal.status === 'ACTIVE' && signal.expires_at) {
-          const expiresAt = new Date(signal.expires_at);
-          if (expiresAt < new Date()) {
-            return { ...signal, status: 'EXPIRED' };
-          }
+        // Check if ACTIVE signal should be auto-expired (5 min default)
+        if (signal.status === 'ACTIVE' && isSignalExpired(signal)) {
+          return { ...signal, status: 'EXPIRED' };
         }
         return signal;
       });
 
+      // Filter out signals older than 2 days from history
+      signals = signals.filter(signal => !isSignalTooOldForHistory(signal));
+
+      // Apply status filter
+      if (filters?.status && filters.status !== "all") {
+        signals = signals.filter(s => s.status === filters.status);
+      }
+
+      // Apply broker filter
       if (filters?.broker && filters.broker !== "all") {
         signals = signals.filter(s => s.broker?.includes(filters.broker!));
       }
@@ -86,17 +112,34 @@ export const useLatestSignals = (limit: number = 3) => {
   return useQuery({
     queryKey: ["latest-signals", limit],
     queryFn: async () => {
-      // Show all active signals (manual and automated)
+      const now = new Date();
+      // Only fetch signals from the last 5 minutes that are active
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      
       const { data, error } = await supabase
         .from("trading_signals")
         .select("*")
         .eq("status", "ACTIVE")
+        .gte("created_at", fiveMinutesAgo.toISOString())
         .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
-      return data as ManualSignal[];
+      
+      // Double-check expiration on the client side
+      const activeSignals = (data as ManualSignal[]).filter(signal => {
+        if (signal.expires_at) {
+          return new Date(signal.expires_at) > now;
+        }
+        // Default: within 5 minutes
+        const createdAt = new Date(signal.created_at);
+        const expiresAt = new Date(createdAt.getTime() + 5 * 60 * 1000);
+        return expiresAt > now;
+      });
+      
+      return activeSignals;
     },
+    refetchInterval: 30000, // Refetch every 30 seconds to keep expiration status current
   });
 };
 
