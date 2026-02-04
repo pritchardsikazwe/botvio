@@ -20,3 +20,27 @@ verify_jwt = false
 
 [functions.deriv-health-check]
 verify_jwt = false
+
+[functions.deriv-trade-execute]
+verify_jwt = false
+
+[functions.deriv-contracts-for-symbol]
+verify_jwt = false
+
+[functions.deriv-active-symbols]
+verify_jwt = false
+
+[functions.bridge-register-terminal]
+verify_jwt = false
+
+[functions.bridge-heartbeat]
+verify_jwt = false
+
+[functions.bridge-pull-commands]
+verify_jwt = false
+
+[functions.bridge-ack-command]
+verify_jwt = false
+
+[functions.bridge-push-state]
+verify_jwt = false

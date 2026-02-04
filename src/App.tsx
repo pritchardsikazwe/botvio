@@ -13,6 +13,8 @@ import Learn from "./pages/Learn";
 import Lesson from "./pages/Lesson";
 import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
+import Connections from "./pages/Connections";
+import TradeHistory from "./pages/TradeHistory";
 import Providers from "./pages/Providers";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import Bots from "./pages/Bots";
@@ -48,6 +50,8 @@ const App = () => (
               <Route path="/install" element={<Install />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/accounts" element={<Accounts />} />
+              <Route path="/connections" element={<Connections />} />
+              <Route path="/trade-history" element={<TradeHistory />} />
               <Route path="/providers" element={<Providers />} />
               <Route path="/provider-dashboard" element={<ProviderDashboard />} />
               <Route path="/bots" element={<Bots />} />
