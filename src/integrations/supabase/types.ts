@@ -862,6 +862,53 @@ export type Database = {
         }
         Relationships: []
       }
+      executions: {
+        Row: {
+          broker_ref: string | null
+          created_at: string
+          fill_price: number | null
+          id: string
+          pnl: number | null
+          raw: Json | null
+          stake_or_lot: number
+          status: string | null
+          trade_intent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          broker_ref?: string | null
+          created_at?: string
+          fill_price?: number | null
+          id?: string
+          pnl?: number | null
+          raw?: Json | null
+          stake_or_lot: number
+          status?: string | null
+          trade_intent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          broker_ref?: string | null
+          created_at?: string
+          fill_price?: number | null
+          id?: string
+          pnl?: number | null
+          raw?: Json | null
+          stake_or_lot?: number
+          status?: string | null
+          trade_intent_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "executions_trade_intent_id_fkey"
+            columns: ["trade_intent_id"]
+            isOneToOne: false
+            referencedRelation: "trade_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_sessions: {
         Row: {
           close_time: string | null
@@ -898,6 +945,69 @@ export type Database = {
           open_days?: number[]
           open_time?: string | null
           timezone?: string
+        }
+        Relationships: []
+      }
+      mt5_commands: {
+        Row: {
+          acked_at: string | null
+          command: Json
+          created_at: string
+          id: string
+          result: Json | null
+          status: string
+          terminal_uid: string
+        }
+        Insert: {
+          acked_at?: string | null
+          command?: Json
+          created_at?: string
+          id?: string
+          result?: Json | null
+          status?: string
+          terminal_uid: string
+        }
+        Update: {
+          acked_at?: string | null
+          command?: Json
+          created_at?: string
+          id?: string
+          result?: Json | null
+          status?: string
+          terminal_uid?: string
+        }
+        Relationships: []
+      }
+      mt5_states: {
+        Row: {
+          balance: number | null
+          equity: number | null
+          free_margin: number | null
+          id: string
+          margin: number | null
+          positions: Json | null
+          terminal_uid: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number | null
+          equity?: number | null
+          free_margin?: number | null
+          id?: string
+          margin?: number | null
+          positions?: Json | null
+          terminal_uid: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number | null
+          equity?: number | null
+          free_margin?: number | null
+          id?: string
+          margin?: number | null
+          positions?: Json | null
+          terminal_uid?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1845,6 +1955,7 @@ export type Database = {
       strategies: {
         Row: {
           config_json: Json | null
+          contract_family: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -1852,6 +1963,7 @@ export type Database = {
           id: string
           is_public: boolean | null
           market: string
+          market_type: string | null
           owner_user_id: string
           price_usd: number | null
           pricing_type: string
@@ -1863,6 +1975,7 @@ export type Database = {
         }
         Insert: {
           config_json?: Json | null
+          contract_family?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -1870,6 +1983,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           market: string
+          market_type?: string | null
           owner_user_id: string
           price_usd?: number | null
           pricing_type?: string
@@ -1881,6 +1995,7 @@ export type Database = {
         }
         Update: {
           config_json?: Json | null
+          contract_family?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -1888,6 +2003,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           market?: string
+          market_type?: string | null
           owner_user_id?: string
           price_usd?: number | null
           pricing_type?: string
@@ -2060,6 +2176,60 @@ export type Database = {
             columns: ["trading_account_id"]
             isOneToOne: false
             referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_intents: {
+        Row: {
+          broker_ref: string | null
+          connection_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          idempotency_key: string
+          intent: Json
+          status: string
+          strategy_id: string | null
+          user_id: string
+        }
+        Insert: {
+          broker_ref?: string | null
+          connection_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key: string
+          intent?: Json
+          status?: string
+          strategy_id?: string | null
+          user_id: string
+        }
+        Update: {
+          broker_ref?: string | null
+          connection_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key?: string
+          intent?: Json
+          status?: string
+          strategy_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_intents_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "deriv_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_intents_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "strategies"
             referencedColumns: ["id"]
           },
         ]

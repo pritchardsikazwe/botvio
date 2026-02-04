@@ -28,6 +28,7 @@ import {
   History,
   Clock
 } from "lucide-react";
+import { SocialShareButtons } from "@/components/social/SocialShareButtons";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -445,10 +446,19 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
 
                 {/* Full Analysis */}
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" />
-                    AI Analysis Report
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      AI Analysis Report
+                    </Label>
+                    <SocialShareButtons 
+                      title={`${symbol || "Chart"} Analysis - ${structuredResult?.trend || "Trading"} Signal`}
+                      description={structuredResult?.recommendation 
+                        ? `${structuredResult.recommendation} signal with ${structuredResult.confidence || 75}% confidence` 
+                        : analysisResult?.slice(0, 150)}
+                      imageUrl={previewUrl || undefined}
+                    />
+                  </div>
                   <div className="p-4 rounded-lg bg-muted/30 border border-border/50 max-h-80 overflow-y-auto">
                     <div className="prose prose-sm prose-invert max-w-none">
                       <pre className="whitespace-pre-wrap text-sm font-sans text-foreground/90">
