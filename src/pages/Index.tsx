@@ -198,6 +198,7 @@ const Index = () => {
 
           {/* Right Sidebar */}
           <div className="lg:col-span-3 space-y-6">
+            <ActiveBotsWidget />
             <SupportResistanceLevels levels={srLevels} currentPrice={marketData.price} />
             <PerformancePanel />
           </div>
