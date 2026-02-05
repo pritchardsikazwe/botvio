@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
-import { useUserStrategies } from "@/hooks/useUserStrategies";
+import { useStrategiesWithSelections } from "@/hooks/useUserStrategies";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ interface Execution {
 export const AutoTradingPanel = () => {
   const { user } = useAuth();
   const { authorized, balance } = useDeriv();
-  const { strategies, isLoading: strategiesLoading } = useUserStrategies();
+  const { strategies, isLoading: strategiesLoading } = useStrategiesWithSelections();
   const queryClient = useQueryClient();
   const [autoTradingEnabled, setAutoTradingEnabled] = useState(false);
 
@@ -141,8 +141,9 @@ export const AutoTradingPanel = () => {
     }
   }, [userSettings]);
 
-  const enabledStrategies = strategies?.filter(s => s.is_enabled) || [];
-  const hasBalance = balance && balance > 0;
+  const enabledStrategies = strategies?.filter(s => s.enabled) || [];
+  const balanceAmount = balance?.balance ?? 0;
+  const hasBalance = balanceAmount > 0;
   const canAutoTrade = authorized && hasBalance && enabledStrategies.length > 0;
 
   const openTrades = tradeIntents?.filter(t => t.status === "SENT" || t.status === "QUEUED") || [];
@@ -240,7 +241,7 @@ export const AutoTradingPanel = () => {
           </div>
           <div className={`p-2 rounded-lg ${hasBalance ? 'bg-success/10' : 'bg-warning/10'}`}>
             <DollarSign className={`h-4 w-4 mx-auto mb-1 ${hasBalance ? 'text-success' : 'text-warning'}`} />
-            <p className="text-xs font-medium">${balance?.toFixed(2) || '0.00'}</p>
+            <p className="text-xs font-medium">${balanceAmount.toFixed(2)}</p>
           </div>
           <div className={`p-2 rounded-lg ${enabledStrategies.length > 0 ? 'bg-success/10' : 'bg-muted'}`}>
             <Zap className={`h-4 w-4 mx-auto mb-1 ${enabledStrategies.length > 0 ? 'text-success' : 'text-muted-foreground'}`} />
@@ -254,7 +255,7 @@ export const AutoTradingPanel = () => {
             <p className="text-xs font-medium text-muted-foreground">Active Strategies:</p>
             <div className="flex flex-wrap gap-1">
               {enabledStrategies.map((strategy) => (
-                <Badge key={strategy.id} variant="outline" className="text-xs">
+                <Badge key={strategy.code} variant="outline" className="text-xs">
                   {strategy.name}
                 </Badge>
               ))}
