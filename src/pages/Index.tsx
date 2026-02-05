@@ -215,7 +215,7 @@ const Index = () => {
               Quick Links
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Deriv Affiliate Link */}
             <a 
               href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" 
@@ -223,21 +223,75 @@ const Index = () => {
               rel="noopener noreferrer"
               className="block"
             >
-              <Card className="glass-card hover:border-primary/50 transition-all hover:scale-[1.02] cursor-pointer">
+              <Card className="glass-card hover:border-primary/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/30">
                       <TrendingUp className="h-6 w-6 text-red-500" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">Open Deriv Account</CardTitle>
-                      <CardDescription>Trade binary options & CFDs with Deriv</CardDescription>
+                      <CardTitle className="text-base">Deriv</CardTitle>
+                      <CardDescription className="text-xs">Binary options & CFDs</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Badge variant="outline" className="text-xs">
-                    Get started in minutes →
+                    Open Account →
+                  </Badge>
+                </CardContent>
+              </Card>
+            </a>
+
+            {/* Exness Affiliate Link */}
+            <a 
+              href="https://one.exness-track.com/a/ts1kvs1k" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="glass-card hover:border-warning/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-warning/20 to-yellow-600/20 border border-warning/30">
+                      <TrendingUp className="h-6 w-6 text-warning" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Exness</CardTitle>
+                      <CardDescription className="text-xs">Forex & CFDs trading</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Badge variant="outline" className="text-xs text-warning border-warning/30">
+                    Open Account →
+                  </Badge>
+                </CardContent>
+              </Card>
+            </a>
+
+            {/* Binance Affiliate Link */}
+            <a 
+              href="https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="glass-card hover:border-yellow-500/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30">
+                      <Target className="h-6 w-6 text-yellow-500" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Binance</CardTitle>
+                      <CardDescription className="text-xs">Crypto exchange</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Badge variant="outline" className="text-xs text-yellow-500 border-yellow-500/30">
+                    Open Account →
                   </Badge>
                 </CardContent>
               </Card>
@@ -250,21 +304,21 @@ const Index = () => {
               rel="noopener noreferrer"
               className="block"
             >
-              <Card className="glass-card hover:border-success/50 transition-all hover:scale-[1.02] cursor-pointer">
+              <Card className="glass-card hover:border-success/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-success/20 to-green-600/20 border border-success/30">
                       <MessageCircle className="h-6 w-6 text-success" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">Join WhatsApp Community</CardTitle>
-                      <CardDescription>Get signals, tips & connect with traders</CardDescription>
+                      <CardTitle className="text-base">WhatsApp</CardTitle>
+                      <CardDescription className="text-xs">Trading community</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Badge variant="outline" className="text-xs text-success border-success/30">
-                    Join our trading group →
+                    Join Group →
                   </Badge>
                 </CardContent>
               </Card>
