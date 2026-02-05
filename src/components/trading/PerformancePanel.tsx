@@ -1,10 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPerformance } from "@/hooks/useUserPerformance";
-import { TrendingUp, TrendingDown, Target, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, Target, BarChart3, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const PerformancePanel = () => {
   const { user } = useAuth();
-  const { stats, loading } = useUserPerformance();
+  const { stats, loading, refetch } = useUserPerformance();
 
   if (!user) {
     return (
@@ -31,9 +32,44 @@ export const PerformancePanel = () => {
     );
   }
 
+  // Show placeholder if no trades
+  if (stats.totalTrades === 0) {
+    return (
+      <div className="glass-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <span className="data-label">Your Performance</span>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={refetch}>
+            <RefreshCw className="w-3 h-3" />
+          </Button>
+        </div>
+        <div className="text-center py-6 text-muted-foreground">
+          <BarChart3 className="w-10 h-10 mx-auto mb-3 opacity-40" />
+          <p className="text-sm font-medium mb-1">No trades recorded yet</p>
+          <p className="text-xs">Start trading to see your performance stats</p>
+        </div>
+        {/* Placeholder stats */}
+        <div className="grid grid-cols-2 gap-3 mt-4 opacity-50">
+          <div className="text-center p-3 bg-secondary/50 rounded-lg">
+            <p className="text-lg font-bold">0%</p>
+            <p className="text-xs text-muted-foreground">Win Rate</p>
+          </div>
+          <div className="text-center p-3 bg-secondary/50 rounded-lg">
+            <p className="text-lg font-bold">0</p>
+            <p className="text-xs text-muted-foreground">Total Trades</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="glass-card p-6">
-      <span className="data-label mb-4 block">Your Performance</span>
+      <div className="flex items-center justify-between mb-4">
+        <span className="data-label">Your Performance</span>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={refetch}>
+          <RefreshCw className="w-3 h-3" />
+        </Button>
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center p-4 bg-success/10 rounded-xl">
           <p className="text-2xl font-bold text-success">{stats.winRate}%</p>
