@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -13,14 +13,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +36,7 @@ export const Header = () => {
     <>
       <header className="sticky top-0 z-50 glass-card border-b border-border/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <div 
               className="flex items-center gap-3 cursor-pointer"
               onClick={() => navigate('/')}
@@ -52,14 +44,14 @@ export const Header = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-warning flex items-center justify-center">
                 <Bot className="w-6 h-6 text-primary-foreground" />
               </div>
-              <div>
+              <div className="hidden sm:block">
                 <h1 className="font-bold text-lg gold-text">BOTVIO</h1>
                 <p className="text-[10px] text-muted-foreground">powered by Deriv</p>
               </div>
             </div>
 
-            {/* Navigation - Desktop */}
-            <nav className="hidden md:flex items-center gap-1">
+            {/* Navigation - Desktop - Direct links (no dropdowns) */}
+            <nav className="hidden lg:flex items-center gap-1">
               <Button 
                 variant={location.pathname === '/' ? 'secondary' : 'ghost'} 
                 size="sm"
@@ -71,85 +63,40 @@ export const Header = () => {
               {user && (
                 <>
                   <Button 
-                    variant={location.pathname === '/dashboard' ? 'secondary' : 'ghost'} 
+                    variant={location.pathname === '/signals' ? 'secondary' : 'ghost'} 
                     size="sm"
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate('/signals')}
                   >
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
+                    <Signal className="w-4 h-4 mr-1" />
+                    Signals
                   </Button>
                   
-                  {/* Trading Dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        Trading
-                        <ChevronDown className="w-3 h-3 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 glass-card">
-                      <DropdownMenuLabel>Trading Tools</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/signals')}>
-                        <Signal className="w-4 h-4 mr-2" />
-                        Signals & AI Analysis
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/bots')}>
-                        <Bot className="w-4 h-4 mr-2" />
-                        Trading Bots
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/providers')}>
-                        <Users className="w-4 h-4 mr-2" />
-                        Copy Trading
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/strategies')}>
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        Strategies
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
-                        <Users className="w-4 h-4 mr-2" />
-                        Become a Provider
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button 
+                    variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/bots')}
+                  >
+                    <Bot className="w-4 h-4 mr-1" />
+                    Bots
+                  </Button>
                   
-                  {/* More Dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Menu className="w-4 h-4 mr-2" />
-                        More
-                        <ChevronDown className="w-3 h-3 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 glass-card">
-                      <DropdownMenuLabel>Tools & Features</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/accounts')}>
-                        <Wallet className="w-4 h-4 mr-2" />
-                        Trading Accounts
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/p2p')}>
-                        <ArrowLeftRight className="w-4 h-4 mr-2" />
-                        P2P Trading
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/affiliate')}>
-                        <Gift className="w-4 h-4 mr-2" />
-                        Affiliate Program
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/billing')}>
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        Billing & Plans
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/settings')}>
-                        <Settings className="w-4 h-4 mr-2" />
-                        Settings
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button 
+                    variant={location.pathname === '/providers' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/providers')}
+                  >
+                    <Users className="w-4 h-4 mr-1" />
+                    Copy Trade
+                  </Button>
+                  
+                  <Button 
+                    variant={location.pathname === '/provider-dashboard' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/provider-dashboard')}
+                  >
+                    <Zap className="w-4 h-4 mr-1" />
+                    Provider
+                  </Button>
                 </>
               )}
               
@@ -158,15 +105,107 @@ export const Header = () => {
                 size="sm"
                 onClick={() => navigate('/learn')}
               >
-                <GraduationCap className="w-4 h-4 mr-2" />
+                <GraduationCap className="w-4 h-4 mr-1" />
                 Learn
               </Button>
+
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <Menu className="w-4 h-4 mr-1" />
+                      More
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 glass-card">
+                    <DropdownMenuLabel>Tools & Features</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/accounts')}>
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Trading Accounts
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/strategies')}>
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Strategies
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/trade-history')}>
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Trade History
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/p2p')}>
+                      <ArrowLeftRight className="w-4 h-4 mr-2" />
+                      P2P Trading
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/affiliate')}>
+                      <Gift className="w-4 h-4 mr-2" />
+                      Affiliate Program
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/billing')}>
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Billing & Plans
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </nav>
+
+            {/* Mobile Navigation */}
+            <nav className="lg:hidden flex items-center">
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <Menu className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 glass-card">
+                    <DropdownMenuItem onClick={() => navigate('/')}>
+                      Home
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/signals')}>
+                      <Signal className="w-4 h-4 mr-2" />
+                      Signals & AI
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/bots')}>
+                      <Bot className="w-4 h-4 mr-2" />
+                      Trading Bots
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/providers')}>
+                      <Users className="w-4 h-4 mr-2" />
+                      Copy Trading
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Become a Provider
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/learn')}>
+                      <GraduationCap className="w-4 h-4 mr-2" />
+                      Learn
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/accounts')}>
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Accounts
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/strategies')}>
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Strategies
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </nav>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Community Links - visible on desktop */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden xl:flex items-center gap-1">
               <a href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ" target="_blank" rel="noopener noreferrer">
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
                   <MessageCircle className="h-4 w-4" />
@@ -211,27 +250,19 @@ export const Header = () => {
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/signals')}>
-                    <Signal className="w-4 h-4 mr-2" />
-                    Signals & AI Analysis
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/accounts')}>
                     <Wallet className="w-4 h-4 mr-2" />
                     Trading Accounts
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
-                    <Users className="w-4 h-4 mr-2" />
-                    Provider Panel
+                  <DropdownMenuItem onClick={() => navigate('/trade-history')}>
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Trade History
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/billing')}>
                     <CreditCard className="w-4 h-4 mr-2" />
                     Billing
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/learn')}>
-                    <GraduationCap className="w-4 h-4 mr-2" />
-                    Learn Strategy
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/affiliate')}>
                     <Gift className="w-4 h-4 mr-2" />
                     Affiliate
@@ -240,7 +271,6 @@ export const Header = () => {
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </DropdownMenuItem>
-                  {/* Admin panel removed from tenant UI - access via /admin/login only */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut} className="text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
