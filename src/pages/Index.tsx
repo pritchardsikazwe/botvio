@@ -12,6 +12,7 @@ import { BotvioSniperPanel } from "@/components/trading/BotvioSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
 import { QuickTrade } from "@/components/trading/QuickTrade";
 import { ActiveBotsWidget } from "@/components/trading/ActiveBotsWidget";
+import { AutoTradingPanel } from "@/components/trading/AutoTradingPanel";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
