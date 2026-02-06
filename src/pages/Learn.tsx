@@ -318,6 +318,10 @@ const Learn = () => {
           )}
         </div>
 
+        {!gate.isPaid && lessons.length > FREE_LESSON_LIMIT && (
+          <UpgradePrompt feature="All Course Lessons" requiredPlan="Basic" className="mt-6" />
+        )}
+
         {/* Quick Start Guide */}
         <div className="mt-12 glass-card p-8">
           <h2 className="text-2xl font-bold mb-6">Trading Process – Quick Guide</h2>
