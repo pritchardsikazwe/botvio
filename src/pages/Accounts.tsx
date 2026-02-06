@@ -449,8 +449,18 @@ const Accounts = () => {
                   </div>
                   
                   <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Test Connection
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      disabled={testingAccountId === account.id}
+                      onClick={() => handleTestConnection(account.id)}
+                    >
+                      {testingAccountId === account.id ? (
+                        <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Testing...</>
+                      ) : (
+                        "Test Connection"
+                      )}
                     </Button>
                     <Button
                       variant="destructive"
