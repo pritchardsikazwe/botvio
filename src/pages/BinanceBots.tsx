@@ -55,7 +55,7 @@ const BinanceBots = () => {
         strategy_id: newBot.strategy_id,
         symbol: newBot.symbol,
         risk_profile: newBot.risk_profile,
-        config_json: strategy?.template_json ?? {},
+        config_json: (strategy?.template_json as Record<string, any>) ?? {},
       });
       toast.success("Bot created! Configure and start it.");
       setShowCreate(false);
