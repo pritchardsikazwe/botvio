@@ -36,8 +36,8 @@ const Strategies = () => {
   });
 
   const { data: strategies = [], isLoading } = useStrategies({
-    market: marketFilter || undefined,
-    pricingType: pricingFilter || undefined,
+    market: marketFilter === "all" ? undefined : marketFilter,
+    pricingType: pricingFilter === "all" ? undefined : pricingFilter,
   });
   const { data: myStrategies = [] } = useMyStrategies();
   const createStrategy = useCreateStrategy();

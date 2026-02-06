@@ -138,7 +138,7 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
     }
 
     // Calculate expiration time
-    const expiresAt = expiresIn ? new Date(Date.now() + parseInt(expiresIn) * 60 * 60 * 1000).toISOString() : undefined;
+    const expiresAt = expiresIn && expiresIn !== "none" ? new Date(Date.now() + parseInt(expiresIn) * 60 * 60 * 1000).toISOString() : undefined;
 
     await createSignal.mutateAsync({
       symbol,
