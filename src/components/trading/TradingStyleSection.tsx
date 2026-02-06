@@ -78,7 +78,7 @@ export function TradingStyleSection() {
     if (experience === "new") return STYLES.find(s => s.key === "voltrend")!;
     if (experience === "some" && risk === "medium") return STYLES.find(s => s.key === "risefall")!;
     if (risk === "high" && time !== "short") return STYLES.find(s => s.key === "boomcrash")!;
-    if (time === "short" && experience !== "new") return STYLES.find(s => s.key === "digits")!;
+    if (time === "short" && experience === "pro") return STYLES.find(s => s.key === "digits")!;
     return STYLES.find(s => s.key === "synthetic")!;
   }, [experience, risk, time]);
 
