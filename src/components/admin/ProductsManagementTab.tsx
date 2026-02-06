@@ -326,6 +326,7 @@ export const ProductsManagementTab = () => {
                 />
               </div>
 
+              <div className="flex items-center justify-between">
                 <Label>Active</Label>
                 <Switch
                   checked={form.is_active}
