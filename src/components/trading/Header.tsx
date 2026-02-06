@@ -244,18 +244,7 @@ export const Header = () => {
 
           <div className="flex items-center gap-2">
             {/* Community Links - visible on desktop */}
-            <div className="hidden xl:flex items-center gap-1">
-              <a href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ" target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
-              </a>
-              <a href="https://t.me/+AZjYpDncHEA5OTM0" target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                  <Send className="h-4 w-4" />
-                </Button>
-              </a>
-            </div>
+            {/* Community links moved to DB-driven partner_links */}
             
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20">
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
