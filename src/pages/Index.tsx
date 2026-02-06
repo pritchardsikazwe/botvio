@@ -62,7 +62,7 @@ const Index = () => {
   }, [authorized, selectedPair, subscribeTicks, unsubscribeTicks]);
 
   const handleCloseOnboarding = () => {
-    localStorage.setItem('hauza_onboarding_seen', 'true');
+    localStorage.setItem('botvio_onboarding_seen', 'true');
     setShowOnboarding(false);
   };
 

@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Admins should NOT be treated as affiliates even if they have the role
       setIsAffiliate(hasAffiliateRole && !hasAdminRole);
       
-      console.log("[Auth] User roles loaded:", roles, { isAdmin: hasAdminRole, isSuperAdmin: hasSuperAdminRole, isAffiliate: hasAffiliateRole && !hasAdminRole });
+      // Roles loaded silently
     } catch (error) {
       console.error("Error fetching user roles:", error);
       setUserRoles([]);

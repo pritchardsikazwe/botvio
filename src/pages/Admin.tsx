@@ -995,6 +995,10 @@ const Admin = () => {
               <Package className="w-4 h-4" />
               Products
             </TabsTrigger>
+            <TabsTrigger value="seo" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              SEO & Webmasters
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
