@@ -23,7 +23,7 @@ const Providers = () => {
   const { data: providers, isLoading } = useProviders();
   const { data: accounts } = useTradingAccounts();
   const { data: mySubscriptions } = useMyCopySubscriptions();
-  const { data: myPlan } = useMySubscription();
+  const gate = useSubscriptionGate();
   const subscribe = useSubscribeToProvider();
 
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
