@@ -144,7 +144,8 @@ const StrategyDetail = () => {
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        {/* Header */}
+        <Header />
+        {/* Strategy Detail Header */}
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
           <div className="container mx-auto px-4 py-8">
             <Button variant="ghost" onClick={() => navigate("/strategies")} className="mb-4">
