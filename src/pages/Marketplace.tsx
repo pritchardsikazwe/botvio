@@ -170,6 +170,11 @@ const Marketplace = () => {
                       ⭐ Featured
                     </div>
                   )}
+                  {product.type === "course" && (
+                    <div className="bg-gradient-to-r from-primary to-blue-500 text-white text-xs px-3 py-1 text-center font-medium flex items-center justify-center gap-1">
+                      🎓 Coming Soon — Lessons Being Prepared
+                    </div>
+                  )}
 
                   {product.cover_image_url && (
                     <div className="h-40 bg-muted overflow-hidden">
