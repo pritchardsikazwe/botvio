@@ -130,6 +130,10 @@ export const Header = () => {
                   <DropdownMenuContent className="w-56 glass-card">
                     <DropdownMenuLabel>Tools & Features</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/my-products')}>
+                      <Package className="w-4 h-4 mr-2" />
+                      My Products
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/accounts')}>
                       <Wallet className="w-4 h-4 mr-2" />
                       Trading Accounts
