@@ -238,15 +238,19 @@ const Billing = () => {
                       
                       <CardHeader className="text-center pb-2">
                         <div className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-white mb-4 ${
-                          isTrial 
+                          isFree
+                            ? "bg-gradient-to-br from-muted-foreground to-muted-foreground/80"
+                            : isTrial 
                             ? "bg-gradient-to-br from-blue-500 to-blue-600" 
-                            : "bg-gradient-to-br from-amber-500 to-amber-600"
+                            : isVIP
+                            ? "bg-gradient-to-br from-amber-500 to-amber-600"
+                            : "bg-gradient-to-br from-primary to-primary/80"
                         }`}>
-                          {isTrial ? <Zap className="h-6 w-6" /> : <Crown className="h-6 w-6" />}
+                          {isFree ? <Shield className="h-6 w-6" /> : isTrial ? <Zap className="h-6 w-6" /> : isVIP ? <Crown className="h-6 w-6" /> : <Star className="h-6 w-6" />}
                         </div>
-                        <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                        <CardDescription>
-                          {isTrial ? "7 days free access" : "Unlimited monthly access"}
+                        <CardTitle className="text-xl">{plan.name}</CardTitle>
+                        <CardDescription className="text-xs">
+                          {isFree ? "Limited access forever" : isTrial ? "7 days free access" : isVIP ? "Unlimited access" : `${plan.max_accounts} accounts, ${plan.max_bot_instances} bots`}
                         </CardDescription>
                       </CardHeader>
                       
