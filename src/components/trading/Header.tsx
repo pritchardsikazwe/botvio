@@ -232,6 +232,10 @@ export const Header = () => {
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       Marketplace
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/install')}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Install App
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
