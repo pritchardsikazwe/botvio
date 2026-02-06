@@ -862,6 +862,57 @@ export type Database = {
         }
         Relationships: []
       }
+      entitlements: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          product_id: string
+          source_order_id: string | null
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          product_id: string
+          source_order_id?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          product_id?: string
+          source_order_id?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_source_order_id_fkey"
+            columns: ["source_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       executions: {
         Row: {
           broker_ref: string | null
@@ -1522,6 +1573,9 @@ export type Database = {
       }
       products: {
         Row: {
+          affiliate_percent: number
+          billing_interval: string | null
+          billing_type: string
           bot_id: string | null
           cover_image_url: string | null
           created_at: string
@@ -1539,6 +1593,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          affiliate_percent?: number
+          billing_interval?: string | null
+          billing_type?: string
           bot_id?: string | null
           cover_image_url?: string | null
           created_at?: string
@@ -1556,6 +1613,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          affiliate_percent?: number
+          billing_interval?: string | null
+          billing_type?: string
           bot_id?: string | null
           cover_image_url?: string | null
           created_at?: string
