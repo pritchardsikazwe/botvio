@@ -188,13 +188,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
       },
     });
+
+    // Notify admin of new signup (fire and forget)
+    if (!error && data?.user) {
+      supabase.functions.invoke("admin-signup-notification", {
+        body: {
+          email,
+          user_id: data.user.id,
+          created_at: new Date().toISOString(),
+        },
+      }).catch(console.error);
+    }
+
     return { error };
   };
 
