@@ -21,7 +21,9 @@ import {
   BarChart3,
   LineChart,
   Newspaper,
-  Clock
+  Clock,
+  Lock,
+  Crown
 } from "lucide-react";
 
 interface Lesson {
