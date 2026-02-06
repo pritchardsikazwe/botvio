@@ -265,7 +265,7 @@ const Learn = () => {
           ) : (
             lessons.map((lesson, index) => {
               const Icon = lessonIcons[lesson.slug] || BookOpen;
-              const isLocked = !gate.isPaid && index >= FREE_LESSON_LIMIT;
+              const isLocked = !ownsCourse && index >= FREE_LESSON_LIMIT;
               return (
                 <Card 
                   key={lesson.id} 
