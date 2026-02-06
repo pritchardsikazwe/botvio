@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/trading/Header";
 import { useNavigate } from "react-router-dom";
-import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, Gift, Sparkles } from "lucide-react";
+import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, Gift, Sparkles, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 // Affiliate links
