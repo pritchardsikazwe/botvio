@@ -39,17 +39,30 @@ const Accounts = () => {
   const [showToken, setShowToken] = useState(false);
   const [testingAccountId, setTestingAccountId] = useState<string | null>(null);
 
-  const handleTestConnection = async (accountId: string) => {
+  const handleTestConnection = async (accountId: string, broker: string) => {
     setTestingAccountId(accountId);
     try {
-      const { data, error } = await supabase.functions.invoke("deriv-health-check", {
-        body: { trading_account_id: accountId },
-      });
-      if (error) throw error;
-      if (data?.authorized) {
-        toast.success(`Connection OK — ${data.loginid || "Authorized"} (${data.currency || ""} ${data.balance ?? ""})`);
+      if (broker === "deriv") {
+        // Use deriv-verify-token edge function with the trading account
+        const { data, error } = await supabase.functions.invoke("deriv-health-check", {
+          body: {},
+        });
+        if (error) throw error;
+        
+        if (data?.ok && data?.results?.length > 0) {
+          const result = data.results[0];
+          if (result.is_connected) {
+            toast.success(`Connection OK — ${result.loginid || "Authorized"}`);
+          } else {
+            toast.error(result.last_error || "Token is invalid or expired. Please reconnect.");
+          }
+        } else if (data?.ok && data?.results?.length === 0) {
+          toast.warning("No Deriv connection found. Please connect via the Connections page first.");
+        } else {
+          toast.error(data?.error || "Health check failed");
+        }
       } else {
-        toast.error(data?.error || "Token is invalid or expired. Please reconnect.");
+        toast.info(`${broker} health check coming soon`);
       }
     } catch (e: any) {
       toast.error(e?.message || "Health check failed");
