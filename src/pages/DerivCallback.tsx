@@ -48,12 +48,53 @@ export default function DerivCallbackPage() {
 
       // Handle direct token flow (some Deriv flows return token directly)
       if (directToken && !code) {
-        console.log("[DerivCallback] Direct token received, storing locally");
-        setDerivOAuthToken(directToken);
-        setStatus("success");
-        setMessage("Connected to Deriv successfully!");
-        localStorage.removeItem(RETRY_COOLDOWN_KEY);
-        setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
+        console.log("[DerivCallback] Direct token received, verifying and storing");
+        
+        // Check if user is authenticated first
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session?.user) {
+          // Store token locally for now, but warn user
+          setDerivOAuthToken(directToken);
+          setStatus("success");
+          setMessage("Connected to Deriv! Log in to enable auto-trading.");
+          setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
+          return;
+        }
+
+        // Call edge function to verify and persist the token
+        try {
+          const cfg = getDerivConfig();
+          const { data, error: fnError } = await supabase.functions.invoke("deriv-oauth-exchange", {
+            body: { 
+              code: directToken, // Direct token acts as the OAuth code
+              env: cfg.env, 
+              redirectUrl: cfg.redirectUrl 
+            },
+          });
+
+          if (fnError || !data?.ok) {
+            console.error("[DerivCallback] Token verification failed:", data?.error || fnError?.message);
+            // Still store locally for WebSocket, but warn about auto-trading
+            setDerivOAuthToken(directToken);
+            setStatus("success");
+            setMessage("Connected to Deriv (limited mode)");
+            setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
+            return;
+          }
+
+          // Token verified and stored in database
+          setDerivOAuthToken(directToken);
+          setStatus("success");
+          setMessage("Connected to Deriv successfully!");
+          localStorage.removeItem(RETRY_COOLDOWN_KEY);
+          setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
+        } catch (err: any) {
+          console.error("[DerivCallback] Error verifying token:", err);
+          setDerivOAuthToken(directToken);
+          setStatus("success");
+          setMessage("Connected to Deriv (limited mode)");
+          setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
+        }
         return;
       }
 
