@@ -75,7 +75,7 @@ const Billing = () => {
   };
 
   const handlePaymentInitiated = (method: string, details: any) => {
-    console.log("Payment initiated:", method, details);
+    // Payment initiated
     toast.success("Payment initiated! You'll receive confirmation shortly.");
     setShowPaymentModal(false);
   };

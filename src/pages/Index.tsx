@@ -166,6 +166,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Trading Dashboard" description="AI-powered trading dashboard with live signals, bots, and copy trading" noIndex />
       <Header />
 
       <main className="container mx-auto px-4 py-6">
