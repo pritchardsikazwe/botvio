@@ -65,23 +65,8 @@ const Signals = () => {
     status,
   });
 
-  // Check if user has premium subscription
-  const { data: subscription } = useQuery({
-    queryKey: ["user-subscription", user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data } = await supabase
-        .from("user_plan_subscriptions")
-        .select("*, pricing_plans(code, name)")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const isPremium = (subscription?.pricing_plans as any)?.code !== "free" && !!subscription;
+  const gate = useSubscriptionGate();
+  const isPremium = gate.isPaid;
 
   // Subscribe to realtime updates
   useEffect(() => {
