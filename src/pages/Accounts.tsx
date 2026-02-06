@@ -467,7 +467,7 @@ const Accounts = () => {
                       size="sm"
                       className="flex-1"
                       disabled={testingAccountId === account.id}
-                      onClick={() => handleTestConnection(account.id)}
+                      onClick={() => handleTestConnection(account.id, account.broker)}
                     >
                       {testingAccountId === account.id ? (
                         <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Testing...</>
