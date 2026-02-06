@@ -86,6 +86,8 @@ const App = () => (
               <Route path="/s/:slug" element={<StrategyDetail />} />
               <Route path="/r/:code" element={<ReferralRedirect />} />
               <Route path="/signals" element={<Signals />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/my-products" element={<MyProducts />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
