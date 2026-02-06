@@ -94,6 +94,7 @@ const Signals = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Trading Signals" description="Real-time trading signals for Gold, Forex, Synthetic Indices & Crypto" />
       <Header />
 
       <main className="container mx-auto px-4 py-6">

@@ -154,6 +154,7 @@ const Learn = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Learn Trading" description="Free trading courses and strategies for beginners and advanced traders" />
       <Header />
 
       <main className="container mx-auto px-4 py-8">

@@ -110,6 +110,7 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Marketplace" description="Browse trading bots, signal packs, strategies, and courses" />
       <Header />
 
       <main className="container mx-auto px-4 py-6">
