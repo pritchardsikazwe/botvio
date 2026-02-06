@@ -1565,6 +1565,42 @@ export type Database = {
           },
         ]
       }
+      partner_links: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+          url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+          url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+          url?: string
+        }
+        Relationships: []
+      }
       payment_options: {
         Row: {
           country_code: string
@@ -1932,6 +1968,7 @@ export type Database = {
           email: string | null
           id: string
           language: string | null
+          onboarding_complete: boolean | null
           updated_at: string
           user_id: string
         }
@@ -1943,6 +1980,7 @@ export type Database = {
           email?: string | null
           id?: string
           language?: string | null
+          onboarding_complete?: boolean | null
           updated_at?: string
           user_id: string
         }
@@ -1954,6 +1992,7 @@ export type Database = {
           email?: string | null
           id?: string
           language?: string | null
+          onboarding_complete?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -2285,6 +2324,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_settings: {
+        Row: {
+          bing_verification_code: string | null
+          canonical_base_url: string | null
+          created_at: string
+          google_verification_code: string | null
+          id: string
+          logo_url: string | null
+          meta_description_default: string | null
+          meta_keywords: string | null
+          meta_title_default: string | null
+          og_image_url: string | null
+          robots_follow: boolean
+          robots_index: boolean
+          site_name: string
+          site_url: string
+          updated_at: string
+        }
+        Insert: {
+          bing_verification_code?: string | null
+          canonical_base_url?: string | null
+          created_at?: string
+          google_verification_code?: string | null
+          id?: string
+          logo_url?: string | null
+          meta_description_default?: string | null
+          meta_keywords?: string | null
+          meta_title_default?: string | null
+          og_image_url?: string | null
+          robots_follow?: boolean
+          robots_index?: boolean
+          site_name?: string
+          site_url?: string
+          updated_at?: string
+        }
+        Update: {
+          bing_verification_code?: string | null
+          canonical_base_url?: string | null
+          created_at?: string
+          google_verification_code?: string | null
+          id?: string
+          logo_url?: string | null
+          meta_description_default?: string | null
+          meta_keywords?: string | null
+          meta_title_default?: string | null
+          og_image_url?: string | null
+          robots_follow?: boolean
+          robots_index?: boolean
+          site_name?: string
+          site_url?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       strategies: {
         Row: {
