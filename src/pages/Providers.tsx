@@ -35,7 +35,7 @@ const Providers = () => {
     multiplier: 1,
   });
 
-  const canUseCopyTrading = myPlan?.pricing_plan?.allow_copy_trading ?? false;
+  const canUseCopyTrading = gate.canCopyTrade;
 
   const isSubscribedTo = (providerId: string) => {
     return mySubscriptions?.some(
