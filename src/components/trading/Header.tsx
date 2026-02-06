@@ -59,6 +59,15 @@ export const Header = () => {
               >
                 Home
               </Button>
+
+              <Button 
+                variant={location.pathname === '/marketplace' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/marketplace')}
+              >
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                Marketplace
+              </Button>
               
               {user && (
                 <>
