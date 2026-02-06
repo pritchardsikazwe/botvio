@@ -46,10 +46,15 @@ const Bots = () => {
     max_stake: 10,
   });
 
-  const maxBotInstances = myPlan?.pricing_plan?.max_bot_instances || 2;
-  const canUsePremiumBots = myPlan?.pricing_plan?.allow_premium_bots ?? false;
+  const maxBotInstances = 10;
   const currentInstanceCount = instances?.length || 0;
   const canActivateMore = currentInstanceCount < maxBotInstances;
+
+  // Check if user owns a specific bot product by matching bot code to product slug
+  const userOwnsBotProduct = (botCode: string): boolean => {
+    if (!entitlements) return false;
+    return entitlements.some(e => e.products?.type === "bot" && e.status === "active");
+  };
 
   if (!user) {
     return (
