@@ -22,7 +22,7 @@ import { useDeriv } from "@/contexts/DerivContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package, HelpCircle, MessageCircle, ExternalLink } from "lucide-react";
+import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package, HelpCircle, MessageCircle, ExternalLink, Download, Smartphone } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
