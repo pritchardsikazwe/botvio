@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -58,6 +58,15 @@ export const Header = () => {
                 onClick={() => navigate('/')}
               >
                 Home
+              </Button>
+
+              <Button 
+                variant={location.pathname === '/marketplace' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/marketplace')}
+              >
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                Marketplace
               </Button>
               
               {user && (
@@ -121,6 +130,10 @@ export const Header = () => {
                   <DropdownMenuContent className="w-56 glass-card">
                     <DropdownMenuLabel>Tools & Features</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/my-products')}>
+                      <Package className="w-4 h-4 mr-2" />
+                      My Products
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/accounts')}>
                       <Wallet className="w-4 h-4 mr-2" />
                       Trading Accounts

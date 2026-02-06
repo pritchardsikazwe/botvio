@@ -25,6 +25,9 @@ interface Product {
   price_usd: number;
   is_active: boolean;
   is_featured: boolean;
+  billing_type: string;
+  billing_interval: string | null;
+  affiliate_percent: number;
   created_at: string;
 }
 
@@ -49,6 +52,9 @@ export const ProductsManagementTab = () => {
     price_usd: 0,
     is_active: true,
     is_featured: false,
+    billing_type: "one_time",
+    billing_interval: null as string | null,
+    affiliate_percent: 0,
   });
 
   const { data: products, isLoading } = useQuery({
@@ -138,6 +144,9 @@ export const ProductsManagementTab = () => {
       price_usd: 0,
       is_active: true,
       is_featured: false,
+      billing_type: "one_time",
+      billing_interval: null,
+      affiliate_percent: 0,
     });
   };
 
@@ -153,6 +162,9 @@ export const ProductsManagementTab = () => {
       price_usd: product.price_usd,
       is_active: product.is_active,
       is_featured: product.is_featured,
+      billing_type: product.billing_type || "one_time",
+      billing_interval: product.billing_interval || null,
+      affiliate_percent: product.affiliate_percent || 0,
     });
     setShowDialog(true);
   };
@@ -271,6 +283,46 @@ export const ProductsManagementTab = () => {
                   onChange={(e) => setForm({ ...form, price_usd: parseFloat(e.target.value) || 0 })}
                   min={0}
                   step={0.01}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Billing Type</Label>
+                <Select value={form.billing_type} onValueChange={(v) => setForm({ ...form, billing_type: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="one_time">One-time</SelectItem>
+                    <SelectItem value="recurring">Recurring</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {form.billing_type === "recurring" && (
+                <div className="space-y-2">
+                  <Label>Billing Interval</Label>
+                  <Select value={form.billing_interval || "month"} onValueChange={(v) => setForm({ ...form, billing_interval: v })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="month">Monthly</SelectItem>
+                      <SelectItem value="year">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Affiliate Commission (%)</Label>
+                <Input
+                  type="number"
+                  value={form.affiliate_percent}
+                  onChange={(e) => setForm({ ...form, affiliate_percent: parseFloat(e.target.value) || 0 })}
+                  min={0}
+                  max={100}
+                  step={0.5}
                 />
               </div>
 

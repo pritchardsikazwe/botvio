@@ -27,6 +27,8 @@ import StrategyDetail from "./pages/StrategyDetail";
 import ReferralRedirect from "./pages/ReferralRedirect";
 import Signals from "./pages/Signals";
 import Settings from "./pages/Settings";
+import Marketplace from "./pages/Marketplace";
+import MyProducts from "./pages/MyProducts";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -84,6 +86,8 @@ const App = () => (
               <Route path="/s/:slug" element={<StrategyDetail />} />
               <Route path="/r/:code" element={<ReferralRedirect />} />
               <Route path="/signals" element={<Signals />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/my-products" element={<MyProducts />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
