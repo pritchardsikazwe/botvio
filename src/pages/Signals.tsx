@@ -32,6 +32,7 @@ import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
   { value: "synthetic", label: "Synthetic Indices" },
+  { value: "syntx", label: "Weltrade SyntX" },
   { value: "gold", label: "Gold (XAUUSD)" },
   { value: "nasdaq", label: "NASDAQ" },
   { value: "crypto", label: "Crypto" },

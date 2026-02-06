@@ -241,6 +241,13 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
                   ))}
                   
                   <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                    Weltrade SyntX
+                  </div>
+                  {SYMBOLS.filter(s => s.category === "syntx").map(s => (
+                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  ))}
+
+                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                     NASDAQ / Indices
                   </div>
                   {SYMBOLS.filter(s => s.category === "nasdaq").map(s => (
