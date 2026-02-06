@@ -21,8 +21,8 @@ const Strategies = () => {
   const { user } = useAuth();
   
   const [search, setSearch] = useState("");
-  const [marketFilter, setMarketFilter] = useState<string>("");
-  const [pricingFilter, setPricingFilter] = useState<string>("");
+  const [marketFilter, setMarketFilter] = useState<string>("all");
+  const [pricingFilter, setPricingFilter] = useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
   // Form state for new strategy
