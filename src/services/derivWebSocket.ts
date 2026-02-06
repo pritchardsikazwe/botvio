@@ -55,6 +55,12 @@ export class DerivWebSocketService {
 
   private tickSubscriptionBySymbol = new Map<string, string>();
 
+  // Rate limiting protection
+  private lastTickRequestTime = 0;
+  private lastForgetRequestTime = 0;
+  private readonly minRequestIntervalMs = 500; // Minimum 500ms between tick/forget requests
+  private pendingTickRequests = new Map<string, boolean>(); // Track pending subscriptions
+
   private readonly url: string;
   private readonly autoReconnect: boolean;
   private readonly reconnectBaseDelayMs: number;
@@ -73,6 +79,25 @@ export class DerivWebSocketService {
     
     // Debug log for troubleshooting
     console.log("[Deriv] WebSocket URL:", this.url, "| Host:", typeof window !== "undefined" ? window.location.hostname : "N/A");
+  }
+
+  // Rate limit helper - returns delay needed before next request
+  private getRateLimitDelay(lastTime: number): number {
+    const elapsed = Date.now() - lastTime;
+    return Math.max(0, this.minRequestIntervalMs - elapsed);
+  }
+
+  private async waitForRateLimit(type: 'tick' | 'forget'): Promise<void> {
+    const lastTime = type === 'tick' ? this.lastTickRequestTime : this.lastForgetRequestTime;
+    const delay = this.getRateLimitDelay(lastTime);
+    if (delay > 0) {
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    if (type === 'tick') {
+      this.lastTickRequestTime = Date.now();
+    } else {
+      this.lastForgetRequestTime = Date.now();
+    }
   }
 
   get connectionStatus() {
@@ -352,20 +377,43 @@ export class DerivWebSocketService {
     }
   }
 
-  /** Subscribe ticks (stores subscription id from tick stream). */
+  /** Subscribe ticks with rate limiting (stores subscription id from tick stream). */
   async subscribeTicks(symbol: string): Promise<void> {
-    await this.send({ ticks: symbol, subscribe: 1 }, 15000);
+    // Check if already subscribed or pending
+    if (this.tickSubscriptionBySymbol.has(symbol)) {
+      console.log(`[Deriv] Already subscribed to ${symbol}, skipping`);
+      return;
+    }
+    if (this.pendingTickRequests.get(symbol)) {
+      console.log(`[Deriv] Subscription pending for ${symbol}, skipping`);
+      return;
+    }
+
+    // Mark as pending
+    this.pendingTickRequests.set(symbol, true);
+
+    try {
+      // Wait for rate limit
+      await this.waitForRateLimit('tick');
+      await this.send({ ticks: symbol, subscribe: 1 }, 15000);
+    } finally {
+      this.pendingTickRequests.delete(symbol);
+    }
   }
 
-  /** Unsubscribe by subscription id returned in tick stream. */
+  /** Unsubscribe by subscription id with rate limiting. */
   async unsubscribe(subscriptionId: string): Promise<void> {
+    await this.waitForRateLimit('forget');
     await this.send({ forget: subscriptionId }, 15000);
   }
 
   /** Convenience: unsubscribe current symbol subscription (if we have it). */
   async unsubscribeTicks(symbol: string): Promise<void> {
     const subId = this.tickSubscriptionBySymbol.get(symbol);
-    if (!subId) return;
+    if (!subId) {
+      console.log(`[Deriv] No subscription found for ${symbol}, skipping unsubscribe`);
+      return;
+    }
     await this.unsubscribe(subId);
     this.tickSubscriptionBySymbol.delete(symbol);
   }
