@@ -109,47 +109,33 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [authorized]);
 
-  // Mock S/R levels
-  const srLevels: SupportResistance[] = [
-    { level: 2380.00, type: 'RESISTANCE', strength: 'STRONG', touches: 5 },
-    { level: 2365.00, type: 'RESISTANCE', strength: 'MODERATE', touches: 3 },
-    { level: 2340.00, type: 'SUPPORT', strength: 'STRONG', touches: 4 },
-    { level: 2320.00, type: 'SUPPORT', strength: 'WEAK', touches: 2 },
-  ];
-
-  // Fetch featured products from database — include all types
-  const { data: featuredProducts } = useQuery({
-    queryKey: ["featured-products-home"],
+  // Fetch real courses from DB
+  const { data: dbCourses } = useQuery({
+    queryKey: ["home-courses"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("is_active", true)
-        .order("is_featured", { ascending: false })
-        .limit(8);
+        .from("education_lessons")
+        .select("category")
+        .order("category");
       if (error) throw error;
-      return data;
+      // Group by category
+      const categories = new Map<string, number>();
+      data?.forEach((l) => {
+        categories.set(l.category || "general", (categories.get(l.category || "general") || 0) + 1);
+      });
+      return Array.from(categories.entries()).map(([cat, count], i) => ({
+        id: i,
+        title: cat.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+        category: cat,
+        lessons: count,
+        slug: cat,
+      })).slice(0, 3);
     },
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Fallback featured bots (used if no products in DB)
-  const defaultFeaturedBots = [
-    { id: "1", name: "Botvio Sniper", short_description: "XAUUSD S/R strategy", type: "bot", price_usd: 0 },
-    { id: "2", name: "V75 Scalper", short_description: "Volatility 75 scalping", type: "bot", price_usd: 29 },
-    { id: "3", name: "Boom Catcher", short_description: "Boom/Crash spikes", type: "bot", price_usd: 0 },
-  ];
-
-  // Featured Courses (can also come from products table)
-  const featuredCourses = [
-    { id: 1, title: "Botvio Sniper Mastery", category: "botvio-sniper", lessons: 8, slug: "botvio-sniper-intro" },
-    { id: 2, title: "VIX Trading Essentials", category: "vix", lessons: 5, slug: "vix-intro" },
-    { id: 3, title: "News Trading Strategy", category: "news-trading", lessons: 4, slug: "news-trading-intro" },
-  ];
-
-  const displayProducts = featuredProducts && featuredProducts.length > 0 
-    ? featuredProducts 
-    : defaultFeaturedBots;
+  const displayProducts = featuredProducts ?? [];
+  const displayCourses = dbCourses ?? [];
 
   const handleSymbolChange = (derivSymbol: string) => {
     // Map Deriv symbol to display pair for UI
