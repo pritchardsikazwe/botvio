@@ -92,6 +92,9 @@ const App = () => (
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/my-products" element={<MyProducts />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/binance" element={<BinanceSettings />} />
+              <Route path="/bots/binance" element={<BinanceBots />} />
+              <Route path="/bots/binance/:id" element={<BinanceBotDetail />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/learn" element={<Learn />} />
