@@ -429,8 +429,35 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Install App Banner */}
+        {/* Push Notifications Banner */}
         <div className="mt-8">
+          <Card className="glass-card border-warning/30 overflow-hidden">
+            <CardContent className="py-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-warning to-orange-500 flex items-center justify-center">
+                    <AlertTriangle className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">🔔 Push Notifications — Coming Soon</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Get instant alerts for signals, trade executions, and market moves. Install the app to be ready!
+                    </p>
+                  </div>
+                </div>
+                <Button variant="gold" asChild>
+                  <Link to="/install">
+                    <Download className="h-4 w-4 mr-2" />
+                    Install App
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Install App Banner */}
+        <div className="mt-4">
           <Card className="glass-card border-primary/30 overflow-hidden">
             <CardContent className="py-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
