@@ -29,9 +29,10 @@ const Bots = () => {
   const { data: bots, isLoading: botsLoading } = useBots();
   const { data: instances, isLoading: instancesLoading } = useBotInstances();
   const { data: accounts } = useTradingAccounts();
-  const { data: myPlan } = useMySubscription();
   const createInstance = useCreateBotInstance();
   const updateInstance = useUpdateBotInstance();
+  const { data: entitlements } = useEntitlements();
+  const ownsAnyBot = useHasProductType("bot");
 
   const [selectedBot, setSelectedBot] = useState<BotType | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
