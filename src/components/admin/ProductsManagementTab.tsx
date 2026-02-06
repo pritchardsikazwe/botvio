@@ -25,6 +25,9 @@ interface Product {
   price_usd: number;
   is_active: boolean;
   is_featured: boolean;
+  billing_type: string;
+  billing_interval: string | null;
+  affiliate_percent: number;
   created_at: string;
 }
 
