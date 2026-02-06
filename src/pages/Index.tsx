@@ -366,11 +366,16 @@ const Index = () => {
                          <Zap className="h-4 w-4 text-primary" />}
                         {product.name}
                       </CardTitle>
-                      {product.price_usd > 0 ? (
-                        <Badge variant="secondary">${product.price_usd}</Badge>
-                      ) : (
-                        <Badge variant="outline">Free</Badge>
-                      )}
+                      <div className="flex items-center gap-1">
+                        {product.type === "course" && (
+                          <Badge variant="outline" className="text-[10px] border-primary text-primary">Soon</Badge>
+                        )}
+                        {product.price_usd > 0 ? (
+                          <Badge variant="secondary">${product.price_usd}</Badge>
+                        ) : (
+                          <Badge variant="outline">Free</Badge>
+                        )}
+                      </div>
                     </div>
                     <CardDescription>{product.short_description || "Trading tool"}</CardDescription>
                   </CardHeader>
