@@ -34,6 +34,47 @@ const SYMBOLS = [
   { value: "JD50", label: "Jump 50", category: "synthetic" },
   { value: "JD25", label: "Jump 25", category: "synthetic" },
   { value: "JD10", label: "Jump 10", category: "synthetic" },
+
+  // Weltrade SyntX — PainX Series
+  { value: "PAINX100", label: "PainX 100", category: "syntx" },
+  { value: "PAINX200", label: "PainX 200", category: "syntx" },
+  { value: "PAINX400", label: "PainX 400", category: "syntx" },
+  { value: "PAINX600", label: "PainX 600", category: "syntx" },
+  { value: "PAINX800", label: "PainX 800", category: "syntx" },
+  { value: "PAINX1200", label: "PainX 1200", category: "syntx" },
+  // Weltrade SyntX — GainX Series
+  { value: "GAINX100", label: "GainX 100", category: "syntx" },
+  { value: "GAINX200", label: "GainX 200", category: "syntx" },
+  { value: "GAINX400", label: "GainX 400", category: "syntx" },
+  { value: "GAINX600", label: "GainX 600", category: "syntx" },
+  { value: "GAINX800", label: "GainX 800", category: "syntx" },
+  { value: "GAINX1200", label: "GainX 1200", category: "syntx" },
+  // Weltrade SyntX — TrendX Series
+  { value: "TRENDX200", label: "TrendX 200", category: "syntx" },
+  { value: "TRENDX400", label: "TrendX 400", category: "syntx" },
+  { value: "TRENDX600", label: "TrendX 600", category: "syntx" },
+  { value: "TRENDX800", label: "TrendX 800", category: "syntx" },
+  { value: "TRENDX1000", label: "TrendX 1000", category: "syntx" },
+  { value: "TRENDX1200", label: "TrendX 1200", category: "syntx" },
+  // Weltrade SyntX — FX Volatility Series
+  { value: "FXVOL10", label: "FX Vol 10", category: "syntx" },
+  { value: "FXVOL20", label: "FX Vol 20", category: "syntx" },
+  { value: "FXVOL40", label: "FX Vol 40", category: "syntx" },
+  { value: "FXVOL80", label: "FX Vol 80", category: "syntx" },
+  { value: "FXVOL160", label: "FX Vol 160", category: "syntx" },
+  // Weltrade SyntX — SFX Volatility Series
+  { value: "SFXVOL10", label: "SFX Vol 10", category: "syntx" },
+  { value: "SFXVOL20", label: "SFX Vol 20", category: "syntx" },
+  { value: "SFXVOL40", label: "SFX Vol 40", category: "syntx" },
+  { value: "SFXVOL80", label: "SFX Vol 80", category: "syntx" },
+  { value: "SFXVOL160", label: "SFX Vol 160", category: "syntx" },
+  // Weltrade SyntX — FlipX / SwitchX / BreakX
+  { value: "FLIPX200", label: "FlipX 200", category: "syntx" },
+  { value: "FLIPX400", label: "FlipX 400", category: "syntx" },
+  { value: "SWITCHX400", label: "SwitchX 400", category: "syntx" },
+  { value: "BREAKX600", label: "BreakX 600", category: "syntx" },
+  { value: "BREAKX1200", label: "BreakX 1200", category: "syntx" },
+
   // Gold
   { value: "XAUUSD", label: "Gold (XAUUSD)", category: "gold" },
   { value: "XAGUSD", label: "Silver (XAGUSD)", category: "gold" },
