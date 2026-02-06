@@ -316,6 +316,10 @@ const Billing = () => {
                           <Button className="w-full" variant="outline" disabled>
                             Current Plan
                           </Button>
+                        ) : isFree ? (
+                          <Button className="w-full" variant="outline" disabled>
+                            Free Forever
+                          </Button>
                         ) : isTrial ? (
                           <Button 
                             className="w-full" 
@@ -327,10 +331,10 @@ const Billing = () => {
                           </Button>
                         ) : (
                           <Button 
-                            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+                            className={`w-full ${isVIP ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" : ""}`}
                             onClick={() => handleUpgradeToVIP(plan)}
                           >
-                            Upgrade to VIP
+                            Upgrade to {plan.name}
                           </Button>
                         )}
                       </CardContent>
