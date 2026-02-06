@@ -112,18 +112,13 @@ const Landing = () => {
     }
   ];
 
-  const brokers = [
-    { name: "Deriv", markets: "Synthetic Indices, Forex, Crypto", link: AFFILIATE_LINKS.deriv },
-    { name: "Exness", markets: "Forex, Gold, Crypto", link: AFFILIATE_LINKS.exness },
-    { name: "Binance", markets: "Spot, Futures, Staking", link: AFFILIATE_LINKS.binance }
-  ];
-
-  const stats = [
-    { value: "50K+", label: "Active Traders" },
-    { value: "24/7", label: "Bot Uptime" },
-    { value: "100+", label: "Trading Bots" },
-    { value: "$2M+", label: "Monthly Volume" }
-  ];
+  const brokers = brokerLinks.length > 0 
+    ? brokerLinks.map(l => ({ name: l.name, markets: l.description || '', link: l.url }))
+    : [
+        { name: "Deriv", markets: "Synthetic Indices, Forex, Crypto", link: "#" },
+        { name: "Exness", markets: "Forex, Gold, Crypto", link: "#" },
+        { name: "Binance", markets: "Spot, Futures, Staking", link: "#" },
+      ];
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
