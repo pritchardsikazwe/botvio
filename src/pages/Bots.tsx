@@ -46,9 +46,8 @@ const Bots = () => {
     max_stake: 10,
   });
 
-  const maxBotInstances = 10;
+  // No artificial limit — gate by product entitlement, not subscription tier
   const currentInstanceCount = instances?.length || 0;
-  const canActivateMore = currentInstanceCount < maxBotInstances;
 
   // Check if user owns a specific bot product by matching bot code to product slug
   const userOwnsBotProduct = (botCode: string): boolean => {
