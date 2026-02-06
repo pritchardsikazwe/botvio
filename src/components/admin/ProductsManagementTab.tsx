@@ -162,6 +162,9 @@ export const ProductsManagementTab = () => {
       price_usd: product.price_usd,
       is_active: product.is_active,
       is_featured: product.is_featured,
+      billing_type: product.billing_type || "one_time",
+      billing_interval: product.billing_interval || null,
+      affiliate_percent: product.affiliate_percent || 0,
     });
     setShowDialog(true);
   };
