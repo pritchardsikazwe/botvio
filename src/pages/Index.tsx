@@ -202,7 +202,7 @@ const Index = () => {
           <div className="lg:col-span-3 space-y-6">
             <AutoTradingPanel />
             <ActiveBotsWidget />
-            <SupportResistanceLevels levels={srLevels} currentPrice={marketData.price} />
+            <SupportResistanceLevels levels={[]} currentPrice={marketData.price} />
             <PerformancePanel />
           </div>
         </div>
