@@ -341,41 +341,49 @@ const Index = () => {
               Featured Products
             </h2>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/bots">
+              <Link to="/marketplace">
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {displayProducts.map((product) => (
-              <Card key={product.id} className="glass-card hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-primary" />
-                      {product.name}
-                    </CardTitle>
-                    {product.price_usd > 0 && (
-                      <Badge variant="secondary">${product.price_usd}</Badge>
-                    )}
-                    {product.price_usd === 0 && (
-                      <Badge variant="outline">Free</Badge>
-                    )}
-                  </div>
-                  <CardDescription>{product.short_description || "Trading strategy"}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="capitalize">
-                      {product.type?.replace("_", " ") || "Strategy"}
-                    </Badge>
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to="/bots">View</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {displayProducts.map((product) => {
+              const productLink = product.type === "bot" ? "/bots" 
+                : product.type === "signal_pack" ? "/signals" 
+                : product.type === "course" ? "/learn" 
+                : "/marketplace";
+              return (
+                <Card key={product.id} className="glass-card hover:border-primary/50 transition-colors">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        {product.type === "bot" ? <Bot className="h-4 w-4 text-primary" /> : 
+                         product.type === "signal_pack" ? <Target className="h-4 w-4 text-primary" /> :
+                         product.type === "course" ? <GraduationCap className="h-4 w-4 text-primary" /> :
+                         <Zap className="h-4 w-4 text-primary" />}
+                        {product.name}
+                      </CardTitle>
+                      {product.price_usd > 0 ? (
+                        <Badge variant="secondary">${product.price_usd}</Badge>
+                      ) : (
+                        <Badge variant="outline">Free</Badge>
+                      )}
+                    </div>
+                    <CardDescription>{product.short_description || "Trading tool"}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="capitalize">
+                        {product.type?.replace("_", " ") || "Product"}
+                      </Badge>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link to={productLink}>View</Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 
