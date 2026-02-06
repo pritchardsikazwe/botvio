@@ -47,6 +47,10 @@ const Landing = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const { data: partnerLinks } = usePartnerLinks();
+  
+  const brokerLinks = partnerLinks?.filter(l => l.category === 'broker') || [];
+  const communityLinks = partnerLinks?.filter(l => l.category === 'community') || [];
 
   useEffect(() => {
     // Check if already installed
