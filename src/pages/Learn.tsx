@@ -299,9 +299,9 @@ const Learn = () => {
                   <CardContent>
                     {isLocked ? (
                       <Button variant="gold" className="w-full" asChild>
-                        <a href="/billing">
+                        <a href="/marketplace">
                           <Crown className="w-4 h-4 mr-2" />
-                          Upgrade to Unlock
+                          Buy Course to Unlock
                         </a>
                       </Button>
                     ) : (
