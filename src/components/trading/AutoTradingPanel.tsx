@@ -113,36 +113,18 @@ export const AutoTradingPanel = () => {
     mutationFn: async (enabled: boolean) => {
       if (!user) throw new Error("Not authenticated");
       
-      // Check if settings exist first
-      const { data: existing } = await supabase
+      // Use upsert for atomic operation
+      const { error } = await supabase
         .from("user_settings")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      let error;
-      if (existing) {
-        // Update existing record
-        const result = await supabase
-          .from("user_settings")
-          .update({
-            auto_trading_enabled: enabled,
-            auto_trading_consent_at: enabled ? new Date().toISOString() : null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", user.id);
-        error = result.error;
-      } else {
-        // Insert new record
-        const result = await supabase
-          .from("user_settings")
-          .insert({
+        .upsert(
+          {
             user_id: user.id,
             auto_trading_enabled: enabled,
             auto_trading_consent_at: enabled ? new Date().toISOString() : null,
-          });
-        error = result.error;
-      }
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
       
       if (error) throw error;
       return enabled;
