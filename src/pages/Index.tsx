@@ -334,6 +334,9 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Trading Style Picker */}
+        <TradingStyleSection />
+
         {/* Latest Trading Signals */}
         <HomeSignalsWidget />
 
