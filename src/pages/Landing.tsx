@@ -246,18 +246,14 @@ const Landing = () => {
           
           {/* Community Links */}
           <div className="flex justify-center gap-4 mt-8">
-            <a href={COMMUNITY_LINKS.whatsapp} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                WhatsApp Group
-              </Button>
-            </a>
-            <a href={COMMUNITY_LINKS.telegram} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <Send className="h-4 w-4 mr-2" />
-                Telegram Group
-              </Button>
-            </a>
+            {communityLinks.map((link) => (
+              <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm">
+                  {link.icon === 'Send' ? <Send className="h-4 w-4 mr-2" /> : <MessageCircle className="h-4 w-4 mr-2" />}
+                  {link.name} Group
+                </Button>
+              </a>
+            ))}
           </div>
         </div>
       </section>
