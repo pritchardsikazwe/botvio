@@ -42,7 +42,7 @@ const Index = () => {
   // Show onboarding for new users (check localStorage to show only once)
   useEffect(() => {
     if (user) {
-      const hasSeenOnboarding = localStorage.getItem('hauza_onboarding_seen');
+      const hasSeenOnboarding = localStorage.getItem('botvio_onboarding_seen');
       if (!hasSeenOnboarding) {
         setShowOnboarding(true);
       }
