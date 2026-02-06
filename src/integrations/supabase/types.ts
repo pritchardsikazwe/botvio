@@ -913,6 +913,280 @@ export type Database = {
           },
         ]
       }
+      exchange_accounts: {
+        Row: {
+          api_key_enc: string
+          api_secret_enc: string
+          created_at: string
+          exchange: string
+          id: string
+          label: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_key_enc: string
+          api_secret_enc: string
+          created_at?: string
+          exchange: string
+          id?: string
+          label?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_key_enc?: string
+          api_secret_enc?: string
+          created_at?: string
+          exchange?: string
+          id?: string
+          label?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exchange_bot_instances: {
+        Row: {
+          config_json: Json
+          created_at: string
+          exchange_account_id: string
+          id: string
+          last_run_at: string | null
+          market_type: string
+          risk_profile: string
+          status: string
+          strategy_id: string
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config_json?: Json
+          created_at?: string
+          exchange_account_id: string
+          id?: string
+          last_run_at?: string | null
+          market_type: string
+          risk_profile?: string
+          status?: string
+          strategy_id: string
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config_json?: Json
+          created_at?: string
+          exchange_account_id?: string
+          id?: string
+          last_run_at?: string | null
+          market_type?: string
+          risk_profile?: string
+          status?: string
+          strategy_id?: string
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_bot_instances_exchange_account_id_fkey"
+            columns: ["exchange_account_id"]
+            isOneToOne: false
+            referencedRelation: "exchange_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exchange_bot_instances_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "exchange_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exchange_bot_runs: {
+        Row: {
+          bot_instance_id: string
+          created_at: string
+          decision: string
+          id: string
+          ran_at: string
+          reason: string | null
+          snapshot: Json | null
+        }
+        Insert: {
+          bot_instance_id: string
+          created_at?: string
+          decision: string
+          id?: string
+          ran_at?: string
+          reason?: string | null
+          snapshot?: Json | null
+        }
+        Update: {
+          bot_instance_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          ran_at?: string
+          reason?: string | null
+          snapshot?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_bot_runs_bot_instance_id_fkey"
+            columns: ["bot_instance_id"]
+            isOneToOne: false
+            referencedRelation: "exchange_bot_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exchange_orders: {
+        Row: {
+          bot_instance_id: string | null
+          created_at: string
+          exchange: string
+          exchange_order_id: string | null
+          id: string
+          order_type: string
+          price: number | null
+          quantity: number | null
+          raw: Json | null
+          side: string
+          status: string
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          bot_instance_id?: string | null
+          created_at?: string
+          exchange: string
+          exchange_order_id?: string | null
+          id?: string
+          order_type: string
+          price?: number | null
+          quantity?: number | null
+          raw?: Json | null
+          side: string
+          status?: string
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          bot_instance_id?: string | null
+          created_at?: string
+          exchange?: string
+          exchange_order_id?: string | null
+          id?: string
+          order_type?: string
+          price?: number | null
+          quantity?: number | null
+          raw?: Json | null
+          side?: string
+          status?: string
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_orders_bot_instance_id_fkey"
+            columns: ["bot_instance_id"]
+            isOneToOne: false
+            referencedRelation: "exchange_bot_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exchange_positions: {
+        Row: {
+          created_at: string
+          entry_price: number | null
+          exchange: string
+          id: string
+          market_type: string
+          position_side: string | null
+          qty: number | null
+          raw: Json | null
+          symbol: string
+          unrealized_pnl: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_price?: number | null
+          exchange: string
+          id?: string
+          market_type: string
+          position_side?: string | null
+          qty?: number | null
+          raw?: Json | null
+          symbol: string
+          unrealized_pnl?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_price?: number | null
+          exchange?: string
+          id?: string
+          market_type?: string
+          position_side?: string | null
+          qty?: number | null
+          raw?: Json | null
+          symbol?: string
+          unrealized_pnl?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exchange_strategies: {
+        Row: {
+          created_at: string
+          description: string | null
+          exchange: string
+          id: string
+          is_active: boolean
+          key: string
+          market_type: string
+          name: string
+          schema_json: Json
+          template_json: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          exchange: string
+          id?: string
+          is_active?: boolean
+          key: string
+          market_type: string
+          name: string
+          schema_json?: Json
+          template_json?: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          exchange?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          market_type?: string
+          name?: string
+          schema_json?: Json
+          template_json?: Json
+        }
+        Relationships: []
+      }
       executions: {
         Row: {
           broker_ref: string | null
