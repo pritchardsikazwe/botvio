@@ -74,9 +74,9 @@ const Bots = () => {
       return;
     }
 
-    if (bot.is_premium && !canUsePremiumBots) {
-      toast.error("Premium bots require Pro or VIP plan");
-      navigate("/billing");
+    if (bot.is_premium && !userOwnsBotProduct(bot.code)) {
+      toast.error("You need to purchase this bot first. Visit the Marketplace.");
+      navigate("/marketplace");
       return;
     }
 
