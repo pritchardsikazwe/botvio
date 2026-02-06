@@ -114,10 +114,14 @@ const lessonIcons: { [key: string]: React.ComponentType<{ className?: string }> 
 };
 
 const Learn = () => {
+  const { user } = useAuth();
+  const gate = useSubscriptionGate();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  const FREE_LESSON_LIMIT = 2;
   
   const activeCategory = searchParams.get("category") || "botvio-sniper";
 
