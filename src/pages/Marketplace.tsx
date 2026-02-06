@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { useMarketplaceProducts, usePurchaseProduct, MarketplaceProduct } from "@/hooks/useMarketplace";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { Header } from "@/components/trading/Header";

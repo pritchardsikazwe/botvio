@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/trading/Header";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { useManualSignals } from "@/hooks/useManualSignals";
