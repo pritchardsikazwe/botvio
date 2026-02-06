@@ -244,12 +244,12 @@ const Bots = () => {
                       <Button
                         className="w-full"
                         onClick={() => handleActivateBot(bot)}
-                        disabled={bot.is_premium && !canUsePremiumBots}
+                        disabled={bot.is_premium && !userOwnsBotProduct(bot.code)}
                       >
-                        {bot.is_premium && !canUsePremiumBots ? (
+                        {bot.is_premium && !userOwnsBotProduct(bot.code) ? (
                           <>
                             <Lock className="mr-2 h-4 w-4" />
-                            Upgrade to Unlock
+                            Buy in Marketplace
                           </>
                         ) : (
                           <>

@@ -262,7 +262,7 @@ const Signals = () => {
                     Upgrade to see all premium signals
                   </p>
                   <Button variant="gold" size="sm" asChild>
-                    <a href="/billing">Unlock All</a>
+                    <a href="/marketplace">Unlock All</a>
                   </Button>
                 </CardContent>
               </Card>

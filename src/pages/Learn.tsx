@@ -317,8 +317,18 @@ const Learn = () => {
           )}
         </div>
 
-        {!gate.isPaid && lessons.length > FREE_LESSON_LIMIT && (
-          <UpgradePrompt feature="All Course Lessons" requiredPlan="Basic" className="mt-6" />
+        {!ownsCourse && lessons.length > FREE_LESSON_LIMIT && (
+          <Card className="glass-card border-warning/30 mt-6">
+            <CardContent className="py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Crown className="h-5 w-5 text-warning" />
+                <span className="text-sm">Purchase a course to unlock all lessons</span>
+              </div>
+              <Button variant="gold" size="sm" asChild>
+                <a href="/marketplace">Browse Courses</a>
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* Quick Start Guide */}
