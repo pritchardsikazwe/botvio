@@ -26,8 +26,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ManualSignal } from "@/hooks/useManualSignals";
-import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
-import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
+import { useHasProductType } from "@/hooks/useEntitlements";
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
@@ -66,8 +65,7 @@ const Signals = () => {
     status,
   });
 
-  const gate = useSubscriptionGate();
-  const isPremium = gate.isPaid;
+  const isPremium = useHasProductType("signal_pack");
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -226,7 +224,17 @@ const Signals = () => {
 
         {/* Upgrade Prompt for free users */}
         {!isPremium && user && (
-          <UpgradePrompt feature="Premium Signals" requiredPlan="Basic" className="mb-6" />
+          <Card className="glass-card border-warning/30 mb-6">
+            <CardContent className="py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Crown className="h-5 w-5 text-warning" />
+                <span className="text-sm">Subscribe to Premium Signals to see all signals</span>
+              </div>
+              <Button variant="gold" size="sm" asChild>
+                <a href="/marketplace">Browse Marketplace</a>
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* Signals Grid */}
@@ -254,7 +262,7 @@ const Signals = () => {
                     Upgrade to see all premium signals
                   </p>
                   <Button variant="gold" size="sm" asChild>
-                    <a href="/billing">Unlock All</a>
+                    <a href="/marketplace">Unlock All</a>
                   </Button>
                 </CardContent>
               </Card>

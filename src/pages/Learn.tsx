@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
-import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
+import { useHasProductType } from "@/hooks/useEntitlements";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,7 +116,7 @@ const lessonIcons: { [key: string]: React.ComponentType<{ className?: string }> 
 
 const Learn = () => {
   const { user } = useAuth();
-  const gate = useSubscriptionGate();
+  const ownsCourse = useHasProductType("course");
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -266,7 +265,7 @@ const Learn = () => {
           ) : (
             lessons.map((lesson, index) => {
               const Icon = lessonIcons[lesson.slug] || BookOpen;
-              const isLocked = !gate.isPaid && index >= FREE_LESSON_LIMIT;
+              const isLocked = !ownsCourse && index >= FREE_LESSON_LIMIT;
               return (
                 <Card 
                   key={lesson.id} 
@@ -300,9 +299,9 @@ const Learn = () => {
                   <CardContent>
                     {isLocked ? (
                       <Button variant="gold" className="w-full" asChild>
-                        <a href="/billing">
+                        <a href="/marketplace">
                           <Crown className="w-4 h-4 mr-2" />
-                          Upgrade to Unlock
+                          Buy Course to Unlock
                         </a>
                       </Button>
                     ) : (
@@ -318,8 +317,18 @@ const Learn = () => {
           )}
         </div>
 
-        {!gate.isPaid && lessons.length > FREE_LESSON_LIMIT && (
-          <UpgradePrompt feature="All Course Lessons" requiredPlan="Basic" className="mt-6" />
+        {!ownsCourse && lessons.length > FREE_LESSON_LIMIT && (
+          <Card className="glass-card border-warning/30 mt-6">
+            <CardContent className="py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Crown className="h-5 w-5 text-warning" />
+                <span className="text-sm">Purchase a course to unlock all lessons</span>
+              </div>
+              <Button variant="gold" size="sm" asChild>
+                <a href="/marketplace">Browse Courses</a>
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* Quick Start Guide */}

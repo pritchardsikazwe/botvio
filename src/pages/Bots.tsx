@@ -6,8 +6,8 @@ import {
   useTradingAccounts, 
   useCreateBotInstance, 
   useUpdateBotInstance,
-  useMySubscription 
 } from "@/hooks/useBotvio";
+import { useHasProductType, useEntitlements } from "@/hooks/useEntitlements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,9 +29,10 @@ const Bots = () => {
   const { data: bots, isLoading: botsLoading } = useBots();
   const { data: instances, isLoading: instancesLoading } = useBotInstances();
   const { data: accounts } = useTradingAccounts();
-  const { data: myPlan } = useMySubscription();
   const createInstance = useCreateBotInstance();
   const updateInstance = useUpdateBotInstance();
+  const { data: entitlements } = useEntitlements();
+  const ownsAnyBot = useHasProductType("bot");
 
   const [selectedBot, setSelectedBot] = useState<BotType | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -45,10 +46,15 @@ const Bots = () => {
     max_stake: 10,
   });
 
-  const maxBotInstances = myPlan?.pricing_plan?.max_bot_instances || 2;
-  const canUsePremiumBots = myPlan?.pricing_plan?.allow_premium_bots ?? false;
+  const maxBotInstances = 10;
   const currentInstanceCount = instances?.length || 0;
   const canActivateMore = currentInstanceCount < maxBotInstances;
+
+  // Check if user owns a specific bot product by matching bot code to product slug
+  const userOwnsBotProduct = (botCode: string): boolean => {
+    if (!entitlements) return false;
+    return entitlements.some(e => e.products?.type === "bot" && e.status === "active");
+  };
 
   if (!user) {
     return (
@@ -68,9 +74,9 @@ const Bots = () => {
       return;
     }
 
-    if (bot.is_premium && !canUsePremiumBots) {
-      toast.error("Premium bots require Pro or VIP plan");
-      navigate("/billing");
+    if (bot.is_premium && !userOwnsBotProduct(bot.code)) {
+      toast.error("You need to purchase this bot first. Visit the Marketplace.");
+      navigate("/marketplace");
       return;
     }
 
@@ -238,12 +244,12 @@ const Bots = () => {
                       <Button
                         className="w-full"
                         onClick={() => handleActivateBot(bot)}
-                        disabled={bot.is_premium && !canUsePremiumBots}
+                        disabled={bot.is_premium && !userOwnsBotProduct(bot.code)}
                       >
-                        {bot.is_premium && !canUsePremiumBots ? (
+                        {bot.is_premium && !userOwnsBotProduct(bot.code) ? (
                           <>
                             <Lock className="mr-2 h-4 w-4" />
-                            Upgrade to Unlock
+                            Buy in Marketplace
                           </>
                         ) : (
                           <>
