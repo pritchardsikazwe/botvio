@@ -26,8 +26,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ManualSignal } from "@/hooks/useManualSignals";
-import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
-import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
+import { useHasProductType } from "@/hooks/useEntitlements";
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
