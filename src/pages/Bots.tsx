@@ -68,11 +68,6 @@ const Bots = () => {
   }
 
   const handleActivateBot = (bot: BotType) => {
-    if (!canActivateMore) {
-      toast.error(`You've reached your limit of ${maxBotInstances} bot instances. Upgrade to add more.`);
-      return;
-    }
-
     if (bot.is_premium && !userOwnsBotProduct(bot.code)) {
       toast.error("You need to purchase this bot first. Visit the Marketplace.");
       navigate("/marketplace");
