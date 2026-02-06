@@ -314,11 +314,12 @@ const Marketplace = () => {
 
           <div className="space-y-4 py-4">
             <PaymentMethodSelector
-              onSelect={(method) => setPaymentMethod(method)}
+              planCode={selectedProduct?.slug || "product"}
+              planName={selectedProduct?.name || "Product"}
+              amount={selectedProduct?.price_usd || 0}
               onPaymentInitiated={(method, details) => {
                 setPaymentMethod(method);
               }}
-              selectedPlan={selectedProduct as any}
             />
 
             <div className="space-y-2">
