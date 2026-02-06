@@ -110,6 +110,13 @@ const Landing = () => {
       title: "Multi-Broker Support",
       description: "Trade on Deriv, Weltrade, and Exness from a single platform"
     }
+      ];
+
+  const stats = [
+    { value: "50K+", label: "Active Traders" },
+    { value: "24/7", label: "Bot Uptime" },
+    { value: "100+", label: "Trading Bots" },
+    { value: "$2M+", label: "Monthly Volume" },
   ];
 
   const brokers = brokerLinks.length > 0 
