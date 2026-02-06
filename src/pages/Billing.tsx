@@ -111,8 +111,8 @@ const Billing = () => {
     }
   };
 
-  // Filter to only show active plans (Trial + VIP)
-  const activePlans = plans?.filter(p => p.is_active) || [];
+  // Show all active plans sorted by price
+  const activePlans = (plans?.filter(p => p.is_active) || []).sort((a, b) => (a.price_usd ?? 0) - (b.price_usd ?? 0));
 
   return (
     <div className="min-h-screen bg-background">
