@@ -224,7 +224,17 @@ const Signals = () => {
 
         {/* Upgrade Prompt for free users */}
         {!isPremium && user && (
-          <UpgradePrompt feature="Premium Signals" requiredPlan="Basic" className="mb-6" />
+          <Card className="glass-card border-warning/30 mb-6">
+            <CardContent className="py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Crown className="h-5 w-5 text-warning" />
+                <span className="text-sm">Subscribe to Premium Signals to see all signals</span>
+              </div>
+              <Button variant="gold" size="sm" asChild>
+                <a href="/marketplace">Browse Marketplace</a>
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* Signals Grid */}
