@@ -116,7 +116,7 @@ const lessonIcons: { [key: string]: React.ComponentType<{ className?: string }> 
 
 const Learn = () => {
   const { user } = useAuth();
-  const gate = useSubscriptionGate();
+  const ownsCourse = useHasProductType("course");
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
