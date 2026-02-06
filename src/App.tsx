@@ -29,6 +29,9 @@ import Signals from "./pages/Signals";
 import Settings from "./pages/Settings";
 import Marketplace from "./pages/Marketplace";
 import MyProducts from "./pages/MyProducts";
+import BinanceSettings from "./pages/BinanceSettings";
+import BinanceBots from "./pages/BinanceBots";
+import BinanceBotDetail from "./pages/BinanceBotDetail";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -89,6 +92,9 @@ const App = () => (
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/my-products" element={<MyProducts />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/binance" element={<BinanceSettings />} />
+              <Route path="/bots/binance" element={<BinanceBots />} />
+              <Route path="/bots/binance/:id" element={<BinanceBotDetail />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/learn" element={<Learn />} />

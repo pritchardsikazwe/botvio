@@ -44,3 +44,18 @@ verify_jwt = false
 
 [functions.bridge-push-state]
 verify_jwt = false
+
+[functions.binance-save-keys]
+verify_jwt = false
+
+[functions.binance-test-connection]
+verify_jwt = false
+
+[functions.binance-place-order]
+verify_jwt = false
+
+[functions.admin-signup-notification]
+verify_jwt = false
+
+[functions.botvio-sniper]
+verify_jwt = false

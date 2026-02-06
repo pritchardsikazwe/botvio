@@ -88,6 +88,15 @@ export const Header = () => {
                     <Bot className="w-4 h-4 mr-1" />
                     Bots
                   </Button>
+
+                  <Button 
+                    variant={location.pathname.startsWith('/bots/binance') || location.pathname === '/settings/binance' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/bots/binance')}
+                  >
+                    <Zap className="w-4 h-4 mr-1" />
+                    Binance
+                  </Button>
                   
                   <Button 
                     variant={location.pathname === '/providers' ? 'secondary' : 'ghost'} 
