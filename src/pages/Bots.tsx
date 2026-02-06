@@ -46,9 +46,8 @@ const Bots = () => {
     max_stake: 10,
   });
 
-  const maxBotInstances = 10;
+  // No artificial limit — gate by product entitlement, not subscription tier
   const currentInstanceCount = instances?.length || 0;
-  const canActivateMore = currentInstanceCount < maxBotInstances;
 
   // Check if user owns a specific bot product by matching bot code to product slug
   const userOwnsBotProduct = (botCode: string): boolean => {
@@ -69,11 +68,6 @@ const Bots = () => {
   }
 
   const handleActivateBot = (bot: BotType) => {
-    if (!canActivateMore) {
-      toast.error(`You've reached your limit of ${maxBotInstances} bot instances. Upgrade to add more.`);
-      return;
-    }
-
     if (bot.is_premium && !userOwnsBotProduct(bot.code)) {
       toast.error("You need to purchase this bot first. Visit the Marketplace.");
       navigate("/marketplace");
@@ -177,7 +171,7 @@ const Bots = () => {
             </p>
           </div>
           <div className="text-right text-sm text-muted-foreground">
-            <p>{currentInstanceCount} / {maxBotInstances} bot instances used</p>
+            <p>{currentInstanceCount} bot instances active</p>
           </div>
         </div>
 

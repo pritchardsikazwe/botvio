@@ -219,6 +219,19 @@ export const Header = () => {
                       <BarChart3 className="w-4 h-4 mr-2" />
                       Strategies
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/bots/binance')}>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Binance Bots
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/settings/binance')}>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Binance Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/marketplace')}>
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Marketplace
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
