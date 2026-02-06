@@ -65,8 +65,7 @@ const Signals = () => {
     status,
   });
 
-  const gate = useSubscriptionGate();
-  const isPremium = gate.isPaid;
+  const isPremium = useHasProductType("signal_pack");
 
   // Subscribe to realtime updates
   useEffect(() => {
