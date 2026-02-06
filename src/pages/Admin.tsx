@@ -45,6 +45,7 @@ import { AdminDerivConnectionsTab } from "@/components/admin/AdminDerivConnectio
 import { AdminPricingPlansTab } from "@/components/admin/AdminPricingPlansTab";
 import { SignalApprovalsTab } from "@/components/admin/SignalApprovalsTab";
 import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab";
+import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
 
 interface Provider {
   id: string;
