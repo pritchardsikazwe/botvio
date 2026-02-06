@@ -205,11 +205,17 @@ const Billing = () => {
                 <Skeleton className="h-96" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <div className={`grid grid-cols-1 gap-6 max-w-5xl mx-auto ${
+                activePlans.length <= 2 ? 'md:grid-cols-2 max-w-2xl' : 
+                activePlans.length === 3 ? 'md:grid-cols-3 max-w-3xl' : 
+                'md:grid-cols-2 lg:grid-cols-4'
+              }`}>
                 {activePlans.map((plan) => {
+                  const isFree = plan.code === "free";
                   const isTrial = plan.code === "trial";
                   const isVIP = plan.code === "vip";
                   const isCurrentPlan = plan.code === currentPlanCode;
+                  const isPopular = plan.code === "standard";
                   
                   return (
                     <Card 
