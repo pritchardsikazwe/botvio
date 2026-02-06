@@ -21,8 +21,8 @@ const Strategies = () => {
   const { user } = useAuth();
   
   const [search, setSearch] = useState("");
-  const [marketFilter, setMarketFilter] = useState<string>("");
-  const [pricingFilter, setPricingFilter] = useState<string>("");
+  const [marketFilter, setMarketFilter] = useState<string>("all");
+  const [pricingFilter, setPricingFilter] = useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
   // Form state for new strategy
@@ -36,8 +36,8 @@ const Strategies = () => {
   });
 
   const { data: strategies = [], isLoading } = useStrategies({
-    market: marketFilter || undefined,
-    pricingType: pricingFilter || undefined,
+    market: marketFilter === "all" ? undefined : marketFilter,
+    pricingType: pricingFilter === "all" ? undefined : pricingFilter,
   });
   const { data: myStrategies = [] } = useMyStrategies();
   const createStrategy = useCreateStrategy();
@@ -241,7 +241,7 @@ const Strategies = () => {
                   <SelectValue placeholder={t("strategies.allMarkets", "All Markets")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("strategies.allMarkets", "All Markets")}</SelectItem>
+                  <SelectItem value="all">{t("strategies.allMarkets", "All Markets")}</SelectItem>
                   <SelectItem value="deriv">Deriv</SelectItem>
                   <SelectItem value="binance">Binance</SelectItem>
                   <SelectItem value="mt5">MT5</SelectItem>
@@ -254,7 +254,7 @@ const Strategies = () => {
                   <SelectValue placeholder={t("strategies.allPricing", "All Pricing")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("strategies.allPricing", "All Pricing")}</SelectItem>
+                  <SelectItem value="all">{t("strategies.allPricing", "All Pricing")}</SelectItem>
                   <SelectItem value="free">{t("strategies.free", "Free")}</SelectItem>
                   <SelectItem value="paid">{t("strategies.paid", "Paid")}</SelectItem>
                 </SelectContent>

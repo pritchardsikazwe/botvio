@@ -138,7 +138,7 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
     }
 
     // Calculate expiration time
-    const expiresAt = expiresIn ? new Date(Date.now() + parseInt(expiresIn) * 60 * 60 * 1000).toISOString() : undefined;
+    const expiresAt = expiresIn && expiresIn !== "none" ? new Date(Date.now() + parseInt(expiresIn) * 60 * 60 * 1000).toISOString() : undefined;
 
     await createSignal.mutateAsync({
       symbol,
@@ -326,7 +326,7 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
                   <SelectItem value="24">24 Hours</SelectItem>
                   <SelectItem value="48">48 Hours</SelectItem>
                   <SelectItem value="72">72 Hours</SelectItem>
-                  <SelectItem value="">No Expiration</SelectItem>
+                  <SelectItem value="none">No Expiration</SelectItem>
                 </SelectContent>
               </Select>
             </div>
