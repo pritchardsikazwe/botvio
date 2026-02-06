@@ -109,6 +109,22 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [authorized]);
 
+  // Fetch featured products from database — include all types
+  const { data: featuredProducts } = useQuery({
+    queryKey: ["featured-products-home"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .order("is_featured", { ascending: false })
+        .limit(8);
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60 * 1000,
+  });
+
   // Fetch real courses from DB
   const { data: dbCourses } = useQuery({
     queryKey: ["home-courses"],
@@ -118,7 +134,6 @@ const Index = () => {
         .select("category")
         .order("category");
       if (error) throw error;
-      // Group by category
       const categories = new Map<string, number>();
       data?.forEach((l) => {
         categories.set(l.category || "general", (categories.get(l.category || "general") || 0) + 1);
@@ -129,7 +144,7 @@ const Index = () => {
         category: cat,
         lessons: count,
         slug: cat,
-      })).slice(0, 3);
+      })).slice(0, 4);
     },
     staleTime: 5 * 60 * 1000,
   });
