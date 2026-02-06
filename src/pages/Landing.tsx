@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { usePartnerLinks } from "@/hooks/useSiteSettings";
 import { 
   Bot, 
   TrendingUp, 
