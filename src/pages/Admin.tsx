@@ -33,7 +33,8 @@ import {
   FileText,
   Settings,
   Package,
-  ClipboardCheck
+  ClipboardCheck,
+  Globe
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
