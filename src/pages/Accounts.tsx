@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/trading/Header";
 import { useNavigate } from "react-router-dom";
-import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, Gift, Sparkles } from "lucide-react";
+import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, Gift, Sparkles, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
 
 // Affiliate links
 const AFFILIATE_LINKS = {
@@ -35,6 +37,39 @@ const Accounts = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showToken, setShowToken] = useState(false);
+  const [testingAccountId, setTestingAccountId] = useState<string | null>(null);
+
+  const handleTestConnection = async (accountId: string, broker: string) => {
+    setTestingAccountId(accountId);
+    try {
+      if (broker === "deriv") {
+        // Use deriv-verify-token edge function with the trading account
+        const { data, error } = await supabase.functions.invoke("deriv-health-check", {
+          body: {},
+        });
+        if (error) throw error;
+        
+        if (data?.ok && data?.results?.length > 0) {
+          const result = data.results[0];
+          if (result.is_connected) {
+            toast.success(`Connection OK — ${result.loginid || "Authorized"}`);
+          } else {
+            toast.error(result.last_error || "Token is invalid or expired. Please reconnect.");
+          }
+        } else if (data?.ok && data?.results?.length === 0) {
+          toast.warning("No Deriv connection found. Please connect via the Connections page first.");
+        } else {
+          toast.error(data?.error || "Health check failed");
+        }
+      } else {
+        toast.info(`${broker} health check coming soon`);
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Health check failed");
+    } finally {
+      setTestingAccountId(null);
+    }
+  };
   const [formData, setFormData] = useState({
     broker: "deriv" as "deriv" | "binance" | "exness",
     label: "",
@@ -427,8 +462,18 @@ const Accounts = () => {
                   </div>
                   
                   <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Test Connection
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      disabled={testingAccountId === account.id}
+                      onClick={() => handleTestConnection(account.id, account.broker)}
+                    >
+                      {testingAccountId === account.id ? (
+                        <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Testing...</>
+                      ) : (
+                        "Test Connection"
+                      )}
                     </Button>
                     <Button
                       variant="destructive"
