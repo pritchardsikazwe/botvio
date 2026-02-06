@@ -101,7 +101,8 @@ const Strategies = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <Header />
+      {/* Sub-Header */}
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
