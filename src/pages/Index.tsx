@@ -421,6 +421,33 @@ const Index = () => {
             ))}
           </div>
         </div>
+
+        {/* Install App Banner */}
+        <div className="mt-8">
+          <Card className="glass-card border-primary/30 overflow-hidden">
+            <CardContent className="py-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-warning flex items-center justify-center">
+                    <Smartphone className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Get the Botvio App</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Install on your phone for instant access, push alerts & offline mode
+                    </p>
+                  </div>
+                </div>
+                <Button variant="gold" asChild>
+                  <Link to="/install">
+                    <Download className="h-4 w-4 mr-2" />
+                    Install App
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {/* Trading Guide Onboarding */}
