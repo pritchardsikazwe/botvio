@@ -221,12 +221,18 @@ const Billing = () => {
                     <Card 
                       key={plan.id} 
                       className={`glass-card relative overflow-hidden ${
-                        isVIP ? "border-amber-500/50 ring-2 ring-amber-500/20" : ""
+                        isVIP ? "border-amber-500/50 ring-2 ring-amber-500/20" : 
+                        isPopular ? "border-primary/50 ring-2 ring-primary/20" : ""
                       }`}
                     >
                       {isVIP && (
                         <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
                           Best Value
+                        </div>
+                      )}
+                      {isPopular && (
+                        <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                          Popular
                         </div>
                       )}
                       
