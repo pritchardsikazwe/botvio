@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProviders, useTradingAccounts, useSubscribeToProvider, useMyCopySubscriptions, useMySubscription } from "@/hooks/useBotvio";
+import { useProviders, useTradingAccounts, useSubscribeToProvider, useMyCopySubscriptions } from "@/hooks/useBotvio";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
