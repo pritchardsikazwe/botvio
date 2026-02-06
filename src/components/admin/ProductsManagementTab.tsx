@@ -286,7 +286,46 @@ export const ProductsManagementTab = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Label>Billing Type</Label>
+                <Select value={form.billing_type} onValueChange={(v) => setForm({ ...form, billing_type: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="one_time">One-time</SelectItem>
+                    <SelectItem value="recurring">Recurring</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {form.billing_type === "recurring" && (
+                <div className="space-y-2">
+                  <Label>Billing Interval</Label>
+                  <Select value={form.billing_interval || "month"} onValueChange={(v) => setForm({ ...form, billing_interval: v })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="month">Monthly</SelectItem>
+                      <SelectItem value="year">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Affiliate Commission (%)</Label>
+                <Input
+                  type="number"
+                  value={form.affiliate_percent}
+                  onChange={(e) => setForm({ ...form, affiliate_percent: parseFloat(e.target.value) || 0 })}
+                  min={0}
+                  max={100}
+                  step={0.5}
+                />
+              </div>
+
                 <Label>Active</Label>
                 <Switch
                   checked={form.is_active}
