@@ -254,7 +254,7 @@ const Strategies = () => {
                   <SelectValue placeholder={t("strategies.allPricing", "All Pricing")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("strategies.allPricing", "All Pricing")}</SelectItem>
+                  <SelectItem value="all">{t("strategies.allPricing", "All Pricing")}</SelectItem>
                   <SelectItem value="free">{t("strategies.free", "Free")}</SelectItem>
                   <SelectItem value="paid">{t("strategies.paid", "Paid")}</SelectItem>
                 </SelectContent>

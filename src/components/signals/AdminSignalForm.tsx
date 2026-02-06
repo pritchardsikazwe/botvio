@@ -326,7 +326,7 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
                   <SelectItem value="24">24 Hours</SelectItem>
                   <SelectItem value="48">48 Hours</SelectItem>
                   <SelectItem value="72">72 Hours</SelectItem>
-                  <SelectItem value="">No Expiration</SelectItem>
+                  <SelectItem value="none">No Expiration</SelectItem>
                 </SelectContent>
               </Select>
             </div>
