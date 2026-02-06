@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProviders, useTradingAccounts, useSubscribeToProvider, useMyCopySubscriptions, useMySubscription } from "@/hooks/useBotvio";
+import { useProviders, useTradingAccounts, useSubscribeToProvider, useMyCopySubscriptions } from "@/hooks/useBotvio";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,7 @@ const Providers = () => {
   const { data: providers, isLoading } = useProviders();
   const { data: accounts } = useTradingAccounts();
   const { data: mySubscriptions } = useMyCopySubscriptions();
-  const { data: myPlan } = useMySubscription();
+  const gate = useSubscriptionGate();
   const subscribe = useSubscribeToProvider();
 
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
@@ -34,7 +35,7 @@ const Providers = () => {
     multiplier: 1,
   });
 
-  const canUseCopyTrading = myPlan?.pricing_plan?.allow_copy_trading ?? false;
+  const canUseCopyTrading = gate.canCopyTrade;
 
   const isSubscribedTo = (providerId: string) => {
     return mySubscriptions?.some(

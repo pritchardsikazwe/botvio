@@ -111,8 +111,8 @@ const Billing = () => {
     }
   };
 
-  // Filter to only show active plans (Trial + VIP)
-  const activePlans = plans?.filter(p => p.is_active) || [];
+  // Show all active plans sorted by price
+  const activePlans = (plans?.filter(p => p.is_active) || []).sort((a, b) => (a.price_usd ?? 0) - (b.price_usd ?? 0));
 
   return (
     <div className="min-h-screen bg-background">
@@ -205,17 +205,24 @@ const Billing = () => {
                 <Skeleton className="h-96" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <div className={`grid grid-cols-1 gap-6 max-w-5xl mx-auto ${
+                activePlans.length <= 2 ? 'md:grid-cols-2 max-w-2xl' : 
+                activePlans.length === 3 ? 'md:grid-cols-3 max-w-3xl' : 
+                'md:grid-cols-2 lg:grid-cols-4'
+              }`}>
                 {activePlans.map((plan) => {
+                  const isFree = plan.code === "free";
                   const isTrial = plan.code === "trial";
                   const isVIP = plan.code === "vip";
                   const isCurrentPlan = plan.code === currentPlanCode;
+                  const isPopular = plan.code === "standard";
                   
                   return (
                     <Card 
                       key={plan.id} 
                       className={`glass-card relative overflow-hidden ${
-                        isVIP ? "border-amber-500/50 ring-2 ring-amber-500/20" : ""
+                        isVIP ? "border-amber-500/50 ring-2 ring-amber-500/20" : 
+                        isPopular ? "border-primary/50 ring-2 ring-primary/20" : ""
                       }`}
                     >
                       {isVIP && (
@@ -223,18 +230,27 @@ const Billing = () => {
                           Best Value
                         </div>
                       )}
+                      {isPopular && (
+                        <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                          Popular
+                        </div>
+                      )}
                       
                       <CardHeader className="text-center pb-2">
                         <div className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-white mb-4 ${
-                          isTrial 
+                          isFree
+                            ? "bg-gradient-to-br from-muted-foreground to-muted-foreground/80"
+                            : isTrial 
                             ? "bg-gradient-to-br from-blue-500 to-blue-600" 
-                            : "bg-gradient-to-br from-amber-500 to-amber-600"
+                            : isVIP
+                            ? "bg-gradient-to-br from-amber-500 to-amber-600"
+                            : "bg-gradient-to-br from-primary to-primary/80"
                         }`}>
-                          {isTrial ? <Zap className="h-6 w-6" /> : <Crown className="h-6 w-6" />}
+                          {isFree ? <Shield className="h-6 w-6" /> : isTrial ? <Zap className="h-6 w-6" /> : isVIP ? <Crown className="h-6 w-6" /> : <Star className="h-6 w-6" />}
                         </div>
-                        <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                        <CardDescription>
-                          {isTrial ? "7 days free access" : "Unlimited monthly access"}
+                        <CardTitle className="text-xl">{plan.name}</CardTitle>
+                        <CardDescription className="text-xs">
+                          {isFree ? "Limited access forever" : isTrial ? "7 days free access" : isVIP ? "Unlimited access" : `${plan.max_accounts} accounts, ${plan.max_bot_instances} bots`}
                         </CardDescription>
                       </CardHeader>
                       
@@ -300,6 +316,10 @@ const Billing = () => {
                           <Button className="w-full" variant="outline" disabled>
                             Current Plan
                           </Button>
+                        ) : isFree ? (
+                          <Button className="w-full" variant="outline" disabled>
+                            Free Forever
+                          </Button>
                         ) : isTrial ? (
                           <Button 
                             className="w-full" 
@@ -311,10 +331,10 @@ const Billing = () => {
                           </Button>
                         ) : (
                           <Button 
-                            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+                            className={`w-full ${isVIP ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" : ""}`}
                             onClick={() => handleUpgradeToVIP(plan)}
                           >
-                            Upgrade to VIP
+                            Upgrade to {plan.name}
                           </Button>
                         )}
                       </CardContent>

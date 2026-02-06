@@ -26,7 +26,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ManualSignal } from "@/hooks/useManualSignals";
-import { useQuery } from "@tanstack/react-query";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
@@ -64,23 +65,8 @@ const Signals = () => {
     status,
   });
 
-  // Check if user has premium subscription
-  const { data: subscription } = useQuery({
-    queryKey: ["user-subscription", user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data } = await supabase
-        .from("user_plan_subscriptions")
-        .select("*, pricing_plans(code, name)")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const isPremium = (subscription?.pricing_plans as any)?.code !== "free" && !!subscription;
+  const gate = useSubscriptionGate();
+  const isPremium = gate.isPaid;
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -237,6 +223,11 @@ const Signals = () => {
           </TabsList>
         </Tabs>
 
+        {/* Upgrade Prompt for free users */}
+        {!isPremium && user && (
+          <UpgradePrompt feature="Premium Signals" requiredPlan="Basic" className="mb-6" />
+        )}
+
         {/* Signals Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -250,9 +241,23 @@ const Signals = () => {
           </div>
         ) : signals && signals.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {signals.map((signal) => (
+            {(isPremium ? signals : signals.slice(0, 3)).map((signal) => (
               <ManualSignalCard key={signal.id} signal={signal} />
             ))}
+            {!isPremium && signals.length > 3 && (
+              <Card className="glass-card border-dashed border-warning/50 flex items-center justify-center min-h-[200px]">
+                <CardContent className="text-center py-8">
+                  <Crown className="h-10 w-10 text-warning mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">+{signals.length - 3} More Signals</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upgrade to see all premium signals
+                  </p>
+                  <Button variant="gold" size="sm" asChild>
+                    <a href="/billing">Unlock All</a>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         ) : (
           <Card className="glass-card">

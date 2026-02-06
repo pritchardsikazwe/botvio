@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +21,9 @@ import {
   BarChart3,
   LineChart,
   Newspaper,
-  Clock
+  Clock,
+  Lock,
+  Crown
 } from "lucide-react";
 
 interface Lesson {
@@ -111,10 +116,14 @@ const lessonIcons: { [key: string]: React.ComponentType<{ className?: string }> 
 };
 
 const Learn = () => {
+  const { user } = useAuth();
+  const gate = useSubscriptionGate();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  const FREE_LESSON_LIMIT = 2;
   
   const activeCategory = searchParams.get("category") || "botvio-sniper";
 
@@ -255,41 +264,63 @@ const Learn = () => {
               </p>
             </div>
           ) : (
-            lessons.map((lesson) => {
+            lessons.map((lesson, index) => {
               const Icon = lessonIcons[lesson.slug] || BookOpen;
+              const isLocked = !gate.isPaid && index >= FREE_LESSON_LIMIT;
               return (
                 <Card 
                   key={lesson.id} 
-                  className="glass-card hover:border-primary/50 transition-all cursor-pointer group"
-                  onClick={() => navigate(`/learn/${lesson.slug}?category=${activeCategory}`)}
+                  className={`glass-card transition-all group ${isLocked ? 'opacity-60' : 'hover:border-primary/50 cursor-pointer'}`}
+                  onClick={() => !isLocked && navigate(`/learn/${lesson.slug}?category=${activeCategory}`)}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                        <Icon className="w-6 h-6 text-primary" />
+                        {isLocked ? <Lock className="w-6 h-6 text-muted-foreground" /> : <Icon className="w-6 h-6 text-primary" />}
                       </div>
-                      <Badge variant="secondary">
-                        Lesson {lesson.lesson_number}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">
+                          Lesson {lesson.lesson_number}
+                        </Badge>
+                        {isLocked && (
+                          <Badge variant="outline" className="border-warning text-warning">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Premium
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                    <CardTitle className={`text-lg ${!isLocked ? 'group-hover:text-primary' : ''} transition-colors`}>
                       {lesson.title}
                     </CardTitle>
                     <CardDescription>
-                      {lesson.content.substring(0, 100).replace(/[#*`]/g, '')}...
+                      {isLocked ? "Upgrade to a paid plan to access this lesson" : lesson.content.substring(0, 100).replace(/[#*`]/g, '') + '...'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="ghost" className="w-full justify-between group-hover:text-primary">
-                      Start Learning
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
+                    {isLocked ? (
+                      <Button variant="gold" className="w-full" asChild>
+                        <a href="/billing">
+                          <Crown className="w-4 h-4 mr-2" />
+                          Upgrade to Unlock
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" className="w-full justify-between group-hover:text-primary">
+                        Start Learning
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               );
             })
           )}
         </div>
+
+        {!gate.isPaid && lessons.length > FREE_LESSON_LIMIT && (
+          <UpgradePrompt feature="All Course Lessons" requiredPlan="Basic" className="mt-6" />
+        )}
 
         {/* Quick Start Guide */}
         <div className="mt-12 glass-card p-8">
