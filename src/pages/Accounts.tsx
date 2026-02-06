@@ -15,6 +15,7 @@ import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+
 // Affiliate links
 const AFFILIATE_LINKS = {
   deriv: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827",
