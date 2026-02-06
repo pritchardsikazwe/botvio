@@ -52,6 +52,9 @@ export const ProductsManagementTab = () => {
     price_usd: 0,
     is_active: true,
     is_featured: false,
+    billing_type: "one_time",
+    billing_interval: null as string | null,
+    affiliate_percent: 0,
   });
 
   const { data: products, isLoading } = useQuery({
