@@ -17,6 +17,7 @@ import { AutoTradingPanel } from "@/components/trading/AutoTradingPanel";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
+import { TradingStyleSection } from "@/components/trading/TradingStyleSection";
 import { MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
@@ -332,6 +333,9 @@ const Index = () => {
             </a>
           </div>
         </div>
+
+        {/* Trading Style Picker */}
+        <TradingStyleSection />
 
         {/* Latest Trading Signals */}
         <HomeSignalsWidget />
