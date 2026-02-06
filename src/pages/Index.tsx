@@ -117,20 +117,20 @@ const Index = () => {
     { level: 2320.00, type: 'SUPPORT', strength: 'WEAK', touches: 2 },
   ];
 
-  // Fetch featured products from database
+  // Fetch featured products from database — include all types
   const { data: featuredProducts } = useQuery({
-    queryKey: ["featured-products"],
+    queryKey: ["featured-products-home"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
-        .eq("is_featured", true)
-        .limit(6);
+        .order("is_featured", { ascending: false })
+        .limit(8);
       if (error) throw error;
       return data;
     },
-    staleTime: 60 * 1000, // 1 minute cache
+    staleTime: 60 * 1000,
   });
 
   // Fallback featured bots (used if no products in DB)

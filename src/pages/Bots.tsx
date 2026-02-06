@@ -171,7 +171,7 @@ const Bots = () => {
             </p>
           </div>
           <div className="text-right text-sm text-muted-foreground">
-            <p>{currentInstanceCount} / {maxBotInstances} bot instances used</p>
+            <p>{currentInstanceCount} bot instances active</p>
           </div>
         </div>
 
