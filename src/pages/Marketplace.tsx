@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { useMarketplaceProducts, usePurchaseProduct, MarketplaceProduct } from "@/hooks/useMarketplace";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { Header } from "@/components/trading/Header";
@@ -109,6 +110,7 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Marketplace" description="Browse trading bots, signal packs, strategies, and courses" />
       <Header />
 
       <main className="container mx-auto px-4 py-6">

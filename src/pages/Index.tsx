@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { PriceDisplay } from "@/components/trading/PriceDisplay";
 import { SupportResistanceLevels } from "@/components/trading/SupportResistanceLevels";
@@ -42,7 +43,7 @@ const Index = () => {
   // Show onboarding for new users (check localStorage to show only once)
   useEffect(() => {
     if (user) {
-      const hasSeenOnboarding = localStorage.getItem('hauza_onboarding_seen');
+      const hasSeenOnboarding = localStorage.getItem('botvio_onboarding_seen');
       if (!hasSeenOnboarding) {
         setShowOnboarding(true);
       }
@@ -62,7 +63,7 @@ const Index = () => {
   }, [authorized, selectedPair, subscribeTicks, unsubscribeTicks]);
 
   const handleCloseOnboarding = () => {
-    localStorage.setItem('hauza_onboarding_seen', 'true');
+    localStorage.setItem('botvio_onboarding_seen', 'true');
     setShowOnboarding(false);
   };
 
@@ -165,6 +166,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Trading Dashboard" description="AI-powered trading dashboard with live signals, bots, and copy trading" noIndex />
       <Header />
 
       <main className="container mx-auto px-4 py-6">

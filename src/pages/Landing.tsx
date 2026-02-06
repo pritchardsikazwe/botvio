@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { usePartnerLinks } from "@/hooks/useSiteSettings";
 import { 
   Bot, 
   TrendingUp, 
@@ -45,6 +47,10 @@ const Landing = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const { data: partnerLinks } = usePartnerLinks();
+  
+  const brokerLinks = partnerLinks?.filter(l => l.category === 'broker') || [];
+  const communityLinks = partnerLinks?.filter(l => l.category === 'community') || [];
 
   useEffect(() => {
     // Check if already installed
@@ -104,23 +110,29 @@ const Landing = () => {
       title: "Multi-Broker Support",
       description: "Trade on Deriv, Weltrade, and Exness from a single platform"
     }
-  ];
-
-  const brokers = [
-    { name: "Deriv", markets: "Synthetic Indices, Forex, Crypto", link: AFFILIATE_LINKS.deriv },
-    { name: "Exness", markets: "Forex, Gold, Crypto", link: AFFILIATE_LINKS.exness },
-    { name: "Binance", markets: "Spot, Futures, Staking", link: AFFILIATE_LINKS.binance }
-  ];
+      ];
 
   const stats = [
     { value: "50K+", label: "Active Traders" },
     { value: "24/7", label: "Bot Uptime" },
     { value: "100+", label: "Trading Bots" },
-    { value: "$2M+", label: "Monthly Volume" }
+    { value: "$2M+", label: "Monthly Volume" },
   ];
+
+  const brokers = brokerLinks.length > 0 
+    ? brokerLinks.map(l => ({ name: l.name, markets: l.description || '', link: l.url }))
+    : [
+        { name: "Deriv", markets: "Synthetic Indices, Forex, Crypto", link: "#" },
+        { name: "Exness", markets: "Forex, Gold, Crypto", link: "#" },
+        { name: "Binance", markets: "Spot, Futures, Staking", link: "#" },
+      ];
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <SEOHead 
+        title="AI Trading Bots & Signals" 
+        description="Automate your trading on Deriv, Exness & Binance. Deploy AI bots, copy top traders, and receive real-time signals."
+      />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="container mx-auto px-4">
@@ -234,18 +246,14 @@ const Landing = () => {
           
           {/* Community Links */}
           <div className="flex justify-center gap-4 mt-8">
-            <a href={COMMUNITY_LINKS.whatsapp} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                WhatsApp Group
-              </Button>
-            </a>
-            <a href={COMMUNITY_LINKS.telegram} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <Send className="h-4 w-4 mr-2" />
-                Telegram Group
-              </Button>
-            </a>
+            {communityLinks.map((link) => (
+              <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm">
+                  {link.icon === 'Send' ? <Send className="h-4 w-4 mr-2" /> : <MessageCircle className="h-4 w-4 mr-2" />}
+                  {link.name} Group
+                </Button>
+              </a>
+            ))}
           </div>
         </div>
       </section>

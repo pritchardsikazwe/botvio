@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/trading/Header";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { useManualSignals } from "@/hooks/useManualSignals";
@@ -93,6 +94,7 @@ const Signals = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Trading Signals" description="Real-time trading signals for Gold, Forex, Synthetic Indices & Crypto" />
       <Header />
 
       <main className="container mx-auto px-4 py-6">

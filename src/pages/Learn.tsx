@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasProductType } from "@/hooks/useEntitlements";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,6 +154,7 @@ const Learn = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Learn Trading" description="Free trading courses and strategies for beginners and advanced traders" />
       <Header />
 
       <main className="container mx-auto px-4 py-8">

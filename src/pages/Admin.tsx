@@ -33,7 +33,8 @@ import {
   FileText,
   Settings,
   Package,
-  ClipboardCheck
+  ClipboardCheck,
+  Globe
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +46,7 @@ import { AdminDerivConnectionsTab } from "@/components/admin/AdminDerivConnectio
 import { AdminPricingPlansTab } from "@/components/admin/AdminPricingPlansTab";
 import { SignalApprovalsTab } from "@/components/admin/SignalApprovalsTab";
 import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab";
+import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
 
 interface Provider {
   id: string;
@@ -994,6 +996,10 @@ const Admin = () => {
               <Package className="w-4 h-4" />
               Products
             </TabsTrigger>
+            <TabsTrigger value="seo" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              SEO & Webmasters
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1009,6 +1015,11 @@ const Admin = () => {
           {/* Products Tab */}
           <TabsContent value="products">
             <ProductsManagementTab />
+          </TabsContent>
+
+          {/* SEO & Webmasters Tab */}
+          <TabsContent value="seo">
+            <AdminSEOTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

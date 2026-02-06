@@ -32,7 +32,7 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   isAffiliate: boolean;
   userRoles: AppRole[];
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, country?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<Profile>) => Promise<void>;
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Admins should NOT be treated as affiliates even if they have the role
       setIsAffiliate(hasAffiliateRole && !hasAdminRole);
       
-      console.log("[Auth] User roles loaded:", roles, { isAdmin: hasAdminRole, isSuperAdmin: hasSuperAdminRole, isAffiliate: hasAffiliateRole && !hasAdminRole });
+      // Roles loaded silently
     } catch (error) {
       console.error("Error fetching user roles:", error);
       setUserRoles([]);
@@ -187,14 +187,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, country?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
+        data: { country: country || undefined },
       },
     });
+
+    // Update profile with country if provided
+    if (!error && data?.user && country) {
+      supabase
+        .from("profiles")
+        .update({ country })
+        .eq("user_id", data.user.id)
+        .then(() => {});
+    }
 
     // Notify admin of new signup (fire and forget)
     if (!error && data?.user) {
@@ -204,7 +214,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           user_id: data.user.id,
           created_at: new Date().toISOString(),
         },
-      }).catch(console.error);
+      }).catch(() => {});
     }
 
     return { error };
