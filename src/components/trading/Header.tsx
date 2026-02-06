@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -231,6 +231,10 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/marketplace')}>
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       Marketplace
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/install')}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Install App
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

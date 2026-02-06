@@ -16,13 +16,13 @@ import { AutoTradingPanel } from "@/components/trading/AutoTradingPanel";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
-import { SupportResistance, MarketData } from "@/types/trading";
+import { MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package, HelpCircle, MessageCircle, ExternalLink } from "lucide-react";
+import { GraduationCap, Target, AlertTriangle, Bot, TrendingUp, ArrowRight, Zap, BookOpen, Package, HelpCircle, MessageCircle, ExternalLink, Download, Smartphone } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -109,14 +109,6 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [authorized]);
 
-  // Mock S/R levels
-  const srLevels: SupportResistance[] = [
-    { level: 2380.00, type: 'RESISTANCE', strength: 'STRONG', touches: 5 },
-    { level: 2365.00, type: 'RESISTANCE', strength: 'MODERATE', touches: 3 },
-    { level: 2340.00, type: 'SUPPORT', strength: 'STRONG', touches: 4 },
-    { level: 2320.00, type: 'SUPPORT', strength: 'WEAK', touches: 2 },
-  ];
-
   // Fetch featured products from database — include all types
   const { data: featuredProducts } = useQuery({
     queryKey: ["featured-products-home"],
@@ -133,23 +125,32 @@ const Index = () => {
     staleTime: 60 * 1000,
   });
 
-  // Fallback featured bots (used if no products in DB)
-  const defaultFeaturedBots = [
-    { id: "1", name: "Botvio Sniper", short_description: "XAUUSD S/R strategy", type: "bot", price_usd: 0 },
-    { id: "2", name: "V75 Scalper", short_description: "Volatility 75 scalping", type: "bot", price_usd: 29 },
-    { id: "3", name: "Boom Catcher", short_description: "Boom/Crash spikes", type: "bot", price_usd: 0 },
-  ];
+  // Fetch real courses from DB
+  const { data: dbCourses } = useQuery({
+    queryKey: ["home-courses"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("education_lessons")
+        .select("category")
+        .order("category");
+      if (error) throw error;
+      const categories = new Map<string, number>();
+      data?.forEach((l) => {
+        categories.set(l.category || "general", (categories.get(l.category || "general") || 0) + 1);
+      });
+      return Array.from(categories.entries()).map(([cat, count], i) => ({
+        id: i,
+        title: cat.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+        category: cat,
+        lessons: count,
+        slug: cat,
+      })).slice(0, 4);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-  // Featured Courses (can also come from products table)
-  const featuredCourses = [
-    { id: 1, title: "Botvio Sniper Mastery", category: "botvio-sniper", lessons: 8, slug: "botvio-sniper-intro" },
-    { id: 2, title: "VIX Trading Essentials", category: "vix", lessons: 5, slug: "vix-intro" },
-    { id: 3, title: "News Trading Strategy", category: "news-trading", lessons: 4, slug: "news-trading-intro" },
-  ];
-
-  const displayProducts = featuredProducts && featuredProducts.length > 0 
-    ? featuredProducts 
-    : defaultFeaturedBots;
+  const displayProducts = featuredProducts ?? [];
+  const displayCourses = dbCourses ?? [];
 
   const handleSymbolChange = (derivSymbol: string) => {
     // Map Deriv symbol to display pair for UI
@@ -201,7 +202,7 @@ const Index = () => {
           <div className="lg:col-span-3 space-y-6">
             <AutoTradingPanel />
             <ActiveBotsWidget />
-            <SupportResistanceLevels levels={srLevels} currentPrice={marketData.price} />
+            <SupportResistanceLevels levels={[]} currentPrice={marketData.price} />
             <PerformancePanel />
           </div>
         </div>
@@ -400,8 +401,8 @@ const Index = () => {
               </Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {featuredCourses.map((course) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {displayCourses.map((course) => (
               <Card key={course.id} className="glass-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate(`/learn/${course.slug}`)}>
                 <CardHeader className="pb-2">
                   <Badge variant="outline" className="w-fit mb-2">{course.category}</Badge>
@@ -419,6 +420,33 @@ const Index = () => {
               </Card>
             ))}
           </div>
+        </div>
+
+        {/* Install App Banner */}
+        <div className="mt-8">
+          <Card className="glass-card border-primary/30 overflow-hidden">
+            <CardContent className="py-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-warning flex items-center justify-center">
+                    <Smartphone className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Get the Botvio App</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Install on your phone for instant access, push alerts & offline mode
+                    </p>
+                  </div>
+                </div>
+                <Button variant="gold" asChild>
+                  <Link to="/install">
+                    <Download className="h-4 w-4 mr-2" />
+                    Install App
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
 
