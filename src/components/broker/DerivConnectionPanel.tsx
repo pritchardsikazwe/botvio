@@ -185,7 +185,12 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
       });
 
       if (fnError || !data?.ok) {
-        toast.error(data?.error || fnError?.message || "Health check failed");
+        // Handle NO_CONNECTION gracefully
+        if (data?.code === "NO_CONNECTION") {
+          toast.warning("No saved connection. Please verify your token first.");
+        } else {
+          toast.error(data?.error || fnError?.message || "Health check failed");
+        }
         return;
       }
 

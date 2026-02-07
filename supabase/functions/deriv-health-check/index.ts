@@ -165,11 +165,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if any connections were found
+    // Check if any connections were found — return structured code, not a hard error
     if (!connections || connections.length === 0) {
       return new Response(
         JSON.stringify({ 
           ok: false, 
+          code: "NO_CONNECTION",
           error: "No Deriv connection found. Please connect via the Connections page first.",
           results: []
         }),

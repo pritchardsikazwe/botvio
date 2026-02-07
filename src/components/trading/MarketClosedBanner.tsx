@@ -26,7 +26,7 @@ export const MarketClosedBanner = ({ symbol, showAlways = false }: MarketClosedB
           <Clock className="h-4 w-4" />
           <span>
             {sessionInfo?.market_name || "This market"} is currently closed. 
-            Scanning is disabled until the market reopens.
+            Switch to Synthetic Indices (available 24/7) or try again when the market reopens.
           </span>
         </div>
         {marketType === "forex" && (
