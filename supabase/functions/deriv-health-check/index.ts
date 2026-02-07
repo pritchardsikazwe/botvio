@@ -125,15 +125,15 @@ Deno.serve(async (req) => {
     const body: HealthCheckRequest = await req.json();
     const { user_id, env } = body;
 
-    // Check if requester is admin
+    // Check if requester is admin or super_admin
     const { data: roleData } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", requesterId)
-      .eq("role", "admin")
-      .single();
+      .in("role", ["admin", "super_admin"])
+      .limit(1);
     
-    const isAdmin = !!roleData;
+    const isAdmin = roleData && roleData.length > 0;
 
     // If user_id is provided and different from requester, must be admin
     const targetUserId = user_id || requesterId;
@@ -162,6 +162,18 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ ok: false, error: fetchError.message }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check if any connections were found
+    if (!connections || connections.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          ok: false, 
+          error: "No Deriv connection found. Please connect via the Connections page first.",
+          results: []
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
