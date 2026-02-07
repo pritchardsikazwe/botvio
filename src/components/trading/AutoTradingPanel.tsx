@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DerivConnectCTA } from "@/components/trading/DerivConnectCTA";
 import { 
   Zap, 
   Play, 
@@ -347,14 +348,17 @@ export const AutoTradingPanel = () => {
           </div>
         )}
 
-        {/* Warning if not ready */}
-        {!canAutoTrade && (
+        {/* Show connect CTA instead of cryptic warnings */}
+        {!authorized && user && (
+          <DerivConnectCTA message="Connect Deriv to enable auto trading" />
+        )}
+
+        {authorized && !canAutoTrade && (
           <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
             <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
             <div className="text-xs">
               <p className="font-medium text-warning">Setup Required</p>
               <ul className="text-muted-foreground mt-1 space-y-0.5">
-                {!authorized && <li>• Connect your Deriv account</li>}
                 {!hasBalance && <li>• Add funds to your account</li>}
                 {enabledStrategies.length === 0 && <li>• Enable at least one strategy</li>}
               </ul>
