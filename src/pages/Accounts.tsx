@@ -6,14 +6,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/trading/Header";
 import { useNavigate } from "react-router-dom";
-import { Wallet, Plus, Trash2, CheckCircle, XCircle, Eye, EyeOff, ExternalLink, Gift, Sparkles, Loader2 } from "lucide-react";
+import {
+  Wallet,
+  Plus,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Eye,
+  EyeOff,
+  ExternalLink,
+  Gift,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { resolveDerivEnv } from "@/config/derivEnv";
 
 
 // Affiliate links
@@ -43,12 +64,12 @@ const Accounts = () => {
     setTestingAccountId(accountId);
     try {
       if (broker === "deriv") {
-        // Use deriv-verify-token edge function with the trading account
+        const env = resolveDerivEnv();
         const { data, error } = await supabase.functions.invoke("deriv-health-check", {
-          body: {},
+          body: { env },
         });
         if (error) throw error;
-        
+
         if (data?.ok && data?.results?.length > 0) {
           const result = data.results[0];
           if (result.is_connected) {
@@ -57,7 +78,12 @@ const Accounts = () => {
             toast.error(result.last_error || "Token is invalid or expired. Please reconnect.");
           }
         } else if (data?.ok && data?.results?.length === 0) {
-          toast.warning("No Deriv connection found. Please connect via the Connections page first.");
+          toast.warning("No Deriv connection found. Please connect via the Connections page first.", {
+            action: {
+              label: "Open Connections",
+              onClick: () => navigate("/connections"),
+            },
+          });
         } else {
           toast.error(data?.error || "Health check failed");
         }
@@ -92,13 +118,25 @@ const Accounts = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.label || !formData.api_key) {
       toast.error("Please fill in required fields");
       return;
     }
 
     try {
+      // Ensure Deriv token is persisted to backend connection table first.
+      if (formData.broker === "deriv") {
+        const env = resolveDerivEnv();
+        const { data: verifyData, error: verifyError } = await supabase.functions.invoke("deriv-verify-token", {
+          body: { token: formData.api_key, env },
+        });
+
+        if (verifyError || !verifyData?.ok) {
+          throw new Error(verifyData?.error || verifyError?.message || "Token verification failed");
+        }
+      }
+
       await addAccount.mutateAsync({
         broker: formData.broker === "exness" ? "deriv" : formData.broker, // Map exness to deriv for now
         label: formData.label,
@@ -106,7 +144,7 @@ const Accounts = () => {
         api_secret: formData.broker === "binance" ? formData.api_secret : undefined,
         login_id: formData.login_id || undefined,
       });
-      
+
       toast.success("Account connected successfully!");
       setIsDialogOpen(false);
       setFormData({

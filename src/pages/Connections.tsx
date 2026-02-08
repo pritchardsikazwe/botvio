@@ -1,38 +1,20 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDeriv } from "@/contexts/DerivContext";
 import { Header } from "@/components/trading/Header";
+import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Wallet, 
-  Link as LinkIcon, 
-  Unlink, 
-  CheckCircle, 
-  XCircle, 
-  Loader2,
-  ExternalLink,
-  RefreshCw,
-  Copy,
-  Monitor
-} from "lucide-react";
+import { Wallet, ExternalLink, RefreshCw, Copy, Monitor } from "lucide-react";
 import { toast } from "sonner";
-import { startDerivOAuthLogin } from "@/lib/derivAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const Connections = () => {
   const { user } = useAuth();
-  const derivContext = useDeriv();
-  const [mt5TerminalUid, setMt5TerminalUid] = useState("");
-  
-  // Map deriv context properties
-  const isConnected = derivContext.authorized;
-  const isLoading = derivContext.loading;
 
   // Fetch all connections
   const { data: connections, refetch: refetchConnections } = useQuery({
@@ -109,102 +91,38 @@ const Connections = () => {
           </TabsList>
 
           <TabsContent value="deriv" className="space-y-6">
-            {/* Current Connection Status */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5" />
-                  Deriv Connection Status
-                </CardTitle>
-                <CardDescription>
-                  Connect your Deriv account using OAuth for secure trading
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isLoading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Checking connection...
-                  </div>
-                ) : isConnected && connections && connections.length > 0 ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-success" />
-                      <span className="font-medium text-success">Connected</span>
-                      <Badge variant="outline">{connections[0]?.login_id || 'Active'}</Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground">Account Type</p>
-                        <p className="font-medium">{connections[0]?.account_type || 'Standard'}</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground">Currency</p>
-                        <p className="font-medium">{connections[0]?.currency || 'USD'}</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground">Balance</p>
-                        <p className="font-medium">{derivContext.balance?.balance?.toFixed(2) || '---'}</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground">Environment</p>
-                        <p className="font-medium">{connections[0]?.env === 'demo' ? 'Demo' : 'Real'}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <Button variant="outline" onClick={() => refetchConnections()}>
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Refresh
-                      </Button>
-                      <Button variant="destructive" onClick={() => derivContext.disconnect()}>
-                        <Unlink className="mr-2 h-4 w-4" />
-                        Disconnect
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <XCircle className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Not connected</span>
-                    </div>
-                    
-                    <Button onClick={startDerivOAuthLogin} variant="gold">
-                      <LinkIcon className="mr-2 h-4 w-4" />
-                      Connect with Deriv OAuth
-                    </Button>
-
-                    <p className="text-xs text-muted-foreground">
-                      You'll be redirected to Deriv to authorize BOTVIO to trade on your behalf.
-                      Your token is encrypted and never exposed to the browser.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Connection (OAuth or Token) */}
+            <DerivConnectionPanel />
 
             {/* Connection History */}
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>Connection History</CardTitle>
-                <CardDescription>All your Deriv connections</CardDescription>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <CardTitle>Connection History</CardTitle>
+                    <CardDescription>All your saved Deriv connections</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => refetchConnections()}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {connections && connections.length > 0 ? (
                   <div className="space-y-3">
                     {connections.map((conn: any) => (
-                      <div 
+                      <div
                         key={conn.id}
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${
-                            conn.is_connected ? 'bg-success' : 'bg-muted-foreground'
-                          }`} />
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              conn.is_connected ? "bg-success" : "bg-muted-foreground"
+                            }`}
+                          />
                           <div>
-                            <p className="font-medium">{conn.login_id || 'Unknown'}</p>
+                            <p className="font-medium">{conn.login_id || "Unknown"}</p>
                             <p className="text-xs text-muted-foreground">
                               {conn.connection_type} • {conn.env}
                             </p>
@@ -217,9 +135,7 @@ const Connections = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-center py-8">
-                    No connections yet
-                  </p>
+                  <p className="text-muted-foreground text-center py-8">No connections yet</p>
                 )}
               </CardContent>
             </Card>

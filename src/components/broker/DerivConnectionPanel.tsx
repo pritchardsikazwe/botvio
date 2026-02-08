@@ -24,13 +24,14 @@ interface DerivConnectionPanelProps {
 export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true }: DerivConnectionPanelProps) => {
   const { user } = useAuth();
   const { connected, authorized, balance, error, loading, connect, disconnect } = useDeriv();
-  
+
   const [connectionMethod, setConnectionMethod] = useState<"token" | "oauth">("token");
   const [apiToken, setApiToken] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveToAccount, setSaveToAccount] = useState(true);
+  // If we hide account selection, default to NOT saving tokens into trading_accounts.
+  const [saveToAccount, setSaveToAccount] = useState(showAccountSelection);
   const [accountLabel, setAccountLabel] = useState("");
   const [storedConnection, setStoredConnection] = useState<any>(null);
 
@@ -41,19 +42,19 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   useEffect(() => {
     const loadStoredConnection = async () => {
       if (!user) return;
-      
+
       const { data } = await supabase
         .from("deriv_connections")
         .select("*")
         .eq("user_id", user.id)
         .eq("env", currentEnv)
         .single();
-      
+
       if (data) {
         setStoredConnection(data);
       }
     };
-    
+
     loadStoredConnection();
   }, [user, currentEnv]);
 
@@ -80,7 +81,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
       }
 
       toast.success(`Token verified! Account: ${data.loginid}`);
-      
+
       // Refresh stored connection
       const { data: conn } = await supabase
         .from("deriv_connections")
@@ -88,9 +89,9 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         .eq("user_id", user?.id)
         .eq("env", currentEnv)
         .single();
-      
+
       setStoredConnection(conn);
-      
+
       // Now connect with the Deriv API
       await handleTokenConnect();
     } catch (e: any) {
@@ -115,24 +116,22 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
     try {
       const balanceResult = await connect(apiToken);
       toast.success(`Connected as ${balanceResult.loginid}`);
-      
+
       // Save to trading_accounts if requested
       if (saveToAccount && user) {
         setIsSaving(true);
         const label = accountLabel || `Deriv ${balanceResult.loginid}`;
-        
-        const { error: saveError } = await supabase
-          .from("trading_accounts")
-          .insert({
-            user_id: user.id,
-            broker: "deriv",
-            label,
-            api_key_encrypted: apiToken,
-            login_id: balanceResult.loginid,
-            connection_type: "api_token",
-            connection_status: "connected",
-            is_virtual: balanceResult.loginid?.startsWith("VRTC"),
-          });
+
+        const { error: saveError } = await supabase.from("trading_accounts").insert({
+          user_id: user.id,
+          broker: "deriv",
+          label,
+          api_key_encrypted: apiToken,
+          login_id: balanceResult.loginid,
+          connection_type: "api_token",
+          connection_status: "connected",
+          is_virtual: balanceResult.loginid?.startsWith("VRTC"),
+        });
 
         if (saveError) {
           console.error("Failed to save account:", saveError);
@@ -153,14 +152,21 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
 
   const handleOAuthConnect = () => {
     const oauthUrl = buildDerivOAuthUrl();
-    window.open(oauthUrl, "_blank", "width=600,height=700");
+
+    // Prefer popup, but gracefully fall back if blocked.
+    const w = window.open(oauthUrl, "_blank", "width=600,height=700");
+    if (!w) {
+      window.location.assign(oauthUrl);
+      return;
+    }
+
     toast.info("Complete the login in the popup window");
   };
 
   const handleDisconnect = async () => {
     disconnect();
     setApiToken("");
-    
+
     // Update database
     if (user) {
       await supabase
@@ -168,10 +174,10 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         .update({ is_connected: false })
         .eq("user_id", user.id)
         .eq("env", currentEnv);
-      
+
       setStoredConnection(null);
     }
-    
+
     toast.info("Disconnected from Deriv");
   };
 

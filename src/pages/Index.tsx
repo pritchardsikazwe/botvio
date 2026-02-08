@@ -211,6 +211,10 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Trade Modes + Style Picker */}
+        <TradeModesGrid />
+        <TradingStyleSection />
+
         {/* AI Chart Analysis Section */}
         <div className="mt-8">
           <ChartUpload />
@@ -334,12 +338,6 @@ const Index = () => {
             </a>
           </div>
         </div>
-
-        {/* Trade Modes Grid */}
-        <TradeModesGrid />
-
-        {/* Trading Style Picker */}
-        <TradingStyleSection />
 
         {/* Latest Trading Signals */}
         <HomeSignalsWidget />
