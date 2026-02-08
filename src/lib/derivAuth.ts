@@ -1,16 +1,10 @@
-// Deriv OAuth configuration for production domain botvio.live
-// App ID 99139 is registered for https://botvio.live
+import { getDerivConfig, buildDerivOAuthUrl } from "@/config/derivEnv";
 
-const DERIV_APP_ID = 99139;
-const DERIV_REDIRECT_URI = "https://botvio.live/auth/deriv/callback";
+// Centralized Deriv OAuth configuration.
+// IMPORTANT: Do not hardcode app_id / redirect URIs here — they depend on environment.
 
 export function startDerivOAuthLogin() {
-  const url =
-    "https://oauth.deriv.com/oauth2/authorize" +
-    "?app_id=" + DERIV_APP_ID +
-    "&redirect_uri=" + encodeURIComponent(DERIV_REDIRECT_URI);
-
-  window.location.assign(url);
+  window.location.assign(buildDerivOAuthUrl());
 }
 
 export function getDerivOAuthToken(): string | null {
@@ -24,5 +18,10 @@ export function setDerivOAuthToken(token: string): void {
 export function clearDerivOAuthToken(): void {
   localStorage.removeItem("deriv_oauth_token");
 }
+
+// Backwards-compatible exports (some legacy code still imports these)
+const cfg = getDerivConfig();
+const DERIV_APP_ID = cfg.appId;
+const DERIV_REDIRECT_URI = cfg.redirectUrl;
 
 export { DERIV_APP_ID, DERIV_REDIRECT_URI };

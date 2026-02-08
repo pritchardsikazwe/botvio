@@ -11,6 +11,16 @@ interface SEOHeadProps {
   jsonLd?: Record<string, unknown>;
 }
 
+function isAbsoluteUrl(url: string) {
+  return /^https?:\/\//i.test(url);
+}
+
+function toAbsoluteUrl(input: string, baseUrl: string): string {
+  if (isAbsoluteUrl(input)) return input;
+  if (input.startsWith("/")) return `${baseUrl}${input}`;
+  return `${baseUrl}/${input}`;
+}
+
 export const SEOHead = ({
   title,
   description,
@@ -24,14 +34,20 @@ export const SEOHead = ({
 
   const siteName = settings?.site_name || "Botvio";
   const baseUrl = settings?.canonical_base_url || settings?.site_url || "https://botvio.live";
+
   const pageTitle = title
     ? `${title} | ${siteName}`
     : settings?.meta_title_default || `${siteName} – AI Trading Bots & Signals`;
+
   const pageDescription =
     description ||
     settings?.meta_description_default ||
     "Automate your trading with AI bots, live signals, and copy trading.";
-  const pageOgImage = ogImage || settings?.og_image_url || `${baseUrl}/favicon.png`;
+
+  // Prefer a proper 512px icon for rich previews
+  const ogImageRaw = ogImage || settings?.og_image_url || "/icon-512.png";
+  const pageOgImage = toAbsoluteUrl(ogImageRaw, baseUrl);
+
   const canonicalUrl = `${baseUrl}${location.pathname}`;
 
   const robotsContent = noIndex
@@ -46,7 +62,7 @@ export const SEOHead = ({
         "@type": "Organization",
         name: siteName,
         url: baseUrl,
-        logo: settings?.logo_url || `${baseUrl}/favicon.png`,
+        logo: toAbsoluteUrl(settings?.logo_url || "/icon-512.png", baseUrl),
       },
       {
         "@type": "WebSite",
@@ -68,14 +84,15 @@ export const SEOHead = ({
       <meta name="robots" content={robotsContent} />
       <link rel="canonical" href={canonicalUrl} />
 
-      {settings?.meta_keywords && (
-        <meta name="keywords" content={settings.meta_keywords} />
-      )}
+      {settings?.meta_keywords && <meta name="keywords" content={settings.meta_keywords} />}
 
       {/* Open Graph */}
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
       <meta property="og:image" content={pageOgImage} />
+      <meta property="og:image:alt" content={`${siteName} app icon`} />
+      <meta property="og:image:width" content="512" />
+      <meta property="og:image:height" content="512" />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content={siteName} />
@@ -85,22 +102,18 @@ export const SEOHead = ({
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={pageOgImage} />
+      <meta name="twitter:image:alt" content={`${siteName} app icon`} />
 
       {/* Verification */}
       {settings?.google_verification_code && (
-        <meta
-          name="google-site-verification"
-          content={settings.google_verification_code}
-        />
+        <meta name="google-site-verification" content={settings.google_verification_code} />
       )}
       {settings?.bing_verification_code && (
         <meta name="msvalidate.01" content={settings.bing_verification_code} />
       )}
 
       {/* JSON-LD */}
-      <script type="application/ld+json">
-        {JSON.stringify(jsonLd || defaultJsonLd)}
-      </script>
+      <script type="application/ld+json">{JSON.stringify(jsonLd || defaultJsonLd)}</script>
     </Helmet>
   );
 };

@@ -7,12 +7,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { usePartnerLinks } from "@/hooks/useSiteSettings";
-import { 
-  Bot, 
-  TrendingUp, 
-  Shield, 
-  Zap, 
-  Users, 
+import { TradeModesGrid } from "@/components/trading/TradeModesGrid";
+import {
+  Bot,
+  TrendingUp,
+  Shield,
+  Zap,
+  Users,
   BarChart3,
   Globe,
   ArrowRight,
@@ -26,7 +27,7 @@ import {
   ChevronRight,
   MessageCircle,
   Send,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 
 // Affiliate links
@@ -138,8 +139,12 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center">
-                <Bot className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/icon-192.png"
+                  alt="Botvio app icon"
+                  className="h-7 w-7"
+                />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-amber-400 bg-clip-text text-transparent">
                 Botvio
@@ -231,10 +236,10 @@ const Landing = () => {
           <p className="text-center text-muted-foreground mb-6">Trade on leading brokers</p>
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
             {brokers.map((broker, i) => (
-              <a 
-                key={i} 
-                href={broker.link} 
-                target="_blank" 
+              <a
+                key={i}
+                href={broker.link}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-center hover:scale-105 transition-transform cursor-pointer"
               >
@@ -243,7 +248,7 @@ const Landing = () => {
               </a>
             ))}
           </div>
-          
+
           {/* Community Links */}
           <div className="flex justify-center gap-4 mt-8">
             {communityLinks.map((link) => (
@@ -255,6 +260,13 @@ const Landing = () => {
               </a>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Trade Modes */}
+      <section className="py-14 px-4">
+        <div className="container mx-auto">
+          <TradeModesGrid />
         </div>
       </section>
 
@@ -374,8 +386,12 @@ const Landing = () => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center">
-                <Bot className="h-4 w-4 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/icon-192.png"
+                  alt="Botvio app icon"
+                  className="h-5 w-5"
+                />
               </div>
               <span className="font-bold">Botvio</span>
               <span className="text-xs text-muted-foreground ml-2">powered by Deriv</span>
