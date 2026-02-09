@@ -173,7 +173,7 @@ export const useDerivAPI = () => {
   const getProposal = useCallback(
     async (params: {
       symbol: string;
-      contract_type: "CALL" | "PUT";
+      contract_type: string;
       amount: number;
       duration: number;
       duration_unit: "t" | "s" | "m" | "h" | "d";
@@ -221,7 +221,7 @@ export const useDerivAPI = () => {
 
   const placeTrade = useCallback(async (params: {
     symbol: string;
-    contract_type: "CALL" | "PUT";
+    contract_type: string;
     amount: number;
     duration: number;
     duration_unit: "t" | "s" | "m" | "h" | "d";

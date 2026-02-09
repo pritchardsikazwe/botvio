@@ -1,0 +1,206 @@
+export interface TradingStyle {
+  id: string;
+  title: string;
+  description: string;
+  riskTag: string;
+  tempoTag: string;
+  contractTypes: ContractTypeConfig[];
+  instruments: InstrumentConfig[];
+}
+
+export interface ContractTypeConfig {
+  id: string;
+  label: string;
+  buyButtons: BuyButton[];
+  /** Duration measured in ticks (true) or seconds (false) */
+  tickDuration?: boolean;
+  /** Whether this contract type needs a digit/barrier input */
+  needsDigit?: boolean;
+}
+
+export interface BuyButton {
+  label: string;
+  contractType: string;
+  variant: "default" | "success" | "destructive";
+}
+
+export interface InstrumentConfig {
+  symbol: string;
+  displayName: string;
+}
+
+// ── Shared instruments ──────────────────────────────────────────────
+const VOL_INDICES: InstrumentConfig[] = [
+  { symbol: "R_10", displayName: "Volatility 10" },
+  { symbol: "R_25", displayName: "Volatility 25" },
+  { symbol: "R_50", displayName: "Volatility 50" },
+  { symbol: "R_75", displayName: "Volatility 75" },
+  { symbol: "R_100", displayName: "Volatility 100" },
+];
+
+const VOL_1S: InstrumentConfig[] = [
+  { symbol: "1HZ10V", displayName: "Vol 10 (1s)" },
+  { symbol: "1HZ25V", displayName: "Vol 25 (1s)" },
+  { symbol: "1HZ50V", displayName: "Vol 50 (1s)" },
+  { symbol: "1HZ75V", displayName: "Vol 75 (1s)" },
+  { symbol: "1HZ100V", displayName: "Vol 100 (1s)" },
+];
+
+const STEP: InstrumentConfig[] = [
+  { symbol: "stpRNG", displayName: "Step Index" },
+];
+
+const JUMP: InstrumentConfig[] = [
+  { symbol: "JD10", displayName: "Jump 10" },
+  { symbol: "JD25", displayName: "Jump 25" },
+  { symbol: "JD50", displayName: "Jump 50" },
+  { symbol: "JD75", displayName: "Jump 75" },
+  { symbol: "JD100", displayName: "Jump 100" },
+];
+
+const BOOM_CRASH: InstrumentConfig[] = [
+  { symbol: "BOOM300N", displayName: "Boom 300" },
+  { symbol: "BOOM500", displayName: "Boom 500" },
+  { symbol: "BOOM1000", displayName: "Boom 1000" },
+  { symbol: "CRASH300N", displayName: "Crash 300" },
+  { symbol: "CRASH500", displayName: "Crash 500" },
+  { symbol: "CRASH1000", displayName: "Crash 1000" },
+];
+
+// ── Contract type presets ───────────────────────────────────────────
+const RISE_FALL: ContractTypeConfig = {
+  id: "rise_fall",
+  label: "Rise / Fall",
+  tickDuration: true,
+  buyButtons: [
+    { label: "Rise", contractType: "CALL", variant: "success" },
+    { label: "Fall", contractType: "PUT", variant: "destructive" },
+  ],
+};
+
+const HIGHER_LOWER: ContractTypeConfig = {
+  id: "higher_lower",
+  label: "Higher / Lower",
+  tickDuration: false,
+  buyButtons: [
+    { label: "Higher", contractType: "CALL", variant: "success" },
+    { label: "Lower", contractType: "PUT", variant: "destructive" },
+  ],
+};
+
+const DIGITS_EVEN_ODD: ContractTypeConfig = {
+  id: "even_odd",
+  label: "Even / Odd",
+  tickDuration: true,
+  buyButtons: [
+    { label: "Even", contractType: "DIGITEVEN", variant: "success" },
+    { label: "Odd", contractType: "DIGITODD", variant: "destructive" },
+  ],
+};
+
+const DIGITS_OVER_UNDER: ContractTypeConfig = {
+  id: "over_under",
+  label: "Over / Under",
+  tickDuration: true,
+  needsDigit: true,
+  buyButtons: [
+    { label: "Over", contractType: "DIGITOVER", variant: "success" },
+    { label: "Under", contractType: "DIGITUNDER", variant: "destructive" },
+  ],
+};
+
+const DIGITS_MATCH_DIFFER: ContractTypeConfig = {
+  id: "match_differ",
+  label: "Matches / Differs",
+  tickDuration: true,
+  needsDigit: true,
+  buyButtons: [
+    { label: "Matches", contractType: "DIGITMATCH", variant: "success" },
+    { label: "Differs", contractType: "DIGITDIFF", variant: "destructive" },
+  ],
+};
+
+const MULTIPLIERS: ContractTypeConfig = {
+  id: "multipliers",
+  label: "Multipliers",
+  tickDuration: false,
+  buyButtons: [
+    { label: "Up", contractType: "MULTUP", variant: "success" },
+    { label: "Down", contractType: "MULTDOWN", variant: "destructive" },
+  ],
+};
+
+const ACCUMULATORS: ContractTypeConfig = {
+  id: "accumulators",
+  label: "Accumulators",
+  tickDuration: false,
+  buyButtons: [
+    { label: "Buy", contractType: "ACCU", variant: "success" },
+  ],
+};
+
+// ── Styles ──────────────────────────────────────────────────────────
+export const TRADING_STYLES: TradingStyle[] = [
+  {
+    id: "synthetic-indices",
+    title: "Synthetic Indices",
+    description: "24/7 markets made for algorithms. Smooth behavior, no news shocks.",
+    riskTag: "Beginner Friendly",
+    tempoTag: "Steady",
+    contractTypes: [RISE_FALL, HIGHER_LOWER],
+    instruments: [...VOL_INDICES, ...VOL_1S, ...STEP, ...JUMP, ...BOOM_CRASH],
+  },
+  {
+    id: "digit-contracts",
+    title: "Digit Contracts",
+    description: "Fast micro-trades based on last-digit movement. High-speed strategies.",
+    riskTag: "Advanced",
+    tempoTag: "Fast",
+    contractTypes: [DIGITS_EVEN_ODD, DIGITS_OVER_UNDER, DIGITS_MATCH_DIFFER],
+    instruments: [...VOL_INDICES, ...VOL_1S],
+  },
+  {
+    id: "rise-fall-scalping",
+    title: "Rise/Fall Scalping",
+    description: "Predict short-term direction using momentum + timing logic.",
+    riskTag: "Medium Risk",
+    tempoTag: "Active",
+    contractTypes: [RISE_FALL],
+    instruments: [
+      ...VOL_INDICES.filter(i => ["R_10","R_25","R_50","R_75"].includes(i.symbol)),
+      ...VOL_1S.filter(i => ["1HZ25V","1HZ50V","1HZ75V"].includes(i.symbol)),
+      ...STEP,
+    ],
+  },
+  {
+    id: "boom-crash",
+    title: "Boom/Crash Spike Logic",
+    description: "Catch spikes using volatility + impulse detection algorithms.",
+    riskTag: "High Volatility",
+    tempoTag: "Precision",
+    contractTypes: [RISE_FALL],
+    instruments: BOOM_CRASH,
+  },
+  {
+    id: "multipliers",
+    title: "Multipliers",
+    description: "Amplify gains with controlled risk using multiplier contracts.",
+    riskTag: "Medium Risk",
+    tempoTag: "Flexible",
+    contractTypes: [MULTIPLIERS],
+    instruments: [...VOL_INDICES, ...VOL_1S],
+  },
+  {
+    id: "accumulators",
+    title: "Accumulators",
+    description: "Accumulate gains with each tick in your favour.",
+    riskTag: "Beginner Friendly",
+    tempoTag: "Steady",
+    contractTypes: [ACCUMULATORS],
+    instruments: [...VOL_INDICES, ...VOL_1S],
+  },
+];
+
+export function getStyleById(id: string): TradingStyle | undefined {
+  return TRADING_STYLES.find(s => s.id === id);
+}
