@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -67,7 +67,7 @@ interface ChartUploadProps {
 }
 
 export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
-  const { user } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -117,6 +117,46 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
     setAnalysisResult(null);
     setStructuredResult(null);
   };
+  const autoPostSignal = useCallback(async (
+    structured: any,
+    sym: string,
+    tf: string,
+    chartImageUrl: string,
+  ) => {
+    if (!user) return;
+    try {
+      const direction = structured.recommendation === "SELL" ? "SELL" : "BUY";
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      const { error } = await supabase
+        .from("trading_signals")
+        .insert({
+          symbol: sym || "UNKNOWN",
+          direction,
+          entry_price: structured.entry_price ? parseFloat(structured.entry_price) : 0,
+          stop_loss: structured.stop_loss ? parseFloat(structured.stop_loss) : null,
+          take_profit: structured.take_profit ? parseFloat(structured.take_profit) : null,
+          timeframe: tf || "M5",
+          category: "forex",
+          confidence: structured.confidence ? parseInt(structured.confidence) : null,
+          reason: `AI Chart Analysis: ${structured.trend || "N/A"} trend, ${structured.confidence || 75}% confidence`,
+          is_manual: true,
+          posted_by: user.id,
+          status: "ACTIVE",
+          strategy_name: "AI Chart Analysis",
+          expires_at: expiresAt,
+        });
+
+      if (error) {
+        console.error("Auto-post signal error:", error);
+        toast.error("Analysis complete but failed to auto-post signal");
+      } else {
+        toast.success("Signal auto-posted to Signals page!");
+      }
+    } catch (err: any) {
+      console.error("Auto-post signal exception:", err);
+    }
+  }, [user]);
 
   const handleAnalyze = async () => {
     if (!selectedFile) {
@@ -176,6 +216,11 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       setAnalysisResult(analysisData.analysis);
       setStructuredResult(analysisData.structured);
       toast.success("Chart analyzed successfully!");
+
+      // Auto-post as signal if user is admin/super_admin
+      if ((isAdmin || isSuperAdmin) && analysisData.structured) {
+        await autoPostSignal(analysisData.structured, symbol, timeframe, imageUrl);
+      }
     } catch (error: any) {
       console.error("Analysis error:", error);
       toast.error(error.message || "Failed to analyze chart");
@@ -230,7 +275,11 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
               </CardDescription>
             </div>
           </div>
-          {user ? (
+          {(isAdmin || isSuperAdmin) ? (
+            <Badge variant="outline" className="text-xs text-primary border-primary/30">
+              Auto-posts signals
+            </Badge>
+          ) : user ? (
             <Badge variant="outline" className="text-xs text-success border-success/30">
               Unlimited analyses
             </Badge>
