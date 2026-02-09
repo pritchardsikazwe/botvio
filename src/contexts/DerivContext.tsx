@@ -14,7 +14,7 @@ interface DerivContextType {
   unsubscribeTicks: (symbol: string) => Promise<void>;
   getProposal: (params: {
     symbol: string;
-    contract_type: "CALL" | "PUT";
+    contract_type: string;
     amount: number;
     duration: number;
     duration_unit: "t" | "s" | "m" | "h" | "d";
@@ -24,7 +24,7 @@ interface DerivContextType {
   buyContract: (proposalId: string, price: number) => Promise<DerivContract>;
   placeTrade: (params: {
     symbol: string;
-    contract_type: "CALL" | "PUT";
+    contract_type: string;
     amount: number;
     duration: number;
     duration_unit: "t" | "s" | "m" | "h" | "d";

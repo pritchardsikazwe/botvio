@@ -25,12 +25,8 @@ const STYLES: TradeStyle[] = [
     title: "Synthetic Indices",
     subtitle: "24/7 markets made for algorithms. Smooth behavior, no news shocks.",
     badges: [{ label: "Beginner Friendly" }, { label: "Steady" }],
-    learn: [
-      "Best for learning bots",
-      "Good for trend + range strategies",
-      "Runs 24/7",
-    ],
-    startRoute: "/bots?mode=synthetic",
+    learn: ["Best for learning bots", "Good for trend + range strategies", "Runs 24/7"],
+    startRoute: "/trade/style/synthetic-indices",
     icon: <Waves className="h-4 w-4" />,
   },
   {
@@ -38,12 +34,8 @@ const STYLES: TradeStyle[] = [
     title: "Digit Contracts",
     subtitle: "Fast micro-trades based on last-digit movement. High-speed strategies.",
     badges: [{ label: "Advanced" }, { label: "Fast" }],
-    learn: [
-      "Short duration trades",
-      "Needs strict risk rules",
-      "Great for automation",
-    ],
-    startRoute: "/bots?mode=digits",
+    learn: ["Short duration trades", "Needs strict risk rules", "Great for automation"],
+    startRoute: "/trade/style/digit-contracts",
     icon: <BarChart3 className="h-4 w-4" />,
   },
   {
@@ -51,12 +43,8 @@ const STYLES: TradeStyle[] = [
     title: "Rise/Fall Scalping",
     subtitle: "Predict short-term direction using momentum + timing logic.",
     badges: [{ label: "Medium Risk" }, { label: "Active" }],
-    learn: [
-      "Quick entries and exits",
-      "Works best with confirmations",
-      "Good for focused sessions",
-    ],
-    startRoute: "/bots?mode=risefall",
+    learn: ["Quick entries and exits", "Works best with confirmations", "Good for focused sessions"],
+    startRoute: "/trade/style/rise-fall-scalping",
     icon: <TrendingUp className="h-4 w-4" />,
   },
   {
@@ -64,12 +52,8 @@ const STYLES: TradeStyle[] = [
     title: "Boom/Crash Spike Logic",
     subtitle: "Catch spikes using volatility + impulse detection algorithms.",
     badges: [{ label: "High Volatility" }, { label: "Precision" }],
-    learn: [
-      "Spikes can be sudden",
-      "Needs tight risk control",
-      "Best for experienced users",
-    ],
-    startRoute: "/bots?mode=boomcrash",
+    learn: ["Spikes can be sudden", "Needs tight risk control", "Best for experienced users"],
+    startRoute: "/trade/style/boom-crash",
     icon: <Zap className="h-4 w-4" />,
   },
   {
@@ -77,12 +61,8 @@ const STYLES: TradeStyle[] = [
     title: "Volatility Trend Bots",
     subtitle: "Ride longer trends using EMA + market structure rules.",
     badges: [{ label: "Beginner Friendly" }, { label: "Trend" }],
-    learn: [
-      "Simple rules: follow trend",
-      "Less overtrading",
-      "Good for passive users",
-    ],
-    startRoute: "/bots?mode=voltrend",
+    learn: ["Simple rules: follow trend", "Less overtrading", "Good for passive users"],
+    startRoute: "/trade/style/synthetic-indices",
     icon: <Activity className="h-4 w-4" />,
   },
 ];
@@ -155,7 +135,7 @@ export function TradingStyleSection() {
                   className="text-xs"
                   onClick={() => navigate(s.startRoute)}
                 >
-                  Start Bot
+                  Trade Now
                 </Button>
               </div>
               {open === s.key && (
