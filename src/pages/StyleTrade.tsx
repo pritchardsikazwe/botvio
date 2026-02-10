@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getStyleById, type ContractTypeConfig } from "@/config/tradingStyles";
 import { SEOHead } from "@/components/seo/SEOHead";
@@ -10,11 +10,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Activity, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Activity, CheckCircle2, XCircle, Bot } from "lucide-react";
 import { toast } from "sonner";
+import { SignalPanel } from "@/components/trading/SignalPanel";
+import { runEngine, generateDemoSignal, type SignalResult, type EngineType } from "@/lib/signalEngines";
+import {
+  createDefaultRiskSession, checkCanTrade, getMinInterval,
+  recordTradeResult, shouldAutoTrade, safeStake,
+  type RiskSession,
+} from "@/lib/riskGuardrails";
 
 interface LogEntry {
   id: number;
@@ -26,7 +34,7 @@ interface LogEntry {
 const StyleTrade = () => {
   const { styleId } = useParams<{ styleId: string }>();
   const navigate = useNavigate();
-  const { authorized, lastTick, subscribeTicks, unsubscribeTicks, getProposal, buyContract } = useDeriv();
+  const { authorized, balance, lastTick, subscribeTicks, unsubscribeTicks, getProposal, buyContract } = useDeriv();
   const style = getStyleById(styleId || "");
 
   const [selectedSymbol, setSelectedSymbol] = useState("");
@@ -37,6 +45,17 @@ const StyleTrade = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [buying, setBuying] = useState(false);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+
+  // Signal engine state
+  const tickBuffer = useRef<number[]>([]);
+  const [currentSignal, setCurrentSignal] = useState<SignalResult | null>(null);
+  const [riskSession, setRiskSession] = useState<RiskSession>(
+    createDefaultRiskSession(balance?.balance)
+  );
+  const [autoMode, setAutoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
+  const consecutiveSameRef = useRef(0);
+  const lastSignalRef = useRef<string>("WAIT");
 
   // Init defaults
   useEffect(() => {
@@ -69,17 +88,110 @@ const StyleTrade = () => {
   // Subscribe to ticks
   useEffect(() => {
     if (authorized && selectedSymbol) {
+      tickBuffer.current = [];
       subscribeTicks(selectedSymbol);
       return () => { unsubscribeTicks(selectedSymbol); };
     }
   }, [authorized, selectedSymbol]);
 
-  // Track price
+  // Track price + buffer ticks for engine
   useEffect(() => {
     if (lastTick && lastTick.symbol === selectedSymbol) {
       setCurrentPrice(lastTick.quote);
+      tickBuffer.current.push(lastTick.quote);
+      if (tickBuffer.current.length > 300) tickBuffer.current = tickBuffer.current.slice(-300);
     }
   }, [lastTick, selectedSymbol]);
+
+  // Run signal engine every ~2 seconds
+  useEffect(() => {
+    if (!activeContract) return;
+
+    const interval = setInterval(() => {
+      const engineType = activeContract as EngineType;
+
+      let result: SignalResult;
+      if (demoMode) {
+        result = generateDemoSignal(engineType);
+      } else if (tickBuffer.current.length >= 20) {
+        result = runEngine(engineType, tickBuffer.current);
+      } else {
+        return; // not enough data yet
+      }
+
+      // Track consecutive same signal for auto-bot
+      if (result.signal === lastSignalRef.current && result.signal !== "WAIT") {
+        consecutiveSameRef.current++;
+      } else {
+        consecutiveSameRef.current = result.signal === "WAIT" ? 0 : 1;
+      }
+      lastSignalRef.current = result.signal;
+
+      setCurrentSignal(result);
+
+      // Update suggested duration
+      if (result.suggestedDuration) {
+        setDuration(String(result.suggestedDuration));
+      }
+      if (result.suggestedBarrier !== undefined) {
+        setDigit(String(result.suggestedBarrier));
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [activeContract, demoMode]);
+
+  // Auto-mode trade execution
+  useEffect(() => {
+    if (!autoMode || !currentSignal || currentSignal.signal === "WAIT") return;
+
+    const canAuto = shouldAutoTrade(
+      { ...riskSession, autoMode: true },
+      currentSignal.confidence,
+      currentSignal.timing,
+      consecutiveSameRef.current,
+    );
+
+    if (!canAuto) return;
+
+    // Map signal to contract type button
+    const ct = style?.contractTypes.find(c => c.id === activeContract);
+    if (!ct) return;
+
+    const matchBtn = ct.buyButtons.find(btn => {
+      const sig = currentSignal.signal;
+      if (sig === "RISE" && btn.contractType === "CALL") return true;
+      if (sig === "FALL" && btn.contractType === "PUT") return true;
+      if (sig === "EVEN" && btn.contractType === "DIGITEVEN") return true;
+      if (sig === "ODD" && btn.contractType === "DIGITODD") return true;
+      if (sig === "OVER" && btn.contractType === "DIGITOVER") return true;
+      if (sig === "UNDER" && btn.contractType === "DIGITUNDER") return true;
+      if (sig === "MATCH" && btn.contractType === "DIGITMATCH") return true;
+      if (sig === "DIFFER" && btn.contractType === "DIGITDIFF") return true;
+      if (sig === "UP" && btn.contractType === "MULTUP") return true;
+      if (sig === "DOWN" && btn.contractType === "MULTDOWN") return true;
+      if (sig === "BUY" && btn.contractType === "ACCU") return true;
+      if (sig === "HIGHER" && btn.contractType === "CALL") return true;
+      if (sig === "LOWER" && btn.contractType === "PUT") return true;
+      return false;
+    });
+
+    if (matchBtn) {
+      handleBuy(matchBtn);
+    }
+  }, [currentSignal, autoMode]);
+
+  // Update risk session when balance changes
+  useEffect(() => {
+    if (balance?.balance) {
+      setRiskSession(prev => ({
+        ...prev,
+        maxDailyLossUsd: Math.min(50, balance.balance * 0.1),
+      }));
+      // Set safe stake
+      setStake(String(safeStake(balance.balance).toFixed(2)));
+    }
+  }, [balance?.balance]);
 
   const addLog = useCallback((type: LogEntry["type"], message: string) => {
     setLogs(prev => [{
@@ -92,12 +204,26 @@ const StyleTrade = () => {
 
   const currentContractConfig = style?.contractTypes.find(c => c.id === activeContract);
 
+  const tradeCheck = currentSignal
+    ? checkCanTrade(riskSession, currentSignal.confidence, getMinInterval(styleId || ""))
+    : { allowed: false, reason: null as any, message: "Waiting for signal" };
+
   const handleBuy = async (button: ContractTypeConfig["buyButtons"][0]) => {
     if (!authorized) {
       toast.error("Connect your Deriv account first");
       return;
     }
     if (!selectedSymbol) return;
+
+    // Risk check
+    if (currentSignal) {
+      const check = checkCanTrade(riskSession, currentSignal.confidence, getMinInterval(styleId || ""));
+      if (!check.allowed) {
+        toast.error(check.message);
+        addLog("error", `Blocked: ${check.message}`);
+        return;
+      }
+    }
 
     setBuying(true);
     addLog("info", `Placing ${button.label} on ${selectedSymbol} — stake $${stake}`);
@@ -120,9 +246,15 @@ const StyleTrade = () => {
       const contract = await buyContract(proposalRes.id, proposalRes.ask_price);
       addLog("success", `✅ Trade opened — Contract ID ${contract.contract_id}`);
       toast.success("Trade placed successfully!");
+
+      // Update risk session
+      setRiskSession(prev => recordTradeResult(prev, true, proposalRes.payout - parseFloat(stake), styleId || ""));
     } catch (err: any) {
       addLog("error", `Error: ${err.message}`);
       toast.error(err.message);
+
+      // Record loss in risk session
+      setRiskSession(prev => recordTradeResult(prev, false, -parseFloat(stake), styleId || ""));
     } finally {
       setBuying(false);
     }
@@ -140,6 +272,8 @@ const StyleTrade = () => {
     );
   }
 
+  const isDisabledBySignal = currentSignal ? currentSignal.confidence < 60 : false;
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead title={`${style.title} Trading`} description={style.description} noIndex />
@@ -147,17 +281,31 @@ const StyleTrade = () => {
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Title bar */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold">{style.title}</h1>
             <p className="text-sm text-muted-foreground">{style.description}</p>
           </div>
-          <div className="flex gap-1.5 ml-auto">
+          <div className="flex items-center gap-2">
             <Badge variant="outline">{style.riskTag}</Badge>
             <Badge variant="outline">{style.tempoTag}</Badge>
+          </div>
+          {/* Auto / Demo toggles */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-muted-foreground">Manual</Label>
+              <Switch checked={autoMode} onCheckedChange={setAutoMode} />
+              <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                <Bot className="h-3 w-3" /> Auto
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-muted-foreground">Demo</Label>
+              <Switch checked={demoMode} onCheckedChange={setDemoMode} />
+            </div>
           </div>
         </div>
 
@@ -191,6 +339,14 @@ const StyleTrade = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Signal Panel */}
+              <SignalPanel
+                signal={currentSignal}
+                riskSession={riskSession}
+                blockReason={tradeCheck.reason}
+                blockMessage={tradeCheck.message}
+              />
             </div>
 
             {/* Center – Contract Tabs + Trade UI */}
@@ -255,13 +411,19 @@ const StyleTrade = () => {
                               key={btn.contractType}
                               className="flex-1 h-12 text-base font-bold"
                               variant={btn.variant === "success" ? "default" : btn.variant === "destructive" ? "destructive" : "default"}
-                              disabled={buying || !selectedSymbol}
+                              disabled={buying || !selectedSymbol || isDisabledBySignal || !tradeCheck.allowed}
                               onClick={() => handleBuy(btn)}
                             >
                               {buying ? "Placing…" : btn.label}
                             </Button>
                           ))}
                         </div>
+
+                        {isDisabledBySignal && (
+                          <p className="text-xs text-amber-400 text-center">
+                            ⚠️ Confidence below 60% — buttons disabled
+                          </p>
+                        )}
                       </CardContent>
                     </TabsContent>
                   ))}

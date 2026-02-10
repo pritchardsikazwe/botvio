@@ -62,7 +62,7 @@ const TRADE_MODES = [
     description: "Ultra-short contracts for fast results",
     icon: <Target className="h-5 w-5" />,
     badges: ["Advanced", "Speed"],
-    route: "/trade/style/rise-fall-scalping",
+    route: "/trade/style/turbo",
   },
 ];
 

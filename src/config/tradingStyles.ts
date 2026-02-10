@@ -139,6 +139,16 @@ const ACCUMULATORS: ContractTypeConfig = {
   ],
 };
 
+const TURBO: ContractTypeConfig = {
+  id: "turbo",
+  label: "Turbo",
+  tickDuration: true,
+  buyButtons: [
+    { label: "Rise", contractType: "CALL", variant: "success" },
+    { label: "Fall", contractType: "PUT", variant: "destructive" },
+  ],
+};
+
 // ── Styles ──────────────────────────────────────────────────────────
 export const TRADING_STYLES: TradingStyle[] = [
   {
@@ -198,6 +208,18 @@ export const TRADING_STYLES: TradingStyle[] = [
     tempoTag: "Steady",
     contractTypes: [ACCUMULATORS],
     instruments: [...VOL_INDICES, ...VOL_1S],
+  },
+  {
+    id: "turbo",
+    title: "Turbo",
+    description: "Ultra-short breakout contracts for fast results.",
+    riskTag: "Advanced",
+    tempoTag: "Speed",
+    contractTypes: [TURBO],
+    instruments: [
+      ...VOL_INDICES.filter(i => ["R_50","R_75","R_100"].includes(i.symbol)),
+      ...VOL_1S.filter(i => ["1HZ50V","1HZ75V","1HZ100V"].includes(i.symbol)),
+    ],
   },
 ];
 
