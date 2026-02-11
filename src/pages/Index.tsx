@@ -13,11 +13,9 @@ import { BotvioSniperPanel } from "@/components/trading/BotvioSniperPanel";
 import { PerformancePanel } from "@/components/trading/PerformancePanel";
 import { QuickTrade } from "@/components/trading/QuickTrade";
 import { ActiveBotsWidget } from "@/components/trading/ActiveBotsWidget";
-import { AutoTradingPanel } from "@/components/trading/AutoTradingPanel";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
-import { TradingStyleSection } from "@/components/trading/TradingStyleSection";
 import { TradeModesGrid } from "@/components/trading/TradeModesGrid";
 import { MarketData } from "@/types/trading";
 import { useAuth } from "@/contexts/AuthContext";
@@ -121,7 +119,7 @@ const Index = () => {
         .select("*")
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
-        .limit(8);
+        .limit(4);
       if (error) throw error;
       return data;
     },
@@ -204,16 +202,13 @@ const Index = () => {
 
           {/* Right Sidebar */}
           <div className="lg:col-span-3 space-y-6">
-            <AutoTradingPanel />
-            <ActiveBotsWidget />
             <SupportResistanceLevels levels={[]} currentPrice={marketData.price} />
             <PerformancePanel />
           </div>
         </div>
 
-        {/* Trade Modes + Style Picker */}
+        {/* Trade Modes */}
         <TradeModesGrid />
-        <TradingStyleSection />
 
         {/* AI Chart Analysis Section */}
         <div className="mt-8">
