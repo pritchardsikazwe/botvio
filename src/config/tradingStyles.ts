@@ -67,11 +67,15 @@ const BOOM_CRASH: InstrumentConfig[] = [
   { symbol: "CRASH1000", displayName: "Crash 1000" },
 ];
 
+const ALL_INSTRUMENTS: InstrumentConfig[] = [
+  ...VOL_INDICES, ...VOL_1S, ...STEP, ...JUMP, ...BOOM_CRASH,
+];
+
 // ── Contract type presets ───────────────────────────────────────────
 const RISE_FALL: ContractTypeConfig = {
   id: "rise_fall",
   label: "Rise / Fall",
-  tickDuration: true,
+  tickDuration: false,
   buyButtons: [
     { label: "Rise", contractType: "CALL", variant: "success" },
     { label: "Fall", contractType: "PUT", variant: "destructive" },
@@ -91,7 +95,7 @@ const HIGHER_LOWER: ContractTypeConfig = {
 const DIGITS_EVEN_ODD: ContractTypeConfig = {
   id: "even_odd",
   label: "Even / Odd",
-  tickDuration: true,
+  tickDuration: false,
   buyButtons: [
     { label: "Even", contractType: "DIGITEVEN", variant: "success" },
     { label: "Odd", contractType: "DIGITODD", variant: "destructive" },
@@ -101,7 +105,7 @@ const DIGITS_EVEN_ODD: ContractTypeConfig = {
 const DIGITS_OVER_UNDER: ContractTypeConfig = {
   id: "over_under",
   label: "Over / Under",
-  tickDuration: true,
+  tickDuration: false,
   needsDigit: true,
   buyButtons: [
     { label: "Over", contractType: "DIGITOVER", variant: "success" },
@@ -112,7 +116,7 @@ const DIGITS_OVER_UNDER: ContractTypeConfig = {
 const DIGITS_MATCH_DIFFER: ContractTypeConfig = {
   id: "match_differ",
   label: "Matches / Differs",
-  tickDuration: true,
+  tickDuration: false,
   needsDigit: true,
   buyButtons: [
     { label: "Matches", contractType: "DIGITMATCH", variant: "success" },
@@ -142,7 +146,7 @@ const ACCUMULATORS: ContractTypeConfig = {
 const TURBO: ContractTypeConfig = {
   id: "turbo",
   label: "Turbo",
-  tickDuration: true,
+  tickDuration: false,
   buyButtons: [
     { label: "Rise", contractType: "CALL", variant: "success" },
     { label: "Fall", contractType: "PUT", variant: "destructive" },
@@ -158,29 +162,25 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Beginner Friendly",
     tempoTag: "Steady",
     contractTypes: [RISE_FALL, HIGHER_LOWER],
-    instruments: [...VOL_INDICES, ...VOL_1S, ...STEP, ...JUMP, ...BOOM_CRASH],
+    instruments: ALL_INSTRUMENTS,
   },
   {
     id: "digit-contracts",
     title: "Digit Contracts",
-    description: "Fast micro-trades based on last-digit movement. High-speed strategies.",
+    description: "Hauza Sniper — Fast micro-trades based on last-digit movement.",
     riskTag: "Advanced",
     tempoTag: "Fast",
-    contractTypes: [DIGITS_EVEN_ODD, DIGITS_OVER_UNDER, DIGITS_MATCH_DIFFER],
-    instruments: [...VOL_INDICES, ...VOL_1S],
+    contractTypes: [DIGITS_MATCH_DIFFER, DIGITS_OVER_UNDER, DIGITS_EVEN_ODD],
+    instruments: ALL_INSTRUMENTS,
   },
   {
     id: "rise-fall-scalping",
     title: "Rise/Fall Scalping",
-    description: "Predict short-term direction using momentum + timing logic.",
+    description: "Hauza Sniper — Predict short-term direction using momentum + timing logic.",
     riskTag: "Medium Risk",
     tempoTag: "Active",
     contractTypes: [RISE_FALL],
-    instruments: [
-      ...VOL_INDICES.filter(i => ["R_10","R_25","R_50","R_75"].includes(i.symbol)),
-      ...VOL_1S.filter(i => ["1HZ25V","1HZ50V","1HZ75V"].includes(i.symbol)),
-      ...STEP,
-    ],
+    instruments: ALL_INSTRUMENTS,
   },
   {
     id: "boom-crash",
@@ -189,25 +189,25 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "High Volatility",
     tempoTag: "Precision",
     contractTypes: [RISE_FALL],
-    instruments: BOOM_CRASH,
+    instruments: ALL_INSTRUMENTS,
   },
   {
     id: "multipliers",
     title: "Multipliers",
-    description: "Amplify gains with controlled risk using multiplier contracts.",
+    description: "Hauza Sniper — Amplify gains with controlled risk using multiplier contracts.",
     riskTag: "Medium Risk",
     tempoTag: "Flexible",
     contractTypes: [MULTIPLIERS],
-    instruments: [...VOL_INDICES, ...VOL_1S],
+    instruments: ALL_INSTRUMENTS,
   },
   {
     id: "accumulators",
     title: "Accumulators",
-    description: "Accumulate gains with each tick in your favour.",
+    description: "Hauza Sniper — Accumulate gains with each tick in your favour.",
     riskTag: "Beginner Friendly",
     tempoTag: "Steady",
     contractTypes: [ACCUMULATORS],
-    instruments: [...VOL_INDICES, ...VOL_1S],
+    instruments: ALL_INSTRUMENTS,
   },
   {
     id: "turbo",
@@ -216,10 +216,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Advanced",
     tempoTag: "Speed",
     contractTypes: [TURBO],
-    instruments: [
-      ...VOL_INDICES.filter(i => ["R_50","R_75","R_100"].includes(i.symbol)),
-      ...VOL_1S.filter(i => ["1HZ50V","1HZ75V","1HZ100V"].includes(i.symbol)),
-    ],
+    instruments: ALL_INSTRUMENTS,
   },
 ];
 

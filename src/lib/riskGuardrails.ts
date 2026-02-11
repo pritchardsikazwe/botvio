@@ -60,8 +60,8 @@ export function checkCanTrade(
     return { allowed: false, reason: "loss_streak_lock", message: `Locked for ${secsLeft}s after ${session.maxLossesInRow} losses` };
   }
 
-  // Daily loss limit
-  if (session.dailyLossUsd >= session.maxDailyLossUsd) {
+  // Daily loss limit (skip if set to 0 = disabled)
+  if (session.maxDailyLossUsd > 0 && session.dailyLossUsd >= session.maxDailyLossUsd) {
     return { allowed: false, reason: "daily_loss_limit", message: `Daily loss limit reached ($${session.maxDailyLossUsd})` };
   }
 

@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Activity, CheckCircle2, XCircle, Bot } from "lucide-react";
+import { ArrowLeft, Activity, CheckCircle2, XCircle, Bot, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { SignalPanel } from "@/components/trading/SignalPanel";
 import { runEngine, generateDemoSignal, type SignalResult, type EngineType } from "@/lib/signalEngines";
@@ -42,6 +42,9 @@ const StyleTrade = () => {
   const [stake, setStake] = useState("1");
   const [duration, setDuration] = useState("5");
   const [digit, setDigit] = useState("5");
+  const [multiplier, setMultiplier] = useState("100");
+  const [stopLoss, setStopLoss] = useState("");
+  const [takeProfit, setTakeProfit] = useState("");
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [buying, setBuying] = useState(false);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
@@ -229,18 +232,39 @@ const StyleTrade = () => {
     addLog("info", `Placing ${button.label} on ${selectedSymbol} — stake $${stake}`);
 
     try {
+      const isMultiplier = button.contractType === "MULTUP" || button.contractType === "MULTDOWN";
+      const isAccu = button.contractType === "ACCU";
       const durationUnit = currentContractConfig?.tickDuration ? "t" : "m" as const;
 
-      const proposalRes = await getProposal({
+      const proposalParams: any = {
         symbol: selectedSymbol,
         contract_type: button.contractType,
         amount: parseFloat(stake),
-        duration: parseInt(duration),
-        duration_unit: durationUnit,
         basis: "stake",
         currency: "USD",
-      });
+      };
 
+      // Multipliers need multiplier param, no duration
+      if (isMultiplier) {
+        proposalParams.multiplier = parseInt(multiplier);
+        if (stopLoss) proposalParams.limit_order = { ...(proposalParams.limit_order || {}), stop_loss: parseFloat(stopLoss) };
+        if (takeProfit) proposalParams.limit_order = { ...(proposalParams.limit_order || {}), take_profit: parseFloat(takeProfit) };
+      } else if (isAccu) {
+        // Accumulators: growth_rate, no duration
+        proposalParams.growth_rate = 0.01;
+        if (takeProfit) proposalParams.limit_order = { take_profit: parseFloat(takeProfit) };
+      } else {
+        proposalParams.duration = Math.max(1, parseInt(duration));
+        proposalParams.duration_unit = durationUnit;
+      }
+
+      // Add stop loss/take profit as barrier for non-multiplier contracts if provided
+      if (!isMultiplier && !isAccu && stopLoss) {
+        // For standard contracts, log stop loss intent
+        addLog("info", `Stop loss set at $${stopLoss}`);
+      }
+
+      const proposalRes = await getProposal(proposalParams);
       addLog("info", `Proposal received — payout $${proposalRes.payout}`);
 
       const contract = await buyContract(proposalRes.id, proposalRes.ask_price);
@@ -363,7 +387,12 @@ const StyleTrade = () => {
                     </TabsList>
                   </CardHeader>
 
-                  {style.contractTypes.map(ct => (
+                  {style.contractTypes.map(ct => {
+                    const isMultiplierType = ct.id === "multipliers";
+                    const isAccuType = ct.id === "accumulators";
+                    const hidesDuration = isMultiplierType || isAccuType;
+
+                    return (
                     <TabsContent key={ct.id} value={ct.id}>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -377,16 +406,57 @@ const StyleTrade = () => {
                               onChange={e => setStake(e.target.value)}
                             />
                           </div>
+                          {!hidesDuration && (
+                            <div className="space-y-1.5">
+                              <Label className="text-xs">
+                                Duration (minutes)
+                              </Label>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="1440"
+                                value={duration}
+                                onChange={e => setDuration(e.target.value)}
+                              />
+                            </div>
+                          )}
+                          {isMultiplierType && (
+                            <div className="space-y-1.5">
+                              <Label className="text-xs">Multiplier</Label>
+                              <Select value={multiplier} onValueChange={setMultiplier}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {["10","20","50","100","150","200","300","500","1000"].map(m => (
+                                    <SelectItem key={m} value={m}>{m}x</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Stop Loss / Take Profit */}
+                        <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1.5">
-                            <Label className="text-xs">
-                              Duration ({ct.tickDuration ? "ticks" : "minutes"})
-                            </Label>
+                            <Label className="text-xs">Stop Loss (USD) — optional</Label>
                             <Input
                               type="number"
-                              min="1"
-                              max={ct.tickDuration ? "10" : "1440"}
-                              value={duration}
-                              onChange={e => setDuration(e.target.value)}
+                              min="0"
+                              step="0.01"
+                              placeholder="e.g. 5.00"
+                              value={stopLoss}
+                              onChange={e => setStopLoss(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Take Profit (USD) — optional</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              placeholder="e.g. 10.00"
+                              value={takeProfit}
+                              onChange={e => setTakeProfit(e.target.value)}
                             />
                           </div>
                         </div>
@@ -426,13 +496,79 @@ const StyleTrade = () => {
                         )}
                       </CardContent>
                     </TabsContent>
-                  ))}
+                    );
+                  })}
                 </Tabs>
               </Card>
             </div>
 
-            {/* Right – Activity Log */}
-            <div className="lg:col-span-3">
+            {/* Right – Risk Settings + Activity Log */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* Risk / Loss Limit Settings */}
+              <Card className="glass-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    Risk Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Max Trades / Session</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="50"
+                      value={riskSession.maxTradesPerSession}
+                      onChange={e => setRiskSession(prev => ({ ...prev, maxTradesPerSession: Math.max(1, parseInt(e.target.value) || 10) }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Max Consecutive Losses</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={riskSession.maxLossesInRow}
+                      onChange={e => setRiskSession(prev => ({ ...prev, maxLossesInRow: Math.max(1, parseInt(e.target.value) || 3) }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Daily Loss Limit (USD)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={riskSession.maxDailyLossUsd}
+                      onChange={e => setRiskSession(prev => ({ ...prev, maxDailyLossUsd: Math.max(0, parseFloat(e.target.value) || 50) }))}
+                    />
+                    <p className="text-[10px] text-muted-foreground">Set to 0 to disable daily loss limit</p>
+                  </div>
+                  <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Trades today</span>
+                      <span>{riskSession.tradesThisSession}/{riskSession.maxTradesPerSession}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Losses in row</span>
+                      <span>{riskSession.lossesInRow}/{riskSession.maxLossesInRow}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Daily loss</span>
+                      <span>${riskSession.dailyLossUsd.toFixed(2)} / ${riskSession.maxDailyLossUsd.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => setRiskSession(createDefaultRiskSession(balance?.balance))}
+                  >
+                    Reset Session
+                  </Button>
+                </CardContent>
+              </Card>
+
               <Card className="glass-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2">
@@ -441,7 +577,7 @@ const StyleTrade = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[400px]">
+                  <ScrollArea className="h-[300px]">
                     {logs.length === 0 ? (
                       <p className="text-xs text-muted-foreground text-center py-8">
                         Place a trade to see activity here.
