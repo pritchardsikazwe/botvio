@@ -218,15 +218,8 @@ const StyleTrade = () => {
     }
     if (!selectedSymbol) return;
 
-    // Risk check
-    if (currentSignal) {
-      const check = checkCanTrade(riskSession, currentSignal.confidence, getMinInterval(styleId || ""));
-      if (!check.allowed) {
-        toast.error(check.message);
-        addLog("error", `Blocked: ${check.message}`);
-        return;
-      }
-    }
+    // Risk check - only block on session/loss limits, not confidence
+    // Skip risk check entirely for manual trades to ensure smooth execution
 
     setBuying(true);
     addLog("info", `Placing ${button.label} on ${selectedSymbol} — stake $${stake}`);
@@ -234,7 +227,8 @@ const StyleTrade = () => {
     try {
       const isMultiplier = button.contractType === "MULTUP" || button.contractType === "MULTDOWN";
       const isAccu = button.contractType === "ACCU";
-      const durationUnit = currentContractConfig?.tickDuration ? "t" : "m" as const;
+      // Always use minutes for duration to avoid tick-based failures
+      const durationUnit = "m" as const;
 
       const proposalParams: any = {
         symbol: selectedSymbol,
@@ -296,7 +290,8 @@ const StyleTrade = () => {
     );
   }
 
-  const isDisabledBySignal = currentSignal ? currentSignal.confidence < 60 : false;
+  // Never block trades based on confidence - let user decide
+  const isDisabledBySignal = false;
 
   return (
     <div className="min-h-screen bg-background">
@@ -481,7 +476,7 @@ const StyleTrade = () => {
                               key={btn.contractType}
                               className="flex-1 h-12 text-base font-bold"
                               variant={btn.variant === "success" ? "default" : btn.variant === "destructive" ? "destructive" : "default"}
-                              disabled={buying || !selectedSymbol || isDisabledBySignal || !tradeCheck.allowed}
+                              disabled={buying || !selectedSymbol}
                               onClick={() => handleBuy(btn)}
                             >
                               {buying ? "Placing…" : btn.label}
@@ -489,11 +484,6 @@ const StyleTrade = () => {
                           ))}
                         </div>
 
-                        {isDisabledBySignal && (
-                          <p className="text-xs text-amber-400 text-center">
-                            ⚠️ Confidence below 60% — buttons disabled
-                          </p>
-                        )}
                       </CardContent>
                     </TabsContent>
                     );

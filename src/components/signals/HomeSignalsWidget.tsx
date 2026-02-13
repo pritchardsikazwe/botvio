@@ -5,35 +5,37 @@ import { Badge } from "@/components/ui/badge";
 import { Signal, ArrowRight, TrendingUp, TrendingDown, Clock, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Helper to check if signal is expired (5 min after creation)
-function isSignalExpired(signal: { created_at: string; expires_at?: string | null }): boolean {
-  const now = new Date();
-  if (signal.expires_at) {
-    return new Date(signal.expires_at) < now;
-  }
-  const createdAt = new Date(signal.created_at);
-  const fiveMinutesLater = new Date(createdAt.getTime() + 5 * 60 * 1000);
-  return fiveMinutesLater < now;
+// Map timeframe to ms for expiration
+function timeframeToMs(timeframe: string): number {
+  const map: Record<string, number> = {
+    M1: 60_000, M5: 300_000, M15: 900_000, M30: 1_800_000,
+    H1: 3_600_000, H4: 14_400_000, D1: 86_400_000,
+  };
+  return map[timeframe] || 300_000;
 }
 
-// Get time remaining for active signal
-function getTimeRemaining(signal: { created_at: string; expires_at?: string | null }): string {
+function isSignalExpired(signal: { created_at: string; expires_at?: string | null; timeframe?: string }): boolean {
+  const now = new Date();
+  if (signal.expires_at) return new Date(signal.expires_at) < now;
+  const createdAt = new Date(signal.created_at);
+  return new Date(createdAt.getTime() + timeframeToMs(signal.timeframe || "M5")) < now;
+}
+
+function getTimeRemaining(signal: { created_at: string; expires_at?: string | null; timeframe?: string }): string {
   const now = new Date();
   let expiresAt: Date;
-  
   if (signal.expires_at) {
     expiresAt = new Date(signal.expires_at);
   } else {
     const createdAt = new Date(signal.created_at);
-    expiresAt = new Date(createdAt.getTime() + 5 * 60 * 1000);
+    expiresAt = new Date(createdAt.getTime() + timeframeToMs(signal.timeframe || "M5"));
   }
-  
   const diffMs = expiresAt.getTime() - now.getTime();
   if (diffMs <= 0) return "Expired";
-  
-  const minutes = Math.floor(diffMs / 60000);
-  const seconds = Math.floor((diffMs % 60000) / 1000);
-  
+  const hours = Math.floor(diffMs / 3_600_000);
+  const minutes = Math.floor((diffMs % 3_600_000) / 60_000);
+  const seconds = Math.floor((diffMs % 60_000) / 1000);
+  if (hours > 0) return `${hours}h ${minutes}m`;
   if (minutes > 0) return `${minutes}m ${seconds}s`;
   return `${seconds}s`;
 }
@@ -86,7 +88,7 @@ export const HomeSignalsWidget = () => {
             <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
             <h3 className="font-semibold mb-1">No Active Signals</h3>
             <p className="text-sm text-muted-foreground">
-              Signals expire 5 minutes after posting. Check back soon for new opportunities.
+              Signals expire based on their timeframe. Check back soon for new opportunities.
             </p>
           </CardContent>
         </Card>
