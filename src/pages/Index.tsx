@@ -13,8 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   GraduationCap, Target, AlertTriangle, Bot, TrendingUp,
   ArrowRight, Zap, BookOpen, Package, MessageCircle,
-  ExternalLink, Download, Smartphone
+  ExternalLink, Download, Smartphone, Sparkles
 } from "lucide-react";
+import { ChartUpload } from "@/components/signals/ChartUpload";
+import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -98,7 +100,21 @@ const Index = () => {
           <TradeModesGrid />
         </section>
 
-        {/* 3 — Quick Links (affiliates + community) */}
+        {/* 3 — AI Chart Analysis */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-bold">AI Chart Analysis</h2>
+          </div>
+          <ChartUpload />
+        </section>
+
+        {/* 4 — Latest Signals (admin-posted) */}
+        <section>
+          <HomeSignalsWidget />
+        </section>
+
+        {/* 5 — Quick Links (affiliates + community) */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">

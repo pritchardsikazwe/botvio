@@ -35,7 +35,21 @@ interface CreateSignalInput {
   expires_at?: string;
 }
 
-// Helper to check if signal is expired (5 minutes after creation or expires_at)
+// Map timeframe string to milliseconds for expiration
+function timeframeToMs(timeframe: string): number {
+  const map: Record<string, number> = {
+    M1: 1 * 60 * 1000,
+    M5: 5 * 60 * 1000,
+    M15: 15 * 60 * 1000,
+    M30: 30 * 60 * 1000,
+    H1: 60 * 60 * 1000,
+    H4: 4 * 60 * 60 * 1000,
+    D1: 24 * 60 * 60 * 1000,
+  };
+  return map[timeframe] || 5 * 60 * 1000; // default 5 min
+}
+
+// Helper to check if signal is expired based on its timeframe
 function isSignalExpired(signal: ManualSignal): boolean {
   const now = new Date();
   
@@ -44,10 +58,10 @@ function isSignalExpired(signal: ManualSignal): boolean {
     return new Date(signal.expires_at) < now;
   }
   
-  // Default: expire 5 minutes after creation
+  // Expire based on signal timeframe
   const createdAt = new Date(signal.created_at);
-  const fiveMinutesLater = new Date(createdAt.getTime() + 5 * 60 * 1000);
-  return fiveMinutesLater < now;
+  const expiresAt = new Date(createdAt.getTime() + timeframeToMs(signal.timeframe));
+  return expiresAt < now;
 }
 
 // Helper to check if signal is too old for history (2 days)
@@ -113,27 +127,26 @@ export const useLatestSignals = (limit: number = 3) => {
     queryKey: ["latest-signals", limit],
     queryFn: async () => {
       const now = new Date();
-      // Only fetch signals from the last 5 minutes that are active
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      // Fetch recent active signals (last 24h to cover all timeframes)
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       
       const { data, error } = await supabase
         .from("trading_signals")
         .select("*")
         .eq("status", "ACTIVE")
-        .gte("created_at", fiveMinutesAgo.toISOString())
+        .gte("created_at", oneDayAgo.toISOString())
         .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
       
-      // Double-check expiration on the client side
+      // Filter by timeframe-based expiration
       const activeSignals = (data as ManualSignal[]).filter(signal => {
         if (signal.expires_at) {
           return new Date(signal.expires_at) > now;
         }
-        // Default: within 5 minutes
         const createdAt = new Date(signal.created_at);
-        const expiresAt = new Date(createdAt.getTime() + 5 * 60 * 1000);
+        const expiresAt = new Date(createdAt.getTime() + timeframeToMs(signal.timeframe));
         return expiresAt > now;
       });
       
