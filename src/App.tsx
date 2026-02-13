@@ -37,6 +37,7 @@ import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import DerivCallback from "./pages/DerivCallback";
 import StyleTrade from "./pages/StyleTrade";
+import Trading from "./pages/Trading";
 import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 
@@ -101,6 +102,7 @@ const App = () => (
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/:slug" element={<Lesson />} />
               <Route path="/auth/deriv/callback" element={<DerivCallback />} />
+              <Route path="/trading" element={<Trading />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
