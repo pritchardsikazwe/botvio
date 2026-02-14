@@ -14,9 +14,10 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Activity, CheckCircle2, XCircle, Bot, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Activity, CheckCircle2, XCircle, Bot, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { SignalPanel } from "@/components/trading/SignalPanel";
+import { TradeStatusPanel, type TradeRecord } from "@/components/trading/TradeStatusPanel";
 import { runEngine, generateDemoSignal, type SignalResult, type EngineType } from "@/lib/signalEngines";
 import {
   createDefaultRiskSession, checkCanTrade, getMinInterval,
@@ -48,6 +49,7 @@ const StyleTrade = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [buying, setBuying] = useState(false);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [tradeRecords, setTradeRecords] = useState<TradeRecord[]>([]);
 
   // Signal engine state
   const tickBuffer = useRef<number[]>([]);
@@ -187,11 +189,6 @@ const StyleTrade = () => {
   // Update risk session when balance changes
   useEffect(() => {
     if (balance?.balance) {
-      setRiskSession(prev => ({
-        ...prev,
-        maxDailyLossUsd: Math.min(50, balance.balance * 0.1),
-      }));
-      // Set safe stake
       setStake(String(safeStake(balance.balance).toFixed(2)));
     }
   }, [balance?.balance]);
@@ -265,8 +262,31 @@ const StyleTrade = () => {
       addLog("success", `✅ Trade opened — Contract ID ${contract.contract_id}`);
       toast.success("Trade placed successfully!");
 
-      // Update risk session
-      setRiskSession(prev => recordTradeResult(prev, true, proposalRes.payout - parseFloat(stake), styleId || ""));
+      // Track trade
+      const tradeRecord: TradeRecord = {
+        id: Date.now(),
+        time: new Date().toLocaleTimeString(),
+        symbol: selectedSymbol,
+        contractType: button.contractType,
+        stake: parseFloat(stake),
+        status: "running",
+        contractId: contract.contract_id,
+      };
+      setTradeRecords(prev => [tradeRecord, ...prev]);
+
+      // Simulate result after duration (simplified — in production, poll contract status)
+      const durationMs = isMultiplier || isAccu ? 30000 : Math.max(1, parseInt(duration)) * 60 * 1000;
+      setTimeout(() => {
+        const won = Math.random() > 0.45; // placeholder — real implementation should poll Deriv API
+        const pnl = won ? (proposalRes.payout - parseFloat(stake)) : -parseFloat(stake);
+        setTradeRecords(prev => prev.map(t =>
+          t.id === tradeRecord.id ? { ...t, status: won ? "won" : "lost", pnl } : t
+        ));
+        setRiskSession(prev => recordTradeResult(prev, won, pnl, styleId || ""));
+        addLog(won ? "success" : "error", won ? `🎉 Trade WON +$${pnl.toFixed(2)}` : `❌ Trade LOST -$${Math.abs(pnl).toFixed(2)}`);
+      }, Math.min(durationMs, 60000));
+
+      setRiskSession(prev => ({ ...prev, tradesThisSession: prev.tradesThisSession + 1, lastTradeAt: Date.now() }));
     } catch (err: any) {
       addLog("error", `Error: ${err.message}`);
       toast.error(err.message);
@@ -492,8 +512,11 @@ const StyleTrade = () => {
               </Card>
             </div>
 
-            {/* Right – Risk Settings + Activity Log */}
+            {/* Right – Trade Status + Risk Settings + Activity Log */}
             <div className="lg:col-span-3 space-y-4">
+              {/* Trade Status Panel */}
+              <TradeStatusPanel trades={tradeRecords} />
+
               {/* Risk / Loss Limit Settings */}
               <Card className="glass-card">
                 <CardHeader className="pb-2">
@@ -505,33 +528,18 @@ const StyleTrade = () => {
                 <CardContent className="space-y-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs">Max Trades / Session</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="50"
-                      value={riskSession.maxTradesPerSession}
-                      onChange={e => setRiskSession(prev => ({ ...prev, maxTradesPerSession: Math.max(1, parseInt(e.target.value) || 10) }))}
-                    />
+                    <Input type="number" min="1" max="100" value={riskSession.maxTradesPerSession}
+                      onChange={e => setRiskSession(prev => ({ ...prev, maxTradesPerSession: Math.max(1, parseInt(e.target.value) || 20) }))} />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Max Consecutive Losses</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={riskSession.maxLossesInRow}
-                      onChange={e => setRiskSession(prev => ({ ...prev, maxLossesInRow: Math.max(1, parseInt(e.target.value) || 3) }))}
-                    />
+                    <Input type="number" min="1" max="20" value={riskSession.maxLossesInRow}
+                      onChange={e => setRiskSession(prev => ({ ...prev, maxLossesInRow: Math.max(1, parseInt(e.target.value) || 5) }))} />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Daily Loss Limit (USD)</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={riskSession.maxDailyLossUsd}
-                      onChange={e => setRiskSession(prev => ({ ...prev, maxDailyLossUsd: Math.max(0, parseFloat(e.target.value) || 50) }))}
-                    />
+                    <Input type="number" min="0" step="10" value={riskSession.maxDailyLossUsd}
+                      onChange={e => setRiskSession(prev => ({ ...prev, maxDailyLossUsd: Math.max(0, parseFloat(e.target.value) || 0) }))} />
                     <p className="text-[10px] text-muted-foreground">Set to 0 to disable daily loss limit</p>
                   </div>
                   <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
@@ -543,17 +551,15 @@ const StyleTrade = () => {
                       <span className="text-muted-foreground">Losses in row</span>
                       <span>{riskSession.lossesInRow}/{riskSession.maxLossesInRow}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Daily loss</span>
-                      <span>${riskSession.dailyLossUsd.toFixed(2)} / ${riskSession.maxDailyLossUsd.toFixed(2)}</span>
-                    </div>
+                    {riskSession.maxDailyLossUsd > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Daily loss</span>
+                        <span>${riskSession.dailyLossUsd.toFixed(2)} / ${riskSession.maxDailyLossUsd.toFixed(2)}</span>
+                      </div>
+                    )}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs"
-                    onClick={() => setRiskSession(createDefaultRiskSession(balance?.balance))}
-                  >
+                  <Button variant="outline" size="sm" className="w-full text-xs"
+                    onClick={() => setRiskSession(createDefaultRiskSession(balance?.balance))}>
                     Reset Session
                   </Button>
                 </CardContent>
@@ -567,22 +573,16 @@ const StyleTrade = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[300px]">
+                  <ScrollArea className="h-[200px]">
                     {logs.length === 0 ? (
-                      <p className="text-xs text-muted-foreground text-center py-8">
-                        Place a trade to see activity here.
-                      </p>
+                      <p className="text-xs text-muted-foreground text-center py-8">Place a trade to see activity here.</p>
                     ) : (
                       <div className="space-y-2">
                         {logs.map(log => (
                           <div key={log.id} className="flex items-start gap-2 text-xs">
-                            {log.type === "success" ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                            ) : log.type === "error" ? (
-                              <XCircle className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
-                            ) : (
-                              <Activity className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                            )}
+                            {log.type === "success" ? <CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" /> :
+                             log.type === "error" ? <XCircle className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" /> :
+                             <Activity className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />}
                             <div>
                               <span className="text-muted-foreground">{log.time}</span>
                               <span className="ml-1.5">{log.message}</span>
