@@ -71,6 +71,13 @@ const StyleTrade = () => {
       if (style.contractTypes.length > 0 && !activeContract) {
         setActiveContract(style.contractTypes[0].id);
       }
+      // Default to 5 ticks for digit styles, 5 minutes for others
+      const isDigitStyle = style.contractTypes.some(ct => 
+        ct.id === "even_odd" || ct.id === "over_under" || ct.id === "match_differ"
+      );
+      if (isDigitStyle) {
+        setDuration("5");
+      }
     }
   }, [style]);
 
@@ -215,28 +222,26 @@ const StyleTrade = () => {
     }
     if (!selectedSymbol) return;
 
-    // Risk check - only block on session/loss limits, not confidence
-    // Skip risk check entirely for manual trades to ensure smooth execution
-
     setBuying(true);
     addLog("info", `Placing ${button.label} on ${selectedSymbol} — stake $${stake}`);
 
     try {
-      const isMultiplier = button.contractType === "MULTUP" || button.contractType === "MULTDOWN";
-      const isAccu = button.contractType === "ACCU";
-      // Always use minutes for duration to avoid tick-based failures
-      const durationUnit = "m" as const;
+      const ct = button.contractType;
+      const isMultiplier = ct === "MULTUP" || ct === "MULTDOWN";
+      const isAccu = ct === "ACCU";
+      const isDigit = ct.startsWith("DIGIT");
+      const needsBarrier = ct === "DIGITMATCH" || ct === "DIGITDIFF" || ct === "DIGITOVER" || ct === "DIGITUNDER";
 
       const proposalParams: any = {
         symbol: selectedSymbol,
-        contract_type: button.contractType,
+        contract_type: ct,
         amount: parseFloat(stake),
         basis: "stake",
         currency: "USD",
       };
 
-      // Multipliers need multiplier param, no duration
       if (isMultiplier) {
+        // Multipliers: multiplier param, no duration
         proposalParams.multiplier = parseInt(multiplier);
         if (stopLoss) proposalParams.limit_order = { ...(proposalParams.limit_order || {}), stop_loss: parseFloat(stopLoss) };
         if (takeProfit) proposalParams.limit_order = { ...(proposalParams.limit_order || {}), take_profit: parseFloat(takeProfit) };
@@ -244,14 +249,22 @@ const StyleTrade = () => {
         // Accumulators: growth_rate, no duration
         proposalParams.growth_rate = 0.01;
         if (takeProfit) proposalParams.limit_order = { take_profit: parseFloat(takeProfit) };
+      } else if (isDigit) {
+        // ALL digit contracts require tick-based duration (1-10 ticks)
+        const tickDur = Math.max(1, Math.min(10, parseInt(duration)));
+        proposalParams.duration = tickDur;
+        proposalParams.duration_unit = "t";
+        // Digit contracts that need a last-digit prediction
+        if (needsBarrier) {
+          proposalParams.barrier = parseInt(digit);
+        }
       } else {
+        // Standard contracts (Rise/Fall, Higher/Lower, Turbo): use minutes
         proposalParams.duration = Math.max(1, parseInt(duration));
-        proposalParams.duration_unit = durationUnit;
+        proposalParams.duration_unit = "m";
       }
 
-      // Add stop loss/take profit as barrier for non-multiplier contracts if provided
       if (!isMultiplier && !isAccu && stopLoss) {
-        // For standard contracts, log stop loss intent
         addLog("info", `Stop loss set at $${stopLoss}`);
       }
 
@@ -405,11 +418,111 @@ const StyleTrade = () => {
                   {style.contractTypes.map(ct => {
                     const isMultiplierType = ct.id === "multipliers";
                     const isAccuType = ct.id === "accumulators";
+                    const isDigitType = ct.id === "even_odd" || ct.id === "over_under" || ct.id === "match_differ";
                     const hidesDuration = isMultiplierType || isAccuType;
+
+                    // Trading guide per contract type
+                    const guideMap: Record<string, { title: string; steps: string[] }> = {
+                      rise_fall: {
+                        title: "Rise/Fall Guide",
+                        steps: [
+                          "1. Select an instrument (e.g. Volatility 100)",
+                          "2. Set your stake amount in USD",
+                          "3. Set duration in minutes (1-1440)",
+                          "4. Click 'Rise' if you think price will go UP",
+                          "5. Click 'Fall' if you think price will go DOWN",
+                          "6. Trade settles at end of duration — profit if correct!",
+                        ],
+                      },
+                      higher_lower: {
+                        title: "Higher/Lower Guide",
+                        steps: [
+                          "1. Select instrument and set stake",
+                          "2. Set duration in minutes",
+                          "3. Click 'Higher' if price will be ABOVE entry at expiry",
+                          "4. Click 'Lower' if price will be BELOW entry at expiry",
+                        ],
+                      },
+                      even_odd: {
+                        title: "Even/Odd Guide",
+                        steps: [
+                          "1. Select instrument and set stake",
+                          "2. Set duration in TICKS (1-10)",
+                          "3. Click 'Even' — you win if the last digit is 0,2,4,6,8",
+                          "4. Click 'Odd' — you win if the last digit is 1,3,5,7,9",
+                          "5. No digit selection needed — it's automatic!",
+                        ],
+                      },
+                      over_under: {
+                        title: "Over/Under Guide",
+                        steps: [
+                          "1. Select instrument and set stake",
+                          "2. Set duration in TICKS (1-10)",
+                          "3. Choose your prediction digit (0-9)",
+                          "4. Click 'Over' — you win if last digit > your prediction",
+                          "5. Click 'Under' — you win if last digit < your prediction",
+                        ],
+                      },
+                      match_differ: {
+                        title: "Matches/Differs Guide",
+                        steps: [
+                          "1. Select instrument and set stake",
+                          "2. Set duration in TICKS (1-10)",
+                          "3. Choose the digit you want to predict (0-9)",
+                          "4. Click 'Matches' — you win if last digit = your digit",
+                          "5. Click 'Differs' — you win if last digit ≠ your digit",
+                        ],
+                      },
+                      multipliers: {
+                        title: "Multipliers Guide",
+                        steps: [
+                          "1. Select instrument and set stake",
+                          "2. Choose your multiplier (10x-1000x) — higher = more risk/reward",
+                          "3. Optionally set Stop Loss & Take Profit in USD",
+                          "4. Click 'Up' if you think price will rise",
+                          "5. Click 'Down' if you think price will fall",
+                          "6. Trade stays open until you sell or hit SL/TP",
+                        ],
+                      },
+                      accumulators: {
+                        title: "Accumulators Guide",
+                        steps: [
+                          "1. Select instrument and set stake",
+                          "2. Optionally set Take Profit in USD",
+                          "3. Click 'Buy' — your profit grows each tick the price stays in range",
+                          "4. Trade closes automatically if price moves out of range",
+                        ],
+                      },
+                      turbo: {
+                        title: "Turbo Guide",
+                        steps: [
+                          "1. Select instrument and set stake",
+                          "2. Set a short duration (1-5 minutes recommended)",
+                          "3. Click 'Rise' or 'Fall' for ultra-fast breakout trades",
+                          "4. Ideal for quick scalping on volatile instruments",
+                        ],
+                      },
+                    };
+                    const guide = guideMap[ct.id];
 
                     return (
                     <TabsContent key={ct.id} value={ct.id}>
                       <CardContent className="space-y-4">
+                        {/* Trading Guide */}
+                        {guide && (
+                          <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 space-y-1.5">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                              <Info className="h-4 w-4" />
+                              {guide.title}
+                            </div>
+                            <ul className="text-xs text-muted-foreground space-y-0.5">
+                              {guide.steps.map((step, i) => (
+                                <li key={i}>{step}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1.5">
                             <Label className="text-xs">Stake (USD)</Label>
@@ -424,12 +537,12 @@ const StyleTrade = () => {
                           {!hidesDuration && (
                             <div className="space-y-1.5">
                               <Label className="text-xs">
-                                Duration (minutes)
+                                {isDigitType ? "Duration (ticks, 1-10)" : "Duration (minutes)"}
                               </Label>
                               <Input
                                 type="number"
-                                min="1"
-                                max="1440"
+                                min={isDigitType ? "1" : "1"}
+                                max={isDigitType ? "10" : "1440"}
                                 value={duration}
                                 onChange={e => setDuration(e.target.value)}
                               />
@@ -478,7 +591,7 @@ const StyleTrade = () => {
 
                         {ct.needsDigit && (
                           <div className="space-y-1.5">
-                            <Label className="text-xs">Digit (0–9)</Label>
+                            <Label className="text-xs">Last Digit Prediction (0–9)</Label>
                             <Select value={digit} onValueChange={setDigit}>
                               <SelectTrigger><SelectValue /></SelectTrigger>
                               <SelectContent>
