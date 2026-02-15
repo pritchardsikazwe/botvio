@@ -185,7 +185,7 @@ export const useDerivAPI = () => {
       limit_order?: Record<string, number>;
     }): Promise<DerivProposal> => {
       const symbol = toDerivSymbol(params.symbol);
-      const request: any = {
+      const request: Record<string, unknown> = {
         proposal: 1,
         amount: params.amount,
         basis: params.basis || "stake",
@@ -195,31 +195,32 @@ export const useDerivAPI = () => {
       };
 
       // Duration (not used for multipliers/accumulators)
-      if (params.duration !== undefined) {
+      if (params.duration !== undefined && params.duration !== null) {
         request.duration = params.duration;
         request.duration_unit = params.duration_unit || "m";
       }
 
       // Digit contracts barrier (last digit prediction 0-9)
-      if (params.barrier !== undefined) {
+      if (params.barrier !== undefined && params.barrier !== null) {
         request.barrier = String(params.barrier);
       }
 
       // Multiplier contracts
-      if (params.multiplier !== undefined) {
+      if (params.multiplier !== undefined && params.multiplier !== null) {
         request.multiplier = params.multiplier;
       }
 
       // Accumulator growth rate
-      if (params.growth_rate !== undefined) {
+      if (params.growth_rate !== undefined && params.growth_rate !== null) {
         request.growth_rate = params.growth_rate;
       }
 
       // Limit orders (stop_loss / take_profit for multipliers)
-      if (params.limit_order) {
+      if (params.limit_order && Object.keys(params.limit_order).length > 0) {
         request.limit_order = params.limit_order;
       }
 
+      console.log("[Deriv] getProposal request:", JSON.stringify(request));
       const response: any = await service.send(request);
 
       return {
