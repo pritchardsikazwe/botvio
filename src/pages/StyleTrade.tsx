@@ -268,6 +268,7 @@ const StyleTrade = () => {
         addLog("info", `Stop loss set at $${stopLoss}`);
       }
 
+      console.log("[StyleTrade] proposalParams:", JSON.stringify(proposalParams));
       const proposalRes = await getProposal(proposalParams);
       addLog("info", `Proposal received — payout $${proposalRes.payout}`);
 

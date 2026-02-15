@@ -30,8 +30,12 @@ interface DerivContextType {
     symbol: string;
     contract_type: string;
     amount: number;
-    duration: number;
-    duration_unit: "t" | "s" | "m" | "h" | "d";
+    duration?: number;
+    duration_unit?: "t" | "s" | "m" | "h" | "d";
+    barrier?: number | string;
+    multiplier?: number;
+    growth_rate?: number;
+    limit_order?: Record<string, number>;
   }) => Promise<DerivContract>;
 }
 
