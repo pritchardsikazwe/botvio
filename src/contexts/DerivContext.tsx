@@ -16,10 +16,14 @@ interface DerivContextType {
     symbol: string;
     contract_type: string;
     amount: number;
-    duration: number;
-    duration_unit: "t" | "s" | "m" | "h" | "d";
+    duration?: number;
+    duration_unit?: "t" | "s" | "m" | "h" | "d";
     basis?: "stake" | "payout";
     currency?: string;
+    barrier?: number | string;
+    multiplier?: number;
+    growth_rate?: number;
+    limit_order?: Record<string, number>;
   }) => Promise<DerivProposal>;
   buyContract: (proposalId: string, price: number) => Promise<DerivContract>;
   placeTrade: (params: {

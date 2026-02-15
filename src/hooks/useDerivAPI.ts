@@ -175,22 +175,52 @@ export const useDerivAPI = () => {
       symbol: string;
       contract_type: string;
       amount: number;
-      duration: number;
-      duration_unit: "t" | "s" | "m" | "h" | "d";
+      duration?: number;
+      duration_unit?: "t" | "s" | "m" | "h" | "d";
       basis?: "stake" | "payout";
       currency?: string;
+      barrier?: number | string;
+      multiplier?: number;
+      growth_rate?: number;
+      limit_order?: Record<string, number>;
     }): Promise<DerivProposal> => {
       const symbol = toDerivSymbol(params.symbol);
-      const response: any = await service.send({
+      const request: any = {
         proposal: 1,
         amount: params.amount,
         basis: params.basis || "stake",
         contract_type: params.contract_type,
         currency: params.currency || "USD",
-        duration: params.duration,
-        duration_unit: params.duration_unit,
         symbol,
-      });
+      };
+
+      // Duration (not used for multipliers/accumulators)
+      if (params.duration !== undefined) {
+        request.duration = params.duration;
+        request.duration_unit = params.duration_unit || "m";
+      }
+
+      // Digit contracts barrier (last digit prediction 0-9)
+      if (params.barrier !== undefined) {
+        request.barrier = String(params.barrier);
+      }
+
+      // Multiplier contracts
+      if (params.multiplier !== undefined) {
+        request.multiplier = params.multiplier;
+      }
+
+      // Accumulator growth rate
+      if (params.growth_rate !== undefined) {
+        request.growth_rate = params.growth_rate;
+      }
+
+      // Limit orders (stop_loss / take_profit for multipliers)
+      if (params.limit_order) {
+        request.limit_order = params.limit_order;
+      }
+
+      const response: any = await service.send(request);
 
       return {
         id: response.proposal.id,
@@ -223,8 +253,12 @@ export const useDerivAPI = () => {
     symbol: string;
     contract_type: string;
     amount: number;
-    duration: number;
-    duration_unit: "t" | "s" | "m" | "h" | "d";
+    duration?: number;
+    duration_unit?: "t" | "s" | "m" | "h" | "d";
+    barrier?: number | string;
+    multiplier?: number;
+    growth_rate?: number;
+    limit_order?: Record<string, number>;
   }): Promise<DerivContract> => {
     // Get proposal first
     const proposal = await getProposal(params);
