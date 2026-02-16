@@ -6,6 +6,8 @@ import {
   Timer, Target, Layers, ArrowRight, Crosshair, Info
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { StrategyGuidePanel } from "@/components/trading/StrategyGuidePanel";
+import { STRATEGY_GUIDES, TITLE_TO_MODE_KEY } from "@/lib/tradeModesStrategies";
 
 const TRADE_MODES = [
   {
@@ -161,7 +163,11 @@ export const TradeModesGrid = () => {
                     </Badge>
                   ))}
                 </div>
-                <div className="flex items-center text-[10px] text-muted-foreground group-hover:text-primary transition-colors">
+                {/* Strategy Guide */}
+                {TITLE_TO_MODE_KEY[mode.title] && STRATEGY_GUIDES[TITLE_TO_MODE_KEY[mode.title]] && (
+                  <StrategyGuidePanel guide={STRATEGY_GUIDES[TITLE_TO_MODE_KEY[mode.title]]} />
+                )}
+                <div className="flex items-center text-[10px] text-muted-foreground group-hover:text-primary transition-colors mt-2">
                   Trade Now <ArrowRight className="h-3 w-3 ml-1" />
                 </div>
               </CardContent>
