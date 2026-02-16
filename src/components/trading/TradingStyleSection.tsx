@@ -5,9 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, ChevronUp, Zap, TrendingUp, BarChart3, Activity, Waves } from "lucide-react";
+import { StrategyGuidePanel } from "@/components/trading/StrategyGuidePanel";
+import { STRATEGY_GUIDES, type TradeModeKey } from "@/lib/tradeModesStrategies";
 import { useNavigate } from "react-router-dom";
 
 type StyleKey = "synthetic" | "digits" | "risefall" | "boomcrash" | "voltrend";
+
+const STYLE_TO_MODE: Record<StyleKey, TradeModeKey | null> = {
+  synthetic: "higher_lower",
+  digits: "digits",
+  risefall: "rise_fall",
+  boomcrash: "boom_crash",
+  voltrend: "accumulators",
+};
 
 type TradeStyle = {
   key: StyleKey;
@@ -139,11 +149,16 @@ export function TradingStyleSection() {
                 </Button>
               </div>
               {open === s.key && (
-                <div className="rounded-lg border border-border/50 p-3 text-sm space-y-2 bg-muted/30">
-                  <div className="font-semibold text-xs">Quick Notes</div>
-                  <ul className="list-disc pl-4 space-y-1 text-xs text-muted-foreground">
-                    {s.learn.map((t, i) => <li key={i}>{t}</li>)}
-                  </ul>
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-border/50 p-3 text-sm space-y-2 bg-muted/30">
+                    <div className="font-semibold text-xs">Quick Notes</div>
+                    <ul className="list-disc pl-4 space-y-1 text-xs text-muted-foreground">
+                      {s.learn.map((t, i) => <li key={i}>{t}</li>)}
+                    </ul>
+                  </div>
+                  {STYLE_TO_MODE[s.key] && STRATEGY_GUIDES[STYLE_TO_MODE[s.key]!] && (
+                    <StrategyGuidePanel guide={STRATEGY_GUIDES[STYLE_TO_MODE[s.key]!]} />
+                  )}
                 </div>
               )}
             </CardContent>
