@@ -19,7 +19,7 @@ interface UserSettings {
   risk_per_trade: number;
 }
 
-type AppRole = 'admin' | 'super_admin' | 'moderator' | 'user' | 'affiliate';
+type AppRole = 'admin' | 'super_admin' | 'moderator' | 'user' | 'affiliate' | 'signal_manager';
 
 interface AuthContextType {
   user: User | null;
@@ -31,6 +31,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   isAffiliate: boolean;
+  isSignalManager: boolean;
   userRoles: AppRole[];
   signUp: (email: string, password: string, country?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -53,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isAffiliate, setIsAffiliate] = useState(false);
+  const [isSignalManager, setIsSignalManager] = useState(false);
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -96,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(false);
         setIsSuperAdmin(false);
         setIsAffiliate(false);
+        setIsSignalManager(false);
         return;
       }
 
@@ -106,11 +109,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const hasAdminRole = roles.includes('admin') || roles.includes('super_admin');
       const hasSuperAdminRole = roles.includes('super_admin');
       const hasAffiliateRole = roles.includes('affiliate');
+      const hasSignalManagerRole = roles.includes('signal_manager');
       
       setIsAdmin(hasAdminRole);
       setIsSuperAdmin(hasSuperAdminRole);
       // Admins should NOT be treated as affiliates even if they have the role
       setIsAffiliate(hasAffiliateRole && !hasAdminRole);
+      // Signal managers can post signals (admins/super_admins already can)
+      setIsSignalManager(hasSignalManagerRole || hasAdminRole);
       
       // Roles loaded silently
     } catch (error) {
@@ -119,6 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAdmin(false);
       setIsSuperAdmin(false);
       setIsAffiliate(false);
+      setIsSignalManager(false);
     } finally {
       setRolesLoading(false);
     }
@@ -151,6 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setIsAdmin(false);
           setIsSuperAdmin(false);
           setIsAffiliate(false);
+          setIsSignalManager(false);
           setRolesLoading(false);
         }
       }
@@ -238,6 +246,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsAdmin(false);
     setIsSuperAdmin(false);
     setIsAffiliate(false);
+    setIsSignalManager(false);
   };
 
   const updateProfile = async (data: Partial<Profile>) => {
@@ -278,6 +287,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAdmin,
         isSuperAdmin,
         isAffiliate,
+        isSignalManager,
         userRoles,
         signUp,
         signIn,

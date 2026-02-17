@@ -34,8 +34,11 @@ export const SignalPanel = memo(({ signal, riskSession, blockReason, blockMessag
     return (
       <Card className="glass-card">
         <CardContent className="py-8 text-center text-sm text-muted-foreground">
-          <Activity className="h-8 w-8 mx-auto mb-2 animate-pulse" />
-          Waiting for tick data…
+          <Activity className="h-8 w-8 mx-auto mb-2 animate-pulse text-primary" />
+          <p className="font-medium">Analyzing market data…</p>
+          <p className="text-xs mt-1 text-muted-foreground/70">
+            Gathering real-time tick data for signal analysis. This may take a few seconds.
+          </p>
         </CardContent>
       </Card>
     );

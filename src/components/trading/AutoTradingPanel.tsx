@@ -155,7 +155,12 @@ export const AutoTradingPanel = () => {
   const openTrades = tradeIntents?.filter(t => t.status === "SENT" || t.status === "QUEUED") || [];
   const completedTrades = tradeIntents?.filter(t => t.status === "FILLED" || t.status === "REJECTED" || t.status === "FAILED") || [];
 
-  const totalPnL = executions?.reduce((sum, e) => sum + (e.pnl || 0), 0) || 0;
+  // Filter executions to only current user's trades for accurate P&L
+  const userExecutions = executions?.filter(e => {
+    const matchingIntent = tradeIntents?.find(t => t.id === e.trade_intent_id);
+    return !!matchingIntent;
+  }) || [];
+  const totalPnL = userExecutions.reduce((sum, e) => sum + (e.pnl || 0), 0);
 
   if (!user) {
     return (
@@ -339,9 +344,9 @@ export const AutoTradingPanel = () => {
         )}
 
         {/* Total P/L */}
-        {executions && executions.length > 0 && (
+        {userExecutions.length > 0 && (
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-            <span className="text-sm font-medium">Total P/L:</span>
+            <span className="text-sm font-medium">Session P/L:</span>
             <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-success' : 'text-destructive'}`}>
               {totalPnL >= 0 ? '+' : ''}{totalPnL.toFixed(2)} USD
             </span>

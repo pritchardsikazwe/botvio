@@ -67,7 +67,7 @@ interface ChartUploadProps {
 }
 
 export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
-  const { user, isAdmin, isSuperAdmin } = useAuth();
+  const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -128,10 +128,13 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       const direction = structured.recommendation === "SELL" ? "SELL" : "BUY";
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+      // Use detected instrument name from AI, falling back to user-selected symbol
+      const instrumentName = structured.instrument || sym || "UNKNOWN";
+
       const { error } = await supabase
         .from("trading_signals")
         .insert({
-          symbol: sym || "UNKNOWN",
+          symbol: instrumentName,
           direction,
           entry_price: structured.entry_price ? parseFloat(structured.entry_price) : 0,
           stop_loss: structured.stop_loss ? parseFloat(structured.stop_loss) : null,
@@ -139,7 +142,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
           timeframe: tf || "M5",
           category: "forex",
           confidence: structured.confidence ? parseInt(structured.confidence) : null,
-          reason: `AI Chart Analysis: ${structured.trend || "N/A"} trend, ${structured.confidence || 75}% confidence`,
+          reason: `AI Chart Analysis: ${structured.trend || "N/A"} trend on ${instrumentName}, ${structured.confidence || 75}% confidence`,
           is_manual: true,
           posted_by: user.id,
           status: "ACTIVE",
@@ -151,7 +154,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
         console.error("Auto-post signal error:", error);
         toast.error("Analysis complete but failed to auto-post signal");
       } else {
-        toast.success("Signal auto-posted to Signals page!");
+        toast.success(`Signal for ${instrumentName} auto-posted to Signals page!`);
       }
     } catch (err: any) {
       console.error("Auto-post signal exception:", err);
@@ -217,8 +220,8 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       setStructuredResult(analysisData.structured);
       toast.success("Chart analyzed successfully!");
 
-      // Auto-post as signal if user is admin/super_admin
-      if ((isAdmin || isSuperAdmin) && analysisData.structured) {
+      // Auto-post as signal if user is admin/super_admin/signal_manager
+      if ((isAdmin || isSuperAdmin || isSignalManager) && analysisData.structured) {
         await autoPostSignal(analysisData.structured, symbol, timeframe, imageUrl);
       }
     } catch (error: any) {
@@ -275,7 +278,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
               </CardDescription>
             </div>
           </div>
-          {(isAdmin || isSuperAdmin) ? (
+          {(isAdmin || isSuperAdmin || isSignalManager) ? (
             <Badge variant="outline" className="text-xs text-primary border-primary/30">
               Auto-posts signals
             </Badge>
