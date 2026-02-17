@@ -3,6 +3,7 @@ import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { ChartUpload } from "@/components/signals/ChartUpload";
+import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals } from "@/hooks/useManualSignals";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ const STATUS_OPTIONS = [
 ];
 
 const Signals = () => {
-  const { user } = useAuth();
+  const { user, isSignalManager } = useAuth();
   const [category, setCategory] = useState("all");
   const [broker, setBroker] = useState("all");
   const [status, setStatus] = useState("ACTIVE");
@@ -132,7 +133,7 @@ const Signals = () => {
 
         {/* Main Tabs - Signals vs Chart Analysis */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-md">
+          <TabsList className="grid grid-cols-3 w-full max-w-lg">
             <TabsTrigger value="signals" className="flex items-center gap-2">
               <Signal className="h-4 w-4" />
               Trading Signals
@@ -141,11 +142,23 @@ const Signals = () => {
               <ImageIcon className="h-4 w-4" />
               AI Chart Analysis
             </TabsTrigger>
+            {isSignalManager && (
+              <TabsTrigger value="post-signal" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Post Signal
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="chart-analysis" className="mt-6">
             <ChartUpload isPremium={isPremium} />
           </TabsContent>
+
+          {isSignalManager && (
+            <TabsContent value="post-signal" className="mt-6">
+              <AdminSignalForm onSuccess={() => refetch()} />
+            </TabsContent>
+          )}
 
           <TabsContent value="signals" className="mt-6">
             {/* Filters */}

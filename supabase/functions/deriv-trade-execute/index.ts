@@ -203,14 +203,17 @@ serve(async (req) => {
       };
 
       switch (contract_family) {
-        case 'MULTIPLIERS':
+        case 'MULTIPLIERS': {
           proposalRequest.contract_type = payload.contract_type; // MULTUP or MULTDOWN
-          proposalRequest.multiplier = payload.multiplier;
+          // Dynamically accept multiplier from client - Deriv validates per-symbol
+          // Common values: 10, 20, 30, 40, 50, 100, 150, 200, 250, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000
+          // Do NOT hardcode allowed range - let Deriv API validate per symbol
+          proposalRequest.multiplier = payload.multiplier || 100;
           if (payload.limit_order) {
             proposalRequest.limit_order = payload.limit_order;
           }
           break;
-          
+        }
         case 'DIGITS':
           proposalRequest.contract_type = payload.contract_type; // DIGITDIFF, DIGITMATCH, DIGITOVER, DIGITUNDER, DIGITEVEN, DIGITODD
           proposalRequest.duration = payload.duration;

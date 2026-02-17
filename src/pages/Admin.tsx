@@ -45,6 +45,7 @@ import { SubscriptionRequestsTab } from "@/components/admin/SubscriptionRequests
 import { AdminDerivConnectionsTab } from "@/components/admin/AdminDerivConnectionsTab";
 import { AdminPricingPlansTab } from "@/components/admin/AdminPricingPlansTab";
 import { SignalApprovalsTab } from "@/components/admin/SignalApprovalsTab";
+import { SignalManagersTab } from "@/components/admin/SignalManagersTab";
 import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab";
 import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
 
@@ -992,6 +993,10 @@ const Admin = () => {
               <ClipboardCheck className="w-4 h-4" />
               Signal Approvals
             </TabsTrigger>
+            <TabsTrigger value="signal_managers" className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4" />
+              Signal Managers
+            </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               Products
@@ -1010,6 +1015,11 @@ const Admin = () => {
           {/* Signal Approvals Tab */}
           <TabsContent value="signal_approvals">
             <SignalApprovalsTab />
+          </TabsContent>
+
+          {/* Signal Managers Tab */}
+          <TabsContent value="signal_managers">
+            <SignalManagersTab />
           </TabsContent>
 
           {/* Products Tab */}
