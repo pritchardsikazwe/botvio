@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const RETRY_COOLDOWN_KEY = "botvio_oauth_retry_at";
+const OAUTH_COOLDOWN_KEY = "botvio_oauth_cooldown_until";
 
 // Parse token from hash or query params (Deriv uses various patterns)
 function parseDerivParams(): Record<string, string> {
@@ -87,6 +88,7 @@ export default function DerivCallbackPage() {
           setStatus("success");
           setMessage("Connected to Deriv successfully!");
           localStorage.removeItem(RETRY_COOLDOWN_KEY);
+          localStorage.removeItem(OAUTH_COOLDOWN_KEY);
           setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
         } catch (err: any) {
           console.error("[DerivCallback] Error verifying token:", err);
@@ -158,6 +160,7 @@ export default function DerivCallbackPage() {
         
         // Clear cooldown on success
         localStorage.removeItem(RETRY_COOLDOWN_KEY);
+        localStorage.removeItem(OAUTH_COOLDOWN_KEY);
         
         // Redirect after short delay
         setTimeout(() => {
