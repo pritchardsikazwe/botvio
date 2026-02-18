@@ -261,8 +261,10 @@ export class DerivWebSocketService {
     this.reconnectTimer = window.setTimeout(async () => {
       try {
         await this.open();
-        // re-authorize + re-subscribe if we were previously authorized
+        // Re-authorize with stored token if we had one — but do NOT trigger
+        // a new OAuth flow. This simply resumes the existing session.
         if (this.token) {
+          console.log("[RECONNECT] Re-authorizing with stored token (no new OAuth)");
           await this.authorize(this.token);
           for (const [symbol] of this.tickSubscriptionBySymbol.entries()) {
             await this.subscribeTicks(symbol);

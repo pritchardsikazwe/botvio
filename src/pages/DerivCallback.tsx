@@ -89,6 +89,7 @@ export default function DerivCallbackPage() {
           setMessage("Connected to Deriv successfully!");
           localStorage.removeItem(RETRY_COOLDOWN_KEY);
           localStorage.removeItem(OAUTH_COOLDOWN_KEY);
+          console.log("[LOGIN SUCCESS] OAuth callback completed");
           setTimeout(() => navigate("/accounts?oauth=complete"), 2000);
         } catch (err: any) {
           console.error("[DerivCallback] Error verifying token:", err);
@@ -157,12 +158,12 @@ export default function DerivCallbackPage() {
 
         setStatus("success");
         setMessage("Connected to Deriv successfully!");
+        console.log("[LOGIN SUCCESS] OAuth code exchange completed");
         
         // Clear cooldown on success
         localStorage.removeItem(RETRY_COOLDOWN_KEY);
         localStorage.removeItem(OAUTH_COOLDOWN_KEY);
         
-        // Redirect after short delay
         setTimeout(() => {
           navigate("/accounts?oauth=complete");
         }, 2000);
