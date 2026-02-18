@@ -372,13 +372,30 @@ export class DerivWebSocketService {
       };
       this.contractListeners.forEach((l) => l(update));
 
-      // Auto-forget subscription on settlement
+      // Auto-forget subscription on settlement and force balance refresh
       if (isSettled) {
         const subId = (data as any).subscription?.id;
         if (subId) {
           this.send({ forget: subId }).catch(() => {});
         }
         console.log(`[SETTLED] contract_id=${c.contract_id} profit=${c.profit} sell_price=${c.sell_price} status=${update.status}`);
+        
+        // Force an immediate balance request to ensure UI updates with post-settlement balance
+        // This is critical: Deriv's balance subscription may lag behind settlement
+        setTimeout(() => {
+          this.send({ balance: 1, account: "current", subscribe: 1 }).then((res: any) => {
+            if (res?.balance) {
+              const freshBal: DerivBalance = {
+                balance: res.balance.balance,
+                currency: res.balance.currency,
+                loginid: res.balance.loginid,
+              };
+              this.lastBalance = freshBal;
+              this.balanceListeners.forEach((l) => l(freshBal));
+              console.log(`[BALANCE] post-settlement refresh: ${freshBal.balance} ${freshBal.currency}`);
+            }
+          }).catch(() => {});
+        }, 500);
       }
     }
   }
