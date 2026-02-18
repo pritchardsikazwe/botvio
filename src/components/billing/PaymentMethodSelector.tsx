@@ -15,18 +15,17 @@ import {
 
 // Your crypto wallet addresses
 const CRYPTO_WALLETS: Record<string, { address: string; network: string }> = {
-  usdt: { address: "TRC20: TYourWalletAddressHere", network: "TRC20" },
-  btc: { address: "bc1qYourBTCAddressHere", network: "Bitcoin" },
-  eth: { address: "0xYourETHAddressHere", network: "ERC20" },
+  usdt_trc20: { address: "TRC20 wallet address pending", network: "TRC20" },
+  usdt_erc20: { address: "0x4CdDb5A96d2c9c2A2B1c97878F74126e11C616a6", network: "ERC20" },
+  btc: { address: "bc1q7r2ahssecmldf960gc4dklapfe5nkph2fh5etx", network: "Bitcoin" },
 };
 
 // Your mobile money details
 const MOBILE_MONEY_DETAILS = {
-  name: "Botvio Trading",
+  name: "Pritchard Sikazwe",
   numbers: {
-    airtel_money: "+260 97X XXX XXX",
-    mtn_money: "+260 96X XXX XXX",
-    zamtel: "+260 95X XXX XXX",
+    airtel_zm: "+260777204440",
+    mtn_zm: "+260966284085",
   } as Record<string, string>,
 };
 
@@ -107,11 +106,10 @@ export const PaymentMethodSelector = ({
   };
 
   // Get crypto wallet for selected method
-  const cryptoKey = selectedMethod?.replace("crypto_", "").toLowerCase() || "";
-  const cryptoWallet = CRYPTO_WALLETS[cryptoKey] || CRYPTO_WALLETS.usdt;
+  const cryptoWallet = CRYPTO_WALLETS[selectedMethod || ""] || CRYPTO_WALLETS.btc;
 
   // Get mobile number for selected method
-  const mobileNumber = MOBILE_MONEY_DETAILS.numbers[selectedMethod || ""] || MOBILE_MONEY_DETAILS.numbers.airtel_money;
+  const mobileNumber = MOBILE_MONEY_DETAILS.numbers[selectedMethod || ""] || MOBILE_MONEY_DETAILS.numbers.airtel_zm;
 
   return (
     <Card className="glass-card">
