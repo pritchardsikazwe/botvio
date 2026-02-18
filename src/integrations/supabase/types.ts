@@ -2284,6 +2284,69 @@ export type Database = {
           },
         ]
       }
+      running_trades: {
+        Row: {
+          buy_price: number
+          contract_id: number
+          contract_type: string
+          created_at: string
+          current_profit: number
+          ended_at: string | null
+          final_profit: number | null
+          final_status: string | null
+          id: string
+          is_virtual: boolean
+          loginid: string
+          payout: number | null
+          sell_price: number | null
+          started_at: string
+          status: string
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          buy_price: number
+          contract_id: number
+          contract_type: string
+          created_at?: string
+          current_profit?: number
+          ended_at?: string | null
+          final_profit?: number | null
+          final_status?: string | null
+          id?: string
+          is_virtual?: boolean
+          loginid: string
+          payout?: number | null
+          sell_price?: number | null
+          started_at?: string
+          status?: string
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          buy_price?: number
+          contract_id?: number
+          contract_type?: string
+          created_at?: string
+          current_profit?: number
+          ended_at?: string | null
+          final_profit?: number | null
+          final_status?: string | null
+          id?: string
+          is_virtual?: boolean
+          loginid?: string
+          payout?: number | null
+          sell_price?: number | null
+          started_at?: string
+          status?: string
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       signal_audit_logs: {
         Row: {
           action: string
@@ -2833,6 +2896,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_active_tokens: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          is_virtual: boolean
+          loginid: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          is_virtual?: boolean
+          loginid: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          is_virtual?: boolean
+          loginid?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_plan_subscriptions: {
         Row: {
