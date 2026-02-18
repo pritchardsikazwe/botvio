@@ -77,14 +77,22 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [derivAPI.authorized, derivAPI.accountInfo?.loginid]);
 
-  // Listen for contract updates to track running trades
+  // Listen for contract updates to track running trades + refresh balance on settlement
   useEffect(() => {
     if (!derivAPI.authorized) return;
     const unsub = derivAPI.onContractUpdate((update) => {
       handleContractUpdate(update);
+      // On settlement, immediately refresh wallet balance from Deriv
+      const isSettled = update.is_sold || update.is_expired || ["won", "lost", "sold"].includes(update.status);
+      if (isSettled) {
+        console.log(`[BALANCE] Refreshing after settlement of contract_id=${update.contract_id}`);
+        derivAPI.refreshBalance().then((bal) => {
+          if (bal) console.log(`[BALANCE] after=${bal.balance} ${bal.currency} loginid=${bal.loginid}`);
+        });
+      }
     });
     return () => { unsub(); };
-  }, [derivAPI.authorized, derivAPI.onContractUpdate, handleContractUpdate]);
+  }, [derivAPI.authorized, derivAPI.onContractUpdate, handleContractUpdate, derivAPI.refreshBalance]);
 
   // Enhanced placeTrade that also tracks running trades
   const enhancedPlaceTrade = useCallback(async (params: Parameters<typeof derivAPI.placeTrade>[0]) => {
