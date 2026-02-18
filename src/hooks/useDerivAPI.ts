@@ -270,28 +270,19 @@ export const useDerivAPI = () => {
   // Refresh balance from Deriv (truth source)
   const refreshBalance = useCallback(async () => {
     try {
-      // Try with subscribe first to re-establish if dropped
-      const b = await service.getBalance(true);
+      // One-shot balance request (no subscribe to avoid errors)
+      const b = await service.getBalance(false);
       console.log(`[BALANCE] refreshed: ${b.loginid} ${b.currency} ${b.balance}`);
       updateState({ balance: b });
       return b;
-    } catch {
-      // Fallback: try without subscribe
-      try {
-        const b2 = await service.getBalance(false);
-        console.log(`[BALANCE] refreshed (no-sub): ${b2.loginid} ${b2.currency} ${b2.balance}`);
-        updateState({ balance: b2 });
-        return b2;
-      } catch (e2) {
-        console.error("[BALANCE] refresh failed:", e2);
-        const cached = service.latestBalance;
-        if (cached) {
-          console.log(`[BALANCE] using cached: ${cached.balance} ${cached.currency}`);
-          updateState({ balance: cached });
-          return cached;
-        }
-        return null;
+    } catch (e) {
+      console.error("[BALANCE] refresh failed:", e);
+      const cached = service.latestBalance;
+      if (cached) {
+        updateState({ balance: cached });
+        return cached;
       }
+      return null;
     }
   }, [service, updateState]);
 
