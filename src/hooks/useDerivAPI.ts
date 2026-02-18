@@ -270,8 +270,9 @@ export const useDerivAPI = () => {
   // Refresh balance from Deriv (truth source)
   const refreshBalance = useCallback(async () => {
     try {
-      // Use subscribe=true to ensure we keep receiving balance updates
-      const b = await service.getBalance(true);
+      // Use subscribe=false to avoid "already subscribed" errors
+      // The balance subscription is already established during connect()
+      const b = await service.getBalance(false);
       console.log(`[BALANCE] refreshed: ${b.loginid} ${b.currency} ${b.balance}`);
       updateState({ balance: b });
       return b;
@@ -280,6 +281,7 @@ export const useDerivAPI = () => {
       // Fall back to cached balance from service
       const cached = service.latestBalance;
       if (cached) {
+        console.log(`[BALANCE] using cached: ${cached.balance} ${cached.currency}`);
         updateState({ balance: cached });
         return cached;
       }

@@ -383,10 +383,11 @@ export class DerivWebSocketService {
         }
         console.log(`[SETTLED] contract_id=${c.contract_id} profit=${c.profit} sell_price=${c.sell_price} status=${update.status}`);
         
-        // Force multiple balance refreshes to catch the payout credit
-        // Deriv may take a moment to credit the payout after settlement
+        // Force balance refresh after settlement
+        // Use subscribe: 0 to avoid "already subscribed" errors
         const refreshBalanceNow = () => {
-          this.send({ balance: 1, account: "current", subscribe: 1 }).then((res: any) => {
+          if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+          this.send({ balance: 1, account: "current" }).then((res: any) => {
             if (res?.balance) {
               const freshBal: DerivBalance = {
                 balance: res.balance.balance,
@@ -397,13 +398,15 @@ export class DerivWebSocketService {
               this.balanceListeners.forEach((l) => l(freshBal));
               console.log(`[BALANCE] post-settlement: ${freshBal.balance} ${freshBal.currency}`);
             }
-          }).catch(() => {});
+          }).catch((e) => {
+            console.warn(`[BALANCE] refresh failed:`, e);
+          });
         };
         
-        // Refresh at 300ms, 1s, and 2s to catch delayed payout credits
-        setTimeout(refreshBalanceNow, 300);
-        setTimeout(refreshBalanceNow, 1000);
-        setTimeout(refreshBalanceNow, 2000);
+        // Refresh at 500ms, 1.5s, and 3s to catch delayed payout credits
+        setTimeout(refreshBalanceNow, 500);
+        setTimeout(refreshBalanceNow, 1500);
+        setTimeout(refreshBalanceNow, 3000);
       }
     }
   }
