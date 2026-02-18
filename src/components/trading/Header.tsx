@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
-  const { authorized, accountInfo, balance } = useDeriv();
+  const { authorized, accountInfo, balance, equity, runningTrades } = useDeriv();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -262,6 +262,11 @@ export const Header = () => {
                 <span className="text-xs text-muted-foreground">
                   {accountInfo.currency} {balance?.balance?.toFixed(2)}
                 </span>
+                {runningTrades.length > 0 && (
+                  <span className="text-xs text-warning font-medium" title="Equity = Balance + Running P&L">
+                    Eq: {equity.toFixed(2)}
+                  </span>
+                )}
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
