@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useEffect, useMemo, useCallback } from "react";
+import React, { createContext, useContext, ReactNode, useEffect, useMemo, useCallback, useRef } from "react";
 import { useDerivAPI, DerivBalance, DerivTick, DerivProposal, DerivContract, DerivAccountInfo, DerivContractUpdate } from "@/hooks/useDerivAPI";
 import { useRunningTrades, RunningTrade } from "@/hooks/useRunningTrades";
 import { useActiveToken, ActiveToken } from "@/hooks/useActiveToken";
@@ -68,6 +68,20 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
   const { tokens: derivTokens, activeToken: activeDerivToken, upsertToken, switchToken: switchDerivToken, removeToken: removeDerivToken } = useDerivTokens();
   const derivTrades = useDerivTrades();
 
+  // Use refs for values that change but shouldn't cause effect re-runs
+  // This prevents the onContractUpdate listener from being briefly removed
+  // when these values change, which was causing missed settlements for
+  // longer-running contracts (Rise/Fall, Multipliers) vs instant tick contracts
+  const handleContractUpdateRef = useRef(handleContractUpdate);
+  const activeDerivTokenRef = useRef(activeDerivToken);
+  const derivTradesRef = useRef(derivTrades);
+  const refreshBalanceRef = useRef(derivAPI.refreshBalance);
+
+  useEffect(() => { handleContractUpdateRef.current = handleContractUpdate; }, [handleContractUpdate]);
+  useEffect(() => { activeDerivTokenRef.current = activeDerivToken; }, [activeDerivToken]);
+  useEffect(() => { derivTradesRef.current = derivTrades; }, [derivTrades]);
+  useEffect(() => { refreshBalanceRef.current = derivAPI.refreshBalance; }, [derivAPI.refreshBalance]);
+
   // Equity = Deriv balance + sum of running profits (never simulated)
   const equity = useMemo(() => {
     const bal = derivAPI.balance?.balance ?? 0;
@@ -97,19 +111,23 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
   }, [derivAPI.authorized, derivAPI.accountInfo?.loginid]);
 
   // Listen for contract updates to track running trades + refresh balance on settlement
+  // IMPORTANT: Use refs for unstable deps so this listener is NEVER removed during trading.
+  // Previously, changes to activeDerivToken/handleContractUpdate caused the listener to
+  // briefly detach, missing settlement events for minute-based contracts.
   useEffect(() => {
     if (!derivAPI.authorized) return;
     const unsub = derivAPI.onContractUpdate((update) => {
-      handleContractUpdate(update);
+      handleContractUpdateRef.current(update);
       // On settlement, immediately refresh wallet balance from Deriv
       const isSettled = update.is_sold || update.is_expired || ["won", "lost", "sold"].includes(update.status);
       if (isSettled) {
         console.log(`[BALANCE] Refreshing after settlement of contract_id=${update.contract_id}`);
 
         // Also settle in new deriv_trades table
-        if (activeDerivToken) {
+        const token = activeDerivTokenRef.current;
+        if (token) {
           const outcome = update.status === "won" ? "WIN" : update.status === "lost" ? "LOSS" : "BREAKEVEN";
-          derivTrades.settleTrade(update.contract_id, {
+          derivTradesRef.current.settleTrade(update.contract_id, {
             sell_price: update.sell_price ?? 0,
             profit: update.profit ?? 0,
             payout: update.payout,
@@ -118,13 +136,13 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
           });
         }
 
-        derivAPI.refreshBalance().then((bal) => {
+        refreshBalanceRef.current().then((bal) => {
           if (bal) console.log(`[BALANCE] after=${bal.balance} ${bal.currency} loginid=${bal.loginid}`);
         });
       }
     });
     return () => { unsub(); };
-  }, [derivAPI.authorized, derivAPI.onContractUpdate, handleContractUpdate, derivAPI.refreshBalance, activeDerivToken]);
+  }, [derivAPI.authorized, derivAPI.onContractUpdate]);
 
   // Enhanced placeTrade that also tracks running trades
   const enhancedPlaceTrade = useCallback(async (params: Parameters<typeof derivAPI.placeTrade>[0]) => {

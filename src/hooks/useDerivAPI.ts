@@ -249,6 +249,8 @@ export const useDerivAPI = () => {
   const subscribeContract = useCallback(
     async (contractId: number) => {
       console.log(`[BUY] Subscribing to contract ${contractId}`);
+      // Track for re-subscription on reconnect (critical for minute-based contracts)
+      service.trackContractSubscription(contractId);
       const response: any = await service.send({
         proposal_open_contract: 1,
         contract_id: contractId,
