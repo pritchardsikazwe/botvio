@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -150,16 +150,47 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
     }
   };
 
-  const handleOAuthConnect = () => {
-    const oauthUrl = buildDerivOAuthUrl();
+  const oauthPopupRef = useRef<Window | null>(null);
+  const [oauthCooldown, setOauthCooldown] = useState(0);
 
-    // Prefer popup, but gracefully fall back if blocked.
-    const w = window.open(oauthUrl, "_blank", "width=600,height=700");
+  // Cooldown timer for OAuth
+  useEffect(() => {
+    const checkCooldown = () => {
+      const until = localStorage.getItem("botvio_oauth_cooldown_until");
+      if (!until) { setOauthCooldown(0); return; }
+      const remaining = Math.max(0, Math.ceil((parseInt(until, 10) - Date.now()) / 1000));
+      setOauthCooldown(remaining);
+      if (remaining <= 0) localStorage.removeItem("botvio_oauth_cooldown_until");
+    };
+    checkCooldown();
+    const id = setInterval(checkCooldown, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const handleOAuthConnect = () => {
+    // Prevent rapid re-clicks (Deriv blocks these)
+    if (oauthCooldown > 0) {
+      toast.warning(`Please wait ${oauthCooldown}s before trying again`);
+      return;
+    }
+    // Close any existing popup
+    if (oauthPopupRef.current && !oauthPopupRef.current.closed) {
+      oauthPopupRef.current.focus();
+      toast.info("OAuth window is already open");
+      return;
+    }
+
+    // Set 60s cooldown
+    localStorage.setItem("botvio_oauth_cooldown_until", String(Date.now() + 60000));
+    setOauthCooldown(60);
+
+    const oauthUrl = buildDerivOAuthUrl();
+    const w = window.open(oauthUrl, "deriv_oauth", "width=600,height=700");
     if (!w) {
       window.location.assign(oauthUrl);
       return;
     }
-
+    oauthPopupRef.current = w;
     toast.info("Complete the login in the popup window");
   };
 
@@ -506,9 +537,9 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   </div>
                 </div>
 
-                <Button className="w-full" onClick={handleOAuthConnect}>
+                <Button className="w-full" onClick={handleOAuthConnect} disabled={oauthCooldown > 0}>
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Continue with Deriv
+                  {oauthCooldown > 0 ? `Wait ${oauthCooldown}s before retrying` : "Continue with Deriv"}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
