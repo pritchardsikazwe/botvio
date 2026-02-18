@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { getStyleById, type ContractTypeConfig } from "@/config/tradingStyles";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { DerivConnectCTA } from "@/components/trading/DerivConnectCTA";
 import { useDeriv } from "@/contexts/DerivContext";
+import { useContractCapabilities } from "@/hooks/useContractCapabilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Activity, CheckCircle2, XCircle, Bot, AlertTriangle, Info } from "lucide-react";
+import { ArrowLeft, Activity, CheckCircle2, XCircle, Bot, AlertTriangle, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SignalPanel } from "@/components/trading/SignalPanel";
 import { TradeStatusPanel, type TradeRecord } from "@/components/trading/TradeStatusPanel";
@@ -34,11 +35,16 @@ interface LogEntry {
 
 const StyleTrade = () => {
   const { styleId } = useParams<{ styleId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { authorized, balance, lastTick, subscribeTicks, unsubscribeTicks, getProposal, buyContract } = useDeriv();
+  const {
+    authorized, balance, lastTick, subscribeTicks, unsubscribeTicks,
+    getProposal, buyContract, subscribeContract, onContractUpdate, refreshBalance,
+    accountInfo, activeDerivToken,
+  } = useDeriv();
   const style = getStyleById(styleId || "");
 
-  const [selectedSymbol, setSelectedSymbol] = useState("");
+  const [selectedSymbol, setSelectedSymbol] = useState(() => searchParams.get("symbol") || "");
   const [activeContract, setActiveContract] = useState("");
   const [stake, setStake] = useState("1");
   const [duration, setDuration] = useState("5");
@@ -62,6 +68,11 @@ const StyleTrade = () => {
   const consecutiveSameRef = useRef(0);
   const lastSignalRef = useRef<string>("WAIT");
 
+  // Capability gating
+  const { isSupported, getAllowedMultipliers, loading: capsLoading, supportedTypes } = useContractCapabilities(
+    authorized ? selectedSymbol : null
+  );
+
   // Init defaults
   useEffect(() => {
     if (style) {
@@ -71,7 +82,6 @@ const StyleTrade = () => {
       if (style.contractTypes.length > 0 && !activeContract) {
         setActiveContract(style.contractTypes[0].id);
       }
-      // Default to 5 ticks for digit styles, 5 minutes for others
       const isDigitStyle = style.contractTypes.some(ct => 
         ct.id === "even_odd" || ct.id === "over_under" || ct.id === "match_differ"
       );
@@ -81,6 +91,14 @@ const StyleTrade = () => {
     }
   }, [style]);
 
+  // Set multiplier from capability when available
+  useEffect(() => {
+    const allowed = getAllowedMultipliers();
+    if (allowed.length > 0 && !allowed.includes(parseInt(multiplier))) {
+      setMultiplier(String(allowed[0]));
+    }
+  }, [getAllowedMultipliers, selectedSymbol]);
+
   // Persist last instrument per style
   useEffect(() => {
     if (styleId && selectedSymbol) {
@@ -89,7 +107,7 @@ const StyleTrade = () => {
   }, [styleId, selectedSymbol]);
 
   useEffect(() => {
-    if (styleId) {
+    if (styleId && !searchParams.get("symbol")) {
       const saved = localStorage.getItem(`botvio_last_instrument_${styleId}`);
       if (saved && style?.instruments.some(i => i.symbol === saved)) {
         setSelectedSymbol(saved);
@@ -115,6 +133,37 @@ const StyleTrade = () => {
     }
   }, [lastTick, selectedSymbol]);
 
+  // Listen for contract updates to settle trades in real-time
+  useEffect(() => {
+    if (!authorized) return;
+    const unsub = onContractUpdate((update) => {
+      const isSettled = update.is_sold || update.is_expired || ["won", "lost", "sold"].includes(update.status);
+
+      // Update local trade records
+      setTradeRecords(prev => prev.map(t => {
+        if (t.contractId === update.contract_id) {
+          if (isSettled) {
+            const won = update.status === "won" || (update.profit !== undefined && update.profit > 0);
+            const pnl = update.profit ?? (won ? (t.stake * 0.8) : -t.stake);
+            return { ...t, status: won ? "won" as const : "lost" as const, pnl };
+          }
+        }
+        return t;
+      }));
+
+      if (isSettled) {
+        const won = update.status === "won" || (update.profit !== undefined && update.profit > 0);
+        const pnl = update.profit ?? 0;
+        setRiskSession(prev => recordTradeResult(prev, won, pnl, styleId || ""));
+        addLog(
+          won ? "success" : "error",
+          won ? `🎉 Trade WON +$${Math.abs(pnl).toFixed(2)}` : `❌ Trade LOST -$${Math.abs(pnl).toFixed(2)}`
+        );
+      }
+    });
+    return () => { unsub(); };
+  }, [authorized, onContractUpdate, styleId]);
+
   // Run signal engine every ~2 seconds
   useEffect(() => {
     if (!activeContract) return;
@@ -128,10 +177,9 @@ const StyleTrade = () => {
       } else if (tickBuffer.current.length >= 20) {
         result = runEngine(engineType, tickBuffer.current);
       } else {
-        return; // not enough data yet
+        return;
       }
 
-      // Track consecutive same signal for auto-bot
       if (result.signal === lastSignalRef.current && result.signal !== "WAIT") {
         consecutiveSameRef.current++;
       } else {
@@ -141,7 +189,6 @@ const StyleTrade = () => {
 
       setCurrentSignal(result);
 
-      // Update suggested duration
       if (result.suggestedDuration) {
         setDuration(String(result.suggestedDuration));
       }
@@ -166,7 +213,6 @@ const StyleTrade = () => {
 
     if (!canAuto) return;
 
-    // Map signal to contract type button
     const ct = style?.contractTypes.find(c => c.id === activeContract);
     if (!ct) return;
 
@@ -222,6 +268,12 @@ const StyleTrade = () => {
     }
     if (!selectedSymbol) return;
 
+    // Capability check
+    if (!isSupported(button.contractType)) {
+      toast.error(`${button.contractType} is not available for ${selectedSymbol}`);
+      return;
+    }
+
     setBuying(true);
     addLog("info", `Placing ${button.label} on ${selectedSymbol} — stake $${stake}`);
 
@@ -241,25 +293,20 @@ const StyleTrade = () => {
       };
 
       if (isMultiplier) {
-        // Multipliers: multiplier param, no duration
         proposalParams.multiplier = parseInt(multiplier);
         if (stopLoss) proposalParams.limit_order = { ...(proposalParams.limit_order || {}), stop_loss: parseFloat(stopLoss) };
         if (takeProfit) proposalParams.limit_order = { ...(proposalParams.limit_order || {}), take_profit: parseFloat(takeProfit) };
       } else if (isAccu) {
-        // Accumulators: growth_rate, no duration
         proposalParams.growth_rate = 0.01;
         if (takeProfit) proposalParams.limit_order = { take_profit: parseFloat(takeProfit) };
       } else if (isDigit) {
-        // ALL digit contracts require tick-based duration (1-10 ticks)
         const tickDur = Math.max(1, Math.min(10, parseInt(duration)));
         proposalParams.duration = tickDur;
         proposalParams.duration_unit = "t";
-        // Digit contracts that need a last-digit prediction
         if (needsBarrier) {
           proposalParams.barrier = parseInt(digit);
         }
       } else {
-        // Standard contracts (Rise/Fall, Higher/Lower, Turbo): use minutes
         proposalParams.duration = Math.max(1, parseInt(duration));
         proposalParams.duration_unit = "m";
       }
@@ -276,7 +323,7 @@ const StyleTrade = () => {
       addLog("success", `✅ Trade opened — Contract ID ${contract.contract_id}`);
       toast.success("Trade placed successfully!");
 
-      // Track trade
+      // Track trade locally as RUNNING
       const tradeRecord: TradeRecord = {
         id: Date.now(),
         time: new Date().toLocaleTimeString(),
@@ -288,24 +335,17 @@ const StyleTrade = () => {
       };
       setTradeRecords(prev => [tradeRecord, ...prev]);
 
-      // Simulate result after duration (simplified — in production, poll contract status)
-      const durationMs = isMultiplier || isAccu ? 30000 : Math.max(1, parseInt(duration)) * 60 * 1000;
-      setTimeout(() => {
-        const won = Math.random() > 0.45; // placeholder — real implementation should poll Deriv API
-        const pnl = won ? (proposalRes.payout - parseFloat(stake)) : -parseFloat(stake);
-        setTradeRecords(prev => prev.map(t =>
-          t.id === tradeRecord.id ? { ...t, status: won ? "won" : "lost", pnl } : t
-        ));
-        setRiskSession(prev => recordTradeResult(prev, won, pnl, styleId || ""));
-        addLog(won ? "success" : "error", won ? `🎉 Trade WON +$${pnl.toFixed(2)}` : `❌ Trade LOST -$${Math.abs(pnl).toFixed(2)}`);
-      }, Math.min(durationMs, 60000));
+      // Subscribe to contract for real settlement tracking
+      await subscribeContract(contract.contract_id);
+      addLog("info", `Watching contract ${contract.contract_id} for settlement...`);
+
+      // Refresh balance immediately (stake deducted)
+      refreshBalance().catch(() => {});
 
       setRiskSession(prev => ({ ...prev, tradesThisSession: prev.tradesThisSession + 1, lastTradeAt: Date.now() }));
     } catch (err: any) {
       addLog("error", `Error: ${err.message}`);
       toast.error(err.message);
-
-      // Record loss in risk session
       setRiskSession(prev => recordTradeResult(prev, false, -parseFloat(stake), styleId || ""));
     } finally {
       setBuying(false);
@@ -324,8 +364,13 @@ const StyleTrade = () => {
     );
   }
 
-  // Never block trades based on confidence - let user decide
   const isDisabledBySignal = false;
+
+  // Compute allowed multipliers for the selected symbol
+  const allowedMultipliers = getAllowedMultipliers();
+  const multiplierOptions = allowedMultipliers.length > 0
+    ? allowedMultipliers.map(String)
+    : ["10","20","50","100","150","200","300","500","1000"]; // fallback
 
   return (
     <div className="min-h-screen bg-background">
@@ -384,6 +429,13 @@ const StyleTrade = () => {
                     </SelectContent>
                   </Select>
 
+                  {capsLoading && (
+                    <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Loading capabilities...
+                    </div>
+                  )}
+
                   {currentPrice !== null && (
                     <div className="mt-4 p-3 rounded-lg bg-muted/50 text-center">
                       <div className="text-xs text-muted-foreground">Live Price</div>
@@ -408,11 +460,23 @@ const StyleTrade = () => {
                 <Tabs value={activeContract} onValueChange={setActiveContract}>
                   <CardHeader className="pb-2">
                     <TabsList className="w-full justify-start flex-wrap h-auto gap-1">
-                      {style.contractTypes.map(ct => (
-                        <TabsTrigger key={ct.id} value={ct.id} className="text-xs">
-                          {ct.label}
-                        </TabsTrigger>
-                      ))}
+                      {style.contractTypes.map(ct => {
+                        // Check if any of this tab's contract types are supported
+                        const tabSupported = ct.buyButtons.some(btn => isSupported(btn.contractType));
+                        return (
+                          <TabsTrigger
+                            key={ct.id}
+                            value={ct.id}
+                            className="text-xs"
+                            disabled={!tabSupported && supportedTypes.length > 0}
+                          >
+                            {ct.label}
+                            {!tabSupported && supportedTypes.length > 0 && (
+                              <span className="ml-1 text-[8px] text-muted-foreground">(N/A)</span>
+                            )}
+                          </TabsTrigger>
+                        );
+                      })}
                     </TabsList>
                   </CardHeader>
 
@@ -422,7 +486,6 @@ const StyleTrade = () => {
                     const isDigitType = ct.id === "even_odd" || ct.id === "over_under" || ct.id === "match_differ";
                     const hidesDuration = isMultiplierType || isAccuType;
 
-                    // Trading guide per contract type
                     const guideMap: Record<string, { title: string; steps: string[] }> = {
                       rise_fall: {
                         title: "Rise/Fall Guide",
@@ -478,7 +541,7 @@ const StyleTrade = () => {
                         title: "Multipliers Guide",
                         steps: [
                           "1. Select instrument and set stake",
-                          "2. Choose your multiplier (10x-1000x) — higher = more risk/reward",
+                          "2. Choose your multiplier — higher = more risk/reward",
                           "3. Optionally set Stop Loss & Take Profit in USD",
                           "4. Click 'Up' if you think price will rise",
                           "5. Click 'Down' if you think price will fall",
@@ -551,11 +614,16 @@ const StyleTrade = () => {
                           )}
                           {isMultiplierType && (
                             <div className="space-y-1.5">
-                              <Label className="text-xs">Multiplier</Label>
+                              <Label className="text-xs">
+                                Multiplier
+                                {allowedMultipliers.length > 0 && (
+                                  <span className="ml-1 text-[10px] text-muted-foreground">(allowed for this symbol)</span>
+                                )}
+                              </Label>
                               <Select value={multiplier} onValueChange={setMultiplier}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                  {["10","20","50","100","150","200","300","500","1000"].map(m => (
+                                  {multiplierOptions.map(m => (
                                     <SelectItem key={m} value={m}>{m}x</SelectItem>
                                   ))}
                                 </SelectContent>
@@ -605,17 +673,21 @@ const StyleTrade = () => {
                         )}
 
                         <div className="flex gap-3">
-                          {ct.buyButtons.map(btn => (
-                            <Button
-                              key={btn.contractType}
-                              className="flex-1 h-12 text-base font-bold"
-                              variant={btn.variant === "success" ? "default" : btn.variant === "destructive" ? "destructive" : "default"}
-                              disabled={buying || !selectedSymbol}
-                              onClick={() => handleBuy(btn)}
-                            >
-                              {buying ? "Placing…" : btn.label}
-                            </Button>
-                          ))}
+                          {ct.buyButtons.map(btn => {
+                            const btnSupported = isSupported(btn.contractType);
+                            return (
+                              <Button
+                                key={btn.contractType}
+                                className="flex-1 h-12 text-base font-bold"
+                                variant={btn.variant === "success" ? "default" : btn.variant === "destructive" ? "destructive" : "default"}
+                                disabled={buying || !selectedSymbol || (!btnSupported && supportedTypes.length > 0)}
+                                onClick={() => handleBuy(btn)}
+                                title={!btnSupported && supportedTypes.length > 0 ? `${btn.contractType} not available for ${selectedSymbol}` : undefined}
+                              >
+                                {buying ? "Placing…" : btn.label}
+                              </Button>
+                            );
+                          })}
                         </div>
 
                       </CardContent>
