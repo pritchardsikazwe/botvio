@@ -1,5 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useBotInstances, useMyCopySubscriptions, useTradingAccounts, useMySubscription, useNotifications } from "@/hooks/useBotvio";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +25,23 @@ const Dashboard = () => {
   const connectedAccounts = accounts?.length || 0;
   const unreadNotifications = notifications?.filter(n => !n.is_read).length || 0;
 
-  // Calculate today's P&L (mock for now)
-  const todayPnL = 25.50;
+  // Fetch real today's P&L from executions
+  const { data: todayPnL = 0 } = useQuery({
+    queryKey: ["todays-pnl", user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { data, error } = await supabase
+        .from("executions")
+        .select("pnl")
+        .eq("user_id", user.id)
+        .gte("created_at", todayStart.toISOString());
+      if (error) throw error;
+      return (data || []).reduce((sum, e) => sum + (e.pnl || 0), 0);
+    },
+    enabled: !!user,
+  });
 
   if (!user) {
     return (
