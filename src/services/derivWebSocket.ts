@@ -324,13 +324,16 @@ export class DerivWebSocketService {
 
     if (data.msg_type === "balance" && (data as any).balance) {
       const b = (data as any).balance as any;
-      this.lastBalance = {
+      const newBal: DerivBalance = {
         balance: b.balance,
         currency: b.currency,
         loginid: b.loginid,
       };
-      // Emit to balance listeners for real-time sync
-      this.balanceListeners.forEach((l) => l(this.lastBalance!));
+      const prevBalance = this.lastBalance?.balance;
+      this.lastBalance = newBal;
+      // Always emit to all balance listeners for real-time sync
+      console.log(`[BALANCE STREAM] ${prevBalance} -> ${newBal.balance} ${newBal.currency} (loginid=${newBal.loginid})`);
+      this.balanceListeners.forEach((l) => l(newBal));
     }
 
     if (data.msg_type === "tick" && (data as any).tick) {
@@ -380,9 +383,9 @@ export class DerivWebSocketService {
         }
         console.log(`[SETTLED] contract_id=${c.contract_id} profit=${c.profit} sell_price=${c.sell_price} status=${update.status}`);
         
-        // Force an immediate balance request to ensure UI updates with post-settlement balance
-        // This is critical: Deriv's balance subscription may lag behind settlement
-        setTimeout(() => {
+        // Force multiple balance refreshes to catch the payout credit
+        // Deriv may take a moment to credit the payout after settlement
+        const refreshBalanceNow = () => {
           this.send({ balance: 1, account: "current", subscribe: 1 }).then((res: any) => {
             if (res?.balance) {
               const freshBal: DerivBalance = {
@@ -392,10 +395,15 @@ export class DerivWebSocketService {
               };
               this.lastBalance = freshBal;
               this.balanceListeners.forEach((l) => l(freshBal));
-              console.log(`[BALANCE] post-settlement refresh: ${freshBal.balance} ${freshBal.currency}`);
+              console.log(`[BALANCE] post-settlement: ${freshBal.balance} ${freshBal.currency}`);
             }
           }).catch(() => {});
-        }, 500);
+        };
+        
+        // Refresh at 300ms, 1s, and 2s to catch delayed payout credits
+        setTimeout(refreshBalanceNow, 300);
+        setTimeout(refreshBalanceNow, 1000);
+        setTimeout(refreshBalanceNow, 2000);
       }
     }
   }

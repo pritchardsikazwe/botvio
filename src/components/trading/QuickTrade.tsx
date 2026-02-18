@@ -132,7 +132,10 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
         }
 
         // Refresh balance from Deriv (truth source - never simulate!)
+        // Multiple refreshes to ensure we catch the payout credit
         refreshBalance();
+        setTimeout(() => refreshBalance(), 1500);
+        setTimeout(() => refreshBalance(), 3000);
       }
     });
 
