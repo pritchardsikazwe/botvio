@@ -37,13 +37,16 @@ const TradeHistory = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toUpperCase()) {
+      case 'WON':
       case 'FILLED':
       case 'OPEN':
         return 'text-success';
+      case 'RUNNING':
       case 'QUEUED':
       case 'SENT':
-        return 'text-warning';
+        return 'text-primary';
+      case 'LOST':
       case 'REJECTED':
       case 'FAILED':
         return 'text-destructive';
@@ -115,9 +118,12 @@ const TradeHistory = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                               <div className={`p-2 rounded-lg ${
+                                exec.status === 'RUNNING' ? 'bg-primary/10' :
                                 (exec.pnl || 0) >= 0 ? 'bg-success/10' : 'bg-destructive/10'
                               }`}>
-                                {(exec.pnl || 0) >= 0 ? (
+                                {exec.status === 'RUNNING' ? (
+                                  <Clock className="h-5 w-5 text-primary animate-pulse" />
+                                ) : (exec.pnl || 0) >= 0 ? (
                                   <ArrowUpRight className="h-5 w-5 text-success" />
                                 ) : (
                                   <ArrowDownRight className="h-5 w-5 text-destructive" />
@@ -125,10 +131,11 @@ const TradeHistory = () => {
                               </div>
                               <div className="text-left">
                                 <p className="font-medium">
-                                  {exec.broker_ref ? `Contract #${exec.broker_ref}` : 'Execution'}
+                                  {exec.raw?.symbol || exec.raw?.underlying || (exec.broker_ref ? `Contract #${exec.broker_ref}` : 'Execution')}
+                                  {exec.raw?.contract_type && <span className="text-xs text-muted-foreground ml-1">({exec.raw.contract_type})</span>}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  {formatDate(exec.created_at)}
+                                  {formatDate(exec.created_at)} {exec.broker_ref && `• #${exec.broker_ref}`}
                                 </p>
                               </div>
                             </div>
@@ -137,7 +144,9 @@ const TradeHistory = () => {
                                 <p className="font-medium">
                                   Stake: ${exec.stake_or_lot?.toFixed(2)}
                                 </p>
-                                {exec.pnl !== null && (
+                                {exec.status === 'RUNNING' ? (
+                                  <p className="text-sm text-primary animate-pulse">Running...</p>
+                                ) : exec.pnl !== null && (
                                   <p className={`text-sm ${(exec.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
                                     P&L: {exec.pnl >= 0 ? '+' : ''}{exec.pnl?.toFixed(2)}
                                   </p>
