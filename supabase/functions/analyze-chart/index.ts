@@ -160,23 +160,36 @@ serve(async (req) => {
       );
     }
 
-    const analysisPrompt = `You are an expert forex and trading chart analyst. Analyze this trading chart image and provide:
+    const analysisPrompt = `You are an expert forex and trading chart analyst. Analyze this trading chart image.
 
-1. **Instrument Name**: Identify the trading instrument shown (e.g., "Gold (XAUUSD)", "Crash 500", "Volatility 75 Index", "EUR/USD"). This is REQUIRED - never return null or empty.
-2. **Trend Analysis**: Is the market bullish, bearish, or ranging?
-3. **Key Levels**: Identify major support and resistance levels
-4. **Pattern Recognition**: Any chart patterns visible (head & shoulders, triangles, flags, etc.)
-5. **Entry Recommendation**: BUY, SELL, or WAIT with entry price range
-6. **Stop Loss**: Suggested stop loss level
-7. **Take Profit**: Suggested take profit levels (TP1, TP2, TP3)
-8. **Risk Assessment**: Low, Medium, or High risk trade
-9. **Confidence Score**: 1-100%
-10. **Timeframe Suggestion**: Best timeframe for this setup
+CRITICAL INSTRUCTIONS FOR INSTRUMENT NAME:
+- You MUST return a short, clean instrument name on the FIRST line in this exact format: **Instrument**: <SHORT NAME>
+- Use the common trading name ONLY. Examples: "Gold", "EUR/USD", "Crash 500", "Volatility 75", "NASDAQ", "Bitcoin", "US30", "GBP/JPY", "Step Index"
+- Do NOT use long descriptions like "US 10-Year Treasury Note Futures (ZB1!)" — instead just say "US Treasury Bond" or "ZB Futures"
+- Do NOT add exchange codes, contract IDs, or parenthetical suffixes
+- If you cannot identify the instrument, say "Unknown"
 
-${symbol ? `Symbol: ${symbol}` : "IMPORTANT: You MUST identify the instrument from the chart image. Look at axis labels, title, watermarks, price levels, and chart patterns to determine the instrument."}
+CRITICAL INSTRUCTIONS FOR TRADE LEVELS:
+- You MUST return exact numeric price values in this exact format:
+- **Entry Price**: <number>
+- **Stop Loss**: <number>
+- **Take Profit 1**: <number>
+- **Take Profit 2**: <number> (optional)
+- **Take Profit 3**: <number> (optional)
+- **Direction**: BUY or SELL
+- **Confidence**: <number>%
+
+Also provide:
+1. **Trend Analysis**: Bullish, Bearish, or Ranging
+2. **Key Levels**: Major support and resistance levels
+3. **Pattern Recognition**: Any chart patterns visible
+4. **Risk Assessment**: Low, Medium, or High
+5. **Timeframe Suggestion**: Best timeframe for this setup
+
+${symbol ? `Symbol: ${symbol}` : "Identify the instrument from the chart image. Look at axis labels, title, watermarks, price levels."}
 ${timeframe ? `Current Timeframe: ${timeframe}` : ""}
 
-Provide actionable trading advice in a structured format. Always start your response with the instrument name.`;
+Keep the response structured and actionable.`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
@@ -290,51 +303,91 @@ Provide actionable trading advice in a structured format. Always start your resp
     const aiData = await aiResponse.json();
     const analysisText = aiData.choices?.[0]?.message?.content || "Analysis not available";
 
-    // Extract instrument name from AI response
+    // Extract instrument name from AI response - clean short name
     let detectedInstrument = symbol || null;
     if (!detectedInstrument) {
-      // Try to extract instrument from the AI analysis text
-      const instrumentPatterns = [
-        /\*\*Instrument(?:\s*Name)?\*\*[:\s]*(.+?)(?:\n|$)/i,
-        /Instrument[:\s]*(.+?)(?:\n|$)/i,
-        /(?:Gold|XAUUSD|XAU\/USD)/i,
-        /(?:Crash\s*\d+|Boom\s*\d+)/i,
-        /(?:Volatility\s*\d+(?:\s*Index)?)/i,
-        /(?:EUR\/USD|GBP\/USD|USD\/JPY|AUD\/USD)/i,
-        /(?:NASDAQ|NAS100|US30|S&P\s*500)/i,
-        /(?:Bitcoin|BTC\/USD|ETH\/USD)/i,
-        /(?:Step\s*Index)/i,
-      ];
+      // Primary: look for **Instrument**: <name> pattern
+      const instrumentLineMatch = analysisText.match(/\*\*Instrument\*\*[:\s]*(.+?)(?:\n|$)/i);
+      if (instrumentLineMatch) {
+        detectedInstrument = instrumentLineMatch[1]
+          .trim()
+          .replace(/\*+/g, '')
+          .replace(/\s*\(.*?\)\s*/g, '') // Remove parenthetical like (ZB1!)
+          .replace(/\s*-\s*Inferred.*$/i, '') // Remove "- Inferred from..." suffixes
+          .trim();
+      }
       
-      for (const pattern of instrumentPatterns) {
-        const match = analysisText.match(pattern);
-        if (match) {
-          detectedInstrument = match[1] ? match[1].trim().replace(/\*+/g, '') : match[0].trim();
-          break;
+      // Fallback: try known instrument keywords
+      if (!detectedInstrument || detectedInstrument.length > 30) {
+        const knownPatterns: [RegExp, string][] = [
+          [/\b(?:Gold|XAUUSD|XAU\/USD)\b/i, "Gold"],
+          [/\b(?:Crash\s*(\d+))\b/i, "Crash $1"],
+          [/\b(?:Boom\s*(\d+))\b/i, "Boom $1"],
+          [/\b(?:Volatility\s*(\d+)(?:\s*Index)?)\b/i, "Volatility $1"],
+          [/\b(?:V75|V100|V50|V25|V10)\b/i, "$&"],
+          [/\b(?:EUR\/USD|EURUSD)\b/i, "EUR/USD"],
+          [/\b(?:GBP\/USD|GBPUSD)\b/i, "GBP/USD"],
+          [/\b(?:USD\/JPY|USDJPY)\b/i, "USD/JPY"],
+          [/\b(?:GBP\/JPY|GBPJPY)\b/i, "GBP/JPY"],
+          [/\b(?:AUD\/USD|AUDUSD)\b/i, "AUD/USD"],
+          [/\b(?:NASDAQ|NAS100|NAS\s*100)\b/i, "NASDAQ"],
+          [/\b(?:US30|Dow\s*Jones)\b/i, "US30"],
+          [/\b(?:S&P\s*500|SPX500|SP500)\b/i, "S&P 500"],
+          [/\b(?:Bitcoin|BTC\/USD|BTCUSD)\b/i, "Bitcoin"],
+          [/\b(?:Ethereum|ETH\/USD|ETHUSD)\b/i, "Ethereum"],
+          [/\b(?:Step\s*Index)\b/i, "Step Index"],
+          [/\b(?:US\s*Treasury|ZB\s*Futures|T-Bond)\b/i, "US Treasury Bond"],
+          [/\b(?:Crude\s*Oil|WTI|USOIL)\b/i, "Crude Oil"],
+          [/\b(?:Silver|XAGUSD|XAG\/USD)\b/i, "Silver"],
+        ];
+        
+        for (const [pattern, replacement] of knownPatterns) {
+          const m = analysisText.match(pattern);
+          if (m) {
+            detectedInstrument = replacement.includes("$") 
+              ? replacement.replace(/\$(\d+|&)/g, (_, g) => g === "&" ? m[0] : (m[parseInt(g)] || ""))
+              : replacement;
+            break;
+          }
         }
       }
       
       if (!detectedInstrument) {
-        detectedInstrument = "Unknown Instrument";
+        detectedInstrument = "Unknown";
       }
     }
 
-    // Extract price targets from AI text
-    const entryMatch = analysisText.match(/[Ee]ntry[:\s]*\$?(\d+[\d,.]*)/);
-    const slMatch = analysisText.match(/[Ss]top\s*[Ll]oss[:\s]*\$?(\d+[\d,.]*)/);
-    const tpMatch = analysisText.match(/[Tt]ake\s*[Pp]rofit[:\s]*\$?(\d+[\d,.]*)/);
-    const confMatch = analysisText.match(/[Cc]onfidence[:\s]*(\d+)/);
+    // Extract price targets with improved patterns
+    const entryMatch = analysisText.match(/\*\*Entry\s*(?:Price)?\*\*[:\s]*\$?([\d,]+\.?\d*)/i) 
+                    || analysisText.match(/Entry\s*(?:Price)?[:\s]*\$?([\d,]+\.?\d*)/i);
+    const slMatch = analysisText.match(/\*\*Stop\s*Loss\*\*[:\s]*\$?([\d,]+\.?\d*)/i)
+                 || analysisText.match(/Stop\s*Loss[:\s]*\$?([\d,]+\.?\d*)/i);
+    const tp1Match = analysisText.match(/\*\*Take\s*Profit\s*1?\*\*[:\s]*\$?([\d,]+\.?\d*)/i)
+                  || analysisText.match(/Take\s*Profit\s*1?[:\s]*\$?([\d,]+\.?\d*)/i)
+                  || analysisText.match(/TP\s*1?[:\s]*\$?([\d,]+\.?\d*)/i);
+    const tp2Match = analysisText.match(/\*\*Take\s*Profit\s*2\*\*[:\s]*\$?([\d,]+\.?\d*)/i)
+                  || analysisText.match(/Take\s*Profit\s*2[:\s]*\$?([\d,]+\.?\d*)/i)
+                  || analysisText.match(/TP\s*2[:\s]*\$?([\d,]+\.?\d*)/i);
+    const tp3Match = analysisText.match(/\*\*Take\s*Profit\s*3\*\*[:\s]*\$?([\d,]+\.?\d*)/i)
+                  || analysisText.match(/Take\s*Profit\s*3[:\s]*\$?([\d,]+\.?\d*)/i)
+                  || analysisText.match(/TP\s*3[:\s]*\$?([\d,]+\.?\d*)/i);
+    const confMatch = analysisText.match(/\*\*Confidence\*\*[:\s]*(\d+)/i)
+                   || analysisText.match(/Confidence[:\s]*(\d+)/i);
+    const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL)/i);
 
     const analysisResult = {
       raw_analysis: analysisText,
       instrument: detectedInstrument,
       trend: analysisText.toLowerCase().includes("bullish") ? "BULLISH" : 
              analysisText.toLowerCase().includes("bearish") ? "BEARISH" : "RANGING",
-      recommendation: analysisText.includes("BUY") ? "BUY" : 
+      recommendation: dirMatch ? dirMatch[1].toUpperCase() :
+                      analysisText.includes("BUY") ? "BUY" : 
                       analysisText.includes("SELL") ? "SELL" : "WAIT",
       entry_price: entryMatch ? entryMatch[1].replace(/,/g, '') : null,
       stop_loss: slMatch ? slMatch[1].replace(/,/g, '') : null,
-      take_profit: tpMatch ? tpMatch[1].replace(/,/g, '') : null,
+      take_profit: tp1Match ? tp1Match[1].replace(/,/g, '') : null,
+      take_profit_2: tp2Match ? tp2Match[1].replace(/,/g, '') : null,
+      take_profit_3: tp3Match ? tp3Match[1].replace(/,/g, '') : null,
       confidence: confMatch ? confMatch[1] : null,
       analyzed_at: new Date().toISOString(),
     };
