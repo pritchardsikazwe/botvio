@@ -383,47 +383,33 @@ export class DerivWebSocketService {
         }
         console.log(`[SETTLED] contract_id=${c.contract_id} profit=${c.profit} sell_price=${c.sell_price} status=${update.status}`);
         
-        // Force balance refresh after settlement
-        // Re-subscribe to balance to ensure we get the updated value
+        // Force balance refresh after settlement using simple one-shot requests
+        // The balance subscription stream should also auto-push, but we poll as backup
         const refreshBalanceNow = async () => {
           if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
           try {
-            // Use subscribe: 1 to re-establish subscription AND get fresh value
-            const res: any = await this.send({ balance: 1, account: "current", subscribe: 1 }, 10000);
+            // Simple one-shot balance request (no subscribe field to avoid "already subscribed" errors)
+            const res: any = await this.send({ balance: 1, account: "current" }, 10000);
             if (res?.balance) {
               const freshBal: DerivBalance = {
                 balance: res.balance.balance,
                 currency: res.balance.currency,
                 loginid: res.balance.loginid,
               };
-              console.log(`[BALANCE] post-settlement refresh: ${this.lastBalance?.balance} -> ${freshBal.balance} ${freshBal.currency}`);
+              console.log(`[BALANCE] post-settle: ${this.lastBalance?.balance} -> ${freshBal.balance} ${freshBal.currency}`);
               this.lastBalance = freshBal;
               this.balanceListeners.forEach((l) => l(freshBal));
             }
           } catch (e) {
-            // If subscribe fails (already subscribed), try without subscribe
-            try {
-              const res2: any = await this.send({ balance: 1, account: "current" }, 10000);
-              if (res2?.balance) {
-                const freshBal: DerivBalance = {
-                  balance: res2.balance.balance,
-                  currency: res2.balance.currency,
-                  loginid: res2.balance.loginid,
-                };
-                console.log(`[BALANCE] post-settlement fallback: ${this.lastBalance?.balance} -> ${freshBal.balance} ${freshBal.currency}`);
-                this.lastBalance = freshBal;
-                this.balanceListeners.forEach((l) => l(freshBal));
-              }
-            } catch (e2) {
-              console.warn(`[BALANCE] all refresh attempts failed:`, e2);
-            }
+            console.warn(`[BALANCE] refresh failed:`, e);
           }
         };
         
-        // Refresh at 500ms, 2s, and 4s to catch delayed payout credits
+        // Poll at 500ms, 2s, 5s, and 8s to catch delayed payout credits
         setTimeout(refreshBalanceNow, 500);
         setTimeout(refreshBalanceNow, 2000);
-        setTimeout(refreshBalanceNow, 4000);
+        setTimeout(refreshBalanceNow, 5000);
+        setTimeout(refreshBalanceNow, 8000);
       }
     }
   }
@@ -525,11 +511,16 @@ export class DerivWebSocketService {
     this.tickSubscriptionBySymbol.delete(symbol);
   }
 
-  /** Request balance; you can also subscribe by passing subscribe: 1 (we do subscribe by default in the hook). */
+  /** Request balance; optionally subscribe for streaming updates. */
   async getBalance(subscribe = true): Promise<DerivBalance> {
-    const res: any = await this.send({ balance: 1, account: "current", subscribe: subscribe ? 1 : 0 }, 15000);
+    // IMPORTANT: Don't send subscribe: 0 — Deriv doesn't support it.
+    // Either send subscribe: 1 or omit the field entirely for one-shot.
+    const payload: Record<string, unknown> = { balance: 1, account: "current" };
+    if (subscribe) {
+      payload.subscribe = 1;
+    }
+    const res: any = await this.send(payload, 15000);
     if (!res?.balance) {
-      // sometimes balance comes via stream after request; fall back to cached
       if (this.lastBalance) return this.lastBalance;
       throw new Error("Balance not available");
     }
