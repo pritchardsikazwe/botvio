@@ -48,6 +48,7 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
     status?: string;
   } | null>(null);
   const intentIdMap = useRef<Map<number, string>>(new Map());
+  const executionIdMap = useRef<Map<number, string>>(new Map());
   const activeContractsRef = useRef<Set<number>>(new Set());
 
   // Listen for contract settlement events
@@ -88,25 +89,46 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
           return prev;
         });
 
-        // Persist execution settlement to DB
+        // Update execution record from RUNNING → final status
         if (user) {
           const intentId = intentIdMap.current.get(update.contract_id);
-          supabase
-            .from('executions')
-            .insert({
-              user_id: user.id,
-              trade_intent_id: intentId || null,
-              broker_ref: update.contract_id.toString(),
-              fill_price: update.buy_price,
-              stake_or_lot: update.buy_price,
-              pnl: profit,
-              status: finalStatus.toUpperCase(),
-              raw: update,
-            })
-            .then(() => {
-              queryClient.invalidateQueries({ queryKey: ["executions"] });
-              queryClient.invalidateQueries({ queryKey: ["todays-pnl"] });
-            });
+          const execId = executionIdMap.current.get(update.contract_id);
+          
+          if (execId) {
+            // Update existing RUNNING execution with settlement data
+            supabase
+              .from('executions')
+              .update({
+                pnl: profit,
+                status: finalStatus.toUpperCase(),
+                raw: update,
+              })
+              .eq('id', execId)
+              .eq('user_id', user.id)
+              .then(() => {
+                executionIdMap.current.delete(update.contract_id);
+                queryClient.invalidateQueries({ queryKey: ["executions"] });
+                queryClient.invalidateQueries({ queryKey: ["todays-pnl"] });
+              });
+          } else {
+            // Fallback: insert if no RUNNING record exists
+            supabase
+              .from('executions')
+              .insert({
+                user_id: user.id,
+                trade_intent_id: intentId || null,
+                broker_ref: update.contract_id.toString(),
+                fill_price: update.buy_price,
+                stake_or_lot: update.buy_price,
+                pnl: profit,
+                status: finalStatus.toUpperCase(),
+                raw: update,
+              })
+              .then(() => {
+                queryClient.invalidateQueries({ queryKey: ["executions"] });
+                queryClient.invalidateQueries({ queryKey: ["todays-pnl"] });
+              });
+          }
 
           // Update trade intent if exists
           if (intentId) {
@@ -195,6 +217,28 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
       activeContractsRef.current.add(contract.contract_id);
       if (intentId) {
         intentIdMap.current.set(contract.contract_id, intentId);
+      }
+
+      // Insert RUNNING execution immediately so it shows in Trade History
+      if (user) {
+        const { data: execData } = await supabase
+          .from('executions')
+          .insert({
+            user_id: user.id,
+            trade_intent_id: intentId || null,
+            broker_ref: contract.contract_id.toString(),
+            fill_price: contract.buy_price,
+            stake_or_lot: amount,
+            pnl: null,
+            status: 'RUNNING',
+            raw: { symbol, contract_type: type, contract_id: contract.contract_id, buy_price: contract.buy_price, payout: contract.payout },
+          })
+          .select('id')
+          .single();
+        if (execData?.id) {
+          executionIdMap.current.set(contract.contract_id, execData.id);
+        }
+        queryClient.invalidateQueries({ queryKey: ["executions"] });
       }
 
       setLastTrade({
