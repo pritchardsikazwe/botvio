@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDeriv } from "@/contexts/DerivContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { NotificationBell } from "@/components/trading/NotificationBell";
 import {
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
+  const { authorized, accountInfo, balance } = useDeriv();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -246,10 +248,27 @@ export const Header = () => {
             {/* Community Links - visible on desktop */}
             {/* Community links moved to DB-driven partner_links */}
             
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20">
-              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              <span className="text-sm font-medium text-success">Real</span>
-            </div>
+            {authorized && accountInfo ? (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border"
+                style={{
+                  backgroundColor: accountInfo.is_virtual ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--success) / 0.1)',
+                  borderColor: accountInfo.is_virtual ? 'hsl(var(--primary) / 0.2)' : 'hsl(var(--success) / 0.2)',
+                }}
+              >
+                <div className={`w-2 h-2 rounded-full animate-pulse ${accountInfo.is_virtual ? 'bg-primary' : 'bg-success'}`} />
+                <span className={`text-xs font-medium ${accountInfo.is_virtual ? 'text-primary' : 'text-success'}`}>
+                  {accountInfo.loginid} ({accountInfo.is_virtual ? 'DEMO' : 'REAL'})
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {accountInfo.currency} {balance?.balance?.toFixed(2)}
+                </span>
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground">Not Connected</span>
+              </div>
+            )}
             
             <NotificationBell />
             

@@ -1,4 +1,4 @@
-import type { DerivMessage, DerivTick, DerivBalance } from "@/types/deriv";
+import type { DerivMessage, DerivTick, DerivBalance, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
 import { getDerivWebSocketUrl } from "@/config/derivEnv";
 
 type ConnectionStatus = "idle" | "connecting" | "open" | "closed";
@@ -47,11 +47,14 @@ export class DerivWebSocketService {
   private token: string | null = null;
   private lastBalance: DerivBalance | null = null;
   private loginid: string | null = null;
+  private accountInfo: DerivAccountInfo | null = null;
 
   private tickListeners = new Set<Listener<DerivTick>>();
   private statusListeners = new Set<Listener<ConnectionStatus>>();
   private logListeners = new Set<Listener<string>>();
   private errorListeners = new Set<Listener<string>>();
+  private contractListeners = new Set<Listener<DerivContractUpdate>>();
+  private balanceListeners = new Set<Listener<DerivBalance>>();
 
   private tickSubscriptionBySymbol = new Map<string, string>();
 
@@ -112,9 +115,23 @@ export class DerivWebSocketService {
     return this.lastBalance;
   }
 
+  get account() {
+    return this.accountInfo;
+  }
+
   onTick(listener: Listener<DerivTick>) {
     this.tickListeners.add(listener);
     return () => this.tickListeners.delete(listener);
+  }
+
+  onContractUpdate(listener: Listener<DerivContractUpdate>) {
+    this.contractListeners.add(listener);
+    return () => this.contractListeners.delete(listener);
+  }
+
+  onBalanceUpdate(listener: Listener<DerivBalance>) {
+    this.balanceListeners.add(listener);
+    return () => this.balanceListeners.delete(listener);
   }
 
   onStatus(listener: Listener<ConnectionStatus>) {
@@ -296,6 +313,13 @@ export class DerivWebSocketService {
         loginid: a.loginid,
         fullname: a.fullname,
       };
+      this.accountInfo = {
+        loginid: a.loginid,
+        is_virtual: !!a.is_virtual,
+        currency: a.currency,
+        fullname: a.fullname,
+        account_list: a.account_list,
+      };
     }
 
     if (data.msg_type === "balance" && (data as any).balance) {
@@ -305,6 +329,8 @@ export class DerivWebSocketService {
         currency: b.currency,
         loginid: b.loginid,
       };
+      // Emit to balance listeners for real-time sync
+      this.balanceListeners.forEach((l) => l(this.lastBalance!));
     }
 
     if (data.msg_type === "tick" && (data as any).tick) {
@@ -318,6 +344,42 @@ export class DerivWebSocketService {
         subscription_id: subId,
       };
       this.tickListeners.forEach((l) => l(tick));
+    }
+
+    // Handle proposal_open_contract stream updates (settlement detection)
+    if (data.msg_type === "proposal_open_contract" && (data as any).proposal_open_contract) {
+      const c = (data as any).proposal_open_contract as any;
+      const isSettled = c.is_sold === 1 || c.is_expired === 1 || 
+                        ["won", "lost", "sold"].includes(c.status);
+      const update: DerivContractUpdate = {
+        contract_id: c.contract_id,
+        buy_price: c.buy_price,
+        sell_price: c.sell_price,
+        current_spot: c.current_spot,
+        current_spot_time: c.current_spot_time,
+        profit: c.profit, // Deriv's profit is already signed (+win/-loss)
+        profit_percentage: c.profit_percentage || 0,
+        status: c.is_sold ? "sold" : c.is_expired ? (c.profit >= 0 ? "won" : "lost") : "open",
+        is_expired: !!c.is_expired,
+        is_sold: !!c.is_sold,
+        is_valid_to_sell: !!c.is_valid_to_sell,
+        entry_spot: c.entry_spot,
+        exit_tick: c.exit_tick,
+        payout: c.payout,
+        longcode: c.longcode,
+        underlying: c.underlying || "",
+        contract_type: c.contract_type || "",
+      };
+      this.contractListeners.forEach((l) => l(update));
+
+      // Auto-forget subscription on settlement
+      if (isSettled) {
+        const subId = (data as any).subscription?.id;
+        if (subId) {
+          this.send({ forget: subId }).catch(() => {});
+        }
+        console.log(`[SETTLED] contract_id=${c.contract_id} profit=${c.profit} sell_price=${c.sell_price} status=${update.status}`);
+      }
     }
   }
 
