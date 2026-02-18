@@ -129,7 +129,15 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
       // Use detected instrument name from AI, falling back to user-selected symbol
-      const instrumentName = structured.instrument || sym || "UNKNOWN";
+      const instrumentName = structured.instrument || sym || "Unknown";
+
+      // Build a clean reason focusing on Entry/TP/SL
+      const parts: string[] = [`AI Signal: ${direction} ${instrumentName}`];
+      if (structured.entry_price) parts.push(`Entry: ${structured.entry_price}`);
+      if (structured.take_profit) parts.push(`TP1: ${structured.take_profit}`);
+      if (structured.take_profit_2) parts.push(`TP2: ${structured.take_profit_2}`);
+      if (structured.take_profit_3) parts.push(`TP3: ${structured.take_profit_3}`);
+      if (structured.stop_loss) parts.push(`SL: ${structured.stop_loss}`);
 
       const { error } = await supabase
         .from("trading_signals")
@@ -142,7 +150,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
           timeframe: tf || "M5",
           category: "forex",
           confidence: structured.confidence ? parseInt(structured.confidence) : null,
-          reason: `AI Chart Analysis: ${structured.trend || "N/A"} trend on ${instrumentName}, ${structured.confidence || 75}% confidence`,
+          reason: parts.join(" | "),
           is_manual: true,
           posted_by: user.id,
           status: "ACTIVE",
