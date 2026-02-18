@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, TrendingDown, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 import type { DerivContractUpdate } from "@/types/deriv";
 
 interface QuickTradeProps {
@@ -31,6 +34,8 @@ const DURATION_OPTIONS = [
 
 export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
   const { authorized, balance, placeTrade, onContractUpdate, refreshBalance, accountInfo } = useDeriv();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [stake, setStake] = useState("1");
   const [duration, setDuration] = useState("5_t");
   const [trading, setTrading] = useState<"CALL" | "PUT" | null>(null);
@@ -42,6 +47,7 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
     profit?: number;
     status?: string;
   } | null>(null);
+  const intentIdMap = useRef<Map<number, string>>(new Map());
   const activeContractsRef = useRef<Set<number>>(new Set());
 
   // Listen for contract settlement events
@@ -81,6 +87,38 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
           }
           return prev;
         });
+
+        // Persist execution settlement to DB
+        if (user) {
+          const intentId = intentIdMap.current.get(update.contract_id);
+          supabase
+            .from('executions')
+            .insert({
+              user_id: user.id,
+              trade_intent_id: intentId || null,
+              broker_ref: update.contract_id.toString(),
+              fill_price: update.buy_price,
+              stake_or_lot: update.buy_price,
+              pnl: profit,
+              status: finalStatus.toUpperCase(),
+              raw: update,
+            })
+            .then(() => {
+              queryClient.invalidateQueries({ queryKey: ["executions"] });
+              queryClient.invalidateQueries({ queryKey: ["todays-pnl"] });
+            });
+
+          // Update trade intent if exists
+          if (intentId) {
+            supabase
+              .from('trade_intents')
+              .update({ status: 'FILLED', broker_ref: update.contract_id.toString() })
+              .eq('id', intentId)
+              .then(() => {
+                queryClient.invalidateQueries({ queryKey: ["trade-intents"] });
+              });
+          }
+        }
 
         // Show settlement toast
         if (profit >= 0) {
@@ -123,6 +161,25 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
     setTrading(type);
 
     try {
+      const idempotencyKey = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Create trade intent record in DB
+      let intentId: string | null = null;
+      if (user) {
+        const { data: intentData } = await supabase
+          .from('trade_intents')
+          .insert({
+            user_id: user.id,
+            intent: { symbol, contract_type: type, stake: amount, duration: parseInt(dur), duration_unit: unit },
+            idempotency_key: idempotencyKey,
+            status: 'SENT',
+          })
+          .select('id')
+          .single();
+        intentId = intentData?.id || null;
+        queryClient.invalidateQueries({ queryKey: ["trade-intents"] });
+      }
+
       const contract = await placeTrade({
         symbol,
         contract_type: type,
@@ -133,6 +190,9 @@ export const QuickTrade = ({ symbol, onTradeUpdate }: QuickTradeProps) => {
 
       // Track this contract for settlement
       activeContractsRef.current.add(contract.contract_id);
+      if (intentId) {
+        intentIdMap.current.set(contract.contract_id, intentId);
+      }
 
       setLastTrade({
         type,
