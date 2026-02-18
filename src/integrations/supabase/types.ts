@@ -796,6 +796,80 @@ export type Database = {
         }
         Relationships: []
       }
+      deriv_trades: {
+        Row: {
+          buy_price: number
+          contract_id: number
+          contract_type: string | null
+          created_at: string
+          currency: string
+          ended_at: string | null
+          id: string
+          is_virtual: boolean
+          loginid: string
+          outcome: string | null
+          payout: number | null
+          profit: number | null
+          sell_price: number | null
+          started_at: string
+          status: string
+          symbol: string
+          token_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          buy_price: number
+          contract_id: number
+          contract_type?: string | null
+          created_at?: string
+          currency?: string
+          ended_at?: string | null
+          id?: string
+          is_virtual?: boolean
+          loginid: string
+          outcome?: string | null
+          payout?: number | null
+          profit?: number | null
+          sell_price?: number | null
+          started_at?: string
+          status?: string
+          symbol: string
+          token_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          buy_price?: number
+          contract_id?: number
+          contract_type?: string | null
+          created_at?: string
+          currency?: string
+          ended_at?: string | null
+          id?: string
+          is_virtual?: boolean
+          loginid?: string
+          outcome?: string | null
+          payout?: number | null
+          profit?: number | null
+          sell_price?: number | null
+          started_at?: string
+          status?: string
+          symbol?: string
+          token_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deriv_trades_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "user_deriv_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       edge_logs: {
         Row: {
           created_at: string
@@ -2925,6 +2999,45 @@ export type Database = {
           is_active?: boolean
           is_virtual?: boolean
           loginid?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_deriv_tokens: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          is_virtual: boolean
+          label: string | null
+          loginid: string
+          token_encrypted: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          is_virtual?: boolean
+          label?: string | null
+          loginid: string
+          token_encrypted: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          is_virtual?: boolean
+          label?: string | null
+          loginid?: string
+          token_encrypted?: string
           updated_at?: string
           user_id?: string
         }

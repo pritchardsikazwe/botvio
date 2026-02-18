@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDeriv } from "@/contexts/DerivContext";
 import { Header } from "@/components/trading/Header";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
+import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Connections = () => {
   const { user } = useAuth();
+  const { derivTokens, switchDerivToken, removeDerivToken } = useDeriv();
 
   // Fetch all connections
   const { data: connections, refetch: refetchConnections } = useQuery({
@@ -91,6 +94,15 @@ const Connections = () => {
           </TabsList>
 
           <TabsContent value="deriv" className="space-y-6">
+            {/* Multi-Account Switcher */}
+            {derivTokens.length > 0 && (
+              <AccountSwitcher
+                tokens={derivTokens}
+                onActivate={switchDerivToken}
+                onRemove={removeDerivToken}
+              />
+            )}
+
             {/* Connection (OAuth or Token) */}
             <DerivConnectionPanel />
 
