@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { DerivWebSocketService } from "@/services/derivWebSocket";
-import type { DerivBalance, DerivTick } from "@/types/deriv";
+import type { DerivBalance, DerivTick, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
 import { getDerivConfig } from "@/config/derivEnv";
 
 export type DerivProposal = {
@@ -24,6 +24,7 @@ interface DerivAPIState {
   error: string | null;
   loading: boolean;
   lastTick: DerivTick | null;
+  accountInfo: DerivAccountInfo | null;
 }
 
 export const useDerivAPI = () => {
@@ -34,37 +35,29 @@ export const useDerivAPI = () => {
     error: null,
     loading: false,
     lastTick: null,
+    accountInfo: null,
   });
 
   const updateState = useCallback((partial: Partial<DerivAPIState>) => {
     setState(prev => ({ ...prev, ...partial }));
   }, []);
 
-  // Use environment-based configuration
   const derivConfig = getDerivConfig();
 
   const service = useMemo(() => {
-    // DerivWebSocketService now automatically uses environment-based config
     const s = new DerivWebSocketService();
     return s;
   }, [derivConfig.appId]);
 
   const [tickSubscriptions, setTickSubscriptions] = useState<Record<string, string>>({});
 
-  // Map your app symbols (XAUUSD/EURUSD/BTCUSD) to Deriv symbols.
-  // This prevents “connected but no ticks” when the symbol name is not valid on Deriv.
   const toDerivSymbol = useCallback((symbol: string) => {
     const s = symbol.trim();
     if (!s) return s;
-    // already a Deriv style symbol like R_100 / frxEURUSD / cryBTCUSD
     if (s.includes("_") || s.startsWith("frx") || s.startsWith("cry")) return s;
-
-    // Basic heuristics:
     if (s === "XAUUSD") return "frxXAUUSD";
     if (s === "BTCUSD") return "cryBTCUSD";
     if (s === "ETHUSD") return "cryETHUSD";
-
-    // Forex majors in this app: EURUSD, GBPUSD, USDJPY, etc.
     return `frx${s}`;
   }, []);
 
@@ -75,7 +68,6 @@ export const useDerivAPI = () => {
         await service.open();
         updateState({ connected: true });
 
-        // Wire stream listeners once per connect call
         const offStatus = service.onStatus((st) => {
           updateState({ connected: st === "open" });
         });
@@ -95,8 +87,22 @@ export const useDerivAPI = () => {
           }
         });
 
+        // Listen for real-time balance updates from Deriv
+        const offBalance = service.onBalanceUpdate((bal) => {
+          console.log(`[BALANCE] ${bal.loginid} ${bal.currency} ${bal.balance}`);
+          updateState({ balance: bal });
+        });
+
         const balance = await service.authorize(apiToken);
-        updateState({ authorized: true, balance });
+        const acctInfo = service.account;
+        
+        console.log(`[AUTH] loginid=${balance.loginid} is_virtual=${acctInfo?.is_virtual} currency=${balance.currency} balance=${balance.balance}`);
+        
+        updateState({ 
+          authorized: true, 
+          balance,
+          accountInfo: acctInfo,
+        });
 
         // Subscribe to balance updates
         try {
@@ -108,12 +114,11 @@ export const useDerivAPI = () => {
 
         updateState({ loading: false });
 
-        // Cleanup listeners when disconnect() is called by user
-        // (we keep them referenced via closure and call in disconnect)
         (disconnect as any).__cleanup = () => {
           offStatus();
           offError();
           offTick();
+          offBalance();
         };
 
         return balance;
@@ -139,6 +144,7 @@ export const useDerivAPI = () => {
       error: null,
       loading: false,
       lastTick: null,
+      accountInfo: null,
     });
   }, [service, updateState]);
 
@@ -153,7 +159,6 @@ export const useDerivAPI = () => {
   const unsubscribeTicks = useCallback(
     async (symbol: string) => {
       const derivSymbol = toDerivSymbol(symbol);
-      // prefer "forget" with subscription id (per requirement)
       const subId = tickSubscriptions[derivSymbol];
       if (subId) {
         await service.unsubscribe(subId);
@@ -164,7 +169,6 @@ export const useDerivAPI = () => {
         });
         return;
       }
-      // fallback (if we don't have a cached subscription id yet)
       await service.unsubscribeTicks(derivSymbol);
     },
     [service, tickSubscriptions, toDerivSymbol],
@@ -194,28 +198,19 @@ export const useDerivAPI = () => {
         symbol,
       };
 
-      // Duration (not used for multipliers/accumulators)
       if (params.duration !== undefined && params.duration !== null) {
         request.duration = params.duration;
         request.duration_unit = params.duration_unit || "m";
       }
-
-      // Digit contracts barrier (last digit prediction 0-9)
       if (params.barrier !== undefined && params.barrier !== null) {
         request.barrier = String(params.barrier);
       }
-
-      // Multiplier contracts
       if (params.multiplier !== undefined && params.multiplier !== null) {
         request.multiplier = params.multiplier;
       }
-
-      // Accumulator growth rate
       if (params.growth_rate !== undefined && params.growth_rate !== null) {
         request.growth_rate = params.growth_rate;
       }
-
-      // Limit orders (stop_loss / take_profit for multipliers)
       if (params.limit_order && Object.keys(params.limit_order).length > 0) {
         request.limit_order = params.limit_order;
       }
@@ -250,6 +245,41 @@ export const useDerivAPI = () => {
     [service],
   );
 
+  // Subscribe to proposal_open_contract for settlement tracking
+  const subscribeContract = useCallback(
+    async (contractId: number) => {
+      console.log(`[BUY] Subscribing to contract ${contractId}`);
+      const response: any = await service.send({
+        proposal_open_contract: 1,
+        contract_id: contractId,
+        subscribe: 1,
+      });
+      return response;
+    },
+    [service],
+  );
+
+  // Listen for contract settlement events
+  const onContractUpdate = useCallback(
+    (listener: (update: DerivContractUpdate) => void) => {
+      return service.onContractUpdate(listener);
+    },
+    [service],
+  );
+
+  // Refresh balance from Deriv (truth source)
+  const refreshBalance = useCallback(async () => {
+    try {
+      const b = await service.getBalance(false);
+      console.log(`[BALANCE] refreshed: ${b.loginid} ${b.currency} ${b.balance}`);
+      updateState({ balance: b });
+      return b;
+    } catch (e) {
+      console.error("[BALANCE] refresh failed:", e);
+      return null;
+    }
+  }, [service, updateState]);
+
   const placeTrade = useCallback(async (params: {
     symbol: string;
     contract_type: string;
@@ -261,14 +291,16 @@ export const useDerivAPI = () => {
     growth_rate?: number;
     limit_order?: Record<string, number>;
   }): Promise<DerivContract> => {
-    // Get proposal first
     const proposal = await getProposal(params);
-    
-    // Then buy
     const contract = await buyContract(proposal.id, proposal.ask_price);
     
+    console.log(`[BUY] ${params.symbol} ${params.contract_type} stake=${params.amount} contract_id=${contract.contract_id} buy_price=${contract.buy_price}`);
+    
+    // Auto-subscribe to contract for settlement tracking
+    await subscribeContract(contract.contract_id);
+    
     return contract;
-  }, [getProposal, buyContract]);
+  }, [getProposal, buyContract, subscribeContract]);
 
   useEffect(() => {
     return () => {
@@ -285,7 +317,10 @@ export const useDerivAPI = () => {
     getProposal,
     buyContract,
     placeTrade,
+    subscribeContract,
+    onContractUpdate,
+    refreshBalance,
   };
 };
 
-export type { DerivBalance, DerivTick };
+export type { DerivBalance, DerivTick, DerivAccountInfo, DerivContractUpdate };

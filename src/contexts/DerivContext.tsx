@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from "react";
-import { useDerivAPI, DerivBalance, DerivTick, DerivProposal, DerivContract } from "@/hooks/useDerivAPI";
+import { useDerivAPI, DerivBalance, DerivTick, DerivProposal, DerivContract, DerivAccountInfo, DerivContractUpdate } from "@/hooks/useDerivAPI";
 
 interface DerivContextType {
   connected: boolean;
@@ -8,6 +8,7 @@ interface DerivContextType {
   error: string | null;
   loading: boolean;
   lastTick: DerivTick | null;
+  accountInfo: DerivAccountInfo | null;
   connect: (apiToken: string) => Promise<DerivBalance>;
   disconnect: () => void;
   subscribeTicks: (symbol: string) => Promise<void>;
@@ -37,6 +38,9 @@ interface DerivContextType {
     growth_rate?: number;
     limit_order?: Record<string, number>;
   }) => Promise<DerivContract>;
+  subscribeContract: (contractId: number) => Promise<any>;
+  onContractUpdate: (listener: (update: DerivContractUpdate) => void) => () => void;
+  refreshBalance: () => Promise<DerivBalance | null>;
 }
 
 const DerivContext = createContext<DerivContextType | undefined>(undefined);
