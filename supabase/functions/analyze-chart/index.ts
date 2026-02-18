@@ -160,33 +160,30 @@ serve(async (req) => {
       );
     }
 
-    const analysisPrompt = `You are an expert forex and trading chart analyst. Analyze this trading chart image.
+    const analysisPrompt = `You are an expert trading chart analyst. Analyze this chart image.
 
-CRITICAL INSTRUCTIONS FOR INSTRUMENT NAME:
-- You MUST return a short, clean instrument name on the FIRST line in this exact format: **Instrument**: <SHORT NAME>
-- Use the common trading name ONLY. Examples: "Gold", "EUR/USD", "Crash 500", "Volatility 75", "NASDAQ", "Bitcoin", "US30", "GBP/JPY", "Step Index"
-- Do NOT use long descriptions like "US 10-Year Treasury Note Futures (ZB1!)" — instead just say "US Treasury Bond" or "ZB Futures"
-- Do NOT add exchange codes, contract IDs, or parenthetical suffixes
-- If you cannot identify the instrument, say "Unknown"
+FIRST LINE MUST BE exactly: **Instrument**: <NAME>
+Rules for instrument name:
+- Use ONLY the short trading name: Gold, EUR/USD, Crash 500, Volatility 75, NASDAQ, Bitcoin, US30, GBP/JPY, Step Index, Boom 1000, Crude Oil, Silver etc.
+- NEVER use long descriptions, exchange codes, or contract IDs
+- Look at the chart title, axis labels, watermarks, and price range to identify the instrument
+- Common price ranges: 1800-2700 = Gold, 0.5-2.0 = Forex pairs, 30000-45000 = US30/Dow, 15000-22000 = NASDAQ, 50000-110000 = Bitcoin
+${symbol ? `- The user has specified the symbol as: ${symbol} — use this as the instrument name` : "- You MUST identify the instrument. Do NOT say Unknown."}
 
-CRITICAL INSTRUCTIONS FOR TRADE LEVELS:
-- You MUST return exact numeric price values in this exact format:
-- **Entry Price**: <number>
-- **Stop Loss**: <number>
-- **Take Profit 1**: <number>
-- **Take Profit 2**: <number> (optional)
-- **Take Profit 3**: <number> (optional)
-- **Direction**: BUY or SELL
-- **Confidence**: <number>%
+REQUIRED STRUCTURED DATA (use exact format):
+**Direction**: BUY or SELL
+**Entry Price**: <exact number from chart>
+**Stop Loss**: <exact number>
+**Take Profit 1**: <exact number>
+**Take Profit 2**: <exact number> (if applicable)
+**Take Profit 3**: <exact number> (if applicable)
+**Confidence**: <number>%
 
-Also provide:
+ALSO PROVIDE:
 1. **Trend Analysis**: Bullish, Bearish, or Ranging
-2. **Key Levels**: Major support and resistance levels
-3. **Pattern Recognition**: Any chart patterns visible
+2. **Key Levels**: Support and resistance
+3. **Pattern Recognition**: Chart patterns visible
 4. **Risk Assessment**: Low, Medium, or High
-5. **Timeframe Suggestion**: Best timeframe for this setup
-
-${symbol ? `Symbol: ${symbol}` : "Identify the instrument from the chart image. Look at axis labels, title, watermarks, price levels."}
 ${timeframe ? `Current Timeframe: ${timeframe}` : ""}
 
 Keep the response structured and actionable.`;
@@ -303,61 +300,7 @@ Keep the response structured and actionable.`;
     const aiData = await aiResponse.json();
     const analysisText = aiData.choices?.[0]?.message?.content || "Analysis not available";
 
-    // Extract instrument name from AI response - clean short name
-    let detectedInstrument = symbol || null;
-    if (!detectedInstrument) {
-      // Primary: look for **Instrument**: <name> pattern
-      const instrumentLineMatch = analysisText.match(/\*\*Instrument\*\*[:\s]*(.+?)(?:\n|$)/i);
-      if (instrumentLineMatch) {
-        detectedInstrument = instrumentLineMatch[1]
-          .trim()
-          .replace(/\*+/g, '')
-          .replace(/\s*\(.*?\)\s*/g, '') // Remove parenthetical like (ZB1!)
-          .replace(/\s*-\s*Inferred.*$/i, '') // Remove "- Inferred from..." suffixes
-          .trim();
-      }
-      
-      // Fallback: try known instrument keywords
-      if (!detectedInstrument || detectedInstrument.length > 30) {
-        const knownPatterns: [RegExp, string][] = [
-          [/\b(?:Gold|XAUUSD|XAU\/USD)\b/i, "Gold"],
-          [/\b(?:Crash\s*(\d+))\b/i, "Crash $1"],
-          [/\b(?:Boom\s*(\d+))\b/i, "Boom $1"],
-          [/\b(?:Volatility\s*(\d+)(?:\s*Index)?)\b/i, "Volatility $1"],
-          [/\b(?:V75|V100|V50|V25|V10)\b/i, "$&"],
-          [/\b(?:EUR\/USD|EURUSD)\b/i, "EUR/USD"],
-          [/\b(?:GBP\/USD|GBPUSD)\b/i, "GBP/USD"],
-          [/\b(?:USD\/JPY|USDJPY)\b/i, "USD/JPY"],
-          [/\b(?:GBP\/JPY|GBPJPY)\b/i, "GBP/JPY"],
-          [/\b(?:AUD\/USD|AUDUSD)\b/i, "AUD/USD"],
-          [/\b(?:NASDAQ|NAS100|NAS\s*100)\b/i, "NASDAQ"],
-          [/\b(?:US30|Dow\s*Jones)\b/i, "US30"],
-          [/\b(?:S&P\s*500|SPX500|SP500)\b/i, "S&P 500"],
-          [/\b(?:Bitcoin|BTC\/USD|BTCUSD)\b/i, "Bitcoin"],
-          [/\b(?:Ethereum|ETH\/USD|ETHUSD)\b/i, "Ethereum"],
-          [/\b(?:Step\s*Index)\b/i, "Step Index"],
-          [/\b(?:US\s*Treasury|ZB\s*Futures|T-Bond)\b/i, "US Treasury Bond"],
-          [/\b(?:Crude\s*Oil|WTI|USOIL)\b/i, "Crude Oil"],
-          [/\b(?:Silver|XAGUSD|XAG\/USD)\b/i, "Silver"],
-        ];
-        
-        for (const [pattern, replacement] of knownPatterns) {
-          const m = analysisText.match(pattern);
-          if (m) {
-            detectedInstrument = replacement.includes("$") 
-              ? replacement.replace(/\$(\d+|&)/g, (_, g) => g === "&" ? m[0] : (m[parseInt(g)] || ""))
-              : replacement;
-            break;
-          }
-        }
-      }
-      
-      if (!detectedInstrument) {
-        detectedInstrument = "Unknown";
-      }
-    }
-
-    // Extract price targets with improved patterns
+    // Extract price targets first (needed for instrument price-range fallback)
     const entryMatch = analysisText.match(/\*\*Entry\s*(?:Price)?\*\*[:\s]*\$?([\d,]+\.?\d*)/i) 
                     || analysisText.match(/Entry\s*(?:Price)?[:\s]*\$?([\d,]+\.?\d*)/i);
     const slMatch = analysisText.match(/\*\*Stop\s*Loss\*\*[:\s]*\$?([\d,]+\.?\d*)/i)
@@ -375,9 +318,115 @@ Keep the response structured and actionable.`;
                    || analysisText.match(/Confidence[:\s]*(\d+)/i);
     const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL)/i);
 
+    // Extract instrument name
+    let detectedInstrument = symbol || null;
+    if (!detectedInstrument) {
+      const instrumentLineMatch = analysisText.match(/\*\*Instrument\*\*[:\s]*(.+?)(?:\n|$)/i);
+      if (instrumentLineMatch) {
+        detectedInstrument = instrumentLineMatch[1]
+          .trim()
+          .replace(/\*+/g, '')
+          .replace(/\s*\(.*?\)\s*/g, '')
+          .replace(/\s*-\s*Inferred.*$/i, '')
+          .replace(/\s*-\s*Based on.*$/i, '')
+          .replace(/\s*Futures?\s*$/i, '')
+          .trim();
+      }
+      
+      if (!detectedInstrument || detectedInstrument === "Unknown" || detectedInstrument.length > 25) {
+        const knownPatterns: [RegExp, string][] = [
+          [/\b(?:Gold|XAUUSD|XAU\/USD)\b/i, "Gold"],
+          [/\bCrash\s*(\d+)\b/i, "Crash $1"],
+          [/\bBoom\s*(\d+)\b/i, "Boom $1"],
+          [/\bVolatility\s*(\d+)(?:\s*(?:Index|1s))?\b/i, "Volatility $1"],
+          [/\b(V75|V100|V50|V25|V10)\b/i, "$1"],
+          [/\b(?:EUR\/USD|EURUSD)\b/i, "EUR/USD"],
+          [/\b(?:GBP\/USD|GBPUSD)\b/i, "GBP/USD"],
+          [/\b(?:USD\/JPY|USDJPY)\b/i, "USD/JPY"],
+          [/\b(?:GBP\/JPY|GBPJPY)\b/i, "GBP/JPY"],
+          [/\b(?:AUD\/USD|AUDUSD)\b/i, "AUD/USD"],
+          [/\b(?:EUR\/JPY|EURJPY)\b/i, "EUR/JPY"],
+          [/\b(?:USD\/CAD|USDCAD)\b/i, "USD/CAD"],
+          [/\b(?:USD\/CHF|USDCHF)\b/i, "USD/CHF"],
+          [/\b(?:NZD\/USD|NZDUSD)\b/i, "NZD/USD"],
+          [/\b(?:NASDAQ|NAS100|NAS\s*100)\b/i, "NASDAQ"],
+          [/\b(?:US30|Dow\s*Jones|DJI)\b/i, "US30"],
+          [/\b(?:S&P\s*500|SPX500|SP500)\b/i, "S&P 500"],
+          [/\b(?:Bitcoin|BTC\/USD|BTCUSD)\b/i, "Bitcoin"],
+          [/\b(?:Ethereum|ETH\/USD|ETHUSD)\b/i, "Ethereum"],
+          [/\b(?:Step\s*Index)\b/i, "Step Index"],
+          [/\b(?:Jump\s*(\d+))\b/i, "Jump $1"],
+          [/\b(?:Range\s*Break)\b/i, "Range Break"],
+          [/\b(?:Crude\s*Oil|WTI|USOIL)\b/i, "Crude Oil"],
+          [/\b(?:Silver|XAGUSD|XAG\/USD)\b/i, "Silver"],
+          [/\b(?:Natural\s*Gas|NATGAS)\b/i, "Natural Gas"],
+          [/\b(?:US\s*(?:10|30|5)[- ]?(?:Year|yr))/i, "US Treasury Bond"],
+          [/\bDE40\b/i, "DE40"], [/\bUK100\b/i, "UK100"], [/\bJP225\b/i, "JP225"],
+          [/\bPainX\s*(\d+)\b/i, "PainX $1"], [/\bGainX\s*(\d+)\b/i, "GainX $1"],
+          [/\bTrendX\s*(\d+)\b/i, "TrendX $1"],
+          [/\bFlipX\b/i, "FlipX"], [/\bSwitchX\b/i, "SwitchX"], [/\bBreakX\b/i, "BreakX"],
+        ];
+        for (const [pattern, replacement] of knownPatterns) {
+          const m = analysisText.match(pattern);
+          if (m) {
+            detectedInstrument = replacement.includes("$") 
+              ? replacement.replace(/\$(\d+|&)/g, (_, g) => g === "&" ? m[0] : (m[parseInt(g)] || ""))
+              : replacement;
+            break;
+          }
+        }
+      }
+      
+      // Price-range fallback
+      if (!detectedInstrument || detectedInstrument === "Unknown") {
+        const priceVal = entryMatch ? parseFloat(entryMatch[1].replace(/,/g, '')) : null;
+        if (priceVal) {
+          if (priceVal > 1800 && priceVal < 3000) detectedInstrument = "Gold";
+          else if (priceVal > 30000 && priceVal < 50000) detectedInstrument = "US30";
+          else if (priceVal > 14000 && priceVal < 25000) detectedInstrument = "NASDAQ";
+          else if (priceVal > 50000 && priceVal < 120000) detectedInstrument = "Bitcoin";
+          else if (priceVal > 15 && priceVal < 35) detectedInstrument = "Silver";
+          else if (priceVal > 60 && priceVal < 120) detectedInstrument = "Crude Oil";
+        }
+      }
+      if (!detectedInstrument) detectedInstrument = "Unknown";
+    }
+
+    // Broker symbol metadata for Deriv, Weltrade, Exness
+    const brokerSymbolMap: Record<string, Record<string, string>> = {
+      "Gold": { deriv: "frxXAUUSD", weltrade: "XAUUSD", exness: "XAUUSDm" },
+      "EUR/USD": { deriv: "frxEURUSD", weltrade: "EURUSD", exness: "EURUSDm" },
+      "GBP/USD": { deriv: "frxGBPUSD", weltrade: "GBPUSD", exness: "GBPUSDm" },
+      "USD/JPY": { deriv: "frxUSDJPY", weltrade: "USDJPY", exness: "USDJPYm" },
+      "GBP/JPY": { deriv: "frxGBPJPY", weltrade: "GBPJPY", exness: "GBPJPYm" },
+      "AUD/USD": { deriv: "frxAUDUSD", weltrade: "AUDUSD", exness: "AUDUSDm" },
+      "EUR/JPY": { deriv: "frxEURJPY", weltrade: "EURJPY", exness: "EURJPYm" },
+      "USD/CAD": { deriv: "frxUSDCAD", weltrade: "USDCAD", exness: "USDCADm" },
+      "USD/CHF": { deriv: "frxUSDCHF", weltrade: "USDCHF", exness: "USDCHFm" },
+      "NZD/USD": { deriv: "frxNZDUSD", weltrade: "NZDUSD", exness: "NZDUSDm" },
+      "Bitcoin": { deriv: "cryBTCUSD", weltrade: "BTCUSD", exness: "BTCUSDm" },
+      "Ethereum": { deriv: "cryETHUSD", weltrade: "ETHUSD", exness: "ETHUSDm" },
+      "NASDAQ": { deriv: "OTC_NDX", weltrade: "NAS100", exness: "NAS100m" },
+      "US30": { deriv: "OTC_DJI", weltrade: "US30", exness: "US30m" },
+      "Crash 500": { deriv: "CRASH500", weltrade: "Crash500", exness: "" },
+      "Crash 1000": { deriv: "CRASH1000", weltrade: "Crash1000", exness: "" },
+      "Boom 500": { deriv: "BOOM500", weltrade: "Boom500", exness: "" },
+      "Boom 1000": { deriv: "BOOM1000", weltrade: "Boom1000", exness: "" },
+      "Volatility 75": { deriv: "R_75", weltrade: "V75", exness: "" },
+      "Volatility 100": { deriv: "R_100", weltrade: "V100", exness: "" },
+      "Volatility 50": { deriv: "R_50", weltrade: "V50", exness: "" },
+      "Volatility 25": { deriv: "R_25", weltrade: "V25", exness: "" },
+      "Volatility 10": { deriv: "R_10", weltrade: "V10", exness: "" },
+      "Step Index": { deriv: "stpRNG", weltrade: "StepIndex", exness: "" },
+      "Silver": { deriv: "frxXAGUSD", weltrade: "XAGUSD", exness: "XAGUSDm" },
+      "Crude Oil": { deriv: "frxBROUSD", weltrade: "USOIL", exness: "USOILm" },
+    };
+    const brokerMeta = brokerSymbolMap[detectedInstrument] || null;
+
     const analysisResult = {
       raw_analysis: analysisText,
       instrument: detectedInstrument,
+      broker_symbols: brokerMeta,
       trend: analysisText.toLowerCase().includes("bullish") ? "BULLISH" : 
              analysisText.toLowerCase().includes("bearish") ? "BEARISH" : "RANGING",
       recommendation: dirMatch ? dirMatch[1].toUpperCase() :
