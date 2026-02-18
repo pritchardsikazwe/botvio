@@ -270,12 +270,19 @@ export const useDerivAPI = () => {
   // Refresh balance from Deriv (truth source)
   const refreshBalance = useCallback(async () => {
     try {
-      const b = await service.getBalance(false);
+      // Use subscribe=true to ensure we keep receiving balance updates
+      const b = await service.getBalance(true);
       console.log(`[BALANCE] refreshed: ${b.loginid} ${b.currency} ${b.balance}`);
       updateState({ balance: b });
       return b;
     } catch (e) {
       console.error("[BALANCE] refresh failed:", e);
+      // Fall back to cached balance from service
+      const cached = service.latestBalance;
+      if (cached) {
+        updateState({ balance: cached });
+        return cached;
+      }
       return null;
     }
   }, [service, updateState]);
@@ -296,11 +303,14 @@ export const useDerivAPI = () => {
     
     console.log(`[BUY] ${params.symbol} ${params.contract_type} stake=${params.amount} contract_id=${contract.contract_id} buy_price=${contract.buy_price}`);
     
+    // Immediately refresh balance after buy (stake deducted)
+    refreshBalance().catch(() => {});
+    
     // Auto-subscribe to contract for settlement tracking
     await subscribeContract(contract.contract_id);
     
     return contract;
-  }, [getProposal, buyContract, subscribeContract]);
+  }, [getProposal, buyContract, subscribeContract, refreshBalance]);
 
   useEffect(() => {
     return () => {
