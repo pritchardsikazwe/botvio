@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getDerivConfig, buildDerivOAuthUrl, resolveDerivEnv } from "@/config/derivEnv";
+import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
 
 interface DerivConnectionPanelProps {
   onConnected?: (balance: any) => void;
@@ -30,7 +31,6 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   const [isConnecting, setIsConnecting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  // If we hide account selection, default to NOT saving tokens into trading_accounts.
   const [saveToAccount, setSaveToAccount] = useState(showAccountSelection);
   const [accountLabel, setAccountLabel] = useState("");
   const [storedConnection, setStoredConnection] = useState<any>(null);
@@ -38,61 +38,55 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   const derivConfig = getDerivConfig();
   const currentEnv = resolveDerivEnv();
 
+  // Consolidated OAuth mutex + cooldown
+  const {
+    cooldownRemaining,
+    loginInProgress,
+    canLogin,
+    acquireLogin,
+    releaseLogin,
+    setStoredSession,
+    clearStoredSession,
+  } = useOAuthCooldown();
+
+  const oauthPopupRef = useRef<Window | null>(null);
+
   // Load existing connection from database
   useEffect(() => {
     const loadStoredConnection = async () => {
       if (!user) return;
-
       const { data } = await supabase
         .from("deriv_connections")
         .select("*")
         .eq("user_id", user.id)
         .eq("env", currentEnv)
         .single();
-
-      if (data) {
-        setStoredConnection(data);
-      }
+      if (data) setStoredConnection(data);
     };
-
     loadStoredConnection();
   }, [user, currentEnv]);
 
   const handleTokenVerify = async () => {
-    if (!apiToken.trim()) {
-      toast.error("Please enter your API token");
-      return;
-    }
-
-    if (apiToken.length < 10) {
-      toast.error("Invalid token format");
-      return;
-    }
+    if (!apiToken.trim()) { toast.error("Please enter your API token"); return; }
+    if (apiToken.length < 10) { toast.error("Invalid token format"); return; }
 
     setIsVerifying(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deriv-verify-token", {
         body: { token: apiToken, env: currentEnv },
       });
-
       if (fnError || !data?.ok) {
         toast.error(data?.error || fnError?.message || "Verification failed");
         return;
       }
-
       toast.success(`Token verified! Account: ${data.loginid}`);
-
-      // Refresh stored connection
       const { data: conn } = await supabase
         .from("deriv_connections")
         .select("*")
         .eq("user_id", user?.id)
         .eq("env", currentEnv)
         .single();
-
       setStoredConnection(conn);
-
-      // Now connect with the Deriv API
       await handleTokenConnect();
     } catch (e: any) {
       toast.error(e.message || "Verification failed");
@@ -102,26 +96,18 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   };
 
   const handleTokenConnect = async () => {
-    if (!apiToken.trim()) {
-      toast.error("Please enter your API token");
-      return;
-    }
-
-    if (apiToken.length < 10) {
-      toast.error("Invalid token format");
-      return;
-    }
+    if (!apiToken.trim()) { toast.error("Please enter your API token"); return; }
+    if (apiToken.length < 10) { toast.error("Invalid token format"); return; }
 
     setIsConnecting(true);
     try {
       const balanceResult = await connect(apiToken);
       toast.success(`Connected as ${balanceResult.loginid}`);
+      setStoredSession(balanceResult.loginid ?? "");
 
-      // Save to trading_accounts if requested
       if (saveToAccount && user) {
         setIsSaving(true);
         const label = accountLabel || `Deriv ${balanceResult.loginid}`;
-
         const { error: saveError } = await supabase.from("trading_accounts").insert({
           user_id: user.id,
           broker: "deriv",
@@ -132,7 +118,6 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
           connection_status: "connected",
           is_virtual: balanceResult.loginid?.startsWith("VRTC"),
         });
-
         if (saveError) {
           console.error("Failed to save account:", saveError);
           toast.error("Connected but failed to save account");
@@ -141,7 +126,6 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         }
         setIsSaving(false);
       }
-
       onConnected?.(balanceResult);
     } catch (e: any) {
       toast.error(e.message || "Connection failed");
@@ -150,82 +134,74 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
     }
   };
 
-  const oauthPopupRef = useRef<Window | null>(null);
-  const [oauthCooldown, setOauthCooldown] = useState(0);
-
-  // Cooldown timer for OAuth
-  useEffect(() => {
-    const checkCooldown = () => {
-      const until = localStorage.getItem("botvio_oauth_cooldown_until");
-      if (!until) { setOauthCooldown(0); return; }
-      const remaining = Math.max(0, Math.ceil((parseInt(until, 10) - Date.now()) / 1000));
-      setOauthCooldown(remaining);
-      if (remaining <= 0) localStorage.removeItem("botvio_oauth_cooldown_until");
-    };
-    checkCooldown();
-    const id = setInterval(checkCooldown, 1000);
-    return () => clearInterval(id);
-  }, []);
-
   const handleOAuthConnect = () => {
-    // Prevent rapid re-clicks (Deriv blocks these)
-    if (oauthCooldown > 0) {
-      toast.warning(`Please wait ${oauthCooldown}s before trying again`);
-      return;
-    }
-    // Close any existing popup
-    if (oauthPopupRef.current && !oauthPopupRef.current.closed) {
-      oauthPopupRef.current.focus();
-      toast.info("OAuth window is already open");
+    // Mutex + cooldown check
+    if (!canLogin) {
+      if (loginInProgress) {
+        // Focus existing popup if still open
+        if (oauthPopupRef.current && !oauthPopupRef.current.closed) {
+          oauthPopupRef.current.focus();
+          toast.info("OAuth window is already open");
+        } else {
+          toast.warning("Login in progress, please wait...");
+        }
+        return;
+      }
+      toast.warning(`Please wait ${cooldownRemaining}s before trying again`);
       return;
     }
 
-    // Set 60s cooldown
-    localStorage.setItem("botvio_oauth_cooldown_until", String(Date.now() + 60000));
-    setOauthCooldown(60);
+    // Acquire mutex
+    if (!acquireLogin()) return;
 
     const oauthUrl = buildDerivOAuthUrl();
     const w = window.open(oauthUrl, "deriv_oauth", "width=600,height=700,popup=yes");
     if (!w || w.closed) {
-      // Don't navigate away - it causes session loss and the "blink" issue
-      localStorage.removeItem("botvio_oauth_cooldown_until");
-      setOauthCooldown(0);
-      toast.error("Popup was blocked. Please allow popups for this site, or use the API Token method instead.");
+      releaseLogin(false);
+      toast.error("Popup was blocked. Please allow popups or use the API Token method.");
       return;
     }
     oauthPopupRef.current = w;
     toast.info("Complete the login in the popup window");
+
+    // Watch for popup close (user cancelled)
+    const pollId = setInterval(() => {
+      if (w.closed) {
+        clearInterval(pollId);
+        // Don't release mutex here — the callback page handles success.
+        // But if no callback arrived in 5s, release as failure.
+        setTimeout(() => {
+          if (loginInProgress) {
+            releaseLogin(false);
+          }
+        }, 5000);
+      }
+    }, 1000);
   };
 
   const handleDisconnect = async () => {
     disconnect();
+    clearStoredSession();
     setApiToken("");
-
-    // Update database
     if (user) {
       await supabase
         .from("deriv_connections")
         .update({ is_connected: false })
         .eq("user_id", user.id)
         .eq("env", currentEnv);
-
       setStoredConnection(null);
     }
-
     toast.info("Disconnected from Deriv");
   };
 
   const handleHealthCheck = async () => {
     if (!user) return;
-    
     setIsVerifying(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deriv-health-check", {
         body: { env: currentEnv },
       });
-
       if (fnError || !data?.ok) {
-        // Handle NO_CONNECTION gracefully
         if (data?.code === "NO_CONNECTION") {
           toast.warning("No saved connection. Please verify your token first.");
         } else {
@@ -233,22 +209,18 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         }
         return;
       }
-
       const result = data.results?.[0];
       if (result?.is_connected) {
         toast.success("Connection is healthy!");
       } else {
         toast.warning(result?.last_error || "Connection needs re-verification");
       }
-      
-      // Refresh stored connection
       const { data: conn } = await supabase
         .from("deriv_connections")
         .select("*")
         .eq("user_id", user.id)
         .eq("env", currentEnv)
         .single();
-      
       setStoredConnection(conn);
     } catch (e: any) {
       toast.error(e.message || "Health check failed");
@@ -266,6 +238,12 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   };
 
   const status = getConnectionStatus();
+  const oauthButtonDisabled = !canLogin;
+  const oauthButtonText = loginInProgress
+    ? "Logging in..."
+    : cooldownRemaining > 0
+    ? `Wait ${cooldownRemaining}s before retrying`
+    : "Continue with Deriv";
 
   return (
     <Card className="glass-card">
@@ -310,13 +288,11 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
           </div>
         </div>
         
-        {/* Environment Info */}
         <div className="mt-2 p-2 rounded bg-muted/50 text-xs text-muted-foreground">
           <p>App ID: <strong>{derivConfig.appId}</strong> | Domain: <strong>{derivConfig.baseDomain}</strong></p>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Stored Connection Info */}
         {storedConnection && (
           <div className="mb-4 p-3 rounded-lg bg-muted/30 border">
             <div className="flex items-center justify-between">
@@ -341,7 +317,6 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
 
         {authorized ? (
           <div className="space-y-4">
-            {/* Connected State */}
             <div className="p-4 rounded-lg bg-success/10 border border-success/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -363,7 +338,6 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                 </div>
               </div>
             </div>
-
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={handleDisconnect}>
                 <WifiOff className="h-4 w-4 mr-2" />
@@ -423,7 +397,6 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                         disabled={isConnecting || isVerifying}
                       />
                     </div>
-
                     <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -447,15 +420,9 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                     disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
                   >
                     {isVerifying ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Verifying...
-                      </>
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Verifying...</>
                     ) : (
-                      <>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Verify Token
-                      </>
+                      <><CheckCircle className="h-4 w-4 mr-2" />Verify Token</>
                     )}
                   </Button>
                   <Button
@@ -464,15 +431,9 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                     disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
                   >
                     {isConnecting || loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Connecting...
-                      </>
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Connecting...</>
                     ) : (
-                      <>
-                        <Wifi className="h-4 w-4 mr-2" />
-                        Connect
-                      </>
+                      <><Wifi className="h-4 w-4 mr-2" />Connect</>
                     )}
                   </Button>
                 </div>
@@ -481,21 +442,10 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   <p className="font-medium mb-2">How to get your API Token:</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
                     <li>
-                      <a
-                        href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
+                      <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         Log in to Deriv
-                      </a>{" "}
-                      or{" "}
-                      <a
-                        href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
+                      </a>{" "}or{" "}
+                      <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         Create a free demo account
                       </a>
                     </li>
@@ -503,12 +453,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                     <li>Create a token with <strong>Trade</strong> and <strong>Read</strong> permissions</li>
                     <li>Copy and paste the token above</li>
                   </ol>
-                  <a
-                    href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-primary mt-2 hover:underline"
-                  >
+                  <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary mt-2 hover:underline">
                     Get your Demo API Token <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
@@ -540,9 +485,16 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   </div>
                 </div>
 
-                <Button className="w-full" onClick={handleOAuthConnect} disabled={oauthCooldown > 0}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  {oauthCooldown > 0 ? `Wait ${oauthCooldown}s before retrying` : "Continue with Deriv"}
+                <Button
+                  className="w-full"
+                  onClick={handleOAuthConnect}
+                  disabled={oauthButtonDisabled}
+                >
+                  {loginInProgress ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{oauthButtonText}</>
+                  ) : (
+                    <><ExternalLink className="h-4 w-4 mr-2" />{oauthButtonText}</>
+                  )}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
