@@ -384,29 +384,46 @@ export class DerivWebSocketService {
         console.log(`[SETTLED] contract_id=${c.contract_id} profit=${c.profit} sell_price=${c.sell_price} status=${update.status}`);
         
         // Force balance refresh after settlement
-        // Use subscribe: 0 to avoid "already subscribed" errors
-        const refreshBalanceNow = () => {
+        // Re-subscribe to balance to ensure we get the updated value
+        const refreshBalanceNow = async () => {
           if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-          this.send({ balance: 1, account: "current" }).then((res: any) => {
+          try {
+            // Use subscribe: 1 to re-establish subscription AND get fresh value
+            const res: any = await this.send({ balance: 1, account: "current", subscribe: 1 }, 10000);
             if (res?.balance) {
               const freshBal: DerivBalance = {
                 balance: res.balance.balance,
                 currency: res.balance.currency,
                 loginid: res.balance.loginid,
               };
+              console.log(`[BALANCE] post-settlement refresh: ${this.lastBalance?.balance} -> ${freshBal.balance} ${freshBal.currency}`);
               this.lastBalance = freshBal;
               this.balanceListeners.forEach((l) => l(freshBal));
-              console.log(`[BALANCE] post-settlement: ${freshBal.balance} ${freshBal.currency}`);
             }
-          }).catch((e) => {
-            console.warn(`[BALANCE] refresh failed:`, e);
-          });
+          } catch (e) {
+            // If subscribe fails (already subscribed), try without subscribe
+            try {
+              const res2: any = await this.send({ balance: 1, account: "current" }, 10000);
+              if (res2?.balance) {
+                const freshBal: DerivBalance = {
+                  balance: res2.balance.balance,
+                  currency: res2.balance.currency,
+                  loginid: res2.balance.loginid,
+                };
+                console.log(`[BALANCE] post-settlement fallback: ${this.lastBalance?.balance} -> ${freshBal.balance} ${freshBal.currency}`);
+                this.lastBalance = freshBal;
+                this.balanceListeners.forEach((l) => l(freshBal));
+              }
+            } catch (e2) {
+              console.warn(`[BALANCE] all refresh attempts failed:`, e2);
+            }
+          }
         };
         
-        // Refresh at 500ms, 1.5s, and 3s to catch delayed payout credits
+        // Refresh at 500ms, 2s, and 4s to catch delayed payout credits
         setTimeout(refreshBalanceNow, 500);
-        setTimeout(refreshBalanceNow, 1500);
-        setTimeout(refreshBalanceNow, 3000);
+        setTimeout(refreshBalanceNow, 2000);
+        setTimeout(refreshBalanceNow, 4000);
       }
     }
   }
