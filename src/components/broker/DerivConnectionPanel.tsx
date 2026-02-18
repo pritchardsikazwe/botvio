@@ -185,9 +185,12 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
     setOauthCooldown(60);
 
     const oauthUrl = buildDerivOAuthUrl();
-    const w = window.open(oauthUrl, "deriv_oauth", "width=600,height=700");
-    if (!w) {
-      window.location.assign(oauthUrl);
+    const w = window.open(oauthUrl, "deriv_oauth", "width=600,height=700,popup=yes");
+    if (!w || w.closed) {
+      // Don't navigate away - it causes session loss and the "blink" issue
+      localStorage.removeItem("botvio_oauth_cooldown_until");
+      setOauthCooldown(0);
+      toast.error("Popup was blocked. Please allow popups for this site, or use the API Token method instead.");
       return;
     }
     oauthPopupRef.current = w;
