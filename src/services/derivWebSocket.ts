@@ -57,6 +57,7 @@ export class DerivWebSocketService {
   private balanceListeners = new Set<Listener<DerivBalance>>();
 
   private tickSubscriptionBySymbol = new Map<string, string>();
+  private activeContractSubscriptions = new Set<number>(); // Track contract IDs for re-subscribe on reconnect
 
   // Rate limiting protection
   private lastTickRequestTime = 0;
@@ -239,6 +240,7 @@ export class DerivWebSocketService {
     this.clearReconnectTimer();
     this.clearPingTimer();
     this.tickSubscriptionBySymbol.clear();
+    this.activeContractSubscriptions.clear();
     this.token = null;
     this.loginid = null;
     this.lastBalance = null;
@@ -266,8 +268,19 @@ export class DerivWebSocketService {
         if (this.token) {
           console.log("[RECONNECT] Re-authorizing with stored token (no new OAuth)");
           await this.authorize(this.token);
+          // Re-subscribe to tick streams
           for (const [symbol] of this.tickSubscriptionBySymbol.entries()) {
             await this.subscribeTicks(symbol);
+          }
+          // Re-subscribe to active contract streams (critical for Rise/Fall, Multipliers, etc.)
+          for (const contractId of this.activeContractSubscriptions) {
+            console.log(`[RECONNECT] Re-subscribing to contract ${contractId}`);
+            try {
+              await this.send({ proposal_open_contract: 1, contract_id: contractId, subscribe: 1 }, 15000);
+            } catch (e) {
+              console.warn(`[RECONNECT] Failed to re-subscribe contract ${contractId}:`, e);
+              this.activeContractSubscriptions.delete(contractId);
+            }
           }
         }
       } catch {
@@ -379,6 +392,8 @@ export class DerivWebSocketService {
 
       // Auto-forget subscription on settlement and force balance refresh
       if (isSettled) {
+        // Remove from active contract tracking
+        this.activeContractSubscriptions.delete(c.contract_id);
         const subId = (data as any).subscription?.id;
         if (subId) {
           this.send({ forget: subId }).catch(() => {});
@@ -414,6 +429,11 @@ export class DerivWebSocketService {
         setTimeout(refreshBalanceNow, 8000);
       }
     }
+  }
+
+  /** Track a contract ID for re-subscription on reconnect */
+  trackContractSubscription(contractId: number) {
+    this.activeContractSubscriptions.add(contractId);
   }
 
   private ensureOpen() {
