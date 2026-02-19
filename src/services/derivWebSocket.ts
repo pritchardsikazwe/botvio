@@ -268,6 +268,13 @@ export class DerivWebSocketService {
         if (this.token) {
           console.log("[RECONNECT] Re-authorizing with stored token (no new OAuth)");
           await this.authorize(this.token);
+          // Re-subscribe to balance stream (CRITICAL - without this, balance stops updating after reconnect)
+          try {
+            console.log("[RECONNECT] Re-subscribing to balance stream");
+            await this.send({ balance: 1, account: "current", subscribe: 1 }, 15000);
+          } catch (e) {
+            console.warn("[RECONNECT] Failed to re-subscribe balance:", e);
+          }
           // Re-subscribe to tick streams
           for (const [symbol] of this.tickSubscriptionBySymbol.entries()) {
             await this.subscribeTicks(symbol);
