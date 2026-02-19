@@ -538,8 +538,10 @@ function waitResult(reason: string, ticks?: number[]): SignalResult {
 
 // ── Engine dispatcher ───────────────────────────────────────────────
 
+import { ticksDigitEngine, ticksEngine } from "./ticksDigitEngine";
+
 export type EngineType = "rise_fall" | "higher_lower" | "even_odd" | "over_under" |
-  "match_differ" | "boom_crash" | "accumulators" | "multipliers" | "turbo";
+  "match_differ" | "boom_crash" | "accumulators" | "multipliers" | "turbo" | "ticks";
 
 export function runEngine(type: EngineType, ticks: number[]): SignalResult {
   switch (type) {
@@ -552,6 +554,7 @@ export function runEngine(type: EngineType, ticks: number[]): SignalResult {
     case "accumulators": return accumulatorsEngine(ticks);
     case "multipliers": return multipliersEngine(ticks);
     case "turbo": return turboEngine(ticks);
+    case "ticks": return ticksEngine(ticks);
     default: return waitResult("Unknown engine type");
   }
 }

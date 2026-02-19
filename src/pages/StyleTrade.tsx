@@ -133,7 +133,11 @@ const StyleTrade = () => {
     }
   }, [lastTick, selectedSymbol]);
 
-  // Listen for contract updates to settle trades in real-time
+  // Refs for settlement handler (declared after addLog below, initialized lazily)
+  const addLogRef = useRef<typeof addLog | null>(null);
+  const styleIdRef = useRef(styleId);
+  useEffect(() => { styleIdRef.current = styleId; }, [styleId]);
+
   useEffect(() => {
     if (!authorized) return;
     const unsub = onContractUpdate((update) => {
@@ -154,15 +158,20 @@ const StyleTrade = () => {
       if (isSettled) {
         const won = update.status === "won" || (update.profit !== undefined && update.profit > 0);
         const pnl = update.profit ?? 0;
-        setRiskSession(prev => recordTradeResult(prev, won, pnl, styleId || ""));
-        addLog(
+        setRiskSession(prev => recordTradeResult(prev, won, pnl, styleIdRef.current || ""));
+        addLogRef.current?.(
           won ? "success" : "error",
           won ? `🎉 Trade WON +$${Math.abs(pnl).toFixed(2)}` : `❌ Trade LOST -$${Math.abs(pnl).toFixed(2)}`
         );
+
+        // Force multiple balance refreshes after settlement (same pattern that makes Ticks work)
+        setTimeout(() => refreshBalance().catch(() => {}), 300);
+        setTimeout(() => refreshBalance().catch(() => {}), 1500);
+        setTimeout(() => refreshBalance().catch(() => {}), 4000);
       }
     });
     return () => { unsub(); };
-  }, [authorized, onContractUpdate, styleId]);
+  }, [authorized, onContractUpdate, refreshBalance]);
 
   // Run signal engine every ~2 seconds
   useEffect(() => {
@@ -254,6 +263,9 @@ const StyleTrade = () => {
       message,
     }, ...prev].slice(0, 50));
   }, []);
+
+  // Now that addLog is declared, keep ref updated for settlement handler
+  useEffect(() => { addLogRef.current = addLog; }, [addLog]);
 
   const currentContractConfig = style?.contractTypes.find(c => c.id === activeContract);
 
