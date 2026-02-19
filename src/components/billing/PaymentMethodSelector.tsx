@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Bitcoin, Check, ArrowRight, Wallet, Copy, Upload } from "lucide-react";
+import { Bitcoin, Check, ArrowRight, Wallet, Copy, Upload, Phone } from "lucide-react";
 
 const CRYPTO_WALLETS = [
   {
@@ -21,6 +21,25 @@ const CRYPTO_WALLETS = [
     network: "ERC20",
     address: "0x4CdDb5A96d2c9c2A2B1c97878F74126e11C616a6",
     icon: "₮",
+  },
+];
+
+const MOBILE_MONEY = [
+  {
+    key: "airtel_money",
+    label: "Airtel Money",
+    network: "Airtel",
+    number: "+260777204440",
+    name: "Pritchard Sikazwe",
+    icon: "📱",
+  },
+  {
+    key: "mtn_money",
+    label: "MTN Mobile Money",
+    network: "MTN",
+    number: "+260966284085",
+    name: "Pritchard Sikazwe",
+    icon: "📱",
   },
 ];
 
@@ -59,6 +78,7 @@ export const PaymentMethodSelector = ({
   };
 
   const activeWallet = CRYPTO_WALLETS.find(w => w.key === selectedWallet);
+  const activeMobile = MOBILE_MONEY.find(m => m.key === selectedWallet);
 
   return (
     <Card className="glass-card">
