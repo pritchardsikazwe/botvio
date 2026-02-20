@@ -294,6 +294,7 @@ const StyleTrade = () => {
       const isMultiplier = ct === "MULTUP" || ct === "MULTDOWN";
       const isAccu = ct === "ACCU";
       const isDigit = ct.startsWith("DIGIT");
+      const isTicksBased = currentContractConfig?.tickDuration === true;
       const needsBarrier = ct === "DIGITMATCH" || ct === "DIGITDIFF" || ct === "DIGITOVER" || ct === "DIGITUNDER";
 
       const proposalParams: any = {
@@ -311,7 +312,7 @@ const StyleTrade = () => {
       } else if (isAccu) {
         proposalParams.growth_rate = 0.01;
         if (takeProfit) proposalParams.limit_order = { take_profit: parseFloat(takeProfit) };
-      } else if (isDigit) {
+      } else if (isDigit || isTicksBased) {
         const tickDur = Math.max(1, Math.min(10, parseInt(duration)));
         proposalParams.duration = tickDur;
         proposalParams.duration_unit = "t";
@@ -496,6 +497,7 @@ const StyleTrade = () => {
                     const isMultiplierType = ct.id === "multipliers";
                     const isAccuType = ct.id === "accumulators";
                     const isDigitType = ct.id === "even_odd" || ct.id === "over_under" || ct.id === "match_differ";
+                    const isTicksType = ct.id === "ticks";
                     const hidesDuration = isMultiplierType || isAccuType;
 
                     const guideMap: Record<string, { title: string; steps: string[] }> = {
@@ -578,6 +580,17 @@ const StyleTrade = () => {
                           "4. Ideal for quick scalping on volatile instruments",
                         ],
                       },
+                      ticks: {
+                        title: "Ticks Momentum Guide",
+                        steps: [
+                          "1. Select a synthetic instrument (e.g. Volatility 100)",
+                          "2. Set stake and duration in TICKS (3-10)",
+                          "3. Watch the signal panel — it detects tick momentum bursts",
+                          "4. Click 'Rise' when 5+ ticks accelerate upward",
+                          "5. Click 'Fall' when 5+ ticks accelerate downward",
+                          "6. Trade settles after your chosen number of ticks",
+                        ],
+                      },
                     };
                     const guide = guideMap[ct.id];
 
@@ -613,12 +626,12 @@ const StyleTrade = () => {
                           {!hidesDuration && (
                             <div className="space-y-1.5">
                               <Label className="text-xs">
-                                {isDigitType ? "Duration (ticks, 1-10)" : "Duration (minutes)"}
+                                {isDigitType || isTicksType ? "Duration (ticks, 1-10)" : "Duration (minutes)"}
                               </Label>
                               <Input
                                 type="number"
-                                min={isDigitType ? "1" : "1"}
-                                max={isDigitType ? "10" : "1440"}
+                                min={(isDigitType || isTicksType) ? "1" : "1"}
+                                max={(isDigitType || isTicksType) ? "10" : "1440"}
                                 value={duration}
                                 onChange={e => setDuration(e.target.value)}
                               />

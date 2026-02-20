@@ -153,6 +153,16 @@ const TURBO: ContractTypeConfig = {
   ],
 };
 
+const TICKS_RISE_FALL: ContractTypeConfig = {
+  id: "ticks",
+  label: "Ticks Rise/Fall",
+  tickDuration: true,
+  buyButtons: [
+    { label: "Rise", contractType: "CALL", variant: "success" },
+    { label: "Fall", contractType: "PUT", variant: "destructive" },
+  ],
+};
+
 // ── Styles ──────────────────────────────────────────────────────────
 export const TRADING_STYLES: TradingStyle[] = [
   {
@@ -216,6 +226,15 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Advanced",
     tempoTag: "Speed",
     contractTypes: [TURBO],
+    instruments: ALL_INSTRUMENTS,
+  },
+  {
+    id: "ticks",
+    title: "Ticks",
+    description: "Hauza Sniper — Tick-by-tick momentum scalping on synthetic indices.",
+    riskTag: "Intermediate",
+    tempoTag: "Fast",
+    contractTypes: [TICKS_RISE_FALL],
     instruments: ALL_INSTRUMENTS,
   },
 ];
