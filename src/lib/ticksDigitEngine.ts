@@ -202,30 +202,50 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
 
   const confidence = Math.round(100 * clamp01(confidenceRaw));
 
-  // Contract choice logic
+  // Contract choice logic — improved v2
   let contract = "DIFFERS";
   let barrier = freq.hotDigit;
   let strategy = "Digit Mean Reversion";
   const reasonParts: string[] = [];
 
-  // Streak exhaustion takes priority when run is long
-  if (run.runLen >= 3) {
-    strategy = "Streak Exhaustion";
+  // Get last digit for Markov context
+  const lastDigit = digits[digits.length - 1];
+
+  // ── MATCH via Markov transition (primary MATCH signal) ──
+  // If a specific digit frequently follows the current last digit, MATCH it
+  if (mk.transitionProb >= 0.17 && mk.nextLikelyDigit !== lastDigit) {
+    contract = "MATCH";
+    barrier = mk.nextLikelyDigit;
+    strategy = "Markov Transition Match";
+    reasonParts.push(`After digit ${lastDigit}, digit ${mk.nextLikelyDigit} appears ${(mk.transitionProb * 100).toFixed(0)}%`);
+    reasonParts.push(`Markov edge: +${((mk.transitionProb - 0.10) * 100).toFixed(1)}% above baseline`);
+  }
+  // ── Streak exhaustion → DIFFERS ──
+  else if (run.runLen >= 3) {
+    contract = "DIFFERS";
     barrier = run.runDigit;
+    strategy = "Streak Exhaustion";
     reasonParts.push(`Run ${run.runDigit} ×${run.runLen}`);
     reasonParts.push(`Streak score: ${(run.streakScore * 100).toFixed(0)}%`);
-  } else {
-    reasonParts.push(`Hot digit: ${freq.hotDigit} (z=${freq.zMax.toFixed(2)})`);
-    if (freq.freqScore > 0.5) {
-      reasonParts.push(`Strong frequency divergence`);
-    }
   }
-
-  // Markov-based MATCH (rare, high confidence only)
-  if (confidence >= 85 && mk.nextLikelyDigit === barrier && run.runLen === 1 && mk.transitionProb > 0.2) {
+  // ── Hot digit mean reversion → DIFFERS ──
+  else if (freq.freqScore > 0.3) {
+    contract = "DIFFERS";
+    barrier = freq.hotDigit;
+    strategy = "Digit Mean Reversion";
+    reasonParts.push(`Hot digit: ${freq.hotDigit} (z=${freq.zMax.toFixed(2)})`);
+    reasonParts.push(`Frequency divergence: ${(freq.freqScore * 100).toFixed(0)}%`);
+  }
+  // ── Self-repeat Markov → MATCH ──
+  else if (mk.transitionProb >= 0.14 && run.runLen >= 2) {
     contract = "MATCH";
-    strategy = "Transition Repeat (Markov)";
-    reasonParts.push(`Markov: digit ${mk.nextLikelyDigit} likely (${(mk.transitionProb * 100).toFixed(0)}%)`);
+    barrier = lastDigit;
+    strategy = "Self-Repeat (Markov)";
+    reasonParts.push(`Digit ${lastDigit} self-repeats ${(mk.transitionProb * 100).toFixed(0)}% (streak ×${run.runLen})`);
+  }
+  // ── Default: DIFFERS hot digit ──
+  else {
+    reasonParts.push(`Hot digit: ${freq.hotDigit} (z=${freq.zMax.toFixed(2)})`);
   }
 
   // Add volatility note
