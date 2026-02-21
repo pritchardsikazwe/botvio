@@ -213,7 +213,7 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
 
   // ── MATCH via Markov transition (primary MATCH signal) ──
   // If a specific digit frequently follows the current last digit, MATCH it
-  if (mk.transitionProb >= 0.17 && mk.nextLikelyDigit !== lastDigit) {
+  if (mk.transitionProb >= 0.15 && mk.nextLikelyDigit !== lastDigit) {
     contract = "MATCH";
     barrier = mk.nextLikelyDigit;
     strategy = "Markov Transition Match";
@@ -237,7 +237,7 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
     reasonParts.push(`Frequency divergence: ${(freq.freqScore * 100).toFixed(0)}%`);
   }
   // ── Self-repeat Markov → MATCH ──
-  else if (mk.transitionProb >= 0.14 && run.runLen >= 2) {
+  else if (mk.transitionProb >= 0.12 && run.runLen >= 2) {
     contract = "MATCH";
     barrier = lastDigit;
     strategy = "Self-Repeat (Markov)";
@@ -253,8 +253,8 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
     reasonParts.push(`⚠ Unusual volatility regime`);
   }
 
-  // Determine action
-  const action: SignalDirection = confidence >= 70 ? "DIFFER" : "WAIT";
+  // Determine action — lower threshold for more signals
+  const action: SignalDirection = confidence >= 55 ? "DIFFER" : "WAIT";
 
   // Probability estimate
   const baseline = contract === "DIFFERS" ? 0.9 : 0.1;
@@ -265,7 +265,7 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
 
   // Map contract to signal direction
   let signalDir: SignalDirection = "WAIT";
-  if (action !== "WAIT") {
+  if (confidence >= 55) {
     if (contract === "DIFFERS") signalDir = "DIFFER";
     else if (contract === "MATCH") signalDir = "MATCH";
   }
@@ -344,7 +344,7 @@ export function ticksEngine(prices: number[]): SignalResult {
   
   const conf = Math.round(40 + dirScore * 35 + Math.min(Math.abs(accel), 1) * 25);
   
-  if (accel > 0.3 && dirScore >= 0.6 && mom > 0.2) {
+  if (accel > 0.2 && dirScore >= 0.5 && mom > 0.15) {
     return {
       signal: "RISE",
       confidence: Math.min(conf, 95),
@@ -360,7 +360,7 @@ export function ticksEngine(prices: number[]): SignalResult {
     };
   }
   
-  if (accel < -0.3 && dirScore >= 0.6 && mom < -0.2) {
+  if (accel < -0.2 && dirScore >= 0.5 && mom < -0.15) {
     return {
       signal: "FALL",
       confidence: Math.min(conf, 95),
