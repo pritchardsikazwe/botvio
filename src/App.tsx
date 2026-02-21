@@ -38,6 +38,16 @@ import NotFound from "./pages/NotFound";
 import DerivCallback from "./pages/DerivCallback";
 import StyleTrade from "./pages/StyleTrade";
 import Trading from "./pages/Trading";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import CountryPage from "./pages/CountryPage";
+import Docs from "./pages/Docs";
+import FAQ from "./pages/FAQ";
+import Whitepaper from "./pages/Whitepaper";
+import Testimonials from "./pages/Testimonials";
+import Press from "./pages/Press";
+import CaseStudies from "./pages/CaseStudies";
+import AuthoritySignals from "./pages/AuthoritySignals";
 import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 
@@ -104,6 +114,18 @@ const App = () => (
               <Route path="/auth/deriv/callback" element={<DerivCallback />} />
               <Route path="/trading" element={<Trading />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
+              <Route path="/trading" element={<Trading />} />
+              <Route path="/trade/style/:styleId" element={<StyleTrade />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/docs" element={<Docs />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/whitepaper" element={<Whitepaper />} />
+              <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/press" element={<Press />} />
+              <Route path="/case-studies" element={<CaseStudies />} />
+              <Route path="/authority-signals" element={<AuthoritySignals />} />
+              <Route path="/:country" element={<CountryPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -248,9 +248,11 @@ const StyleTrade = () => {
     }
   }, [currentSignal, autoMode]);
 
-  // Update risk session when balance changes
+  // Set initial stake from balance ONLY on first load — never override user's choice
+  const stakeInitialized = useRef(false);
   useEffect(() => {
-    if (balance?.balance) {
+    if (balance?.balance && !stakeInitialized.current) {
+      stakeInitialized.current = true;
       setStake(String(safeStake(balance.balance).toFixed(2)));
     }
   }, [balance?.balance]);
