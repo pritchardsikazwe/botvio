@@ -130,6 +130,23 @@ export const Header = () => {
                 Learn
               </Button>
 
+              <Button 
+                variant={location.pathname === '/blog' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/blog')}
+              >
+                Blog
+              </Button>
+
+              <Button 
+                variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/authority-signals')}
+              >
+                <Signal className="w-4 h-4 mr-1" />
+                Authority
+              </Button>
+
               {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -165,6 +182,32 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/affiliate')}>
                       <Gift className="w-4 h-4 mr-2" />
                       Affiliate Program
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Content & Resources</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => navigate('/docs')}>
+                      <GraduationCap className="w-4 h-4 mr-2" />
+                      Documentation
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/faq')}>
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      FAQ
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/whitepaper')}>
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Whitepaper
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/testimonials')}>
+                      <Users className="w-4 h-4 mr-2" />
+                      Testimonials
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/case-studies')}>
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Case Studies
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/press')}>
+                      <Send className="w-4 h-4 mr-2" />
+                      Press
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/billing')}>
@@ -238,6 +281,35 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/install')}>
                       <Download className="w-4 h-4 mr-2" />
                       Install App
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Resources</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => navigate('/blog')}>
+                      Blog
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
+                      <Signal className="w-4 h-4 mr-2" />
+                      Authority Signals
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/docs')}>
+                      <GraduationCap className="w-4 h-4 mr-2" />
+                      Documentation
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/faq')}>
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      FAQ
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/whitepaper')}>
+                      Whitepaper
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/testimonials')}>
+                      Testimonials
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/case-studies')}>
+                      Case Studies
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/press')}>
+                      Press
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
