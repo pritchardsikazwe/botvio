@@ -213,7 +213,7 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
 
   // ── MATCH via Markov transition (primary MATCH signal) ──
   // If a specific digit frequently follows the current last digit, MATCH it
-  if (mk.transitionProb >= 0.18 && mk.nextLikelyDigit !== lastDigit) {
+  if (mk.transitionProb >= 0.40 && mk.nextLikelyDigit !== lastDigit) {
     contract = "MATCH";
     barrier = mk.nextLikelyDigit;
     strategy = "Markov Transition Match";
@@ -229,7 +229,7 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
     reasonParts.push(`Streak score: ${(run.streakScore * 100).toFixed(0)}%`);
   }
   // ── Hot digit mean reversion → DIFFERS ──
-  else if (freq.freqScore > 0.3) {
+  else if (freq.freqScore > 0.25) {
     contract = "DIFFERS";
     barrier = freq.hotDigit;
     strategy = "Digit Mean Reversion";
@@ -237,7 +237,7 @@ export function ticksDigitEngine(prices: number[]): SignalResult & { digitFeatur
     reasonParts.push(`Frequency divergence: ${(freq.freqScore * 100).toFixed(0)}%`);
   }
   // ── Self-repeat Markov → MATCH ──
-  else if (mk.transitionProb >= 0.15 && run.runLen >= 2) {
+  else if (mk.transitionProb >= 0.27 && run.runLen >= 2) {
     contract = "MATCH";
     barrier = lastDigit;
     strategy = "Self-Repeat (Markov)";

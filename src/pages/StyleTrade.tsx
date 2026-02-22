@@ -198,12 +198,7 @@ const StyleTrade = () => {
 
       setCurrentSignal(result);
 
-      if (result.suggestedDuration) {
-        setDuration(String(result.suggestedDuration));
-      }
-      if (result.suggestedBarrier !== undefined) {
-        setDigit(String(result.suggestedBarrier));
-      }
+      // Do NOT auto-change duration or digit — user controls these manually
     }, 2000);
 
     return () => clearInterval(interval);
@@ -248,14 +243,14 @@ const StyleTrade = () => {
     }
   }, [currentSignal, autoMode]);
 
-  // Set initial stake from balance ONLY on first load — never override user's choice
+  // Set minimum default stake (0.35) — never auto-change, user controls it
   const stakeInitialized = useRef(false);
   useEffect(() => {
-    if (balance?.balance && !stakeInitialized.current) {
+    if (!stakeInitialized.current) {
       stakeInitialized.current = true;
-      setStake(String(safeStake(balance.balance).toFixed(2)));
+      setStake("0.35");
     }
-  }, [balance?.balance]);
+  }, []);
 
   const addLog = useCallback((type: LogEntry["type"], message: string) => {
     setLogs(prev => [{
