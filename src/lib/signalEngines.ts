@@ -362,7 +362,7 @@ export function digitsMatchDifferEngine(ticks: number[]): SignalResult {
   // ── MATCH logic: use Markov transition ──
   // If a digit frequently follows the current digit, MATCH it
   // Threshold: >18% transition probability (baseline is 10%)
-  if (bestTransProb >= 0.15 && bestTransDigit !== lastDigit) {
+  if (bestTransProb >= 0.18 && bestTransDigit !== lastDigit) {
     const edge = bestTransProb - 0.10;
     const conf = Math.round(58 + edge * 450);
     reasons.push(`After digit ${lastDigit}, digit ${bestTransDigit} appears ${(bestTransProb * 100).toFixed(0)}% of time`);
@@ -378,7 +378,7 @@ export function digitsMatchDifferEngine(ticks: number[]): SignalResult {
   }
 
   // Also MATCH if same digit has a self-transition >13% AND streak >= 2
-  if (transProbs[lastDigit] >= 0.13 && streak >= 2) {
+  if (transProbs[lastDigit] >= 0.15 && streak >= 2) {
     const edge = transProbs[lastDigit] - 0.10;
     const conf = Math.round(58 + edge * 400 + streak * 5);
     reasons.push(`Digit ${lastDigit} self-repeats ${(transProbs[lastDigit] * 100).toFixed(0)}% (streak ×${streak})`);
@@ -394,7 +394,7 @@ export function digitsMatchDifferEngine(ticks: number[]): SignalResult {
 
   // ── DIFFER logic: hot digit mean reversion ──
   // If a digit is overrepresented (>13%), it's likely to NOT appear next
-  if (hotP > 0.13) {
+  if (hotP > 0.14) {
     const edge = hotP - 0.10;
     const conf = Math.round(58 + edge * 400);
     reasons.push(`Digit ${hotDigit} overrepresented at ${(hotP * 100).toFixed(0)}% (expected 10%)`);
