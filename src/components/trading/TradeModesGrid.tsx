@@ -8,6 +8,8 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { StrategyGuidePanel } from "@/components/trading/StrategyGuidePanel";
 import { STRATEGY_GUIDES, TITLE_TO_MODE_KEY } from "@/lib/tradeModesStrategies";
+import { TradeTip } from "@/components/trading/TradeTip";
+import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 
 const TRADE_MODES = [
   {
@@ -19,7 +21,9 @@ const TRADE_MODES = [
     borderColor: "border-violet-500/30",
     iconColor: "text-violet-400",
     route: "/trade/style/digit-contracts",
-    guide: "Predict the last digit of the price. Choose Matches (digit = your pick), Differs (digit ≠ your pick), Over/Under (digit above/below threshold), or Even/Odd. Set your stake, pick a digit 0–9, choose duration in minutes, then tap your prediction button.",
+    guide: "Predict the last digit of the price. Choose Matches, Differs, Over/Under, or Even/Odd.",
+    tip: "Start with DIFFER — 90% baseline win rate. Use 5-tick duration for best results.",
+    disclaimer: "Digit trading outcomes are based on statistical probability, not certainty.",
   },
   {
     title: "Multipliers",
@@ -30,7 +34,9 @@ const TRADE_MODES = [
     borderColor: "border-blue-500/30",
     iconColor: "text-blue-400",
     route: "/trade/style/multipliers",
-    guide: "Trade with leverage (10x–1000x). Select a multiplier, set your stake, optionally set Stop Loss & Take Profit in USD. Tap Up or Down. Your profit/loss is multiplied. No expiry — close anytime.",
+    guide: "Trade with leverage (10x–1000x). Set stake, multiplier, SL/TP.",
+    tip: "Always set Stop Loss. Higher multipliers = higher risk. Start with 10x-50x.",
+    disclaimer: "Multipliers amplify both profits AND losses. You can lose your entire stake.",
   },
   {
     title: "Rise / Fall",
@@ -41,7 +47,9 @@ const TRADE_MODES = [
     borderColor: "border-emerald-500/30",
     iconColor: "text-emerald-400",
     route: "/trade/style/rise-fall-scalping",
-    guide: "Predict if the price will rise or fall within your chosen duration. Set stake, duration (minutes), then tap Rise or Fall. Payout is shown before you buy. Simple and fast for beginners.",
+    guide: "Predict if price rises or falls within your chosen duration.",
+    tip: "Best for trending markets. Use 3-5 minute durations for higher accuracy.",
+    disclaimer: "Past trends do not guarantee future direction.",
   },
   {
     title: "Higher / Lower",
@@ -52,7 +60,9 @@ const TRADE_MODES = [
     borderColor: "border-sky-500/30",
     iconColor: "text-sky-400",
     route: "/trade/style/synthetic-indices",
-    guide: "Predict if price will end higher or lower than a barrier price at contract expiry. Set stake, duration, then choose Higher or Lower. Good for ranging markets with clear support/resistance.",
+    guide: "Predict if price ends higher or lower than barrier at expiry.",
+    tip: "Look for clear support/resistance levels before entering.",
+    disclaimer: "Barrier-based contracts carry additional risk from price gaps.",
   },
   {
     title: "Boom / Crash",
@@ -63,7 +73,9 @@ const TRADE_MODES = [
     borderColor: "border-orange-500/30",
     iconColor: "text-orange-400",
     route: "/trade/style/boom-crash",
-    guide: "Trade Boom (sudden spike up) or Crash (sudden drop) indices. Use Rise/Fall contracts on Boom/Crash symbols. Timing is key — watch the tick stream and enter when you sense a spike is due.",
+    guide: "Catch sudden spikes on Boom/Crash indices.",
+    tip: "Patience is key — wait for spike droughts before entering.",
+    disclaimer: "Boom/Crash indices are highly volatile. Use small stakes.",
   },
   {
     title: "Ticks",
@@ -74,7 +86,9 @@ const TRADE_MODES = [
     borderColor: "border-pink-500/30",
     iconColor: "text-pink-400",
     route: "/trade/style/ticks",
-    guide: "Watch live price ticks and trade based on tick momentum. The engine detects 5-tick acceleration patterns and signals Rise or Fall. Set stake, duration in ticks (3-10), and execute when momentum aligns.",
+    guide: "Watch live ticks and trade based on momentum.",
+    tip: "Use 5-tick contracts. Watch for 3-tick directional alignment.",
+    disclaimer: "Tick trading is ultra-fast — results can vary significantly.",
   },
   {
     title: "Accumulators",
@@ -85,7 +99,9 @@ const TRADE_MODES = [
     borderColor: "border-teal-500/30",
     iconColor: "text-teal-400",
     route: "/trade/style/accumulators",
-    guide: "Your payout grows with each tick the price stays within a range. Set stake and optionally Take Profit. The contract auto-closes if price moves outside the accumulation range. Great for steady gains.",
+    guide: "Payout grows each tick price stays in range. Set Take Profit.",
+    tip: "Best during calm markets. Set Take Profit to lock in gains early.",
+    disclaimer: "Contract closes instantly if price moves outside range.",
   },
   {
     title: "Turbo",
@@ -96,7 +112,9 @@ const TRADE_MODES = [
     borderColor: "border-amber-500/30",
     iconColor: "text-amber-400",
     route: "/trade/style/turbo",
-    guide: "Very short duration contracts (1–5 minutes). Set stake, duration, and predict price direction. Fast execution, quick results. Best for traders who want rapid-fire trades with quick outcomes.",
+    guide: "Very short duration contracts (1–5 minutes).",
+    tip: "Enter after a period of consolidation for best breakout results.",
+    disclaimer: "Ultra-short durations have higher variance in outcomes.",
   },
 ];
 
@@ -114,6 +132,7 @@ export const TradeModesGrid = () => {
             </h2>
             <p className="text-sm text-muted-foreground mt-1">Choose your trading style and start executing</p>
           </div>
+          <DerivAffiliateButton label="Open Deriv Account" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {TRADE_MODES.map((mode) => (
@@ -124,7 +143,6 @@ export const TradeModesGrid = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
-              {/* Info tooltip */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button 
@@ -137,6 +155,7 @@ export const TradeModesGrid = () => {
                 <TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">
                   <p className="font-semibold mb-1">How to trade {mode.title}:</p>
                   <p>{mode.guide}</p>
+                  {mode.tip && <p className="mt-1 text-primary">💡 {mode.tip}</p>}
                 </TooltipContent>
               </Tooltip>
 
@@ -152,7 +171,7 @@ export const TradeModesGrid = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0 relative z-10">
-                <div className="flex flex-wrap gap-1 mb-3">
+                <div className="flex flex-wrap gap-1 mb-2">
                   {mode.badges.map((b) => (
                     <Badge
                       key={b}
@@ -163,7 +182,6 @@ export const TradeModesGrid = () => {
                     </Badge>
                   ))}
                 </div>
-                {/* Strategy Guide */}
                 {TITLE_TO_MODE_KEY[mode.title] && STRATEGY_GUIDES[TITLE_TO_MODE_KEY[mode.title]] && (
                   <StrategyGuidePanel guide={STRATEGY_GUIDES[TITLE_TO_MODE_KEY[mode.title]]} />
                 )}
@@ -173,6 +191,12 @@ export const TradeModesGrid = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+        
+        {/* Disclaimer */}
+        <div className="mt-4 space-y-2">
+          <TradeTip type="disclaimer" tip="⚠️ Trading binary options involves significant risk. You may lose some or all of your invested capital. Trade responsibly." />
+          <TradeTip type="tip" tip="💡 Start with a Demo account to practice risk-free. Use the demo token above to get started instantly." />
         </div>
       </div>
     </TooltipProvider>
