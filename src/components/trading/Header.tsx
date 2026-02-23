@@ -185,30 +185,34 @@ export const Header = () => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>Content & Resources</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => navigate('/docs')}>
-                      <GraduationCap className="w-4 h-4 mr-2" />
-                      Documentation
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/faq')}>
                       <MessageCircle className="w-4 h-4 mr-2" />
                       FAQ
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/whitepaper')}>
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      Whitepaper
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/testimonials')}>
                       <Users className="w-4 h-4 mr-2" />
                       Testimonials
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/case-studies')}>
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      Case Studies
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/press')}>
                       <Send className="w-4 h-4 mr-2" />
                       Press
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/docs')}>
+                          <GraduationCap className="w-4 h-4 mr-2" />
+                          Documentation
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/whitepaper')}>
+                          <BarChart3 className="w-4 h-4 mr-2" />
+                          Whitepaper
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/case-studies')}>
+                          <BarChart3 className="w-4 h-4 mr-2" />
+                          Case Studies
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/billing')}>
                       <CreditCard className="w-4 h-4 mr-2" />
@@ -291,22 +295,12 @@ export const Header = () => {
                       <Signal className="w-4 h-4 mr-2" />
                       Authority Signals
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/docs')}>
-                      <GraduationCap className="w-4 h-4 mr-2" />
-                      Documentation
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/faq')}>
                       <MessageCircle className="w-4 h-4 mr-2" />
                       FAQ
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/whitepaper')}>
-                      Whitepaper
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/testimonials')}>
                       Testimonials
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/case-studies')}>
-                      Case Studies
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/press')}>
                       Press
