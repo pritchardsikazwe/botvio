@@ -185,9 +185,40 @@ export const TradeModesGrid = () => {
                 {TITLE_TO_MODE_KEY[mode.title] && STRATEGY_GUIDES[TITLE_TO_MODE_KEY[mode.title]] && (
                   <StrategyGuidePanel guide={STRATEGY_GUIDES[TITLE_TO_MODE_KEY[mode.title]]} />
                 )}
-                <div className="flex items-center text-[10px] text-muted-foreground group-hover:text-primary transition-colors mt-2">
-                  Trade Now <ArrowRight className="h-3 w-3 ml-1" />
+                
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-1.5 mt-3">
+                  <button
+                    className="px-2 py-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary text-[10px] font-semibold transition-colors border border-primary/20"
+                    onClick={(e) => { e.stopPropagation(); navigate(mode.route); }}
+                  >
+                    Intermediate
+                  </button>
+                  <button
+                    className="px-2 py-1.5 rounded-lg bg-warning/20 hover:bg-warning/30 text-warning text-[10px] font-semibold transition-colors border border-warning/20"
+                    onClick={(e) => { e.stopPropagation(); navigate(mode.route); }}
+                  >
+                    ⚡ Fast
+                  </button>
+                  <button
+                    className="px-2 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-semibold transition-colors border border-emerald-500/20"
+                    onClick={(e) => { e.stopPropagation(); navigate(mode.route); }}
+                  >
+                    🖐 Manual
+                  </button>
+                  <button
+                    className="px-2 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-400 text-[10px] font-semibold transition-colors border border-sky-500/20"
+                    onClick={(e) => { e.stopPropagation(); navigate(mode.route + "?mode=auto"); }}
+                  >
+                    🤖 Auto
+                  </button>
                 </div>
+                <button
+                  className="w-full mt-1.5 px-2 py-1.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-[10px] font-semibold transition-colors border border-violet-500/20"
+                  onClick={(e) => { e.stopPropagation(); navigate(mode.route + "?demo=true"); }}
+                >
+                  🎮 Demo
+                </button>
               </CardContent>
             </Card>
           ))}
