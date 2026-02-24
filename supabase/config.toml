@@ -65,3 +65,18 @@ verify_jwt = false
 
 [functions.sitemap-xml]
 verify_jwt = false
+
+[functions.ea-register]
+verify_jwt = false
+
+[functions.ea-heartbeat]
+verify_jwt = false
+
+[functions.provider-event]
+verify_jwt = false
+
+[functions.follower-commands]
+verify_jwt = false
+
+[functions.follower-report]
+verify_jwt = false

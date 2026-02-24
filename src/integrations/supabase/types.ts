@@ -613,6 +613,80 @@ export type Database = {
           },
         ]
       }
+      copy_links: {
+        Row: {
+          copy_sl_tp: boolean
+          created_at: string
+          fixed_lot: number | null
+          follower_account_id: string
+          id: string
+          lot_mode: string
+          max_lot: number
+          max_trades: number
+          provider_account_id: string
+          risk_mult: number
+          slippage_points: number
+          status: string
+        }
+        Insert: {
+          copy_sl_tp?: boolean
+          created_at?: string
+          fixed_lot?: number | null
+          follower_account_id: string
+          id?: string
+          lot_mode?: string
+          max_lot?: number
+          max_trades?: number
+          provider_account_id: string
+          risk_mult?: number
+          slippage_points?: number
+          status?: string
+        }
+        Update: {
+          copy_sl_tp?: boolean
+          created_at?: string
+          fixed_lot?: number | null
+          follower_account_id?: string
+          id?: string
+          lot_mode?: string
+          max_lot?: number
+          max_trades?: number
+          provider_account_id?: string
+          risk_mult?: number
+          slippage_points?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copy_links_follower_account_id_fkey"
+            columns: ["follower_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "copy_links_follower_account_id_fkey"
+            columns: ["follower_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "copy_links_provider_account_id_fkey"
+            columns: ["provider_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "copy_links_provider_account_id_fkey"
+            columns: ["provider_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copy_subscriptions: {
         Row: {
           copy_mode: string | null
@@ -666,6 +740,47 @@ export type Database = {
             columns: ["subscriber_trading_account_id"]
             isOneToOne: false
             referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      copy_trade_map: {
+        Row: {
+          copy_link_id: string
+          created_at: string
+          follower_trade_id: string | null
+          id: string
+          last_error: string | null
+          provider_trade_id: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          copy_link_id: string
+          created_at?: string
+          follower_trade_id?: string | null
+          id?: string
+          last_error?: string | null
+          provider_trade_id: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          copy_link_id?: string
+          created_at?: string
+          follower_trade_id?: string | null
+          id?: string
+          last_error?: string | null
+          provider_trade_id?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copy_trade_map_copy_link_id_fkey"
+            columns: ["copy_link_id"]
+            isOneToOne: false
+            referencedRelation: "copy_links"
             referencedColumns: ["id"]
           },
         ]
@@ -866,6 +981,51 @@ export type Database = {
             columns: ["token_id"]
             isOneToOne: false
             referencedRelation: "user_deriv_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ea_tokens: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          label: string | null
+          last_seen_at: string | null
+          revoked: boolean
+          token_hash: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          last_seen_at?: string | null
+          revoked?: boolean
+          token_hash: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          last_seen_at?: string | null
+          revoked?: boolean
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ea_tokens_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ea_tokens_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts_status"
             referencedColumns: ["id"]
           },
         ]
@@ -1308,6 +1468,60 @@ export type Database = {
           },
         ]
       }
+      follower_commands: {
+        Row: {
+          command_type: string
+          created_at: string
+          done_at: string | null
+          error: string | null
+          follower_account_id: string
+          id: string
+          payload: Json
+          provider_trade_id: string | null
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          command_type: string
+          created_at?: string
+          done_at?: string | null
+          error?: string | null
+          follower_account_id: string
+          id?: string
+          payload: Json
+          provider_trade_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          command_type?: string
+          created_at?: string
+          done_at?: string | null
+          error?: string | null
+          follower_account_id?: string
+          id?: string
+          payload?: Json
+          provider_trade_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follower_commands_follower_account_id_fkey"
+            columns: ["follower_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follower_commands_follower_account_id_fkey"
+            columns: ["follower_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_sessions: {
         Row: {
           close_time: string | null
@@ -1344,6 +1558,45 @@ export type Database = {
           open_days?: number[]
           open_time?: string | null
           timezone?: string
+        }
+        Relationships: []
+      }
+      mt5_accounts: {
+        Row: {
+          broker: string
+          created_at: string
+          currency: string | null
+          id: string
+          is_verified: boolean
+          login: number
+          nickname: string | null
+          role: string
+          server: string
+          user_id: string
+        }
+        Insert: {
+          broker: string
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_verified?: boolean
+          login: number
+          nickname?: string | null
+          role: string
+          server: string
+          user_id: string
+        }
+        Update: {
+          broker?: string
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_verified?: boolean
+          login?: number
+          nickname?: string | null
+          role?: string
+          server?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2684,6 +2937,48 @@ export type Database = {
           },
         ]
       }
+      trade_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          provider_account_id: string
+          provider_trade_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload: Json
+          provider_account_id: string
+          provider_trade_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          provider_account_id?: string
+          provider_trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_events_provider_account_id_fkey"
+            columns: ["provider_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_events_provider_account_id_fkey"
+            columns: ["provider_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_execution_logs: {
         Row: {
           contract_id: string | null
@@ -3247,7 +3542,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mt5_accounts_status: {
+        Row: {
+          broker: string | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          is_online: boolean | null
+          is_verified: boolean | null
+          last_seen_at_token: string | null
+          login: number | null
+          nickname: string | null
+          role: string | null
+          server: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_expire_signals: { Args: never; Returns: undefined }
@@ -3274,6 +3585,7 @@ export type Database = {
       is_owner: { Args: { record_user_id: string }; Returns: boolean }
       is_provider_owner: { Args: { provider_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      owns_mt5_account: { Args: { acct_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:

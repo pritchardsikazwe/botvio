@@ -67,8 +67,39 @@ const BOOM_CRASH: InstrumentConfig[] = [
   { symbol: "CRASH1000", displayName: "Crash 1000" },
 ];
 
-const ALL_INSTRUMENTS: InstrumentConfig[] = [
+// Digits: only Volatility indices + Vol 1s
+const DIGIT_INSTRUMENTS: InstrumentConfig[] = [
+  ...VOL_INDICES, ...VOL_1S,
+];
+
+// Rise/Fall, Higher/Lower: broad support
+const RISE_FALL_INSTRUMENTS: InstrumentConfig[] = [
   ...VOL_INDICES, ...VOL_1S, ...STEP, ...JUMP, ...BOOM_CRASH,
+];
+
+// Multipliers: limited set
+const MULTIPLIER_INSTRUMENTS: InstrumentConfig[] = [
+  { symbol: "R_75", displayName: "Volatility 75" },
+  { symbol: "R_100", displayName: "Volatility 100" },
+  { symbol: "1HZ100V", displayName: "Vol 100 (1s)" },
+  { symbol: "1HZ75V", displayName: "Vol 75 (1s)" },
+  { symbol: "1HZ50V", displayName: "Vol 50 (1s)" },
+  ...BOOM_CRASH,
+];
+
+// Accumulators: Volatility only
+const ACCU_INSTRUMENTS: InstrumentConfig[] = [
+  ...VOL_INDICES, ...VOL_1S,
+];
+
+// Turbo: Volatility + Vol 1s
+const TURBO_INSTRUMENTS: InstrumentConfig[] = [
+  ...VOL_INDICES, ...VOL_1S,
+];
+
+// Ticks: Volatility + Vol 1s + Step
+const TICK_INSTRUMENTS: InstrumentConfig[] = [
+  ...VOL_INDICES, ...VOL_1S, ...STEP,
 ];
 
 // ── Contract type presets ───────────────────────────────────────────
@@ -172,7 +203,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Beginner Friendly",
     tempoTag: "Steady",
     contractTypes: [RISE_FALL, HIGHER_LOWER],
-    instruments: ALL_INSTRUMENTS,
+    instruments: RISE_FALL_INSTRUMENTS,
   },
   {
     id: "digit-contracts",
@@ -181,7 +212,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Advanced",
     tempoTag: "Fast",
     contractTypes: [DIGITS_MATCH_DIFFER, DIGITS_OVER_UNDER, DIGITS_EVEN_ODD],
-    instruments: ALL_INSTRUMENTS,
+    instruments: DIGIT_INSTRUMENTS,
   },
   {
     id: "rise-fall-scalping",
@@ -190,7 +221,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Medium Risk",
     tempoTag: "Active",
     contractTypes: [RISE_FALL],
-    instruments: ALL_INSTRUMENTS,
+    instruments: RISE_FALL_INSTRUMENTS,
   },
   {
     id: "boom-crash",
@@ -199,7 +230,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "High Volatility",
     tempoTag: "Precision",
     contractTypes: [RISE_FALL],
-    instruments: ALL_INSTRUMENTS,
+    instruments: BOOM_CRASH,
   },
   {
     id: "multipliers",
@@ -208,7 +239,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Medium Risk",
     tempoTag: "Flexible",
     contractTypes: [MULTIPLIERS],
-    instruments: ALL_INSTRUMENTS,
+    instruments: MULTIPLIER_INSTRUMENTS,
   },
   {
     id: "accumulators",
@@ -217,7 +248,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Beginner Friendly",
     tempoTag: "Steady",
     contractTypes: [ACCUMULATORS],
-    instruments: ALL_INSTRUMENTS,
+    instruments: ACCU_INSTRUMENTS,
   },
   {
     id: "turbo",
@@ -226,7 +257,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Advanced",
     tempoTag: "Speed",
     contractTypes: [TURBO],
-    instruments: ALL_INSTRUMENTS,
+    instruments: TURBO_INSTRUMENTS,
   },
   {
     id: "ticks",
@@ -235,7 +266,7 @@ export const TRADING_STYLES: TradingStyle[] = [
     riskTag: "Intermediate",
     tempoTag: "Fast",
     contractTypes: [TICKS_RISE_FALL],
-    instruments: ALL_INSTRUMENTS,
+    instruments: TICK_INSTRUMENTS,
   },
 ];
 
