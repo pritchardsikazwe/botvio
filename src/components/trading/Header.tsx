@@ -53,7 +53,7 @@ export const Header = () => {
               </div>
             </div>
 
-            {/* Navigation - Desktop - Direct links (no dropdowns) */}
+            {/* Navigation - Desktop */}
             <nav className="hidden lg:flex items-center gap-1">
               <Button 
                 variant={location.pathname === '/' ? 'secondary' : 'ghost'} 
@@ -71,36 +71,44 @@ export const Header = () => {
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 Marketplace
               </Button>
+
+              <Button 
+                variant={location.pathname === '/signals' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/signals')}
+              >
+                <Signal className="w-4 h-4 mr-1" />
+                Signals
+              </Button>
               
+              <Button 
+                variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/bots')}
+              >
+                <Bot className="w-4 h-4 mr-1" />
+                Bots
+              </Button>
+
+              <Button 
+                variant={location.pathname.startsWith('/bots/binance') || location.pathname === '/settings/binance' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/bots/binance')}
+              >
+                <Zap className="w-4 h-4 mr-1" />
+                Binance
+              </Button>
+
+              <Button 
+                variant={location.pathname === '/blog' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/blog')}
+              >
+                Blog
+              </Button>
+
               {user && (
                 <>
-                  <Button 
-                    variant={location.pathname === '/signals' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/signals')}
-                  >
-                    <Signal className="w-4 h-4 mr-1" />
-                    Signals
-                  </Button>
-                  
-                  <Button 
-                    variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/bots')}
-                  >
-                    <Bot className="w-4 h-4 mr-1" />
-                    Bots
-                  </Button>
-
-                  <Button 
-                    variant={location.pathname.startsWith('/bots/binance') || location.pathname === '/settings/binance' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/bots/binance')}
-                  >
-                    <Zap className="w-4 h-4 mr-1" />
-                    Binance
-                  </Button>
-                  
                   <Button 
                     variant={location.pathname === '/providers' ? 'secondary' : 'ghost'} 
                     size="sm"
@@ -128,23 +136,6 @@ export const Header = () => {
               >
                 <GraduationCap className="w-4 h-4 mr-1" />
                 Learn
-              </Button>
-
-              <Button 
-                variant={location.pathname === '/blog' ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/blog')}
-              >
-                Blog
-              </Button>
-
-              <Button 
-                variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/authority-signals')}
-              >
-                <Signal className="w-4 h-4 mr-1" />
-                Authority
               </Button>
 
               {user && (
