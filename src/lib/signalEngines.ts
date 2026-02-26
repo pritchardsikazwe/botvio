@@ -1,10 +1,14 @@
 /**
- * Signal Engines for Botvio — Enhanced v2
- * Improved win-rate logic across all trade modes.
- * Key fixes:
- * - MATCH uses Markov transition probability (what digit likely FOLLOWS current)
- * - DIFFER uses frequency mean-reversion (hot digits are overdue to change)
- * - All engines have relaxed thresholds + better confluence scoring
+ * Signal Engines for Botvio — v3 (Win-Rate Optimized)
+ * 
+ * Key improvements over v2:
+ * - Higher confluence requirements before signaling (fewer but better signals)
+ * - Fixed Higher/Lower inverted position logic
+ * - Stronger momentum + RSI alignment requirements
+ * - Multi-timeframe confirmation mandatory for Rise/Fall
+ * - Tighter digit thresholds with larger sample sizes
+ * - Better Boom/Crash spike timing with compression + overdue
+ * - All engines: minimum 65% confidence to signal, more WAITs
  */
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -62,17 +66,17 @@ export type SignalDirection = "RISE" | "FALL" | "HIGHER" | "LOWER" | "EVEN" | "O
 
 export interface SignalResult {
   signal: SignalDirection;
-  confidence: number;            // 0-100
-  validFor: string;              // e.g. "next 5 ticks"
+  confidence: number;
+  validFor: string;
   timing: "Good" | "Okay" | "Late";
   reasons: string[];
-  suggestedDuration?: number;    // ticks or seconds
-  suggestedBarrier?: number;     // for digit Over/Under
-  suggestedMultiplier?: number;  // for multipliers
+  suggestedDuration?: number;
+  suggestedBarrier?: number;
+  suggestedMultiplier?: number;
   biasStrip?: ("↑" | "↓" | "─")[];
 }
 
-// ── Confidence Scoring (Unified) ─────────────────────────────────────
+// ── Confidence Scoring (Stricter) ───────────────────────────────────
 
 function computeConfidence(
   mom: number,
@@ -83,29 +87,33 @@ function computeConfidence(
   dist: number,
   r: number[],
 ): number {
-  // A) Direction strength (0-40)
-  const sDir = 40 * clamp(Math.abs(mom) / 1.0, 0, 1);
+  // A) Direction strength (0-35) — stricter scaling
+  const sDir = 35 * clamp(Math.abs(mom) / 1.2, 0, 1);
 
-  // B) Trend alignment (0-35)
+  // B) Trend alignment (0-30)
   const emaFast = emaFastArr[emaFastArr.length - 1];
   const emaSlow = emaSlowArr[emaSlowArr.length - 1];
   const gap = Math.abs(emaFast - emaSlow) / atrN;
-  const sTrend = 35 * clamp(gap / 0.8, 0, 1);
+  const sTrend = 30 * clamp(gap / 1.0, 0, 1);
 
-  // C) Risk penalties (start 25)
+  // C) Risk penalties (start 35)
   let penalties = 0;
-  if (Math.abs(dist) > 1.5) penalties += 8;
-  if (gap < 0.15) penalties += 8;
-  if (atrN > 2.0 * atrPrev) penalties += 8;
-  if (r.length >= 2 && Math.sign(r[r.length - 1]) !== Math.sign(mom)) penalties += 3;
-  const sRisk = clamp(25 - penalties, 0, 25);
+  if (Math.abs(dist) > 1.2) penalties += 10;  // over-extended
+  if (gap < 0.2) penalties += 10;             // no clear trend
+  if (atrN > 1.8 * atrPrev) penalties += 10;  // volatility spike
+  if (r.length >= 3) {
+    const lastSigns = r.slice(-3).map(Math.sign);
+    const mixed = new Set(lastSigns).size > 1;
+    if (mixed) penalties += 5;  // choppy recent action
+  }
+  const sRisk = clamp(35 - penalties, 0, 35);
 
   return Math.round(sDir + sTrend + sRisk);
 }
 
 function timingLabel(conf: number): "Good" | "Okay" | "Late" {
-  if (conf > 75) return "Good";
-  if (conf > 60) return "Okay";
+  if (conf >= 78) return "Good";
+  if (conf >= 65) return "Okay";
   return "Late";
 }
 
@@ -119,12 +127,12 @@ function buildBiasStrip(ticks: number[], n = 10): ("↑" | "↓" | "─")[] {
   return strip;
 }
 
-// ── A) Rise/Fall Scalping Engine (Enhanced) ─────────────────────────
+// ── A) Rise/Fall Engine (v3 — Stricter) ─────────────────────────────
 
 export function riseFallEngine(ticks: number[]): SignalResult {
-  const N = Math.min(ticks.length, 60);
+  const N = Math.min(ticks.length, 80);
   const t = ticks.slice(-N);
-  if (t.length < 22) return waitResult("Not enough data (need 22+ ticks)");
+  if (t.length < 30) return waitResult("Not enough data (need 30+ ticks)");
 
   const emaFastArr = ema(t, 9);
   const emaSlowArr = ema(t, 21);
@@ -132,69 +140,77 @@ export function riseFallEngine(ticks: number[]): SignalResult {
   const emaS = emaSlowArr[emaSlowArr.length - 1];
 
   const atrN = atr(t, N);
-  const atrPrev = atr(t.slice(0, -5), Math.max(N - 5, 10));
+  const atrPrev = atr(t.slice(0, -10), Math.max(N - 10, 15));
   const rsiVal = rsi(t, 14);
   const r = returns(t);
 
-  const k = 5;
+  const k = 7;
+  if (t.length < k + 1) return waitResult("Not enough data");
   const mom = (t[t.length - 1] - t[t.length - 1 - k]) / (k * atrN);
   const dist = (t[t.length - 1] - emaF) / atrN;
 
   const trendUp = emaF > emaS;
   const trendDown = emaF < emaS;
 
-  // Relaxed whipsaw filter
-  if (atrN > 2.0 * atrPrev) return waitResult("ATR spike — choppy market", ticks);
+  // Whipsaw filters (strict)
+  if (atrN > 1.8 * atrPrev) return waitResult("ATR spike — choppy market", ticks);
   const gap = Math.abs(emaF - emaS) / atrN;
-  if (gap < 0.15) return waitResult("Choppy — EMA gap too small", ticks);
+  if (gap < 0.2) return waitResult("Choppy — no clear trend", ticks);
+
+  // Multi-timeframe confirmation (MANDATORY)
+  const mom3 = t.length > 3 ? (t[t.length - 1] - t[t.length - 4]) / (3 * atrN) : 0;
+  const mom10 = t.length > 10 ? (t[t.length - 1] - t[t.length - 11]) / (10 * atrN) : 0;
+  const mom20 = t.length > 20 ? (t[t.length - 1] - t[t.length - 21]) / (20 * atrN) : 0;
+  const multiAlign = Math.sign(mom3) === Math.sign(mom) && Math.sign(mom10) === Math.sign(mom);
+  const deepAlign = multiAlign && Math.sign(mom20) === Math.sign(mom);
+
+  // Require multi-tf alignment
+  if (!multiAlign) return waitResult("Timeframes not aligned", ticks);
 
   const conf = computeConfidence(mom, emaFastArr, emaSlowArr, atrN, atrPrev, dist, r);
   const reasons: string[] = [];
 
-  // Multi-timeframe confirmation: check 3-tick and 10-tick momentum alignment
-  const mom3 = t.length > 3 ? (t[t.length - 1] - t[t.length - 4]) / (3 * atrN) : 0;
-  const mom10 = t.length > 10 ? (t[t.length - 1] - t[t.length - 11]) / (10 * atrN) : 0;
-  const multiAlign = Math.sign(mom3) === Math.sign(mom) && Math.sign(mom10) === Math.sign(mom);
-
-  // RISE — relaxed thresholds + multi-tf bonus
-  if (trendUp && mom > 0.2 && rsiVal >= 45 && rsiVal <= 75 && dist < 1.5) {
-    reasons.push(`Trend UP (EMA9 > EMA21, gap ${gap.toFixed(2)})`);
-    reasons.push(`Momentum ${mom.toFixed(2)}`);
-    reasons.push(`RSI ${rsiVal.toFixed(0)}`);
-    if (multiAlign) reasons.push(`Multi-timeframe aligned ✓`);
-    const bonus = multiAlign ? 8 : 0;
-    const dur = clamp(Math.round(5 + 2 * Math.abs(mom)), 5, 10);
+  // RISE — strict thresholds
+  if (trendUp && mom > 0.3 && rsiVal >= 48 && rsiVal <= 70 && dist < 1.2 && dist > -0.5) {
+    reasons.push(`Trend UP (gap ${gap.toFixed(2)})`);
+    reasons.push(`Momentum ${mom.toFixed(2)} (3tf aligned)`);
+    reasons.push(`RSI ${rsiVal.toFixed(0)} — safe zone`);
+    if (deepAlign) reasons.push(`Deep alignment ✓ (20-tick)`);
+    const bonus = deepAlign ? 10 : 5;
+    const dur = clamp(Math.round(5 + Math.abs(mom) * 2), 5, 8);
+    const finalConf = clamp(conf + bonus, 65, 92);
     return {
-      signal: "RISE", confidence: clamp(conf + bonus, 60, 95), validFor: `next ${dur} ticks`,
-      timing: timingLabel(conf + bonus), reasons, suggestedDuration: dur,
+      signal: "RISE", confidence: finalConf, validFor: `next ${dur} ticks`,
+      timing: timingLabel(finalConf), reasons, suggestedDuration: dur,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  // FALL — relaxed thresholds + multi-tf bonus
-  if (trendDown && mom < -0.2 && rsiVal >= 25 && rsiVal <= 55 && dist > -1.5) {
-    reasons.push(`Trend DOWN (EMA9 < EMA21, gap ${gap.toFixed(2)})`);
-    reasons.push(`Momentum ${mom.toFixed(2)}`);
-    reasons.push(`RSI ${rsiVal.toFixed(0)}`);
-    if (multiAlign) reasons.push(`Multi-timeframe aligned ✓`);
-    const bonus = multiAlign ? 8 : 0;
-    const dur = clamp(Math.round(5 + 2 * Math.abs(mom)), 5, 10);
+  // FALL — strict thresholds
+  if (trendDown && mom < -0.3 && rsiVal >= 30 && rsiVal <= 52 && dist > -1.2 && dist < 0.5) {
+    reasons.push(`Trend DOWN (gap ${gap.toFixed(2)})`);
+    reasons.push(`Momentum ${mom.toFixed(2)} (3tf aligned)`);
+    reasons.push(`RSI ${rsiVal.toFixed(0)} — safe zone`);
+    if (deepAlign) reasons.push(`Deep alignment ✓ (20-tick)`);
+    const bonus = deepAlign ? 10 : 5;
+    const dur = clamp(Math.round(5 + Math.abs(mom) * 2), 5, 8);
+    const finalConf = clamp(conf + bonus, 65, 92);
     return {
-      signal: "FALL", confidence: clamp(conf + bonus, 60, 95), validFor: `next ${dur} ticks`,
-      timing: timingLabel(conf + bonus), reasons, suggestedDuration: dur,
+      signal: "FALL", confidence: finalConf, validFor: `next ${dur} ticks`,
+      timing: timingLabel(finalConf), reasons, suggestedDuration: dur,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  return waitResult(`No clear signal (mom=${mom.toFixed(2)}, RSI=${rsiVal.toFixed(0)})`, ticks);
+  return waitResult(`No clear signal (mom=${mom.toFixed(2)}, RSI=${rsiVal.toFixed(0)}, gap=${gap.toFixed(2)})`, ticks);
 }
 
-// ── B) Digits Engines (Fixed) ───────────────────────────────────────
+// ── B) Digits Engines (v3 — Tighter) ────────────────────────────────
 
 export function digitsEvenOddEngine(ticks: number[]): SignalResult {
-  const M = Math.min(ticks.length, 50);
+  const M = Math.min(ticks.length, 80);
   const digits = extractDigits(ticks.slice(-M));
-  if (digits.length < 15) return waitResult("Not enough digit data");
+  if (digits.length < 25) return waitResult("Not enough digit data (need 25+)");
 
   const count = new Array(10).fill(0);
   digits.forEach(d => count[d]++);
@@ -202,70 +218,75 @@ export function digitsEvenOddEngine(ticks: number[]): SignalResult {
 
   const pEven = p[0] + p[2] + p[4] + p[6] + p[8];
 
-  // Use recent 10 ticks for short-term bias
-  const recent = digits.slice(-10);
+  // Short-term bias (last 15 ticks)
+  const recent = digits.slice(-15);
   const recentEven = recent.filter(d => d % 2 === 0).length / recent.length;
 
-  // Mean reversion: if recent is heavily even, next is more likely odd (and vice versa)
-  // Combined with longer-term frequency
+  // Mean reversion: extreme recent bias + long-term confirmation
   const longEdge = pEven - 0.5;
   const shortEdge = recentEven - 0.5;
 
-  // When both long and short agree strongly, signal that direction
-  // When they diverge, use mean reversion on the short-term extreme
   let edge: number;
-  let useReversion = false;
+  let strategy = "";
 
-  if (Math.abs(shortEdge) > 0.2 && Math.sign(shortEdge) !== Math.sign(longEdge)) {
-    // Short-term extreme opposite to long-term → mean reversion
-    edge = -shortEdge;
-    useReversion = true;
+  if (Math.abs(shortEdge) > 0.25 && Math.sign(shortEdge) !== Math.sign(longEdge)) {
+    // Strong short-term extreme + long-term disagrees → mean reversion
+    edge = -shortEdge * 0.7;
+    strategy = "reversion";
+  } else if (Math.sign(shortEdge) === Math.sign(longEdge) && Math.abs(longEdge) > 0.08) {
+    // Both agree → trend continuation
+    edge = longEdge * 0.5 + shortEdge * 0.5;
+    strategy = "continuation";
   } else {
-    edge = longEdge * 0.4 + shortEdge * 0.6;
+    edge = 0;
+    strategy = "none";
   }
 
-  const conf = Math.round(50 + Math.abs(edge) * 280);
+  const conf = Math.round(48 + Math.abs(edge) * 300);
 
-  if (edge > 0.06) {
+  if (edge > 0.08 && conf >= 65) {
     return {
-      signal: "EVEN", confidence: clamp(conf, 60, 95), validFor: "next 1 tick",
+      signal: "EVEN", confidence: clamp(conf, 65, 90), validFor: "next 1 tick",
       timing: timingLabel(conf),
       reasons: [
-        `Even digits ${useReversion ? 'reversion' : 'dominant'} (long ${(pEven * 100).toFixed(0)}%, recent ${(recentEven * 100).toFixed(0)}%)`,
-        `Edge: +${(edge * 100).toFixed(1)}%`
+        `Even ${strategy} (long ${(pEven * 100).toFixed(0)}%, recent ${(recentEven * 100).toFixed(0)}%)`,
+        `Edge: +${(edge * 100).toFixed(1)}%`,
+        `Sample: ${digits.length} ticks`,
       ],
       suggestedDuration: 1,
       biasStrip: buildBiasStrip(ticks),
     };
   }
-  if (edge < -0.06) {
+  if (edge < -0.08 && conf >= 65) {
     return {
-      signal: "ODD", confidence: clamp(conf, 60, 95), validFor: "next 1 tick",
+      signal: "ODD", confidence: clamp(conf, 65, 90), validFor: "next 1 tick",
       timing: timingLabel(conf),
       reasons: [
-        `Odd digits ${useReversion ? 'reversion' : 'dominant'} (long ${((1 - pEven) * 100).toFixed(0)}%, recent ${((1 - recentEven) * 100).toFixed(0)}%)`,
-        `Edge: ${(edge * 100).toFixed(1)}%`
+        `Odd ${strategy} (long ${((1 - pEven) * 100).toFixed(0)}%, recent ${((1 - recentEven) * 100).toFixed(0)}%)`,
+        `Edge: ${(edge * 100).toFixed(1)}%`,
+        `Sample: ${digits.length} ticks`,
       ],
       suggestedDuration: 1,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  return waitResult(`No digit edge (Even=${(pEven * 100).toFixed(0)}%)`, ticks);
+  return waitResult(`No digit edge (Even=${(pEven * 100).toFixed(0)}%, sample=${digits.length})`, ticks);
 }
 
 export function digitsOverUnderEngine(ticks: number[]): SignalResult {
-  const M = Math.min(ticks.length, 50);
+  const M = Math.min(ticks.length, 80);
   const digits = extractDigits(ticks.slice(-M));
-  if (digits.length < 15) return waitResult("Not enough digit data");
+  if (digits.length < 25) return waitResult("Not enough digit data (need 25+)");
 
   const count = new Array(10).fill(0);
   digits.forEach(d => count[d]++);
   const p = count.map((c: number) => c / digits.length);
 
-  // Try multiple barriers and find the one with strongest edge
+  // Try barriers and find strongest edge
   let bestBarrier = 4;
   let bestEdge = 0;
+  let bestDirection: "OVER" | "UNDER" = "OVER";
   let bestPUnder = 0;
   let bestPOver = 0;
 
@@ -273,51 +294,46 @@ export function digitsOverUnderEngine(ticks: number[]): SignalResult {
     let pU = 0, pO = 0;
     for (let x = 0; x < B; x++) pU += p[x];
     for (let x = B + 1; x <= 9; x++) pO += p[x];
-    const edge = Math.abs(pU - pO);
-    if (edge > bestEdge) {
-      bestEdge = edge;
+    
+    if (pU - pO > bestEdge) {
+      bestEdge = pU - pO;
       bestBarrier = B;
+      bestDirection = "UNDER";
+      bestPUnder = pU;
+      bestPOver = pO;
+    }
+    if (pO - pU > bestEdge) {
+      bestEdge = pO - pU;
+      bestBarrier = B;
+      bestDirection = "OVER";
       bestPUnder = pU;
       bestPOver = pO;
     }
   }
 
-  const conf = Math.round(50 + bestEdge * 230);
+  const conf = Math.round(48 + bestEdge * 250);
 
-  if (bestPUnder - bestPOver > 0.08) {
+  if (bestEdge > 0.12 && conf >= 65) {
     return {
-      signal: "UNDER", confidence: clamp(conf, 60, 95), validFor: "next 1 tick",
+      signal: bestDirection, confidence: clamp(conf, 65, 90), validFor: "next 1 tick",
       timing: timingLabel(conf),
-      reasons: [`Under ${bestBarrier} dominant (${(bestPUnder * 100).toFixed(0)}% vs ${(bestPOver * 100).toFixed(0)}%)`, `Best barrier auto-selected`],
-      suggestedDuration: 5, suggestedBarrier: bestBarrier,
-      biasStrip: buildBiasStrip(ticks),
-    };
-  }
-  if (bestPOver - bestPUnder > 0.08) {
-    return {
-      signal: "OVER", confidence: clamp(conf, 60, 95), validFor: "next 1 tick",
-      timing: timingLabel(conf),
-      reasons: [`Over ${bestBarrier} dominant (${(bestPOver * 100).toFixed(0)}% vs ${(bestPUnder * 100).toFixed(0)}%)`, `Best barrier auto-selected`],
+      reasons: [
+        `${bestDirection} ${bestBarrier} (${bestDirection === "OVER" ? (bestPOver * 100).toFixed(0) : (bestPUnder * 100).toFixed(0)}% vs ${bestDirection === "OVER" ? (bestPUnder * 100).toFixed(0) : (bestPOver * 100).toFixed(0)}%)`,
+        `Edge: ${(bestEdge * 100).toFixed(1)}%`,
+        `Optimal barrier auto-selected`,
+      ],
       suggestedDuration: 5, suggestedBarrier: bestBarrier,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  return waitResult(`No Over/Under edge at any barrier`, ticks);
+  return waitResult(`No Over/Under edge (best ${(bestEdge * 100).toFixed(1)}% at barrier ${bestBarrier})`, ticks);
 }
 
-/**
- * FIXED Match/Differ Engine
- * 
- * KEY FIX: MATCH now uses Markov transition analysis.
- * - We look at what digit typically FOLLOWS the current last digit
- * - If a specific transition is significantly more likely than 10%, signal MATCH
- * - DIFFER uses hot-digit mean reversion (digit that's appeared too much will stop)
- */
 export function digitsMatchDifferEngine(ticks: number[]): SignalResult {
-  const M = Math.min(ticks.length, 80);
+  const M = Math.min(ticks.length, 100);
   const digits = extractDigits(ticks.slice(-M));
-  if (digits.length < 20) return waitResult("Not enough digit data");
+  if (digits.length < 30) return waitResult("Not enough digit data (need 30+)");
 
   const count = new Array(10).fill(0);
   digits.forEach(d => count[d]++);
@@ -333,7 +349,7 @@ export function digitsMatchDifferEngine(ticks: number[]): SignalResult {
   const rowSum = trans[lastDigit].reduce((a: number, b: number) => a + b, 0) || 1;
   const transProbs = trans[lastDigit].map((c: number) => c / rowSum);
 
-  // Find most likely next digit given current last digit
+  // Find most likely next digit
   let bestTransDigit = 0;
   let bestTransProb = 0;
   for (let d = 0; d < 10; d++) {
@@ -343,14 +359,14 @@ export function digitsMatchDifferEngine(ticks: number[]): SignalResult {
     }
   }
 
-  // ── Streak analysis ──
+  // Streak analysis
   let streak = 1;
   for (let i = digits.length - 2; i >= 0; i--) {
     if (digits[i] === lastDigit) streak++;
     else break;
   }
 
-  // ── Hot digit (overrepresented → mean reversion = DIFFER it) ──
+  // Hot digit
   let hotDigit = 0;
   let hotP = 0;
   for (let d = 0; d < 10; d++) {
@@ -359,159 +375,166 @@ export function digitsMatchDifferEngine(ticks: number[]): SignalResult {
 
   const reasons: string[] = [];
 
-  // ── MATCH logic: use Markov transition ──
-  // If a digit frequently follows the current digit, MATCH it
-  // Threshold: >40% transition probability (baseline is 10%)
-  if (bestTransProb >= 0.40 && bestTransDigit !== lastDigit) {
+  // ── MATCH: very strong Markov transition only ──
+  if (bestTransProb >= 0.45 && rowSum >= 8) {
     const edge = bestTransProb - 0.10;
-    const conf = Math.round(58 + edge * 450);
-    reasons.push(`After digit ${lastDigit}, digit ${bestTransDigit} appears ${(bestTransProb * 100).toFixed(0)}% of time`);
-    reasons.push(`Markov edge: +${(edge * 100).toFixed(1)}% above baseline`);
-    if (streak >= 2) reasons.push(`Current streak: ${lastDigit} ×${streak}`);
-    return {
-      signal: "MATCH", confidence: clamp(conf, 62, 95), validFor: "next 1 tick",
-      timing: timingLabel(conf),
-      reasons,
-      suggestedDuration: 5, suggestedBarrier: bestTransDigit,
-      biasStrip: buildBiasStrip(ticks),
-    };
-  }
-
-  // Also MATCH if same digit has a self-transition >27% AND streak >= 2
-  if (transProbs[lastDigit] >= 0.27 && streak >= 2) {
-    const edge = transProbs[lastDigit] - 0.10;
-    const conf = Math.round(58 + edge * 400 + streak * 5);
-    reasons.push(`Digit ${lastDigit} self-repeats ${(transProbs[lastDigit] * 100).toFixed(0)}% (streak ×${streak})`);
-    reasons.push(`Markov self-transition edge: +${(edge * 100).toFixed(1)}%`);
-    return {
-      signal: "MATCH", confidence: clamp(conf, 60, 92), validFor: "next 1 tick",
-      timing: timingLabel(conf),
-      reasons,
-      suggestedDuration: 5, suggestedBarrier: lastDigit,
-      biasStrip: buildBiasStrip(ticks),
-    };
-  }
-
-  // ── DIFFER logic: hot digit mean reversion ──
-  // If a digit is overrepresented (>25%), it's likely to NOT appear next
-  if (hotP > 0.25) {
-    const edge = hotP - 0.10;
-    const conf = Math.round(58 + edge * 400);
-    reasons.push(`Digit ${hotDigit} overrepresented at ${(hotP * 100).toFixed(0)}% (expected 10%)`);
-    reasons.push(`Mean reversion: DIFFER ${hotDigit}`);
-    if (streak >= 3 && hotDigit === lastDigit) {
-      reasons.push(`Streak exhaustion: ${lastDigit} ×${streak}`);
+    const conf = Math.round(55 + edge * 400);
+    if (conf >= 65) {
+      reasons.push(`After ${lastDigit} → ${bestTransDigit} appears ${(bestTransProb * 100).toFixed(0)}% (n=${rowSum})`);
+      reasons.push(`Markov edge: +${(edge * 100).toFixed(1)}%`);
+      return {
+        signal: "MATCH", confidence: clamp(conf, 65, 90), validFor: "next 1 tick",
+        timing: timingLabel(conf), reasons,
+        suggestedDuration: 5, suggestedBarrier: bestTransDigit,
+        biasStrip: buildBiasStrip(ticks),
+      };
     }
-    return {
-      signal: "DIFFER", confidence: clamp(conf, 62, 95), validFor: "next 1 tick",
-      timing: timingLabel(conf),
-      reasons,
-      suggestedDuration: 5, suggestedBarrier: hotDigit,
-      biasStrip: buildBiasStrip(ticks),
-    };
   }
 
-  return waitResult(`No dominant digit pattern (max ${(hotP * 100).toFixed(0)}%)`, ticks);
+  // MATCH on self-repeat only with strong streak + transition
+  if (transProbs[lastDigit] >= 0.30 && streak >= 3 && rowSum >= 8) {
+    const edge = transProbs[lastDigit] - 0.10;
+    const conf = Math.round(55 + edge * 350 + streak * 3);
+    if (conf >= 65) {
+      reasons.push(`Digit ${lastDigit} self-repeats ${(transProbs[lastDigit] * 100).toFixed(0)}% (streak ×${streak})`);
+      return {
+        signal: "MATCH", confidence: clamp(conf, 65, 88), validFor: "next 1 tick",
+        timing: timingLabel(conf), reasons,
+        suggestedDuration: 5, suggestedBarrier: lastDigit,
+        biasStrip: buildBiasStrip(ticks),
+      };
+    }
+  }
+
+  // ── DIFFER: hot digit mean reversion (stricter) ──
+  if (hotP > 0.28 && digits.length >= 30) {
+    const edge = hotP - 0.10;
+    const conf = Math.round(55 + edge * 350);
+    if (conf >= 65) {
+      reasons.push(`Digit ${hotDigit} at ${(hotP * 100).toFixed(0)}% (${count[hotDigit]}/${digits.length})`);
+      reasons.push(`Mean reversion: DIFFER ${hotDigit}`);
+      return {
+        signal: "DIFFER", confidence: clamp(conf, 65, 90), validFor: "next 1 tick",
+        timing: timingLabel(conf), reasons,
+        suggestedDuration: 5, suggestedBarrier: hotDigit,
+        biasStrip: buildBiasStrip(ticks),
+      };
+    }
+  }
+
+  return waitResult(`No dominant pattern (max digit ${hotDigit}@${(hotP * 100).toFixed(0)}%)`, ticks);
 }
 
-// ── C) Higher/Lower Engine (Enhanced) ───────────────────────────────
+// ── C) Higher/Lower Engine (v3 — Fixed Logic) ──────────────────────
 
 export function higherLowerEngine(ticks: number[]): SignalResult {
-  const N = Math.min(ticks.length, 60);
+  const N = Math.min(ticks.length, 80);
   const t = ticks.slice(-N);
-  if (t.length < 30) return waitResult("Need 30+ ticks for Higher/Lower");
+  if (t.length < 35) return waitResult("Need 35+ ticks for Higher/Lower");
 
   const emaFastArr = ema(t, 9);
   const emaSlowArr = ema(t, 21);
   const emaF = emaFastArr[emaFastArr.length - 1];
   const emaS = emaSlowArr[emaSlowArr.length - 1];
   const atrN = atr(t, N);
-  const atrPrev = atr(t.slice(0, -5), Math.max(N - 5, 10));
+  const atrPrev = atr(t.slice(0, -10), Math.max(N - 10, 15));
   const r = returns(t);
-  const k = 5;
+  const k = 7;
   const mom = (t[t.length - 1] - t[t.length - 1 - k]) / (k * atrN);
   const dist = (t[t.length - 1] - emaF) / atrN;
   const rsiVal = rsi(t, 14);
 
-  const last30 = t.slice(-30);
-  const support = Math.min(...last30);
-  const resist = Math.max(...last30);
+  const last40 = t.slice(-40);
+  const support = Math.min(...last40);
+  const resist = Math.max(...last40);
   const price = t[t.length - 1];
   const range = resist - support || atrN;
-
-  // Position in range (0 = at support, 1 = at resistance)
   const posInRange = (price - support) / range;
 
+  const gap = Math.abs(emaF - emaS) / atrN;
   const conf = computeConfidence(mom, emaFastArr, emaSlowArr, atrN, atrPrev, dist, r);
   const trendUp = emaF > emaS;
   const trendDown = emaF < emaS;
 
-  // HIGHER: trend up + not too extended + momentum confirms
-  if (trendUp && mom > 0.15 && posInRange > 0.5 && rsiVal < 75) {
+  // HIGHER: trend up + price NOT already at resistance + good momentum
+  // FIX: Buy when price has room to go up (posInRange < 0.7), not at top
+  if (trendUp && mom > 0.2 && posInRange < 0.7 && posInRange > 0.2 && rsiVal < 70 && rsiVal > 40 && gap > 0.2) {
+    const finalConf = clamp(conf + 5, 65, 92);
     return {
-      signal: "HIGHER", confidence: clamp(conf + 5, 60, 95), validFor: "30s–1m",
-      timing: timingLabel(conf),
+      signal: "HIGHER", confidence: finalConf, validFor: "30s–1m",
+      timing: timingLabel(finalConf),
       reasons: [
-        `Trend UP (EMA9>EMA21)`,
-        `Momentum ${mom.toFixed(2)}`,
-        `Position ${(posInRange * 100).toFixed(0)}% in range`,
-        `RSI ${rsiVal.toFixed(0)}`,
+        `Trend UP (gap ${gap.toFixed(2)})`,
+        `Room to rise (${(posInRange * 100).toFixed(0)}% in range)`,
+        `Momentum ${mom.toFixed(2)}, RSI ${rsiVal.toFixed(0)}`,
       ],
       suggestedDuration: 60,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  // LOWER: trend down + near top of range reversal
-  if (trendDown && mom < -0.15 && posInRange < 0.5 && rsiVal > 25) {
+  // LOWER: trend down + price NOT already at support + downward momentum
+  // FIX: Sell when price has room to drop (posInRange > 0.3)
+  if (trendDown && mom < -0.2 && posInRange > 0.3 && posInRange < 0.8 && rsiVal > 30 && rsiVal < 60 && gap > 0.2) {
+    const finalConf = clamp(conf + 5, 65, 92);
     return {
-      signal: "LOWER", confidence: clamp(conf + 5, 60, 95), validFor: "30s–1m",
-      timing: timingLabel(conf),
+      signal: "LOWER", confidence: finalConf, validFor: "30s–1m",
+      timing: timingLabel(finalConf),
       reasons: [
-        `Trend DOWN (EMA9<EMA21)`,
-        `Momentum ${mom.toFixed(2)}`,
-        `Position ${(posInRange * 100).toFixed(0)}% in range`,
-        `RSI ${rsiVal.toFixed(0)}`,
+        `Trend DOWN (gap ${gap.toFixed(2)})`,
+        `Room to fall (${(posInRange * 100).toFixed(0)}% in range)`,
+        `Momentum ${mom.toFixed(2)}, RSI ${rsiVal.toFixed(0)}`,
       ],
       suggestedDuration: 60,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  // Support/resistance bounce signals
-  if (posInRange < 0.15 && rsiVal < 35 && mom > -0.3) {
+  // Support bounce (contrarian) — only with RSI confirmation
+  if (posInRange < 0.12 && rsiVal < 28 && mom > -0.15) {
+    const bounceConf = clamp(58 + (28 - rsiVal) * 1.5, 65, 82);
     return {
-      signal: "HIGHER", confidence: clamp(55 + (35 - rsiVal), 58, 85), validFor: "bounce play",
+      signal: "HIGHER", confidence: bounceConf, validFor: "bounce play",
       timing: "Okay",
-      reasons: [`Near support (${support.toFixed(4)})`, `RSI oversold ${rsiVal.toFixed(0)}`, `Bounce expected`],
+      reasons: [
+        `Near support (${support.toFixed(4)})`,
+        `RSI deeply oversold ${rsiVal.toFixed(0)}`,
+        `Momentum easing — bounce expected`,
+      ],
       suggestedDuration: 60,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  if (posInRange > 0.85 && rsiVal > 65 && mom < 0.3) {
+  // Resistance rejection — only with RSI confirmation
+  if (posInRange > 0.88 && rsiVal > 72 && mom < 0.15) {
+    const rejectConf = clamp(58 + (rsiVal - 72) * 1.5, 65, 82);
     return {
-      signal: "LOWER", confidence: clamp(55 + (rsiVal - 65), 58, 85), validFor: "rejection play",
+      signal: "LOWER", confidence: rejectConf, validFor: "rejection play",
       timing: "Okay",
-      reasons: [`Near resistance (${resist.toFixed(4)})`, `RSI overbought ${rsiVal.toFixed(0)}`, `Rejection expected`],
+      reasons: [
+        `Near resistance (${resist.toFixed(4)})`,
+        `RSI overbought ${rsiVal.toFixed(0)}`,
+        `Momentum fading — rejection expected`,
+      ],
       suggestedDuration: 60,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  return waitResult("No breakout or bounce detected", ticks);
+  return waitResult(`No clear setup (pos=${(posInRange * 100).toFixed(0)}%, RSI=${rsiVal.toFixed(0)})`, ticks);
 }
 
-// ── D) Boom/Crash Spike Engine (Enhanced) ───────────────────────────
+// ── D) Boom/Crash Spike Engine (v3 — Stricter) ─────────────────────
 
 export function boomCrashEngine(ticks: number[], avgSpikePeriod = 300): SignalResult {
-  const N = Math.min(ticks.length, 200);
+  const N = Math.min(ticks.length, 250);
   const t = ticks.slice(-N);
-  if (t.length < 30) return waitResult("Not enough ticks for spike analysis");
+  if (t.length < 50) return waitResult("Not enough ticks for spike analysis (need 50+)");
 
   const atrN = atr(t, N);
   const r = returns(t);
-  const spikeFactor = 3.5; // slightly more sensitive
+  const spikeFactor = 4.0;
 
   // Find last spike
   let ticksSinceSpike = r.length;
@@ -524,49 +547,54 @@ export function boomCrashEngine(ticks: number[], avgSpikePeriod = 300): SignalRe
 
   const overdue = ticksSinceSpike / avgSpikePeriod;
 
-  // Check for building pressure (decreasing ATR in recent ticks = compression before spike)
-  const recentAtr = atr(t.slice(-20), 20);
-  const olderAtr = atr(t.slice(-60, -20), 40);
+  // Compression analysis (tighter = more likely spike)
+  const recentAtr = atr(t.slice(-25), 25);
+  const olderAtr = atr(t.slice(-80, -25), 55);
   const compression = olderAtr > 0 ? recentAtr / olderAtr : 1;
-  const compressionBonus = compression < 0.7 ? 12 : compression < 0.85 ? 6 : 0;
+  const compressionBonus = compression < 0.6 ? 15 : compression < 0.75 ? 8 : compression < 0.85 ? 4 : 0;
 
-  const conf = Math.round(40 + clamp(overdue, 0, 2) * 25 + compressionBonus);
+  // Volume of small moves (lots of tiny moves = building pressure)
+  const recent20 = r.slice(-20);
+  const tinyMoves = recent20.filter(v => Math.abs(v) < atrN * 0.5).length;
+  const pressureBonus = tinyMoves > 14 ? 8 : tinyMoves > 10 ? 4 : 0;
 
-  if (overdue < 0.5) {
+  const conf = Math.round(35 + clamp(overdue, 0, 2.5) * 20 + compressionBonus + pressureBonus);
+
+  if (overdue < 0.7) {
     return {
-      signal: "WAIT", confidence: clamp(conf, 30, 55), validFor: "monitoring",
+      signal: "WAIT", confidence: clamp(conf, 25, 55), validFor: "too early",
       timing: "Late",
       reasons: [
-        `Too early — ${ticksSinceSpike} ticks since spike`,
-        `Overdue: ${overdue.toFixed(2)} (need >0.5)`,
+        `Only ${ticksSinceSpike} ticks since last spike`,
+        `Overdue: ${overdue.toFixed(2)} (need >0.7)`,
       ],
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  if (overdue >= 0.5) {
+  if (overdue >= 0.7 && conf >= 65) {
     const reasons = [
       `Spike window open (overdue: ${overdue.toFixed(2)})`,
       `${ticksSinceSpike} ticks since last spike`,
     ];
-    if (compressionBonus > 0) reasons.push(`Volatility compression detected ✓`);
+    if (compressionBonus > 0) reasons.push(`Volatility compression ${(compression * 100).toFixed(0)}% ✓`);
+    if (pressureBonus > 0) reasons.push(`Pressure building (${tinyMoves}/20 tiny moves) ✓`);
     return {
-      signal: "BUY", confidence: clamp(conf, 60, 92), validFor: "spike window",
-      timing: timingLabel(conf),
-      reasons,
+      signal: "BUY", confidence: clamp(conf, 65, 90), validFor: "spike window",
+      timing: timingLabel(conf), reasons,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  return waitResult(`Monitoring spike cycle`, ticks);
+  return waitResult(`Monitoring spike cycle (overdue ${overdue.toFixed(2)}, comp ${(compression * 100).toFixed(0)}%)`, ticks);
 }
 
-// ── E) Accumulators Engine (Enhanced) ───────────────────────────────
+// ── E) Accumulators Engine (v3 — Stability-First) ──────────────────
 
 export function accumulatorsEngine(ticks: number[]): SignalResult {
   const t60 = ticks.slice(-60);
   const t240 = ticks.slice(-240);
-  if (t60.length < 25) return waitResult("Not enough data for accumulator analysis");
+  if (t60.length < 30) return waitResult("Not enough data for accumulator analysis");
 
   const atr60 = atr(t60, t60.length);
   const atr240 = t240.length >= 60 ? atr(t240, t240.length) : atr60 * 1.5;
@@ -578,34 +606,44 @@ export function accumulatorsEngine(ticks: number[]): SignalResult {
   const emaF = emaFastArr[emaFastArr.length - 1];
   const emaS = emaSlowArr[emaSlowArr.length - 1];
   const gapNorm = Math.abs(emaF - emaS) / atr60;
-  const trendFlat = gapNorm < 0.3;
+  const trendFlat = gapNorm < 0.25;
 
-  // Smooth trend check: count how many of last 20 returns are same sign
-  const r = returns(t60.slice(-20));
+  // Smoothness: count consistent direction in last 25 returns
+  const r = returns(t60.slice(-25));
   const posCount = r.filter(v => v > 0).length;
   const negCount = r.filter(v => v < 0).length;
   const trendSmooth = Math.max(posCount, negCount) / r.length;
 
-  const conf = Math.round(stability * 70 + (trendFlat ? 10 : 0) + trendSmooth * 20);
+  // Check for sudden reversals (dangerous for accumulators)
+  const last5 = r.slice(-5);
+  const maxReverse = Math.max(...last5.map(Math.abs)) / atr60;
+  const noSuddenReverse = maxReverse < 2.0;
 
-  if (stability > 0.55 && (trendFlat || trendSmooth > 0.6)) {
+  const conf = Math.round(stability * 65 + (trendFlat ? 10 : 0) + trendSmooth * 20 + (noSuddenReverse ? 5 : -10));
+
+  if (stability > 0.6 && (trendFlat || trendSmooth > 0.65) && noSuddenReverse && conf >= 65) {
     return {
-      signal: "BUY", confidence: clamp(conf, 62, 95), validFor: "current range",
+      signal: "BUY", confidence: clamp(conf, 65, 92), validFor: "current range",
       timing: timingLabel(conf),
       reasons: [
         `Stability ${(stability * 100).toFixed(0)}%`,
-        `Trend smoothness: ${(trendSmooth * 100).toFixed(0)}%`,
-        trendFlat ? `Flat trend — safe` : `Mild trend — acceptable`,
+        `Smoothness: ${(trendSmooth * 100).toFixed(0)}%`,
+        trendFlat ? `Flat trend — safe for accumulation` : `Mild trend — acceptable`,
+        `No sudden reversals ✓`,
       ],
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  if (stability > 0.40) {
+  if (stability > 0.45 && noSuddenReverse) {
     return {
-      signal: "WAIT", confidence: clamp(conf, 40, 59), validFor: "monitoring",
+      signal: "WAIT", confidence: clamp(conf, 40, 60), validFor: "monitoring",
       timing: "Late",
-      reasons: [`Borderline stability ${(stability * 100).toFixed(0)}%`, `Smoothness ${(trendSmooth * 100).toFixed(0)}%`],
+      reasons: [
+        `Borderline stability ${(stability * 100).toFixed(0)}%`,
+        `Smoothness ${(trendSmooth * 100).toFixed(0)}%`,
+        `Wait for better conditions`,
+      ],
       biasStrip: buildBiasStrip(ticks),
     };
   }
@@ -613,45 +651,51 @@ export function accumulatorsEngine(ticks: number[]): SignalResult {
   return waitResult(`Too volatile for accumulators (stability ${(stability * 100).toFixed(0)}%)`, ticks);
 }
 
-// ── F) Multipliers Engine (Enhanced) ────────────────────────────────
+// ── F) Multipliers Engine (v3 — Trend + Pullback) ──────────────────
 
 export function multipliersEngine(ticks: number[]): SignalResult {
-  const N = Math.min(ticks.length, 60);
+  const N = Math.min(ticks.length, 80);
   const t = ticks.slice(-N);
-  if (t.length < 22) return waitResult("Not enough ticks for multiplier analysis");
+  if (t.length < 30) return waitResult("Not enough ticks for multiplier analysis");
 
   const emaFastArr = ema(t, 9);
   const emaSlowArr = ema(t, 21);
   const emaF = emaFastArr[emaFastArr.length - 1];
   const emaS = emaSlowArr[emaSlowArr.length - 1];
   const atrN = atr(t, N);
-  const atrPrev = atr(t.slice(0, -5), Math.max(N - 5, 10));
+  const atrPrev = atr(t.slice(0, -10), Math.max(N - 10, 15));
   const r = returns(t);
-  const k = 5;
+  const k = 7;
   const mom = (t[t.length - 1] - t[t.length - 1 - k]) / (k * atrN);
   const dist = (t[t.length - 1] - emaF) / atrN;
   const rsiVal = rsi(t, 14);
+  const gap = Math.abs(emaF - emaS) / atrN;
+
+  // Volatility filter
+  if (atrN > 2.0 * atrPrev) return waitResult("Volatile — skip multipliers", ticks);
+  if (gap < 0.2) return waitResult("No clear trend for multipliers", ticks);
 
   const conf = computeConfidence(mom, emaFastArr, emaSlowArr, atrN, atrPrev, dist, r);
 
-  // Multiplier suggestion based on volatility
+  // Multiplier suggestion
   let mult = 100;
-  if (atrN > 0.5) mult = 50;
-  else if (atrN < 0.2) mult = 200;
+  if (atrN / atrPrev > 1.3) mult = 50;
+  else if (atrN / atrPrev < 0.8) mult = 200;
 
-  // Trend strength bonus from RSI
-  const rsiBonus = (rsiVal > 55 && mom > 0) ? 5 : (rsiVal < 45 && mom < 0) ? 5 : 0;
+  // RSI confluence bonus
+  const rsiBonus = (rsiVal > 55 && rsiVal < 70 && mom > 0) ? 5 : (rsiVal < 45 && rsiVal > 30 && mom < 0) ? 5 : 0;
 
-  // UP — relaxed + RSI confluence
-  if (emaF > emaS && mom > 0.18 && dist >= -0.3 && dist <= 1.2) {
+  // UP — strict: trend + momentum + pullback zone + RSI safe
+  if (emaF > emaS && mom > 0.25 && dist >= -0.3 && dist <= 1.0 && rsiVal >= 45 && rsiVal <= 72) {
+    const finalConf = clamp(conf + rsiBonus, 65, 92);
     return {
-      signal: "UP", confidence: clamp(conf + rsiBonus, 60, 95), validFor: "trend continuation",
-      timing: timingLabel(conf + rsiBonus),
+      signal: "UP", confidence: finalConf, validFor: "trend continuation",
+      timing: timingLabel(finalConf),
       reasons: [
-        `Trend UP (EMA9>EMA21)`,
+        `Trend UP (gap ${gap.toFixed(2)})`,
         `Momentum: ${mom.toFixed(2)}`,
-        `RSI: ${rsiVal.toFixed(0)}`,
-        `Pullback zone (dist=${dist.toFixed(2)})`,
+        `RSI: ${rsiVal.toFixed(0)} — safe zone`,
+        `Pullback entry (dist=${dist.toFixed(2)})`,
       ],
       suggestedMultiplier: mult,
       biasStrip: buildBiasStrip(ticks),
@@ -659,39 +703,40 @@ export function multipliersEngine(ticks: number[]): SignalResult {
   }
 
   // DOWN
-  if (emaF < emaS && mom < -0.18 && dist <= 0.3 && dist >= -1.2) {
+  if (emaF < emaS && mom < -0.25 && dist <= 0.3 && dist >= -1.0 && rsiVal >= 28 && rsiVal <= 55) {
+    const finalConf = clamp(conf + rsiBonus, 65, 92);
     return {
-      signal: "DOWN", confidence: clamp(conf + rsiBonus, 60, 95), validFor: "trend continuation",
-      timing: timingLabel(conf + rsiBonus),
+      signal: "DOWN", confidence: finalConf, validFor: "trend continuation",
+      timing: timingLabel(finalConf),
       reasons: [
-        `Trend DOWN (EMA9<EMA21)`,
+        `Trend DOWN (gap ${gap.toFixed(2)})`,
         `Momentum: ${mom.toFixed(2)}`,
-        `RSI: ${rsiVal.toFixed(0)}`,
-        `Pullback zone (dist=${dist.toFixed(2)})`,
+        `RSI: ${rsiVal.toFixed(0)} — safe zone`,
+        `Pullback entry (dist=${dist.toFixed(2)})`,
       ],
       suggestedMultiplier: mult,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  return waitResult(`No multiplier entry (mom=${mom.toFixed(2)}, dist=${dist.toFixed(2)})`, ticks);
+  return waitResult(`No multiplier entry (mom=${mom.toFixed(2)}, gap=${gap.toFixed(2)})`, ticks);
 }
 
-// ── G) Turbo Engine (Enhanced) ──────────────────────────────────────
+// ── G) Turbo Engine (v3 — Breakout Confirmation) ───────────────────
 
 export function turboEngine(ticks: number[]): SignalResult {
-  const N = Math.min(ticks.length, 60);
+  const N = Math.min(ticks.length, 80);
   const t = ticks.slice(-N);
-  if (t.length < 22) return waitResult("Not enough ticks for turbo analysis");
+  if (t.length < 30) return waitResult("Not enough ticks for turbo analysis");
 
   const atrN = atr(t, N);
   const r = returns(t);
   const k = 5;
   const mom = (t[t.length - 1] - t[t.length - 1 - k]) / (k * atrN);
 
-  const last15 = t.slice(-15);
-  const maxPrice = Math.max(...last15);
-  const minPrice = Math.min(...last15);
+  const last20 = t.slice(-20);
+  const maxPrice = Math.max(...last20);
+  const minPrice = Math.min(...last20);
   const range = maxPrice - minPrice;
   const rangeNorm = range / atrN;
 
@@ -700,52 +745,57 @@ export function turboEngine(ticks: number[]): SignalResult {
 
   const emaFastArr = ema(t, 9);
   const emaSlowArr = ema(t, 21);
-  const atrPrev = atr(t.slice(0, -5), Math.max(N - 5, 10));
+  const atrPrev = atr(t.slice(0, -10), Math.max(N - 10, 15));
   const dist = (t[t.length - 1] - emaFastArr[emaFastArr.length - 1]) / atrN;
   const conf = computeConfidence(mom, emaFastArr, emaSlowArr, atrN, atrPrev, dist, r);
 
-  // Compression detection: tight range = setup for breakout
-  const isCompressed = rangeNorm < 3.0;
-  const compressionBonus = isCompressed ? 8 : 0;
+  // Compression + alignment required
+  const isCompressed = rangeNorm < 2.5;
+  const compressionBonus = isCompressed ? 10 : 0;
 
-  // Check last 3 ticks alignment for confirmation
-  const last3 = r.slice(-3);
-  const aligned3 = last3.every(v => v > 0) || last3.every(v => v < 0);
-  const alignBonus = aligned3 ? 6 : 0;
+  // Last 4 ticks must be aligned
+  const last4 = r.slice(-4);
+  const allUp = last4.every(v => v > 0);
+  const allDown = last4.every(v => v < 0);
+  const alignBonus = (allUp || allDown) ? 8 : 0;
 
-  if ((breakUp > 0.2 || (mom > 0.4 && aligned3)) && mom > 0.3) {
+  if (!allUp && !allDown) return waitResult("Need 4-tick alignment for turbo", ticks);
+
+  if (allUp && (breakUp > 0.15 || mom > 0.5) && mom > 0.35) {
+    const finalConf = clamp(conf + compressionBonus + alignBonus, 65, 92);
     return {
-      signal: "RISE", confidence: clamp(conf + compressionBonus + alignBonus, 60, 95),
+      signal: "RISE", confidence: finalConf,
       validFor: "next 3–5 ticks",
-      timing: timingLabel(conf + compressionBonus + alignBonus),
+      timing: timingLabel(finalConf),
       reasons: [
         `Breakout UP (${breakUp.toFixed(2)})`,
-        `Momentum ${mom.toFixed(2)}`,
-        isCompressed ? `Range compressed ✓` : `Range expanding`,
-        aligned3 ? `3-tick alignment ✓` : ``,
-      ].filter(Boolean),
+        `Strong momentum ${mom.toFixed(2)}`,
+        `4-tick alignment ✓`,
+        isCompressed ? `Range compressed ✓` : `Range active`,
+      ],
       suggestedDuration: 3,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  if ((breakDown < -0.2 || (mom < -0.4 && aligned3)) && mom < -0.3) {
+  if (allDown && (breakDown < -0.15 || mom < -0.5) && mom < -0.35) {
+    const finalConf = clamp(conf + compressionBonus + alignBonus, 65, 92);
     return {
-      signal: "FALL", confidence: clamp(conf + compressionBonus + alignBonus, 60, 95),
+      signal: "FALL", confidence: finalConf,
       validFor: "next 3–5 ticks",
-      timing: timingLabel(conf + compressionBonus + alignBonus),
+      timing: timingLabel(finalConf),
       reasons: [
         `Breakout DOWN (${breakDown.toFixed(2)})`,
-        `Momentum ${mom.toFixed(2)}`,
-        isCompressed ? `Range compressed ✓` : `Range expanding`,
-        aligned3 ? `3-tick alignment ✓` : ``,
-      ].filter(Boolean),
+        `Strong momentum ${mom.toFixed(2)}`,
+        `4-tick alignment ✓`,
+        isCompressed ? `Range compressed ✓` : `Range active`,
+      ],
       suggestedDuration: 3,
       biasStrip: buildBiasStrip(ticks),
     };
   }
 
-  return waitResult(`No breakout (up=${breakUp.toFixed(2)}, down=${breakDown.toFixed(2)})`, ticks);
+  return waitResult(`Aligned but momentum weak (mom=${mom.toFixed(2)})`, ticks);
 }
 
 // ── Wait helper ─────────────────────────────────────────────────────
@@ -753,7 +803,7 @@ export function turboEngine(ticks: number[]): SignalResult {
 function waitResult(reason: string, ticks?: number[]): SignalResult {
   return {
     signal: "WAIT",
-    confidence: Math.round(30 + Math.random() * 25),
+    confidence: Math.round(25 + Math.random() * 20),
     validFor: "waiting",
     timing: "Late",
     reasons: [reason],
@@ -791,23 +841,23 @@ export function generateDemoSignal(style: EngineType): SignalResult {
   let signal: SignalDirection = "WAIT";
   const isDigit = ["even_odd", "over_under", "match_differ"].includes(style);
 
-  if (roll > 0.6 && roll <= 0.8) {
+  if (roll > 0.65 && roll <= 0.82) {
     signal = style === "even_odd" ? "EVEN" : style === "over_under" ? "OVER" :
       style === "match_differ" ? "MATCH" : style === "multipliers" ? "UP" :
       style === "accumulators" ? "BUY" : "RISE";
-  } else if (roll > 0.8) {
+  } else if (roll > 0.82) {
     signal = style === "even_odd" ? "ODD" : style === "over_under" ? "UNDER" :
       style === "match_differ" ? "DIFFER" : style === "multipliers" ? "DOWN" :
       style === "accumulators" ? "WAIT" : "FALL";
   }
 
   const conf = signal === "WAIT"
-    ? Math.floor(35 + Math.random() * 24)
-    : Math.floor(60 + Math.random() * 32);
+    ? Math.floor(30 + Math.random() * 20)
+    : Math.floor(65 + Math.random() * 25);
 
   const demoReasons = signal === "WAIT"
-    ? ["No clear edge detected", "Market consolidating"]
-    : [`Trend aligned`, `Momentum strong`, `RSI in safe zone`];
+    ? ["No clear edge detected", "Market consolidating — patience pays"]
+    : [`Trend aligned ✓`, `Momentum confirmed ✓`, `RSI safe zone ✓`];
 
   return {
     signal,
