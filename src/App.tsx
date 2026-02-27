@@ -48,6 +48,7 @@ import Testimonials from "./pages/Testimonials";
 import Press from "./pages/Press";
 import CaseStudies from "./pages/CaseStudies";
 import AuthoritySignals from "./pages/AuthoritySignals";
+import SEOAnswerPage from "./pages/SEOAnswerPage";
 import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 
@@ -125,6 +126,18 @@ const App = () => (
               <Route path="/press" element={<Press />} />
               <Route path="/case-studies" element={<CaseStudies />} />
               <Route path="/authority-signals" element={<AuthoritySignals />} />
+              {/* SEO Answer Pages */}
+              <Route path="/what-is-botvio" element={<SEOAnswerPage />} />
+              <Route path="/best-deriv-trading-bot" element={<SEOAnswerPage />} />
+              <Route path="/ai-trading-bot-for-boom-100" element={<SEOAnswerPage />} />
+              <Route path="/how-to-automate-deriv-trading" element={<SEOAnswerPage />} />
+              <Route path="/synthetic-indices-trading-bot" element={<SEOAnswerPage />} />
+              {/* Country SEO Pages */}
+              <Route path="/boom-bot-nigeria" element={<SEOAnswerPage />} />
+              <Route path="/deriv-bot-ghana" element={<SEOAnswerPage />} />
+              <Route path="/ai-trading-bot-zambia" element={<SEOAnswerPage />} />
+              <Route path="/boom-crash-bot-kenya" element={<SEOAnswerPage />} />
+              <Route path="/automated-trading-bot-south-africa" element={<SEOAnswerPage />} />
               <Route path="/:country" element={<CountryPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
