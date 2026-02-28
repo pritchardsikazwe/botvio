@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download, ScanSearch } from "lucide-react";
 import { TradesDrawer } from "@/components/trading/TradesDrawer";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -97,6 +97,15 @@ export const Header = () => {
               >
                 <Zap className="w-4 h-4 mr-1" />
                 Binance
+              </Button>
+
+              <Button 
+                variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/authority-signals')}
+              >
+                <ScanSearch className="w-4 h-4 mr-1" />
+                AI Analysis
               </Button>
 
               <Button 
@@ -220,7 +229,6 @@ export const Header = () => {
 
             {/* Mobile Navigation */}
             <nav className="lg:hidden flex items-center">
-              {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm">
@@ -233,72 +241,71 @@ export const Header = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/signals')}>
                       <Signal className="w-4 h-4 mr-2" />
-                      Signals & AI
+                      Signals
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/marketplace')}>
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Marketplace
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/blog')}>
+                      Blog
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
+                      <ScanSearch className="w-4 h-4 mr-2" />
+                      AI Chart Analysis
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/bots')}>
                       <Bot className="w-4 h-4 mr-2" />
                       Trading Bots
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/providers')}>
-                      <Users className="w-4 h-4 mr-2" />
-                      Copy Trading
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
-                      <Zap className="w-4 h-4 mr-2" />
-                      Become a Provider
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/learn')}>
-                      <GraduationCap className="w-4 h-4 mr-2" />
-                      Learn
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/accounts')}>
-                      <Wallet className="w-4 h-4 mr-2" />
-                      Accounts
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/strategies')}>
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      Strategies
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/bots/binance')}>
-                      <Zap className="w-4 h-4 mr-2" />
-                      Binance Bots
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/settings/binance')}>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Binance Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/marketplace')}>
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Marketplace
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/install')}>
-                      <Download className="w-4 h-4 mr-2" />
-                      Install App
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Resources</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => navigate('/blog')}>
-                      Blog
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
-                      <Signal className="w-4 h-4 mr-2" />
-                      Authority Signals
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/faq')}>
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      FAQ
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/testimonials')}>
-                      Testimonials
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/press')}>
-                      Press
-                    </DropdownMenuItem>
+                    {user && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/providers')}>
+                          <Users className="w-4 h-4 mr-2" />
+                          Copy Trading
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
+                          <Zap className="w-4 h-4 mr-2" />
+                          Become a Provider
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate('/learn')}>
+                          <GraduationCap className="w-4 h-4 mr-2" />
+                          Learn
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/accounts')}>
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Accounts
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/strategies')}>
+                          <BarChart3 className="w-4 h-4 mr-2" />
+                          Strategies
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/bots/binance')}>
+                          <Zap className="w-4 h-4 mr-2" />
+                          Binance Bots
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/install')}>
+                          <Download className="w-4 h-4 mr-2" />
+                          Install App
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Resources</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => navigate('/faq')}>
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          FAQ
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/testimonials')}>
+                          Testimonials
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/press')}>
+                          Press
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
             </nav>
           </div>
 
