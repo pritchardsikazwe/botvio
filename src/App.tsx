@@ -132,12 +132,20 @@ const App = () => (
               <Route path="/ai-trading-bot-for-boom-100" element={<SEOAnswerPage />} />
               <Route path="/how-to-automate-deriv-trading" element={<SEOAnswerPage />} />
               <Route path="/synthetic-indices-trading-bot" element={<SEOAnswerPage />} />
+              {/* Gold, Silver, Forex, Boom/Crash SEO Pages */}
+              <Route path="/gold-trading-signals" element={<SEOAnswerPage />} />
+              <Route path="/silver-trading-signals" element={<SEOAnswerPage />} />
+              <Route path="/forex-currency-signals" element={<SEOAnswerPage />} />
+              <Route path="/boom-crash-trading-guide" element={<SEOAnswerPage />} />
+              <Route path="/copy-trading-platform" element={<SEOAnswerPage />} />
+              <Route path="/how-to-make-money-online-trading" element={<SEOAnswerPage />} />
               {/* Country SEO Pages */}
               <Route path="/boom-bot-nigeria" element={<SEOAnswerPage />} />
               <Route path="/deriv-bot-ghana" element={<SEOAnswerPage />} />
               <Route path="/ai-trading-bot-zambia" element={<SEOAnswerPage />} />
               <Route path="/boom-crash-bot-kenya" element={<SEOAnswerPage />} />
               <Route path="/automated-trading-bot-south-africa" element={<SEOAnswerPage />} />
+              {/* Country landing pages */}
               <Route path="/:country" element={<CountryPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
