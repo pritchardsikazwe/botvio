@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
-import { useHasProductType } from "@/hooks/useEntitlements";
+import { useHasProductType, useHasEntitlement } from "@/hooks/useEntitlements";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CourseEnrollmentCards, COURSE_PROGRAMS } from "@/components/courses/CourseEnrollmentCards";
 import { 
   GraduationCap, 
   BookOpen, 
@@ -44,6 +45,27 @@ interface StrategyCategory {
 }
 
 const strategyCategories: StrategyCategory[] = [
+  {
+    id: "forex-beginner-mentorship",
+    name: "Forex Beginner Mentorship",
+    description: "Complete 4-week beginner course — $49",
+    icon: GraduationCap,
+    color: "text-emerald-500",
+  },
+  {
+    id: "forex-strategies-masterclass",
+    name: "Forex Strategies Masterclass",
+    description: "SMC, Supply & Demand, ICT — $79",
+    icon: TrendingUp,
+    color: "text-blue-500",
+  },
+  {
+    id: "pro-trading-bootcamp",
+    name: "Pro Trading Bootcamp",
+    description: "Gold, Indices, Prop Firm Prep — $149",
+    icon: Shield,
+    color: "text-amber-500",
+  },
   {
     id: "botvio-sniper",
     name: "Botvio Sniper",
@@ -118,6 +140,8 @@ const lessonIcons: { [key: string]: React.ComponentType<{ className?: string }> 
 const Learn = () => {
   const { user } = useAuth();
   const ownsCourse = useHasProductType("course");
+  // Check access for premium mentorship courses
+  const isPaidCategory = (cat: string) => COURSE_PROGRAMS.some(p => p.category === cat);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -202,6 +226,15 @@ const Learn = () => {
           </div>
         </div>
 
+        {/* Mentorship & Paid Courses */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Crown className="h-5 w-5 text-warning" />
+            Premium Mentorship Programs
+          </h2>
+          <CourseEnrollmentCards onEnroll={(cat) => handleCategoryChange(cat)} />
+        </div>
+
         {/* Strategy Categories */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Choose a Strategy</h2>
@@ -267,7 +300,12 @@ const Learn = () => {
           ) : (
             lessons.map((lesson, index) => {
               const Icon = lessonIcons[lesson.slug] || BookOpen;
-              const isLocked = !ownsCourse && index >= FREE_LESSON_LIMIT;
+              // For paid mentorship courses, check specific product entitlement
+              const paidCourse = COURSE_PROGRAMS.find(p => p.category === activeCategory);
+              const isLocked = paidCourse
+                ? index >= FREE_LESSON_LIMIT // First 2 free, rest locked unless enrolled
+                  && !ownsCourse
+                : !ownsCourse && index >= FREE_LESSON_LIMIT;
               return (
                 <Card 
                   key={lesson.id} 

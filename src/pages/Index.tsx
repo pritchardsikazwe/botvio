@@ -12,50 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   GraduationCap, Target, AlertTriangle, Bot, TrendingUp,
   ArrowRight, Zap, BookOpen, Package, MessageCircle,
-  ExternalLink, Download, Smartphone, Sparkles, Users, Star, Clock, CheckCircle
+  ExternalLink, Download, Smartphone, Sparkles
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
+import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { useNavigate, Link } from "react-router-dom";
-
-const MENTORSHIP_PROGRAMS = [
-  {
-    id: "beginner-forex",
-    title: "Forex Beginner Mentorship",
-    description: "1-on-1 mentorship program for complete beginners. Learn market structure, risk management, and live trading.",
-    price: 49,
-    duration: "4 Weeks",
-    features: ["Live trading sessions", "Personal mentor", "Trading plan template", "WhatsApp support group"],
-    level: "Beginner",
-    color: "from-emerald-500/20 to-teal-500/20",
-    borderColor: "border-emerald-500/30",
-    iconColor: "text-emerald-500",
-  },
-  {
-    id: "forex-masterclass",
-    title: "Forex Strategies Masterclass",
-    description: "Advanced strategies course covering Smart Money Concepts, Supply & Demand, and ICT methodology.",
-    price: 79,
-    duration: "8 Weeks",
-    features: ["30+ video lessons", "Live market analysis", "Strategy templates", "Certificate of completion"],
-    level: "Intermediate",
-    color: "from-blue-500/20 to-indigo-500/20",
-    borderColor: "border-blue-500/30",
-    iconColor: "text-blue-500",
-  },
-  {
-    id: "pro-trading",
-    title: "Pro Trading Bootcamp",
-    description: "Intensive bootcamp covering Gold, Indices & Forex with real account trading and performance tracking.",
-    price: 149,
-    duration: "12 Weeks",
-    features: ["Daily live sessions", "Account management tips", "Prop firm prep", "Lifetime community access"],
-    level: "Advanced",
-    color: "from-amber-500/20 to-orange-500/20",
-    borderColor: "border-amber-500/30",
-    iconColor: "text-amber-500",
-  },
-];
 
 const Index = () => {
   const { user } = useAuth();
@@ -153,52 +115,7 @@ const Index = () => {
               <Link to="/learn">All Courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {MENTORSHIP_PROGRAMS.map((program) => (
-              <Card
-                key={program.id}
-                className={`glass-card ${program.borderColor} hover:scale-[1.02] transition-all cursor-pointer overflow-hidden`}
-                onClick={() => navigate("/learn")}
-              >
-                {/* Gradient accent bar */}
-                <div className={`h-1.5 bg-gradient-to-r ${program.color.replace("/20", "").replace("/20", "")}`} />
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className={`text-xs ${program.iconColor} border-current`}>
-                      {program.level}
-                    </Badge>
-                    <Badge className="bg-gradient-to-r from-warning to-amber-500 text-white font-bold text-sm">
-                      ${program.price}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-lg leading-tight">{program.title}</CardTitle>
-                  <CardDescription className="text-sm">{program.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />{program.duration}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />Limited Spots
-                    </span>
-                  </div>
-                  <ul className="space-y-1.5">
-                    {program.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button variant="gold" className="w-full" size="sm">
-                    <Star className="h-4 w-4 mr-2" />
-                    Enroll Now
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <CourseEnrollmentCards compact />
         </section>
 
         {/* 4 — Featured Products (4 max) */}
