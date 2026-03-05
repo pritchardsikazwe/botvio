@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Admins and super_admins can manage signals" ON public.trading_signals;
+CREATE POLICY "Admins can manage signals" ON public.trading_signals FOR ALL TO authenticated USING (is_admin()) WITH CHECK (is_admin());
