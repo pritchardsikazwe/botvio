@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { DerivConnection } from "@/components/trading/DerivConnection";
-import { TradeModesGrid } from "@/components/trading/TradeModesGrid";
 import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -90,17 +89,12 @@ const Index = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-8">
-        {/* 1 — API Connection */}
+        {/* 1 — Latest Trading Signals */}
         <section>
-          <DerivConnection />
+          <HomeSignalsWidget />
         </section>
 
-        {/* 2 — Enhanced Trade Modes */}
-        <section>
-          <TradeModesGrid />
-        </section>
-
-        {/* 3 — AI Chart Analysis */}
+        {/* 2 — AI Chart Analysis */}
         <section>
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -109,9 +103,49 @@ const Index = () => {
           <ChartUpload />
         </section>
 
-        {/* 4 — Latest Signals (admin-posted) */}
+        {/* 3 — Featured Products (4 max) */}
+        {displayProducts.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" />
+                Featured Products
+              </h2>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/marketplace">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {displayProducts.map((product) => {
+                const productLink = product.type === "bot" ? "/bots" : product.type === "signal_pack" ? "/signals" : product.type === "course" ? "/learn" : "/marketplace";
+                return (
+                  <Card key={product.id} className="glass-card hover:border-primary/50 transition-colors">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          {product.type === "bot" ? <Bot className="h-4 w-4 text-primary" /> : product.type === "signal_pack" ? <Target className="h-4 w-4 text-primary" /> : product.type === "course" ? <GraduationCap className="h-4 w-4 text-primary" /> : <Zap className="h-4 w-4 text-primary" />}
+                          {product.name}
+                        </CardTitle>
+                        {product.price_usd > 0 ? <Badge variant="secondary">${product.price_usd}</Badge> : <Badge variant="outline">Free</Badge>}
+                      </div>
+                      <CardDescription>{product.short_description || "Trading tool"}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="capitalize">{product.type?.replace("_", " ") || "Product"}</Badge>
+                        <Button size="sm" variant="outline" asChild><Link to={productLink}>View</Link></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* 4 — Deriv API Connection */}
         <section>
-          <HomeSignalsWidget />
+          <DerivConnection />
         </section>
 
         {/* 5 — Quick Links (affiliates + community) */}
@@ -190,47 +224,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* 4 — Featured Products (4 max) */}
-        {displayProducts.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
-                Featured Products
-              </h2>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/marketplace">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {displayProducts.map((product) => {
-                const productLink = product.type === "bot" ? "/bots" : product.type === "signal_pack" ? "/signals" : product.type === "course" ? "/learn" : "/marketplace";
-                return (
-                  <Card key={product.id} className="glass-card hover:border-primary/50 transition-colors">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          {product.type === "bot" ? <Bot className="h-4 w-4 text-primary" /> : product.type === "signal_pack" ? <Target className="h-4 w-4 text-primary" /> : product.type === "course" ? <GraduationCap className="h-4 w-4 text-primary" /> : <Zap className="h-4 w-4 text-primary" />}
-                          {product.name}
-                        </CardTitle>
-                        {product.price_usd > 0 ? <Badge variant="secondary">${product.price_usd}</Badge> : <Badge variant="outline">Free</Badge>}
-                      </div>
-                      <CardDescription>{product.short_description || "Trading tool"}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="capitalize">{product.type?.replace("_", " ") || "Product"}</Badge>
-                        <Button size="sm" variant="outline" asChild><Link to={productLink}>View</Link></Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {/* 5 — Courses */}
+        {/* 6 — Courses */}
         {displayCourses.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
@@ -261,7 +255,7 @@ const Index = () => {
           </section>
         )}
 
-        {/* 6 — Banners */}
+        {/* 7 — Banners */}
         <section className="space-y-4">
           <Card className="glass-card border-warning/30 overflow-hidden">
             <CardContent className="py-6">
