@@ -19,6 +19,8 @@ export interface ManualSignal {
   is_manual: boolean;
   posted_by: string | null;
   expires_at: string | null;
+  outcome: string | null;
+  outcome_updated_at: string | null;
 }
 
 interface CreateSignalInput {
@@ -220,6 +222,36 @@ export const useUpdateSignalStatus = () => {
       queryClient.invalidateQueries({ queryKey: ["manual-signals"] });
       queryClient.invalidateQueries({ queryKey: ["latest-signals"] });
       toast.success("Signal status updated!");
+    },
+  });
+};
+
+export const useUpdateSignalOutcome = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, outcome }: { id: string; outcome: "win" | "loss" | "pending" }) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from("trading_signals")
+        .update({
+          outcome,
+          outcome_updated_at: new Date().toISOString(),
+          outcome_updated_by: userData.user.id,
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { outcome }) => {
+      queryClient.invalidateQueries({ queryKey: ["manual-signals"] });
+      queryClient.invalidateQueries({ queryKey: ["latest-signals"] });
+      toast.success(`Signal marked as ${outcome}`);
+    },
+    onError: (error) => {
+      toast.error(`Failed to update outcome: ${error.message}`);
     },
   });
 };
