@@ -131,8 +131,8 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <SEOHead 
-        title="AI Trading Bots & Signals" 
-        description="Automate your trading on Deriv, Exness & Binance. Deploy AI bots, copy top traders, and receive real-time signals."
+        title="Forex Signals, AI Chart Analysis & Gold Trading Mentorship" 
+        description="Free forex signals, AI chart analysis tools, gold trading mentorship. Get Deriv signals, Exness signals, Weltrade signals & XAUUSD analysis from Botvio."
       />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
