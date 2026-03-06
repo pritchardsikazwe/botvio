@@ -191,15 +191,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       return;
     }
 
-    // Allow guests up to 10 uploads, then require sign-in
-    if (!user) {
-      const guestCount = getGuestUploadCount();
-      if (guestCount >= 10) {
-        setShowAuthModal(true);
-        toast.error("Free analysis limit reached. Sign up to continue!");
-        return;
-      }
-    }
+    // No limits — everyone can use freely
 
     try {
       setIsUploading(true);
