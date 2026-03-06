@@ -142,17 +142,18 @@ const Blog = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: "Botvio Trading Blog",
-    description: "Expert trading guides on how to start forex, how to earn online, Deriv binary options, and AI-powered automated trading strategies.",
+    name: "Botvio Forex & Gold Trading Blog",
+    description: "Expert guides on forex signals, gold trading, XAUUSD analysis, AI chart analysis, Deriv signals, Exness signals, Weltrade signals, and forex mentorship.",
     url: "https://botvio.live/blog",
     publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live" },
+    keywords: "forex signals, gold signals, XAUUSD signals, AI forex analysis, gold trading, gold brokers, gold analysis, deriv signals, exness signals, weltrade signals, forex mentorship, AI chart analysis, gold traders, forex trading signals, copy trading signals, best gold broker, XAUUSD analysis, free forex signals, trading mentorship, binance signals",
   };
 
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Blog – How to Start Forex, Earn Online & AI Trading"
-        description="Expert guides on how to start forex trading, how to earn money online, Deriv binary options strategies, and AI-powered automated trading with Botvio."
+        title="Blog – Gold Signals, Forex Mentorship & AI Chart Analysis"
+        description="Expert guides on gold trading signals, XAUUSD analysis, forex mentorship, Deriv signals, Exness signals, Weltrade signals & AI-powered chart analysis tools."
         jsonLd={jsonLd}
       />
       <Header />
