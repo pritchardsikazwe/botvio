@@ -114,14 +114,14 @@ export const AdminSEOPagesTab = () => {
 
       // Signal Pair Pages
       Object.entries(signalPairPages).forEach(([slug, page]) => {
-        const fullSlug = `signals/${slug}`;
+          const fullSlug = `signals/${slug}`;
         if (!existingSlugs.has(fullSlug)) {
           inserts.push({
             slug: fullSlug,
             page_type: "signal_pair",
-            meta_title: `${page.name} Signals — Free AI Trading Analysis`,
-            meta_description: `Get free ${page.name} trading signals with AI analysis. Entry, SL & TP levels.`,
-            h1: `${page.name} Trading Signals`,
+            meta_title: `${page.displayName} Signals — Free AI Trading Analysis`,
+            meta_description: `Get free ${page.displayName} trading signals with AI analysis. Entry, SL & TP levels.`,
+            h1: `${page.displayName} Trading Signals`,
             content_json: [{ heading: "Analysis", content: page.description }],
             faqs_json: [],
             keywords: [page.pair, `${page.pair} signals`],
