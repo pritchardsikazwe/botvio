@@ -191,15 +191,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       return;
     }
 
-    // Allow guests up to 10 uploads, then require sign-in
-    if (!user) {
-      const guestCount = getGuestUploadCount();
-      if (guestCount >= 10) {
-        setShowAuthModal(true);
-        toast.error("Free analysis limit reached. Sign up to continue!");
-        return;
-      }
-    }
+    // No limits — everyone can use freely
 
     try {
       setIsUploading(true);
@@ -319,13 +311,9 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             <Badge variant="outline" className="text-xs text-primary border-primary/30">
               Auto-posts signals
             </Badge>
-          ) : user ? (
-            <Badge variant="outline" className="text-xs text-success border-success/30">
-              Unlimited analyses
-            </Badge>
           ) : (
-            <Badge variant="outline" className="text-xs">
-              Sign in required
+            <Badge variant="outline" className="text-xs text-success border-success/30">
+              Free — Unlimited
             </Badge>
           )}
         </div>

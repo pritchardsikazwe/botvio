@@ -7,6 +7,8 @@ import { ChartView } from "@/components/chart/ChartView";
 import { ChartAnalysisPanel } from "@/components/chart/ChartAnalysisPanel";
 import { TradePlanBox } from "@/components/chart/TradePlanBox";
 import { ChartHeader } from "@/components/chart/ChartHeader";
+import { ChartBrokerLinks } from "@/components/chart/ChartBrokerLinks";
+import { ChartTipsPanel } from "@/components/chart/ChartTipsPanel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,12 +22,10 @@ const ChartPage = () => {
   const [showLevels, setShowLevels] = useState(true);
   const [showNews, setShowNews] = useState(true);
 
-  // Decode symbol: XAUUSD -> XAU/USD
   const displaySymbol = symbol
     ? symbol.replace(/([A-Z]{3})([A-Z]{3,})/, "$1/$2")
     : "";
 
-  // Fetch asset
   const { data: asset } = useQuery({
     queryKey: ["chart-asset", displaySymbol],
     queryFn: async () => {
@@ -41,7 +41,6 @@ const ChartPage = () => {
     enabled: !!displaySymbol,
   });
 
-  // Fetch latest quote
   const { data: quote } = useQuery({
     queryKey: ["chart-quote", asset?.id],
     queryFn: async () => {
@@ -59,7 +58,6 @@ const ChartPage = () => {
     refetchInterval: 30000,
   });
 
-  // Fetch latest AI signal
   const { data: signal } = useQuery({
     queryKey: ["chart-signal", asset?.id],
     queryFn: async () => {
@@ -76,7 +74,6 @@ const ChartPage = () => {
     enabled: !!asset,
   });
 
-  // Fetch card metrics
   const { data: metrics } = useQuery({
     queryKey: ["chart-metrics", asset?.id],
     queryFn: async () => {
@@ -93,7 +90,6 @@ const ChartPage = () => {
     enabled: !!asset,
   });
 
-  // Fetch indicators
   const { data: indicator } = useQuery({
     queryKey: ["chart-indicator", asset?.id],
     queryFn: async () => {
@@ -111,7 +107,6 @@ const ChartPage = () => {
     enabled: !!asset,
   });
 
-  // Fetch candles for chart
   const { data: candles } = useQuery({
     queryKey: ["chart-candles", asset?.id, timeframe],
     queryFn: async () => {
@@ -142,7 +137,6 @@ const ChartPage = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-4">
-        {/* Back Button */}
         <Button
           variant="ghost"
           size="sm"
@@ -159,7 +153,6 @@ const ChartPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Chart Header */}
             <ChartHeader
               symbol={displaySymbol}
               price={quote?.price ?? null}
@@ -171,7 +164,6 @@ const ChartPage = () => {
 
             {/* Main Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              {/* Chart */}
               <div className="lg:col-span-8 xl:col-span-9">
                 <ChartView
                   candles={candles || []}
@@ -189,7 +181,6 @@ const ChartPage = () => {
                 />
               </div>
 
-              {/* Analysis Panel */}
               <div className="lg:col-span-4 xl:col-span-3 space-y-4">
                 <ChartAnalysisPanel
                   signal={signal}
@@ -197,12 +188,13 @@ const ChartPage = () => {
                   indicator={indicator}
                   symbol={displaySymbol}
                 />
-                <TradePlanBox
-                  signal={signal}
-                  symbol={displaySymbol}
-                />
+                <TradePlanBox signal={signal} symbol={displaySymbol} />
+                <ChartBrokerLinks symbol={displaySymbol} />
               </div>
             </div>
+
+            {/* Below Chart: News Calendar & Tips */}
+            <ChartTipsPanel metrics={metrics} signal={signal} symbol={displaySymbol} />
           </div>
         )}
       </main>

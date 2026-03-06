@@ -10,7 +10,7 @@ const CHECKLIST = [
 ];
 
 export function TradingChecklist() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   return (
     <div className="rounded-xl border border-primary/30 bg-primary/5 overflow-hidden">
