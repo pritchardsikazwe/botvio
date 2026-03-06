@@ -7,10 +7,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYMBOLS = [
+// Process only ONE symbol per invocation to stay within Twelve Data free tier (8 credits/min)
+// The cron scheduler calls this function once per minute with a rotating symbol index.
+
+const ALL_SYMBOLS = [
   "XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "USD/JPY", "EUR/USD", "AUD/USD",
 ];
-const TIMEFRAMES = ["5min", "15min", "1h", "4h"];
+const TIMEFRAMES = ["1h", "4h"]; // Reduced to 2 timeframes to fit in 8 credits (1 price + 2 candle = 3 credits per call)
 
 function toNumber(value: unknown): number | null {
   const n = Number(value);
@@ -66,9 +69,7 @@ function calculateMACD(closes: number[]): { macd: number | null; signal: number 
   const ema12 = calculateEMA(closes, 12);
   const ema26 = calculateEMA(closes, 26);
   if (ema12 == null || ema26 == null) return { macd: null, signal: null };
-  const macdVal = ema12 - ema26;
-  // Simplified signal line
-  return { macd: macdVal, signal: null };
+  return { macd: ema12 - ema26, signal: null };
 }
 
 function detectTrend(ema20: number | null, ema50: number | null, rsi14: number | null): string {
@@ -88,17 +89,6 @@ serve(async (req) => {
   const tdApiKey = Deno.env.get("TWELVE_DATA_API_KEY") ?? "";
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Auth check - admin only
-  const authHeader = req.headers.get("Authorization") || "";
-  if (authHeader.startsWith("Bearer ")) {
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData } = await supabase.auth.getUser(token);
-    if (userData?.user?.id) {
-      const { data: isAdmin } = await supabase.rpc("is_admin");
-      // Allow non-admin to trigger but log it
-    }
-  }
-
   if (!tdApiKey) {
     return new Response(
       JSON.stringify({ error: "TWELVE_DATA_API_KEY not configured" }),
@@ -107,136 +97,141 @@ serve(async (req) => {
   }
 
   try {
-    // Get asset map
+    // Determine which symbol to process
+    let body: any = {};
+    try { body = await req.json(); } catch {}
+    
+    let symbolIndex = body.symbol_index;
+    
+    // If no index provided, use a rotating index based on current minute
+    if (symbolIndex == null) {
+      symbolIndex = new Date().getMinutes() % ALL_SYMBOLS.length;
+    }
+    
+    const symbol = ALL_SYMBOLS[symbolIndex % ALL_SYMBOLS.length];
+    console.log(`Processing symbol: ${symbol} (index ${symbolIndex})`);
+
+    // Get asset record
     const { data: assets, error: assetsErr } = await supabase
       .from("assets")
       .select("id,symbol,provider_symbol")
-      .eq("is_active", true);
+      .eq("symbol", symbol)
+      .eq("is_active", true)
+      .limit(1);
     if (assetsErr) throw assetsErr;
+    
+    const asset = assets?.[0];
+    if (!asset) {
+      return new Response(
+        JSON.stringify({ error: `Asset ${symbol} not found` }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-    const assetMap = new Map(assets?.map((a: any) => [a.symbol, a]) || []);
-
-    // 1. Fetch latest prices
-    const priceUrl = `https://api.twelvedata.com/price?symbol=${SYMBOLS.join(",")}&apikey=${tdApiKey}`;
+    // 1. Fetch price (1 API credit)
+    const priceUrl = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(asset.provider_symbol)}&apikey=${tdApiKey}`;
     const priceRes = await fetch(priceUrl);
-    if (!priceRes.ok) throw new Error(`Price fetch failed: ${priceRes.status}`);
     const priceJson = await priceRes.json();
-
-    const quoteRows: any[] = [];
-    for (const symbol of SYMBOLS) {
-      const asset = assetMap.get(symbol) as any;
-      if (!asset) continue;
-      const raw = priceJson[symbol]?.price ?? priceJson[symbol];
-      const price = toNumber(raw);
-      if (price != null) {
-        quoteRows.push({ asset_id: asset.id, price });
-      }
+    const price = toNumber(priceJson?.price);
+    
+    if (price != null) {
+      await supabase.from("market_quotes").insert({ asset_id: asset.id, price });
     }
 
-    if (quoteRows.length > 0) {
-      await supabase.from("market_quotes").insert(quoteRows);
-    }
-
-    // 2. Fetch candles + compute indicators for each symbol/timeframe
+    // 2. Fetch candles for each timeframe (1 API credit each = 2 credits)
     let candlesFetched = 0;
-    for (const symbol of SYMBOLS) {
-      const asset = assetMap.get(symbol) as any;
-      if (!asset) continue;
-
-      for (const tf of TIMEFRAMES) {
-        try {
-          const tsUrl = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(asset.provider_symbol)}&interval=${tf}&outputsize=120&format=JSON&apikey=${tdApiKey}`;
-          const tsRes = await fetch(tsUrl);
-          if (!tsRes.ok) continue;
-          const tsJson = await tsRes.json();
-          if (tsJson.status === "error") {
-            console.error(`Twelve Data error for ${symbol} ${tf}: ${tsJson.message}`);
-            continue;
-          }
-
-          const values = tsJson.values || [];
-          if (!values.length) continue;
-
-          // Save candles
-          const candleRows = values.map((v: any) => ({
-            asset_id: asset.id,
-            timeframe: tf,
-            candle_time: new Date(v.datetime).toISOString(),
-            open: toNumber(v.open),
-            high: toNumber(v.high),
-            low: toNumber(v.low),
-            close: toNumber(v.close),
-            volume: toNumber(v.volume),
-            provider: "twelvedata",
-          }));
-
-          await supabase
-            .from("market_candles")
-            .upsert(candleRows, { onConflict: "asset_id,timeframe,candle_time" });
-
-          candlesFetched += candleRows.length;
-
-          // Compute indicators
-          const candles = values
-            .map((v: any) => ({
-              datetime: v.datetime,
-              open: toNumber(v.open) || 0,
-              high: toNumber(v.high) || 0,
-              low: toNumber(v.low) || 0,
-              close: toNumber(v.close) || 0,
-              volume: toNumber(v.volume) || 0,
-            }))
-            .reverse(); // oldest first
-
-          const closes = candles.map((c: any) => c.close);
-          const ema20 = calculateEMA(closes, 20);
-          const ema50 = calculateEMA(closes, 50);
-          const rsi14 = calculateRSI(closes, 14);
-          const atr14 = calculateATR(candles, 14);
-          const { macd, signal: macdSignal } = calculateMACD(closes);
-          const trend = detectTrend(ema20, ema50, rsi14);
-
-          const recent = candles.slice(-20);
-          const support1 = Math.min(...recent.map((c: any) => c.low));
-          const resistance1 = Math.max(...recent.map((c: any) => c.high));
-          const latest = candles[candles.length - 1];
-
-          await supabase.from("market_indicators").upsert({
-            asset_id: asset.id,
-            timeframe: tf,
-            candle_time: new Date(latest.datetime).toISOString(),
-            ema_20: ema20,
-            ema_50: ema50,
-            rsi_14: rsi14,
-            atr_14: atr14,
-            macd,
-            macd_signal: macdSignal,
-            support_1: support1,
-            resistance_1: resistance1,
-            trend,
-          }, { onConflict: "asset_id,timeframe,candle_time" });
-
-        } catch (e) {
-          console.error(`Error processing ${symbol} ${tf}:`, e);
+    
+    for (const tf of TIMEFRAMES) {
+      try {
+        const tsUrl = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(asset.provider_symbol)}&interval=${tf}&outputsize=120&format=JSON&apikey=${tdApiKey}`;
+        const tsRes = await fetch(tsUrl);
+        const tsJson = await tsRes.json();
+        
+        if (tsJson.status === "error") {
+          console.error(`Twelve Data error for ${symbol} ${tf}: ${tsJson.message}`);
+          continue;
         }
+
+        const values = tsJson.values || [];
+        if (!values.length) continue;
+
+        // Save candles
+        const candleRows = values.map((v: any) => ({
+          asset_id: asset.id,
+          timeframe: tf,
+          candle_time: new Date(v.datetime).toISOString(),
+          open: toNumber(v.open),
+          high: toNumber(v.high),
+          low: toNumber(v.low),
+          close: toNumber(v.close),
+          volume: toNumber(v.volume),
+          provider: "twelvedata",
+        }));
+
+        await supabase
+          .from("market_candles")
+          .upsert(candleRows, { onConflict: "asset_id,timeframe,candle_time" });
+
+        candlesFetched += candleRows.length;
+
+        // Compute indicators
+        const candles = values
+          .map((v: any) => ({
+            datetime: v.datetime,
+            open: toNumber(v.open) || 0,
+            high: toNumber(v.high) || 0,
+            low: toNumber(v.low) || 0,
+            close: toNumber(v.close) || 0,
+            volume: toNumber(v.volume) || 0,
+          }))
+          .reverse();
+
+        const closes = candles.map((c: any) => c.close);
+        const ema20 = calculateEMA(closes, 20);
+        const ema50 = calculateEMA(closes, 50);
+        const rsi14 = calculateRSI(closes, 14);
+        const atr14 = calculateATR(candles, 14);
+        const { macd, signal: macdSignal } = calculateMACD(closes);
+        const trend = detectTrend(ema20, ema50, rsi14);
+
+        const recent = candles.slice(-20);
+        const support1 = Math.min(...recent.map((c: any) => c.low));
+        const resistance1 = Math.max(...recent.map((c: any) => c.high));
+        const latest = candles[candles.length - 1];
+
+        await supabase.from("market_indicators").upsert({
+          asset_id: asset.id,
+          timeframe: tf,
+          candle_time: new Date(latest.datetime).toISOString(),
+          ema_20: ema20,
+          ema_50: ema50,
+          rsi_14: rsi14,
+          atr_14: atr14,
+          macd,
+          macd_signal: macdSignal,
+          support_1: support1,
+          resistance_1: resistance1,
+          trend,
+        }, { onConflict: "asset_id,timeframe,candle_time" });
+
+      } catch (e) {
+        console.error(`Error processing ${symbol} ${tf}:`, e);
       }
     }
+
+    console.log(`Done: ${symbol} - ${candlesFetched} candles, price=${price}`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        quotes_saved: quoteRows.length,
+        symbol,
+        price_saved: price != null,
         candles_fetched: candlesFetched,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
     console.error("Market ingestion error:", error);
-    await supabase.from("edge_logs").insert({
-      function_name: "market-data-ingest",
-      error_code: "INGESTION_ERROR",
-      error_message: error.message,
-    });
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
