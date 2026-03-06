@@ -67,6 +67,17 @@ interface CardMetrics {
 const ASSET_ICONS: Record<string, string> = {
   "XAU/USD": "🥇", "XAG/USD": "🥈", "BTC/USD": "₿",
   "GBP/USD": "£", "USD/JPY": "¥", "EUR/USD": "€", "AUD/USD": "🇦🇺",
+  "ETH/USD": "⟠", "SOL/USD": "◎", "BNB/USD": "🔶", "XRP/USD": "✕", "DOGE/USD": "🐕",
+};
+
+// Binance symbol mapping — only supported crypto assets
+const BINANCE_SYMBOL_MAP: Record<string, string> = {
+  "BTC/USD": "BTCUSDT",
+  "ETH/USD": "ETHUSDT",
+  "SOL/USD": "SOLUSDT",
+  "BNB/USD": "BNBUSDT",
+  "XRP/USD": "XRPUSDT",
+  "DOGE/USD": "DOGEUSDT",
 };
 
 const SIGNAL_COLORS: Record<string, string> = {
