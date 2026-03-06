@@ -196,15 +196,15 @@ export function ChartView({
         // ── Wick rejections (small horizontal markers) ──────────────────
         const rejections = detectWickRejections(candles);
         rejections.forEach((rej) => {
-          const color = rej.type === "wick_rejection_high"
-            ? "hsl(280 80% 65%)"  // purple for upper wick rejections
-            : "hsl(180 80% 55%)"; // cyan for lower wick rejections
+          const isHigh = rej.type === "wick_rejection_high";
+          const color = isHigh ? "hsl(280 80% 65%)" : "hsl(180 80% 55%)";
           const s = chart.addSeries(LineSeries, {
             color,
             lineWidth: 1,
             lineStyle: 1,
             priceLineVisible: false,
-            lastValueVisible: false,
+            lastValueVisible: true,
+            title: isHigh ? "WR↓" : "WR↑",
           });
           const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
           s.setData([
