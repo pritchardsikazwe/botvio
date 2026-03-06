@@ -7,7 +7,10 @@ import {
   TrendingUp, TrendingDown, Minus, Activity, Sparkles, Clock,
   Newspaper, BarChart3, Shield, Target, Lightbulb, ArrowDown, ArrowUp,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { TradingChecklist } from "./market/TradingChecklist";
+import { NewsImpactBanner } from "./market/NewsImpactBanner";
+import { PatternAlerts } from "./market/PatternAlerts";
 
 interface Asset {
   id: string;
@@ -64,16 +67,23 @@ const ASSET_ICONS: Record<string, string> = {
 };
 
 const SIGNAL_COLORS: Record<string, string> = {
-  buy: "bg-success/15 text-success border-success/30",
-  sell: "bg-destructive/15 text-destructive border-destructive/30",
-  hold: "bg-warning/15 text-warning border-warning/30",
+  buy: "bg-success/20 text-success border-success/40 shadow-success/10 shadow-sm",
+  sell: "bg-destructive/20 text-destructive border-destructive/40 shadow-destructive/10 shadow-sm",
+  hold: "bg-warning/20 text-warning border-warning/40",
   avoid: "bg-muted text-muted-foreground border-border",
 };
 
+const SIGNAL_CARD_GLOW: Record<string, string> = {
+  buy: "border-success/30 shadow-[0_0_15px_-3px_hsl(var(--success)/0.15)]",
+  sell: "border-destructive/30 shadow-[0_0_15px_-3px_hsl(var(--destructive)/0.15)]",
+  hold: "border-warning/20",
+  avoid: "",
+};
+
 const TREND_ICONS: Record<string, React.ReactNode> = {
-  bullish: <TrendingUp className="h-3.5 w-3.5 text-success" />,
-  bearish: <TrendingDown className="h-3.5 w-3.5 text-destructive" />,
-  neutral: <Minus className="h-3.5 w-3.5 text-muted-foreground" />,
+  bullish: <TrendingUp className="h-4 w-4 text-success" />,
+  bearish: <TrendingDown className="h-4 w-4 text-destructive" />,
+  neutral: <Minus className="h-4 w-4 text-muted-foreground" />,
 };
 
 function formatPrice(price: number | null, symbol: string): string {
@@ -100,22 +110,22 @@ function Countdown({ targetTime }: { targetTime: string }) {
     return () => clearInterval(iv);
   }, [targetTime]);
 
-  return <span className="font-mono text-xs font-medium">{remaining}</span>;
+  return <span className="font-mono text-xs font-semibold text-primary">{remaining}</span>;
 }
 
 function SessionBlock({ metrics }: { metrics: CardMetrics }) {
   if (!metrics.current_session) return null;
   return (
-    <div className="flex items-center justify-between text-xs">
-      <span className="text-muted-foreground flex items-center gap-1">
-        <Clock className="h-3 w-3" /> Session
+    <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-2">
+      <span className="text-foreground/70 flex items-center gap-1.5 font-medium">
+        <Clock className="h-3.5 w-3.5 text-primary" /> Session
       </span>
       <div className="flex items-center gap-2">
-        <Badge variant="outline" className="text-[10px] py-0 border-primary/40 text-primary">
+        <Badge variant="outline" className="text-[10px] py-0 border-primary/50 text-primary font-bold bg-primary/10">
           {metrics.current_session}
         </Badge>
         {metrics.next_session && metrics.next_session_open_at && (
-          <span className="text-muted-foreground text-[10px]">
+          <span className="text-foreground/60 text-[10px]">
             → {metrics.next_session} in <Countdown targetTime={metrics.next_session_open_at} />
           </span>
         )}
@@ -127,20 +137,20 @@ function SessionBlock({ metrics }: { metrics: CardMetrics }) {
 function NewsBlock({ metrics }: { metrics: CardMetrics }) {
   if (!metrics.next_high_impact_event) return null;
   return (
-    <div className="bg-destructive/5 border border-destructive/20 rounded-md px-2.5 py-1.5">
-      <div className="flex items-center gap-1 mb-0.5">
-        <Newspaper className="h-3 w-3 text-destructive" />
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-destructive">
-          Next Impact News
+    <div className="bg-destructive/10 border border-destructive/25 rounded-lg px-3 py-2">
+      <div className="flex items-center gap-1.5 mb-1">
+        <Newspaper className="h-3.5 w-3.5 text-destructive" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">
+          Impact News
         </span>
       </div>
       <div className="flex items-center justify-between text-xs">
-        <span className="truncate max-w-[60%]">
-          {metrics.next_high_impact_currency} {metrics.next_high_impact_event}
+        <span className="truncate max-w-[60%] text-foreground font-medium">
+          {metrics.next_high_impact_currency} — {metrics.next_high_impact_event}
         </span>
         {metrics.next_high_impact_time && (
-          <span className="text-destructive font-medium">
-            in <Countdown targetTime={metrics.next_high_impact_time} />
+          <span className="text-destructive font-bold text-[11px]">
+            <Countdown targetTime={metrics.next_high_impact_time} />
           </span>
         )}
       </div>
@@ -154,22 +164,22 @@ function DayRangeBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: stri
     ? Math.abs(metrics.day_high - metrics.day_low) : null;
 
   return (
-    <div className="grid grid-cols-3 gap-1 text-[10px]">
-      <div className="bg-success/10 rounded px-1.5 py-1 text-center">
-        <div className="text-muted-foreground flex items-center justify-center gap-0.5">
-          <ArrowDown className="h-2.5 w-2.5" /> Day Low
+    <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+      <div className="bg-success/10 border border-success/20 rounded-lg px-2 py-1.5 text-center">
+        <div className="text-foreground/50 flex items-center justify-center gap-0.5 text-[9px] font-semibold uppercase">
+          <ArrowDown className="h-2.5 w-2.5 text-success" /> Low
         </div>
-        <div className="font-semibold text-success">{formatPrice(metrics.day_low ? Number(metrics.day_low) : null, symbol)}</div>
+        <div className="font-bold text-success mt-0.5">{formatPrice(metrics.day_low ? Number(metrics.day_low) : null, symbol)}</div>
       </div>
-      <div className="bg-destructive/10 rounded px-1.5 py-1 text-center">
-        <div className="text-muted-foreground flex items-center justify-center gap-0.5">
-          <ArrowUp className="h-2.5 w-2.5" /> Day High
+      <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-2 py-1.5 text-center">
+        <div className="text-foreground/50 flex items-center justify-center gap-0.5 text-[9px] font-semibold uppercase">
+          <ArrowUp className="h-2.5 w-2.5 text-destructive" /> High
         </div>
-        <div className="font-semibold text-destructive">{formatPrice(metrics.day_high ? Number(metrics.day_high) : null, symbol)}</div>
+        <div className="font-bold text-destructive mt-0.5">{formatPrice(metrics.day_high ? Number(metrics.day_high) : null, symbol)}</div>
       </div>
-      <div className="bg-muted/50 rounded px-1.5 py-1 text-center">
-        <div className="text-muted-foreground">Range</div>
-        <div className="font-semibold">{range != null ? formatPrice(range, symbol) : "—"}</div>
+      <div className="bg-muted/50 border border-border/30 rounded-lg px-2 py-1.5 text-center">
+        <div className="text-foreground/50 text-[9px] font-semibold uppercase">Range</div>
+        <div className="font-bold text-foreground mt-0.5">{range != null ? formatPrice(range, symbol) : "—"}</div>
       </div>
     </div>
   );
@@ -178,16 +188,16 @@ function DayRangeBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: stri
 function H4Block({ metrics, symbol }: { metrics: CardMetrics; symbol: string }) {
   if (!metrics.current_4h_block) return null;
   return (
-    <div className="flex items-center justify-between text-xs">
-      <span className="text-muted-foreground flex items-center gap-1">
-        <BarChart3 className="h-3 w-3" /> 4H Block
+    <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-2">
+      <span className="text-foreground/70 flex items-center gap-1.5 font-medium">
+        <BarChart3 className="h-3.5 w-3.5 text-primary" /> 4H Block
       </span>
       <div className="flex items-center gap-2 text-[10px]">
-        <Badge variant="outline" className="py-0 text-[10px]">{metrics.current_4h_block}</Badge>
+        <Badge variant="outline" className="py-0 text-[10px] font-bold bg-primary/10 border-primary/30 text-primary">{metrics.current_4h_block}</Badge>
         {metrics.current_4h_high != null && (
-          <span className="text-muted-foreground">
-            H: <span className="text-foreground font-mono">{formatPrice(Number(metrics.current_4h_high), symbol)}</span>
-            {" "}L: <span className="text-foreground font-mono">{formatPrice(Number(metrics.current_4h_low), symbol)}</span>
+          <span className="text-foreground/60">
+            H: <span className="text-foreground font-mono font-bold">{formatPrice(Number(metrics.current_4h_high), symbol)}</span>
+            {" "}L: <span className="text-foreground font-mono font-bold">{formatPrice(Number(metrics.current_4h_low), symbol)}</span>
           </span>
         )}
       </div>
@@ -200,26 +210,26 @@ function LevelsBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: string
   if (!hasLevels) return null;
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        <Shield className="h-3 w-3" /> Key Levels
+    <div className="space-y-1.5 bg-muted/20 rounded-lg px-3 py-2 border border-border/30">
+      <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-foreground/60">
+        <Shield className="h-3.5 w-3.5 text-primary" /> Key Levels
       </div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
         <div className="flex justify-between">
-          <span className="text-success">S1</span>
-          <span className="font-mono">{formatPrice(metrics.support_1 ? Number(metrics.support_1) : null, symbol)}</span>
+          <span className="text-success font-bold">S1</span>
+          <span className="font-mono font-semibold text-foreground">{formatPrice(metrics.support_1 ? Number(metrics.support_1) : null, symbol)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-destructive">R1</span>
-          <span className="font-mono">{formatPrice(metrics.resistance_1 ? Number(metrics.resistance_1) : null, symbol)}</span>
+          <span className="text-destructive font-bold">R1</span>
+          <span className="font-mono font-semibold text-foreground">{formatPrice(metrics.resistance_1 ? Number(metrics.resistance_1) : null, symbol)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-success/70">S2</span>
-          <span className="font-mono">{formatPrice(metrics.support_2 ? Number(metrics.support_2) : null, symbol)}</span>
+          <span className="text-success/60 font-bold">S2</span>
+          <span className="font-mono font-semibold text-foreground/70">{formatPrice(metrics.support_2 ? Number(metrics.support_2) : null, symbol)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-destructive/70">R2</span>
-          <span className="font-mono">{formatPrice(metrics.resistance_2 ? Number(metrics.resistance_2) : null, symbol)}</span>
+          <span className="text-destructive/60 font-bold">R2</span>
+          <span className="font-mono font-semibold text-foreground/70">{formatPrice(metrics.resistance_2 ? Number(metrics.resistance_2) : null, symbol)}</span>
         </div>
       </div>
     </div>
@@ -229,10 +239,10 @@ function LevelsBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: string
 function TipBlock({ tip }: { tip: string | null }) {
   if (!tip) return null;
   return (
-    <div className="bg-primary/5 border border-primary/20 rounded-md px-2.5 py-1.5">
-      <div className="flex items-start gap-1.5">
-        <Lightbulb className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-        <p className="text-[11px] text-foreground/80 leading-relaxed">{tip}</p>
+    <div className="bg-primary/8 border border-primary/25 rounded-lg px-3 py-2">
+      <div className="flex items-start gap-2">
+        <Lightbulb className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+        <p className="text-[11px] text-foreground leading-relaxed font-medium">{tip}</p>
       </div>
     </div>
   );
@@ -347,6 +357,56 @@ export function MarketDashboard() {
   const signalMap = new Map(signals?.map((s) => [s.asset_id, s]) || []);
   const metricsMap = new Map(cardMetrics?.map((m) => [m.asset_id, m]) || []);
 
+  // Collect all news events for the top banner
+  const allNewsEvents = useMemo(() => {
+    if (!cardMetrics?.length) return [];
+    return cardMetrics
+      .filter((m) => m.next_high_impact_event && m.next_high_impact_time)
+      .map((m) => ({
+        event: m.next_high_impact_event!,
+        currency: m.next_high_impact_currency || "",
+        level: m.next_high_impact_level || "high",
+        time: m.next_high_impact_time!,
+      }))
+      // Deduplicate by event+time
+      .filter((e, i, arr) => arr.findIndex((x) => x.event === e.event && x.time === e.time) === i);
+  }, [cardMetrics]);
+
+  // Build pattern alerts from AI signals
+  const patternAlerts = useMemo(() => {
+    if (!signals?.length || !assets?.length) return [];
+    const assetMap = new Map(assets.map((a) => [a.id, a]));
+    return signals
+      .filter((s) => s.ai_summary && (s.signal === "buy" || s.signal === "sell"))
+      .map((s) => {
+        const asset = assetMap.get(s.asset_id);
+        // Extract pattern hint from summary
+        const summary = s.ai_summary.toLowerCase();
+        let pattern = "Signal Active";
+        let timeframe = "1H";
+        if (summary.includes("breakout")) pattern = "Breakout";
+        else if (summary.includes("rejection")) pattern = "Rejection";
+        else if (summary.includes("bounce")) pattern = "Bounce";
+        else if (summary.includes("divergence")) pattern = "Divergence";
+        else if (summary.includes("crossover")) pattern = "EMA Crossover";
+        else if (summary.includes("reversal")) pattern = "Reversal";
+        if (summary.includes("4h") || summary.includes("4-hour")) timeframe = "4H";
+        else if (summary.includes("daily")) timeframe = "Daily";
+        else if (summary.includes("15m") || summary.includes("15 min")) timeframe = "15M";
+        else if (summary.includes("1h") || summary.includes("1-hour")) timeframe = "1H";
+
+        return {
+          symbol: asset?.symbol || "",
+          pattern,
+          timeframe,
+          direction: s.signal === "buy" ? "bullish" as const : "bearish" as const,
+          suggestedEntry: s.entry_price,
+          suggestedSL: s.stop_loss,
+        };
+      })
+      .filter((p) => p.symbol);
+  }, [signals, assets]);
+
   if (assetsLoading) {
     return (
       <div className="space-y-4">
@@ -367,45 +427,57 @@ export function MarketDashboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-bold">Live Market Intelligence</h2>
-        </div>
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <Activity className="h-5 w-5 text-primary" />
+        <h2 className="text-xl font-bold text-foreground">Live Market Intelligence</h2>
       </div>
 
+      {/* Pre-Trade Checklist */}
+      <TradingChecklist />
+
+      {/* News Impact Banner (top-level, not per-card) */}
+      <NewsImpactBanner newsEvents={allNewsEvents} />
+
+      {/* Pattern Alerts */}
+      <PatternAlerts patterns={patternAlerts} />
+
+      {/* Asset Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {assets.map((asset) => {
           const quote = quoteMap.get(asset.id);
           const ind = indicatorMap.get(asset.id);
           const sig = signalMap.get(asset.id);
           const metrics = metricsMap.get(asset.id);
+          const glowClass = sig ? (SIGNAL_CARD_GLOW[sig.signal] || "") : "";
 
           return (
             <Card
               key={asset.id}
-              className="glass-card hover:border-primary/50 transition-all overflow-hidden"
+              className={`bg-card hover:border-primary/50 transition-all overflow-hidden rounded-xl ${glowClass}`}
             >
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-2 px-4 pt-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{ASSET_ICONS[asset.symbol] || "📊"}</span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">{ASSET_ICONS[asset.symbol] || "📊"}</span>
                     <div>
-                      <CardTitle className="text-base">{asset.symbol}</CardTitle>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                      <CardTitle className="text-base font-bold text-foreground">{asset.symbol}</CardTitle>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
                         {asset.asset_type}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     {ind?.trend && (
-                      <span className="flex items-center gap-0.5 text-[10px] font-medium capitalize">
+                      <span className="flex items-center gap-1 text-[11px] font-bold capitalize">
                         {TREND_ICONS[ind.trend || "neutral"]}
-                        {ind.trend}
+                        <span className={ind.trend === "bullish" ? "text-success" : ind.trend === "bearish" ? "text-destructive" : "text-muted-foreground"}>
+                          {ind.trend}
+                        </span>
                       </span>
                     )}
                     {sig && (
-                      <Badge className={`text-[10px] uppercase font-bold ${SIGNAL_COLORS[sig.signal] || ""}`}>
+                      <Badge className={`text-[10px] uppercase font-extrabold px-2 ${SIGNAL_COLORS[sig.signal] || ""}`}>
                         {sig.signal}
                       </Badge>
                     )}
@@ -413,15 +485,15 @@ export function MarketDashboard() {
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-2.5 pt-0">
+              <CardContent className="space-y-2.5 pt-0 px-4 pb-4">
                 {/* Price + Confidence */}
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <span className="text-2xl font-bold tabular-nums">
+                    <span className="text-2xl font-extrabold tabular-nums text-foreground">
                       {quote ? formatPrice(quote.price, asset.symbol) : "—"}
                     </span>
                     {quote?.change_percent_24h != null && (
-                      <span className={`ml-2 text-xs font-medium ${
+                      <span className={`ml-2 text-sm font-bold ${
                         quote.change_percent_24h >= 0 ? "text-success" : "text-destructive"
                       }`}>
                         {quote.change_percent_24h >= 0 ? "+" : ""}
@@ -430,7 +502,7 @@ export function MarketDashboard() {
                     )}
                   </div>
                   {sig && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-foreground/60 font-semibold">
                       {Math.round(sig.confidence)}% conf
                     </span>
                   )}
@@ -438,21 +510,20 @@ export function MarketDashboard() {
 
                 {/* RSI */}
                 {ind?.rsi_14 != null && (
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">RSI</span>
-                    <span className={`font-mono font-medium ${
-                      Number(ind.rsi_14) > 70 ? "text-destructive" : Number(ind.rsi_14) < 30 ? "text-success" : ""
+                  <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-1.5">
+                    <span className="text-foreground/60 font-medium">RSI (14)</span>
+                    <span className={`font-mono font-bold ${
+                      Number(ind.rsi_14) > 70 ? "text-destructive" : Number(ind.rsi_14) < 30 ? "text-success" : "text-foreground"
                     }`}>
                       {Number(ind.rsi_14).toFixed(1)}
+                      {Number(ind.rsi_14) > 70 && <span className="text-[9px] ml-1 text-destructive/70">Overbought</span>}
+                      {Number(ind.rsi_14) < 30 && <span className="text-[9px] ml-1 text-success/70">Oversold</span>}
                     </span>
                   </div>
                 )}
 
                 {/* Session */}
                 {metrics && <SessionBlock metrics={metrics} />}
-
-                {/* News */}
-                {metrics && <NewsBlock metrics={metrics} />}
 
                 {/* 4H Block */}
                 {metrics && <H4Block metrics={metrics} symbol={asset.symbol} />}
@@ -463,27 +534,27 @@ export function MarketDashboard() {
                 {/* Key Levels */}
                 {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
-                {/* AI Signal */}
+                {/* AI Signal Entry/SL/TP */}
                 {sig && (sig.signal === "buy" || sig.signal === "sell") && (
-                  <div className="border-t border-border/50 pt-2 space-y-1">
-                    <div className="flex items-center gap-1">
-                      <Sparkles className="h-3 w-3 text-primary" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  <div className="border-t border-border/40 pt-2 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                         AI Signal
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-1 text-[10px]">
-                      <div className="bg-muted/50 rounded px-1.5 py-1 text-center">
-                        <div className="text-muted-foreground">Entry</div>
-                        <div className="font-semibold">{sig.entry_price ? formatPrice(Number(sig.entry_price), asset.symbol) : "—"}</div>
+                    <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                      <div className="bg-primary/10 border border-primary/20 rounded-lg px-2 py-1.5 text-center">
+                        <div className="text-foreground/50 text-[9px] font-semibold uppercase">Entry</div>
+                        <div className="font-bold text-foreground">{sig.entry_price ? formatPrice(Number(sig.entry_price), asset.symbol) : "—"}</div>
                       </div>
-                      <div className="bg-destructive/10 rounded px-1.5 py-1 text-center">
-                        <div className="text-muted-foreground">SL</div>
-                        <div className="font-semibold text-destructive">{sig.stop_loss ? formatPrice(Number(sig.stop_loss), asset.symbol) : "—"}</div>
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-2 py-1.5 text-center">
+                        <div className="text-foreground/50 text-[9px] font-semibold uppercase">SL</div>
+                        <div className="font-bold text-destructive">{sig.stop_loss ? formatPrice(Number(sig.stop_loss), asset.symbol) : "—"}</div>
                       </div>
-                      <div className="bg-success/10 rounded px-1.5 py-1 text-center">
-                        <div className="text-muted-foreground">TP1</div>
-                        <div className="font-semibold text-success">{sig.take_profit_1 ? formatPrice(Number(sig.take_profit_1), asset.symbol) : "—"}</div>
+                      <div className="bg-success/10 border border-success/20 rounded-lg px-2 py-1.5 text-center">
+                        <div className="text-foreground/50 text-[9px] font-semibold uppercase">TP1</div>
+                        <div className="font-bold text-success">{sig.take_profit_1 ? formatPrice(Number(sig.take_profit_1), asset.symbol) : "—"}</div>
                       </div>
                     </div>
                   </div>
@@ -494,14 +565,14 @@ export function MarketDashboard() {
 
                 {/* AI Summary */}
                 {sig?.ai_summary && (
-                  <p className="text-[11px] text-muted-foreground line-clamp-2 border-t border-border/30 pt-1.5">
+                  <p className="text-[11px] text-foreground/60 line-clamp-2 border-t border-border/30 pt-2 leading-relaxed">
                     {sig.ai_summary}
                   </p>
                 )}
 
                 {/* Empty state */}
                 {!quote && !sig && !metrics && (
-                  <div className="text-center py-3">
+                  <div className="text-center py-4">
                     <Target className="h-8 w-8 text-muted-foreground/30 mx-auto mb-1" />
                     <p className="text-xs text-muted-foreground">Awaiting market data</p>
                   </div>
