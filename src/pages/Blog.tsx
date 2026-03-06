@@ -162,8 +162,8 @@ const Blog = () => {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
             <div className="space-y-3">
-              <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">Botvio Trading Blog</h1>
-              <p className="text-muted-foreground max-w-2xl">Expert guides on forex trading, earning online, Deriv binary options, and AI-powered automated strategies.</p>
+              <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">Forex & Gold Trading Blog</h1>
+              <p className="text-muted-foreground max-w-2xl">Expert guides on gold signals, XAUUSD analysis, forex mentorship, Deriv signals, Exness signals, Weltrade signals & AI chart analysis.</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
