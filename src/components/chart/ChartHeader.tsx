@@ -1,5 +1,38 @@
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Minus, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { TrendingUp, TrendingDown, Minus, Sparkles, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const CHART_PAIRS = [
+  { category: "Metals", pairs: [
+    { symbol: "XAU/USD", label: "Gold" },
+    { symbol: "XAG/USD", label: "Silver" },
+  ]},
+  { category: "Forex", pairs: [
+    { symbol: "EUR/USD", label: "Euro / Dollar" },
+    { symbol: "GBP/USD", label: "Pound / Dollar" },
+    { symbol: "USD/JPY", label: "Dollar / Yen" },
+    { symbol: "AUD/USD", label: "Aussie / Dollar" },
+  ]},
+  { category: "Crypto", pairs: [
+    { symbol: "BTC/USD", label: "Bitcoin" },
+    { symbol: "ETH/USD", label: "Ethereum" },
+    { symbol: "SOL/USD", label: "Solana" },
+  ]},
+  { category: "Stocks", pairs: [
+    { symbol: "AAPL", label: "Apple" },
+    { symbol: "TSLA", label: "Tesla" },
+    { symbol: "NVDA", label: "Nvidia" },
+  ]},
+];
 
 interface ChartHeaderProps {
   symbol: string;
