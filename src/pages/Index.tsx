@@ -18,6 +18,7 @@ import {
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
+import { MarketDashboard } from "@/components/trading/MarketDashboard";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -117,6 +118,11 @@ const Index = () => {
             </Button>
           </div>
           <CourseEnrollmentCards compact />
+        </section>
+
+        {/* 3c — Live Market Intelligence */}
+        <section>
+          <MarketDashboard />
         </section>
 
         {/* 4 — Featured Products (4 max) */}
