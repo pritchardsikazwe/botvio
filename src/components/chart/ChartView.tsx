@@ -237,6 +237,54 @@ export function ChartView({
         });
       }
 
+      // ── Day High / Day Low pins (bold dashed) ──────────────────────────
+      if (metrics) {
+        if (metrics.day_high != null) {
+          drawHLine(Number(metrics.day_high), "hsl(0 85% 60%)", 2, 1); // red dashed
+        }
+        if (metrics.day_low != null) {
+          drawHLine(Number(metrics.day_low), "hsl(145 70% 50%)", 2, 1); // green dashed
+        }
+      }
+
+      // ── Session open vertical lines ────────────────────────────────────
+      if (showSessions && candles.length > 1) {
+        const SESSION_HOURS: { name: string; utcHour: number; color: string }[] = [
+          { name: "Sydney",  utcHour: 22, color: "hsl(280 60% 55%)" },  // purple
+          { name: "Tokyo",   utcHour: 0,  color: "hsl(350 80% 55%)" },  // pink
+          { name: "London",  utcHour: 8,  color: "hsl(200 80% 55%)" },  // blue
+          { name: "New York",utcHour: 13, color: "hsl(30 90% 55%)" },   // orange
+        ];
+
+        // Find candles at session opens and draw vertical markers
+        candles.forEach((c) => {
+          const d = new Date(c.candle_time);
+          const utcH = d.getUTCHours();
+          const utcM = d.getUTCMinutes();
+
+          SESSION_HOURS.forEach((sess) => {
+            // Match candle whose hour equals session open (within the timeframe granularity)
+            if (utcH === sess.utcHour && utcM === 0) {
+              const t = candleTime(c);
+              // Draw a tall vertical line using a LineSeries from day_low to day_high (or candle range)
+              const lo = metrics?.day_low != null ? Number(metrics.day_low) : c.low;
+              const hi = metrics?.day_high != null ? Number(metrics.day_high) : c.high;
+              const s = chart.addSeries(LineSeries, {
+                color: sess.color,
+                lineWidth: 1,
+                lineStyle: 2, // dashed
+                priceLineVisible: false,
+                lastValueVisible: false,
+              });
+              s.setData([
+                { time: t as any, value: lo },
+                { time: (t + 1) as any, value: hi },
+              ]);
+            }
+          });
+        });
+      }
+
       chart.timeScale().fitContent();
     }
 
@@ -325,6 +373,32 @@ export function ChartView({
         <span className="flex items-center gap-1">
           <span className="w-3 h-0.5 bg-[hsl(200_80%_55%)] inline-block rounded" /> EMA 50
         </span>
+        {metrics && (
+          <>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-destructive inline-block rounded" style={{ borderTop: '2px dashed' }} /> Day High
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-success inline-block rounded" style={{ borderTop: '2px dashed' }} /> Day Low
+            </span>
+          </>
+        )}
+        {showSessions && (
+          <>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-3 border-l-2 border-dashed border-[hsl(280_60%_55%)] inline-block" /> Sydney
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-3 border-l-2 border-dashed border-[hsl(350_80%_55%)] inline-block" /> Tokyo
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-3 border-l-2 border-dashed border-[hsl(200_80%_55%)] inline-block" /> London
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-3 border-l-2 border-dashed border-[hsl(30_90%_55%)] inline-block" /> New York
+            </span>
+          </>
+        )}
         {showLevels && (
           <>
             <span className="flex items-center gap-1">

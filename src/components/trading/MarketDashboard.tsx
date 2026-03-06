@@ -238,13 +238,23 @@ function LevelsBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: string
   );
 }
 
-function TipBlock({ tip }: { tip: string | null }) {
+function TipBlock({ tip, breakoutPrice, symbol }: { tip: string | null; breakoutPrice?: number | null; symbol?: string }) {
   if (!tip) return null;
+  const isBreakout = tip.toLowerCase().includes("breakout");
   return (
-    <div className="bg-primary/8 border border-primary/25 rounded-lg px-3 py-2">
+    <div className={`border rounded-lg px-3 py-2 ${isBreakout ? "bg-warning/10 border-warning/30" : "bg-primary/8 border-primary/25"}`}>
       <div className="flex items-start gap-2">
-        <Lightbulb className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-        <p className="text-[11px] text-foreground leading-relaxed font-medium">{tip}</p>
+        <Lightbulb className={`h-4 w-4 mt-0.5 shrink-0 ${isBreakout ? "text-warning" : "text-primary"}`} />
+        <div className="flex-1">
+          <p className="text-[11px] text-foreground leading-relaxed font-medium">{tip}</p>
+          {isBreakout && breakoutPrice != null && symbol && (
+            <div className="flex items-center gap-1.5 mt-1 bg-warning/10 rounded px-2 py-1">
+              <Target className="h-3 w-3 text-warning" />
+              <span className="text-[10px] font-bold text-warning">Breakout Level:</span>
+              <span className="text-[11px] font-mono font-extrabold text-foreground">{formatPrice(breakoutPrice, symbol)}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -632,7 +642,7 @@ export function MarketDashboard() {
                 )}
 
                 {/* Tip */}
-                {metrics && <TipBlock tip={metrics.market_tip} />}
+                {metrics && <TipBlock tip={metrics.market_tip} breakoutPrice={metrics.resistance_1 != null ? Number(metrics.resistance_1) : null} symbol={asset.symbol} />}
 
                 {/* AI Summary */}
                 {sig?.ai_summary && (
