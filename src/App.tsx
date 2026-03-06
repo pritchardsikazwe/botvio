@@ -53,6 +53,10 @@ import AuthoritySignals from "./pages/AuthoritySignals";
 import SEOAnswerPage from "./pages/SEOAnswerPage";
 import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
 import { AdminLogin } from "@/components/admin/AdminLogin";
+import SignalPairPage from "./pages/SignalPairPage";
+import BotDetailPage from "./pages/BotDetailPage";
+import CountryTrafficPage from "./pages/CountryTrafficPage";
+import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
 
@@ -134,19 +138,37 @@ const App = () => (
               <Route path="/ai-trading-bot-for-boom-100" element={<SEOAnswerPage />} />
               <Route path="/how-to-automate-deriv-trading" element={<SEOAnswerPage />} />
               <Route path="/synthetic-indices-trading-bot" element={<SEOAnswerPage />} />
-              {/* Gold, Silver, Forex, Boom/Crash SEO Pages */}
               <Route path="/gold-trading-signals" element={<SEOAnswerPage />} />
               <Route path="/silver-trading-signals" element={<SEOAnswerPage />} />
               <Route path="/forex-currency-signals" element={<SEOAnswerPage />} />
               <Route path="/boom-crash-trading-guide" element={<SEOAnswerPage />} />
               <Route path="/copy-trading-platform" element={<SEOAnswerPage />} />
               <Route path="/how-to-make-money-online-trading" element={<SEOAnswerPage />} />
-              {/* Country SEO Pages */}
+              {/* Country SEO Pages (original) */}
               <Route path="/boom-bot-nigeria" element={<SEOAnswerPage />} />
               <Route path="/deriv-bot-ghana" element={<SEOAnswerPage />} />
               <Route path="/ai-trading-bot-zambia" element={<SEOAnswerPage />} />
               <Route path="/boom-crash-bot-kenya" element={<SEOAnswerPage />} />
               <Route path="/automated-trading-bot-south-africa" element={<SEOAnswerPage />} />
+
+              {/* === 50+ SEO Traffic Pages === */}
+              {Object.keys(seoTrafficPages).map(slug => (
+                <Route key={slug} path={`/${slug}`} element={<SEOAnswerPage />} />
+              ))}
+
+              {/* === Programmatic Signal Pages === */}
+              <Route path="/signals/:pair" element={<SignalPairPage />} />
+
+              {/* === Programmatic Bot Pages === */}
+              <Route path="/bots/:botSlug" element={<BotDetailPage />} />
+
+              {/* === Country Traffic Pages (forex-trading-X, exness-X, gold-trading-X) === */}
+              {countryTrafficSlugs.flatMap(c => [
+                <Route key={`forex-${c.slug}`} path={`/forex-trading-${c.slug}`} element={<CountryTrafficPage />} />,
+                <Route key={`exness-${c.slug}`} path={`/exness-${c.slug}`} element={<CountryTrafficPage />} />,
+                <Route key={`gold-${c.slug}`} path={`/gold-trading-${c.slug}`} element={<CountryTrafficPage />} />,
+              ])}
+
               {/* Country landing pages */}
               <Route path="/:country" element={<CountryPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
