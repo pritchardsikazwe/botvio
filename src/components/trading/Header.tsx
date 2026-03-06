@@ -89,14 +89,16 @@ export const Header = () => {
                 Blog
               </Button>
 
-              <Button 
-                variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/authority-signals')}
-              >
-                <ScanSearch className="w-4 h-4 mr-1" />
-                AI Analysis
-              </Button>
+              {!user && (
+                <Button 
+                  variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => navigate('/authority-signals')}
+                >
+                  <ScanSearch className="w-4 h-4 mr-1" />
+                  AI Analysis
+                </Button>
+              )}
 
               <Button 
                 variant={location.pathname.startsWith('/learn') ? 'secondary' : 'ghost'} 
@@ -125,33 +127,6 @@ export const Header = () => {
                   >
                     <Zap className="w-4 h-4 mr-1" />
                     Binance
-                  </Button>
-
-                  <Button 
-                    variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/authority-signals')}
-                  >
-                    <ScanSearch className="w-4 h-4 mr-1" />
-                    AI Analysis
-                  </Button>
-
-                  <Button 
-                    variant={location.pathname === '/providers' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/providers')}
-                  >
-                    <Users className="w-4 h-4 mr-1" />
-                    Copy Trade
-                  </Button>
-                  
-                  <Button 
-                    variant={location.pathname === '/provider-dashboard' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/provider-dashboard')}
-                  >
-                    <Zap className="w-4 h-4 mr-1" />
-                    Provider
                   </Button>
                 </>
               )}
@@ -273,14 +248,6 @@ export const Header = () => {
                         <DropdownMenuItem onClick={() => navigate('/bots')}>
                           <Bot className="w-4 h-4 mr-2" />
                           Trading Bots
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/providers')}>
-                          <Users className="w-4 h-4 mr-2" />
-                          Copy Trading
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/provider-dashboard')}>
-                          <Zap className="w-4 h-4 mr-2" />
-                          Become a Provider
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => navigate('/accounts')}>
