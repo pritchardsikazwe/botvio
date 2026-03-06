@@ -146,6 +146,65 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_signals: {
+        Row: {
+          ai_summary: string
+          asset_id: string
+          confidence: number
+          created_at: string
+          entry_price: number | null
+          id: string
+          provider_snapshot_time: string | null
+          reasoning_json: Json | null
+          risk_reward: number | null
+          signal: string
+          stop_loss: number | null
+          take_profit_1: number | null
+          take_profit_2: number | null
+          timeframe: string
+        }
+        Insert: {
+          ai_summary: string
+          asset_id: string
+          confidence: number
+          created_at?: string
+          entry_price?: number | null
+          id?: string
+          provider_snapshot_time?: string | null
+          reasoning_json?: Json | null
+          risk_reward?: number | null
+          signal: string
+          stop_loss?: number | null
+          take_profit_1?: number | null
+          take_profit_2?: number | null
+          timeframe: string
+        }
+        Update: {
+          ai_summary?: string
+          asset_id?: string
+          confidence?: number
+          created_at?: string
+          entry_price?: number | null
+          id?: string
+          provider_snapshot_time?: string | null
+          reasoning_json?: Json | null
+          risk_reward?: number | null
+          signal?: string
+          stop_loss?: number | null
+          take_profit_1?: number | null
+          take_profit_2?: number | null
+          timeframe?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_signals_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analysis_jobs: {
         Row: {
           ai_response: string | null
@@ -221,6 +280,39 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      assets: {
+        Row: {
+          asset_type: string
+          base_currency: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          provider_symbol: string
+          quote_currency: string | null
+          symbol: string
+        }
+        Insert: {
+          asset_type: string
+          base_currency?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider_symbol: string
+          quote_currency?: string | null
+          symbol: string
+        }
+        Update: {
+          asset_type?: string
+          base_currency?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider_symbol?: string
+          quote_currency?: string | null
+          symbol?: string
         }
         Relationships: []
       }
@@ -1522,6 +1614,159 @@ export type Database = {
           },
         ]
       }
+      market_candles: {
+        Row: {
+          asset_id: string
+          candle_time: string
+          close: number
+          created_at: string
+          high: number
+          id: string
+          low: number
+          open: number
+          provider: string
+          timeframe: string
+          volume: number | null
+        }
+        Insert: {
+          asset_id: string
+          candle_time: string
+          close: number
+          created_at?: string
+          high: number
+          id?: string
+          low: number
+          open: number
+          provider?: string
+          timeframe: string
+          volume?: number | null
+        }
+        Update: {
+          asset_id?: string
+          candle_time?: string
+          close?: number
+          created_at?: string
+          high?: number
+          id?: string
+          low?: number
+          open?: number
+          provider?: string
+          timeframe?: string
+          volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_candles_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_indicators: {
+        Row: {
+          asset_id: string
+          atr_14: number | null
+          candle_time: string
+          created_at: string
+          ema_20: number | null
+          ema_50: number | null
+          id: string
+          macd: number | null
+          macd_signal: number | null
+          resistance_1: number | null
+          rsi_14: number | null
+          support_1: number | null
+          timeframe: string
+          trend: string | null
+        }
+        Insert: {
+          asset_id: string
+          atr_14?: number | null
+          candle_time: string
+          created_at?: string
+          ema_20?: number | null
+          ema_50?: number | null
+          id?: string
+          macd?: number | null
+          macd_signal?: number | null
+          resistance_1?: number | null
+          rsi_14?: number | null
+          support_1?: number | null
+          timeframe: string
+          trend?: string | null
+        }
+        Update: {
+          asset_id?: string
+          atr_14?: number | null
+          candle_time?: string
+          created_at?: string
+          ema_20?: number | null
+          ema_50?: number | null
+          id?: string
+          macd?: number | null
+          macd_signal?: number | null
+          resistance_1?: number | null
+          rsi_14?: number | null
+          support_1?: number | null
+          timeframe?: string
+          trend?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_indicators_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_quotes: {
+        Row: {
+          ask: number | null
+          asset_id: string
+          bid: number | null
+          change_percent_24h: number | null
+          fetched_at: string
+          id: string
+          price: number
+          provider_timestamp: string | null
+          spread: number | null
+        }
+        Insert: {
+          ask?: number | null
+          asset_id: string
+          bid?: number | null
+          change_percent_24h?: number | null
+          fetched_at?: string
+          id?: string
+          price: number
+          provider_timestamp?: string | null
+          spread?: number | null
+        }
+        Update: {
+          ask?: number | null
+          asset_id?: string
+          bid?: number | null
+          change_percent_24h?: number | null
+          fetched_at?: string
+          id?: string
+          price?: number
+          provider_timestamp?: string | null
+          spread?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_quotes_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_sessions: {
         Row: {
           close_time: string | null
@@ -2177,6 +2422,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      price_alerts: {
+        Row: {
+          asset_id: string
+          condition_type: string
+          created_at: string
+          id: string
+          is_active: boolean
+          timeframe: string | null
+          trigger_price: number
+          triggered_at: string | null
+          user_id: string
+        }
+        Insert: {
+          asset_id: string
+          condition_type: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          timeframe?: string | null
+          trigger_price: number
+          triggered_at?: string | null
+          user_id: string
+        }
+        Update: {
+          asset_id?: string
+          condition_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          timeframe?: string | null
+          trigger_price?: number
+          triggered_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_alerts_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pricing_plans: {
         Row: {
