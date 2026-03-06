@@ -105,66 +105,18 @@ const Index = () => {
           <ChartUpload />
         </section>
 
-        {/* 3 — Forex Mentorship & Courses */}
+        {/* 3 — Premium Mentorship Programs */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <GraduationCap className="h-5 w-5 text-primary" />
-              Forex Mentorship & Strategy Courses
+              Premium Mentorship Programs
             </h2>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/learn">All Courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
           <CourseEnrollmentCards compact />
-        </section>
-
-        {/* 3b — Signal Pack Subscription */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Signal className="h-5 w-5 text-primary" />
-              Signal Pack — Premium Access
-            </h2>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/signals">View Signals <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { name: "Monthly", price: 19, period: "/mo", features: ["Daily premium signals", "All courses access", "WhatsApp group"], popular: false },
-              { name: "3 Months", price: 49, period: "/3mo", features: ["Save 14%", "Priority support", "Strategy templates"], popular: true },
-              { name: "Lifetime", price: 99, period: " once", features: ["Pay once, forever", "All future content", "VIP mentorship"], popular: false },
-            ].map((plan) => (
-              <Card key={plan.name} className={`glass-card relative overflow-hidden transition-all hover:scale-[1.02] ${plan.popular ? "border-primary/50 ring-1 ring-primary/20" : ""}`}>
-                {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
-                    Best Value
-                  </div>
-                )}
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Signal Pack — {plan.name}</CardTitle>
-                  <div className="flex items-baseline gap-1 mt-2">
-                    <span className="text-3xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground text-sm">{plan.period}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <ul className="space-y-2">
-                    {plan.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm">
-                        <Target className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button variant={plan.popular ? "gold" : "outline"} className="w-full" size="sm" asChild>
-                    <Link to="/billing">Subscribe</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </section>
 
         {/* 4 — Featured Products (4 max) */}
@@ -241,53 +193,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* 5b — Signal Subscription Plans */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Signal className="h-5 w-5 text-primary" />
-              Premium Signals Subscription
-            </h2>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/signals">View Signals <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { name: "Monthly", price: 19, period: "/mo", features: ["Daily premium signals", "All courses access", "WhatsApp group"], popular: false },
-              { name: "3 Months", price: 49, period: "/3mo", features: ["Save 14%", "Priority support", "Strategy templates"], popular: true },
-              { name: "Lifetime", price: 99, period: " once", features: ["Pay once, forever", "All future content", "VIP mentorship"], popular: false },
-            ].map((plan) => (
-              <Card key={plan.name} className={`glass-card relative overflow-hidden transition-all hover:scale-[1.02] ${plan.popular ? "border-primary/50 ring-1 ring-primary/20" : ""}`}>
-                {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
-                    Best Value
-                  </div>
-                )}
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Premium Signals — {plan.name}</CardTitle>
-                  <div className="flex items-baseline gap-1 mt-2">
-                    <span className="text-3xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground text-sm">{plan.period}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <ul className="space-y-2">
-                    {plan.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm">
-                        <Target className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button variant={plan.popular ? "gold" : "outline"} className="w-full" size="sm" asChild>
-                    <Link to="/billing">Subscribe</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
 
         {/* 6 — Quick Links */}
         <section>
