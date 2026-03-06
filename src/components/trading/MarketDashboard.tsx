@@ -6,7 +6,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   TrendingUp, TrendingDown, Minus, Activity, Sparkles, Clock,
   Newspaper, BarChart3, Shield, Target, Lightbulb, ArrowDown, ArrowUp,
+  Crosshair, Zap,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { TradingChecklist } from "./market/TradingChecklist";
 import { NewsImpactBanner } from "./market/NewsImpactBanner";
@@ -243,6 +245,73 @@ function TipBlock({ tip }: { tip: string | null }) {
       <div className="flex items-start gap-2">
         <Lightbulb className="h-4 w-4 text-primary mt-0.5 shrink-0" />
         <p className="text-[11px] text-foreground leading-relaxed font-medium">{tip}</p>
+      </div>
+    </div>
+  );
+}
+
+// Map asset symbols to relevant Hauza Sniper strategies
+const HAUZA_STRATEGIES: { id: string; label: string; emoji: string; route: string }[] = [
+  { id: "digit-contracts", label: "Digits", emoji: "🔢", route: "/style-trade/digit-contracts" },
+  { id: "rise-fall-scalping", label: "Rise/Fall", emoji: "📈", route: "/style-trade/rise-fall-scalping" },
+  { id: "boom-crash", label: "Boom/Crash", emoji: "💥", route: "/style-trade/boom-crash" },
+  { id: "multipliers", label: "Multipliers", emoji: "✖️", route: "/style-trade/multipliers" },
+  { id: "accumulators", label: "Accumulators", emoji: "📊", route: "/style-trade/accumulators" },
+  { id: "turbo", label: "Turbo", emoji: "⚡", route: "/style-trade/turbo" },
+  { id: "ticks", label: "Ticks", emoji: "⏱️", route: "/style-trade/ticks" },
+  { id: "synthetic-indices", label: "Synthetics", emoji: "🤖", route: "/style-trade/synthetic-indices" },
+];
+
+function getStrategiesForAsset(assetType: string, symbol: string) {
+  const type = assetType.toLowerCase();
+  const sym = symbol.toUpperCase();
+  // Forex & commodities: Rise/Fall, Multipliers
+  if (type === "forex" || type === "commodity" || type === "metal") {
+    return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
+  }
+  // Crypto: Rise/Fall, Multipliers
+  if (type === "crypto") {
+    return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers"].includes(s.id));
+  }
+  // Boom/Crash symbols
+  if (sym.includes("BOOM") || sym.includes("CRASH")) {
+    return HAUZA_STRATEGIES.filter(s => ["boom-crash", "rise-fall-scalping"].includes(s.id));
+  }
+  // Synthetic / volatility indices
+  if (type === "synthetic" || sym.startsWith("R_") || sym.includes("HZ")) {
+    return HAUZA_STRATEGIES.filter(s => ["digit-contracts", "rise-fall-scalping", "accumulators", "turbo", "ticks", "multipliers"].includes(s.id));
+  }
+  // Default: show core modes
+  return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
+}
+
+function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol: string }) {
+  const navigate = useNavigate();
+  const strategies = getStrategiesForAsset(assetType, symbol);
+  if (!strategies.length) return null;
+
+  return (
+    <div className="space-y-1.5 bg-accent/30 rounded-lg px-3 py-2 border border-accent/50">
+      <div className="flex items-center gap-1.5">
+        <Crosshair className="h-3.5 w-3.5 text-primary" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+          Hauza Strategies
+        </span>
+        <Zap className="h-3 w-3 text-warning" />
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {strategies.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => navigate(s.route)}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold
+              bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20
+              hover:border-primary/50 transition-all cursor-pointer"
+          >
+            <span>{s.emoji}</span>
+            <span>{s.label}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -534,7 +603,8 @@ export function MarketDashboard() {
                 {/* Key Levels */}
                 {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
-                {/* AI Signal Entry/SL/TP */}
+                {/* Hauza Strategies */}
+                <HauzaStrategiesBlock assetType={asset.asset_type} symbol={asset.symbol} />
                 {sig && (sig.signal === "buy" || sig.signal === "sell") && (
                   <div className="border-t border-border/40 pt-2 space-y-1.5">
                     <div className="flex items-center gap-1.5">
