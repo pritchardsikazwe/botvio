@@ -252,14 +252,14 @@ function TipBlock({ tip }: { tip: string | null }) {
 
 // Map asset symbols to relevant Hauza Sniper strategies
 const HAUZA_STRATEGIES: { id: string; label: string; emoji: string; route: string }[] = [
-  { id: "digit-contracts", label: "Digits", emoji: "🔢", route: "/style-trade/digit-contracts" },
-  { id: "rise-fall-scalping", label: "Rise/Fall", emoji: "📈", route: "/style-trade/rise-fall-scalping" },
-  { id: "boom-crash", label: "Boom/Crash", emoji: "💥", route: "/style-trade/boom-crash" },
-  { id: "multipliers", label: "Multipliers", emoji: "✖️", route: "/style-trade/multipliers" },
-  { id: "accumulators", label: "Accumulators", emoji: "📊", route: "/style-trade/accumulators" },
-  { id: "turbo", label: "Turbo", emoji: "⚡", route: "/style-trade/turbo" },
-  { id: "ticks", label: "Ticks", emoji: "⏱️", route: "/style-trade/ticks" },
-  { id: "synthetic-indices", label: "Synthetics", emoji: "🤖", route: "/style-trade/synthetic-indices" },
+  { id: "digit-contracts", label: "Digits", emoji: "🔢", route: "/trade/style/digit-contracts" },
+  { id: "rise-fall-scalping", label: "Rise/Fall", emoji: "📈", route: "/trade/style/rise-fall-scalping" },
+  { id: "boom-crash", label: "Boom/Crash", emoji: "💥", route: "/trade/style/boom-crash" },
+  { id: "multipliers", label: "Multipliers", emoji: "✖️", route: "/trade/style/multipliers" },
+  { id: "accumulators", label: "Accumulators", emoji: "📊", route: "/trade/style/accumulators" },
+  { id: "turbo", label: "Turbo", emoji: "⚡", route: "/trade/style/turbo" },
+  { id: "ticks", label: "Ticks", emoji: "⏱️", route: "/trade/style/ticks" },
+  { id: "synthetic-indices", label: "Synthetics", emoji: "🤖", route: "/trade/style/synthetic-indices" },
 ];
 
 function getStrategiesForAsset(assetType: string, symbol: string) {
