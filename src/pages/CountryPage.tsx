@@ -19,6 +19,13 @@ const blogLinks = [
 
 const CountryPage = () => {
   const { country } = useParams<{ country: string }>();
+  
+  // Skip file-like paths (e.g. sitemap.xml, robots.txt) — let static files serve
+  if (country?.includes(".")) {
+    window.location.href = `/${country}`;
+    return null;
+  }
+
   const info = countryData[country || ""];
 
   if (!info) {
