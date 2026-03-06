@@ -82,33 +82,6 @@ export const Header = () => {
               </Button>
               
               <Button 
-                variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/bots')}
-              >
-                <Bot className="w-4 h-4 mr-1" />
-                Bots
-              </Button>
-
-              <Button 
-                variant={location.pathname.startsWith('/bots/binance') || location.pathname === '/settings/binance' ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/bots/binance')}
-              >
-                <Zap className="w-4 h-4 mr-1" />
-                Binance
-              </Button>
-
-              <Button 
-                variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/authority-signals')}
-              >
-                <ScanSearch className="w-4 h-4 mr-1" />
-                AI Analysis
-              </Button>
-
-              <Button 
                 variant={location.pathname === '/blog' ? 'secondary' : 'ghost'} 
                 size="sm"
                 onClick={() => navigate('/blog')}
@@ -116,8 +89,44 @@ export const Header = () => {
                 Blog
               </Button>
 
+              <Button 
+                variant={location.pathname.startsWith('/learn') ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/learn')}
+              >
+                <GraduationCap className="w-4 h-4 mr-1" />
+                Learn
+              </Button>
+
               {user && (
                 <>
+                  <Button 
+                    variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/bots')}
+                  >
+                    <Bot className="w-4 h-4 mr-1" />
+                    Bots
+                  </Button>
+
+                  <Button 
+                    variant={location.pathname.startsWith('/bots/binance') || location.pathname === '/settings/binance' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/bots/binance')}
+                  >
+                    <Zap className="w-4 h-4 mr-1" />
+                    Binance
+                  </Button>
+
+                  <Button 
+                    variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => navigate('/authority-signals')}
+                  >
+                    <ScanSearch className="w-4 h-4 mr-1" />
+                    AI Analysis
+                  </Button>
+
                   <Button 
                     variant={location.pathname === '/providers' ? 'secondary' : 'ghost'} 
                     size="sm"
@@ -137,15 +146,6 @@ export const Header = () => {
                   </Button>
                 </>
               )}
-              
-              <Button 
-                variant={location.pathname.startsWith('/learn') ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/learn')}
-              >
-                <GraduationCap className="w-4 h-4 mr-1" />
-                Learn
-              </Button>
 
               {user && (
                 <DropdownMenu>
@@ -250,17 +250,21 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/blog')}>
                       Blog
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
-                      <ScanSearch className="w-4 h-4 mr-2" />
-                      AI Chart Analysis
+                    <DropdownMenuItem onClick={() => navigate('/learn')}>
+                      <GraduationCap className="w-4 h-4 mr-2" />
+                      Learn
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/bots')}>
-                      <Bot className="w-4 h-4 mr-2" />
-                      Trading Bots
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     {user && (
                       <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
+                          <ScanSearch className="w-4 h-4 mr-2" />
+                          AI Chart Analysis
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/bots')}>
+                          <Bot className="w-4 h-4 mr-2" />
+                          Trading Bots
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate('/providers')}>
                           <Users className="w-4 h-4 mr-2" />
                           Copy Trading
@@ -270,10 +274,6 @@ export const Header = () => {
                           Become a Provider
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/learn')}>
-                          <GraduationCap className="w-4 h-4 mr-2" />
-                          Learn
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate('/accounts')}>
                           <Wallet className="w-4 h-4 mr-2" />
                           Accounts
