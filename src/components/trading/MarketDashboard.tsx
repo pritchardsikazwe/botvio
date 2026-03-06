@@ -756,8 +756,27 @@ export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: numb
               </CardContent>
             </Card>
           );
-        })}
-      </div>
+        };
+
+        return (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {limitedNonBinance.map(renderCard)}
+            </div>
+            {limitedBinance.length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">🔶</span>
+                  <h3 className="text-lg font-bold text-foreground">Binance Markets</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {limitedBinance.map(renderCard)}
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
     </div>
   );
 }
