@@ -362,6 +362,10 @@ export function MarketDashboard() {
     const link = partnerLinks?.find((l: any) => l.key === "exness" || l.label?.toLowerCase().includes("exness"));
     return link?.url || null;
   }, [partnerLinks]);
+  const binanceLink = useMemo(() => {
+    const link = partnerLinks?.find((l: any) => l.key === "binance" || l.label?.toLowerCase().includes("binance"));
+    return link?.url || null;
+  }, [partnerLinks]);
 
   const { data: quotes } = useQuery({
     queryKey: ["market-quotes", assetIds],
