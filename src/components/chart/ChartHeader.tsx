@@ -1,5 +1,38 @@
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Minus, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { TrendingUp, TrendingDown, Minus, Sparkles, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const CHART_PAIRS = [
+  { category: "Metals", pairs: [
+    { symbol: "XAU/USD", label: "Gold" },
+    { symbol: "XAG/USD", label: "Silver" },
+  ]},
+  { category: "Forex", pairs: [
+    { symbol: "EUR/USD", label: "Euro / Dollar" },
+    { symbol: "GBP/USD", label: "Pound / Dollar" },
+    { symbol: "USD/JPY", label: "Dollar / Yen" },
+    { symbol: "AUD/USD", label: "Aussie / Dollar" },
+  ]},
+  { category: "Crypto", pairs: [
+    { symbol: "BTC/USD", label: "Bitcoin" },
+    { symbol: "ETH/USD", label: "Ethereum" },
+    { symbol: "SOL/USD", label: "Solana" },
+  ]},
+  { category: "Stocks", pairs: [
+    { symbol: "AAPL", label: "Apple" },
+    { symbol: "TSLA", label: "Tesla" },
+    { symbol: "NVDA", label: "Nvidia" },
+  ]},
+];
 
 interface ChartHeaderProps {
   symbol: string;
@@ -26,17 +59,50 @@ function formatPrice(price: number | null, symbol: string): string {
 }
 
 export function ChartHeader({ symbol, price, changePercent, signal, confidence, trend }: ChartHeaderProps) {
+  const navigate = useNavigate();
   const trendIcon = trend === "bullish"
     ? <TrendingUp className="h-5 w-5 text-success" />
     : trend === "bearish"
       ? <TrendingDown className="h-5 w-5 text-destructive" />
       : <Minus className="h-5 w-5 text-muted-foreground" />;
 
+  const goToSymbol = (s: string) => {
+    const slug = s.replace("/", "");
+    navigate(`/chart/${slug}`);
+  };
+
   return (
     <div className="bg-card border border-border/50 rounded-xl px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">{symbol}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-foreground tracking-tight">{symbol}</h1>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 max-h-80 overflow-y-auto">
+                {CHART_PAIRS.map(({ category, pairs }, i) => (
+                  <div key={category}>
+                    {i > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel className="text-xs text-muted-foreground uppercase">{category}</DropdownMenuLabel>
+                    {pairs.map((p) => (
+                      <DropdownMenuItem
+                        key={p.symbol}
+                        onClick={() => goToSymbol(p.symbol)}
+                        className={`cursor-pointer ${p.symbol === symbol ? "bg-primary/10 font-bold" : ""}`}
+                      >
+                        <span className="font-medium">{p.symbol}</span>
+                        <span className="ml-auto text-xs text-muted-foreground">{p.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <div className="flex items-center gap-2 mt-1">
             {trendIcon}
             <span className={`text-sm font-bold capitalize ${
