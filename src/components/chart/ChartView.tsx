@@ -234,12 +234,12 @@ export function ChartView({
       // ── Signal entry/SL/TP lines ──────────────────────────────────────
       if (showLevels && signal) {
         const signalLines = [
-          { price: signal.entry_price, color: "hsl(45 100% 51%)", w: 2 },
-          { price: signal.stop_loss, color: "hsl(0 85% 55%)", w: 2 },
-          { price: signal.take_profit_1, color: "hsl(145 70% 45%)", w: 2 },
+          { price: signal.entry_price, color: "hsl(45 100% 51%)", w: 2, label: "Entry" },
+          { price: signal.stop_loss, color: "hsl(0 85% 55%)", w: 2, label: "SL" },
+          { price: signal.take_profit_1, color: "hsl(145 70% 45%)", w: 2, label: "TP1" },
         ];
         signalLines.forEach((sl) => {
-          if (sl.price != null) drawHLine(Number(sl.price), sl.color, sl.w, 1);
+          if (sl.price != null) drawHLine(Number(sl.price), sl.color, sl.w, 1, sl.label);
         });
       }
 
