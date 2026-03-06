@@ -108,7 +108,7 @@ export function usePurchaseProduct() {
       if (variables.product.price_usd === 0) {
         toast.success(`${variables.product.name} unlocked!`);
       } else {
-        toast.success("Order placed! Awaiting payment confirmation.");
+        toast.success("Order submitted! Admin will confirm your payment shortly.");
       }
       queryClient.invalidateQueries({ queryKey: ["entitlements"] });
       queryClient.invalidateQueries({ queryKey: ["marketplace-products"] });
