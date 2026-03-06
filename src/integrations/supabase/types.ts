@@ -3100,6 +3100,93 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_affiliate_links: {
+        Row: {
+          broker_key: string
+          id: string
+          is_active: boolean
+          label: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          broker_key: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          broker_key?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      seo_pages: {
+        Row: {
+          broker_cta: string | null
+          content_json: Json
+          country: string | null
+          country_flag: string | null
+          created_at: string
+          faqs_json: Json
+          h1: string
+          id: string
+          is_active: boolean
+          keywords: string[]
+          market: string | null
+          meta_description: string
+          meta_title: string
+          page_type: string
+          slug: string
+          strategy: string | null
+          updated_at: string
+        }
+        Insert: {
+          broker_cta?: string | null
+          content_json?: Json
+          country?: string | null
+          country_flag?: string | null
+          created_at?: string
+          faqs_json?: Json
+          h1?: string
+          id?: string
+          is_active?: boolean
+          keywords?: string[]
+          market?: string | null
+          meta_description?: string
+          meta_title?: string
+          page_type?: string
+          slug: string
+          strategy?: string | null
+          updated_at?: string
+        }
+        Update: {
+          broker_cta?: string | null
+          content_json?: Json
+          country?: string | null
+          country_flag?: string | null
+          created_at?: string
+          faqs_json?: Json
+          h1?: string
+          id?: string
+          is_active?: boolean
+          keywords?: string[]
+          market?: string | null
+          meta_description?: string
+          meta_title?: string
+          page_type?: string
+          slug?: string
+          strategy?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       signal_audit_logs: {
         Row: {
           action: string
