@@ -153,10 +153,11 @@ export function ChartView({
       if (showLevels) {
         const autoLevels = detectSupportResistance(candles);
 
-        autoLevels.forEach((lvl) => {
+        autoLevels.forEach((lvl, i) => {
           const color = lvl.type === "support" ? "hsl(145 70% 45%)" : "hsl(0 85% 55%)";
           const width = lvl.strength === "strong" ? 3 : lvl.strength === "moderate" ? 2 : 1;
-          drawHLine(lvl.price, color, width, lvl.strength === "strong" ? 0 : 2);
+          const label = lvl.type === "support" ? `S${i + 1}` : `R${i + 1}`;
+          drawHLine(lvl.price, color, width, lvl.strength === "strong" ? 0 : 2, label);
         });
 
         // Metrics-based S/R (if available, draw as bold dashed)
