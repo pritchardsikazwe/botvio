@@ -26,6 +26,9 @@ const CHART_PAIRS = [
     { symbol: "BTC/USD", label: "Bitcoin" },
     { symbol: "ETH/USD", label: "Ethereum" },
     { symbol: "SOL/USD", label: "Solana" },
+    { symbol: "BNB/USD", label: "BNB" },
+    { symbol: "XRP/USD", label: "Ripple" },
+    { symbol: "DOGE/USD", label: "Dogecoin" },
   ]},
   { category: "Stocks", pairs: [
     { symbol: "AAPL", label: "Apple" },
