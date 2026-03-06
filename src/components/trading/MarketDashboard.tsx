@@ -318,6 +318,7 @@ function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol
 }
 
 export function MarketDashboard() {
+  const navigate = useNavigate();
   const { data: assets, isLoading: assetsLoading } = useQuery({
     queryKey: ["market-assets"],
     queryFn: async () => {
@@ -639,6 +640,30 @@ export function MarketDashboard() {
                     {sig.ai_summary}
                   </p>
                 )}
+
+                {/* Bottom Buttons */}
+                <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-border/30">
+                  <button
+                    onClick={() => navigate(`/chart/${asset.symbol.replace("/", "")}`)}
+                    className="text-[10px] font-bold py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
+                  >
+                    📈 View Chart
+                  </button>
+                  <button
+                    className="text-[10px] font-bold py-1.5 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                  >
+                    🔔 Set Alert
+                  </button>
+                  <button
+                    onClick={() => {
+                      const text = encodeURIComponent(`${asset.symbol} ${sig?.signal?.toUpperCase() || ""} signal on Botvio`);
+                      window.open(`https://wa.me/?text=${text}`, "_blank");
+                    }}
+                    className="text-[10px] font-bold py-1.5 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
+                  >
+                    💬 WhatsApp
+                  </button>
+                </div>
 
                 {/* Empty state */}
                 {!quote && !sig && !metrics && (

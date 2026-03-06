@@ -38,6 +38,7 @@ import NotFound from "./pages/NotFound";
 import DerivCallback from "./pages/DerivCallback";
 import StyleTrade from "./pages/StyleTrade";
 import Trading from "./pages/Trading";
+import ChartPage from "./pages/ChartPage";
 import TradeModes from "./pages/TradeModes";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -115,6 +116,7 @@ const App = () => (
               <Route path="/learn/:slug" element={<Lesson />} />
               <Route path="/auth/deriv/callback" element={<DerivCallback />} />
               <Route path="/trading" element={<Trading />} />
+              <Route path="/chart/:symbol" element={<ChartPage />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
