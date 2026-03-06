@@ -124,7 +124,7 @@ const blogPosts = [
   },
 ];
 
-const categories = ["All", "Guide", "Tutorial", "Strategy", "Comparison", "Security", "Forex", "Earn Online"];
+const categories = ["All", "Guide", "Tutorial", "Strategy", "Gold", "Signals", "Forex", "Earn Online", "Comparison", "Security"];
 
 const Blog = () => {
   const [search, setSearch] = useState("");

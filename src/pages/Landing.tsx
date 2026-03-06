@@ -82,34 +82,34 @@ const Landing = () => {
 
   const features = [
     {
-      icon: Bot,
-      title: "AI Trading Bots",
-      description: "Deploy pre-built or custom trading bots that execute your strategies 24/7"
-    },
-    {
       icon: Signal,
-      title: "Live Signals",
-      description: "Get real-time trading signals for Gold, Synthetic Indices, NASDAQ & Crypto"
-    },
-    {
-      icon: Users,
-      title: "Copy Trading",
-      description: "Follow expert traders and automatically copy their winning trades"
-    },
-    {
-      icon: Shield,
-      title: "Risk Management",
-      description: "Built-in daily loss limits, position sizing, and account protection"
+      title: "Free Forex Signals",
+      description: "Real-time gold signals, XAUUSD analysis, Deriv signals, Exness signals & Weltrade signals"
     },
     {
       icon: BarChart3,
-      title: "Analytics Dashboard",
-      description: "Track your performance with detailed P&L reports and win rate stats"
+      title: "AI Chart Analysis",
+      description: "Upload any chart and get instant AI-powered technical analysis with entry/exit levels"
+    },
+    {
+      icon: Users,
+      title: "Forex Mentorship",
+      description: "Learn gold trading, forex strategies & risk management from expert mentors"
+    },
+    {
+      icon: Bot,
+      title: "Trading Bots",
+      description: "Deploy AI bots that execute your strategies 24/7 on Deriv, Exness & Binance"
+    },
+    {
+      icon: Shield,
+      title: "Copy Trading",
+      description: "Follow top gold traders and automatically copy their winning XAUUSD trades"
     },
     {
       icon: Globe,
-      title: "Multi-Broker Support",
-      description: "Trade on Deriv, Weltrade, and Exness from a single platform"
+      title: "Multi-Broker Signals",
+      description: "Signals for Deriv, Weltrade, Exness & Binance from a single platform"
     }
       ];
 
