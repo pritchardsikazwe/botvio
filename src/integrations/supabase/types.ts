@@ -1664,6 +1664,86 @@ export type Database = {
           },
         ]
       }
+      market_card_metrics: {
+        Row: {
+          asset_id: string
+          current_4h_block: string | null
+          current_4h_high: number | null
+          current_4h_low: number | null
+          current_session: string | null
+          day_high: number | null
+          day_low: number | null
+          id: string
+          market_tip: string | null
+          next_high_impact_currency: string | null
+          next_high_impact_event: string | null
+          next_high_impact_level: string | null
+          next_high_impact_time: string | null
+          next_session: string | null
+          next_session_open_at: string | null
+          resistance_1: number | null
+          resistance_2: number | null
+          snapshot_time: string
+          support_1: number | null
+          support_2: number | null
+          timeframe: string
+        }
+        Insert: {
+          asset_id: string
+          current_4h_block?: string | null
+          current_4h_high?: number | null
+          current_4h_low?: number | null
+          current_session?: string | null
+          day_high?: number | null
+          day_low?: number | null
+          id?: string
+          market_tip?: string | null
+          next_high_impact_currency?: string | null
+          next_high_impact_event?: string | null
+          next_high_impact_level?: string | null
+          next_high_impact_time?: string | null
+          next_session?: string | null
+          next_session_open_at?: string | null
+          resistance_1?: number | null
+          resistance_2?: number | null
+          snapshot_time?: string
+          support_1?: number | null
+          support_2?: number | null
+          timeframe?: string
+        }
+        Update: {
+          asset_id?: string
+          current_4h_block?: string | null
+          current_4h_high?: number | null
+          current_4h_low?: number | null
+          current_session?: string | null
+          day_high?: number | null
+          day_low?: number | null
+          id?: string
+          market_tip?: string | null
+          next_high_impact_currency?: string | null
+          next_high_impact_event?: string | null
+          next_high_impact_level?: string | null
+          next_high_impact_time?: string | null
+          next_session?: string | null
+          next_session_open_at?: string | null
+          resistance_1?: number | null
+          resistance_2?: number | null
+          snapshot_time?: string
+          support_1?: number | null
+          support_2?: number | null
+          timeframe?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_card_metrics_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_indicators: {
         Row: {
           asset_id: string
