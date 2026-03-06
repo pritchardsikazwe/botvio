@@ -652,6 +652,18 @@ export function MarketDashboard() {
                   </p>
                 )}
 
+                {/* Exness CTA */}
+                {exnessLink && (
+                  <a
+                    href={exnessLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-2 rounded-lg bg-accent/10 border border-accent/30 text-accent-foreground hover:bg-accent/20 transition-all"
+                  >
+                    🏦 Open Forex Account — Best Broker
+                  </a>
+                )}
+
                 {/* Bottom Buttons */}
                 <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-border/30">
                   <button
