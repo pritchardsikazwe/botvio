@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Zap } from "lucide-react";
 import { seoPages, countrySEOPages } from "@/content/seoPages";
+import { seoTrafficPages } from "@/content/seoTrafficPages";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 
 const SEOAnswerPage = () => {
   const location = useLocation();
   const slug = location.pathname.replace(/^\//, "");
-  const page = seoPages[slug] || null;
+  const page = seoPages[slug] || seoTrafficPages[slug] || null;
   const countryPage = countrySEOPages[slug] || null;
 
   if (!page && !countryPage) {
