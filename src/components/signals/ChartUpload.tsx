@@ -169,22 +169,42 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
     }
   }, [user]);
 
+  // Track guest uploads via localStorage
+  const getGuestUploadCount = (): number => {
+    try {
+      const data = JSON.parse(localStorage.getItem("botvio_guest_uploads") || '{"count":0,"reset":""}');
+      const today = new Date().toISOString().slice(0, 10);
+      if (data.reset !== today) return 0;
+      return data.count || 0;
+    } catch { return 0; }
+  };
+
+  const incrementGuestUploadCount = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const current = getGuestUploadCount();
+    localStorage.setItem("botvio_guest_uploads", JSON.stringify({ count: current + 1, reset: today }));
+  };
+
   const handleAnalyze = async () => {
     if (!selectedFile) {
       toast.error("Please select a chart image");
       return;
     }
 
+    // Allow guests up to 10 uploads, then require sign-in
     if (!user) {
-      setShowAuthModal(true);
-      toast.error("Please sign in to use AI chart analysis");
-      return;
+      const guestCount = getGuestUploadCount();
+      if (guestCount >= 10) {
+        setShowAuthModal(true);
+        toast.error("Free analysis limit reached. Sign up to continue!");
+        return;
+      }
     }
 
     try {
       setIsUploading(true);
 
-      const userId = user.id;
+      const userId = user?.id || "guest";
       const fileExt = selectedFile.name.split(".").pop();
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
@@ -227,6 +247,15 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       setAnalysisResult(analysisData.analysis);
       setStructuredResult(analysisData.structured);
       toast.success("Chart analyzed successfully!");
+
+      // Track guest upload count
+      if (!user) {
+        incrementGuestUploadCount();
+        const remaining = 10 - getGuestUploadCount();
+        if (remaining > 0) {
+          toast.info(`${remaining} free analyses remaining`);
+        }
+      }
 
       // Auto-post as signal if user is admin/super_admin/signal_manager
       if ((isAdmin || isSuperAdmin || isSignalManager) && analysisData.structured) {
