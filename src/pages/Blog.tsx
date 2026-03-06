@@ -114,17 +114,74 @@ const blogPosts = [
     image: "📈",
   },
   {
-    slug: "botvio-multiplier-trading-explained",
-    title: "Multiplier Trading Explained: Botvio's Approach",
-    excerpt: "Understand how Botvio trades Multiplier contracts on Deriv with dynamic multiplier selection.",
-    category: "Tutorial",
+    slug: "best-gold-brokers-xauusd-trading",
+    title: "Best Gold Brokers for XAUUSD Trading in 2026",
+    excerpt: "Compare top gold brokers including Exness, Deriv & Weltrade. Find the best spreads and conditions for XAUUSD trading.",
+    category: "Gold",
+    readTime: "10 min",
+    date: "2026-03-01",
+    featured: true,
+    image: "🥇",
+  },
+  {
+    slug: "gold-signals-xauusd-daily-analysis",
+    title: "Gold Signals & XAUUSD Daily Analysis — How Botvio Delivers",
+    excerpt: "Learn how Botvio generates daily gold signals and XAUUSD analysis using AI chart analysis tools for gold traders.",
+    category: "Gold",
+    readTime: "8 min",
+    date: "2026-03-03",
+    image: "📊",
+  },
+  {
+    slug: "deriv-signals-forex-trading-guide",
+    title: "Deriv Signals — Free Forex Trading Signals for 2026",
+    excerpt: "Get free Deriv signals for synthetic indices, forex and gold. AI-powered signal generation for Deriv traders.",
+    category: "Signals",
     readTime: "9 min",
-    date: "2026-02-03",
-    image: "🔢",
+    date: "2026-03-02",
+    image: "📡",
+  },
+  {
+    slug: "exness-signals-gold-forex",
+    title: "Exness Signals — Gold & Forex Trading Signals",
+    excerpt: "Free Exness signals for XAUUSD, EUR/USD and major forex pairs. AI analysis tools for Exness traders.",
+    category: "Signals",
+    readTime: "8 min",
+    date: "2026-02-28",
+    image: "⚡",
+  },
+  {
+    slug: "weltrade-signals-forex-gold",
+    title: "Weltrade Signals — Forex & Gold Copy Trading",
+    excerpt: "Weltrade signals and copy trading for gold and forex. Follow top XAUUSD traders on Weltrade with Botvio.",
+    category: "Signals",
+    readTime: "7 min",
+    date: "2026-02-27",
+    image: "🌍",
+  },
+  {
+    slug: "ai-forex-chart-analysis-tools",
+    title: "AI Forex Chart Analysis Tools — Free Technical Analysis",
+    excerpt: "Upload any forex or gold chart and get instant AI-powered technical analysis with support, resistance & trade setups.",
+    category: "Guide",
+    readTime: "11 min",
+    date: "2026-03-04",
+    featured: true,
+    image: "🤖",
+  },
+  {
+    slug: "forex-mentorship-learn-gold-trading",
+    title: "Forex Mentorship — Learn Gold Trading from Experts",
+    excerpt: "Join Botvio's forex mentorship program. Learn XAUUSD analysis, risk management & professional trading strategies.",
+    category: "Forex",
+    readTime: "12 min",
+    date: "2026-03-05",
+    featured: true,
+    image: "🎓",
   },
 ];
 
-const categories = ["All", "Guide", "Tutorial", "Strategy", "Comparison", "Security", "Forex", "Earn Online"];
+const categories = ["All", "Guide", "Tutorial", "Strategy", "Gold", "Signals", "Forex", "Earn Online", "Comparison", "Security"];
 
 const Blog = () => {
   const [search, setSearch] = useState("");
@@ -142,17 +199,18 @@ const Blog = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: "Botvio Trading Blog",
-    description: "Expert trading guides on how to start forex, how to earn online, Deriv binary options, and AI-powered automated trading strategies.",
+    name: "Botvio Forex & Gold Trading Blog",
+    description: "Expert guides on forex signals, gold trading, XAUUSD analysis, AI chart analysis, Deriv signals, Exness signals, Weltrade signals, and forex mentorship.",
     url: "https://botvio.live/blog",
     publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live" },
+    keywords: "forex signals, gold signals, XAUUSD signals, AI forex analysis, gold trading, gold brokers, gold analysis, deriv signals, exness signals, weltrade signals, forex mentorship, AI chart analysis, gold traders, forex trading signals, copy trading signals, best gold broker, XAUUSD analysis, free forex signals, trading mentorship, binance signals",
   };
 
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Blog – How to Start Forex, Earn Online & AI Trading"
-        description="Expert guides on how to start forex trading, how to earn money online, Deriv binary options strategies, and AI-powered automated trading with Botvio."
+        title="Blog – Gold Signals, Forex Mentorship & AI Chart Analysis"
+        description="Expert guides on gold trading signals, XAUUSD analysis, forex mentorship, Deriv signals, Exness signals, Weltrade signals & AI-powered chart analysis tools."
         jsonLd={jsonLd}
       />
       <Header />
@@ -161,8 +219,8 @@ const Blog = () => {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
             <div className="space-y-3">
-              <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">Botvio Trading Blog</h1>
-              <p className="text-muted-foreground max-w-2xl">Expert guides on forex trading, earning online, Deriv binary options, and AI-powered automated strategies.</p>
+              <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">Forex & Gold Trading Blog</h1>
+              <p className="text-muted-foreground max-w-2xl">Expert guides on gold signals, XAUUSD analysis, forex mentorship, Deriv signals, Exness signals, Weltrade signals & AI chart analysis.</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">

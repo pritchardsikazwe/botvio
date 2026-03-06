@@ -85,9 +85,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Trading Dashboard"
-        description="AI-powered trading dashboard with live signals, bots, and copy trading"
-        noIndex
+        title="Forex Signals & AI Analysis Dashboard"
+        description="Free forex signals, AI chart analysis, gold trading mentorship, Deriv signals, Exness signals & XAUUSD analysis tools."
       />
       <Header />
 

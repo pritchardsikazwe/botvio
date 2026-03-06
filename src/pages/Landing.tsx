@@ -82,34 +82,34 @@ const Landing = () => {
 
   const features = [
     {
-      icon: Bot,
-      title: "AI Trading Bots",
-      description: "Deploy pre-built or custom trading bots that execute your strategies 24/7"
-    },
-    {
       icon: Signal,
-      title: "Live Signals",
-      description: "Get real-time trading signals for Gold, Synthetic Indices, NASDAQ & Crypto"
-    },
-    {
-      icon: Users,
-      title: "Copy Trading",
-      description: "Follow expert traders and automatically copy their winning trades"
-    },
-    {
-      icon: Shield,
-      title: "Risk Management",
-      description: "Built-in daily loss limits, position sizing, and account protection"
+      title: "Free Forex Signals",
+      description: "Real-time gold signals, XAUUSD analysis, Deriv signals, Exness signals & Weltrade signals"
     },
     {
       icon: BarChart3,
-      title: "Analytics Dashboard",
-      description: "Track your performance with detailed P&L reports and win rate stats"
+      title: "AI Chart Analysis",
+      description: "Upload any chart and get instant AI-powered technical analysis with entry/exit levels"
+    },
+    {
+      icon: Users,
+      title: "Forex Mentorship",
+      description: "Learn gold trading, forex strategies & risk management from expert mentors"
+    },
+    {
+      icon: Bot,
+      title: "Trading Bots",
+      description: "Deploy AI bots that execute your strategies 24/7 on Deriv, Exness & Binance"
+    },
+    {
+      icon: Shield,
+      title: "Copy Trading",
+      description: "Follow top gold traders and automatically copy their winning XAUUSD trades"
     },
     {
       icon: Globe,
-      title: "Multi-Broker Support",
-      description: "Trade on Deriv, Weltrade, and Exness from a single platform"
+      title: "Multi-Broker Signals",
+      description: "Signals for Deriv, Weltrade, Exness & Binance from a single platform"
     }
       ];
 
@@ -131,8 +131,8 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <SEOHead 
-        title="AI Trading Bots & Signals" 
-        description="Automate your trading on Deriv, Exness & Binance. Deploy AI bots, copy top traders, and receive real-time signals."
+        title="Forex Signals, AI Chart Analysis & Gold Trading Mentorship" 
+        description="Free forex signals, AI chart analysis tools, gold trading mentorship. Get Deriv signals, Exness signals, Weltrade signals & XAUUSD analysis from Botvio."
       />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -191,19 +191,19 @@ const Landing = () => {
           <div className="text-center max-w-4xl mx-auto">
             <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-2">
               <Zap className="h-3 w-3 mr-2" />
-              AI-Powered Trading Platform
+              Forex Signals • AI Analysis • Gold Mentorship
             </Badge>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Trade Smarter with
+              Forex Signals &
               <span className="block bg-gradient-to-r from-primary via-amber-400 to-amber-500 bg-clip-text text-transparent">
-                Botvio Bots
+                AI Chart Analysis
               </span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Automate your trading on Deriv, Weltrade & Exness. Deploy AI bots, copy top traders, 
-              and receive real-time signals — all from one powerful platform.
+              Free forex signals, AI-powered chart analysis tools, gold trading mentorship & copy trading. 
+              Get Deriv, Exness & Weltrade signals — all in one platform.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
