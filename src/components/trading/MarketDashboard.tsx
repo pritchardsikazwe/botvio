@@ -339,7 +339,7 @@ function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol
   );
 }
 
-export function MarketDashboard() {
+export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: number; maxBinanceCards?: number } = {}) {
   const navigate = useNavigate();
   const { data: assets, isLoading: assetsLoading } = useQuery({
     queryKey: ["market-assets"],
