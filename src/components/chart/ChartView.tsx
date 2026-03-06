@@ -138,11 +138,12 @@ export function ChartView({
         ema20Series.setData(calculateEMA(candles, 20));
       }
       if (candles.length >= 50) {
-        const ema50Series = chart.addSeries(LineSeries, {
+      const ema50Series = chart.addSeries(LineSeries, {
           color: "hsl(200 80% 55%)",
           lineWidth: 1,
           priceLineVisible: false,
-          lastValueVisible: false,
+          lastValueVisible: true,
+          title: "EMA50",
         });
         ema50Series.setData(calculateEMA(candles, 50));
       }
