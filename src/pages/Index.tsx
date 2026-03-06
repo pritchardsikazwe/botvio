@@ -47,7 +47,7 @@ const Index = () => {
         .select("*")
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
-        .limit(4);
+        .limit(2);
       if (error) throw error;
       return data;
     },
@@ -137,7 +137,7 @@ const Index = () => {
                 <Link to="/marketplace">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {displayProducts.map((product) => {
                 const productLink = product.type === "bot" ? "/bots" : product.type === "signal_pack" ? "/signals" : product.type === "course" ? "/learn" : "/marketplace";
                 return (

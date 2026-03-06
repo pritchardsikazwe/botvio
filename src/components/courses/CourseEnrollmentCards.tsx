@@ -308,16 +308,17 @@ const CourseCard = ({ program, compact, onEnroll, onViewLessons, enrolling }: Co
             </span>
           )}
         </div>
-        {!compact && (
-          <ul className="space-y-1.5">
-            {program.features.map((feature, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                {feature}
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="space-y-1.5">
+          {(compact ? program.features.slice(0, 3) : program.features).map((feature, i) => (
+            <li key={i} className="flex items-center gap-2 text-sm">
+              <CheckCircle className="h-3.5 w-3.5 text-success flex-shrink-0" />
+              {feature}
+            </li>
+          ))}
+          {compact && program.features.length > 3 && (
+            <li className="text-xs text-muted-foreground">+{program.features.length - 3} more</li>
+          )}
+        </ul>
         {hasAccess ? (
           <Button variant="outline" className="w-full" size="sm" onClick={onViewLessons}>
             <ArrowRight className="h-4 w-4 mr-2" />
