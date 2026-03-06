@@ -319,13 +319,9 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             <Badge variant="outline" className="text-xs text-primary border-primary/30">
               Auto-posts signals
             </Badge>
-          ) : user ? (
-            <Badge variant="outline" className="text-xs text-success border-success/30">
-              Unlimited analyses
-            </Badge>
           ) : (
-            <Badge variant="outline" className="text-xs">
-              Sign in required
+            <Badge variant="outline" className="text-xs text-success border-success/30">
+              Free — Unlimited
             </Badge>
           )}
         </div>
