@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, XCircle, Clock, Eye, History, AlertTriangle } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, History, AlertTriangle, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { useUpdateSignalOutcome } from "@/hooks/useManualSignals";
 
 interface Signal {
   id: string;
@@ -27,6 +28,7 @@ interface Signal {
   posted_by: string | null;
   strategy_name: string;
   confidence: number | null;
+  outcome: string | null;
 }
 
 interface AuditLog {
@@ -49,6 +51,12 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
   CLOSED: "outline",
 };
 
+const outcomeColors: Record<string, string> = {
+  win: "bg-success/15 text-success border-success/30",
+  loss: "bg-destructive/15 text-destructive border-destructive/30",
+  pending: "bg-muted text-muted-foreground border-border",
+};
+
 export const SignalApprovalsTab = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -57,6 +65,7 @@ export const SignalApprovalsTab = () => {
   const [notes, setNotes] = useState("");
   const [showAuditLog, setShowAuditLog] = useState(false);
   const [auditSignalId, setAuditSignalId] = useState<string | null>(null);
+  const outcomeMutation = useUpdateSignalOutcome();
 
   // Fetch pending signals
   const { data: pendingSignals, isLoading: pendingLoading } = useQuery({
@@ -290,9 +299,9 @@ export const SignalApprovalsTab = () => {
                       <TableHead>Direction</TableHead>
                       <TableHead>Entry</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Strategy</TableHead>
+                      <TableHead>Outcome</TableHead>
                       <TableHead>Created</TableHead>
-                      <TableHead>Audit</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -310,14 +319,39 @@ export const SignalApprovalsTab = () => {
                             {signal.status}
                           </Badge>
                         </TableCell>
-                        <TableCell>{signal.strategy_name}</TableCell>
+                        <TableCell>
+                          <Badge className={outcomeColors[signal.outcome || "pending"] || outcomeColors.pending}>
+                            {signal.outcome === "win" && <Trophy className="h-3 w-3 mr-1" />}
+                            {(signal.outcome || "pending").toUpperCase()}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {new Date(signal.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <Button size="sm" variant="ghost" onClick={() => openAuditLog(signal.id)}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant={signal.outcome === "win" ? "default" : "outline"}
+                              className={signal.outcome === "win" ? "bg-success hover:bg-success/90 text-success-foreground h-7 px-2" : "border-success text-success hover:bg-success hover:text-success-foreground h-7 px-2"}
+                              onClick={() => outcomeMutation.mutate({ id: signal.id, outcome: signal.outcome === "win" ? "pending" : "win" })}
+                              disabled={outcomeMutation.isPending}
+                            >
+                              <Trophy className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={signal.outcome === "loss" ? "destructive" : "outline"}
+                              className={signal.outcome !== "loss" ? "border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground h-7 px-2" : "h-7 px-2"}
+                              onClick={() => outcomeMutation.mutate({ id: signal.id, outcome: signal.outcome === "loss" ? "pending" : "loss" })}
+                              disabled={outcomeMutation.isPending}
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => openAuditLog(signal.id)}>
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

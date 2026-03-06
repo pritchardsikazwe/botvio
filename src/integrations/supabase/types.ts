@@ -3509,6 +3509,9 @@ export type Database = {
           expires_at: string | null
           id: string
           is_manual: boolean | null
+          outcome: string | null
+          outcome_updated_at: string | null
+          outcome_updated_by: string | null
           posted_by: string | null
           reason: string | null
           rejection_reason: string | null
@@ -3533,6 +3536,9 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_manual?: boolean | null
+          outcome?: string | null
+          outcome_updated_at?: string | null
+          outcome_updated_by?: string | null
           posted_by?: string | null
           reason?: string | null
           rejection_reason?: string | null
@@ -3557,6 +3563,9 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_manual?: boolean | null
+          outcome?: string | null
+          outcome_updated_at?: string | null
+          outcome_updated_by?: string | null
           posted_by?: string | null
           reason?: string | null
           rejection_reason?: string | null
