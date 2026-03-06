@@ -339,7 +339,7 @@ function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol
   );
 }
 
-export function MarketDashboard() {
+export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: number; maxBinanceCards?: number } = {}) {
   const navigate = useNavigate();
   const { data: assets, isLoading: assetsLoading } = useQuery({
     queryKey: ["market-assets"],
@@ -545,8 +545,13 @@ export function MarketDashboard() {
       <PatternAlerts patterns={patternAlerts} />
 
       {/* Asset Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {assets.map((asset) => {
+      {(() => {
+        // Separate crypto (Binance-supported) from non-crypto
+        const nonBinanceAssets = assets.filter(a => !BINANCE_SYMBOL_MAP[a.symbol]);
+        const binanceAssets = assets.filter(a => !!BINANCE_SYMBOL_MAP[a.symbol]);
+        const limitedNonBinance = maxCards != null ? nonBinanceAssets.slice(0, maxCards) : nonBinanceAssets;
+        const limitedBinance = maxBinanceCards != null ? binanceAssets.slice(0, maxBinanceCards) : binanceAssets;
+        const renderCard = (asset: Asset) => {
           const quote = quoteMap.get(asset.id);
           const ind = indicatorMap.get(asset.id);
           const sig = signalMap.get(asset.id);
@@ -751,8 +756,27 @@ export function MarketDashboard() {
               </CardContent>
             </Card>
           );
-        })}
-      </div>
+        };
+
+        return (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {limitedNonBinance.map(renderCard)}
+            </div>
+            {limitedBinance.length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">🔶</span>
+                  <h3 className="text-lg font-bold text-foreground">Binance Markets</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {limitedBinance.map(renderCard)}
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
     </div>
   );
 }
