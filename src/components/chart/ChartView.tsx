@@ -278,9 +278,10 @@ export function ChartView({
               const s = chart.addSeries(LineSeries, {
                 color: sess.color,
                 lineWidth: 1,
-                lineStyle: 2, // dashed
+                lineStyle: 2,
                 priceLineVisible: false,
                 lastValueVisible: false,
+                title: sess.name,
               });
               s.setData([
                 { time: t as any, value: lo },
