@@ -163,13 +163,13 @@ export function ChartView({
         // Metrics-based S/R (if available, draw as bold dashed)
         if (metrics) {
           const mLevels = [
-            { price: metrics.support_1, color: "hsl(145 80% 50%)" },
-            { price: metrics.support_2, color: "hsl(145 60% 40%)" },
-            { price: metrics.resistance_1, color: "hsl(0 90% 60%)" },
-            { price: metrics.resistance_2, color: "hsl(0 70% 50%)" },
+            { price: metrics.support_1, color: "hsl(145 80% 50%)", label: "Sup1" },
+            { price: metrics.support_2, color: "hsl(145 60% 40%)", label: "Sup2" },
+            { price: metrics.resistance_1, color: "hsl(0 90% 60%)", label: "Res1" },
+            { price: metrics.resistance_2, color: "hsl(0 70% 50%)", label: "Res2" },
           ];
           mLevels.forEach((m) => {
-            if (m.price != null) drawHLine(Number(m.price), m.color, 2, 2);
+            if (m.price != null) drawHLine(Number(m.price), m.color, 2, 2, m.label);
           });
         }
 
