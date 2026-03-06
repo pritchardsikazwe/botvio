@@ -191,19 +191,19 @@ const Landing = () => {
           <div className="text-center max-w-4xl mx-auto">
             <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-2">
               <Zap className="h-3 w-3 mr-2" />
-              AI-Powered Trading Platform
+              Forex Signals • AI Analysis • Gold Mentorship
             </Badge>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Trade Smarter with
+              Forex Signals &
               <span className="block bg-gradient-to-r from-primary via-amber-400 to-amber-500 bg-clip-text text-transparent">
-                Botvio Bots
+                AI Chart Analysis
               </span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Automate your trading on Deriv, Weltrade & Exness. Deploy AI bots, copy top traders, 
-              and receive real-time signals — all from one powerful platform.
+              Free forex signals, AI-powered chart analysis tools, gold trading mentorship & copy trading. 
+              Get Deriv, Exness & Weltrade signals — all in one platform.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
