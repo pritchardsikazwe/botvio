@@ -673,8 +673,8 @@ export function MarketDashboard() {
                   </p>
                 )}
 
-                {/* Exness CTA */}
-                {exnessLink && (
+                {/* Exness CTA — forex/metals only */}
+                {exnessLink && !BINANCE_SYMBOL_MAP[asset.symbol] && (
                   <a
                     href={exnessLink}
                     target="_blank"
@@ -682,6 +682,18 @@ export function MarketDashboard() {
                     className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-2 rounded-lg bg-accent/10 border border-accent/30 text-accent-foreground hover:bg-accent/20 transition-all"
                   >
                     🏦 Open Forex Account — Best Broker
+                  </a>
+                )}
+
+                {/* Binance CTA — crypto only */}
+                {BINANCE_SYMBOL_MAP[asset.symbol] && (
+                  <a
+                    href={binanceLink || `https://www.binance.com/en/trade/${BINANCE_SYMBOL_MAP[asset.symbol]}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-2 rounded-lg bg-[hsl(45,100%,51%)]/10 border border-[hsl(45,100%,51%)]/30 text-[hsl(45,100%,41%)] hover:bg-[hsl(45,100%,51%)]/20 transition-all"
+                  >
+                    🔶 Trade {BINANCE_SYMBOL_MAP[asset.symbol]} on Binance — Best Exchange
                   </a>
                 )}
 
