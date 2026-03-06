@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo } from "react";
 import { TradingChecklist } from "./market/TradingChecklist";
 import { NewsImpactBanner } from "./market/NewsImpactBanner";
 import { PatternAlerts } from "./market/PatternAlerts";
+import { usePartnerLinks } from "@/hooks/useSiteSettings";
 
 interface Asset {
   id: string;
@@ -345,6 +346,12 @@ export function MarketDashboard() {
 
   const assetIds = assets?.map((a) => a.id) || [];
 
+  const { data: partnerLinks } = usePartnerLinks();
+  const exnessLink = useMemo(() => {
+    const link = partnerLinks?.find((l: any) => l.key === "exness" || l.label?.toLowerCase().includes("exness"));
+    return link?.url || null;
+  }, [partnerLinks]);
+
   const { data: quotes } = useQuery({
     queryKey: ["market-quotes", assetIds],
     queryFn: async () => {
@@ -649,6 +656,18 @@ export function MarketDashboard() {
                   <p className="text-[11px] text-foreground/60 line-clamp-2 border-t border-border/30 pt-2 leading-relaxed">
                     {sig.ai_summary}
                   </p>
+                )}
+
+                {/* Exness CTA */}
+                {exnessLink && (
+                  <a
+                    href={exnessLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-2 rounded-lg bg-accent/10 border border-accent/30 text-accent-foreground hover:bg-accent/20 transition-all"
+                  >
+                    🏦 Open Forex Account — Best Broker
+                  </a>
                 )}
 
                 {/* Bottom Buttons */}
