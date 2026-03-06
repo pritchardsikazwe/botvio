@@ -346,6 +346,12 @@ export function MarketDashboard() {
 
   const assetIds = assets?.map((a) => a.id) || [];
 
+  const { data: partnerLinks } = usePartnerLinks();
+  const exnessLink = useMemo(() => {
+    const link = partnerLinks?.find((l: any) => l.key === "exness" || l.label?.toLowerCase().includes("exness"));
+    return link?.url || null;
+  }, [partnerLinks]);
+
   const { data: quotes } = useQuery({
     queryKey: ["market-quotes", assetIds],
     queryFn: async () => {
