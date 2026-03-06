@@ -122,7 +122,7 @@ const Index = () => {
 
         {/* 3c — Live Market Intelligence */}
         <section>
-          <MarketDashboard />
+          <MarketDashboard {...(!user ? { maxCards: 4, maxBinanceCards: 3 } : {})} />
         </section>
 
         {/* 4 — Featured Products (4 max) */}
