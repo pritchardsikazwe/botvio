@@ -67,6 +67,17 @@ interface CardMetrics {
 const ASSET_ICONS: Record<string, string> = {
   "XAU/USD": "🥇", "XAG/USD": "🥈", "BTC/USD": "₿",
   "GBP/USD": "£", "USD/JPY": "¥", "EUR/USD": "€", "AUD/USD": "🇦🇺",
+  "ETH/USD": "⟠", "SOL/USD": "◎", "BNB/USD": "🔶", "XRP/USD": "✕", "DOGE/USD": "🐕",
+};
+
+// Binance symbol mapping — only supported crypto assets
+const BINANCE_SYMBOL_MAP: Record<string, string> = {
+  "BTC/USD": "BTCUSDT",
+  "ETH/USD": "ETHUSDT",
+  "SOL/USD": "SOLUSDT",
+  "BNB/USD": "BNBUSDT",
+  "XRP/USD": "XRPUSDT",
+  "DOGE/USD": "DOGEUSDT",
 };
 
 const SIGNAL_COLORS: Record<string, string> = {
@@ -349,6 +360,10 @@ export function MarketDashboard() {
   const { data: partnerLinks } = usePartnerLinks();
   const exnessLink = useMemo(() => {
     const link = partnerLinks?.find((l: any) => l.key === "exness" || l.label?.toLowerCase().includes("exness"));
+    return link?.url || null;
+  }, [partnerLinks]);
+  const binanceLink = useMemo(() => {
+    const link = partnerLinks?.find((l: any) => l.key === "binance" || l.label?.toLowerCase().includes("binance"));
     return link?.url || null;
   }, [partnerLinks]);
 
@@ -658,8 +673,8 @@ export function MarketDashboard() {
                   </p>
                 )}
 
-                {/* Exness CTA */}
-                {exnessLink && (
+                {/* Exness CTA — forex/metals only */}
+                {exnessLink && !BINANCE_SYMBOL_MAP[asset.symbol] && (
                   <a
                     href={exnessLink}
                     target="_blank"
@@ -670,29 +685,61 @@ export function MarketDashboard() {
                   </a>
                 )}
 
+                {/* Binance CTA — crypto only */}
+                {BINANCE_SYMBOL_MAP[asset.symbol] && (
+                  <a
+                    href={binanceLink || `https://www.binance.com/en/trade/${BINANCE_SYMBOL_MAP[asset.symbol]}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-2 rounded-lg bg-[hsl(45,100%,51%)]/10 border border-[hsl(45,100%,51%)]/30 text-[hsl(45,100%,41%)] hover:bg-[hsl(45,100%,51%)]/20 transition-all"
+                  >
+                    🔶 Trade {BINANCE_SYMBOL_MAP[asset.symbol]} on Binance — Best Exchange
+                  </a>
+                )}
+
                 {/* Bottom Buttons */}
-                <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-border/30">
-                  <button
-                    onClick={() => navigate(`/chart/${asset.symbol.replace("/", "")}`)}
-                    className="text-[10px] font-bold py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
-                  >
-                    📈 View Chart
-                  </button>
-                  <button
-                    className="text-[10px] font-bold py-1.5 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                  >
-                    🔔 Set Alert
-                  </button>
-                  <button
-                    onClick={() => {
-                      const text = encodeURIComponent(`${asset.symbol} ${sig?.signal?.toUpperCase() || ""} signal on Botvio`);
-                      window.open(`https://wa.me/?text=${text}`, "_blank");
-                    }}
-                    className="text-[10px] font-bold py-1.5 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
-                  >
-                    💬 WhatsApp
-                  </button>
-                </div>
+                {(() => {
+                  const binancePair = BINANCE_SYMBOL_MAP[asset.symbol];
+                  const hasBinance = !!binancePair;
+                  const binanceUrl = binanceLink
+                    ? `${binanceLink}`
+                    : `https://www.binance.com/en/trade/${binancePair}`;
+
+                  return (
+                    <div className={`grid gap-1.5 pt-1 border-t border-border/30 ${hasBinance ? "grid-cols-4" : "grid-cols-3"}`}>
+                      <button
+                        onClick={() => navigate(`/chart/${asset.symbol.replace("/", "")}`)}
+                        className="text-[10px] font-bold py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
+                      >
+                        📈 Chart
+                      </button>
+                      <button
+                        className="text-[10px] font-bold py-1.5 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                      >
+                        🔔 Alert
+                      </button>
+                      <button
+                        onClick={() => {
+                          const text = encodeURIComponent(`${asset.symbol} ${sig?.signal?.toUpperCase() || ""} signal on Botvio`);
+                          window.open(`https://wa.me/?text=${text}`, "_blank");
+                        }}
+                        className="text-[10px] font-bold py-1.5 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
+                      >
+                        💬 Share
+                      </button>
+                      {hasBinance && (
+                        <a
+                          href={binanceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1 text-[10px] font-bold py-1.5 rounded-lg bg-[hsl(45,100%,51%)]/10 border border-[hsl(45,100%,51%)]/30 text-[hsl(45,100%,41%)] hover:bg-[hsl(45,100%,51%)]/20 transition-all"
+                        >
+                          🔶 Binance
+                        </a>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Empty state */}
                 {!quote && !sig && !metrics && (
