@@ -53,6 +53,10 @@ import AuthoritySignals from "./pages/AuthoritySignals";
 import SEOAnswerPage from "./pages/SEOAnswerPage";
 import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
 import { AdminLogin } from "@/components/admin/AdminLogin";
+import SignalPairPage from "./pages/SignalPairPage";
+import BotDetailPage from "./pages/BotDetailPage";
+import CountryTrafficPage from "./pages/CountryTrafficPage";
+import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
 
