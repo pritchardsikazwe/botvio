@@ -112,13 +112,14 @@ export function ChartView({
       const lastTime = candleTime(candles[candles.length - 1]) as any;
 
       // helper to draw a horizontal line
-      const drawHLine = (price: number, color: string, width: number, style: number) => {
+      const drawHLine = (price: number, color: string, width: number, style: number, label?: string) => {
         const s = chart.addSeries(LineSeries, {
           color,
           lineWidth: width as any,
           lineStyle: style,
           priceLineVisible: false,
-          lastValueVisible: false,
+          lastValueVisible: !!label,
+          title: label || "",
         });
         s.setData([
           { time: firstTime, value: price },
@@ -128,20 +129,22 @@ export function ChartView({
 
       // ── EMA 20 & 50 ──────────────────────────────────────────────────
       if (candles.length >= 20) {
-        const ema20Series = chart.addSeries(LineSeries, {
+      const ema20Series = chart.addSeries(LineSeries, {
           color: "hsl(45 100% 51%)",
           lineWidth: 1,
           priceLineVisible: false,
-          lastValueVisible: false,
+          lastValueVisible: true,
+          title: "EMA20",
         });
         ema20Series.setData(calculateEMA(candles, 20));
       }
       if (candles.length >= 50) {
-        const ema50Series = chart.addSeries(LineSeries, {
+      const ema50Series = chart.addSeries(LineSeries, {
           color: "hsl(200 80% 55%)",
           lineWidth: 1,
           priceLineVisible: false,
-          lastValueVisible: false,
+          lastValueVisible: true,
+          title: "EMA50",
         });
         ema50Series.setData(calculateEMA(candles, 50));
       }
@@ -150,22 +153,23 @@ export function ChartView({
       if (showLevels) {
         const autoLevels = detectSupportResistance(candles);
 
-        autoLevels.forEach((lvl) => {
+        autoLevels.forEach((lvl, i) => {
           const color = lvl.type === "support" ? "hsl(145 70% 45%)" : "hsl(0 85% 55%)";
           const width = lvl.strength === "strong" ? 3 : lvl.strength === "moderate" ? 2 : 1;
-          drawHLine(lvl.price, color, width, lvl.strength === "strong" ? 0 : 2);
+          const label = lvl.type === "support" ? `S${i + 1}` : `R${i + 1}`;
+          drawHLine(lvl.price, color, width, lvl.strength === "strong" ? 0 : 2, label);
         });
 
         // Metrics-based S/R (if available, draw as bold dashed)
         if (metrics) {
           const mLevels = [
-            { price: metrics.support_1, color: "hsl(145 80% 50%)" },
-            { price: metrics.support_2, color: "hsl(145 60% 40%)" },
-            { price: metrics.resistance_1, color: "hsl(0 90% 60%)" },
-            { price: metrics.resistance_2, color: "hsl(0 70% 50%)" },
+            { price: metrics.support_1, color: "hsl(145 80% 50%)", label: "Sup1" },
+            { price: metrics.support_2, color: "hsl(145 60% 40%)", label: "Sup2" },
+            { price: metrics.resistance_1, color: "hsl(0 90% 60%)", label: "Res1" },
+            { price: metrics.resistance_2, color: "hsl(0 70% 50%)", label: "Res2" },
           ];
           mLevels.forEach((m) => {
-            if (m.price != null) drawHLine(Number(m.price), m.color, 2, 2);
+            if (m.price != null) drawHLine(Number(m.price), m.color, 2, 2, m.label);
           });
         }
 
@@ -178,7 +182,8 @@ export function ChartView({
             lineWidth: 3,
             lineStyle: 0,
             priceLineVisible: false,
-            lastValueVisible: false,
+            lastValueVisible: true,
+            title: bo.direction === "up" ? "BO↑" : "BO↓",
           });
           // Draw a short bold horizontal dash at breakout point
           const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
@@ -191,15 +196,15 @@ export function ChartView({
         // ── Wick rejections (small horizontal markers) ──────────────────
         const rejections = detectWickRejections(candles);
         rejections.forEach((rej) => {
-          const color = rej.type === "wick_rejection_high"
-            ? "hsl(280 80% 65%)"  // purple for upper wick rejections
-            : "hsl(180 80% 55%)"; // cyan for lower wick rejections
+          const isHigh = rej.type === "wick_rejection_high";
+          const color = isHigh ? "hsl(280 80% 65%)" : "hsl(180 80% 55%)";
           const s = chart.addSeries(LineSeries, {
             color,
             lineWidth: 1,
             lineStyle: 1,
             priceLineVisible: false,
-            lastValueVisible: false,
+            lastValueVisible: true,
+            title: isHigh ? "WR↓" : "WR↑",
           });
           const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
           s.setData([
@@ -219,7 +224,8 @@ export function ChartView({
             lineWidth: 2,
             lineStyle: 0,
             priceLineVisible: false,
-            lastValueVisible: false,
+            lastValueVisible: true,
+            title: tl.type === "ascending" ? "Trend↑" : "Trend↓",
           });
           s.setData(tl.points.map((p) => ({ time: p.time as any, value: p.value })));
         });
@@ -228,22 +234,22 @@ export function ChartView({
       // ── Signal entry/SL/TP lines ──────────────────────────────────────
       if (showLevels && signal) {
         const signalLines = [
-          { price: signal.entry_price, color: "hsl(45 100% 51%)", w: 2 },
-          { price: signal.stop_loss, color: "hsl(0 85% 55%)", w: 2 },
-          { price: signal.take_profit_1, color: "hsl(145 70% 45%)", w: 2 },
+          { price: signal.entry_price, color: "hsl(45 100% 51%)", w: 2, label: "Entry" },
+          { price: signal.stop_loss, color: "hsl(0 85% 55%)", w: 2, label: "SL" },
+          { price: signal.take_profit_1, color: "hsl(145 70% 45%)", w: 2, label: "TP1" },
         ];
         signalLines.forEach((sl) => {
-          if (sl.price != null) drawHLine(Number(sl.price), sl.color, sl.w, 1);
+          if (sl.price != null) drawHLine(Number(sl.price), sl.color, sl.w, 1, sl.label);
         });
       }
 
       // ── Day High / Day Low pins (bold dashed) ──────────────────────────
       if (metrics) {
         if (metrics.day_high != null) {
-          drawHLine(Number(metrics.day_high), "hsl(0 85% 60%)", 2, 1); // red dashed
+          drawHLine(Number(metrics.day_high), "hsl(0 85% 60%)", 2, 1, "DayHi");
         }
         if (metrics.day_low != null) {
-          drawHLine(Number(metrics.day_low), "hsl(145 70% 50%)", 2, 1); // green dashed
+          drawHLine(Number(metrics.day_low), "hsl(145 70% 50%)", 2, 1, "DayLo");
         }
       }
 
@@ -272,9 +278,10 @@ export function ChartView({
               const s = chart.addSeries(LineSeries, {
                 color: sess.color,
                 lineWidth: 1,
-                lineStyle: 2, // dashed
+                lineStyle: 2,
                 priceLineVisible: false,
                 lastValueVisible: false,
+                title: sess.name,
               });
               s.setData([
                 { time: t as any, value: lo },
