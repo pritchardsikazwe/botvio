@@ -48,6 +48,7 @@ import { SignalApprovalsTab } from "@/components/admin/SignalApprovalsTab";
 import { SignalManagersTab } from "@/components/admin/SignalManagersTab";
 import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab";
 import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
+import { AdminSEOPagesTab } from "@/components/admin/AdminSEOPagesTab";
 
 interface Provider {
   id: string;
@@ -1005,6 +1006,10 @@ const Admin = () => {
               <Globe className="w-4 h-4" />
               SEO & Webmasters
             </TabsTrigger>
+            <TabsTrigger value="seo_pages" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              SEO Pages
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1030,6 +1035,11 @@ const Admin = () => {
           {/* SEO & Webmasters Tab */}
           <TabsContent value="seo">
             <AdminSEOTab />
+          </TabsContent>
+
+          {/* SEO Pages Management Tab */}
+          <TabsContent value="seo_pages">
+            <AdminSEOPagesTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}
