@@ -246,10 +246,10 @@ export function ChartView({
       // ── Day High / Day Low pins (bold dashed) ──────────────────────────
       if (metrics) {
         if (metrics.day_high != null) {
-          drawHLine(Number(metrics.day_high), "hsl(0 85% 60%)", 2, 1); // red dashed
+          drawHLine(Number(metrics.day_high), "hsl(0 85% 60%)", 2, 1, "DayHi");
         }
         if (metrics.day_low != null) {
-          drawHLine(Number(metrics.day_low), "hsl(145 70% 50%)", 2, 1); // green dashed
+          drawHLine(Number(metrics.day_low), "hsl(145 70% 50%)", 2, 1, "DayLo");
         }
       }
 
