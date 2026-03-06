@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo } from "react";
 import { TradingChecklist } from "./market/TradingChecklist";
 import { NewsImpactBanner } from "./market/NewsImpactBanner";
 import { PatternAlerts } from "./market/PatternAlerts";
+import { usePartnerLinks } from "@/hooks/useSiteSettings";
 
 interface Asset {
   id: string;
