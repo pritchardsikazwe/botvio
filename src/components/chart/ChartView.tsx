@@ -4,7 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { BarChart3, Eye, Newspaper, Clock } from "lucide-react";
+import { BarChart3, Eye, Newspaper, Clock, TrendingUp } from "lucide-react";
+import {
+  detectSupportResistance,
+  detectWickRejections,
+  detectBreakouts,
+  detectTrendlines,
+  candleTime,
+} from "@/lib/chartAnalysis";
 
 interface Candle {
   candle_time: string;
@@ -51,7 +58,6 @@ export function ChartView({
   const buildChart = useCallback(() => {
     if (!chartContainerRef.current) return;
 
-    // Clear previous
     if (chartRef.current) {
       chartRef.current.remove();
       chartRef.current = null;
@@ -74,21 +80,15 @@ export function ChartView({
         vertLine: { color: "hsl(45 100% 51%)", width: 1, style: 2, labelBackgroundColor: "hsl(45 100% 51%)" },
         horzLine: { color: "hsl(45 100% 51%)", width: 1, style: 2, labelBackgroundColor: "hsl(45 100% 51%)" },
       },
-      rightPriceScale: {
-        borderColor: "hsl(220 15% 18%)",
-      },
-      timeScale: {
-        borderColor: "hsl(220 15% 18%)",
-        timeVisible: true,
-        secondsVisible: false,
-      },
+      rightPriceScale: { borderColor: "hsl(220 15% 18%)" },
+      timeScale: { borderColor: "hsl(220 15% 18%)", timeVisible: true, secondsVisible: false },
       width: container.clientWidth,
       height: 500,
     });
 
     chartRef.current = chart;
 
-    // Candlestick series
+    // ── Candlestick series ────────────────────────────────────────────
     const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: "hsl(145 70% 45%)",
       downColor: "hsl(0 85% 55%)",
@@ -100,7 +100,7 @@ export function ChartView({
 
     if (candles.length > 0) {
       const data = candles.map((c) => ({
-        time: Math.floor(new Date(c.candle_time).getTime() / 1000) as any,
+        time: candleTime(c) as any,
         open: c.open,
         high: c.high,
         low: c.low,
@@ -108,90 +108,138 @@ export function ChartView({
       }));
       candleSeries.setData(data);
 
-      // EMA 20
+      const firstTime = candleTime(candles[0]) as any;
+      const lastTime = candleTime(candles[candles.length - 1]) as any;
+
+      // helper to draw a horizontal line
+      const drawHLine = (price: number, color: string, width: number, style: number) => {
+        const s = chart.addSeries(LineSeries, {
+          color,
+          lineWidth: width as any,
+          lineStyle: style,
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        s.setData([
+          { time: firstTime, value: price },
+          { time: lastTime, value: price },
+        ]);
+      };
+
+      // ── EMA 20 & 50 ──────────────────────────────────────────────────
       if (candles.length >= 20) {
-        const ema20Data = calculateEMA(candles, 20);
         const ema20Series = chart.addSeries(LineSeries, {
           color: "hsl(45 100% 51%)",
           lineWidth: 1,
           priceLineVisible: false,
           lastValueVisible: false,
         });
-        ema20Series.setData(ema20Data);
+        ema20Series.setData(calculateEMA(candles, 20));
       }
-
-      // EMA 50
       if (candles.length >= 50) {
-        const ema50Data = calculateEMA(candles, 50);
         const ema50Series = chart.addSeries(LineSeries, {
           color: "hsl(200 80% 55%)",
           lineWidth: 1,
           priceLineVisible: false,
           lastValueVisible: false,
         });
-        ema50Series.setData(ema50Data);
+        ema50Series.setData(calculateEMA(candles, 50));
       }
 
-      // Support / Resistance lines
-      if (showLevels && metrics) {
-        const levels = [
-          { price: metrics.support_1, color: "hsl(145 70% 45%)", label: "S1" },
-          { price: metrics.support_2, color: "hsl(145 70% 35%)", label: "S2" },
-          { price: metrics.resistance_1, color: "hsl(0 85% 55%)", label: "R1" },
-          { price: metrics.resistance_2, color: "hsl(0 85% 45%)", label: "R2" },
-        ];
-        levels.forEach((lvl) => {
-          if (lvl.price != null) {
-            const lineSeries = chart.addSeries(LineSeries, {
-              color: lvl.color,
-              lineWidth: 1,
-              lineStyle: 2,
-              priceLineVisible: false,
-              lastValueVisible: false,
-            });
-            const firstTime = Math.floor(new Date(candles[0].candle_time).getTime() / 1000) as any;
-            const lastTime = Math.floor(new Date(candles[candles.length - 1].candle_time).getTime() / 1000) as any;
-            lineSeries.setData([
-              { time: firstTime, value: Number(lvl.price) },
-              { time: lastTime, value: Number(lvl.price) },
-            ]);
-          }
+      // ── Auto-detected S/R (bold lines) ───────────────────────────────
+      if (showLevels) {
+        const autoLevels = detectSupportResistance(candles);
+
+        autoLevels.forEach((lvl) => {
+          const color = lvl.type === "support" ? "hsl(145 70% 45%)" : "hsl(0 85% 55%)";
+          const width = lvl.strength === "strong" ? 3 : lvl.strength === "moderate" ? 2 : 1;
+          drawHLine(lvl.price, color, width, lvl.strength === "strong" ? 0 : 2);
+        });
+
+        // Metrics-based S/R (if available, draw as bold dashed)
+        if (metrics) {
+          const mLevels = [
+            { price: metrics.support_1, color: "hsl(145 80% 50%)" },
+            { price: metrics.support_2, color: "hsl(145 60% 40%)" },
+            { price: metrics.resistance_1, color: "hsl(0 90% 60%)" },
+            { price: metrics.resistance_2, color: "hsl(0 70% 50%)" },
+          ];
+          mLevels.forEach((m) => {
+            if (m.price != null) drawHLine(Number(m.price), m.color, 2, 2);
+          });
+        }
+
+        // ── Breakout markers ──────────────────────────────────────────────
+        const breakouts = detectBreakouts(candles, autoLevels);
+        breakouts.forEach((bo) => {
+          const color = bo.direction === "up" ? "hsl(145 90% 55%)" : "hsl(0 90% 60%)";
+          const s = chart.addSeries(LineSeries, {
+            color,
+            lineWidth: 3,
+            lineStyle: 0,
+            priceLineVisible: false,
+            lastValueVisible: false,
+          });
+          // Draw a short bold horizontal dash at breakout point
+          const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
+          s.setData([
+            { time: (bo.time - halfSpan * 2) as any, value: bo.price },
+            { time: (bo.time + halfSpan * 2) as any, value: bo.price },
+          ]);
+        });
+
+        // ── Wick rejections (small horizontal markers) ──────────────────
+        const rejections = detectWickRejections(candles);
+        rejections.forEach((rej) => {
+          const color = rej.type === "wick_rejection_high"
+            ? "hsl(280 80% 65%)"  // purple for upper wick rejections
+            : "hsl(180 80% 55%)"; // cyan for lower wick rejections
+          const s = chart.addSeries(LineSeries, {
+            color,
+            lineWidth: 1,
+            lineStyle: 1,
+            priceLineVisible: false,
+            lastValueVisible: false,
+          });
+          const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
+          s.setData([
+            { time: (rej.time - halfSpan) as any, value: rej.price },
+            { time: (rej.time + halfSpan) as any, value: rej.price },
+          ]);
         });
       }
 
-      // Signal entry/SL/TP lines
+      // ── Auto trendlines ──────────────────────────────────────────────
+      if (showLevels) {
+        const trendlines = detectTrendlines(candles);
+        trendlines.forEach((tl) => {
+          const color = tl.type === "ascending" ? "hsl(145 70% 55%)" : "hsl(0 70% 60%)";
+          const s = chart.addSeries(LineSeries, {
+            color,
+            lineWidth: 2,
+            lineStyle: 0,
+            priceLineVisible: false,
+            lastValueVisible: false,
+          });
+          s.setData(tl.points.map((p) => ({ time: p.time as any, value: p.value })));
+        });
+      }
+
+      // ── Signal entry/SL/TP lines ──────────────────────────────────────
       if (showLevels && signal) {
         const signalLines = [
-          { price: signal.entry_price, color: "hsl(45 100% 51%)", label: "Entry" },
-          { price: signal.stop_loss, color: "hsl(0 85% 55%)", label: "SL" },
-          { price: signal.take_profit_1, color: "hsl(145 70% 45%)", label: "TP1" },
+          { price: signal.entry_price, color: "hsl(45 100% 51%)", w: 2 },
+          { price: signal.stop_loss, color: "hsl(0 85% 55%)", w: 2 },
+          { price: signal.take_profit_1, color: "hsl(145 70% 45%)", w: 2 },
         ];
         signalLines.forEach((sl) => {
-          if (sl.price != null) {
-            const lineSeries = chart.addSeries(LineSeries, {
-              color: sl.color,
-              lineWidth: 2,
-              lineStyle: 1,
-              priceLineVisible: false,
-              lastValueVisible: false,
-            });
-            const firstTime = Math.floor(new Date(candles[0].candle_time).getTime() / 1000) as any;
-            const lastTime = Math.floor(new Date(candles[candles.length - 1].candle_time).getTime() / 1000) as any;
-            lineSeries.setData([
-              { time: firstTime, value: Number(sl.price) },
-              { time: lastTime, value: Number(sl.price) },
-            ]);
-          }
+          if (sl.price != null) drawHLine(Number(sl.price), sl.color, sl.w, 1);
         });
       }
-
-      // Signal markers (lightweight-charts v5 uses attachPrimitive or we skip markers for compatibility)
-      // Markers not available in v5 CandlestickSeries API; signal lines already shown above
 
       chart.timeScale().fitContent();
     }
 
-    // Resize handler
     const handleResize = () => {
       if (chartRef.current && chartContainerRef.current) {
         chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
@@ -216,7 +264,6 @@ export function ChartView({
     <Card className="bg-card border-border/50 rounded-xl overflow-hidden">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border/40">
-        {/* Timeframe buttons */}
         <div className="flex items-center gap-1">
           {TIMEFRAMES.map((tf) => (
             <Button
@@ -235,7 +282,6 @@ export function ChartView({
           ))}
         </div>
 
-        {/* Toggles */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <Switch checked={showSessions} onCheckedChange={onToggleSessions} className="h-4 w-7" />
@@ -282,10 +328,20 @@ export function ChartView({
         {showLevels && (
           <>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-success inline-block rounded border-dashed" /> Support
+              <span className="w-3 h-0.5 bg-success inline-block rounded" /> Support
             </span>
             <span className="flex items-center gap-1">
               <span className="w-3 h-0.5 bg-destructive inline-block rounded" /> Resistance
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-[hsl(145_70%_55%)] inline-block rounded" />
+              <TrendingUp className="h-3 w-3" /> Trendline
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-[hsl(280_80%_65%)] inline-block rounded" /> Wick Reject
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-[hsl(145_90%_55%)] inline-block rounded" style={{ height: 3 }} /> Breakout
             </span>
           </>
         )}
@@ -294,7 +350,6 @@ export function ChartView({
   );
 }
 
-// Compute EMA
 function calculateEMA(candles: { candle_time: string; close: number }[], period: number) {
   const k = 2 / (period + 1);
   const result: { time: any; value: number }[] = [];
