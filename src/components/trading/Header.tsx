@@ -90,6 +90,15 @@ export const Header = () => {
               </Button>
 
               <Button 
+                variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
+                size="sm"
+                onClick={() => navigate('/authority-signals')}
+              >
+                <ScanSearch className="w-4 h-4 mr-1" />
+                AI Analysis
+              </Button>
+
+              <Button 
                 variant={location.pathname.startsWith('/learn') ? 'secondary' : 'ghost'} 
                 size="sm"
                 onClick={() => navigate('/learn')}
@@ -250,6 +259,10 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/blog')}>
                       Blog
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
+                      <ScanSearch className="w-4 h-4 mr-2" />
+                      AI Analysis
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/learn')}>
                       <GraduationCap className="w-4 h-4 mr-2" />
                       Learn
@@ -257,10 +270,6 @@ export const Header = () => {
                     {user && (
                       <>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
-                          <ScanSearch className="w-4 h-4 mr-2" />
-                          AI Chart Analysis
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate('/bots')}>
                           <Bot className="w-4 h-4 mr-2" />
                           Trading Bots

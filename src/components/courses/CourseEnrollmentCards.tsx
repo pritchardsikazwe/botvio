@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { GraduationCap, Clock, Users, CheckCircle, Star, Crown, Lock, ArrowRight } from "lucide-react";
+import { GraduationCap, Clock, Users, CheckCircle, Star, Crown, Lock, ArrowRight, Signal, MessageCircle, Sparkles, Infinity } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,6 +25,9 @@ interface CourseProgram {
   color: string;
   borderColor: string;
   iconColor: string;
+  isFree?: boolean;
+  isSignalPlan?: boolean;
+  signalPeriod?: string;
 }
 
 const COURSE_PROGRAMS: CourseProgram[] = [
@@ -32,46 +35,68 @@ const COURSE_PROGRAMS: CourseProgram[] = [
     id: "forex-beginner-mentorship",
     productId: "041bb16e-4ba7-44d1-b2ce-6a79cc42b93f",
     title: "Forex Beginner Mentorship",
-    description: "1-on-1 mentorship program for complete beginners. Learn market structure, risk management, and live trading.",
-    price: 49,
-    duration: "4 Weeks",
-    features: ["8 structured lessons", "Live trading sessions", "Personal mentor", "Trading plan template", "WhatsApp support group"],
+    description: "Free mentorship for complete beginners. Learn forex markets, crypto basics, and join our personal mentor WhatsApp group.",
+    price: 0,
+    duration: "Self-paced",
+    features: ["Forex markets introduction", "Crypto trading basics", "Personal mentor WhatsApp group", "Market structure fundamentals", "Risk management basics"],
     level: "Beginner",
     category: "forex-beginner-mentorship",
     lessonsCount: 8,
     color: "from-emerald-500/20 to-teal-500/20",
     borderColor: "border-emerald-500/30",
     iconColor: "text-emerald-500",
+    isFree: true,
   },
   {
-    id: "forex-strategies-masterclass",
-    productId: "f8ed3166-8710-47c6-ad89-5cfe704be70b",
-    title: "Forex Strategies Masterclass",
-    description: "Advanced strategies covering Smart Money Concepts, Supply & Demand, ICT methodology, and institutional order flow.",
-    price: 79,
-    duration: "8 Weeks",
-    features: ["10 in-depth lessons", "Live market analysis", "Strategy templates", "Certificate of completion"],
-    level: "Intermediate",
-    category: "forex-strategies-masterclass",
-    lessonsCount: 10,
+    id: "premium-signals-monthly",
+    productId: "048325ee-c379-491c-8b4f-ec80fcfc89d9",
+    title: "Premium Signals — Monthly",
+    description: "Daily premium forex, crypto & indices signals plus access to all paid strategy courses.",
+    price: 19,
+    duration: "1 Month",
+    features: ["Daily premium signals", "Forex Strategies Masterclass access", "Pro Trading Bootcamp access", "AI chart analysis", "WhatsApp signals group"],
+    level: "All Levels",
+    category: "premium-signals-monthly",
+    lessonsCount: 16,
     color: "from-blue-500/20 to-indigo-500/20",
     borderColor: "border-blue-500/30",
     iconColor: "text-blue-500",
+    isSignalPlan: true,
+    signalPeriod: "Monthly",
   },
   {
-    id: "pro-trading-bootcamp",
-    productId: "3358ca73-5471-4c04-8baa-4fb8e9250cdb",
-    title: "Pro Trading Bootcamp",
-    description: "Intensive bootcamp covering Gold, Indices & Forex with real account trading and prop firm preparation.",
-    price: 149,
-    duration: "12 Weeks",
-    features: ["6 advanced modules", "Daily live sessions", "Account management tips", "Prop firm prep", "Lifetime community access"],
-    level: "Advanced",
-    category: "pro-trading-bootcamp",
-    lessonsCount: 6,
+    id: "premium-signals-3months",
+    productId: "95373441-a565-47af-9817-0bfe723f001a",
+    title: "Premium Signals — 3 Months",
+    description: "Save with our quarterly package. All premium signals and full course access for 3 months.",
+    price: 49,
+    duration: "3 Months",
+    features: ["All monthly plan features", "3 months of premium signals", "Full courses library access", "Priority WhatsApp support", "Strategy templates"],
+    level: "All Levels",
+    category: "premium-signals-3months",
+    lessonsCount: 16,
+    color: "from-violet-500/20 to-purple-500/20",
+    borderColor: "border-violet-500/30",
+    iconColor: "text-violet-500",
+    isSignalPlan: true,
+    signalPeriod: "Quarterly",
+  },
+  {
+    id: "premium-signals-lifetime",
+    productId: "f64b75b6-6293-49e1-9953-7130177bc8b3",
+    title: "Premium Signals — Lifetime",
+    description: "One-time payment for lifetime access to all signals, courses, and future content forever.",
+    price: 99,
+    duration: "Lifetime",
+    features: ["Lifetime premium signals", "All current & future courses", "Lifetime WhatsApp VIP group", "1-on-1 mentorship sessions", "Prop firm prep materials"],
+    level: "All Levels",
+    category: "premium-signals-lifetime",
+    lessonsCount: 16,
     color: "from-amber-500/20 to-orange-500/20",
     borderColor: "border-amber-500/30",
     iconColor: "text-amber-500",
+    isSignalPlan: true,
+    signalPeriod: "Lifetime",
   },
 ];
 
@@ -89,8 +114,14 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
   const [selectedCourse, setSelectedCourse] = useState<CourseProgram | null>(null);
 
   const handleEnrollClick = (course: CourseProgram) => {
+    if (course.isFree) {
+      // Free course — go directly to learn page
+      if (onEnroll) onEnroll(course.category);
+      else navigate(`/learn?category=${course.category}`);
+      return;
+    }
     if (!user) {
-      toast.error("Please sign in to enroll in a course");
+      toast.error("Please sign in to subscribe");
       return;
     }
     setSelectedCourse(course);
@@ -102,13 +133,12 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
     setEnrollingId(selectedCourse.id);
     
     try {
-      // Create order
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: user.id,
           product_id: selectedCourse.productId,
-          product_type: "course",
+          product_type: selectedCourse.isSignalPlan ? "signal_pack" : "course",
           amount_usd: selectedCourse.price,
           status: "pending",
         })
@@ -117,7 +147,6 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
 
       if (orderError) throw orderError;
 
-      // Create payment request
       const { error: payError } = await supabase
         .from("payment_requests")
         .insert({
@@ -130,16 +159,11 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
 
       if (payError) throw payError;
 
-      toast.success("Enrollment request submitted! Complete payment to access the course.", {
-        duration: 5000,
-      });
-
+      toast.success("Subscription request submitted! Complete payment to activate.", { duration: 5000 });
       queryClient.invalidateQueries({ queryKey: ["entitlements"] });
       setShowPayDialog(false);
 
-      if (onEnroll) {
-        onEnroll(selectedCourse.category);
-      }
+      if (onEnroll) onEnroll(selectedCourse.category);
     } catch (err: any) {
       toast.error(`Enrollment failed: ${err.message}`);
     } finally {
@@ -149,7 +173,7 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
 
   return (
     <>
-      <div className={`grid grid-cols-1 ${compact ? "md:grid-cols-3" : "md:grid-cols-3"} gap-5`}>
+      <div className={`grid grid-cols-1 ${compact ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-2 lg:grid-cols-4"} gap-5`}>
         {COURSE_PROGRAMS.map((program) => (
           <CourseCard
             key={program.id}
@@ -170,11 +194,13 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-primary" />
-              Enroll in {selectedCourse?.title}
+              <Signal className="h-5 w-5 text-primary" />
+              Subscribe to {selectedCourse?.title}
             </DialogTitle>
             <DialogDescription>
-              Complete your enrollment to get full access to all lessons and mentorship features.
+              {selectedCourse?.isSignalPlan
+                ? "Get premium signals + full course access with this subscription."
+                : "Complete your enrollment to get full access."}
             </DialogDescription>
           </DialogHeader>
 
@@ -183,7 +209,7 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                 <div>
                   <p className="font-semibold">{selectedCourse.title}</p>
-                  <p className="text-sm text-muted-foreground">{selectedCourse.duration} • {selectedCourse.lessonsCount} lessons</p>
+                  <p className="text-sm text-muted-foreground">{selectedCourse.duration} • Signals + Courses</p>
                 </div>
                 <Badge className="bg-gradient-to-r from-warning to-amber-500 text-white text-lg px-4 py-1">
                   ${selectedCourse.price}
@@ -191,7 +217,7 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium">What you get:</p>
+                <p className="text-sm font-medium">What's included:</p>
                 {selectedCourse.features.map((f, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
@@ -203,8 +229,8 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
               <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
                 <p className="font-medium text-warning mb-1">Payment Instructions</p>
                 <p className="text-muted-foreground">
-                  After clicking "Confirm Enrollment", you'll receive payment details via email or WhatsApp. 
-                  Your course access will be activated once payment is confirmed by admin.
+                  After clicking "Confirm", you'll receive payment details via WhatsApp. 
+                  Access activates once payment is confirmed by admin.
                 </p>
               </div>
             </div>
@@ -217,7 +243,7 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
               onClick={handleConfirmEnrollment}
               disabled={enrollingId !== null}
             >
-              {enrollingId ? "Processing..." : `Confirm Enrollment — $${selectedCourse?.price}`}
+              {enrollingId ? "Processing..." : `Confirm — $${selectedCourse?.price}`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -243,11 +269,15 @@ const CourseCard = ({ program, compact, onEnroll, onViewLessons, enrolling }: Co
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between mb-2">
           <Badge variant="outline" className={`text-xs ${program.iconColor} border-current`}>
-            {program.level}
+            {program.isFree ? "FREE" : program.signalPeriod || program.level}
           </Badge>
           {hasAccess ? (
             <Badge className="bg-success text-success-foreground">
-              <CheckCircle className="h-3 w-3 mr-1" /> Enrolled
+              <CheckCircle className="h-3 w-3 mr-1" /> Active
+            </Badge>
+          ) : program.isFree ? (
+            <Badge className="bg-success/20 text-success border border-success/30 font-bold text-sm">
+              FREE
             </Badge>
           ) : (
             <Badge className="bg-gradient-to-r from-warning to-amber-500 text-white font-bold text-sm">
@@ -255,14 +285,28 @@ const CourseCard = ({ program, compact, onEnroll, onViewLessons, enrolling }: Co
             </Badge>
           )}
         </div>
-        <CardTitle className="text-lg leading-tight">{program.title}</CardTitle>
+        <CardTitle className="text-lg leading-tight flex items-center gap-2">
+          {program.isSignalPlan && <Signal className="h-4 w-4 text-primary flex-shrink-0" />}
+          {program.isFree && <GraduationCap className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
+          {program.title}
+        </CardTitle>
         {!compact && <CardDescription className="text-sm">{program.description}</CardDescription>}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{program.duration}</span>
-          <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{program.lessonsCount} lessons</span>
-          <span className="flex items-center gap-1"><Users className="h-3 w-3" />Limited Spots</span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />{program.duration}
+          </span>
+          {program.isSignalPlan && (
+            <span className="flex items-center gap-1">
+              <Signal className="h-3 w-3" />Signals
+            </span>
+          )}
+          {program.isFree && (
+            <span className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" />WhatsApp
+            </span>
+          )}
         </div>
         {!compact && (
           <ul className="space-y-1.5">
@@ -277,11 +321,16 @@ const CourseCard = ({ program, compact, onEnroll, onViewLessons, enrolling }: Co
         {hasAccess ? (
           <Button variant="outline" className="w-full" size="sm" onClick={onViewLessons}>
             <ArrowRight className="h-4 w-4 mr-2" />
-            Continue Learning
+            {program.isSignalPlan ? "View Signals" : "Continue Learning"}
+          </Button>
+        ) : program.isFree ? (
+          <Button variant="outline" className="w-full border-success/30 text-success hover:bg-success/10" size="sm" onClick={onEnroll}>
+            <Sparkles className="h-4 w-4 mr-2" />
+            Start Free Course
           </Button>
         ) : (
           <Button variant="gold" className="w-full" size="sm" onClick={onEnroll} disabled={enrolling}>
-            {enrolling ? "Processing..." : <><Star className="h-4 w-4 mr-2" />Enroll Now — ${program.price}</>}
+            {enrolling ? "Processing..." : <><Star className="h-4 w-4 mr-2" />Subscribe — ${program.price}</>}
           </Button>
         )}
       </CardContent>
