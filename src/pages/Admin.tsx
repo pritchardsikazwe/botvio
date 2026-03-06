@@ -1006,6 +1006,10 @@ const Admin = () => {
               <Globe className="w-4 h-4" />
               SEO & Webmasters
             </TabsTrigger>
+            <TabsTrigger value="seo_pages" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              SEO Pages
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
