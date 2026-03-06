@@ -686,28 +686,48 @@ export function MarketDashboard() {
                 )}
 
                 {/* Bottom Buttons */}
-                <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-border/30">
-                  <button
-                    onClick={() => navigate(`/chart/${asset.symbol.replace("/", "")}`)}
-                    className="text-[10px] font-bold py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
-                  >
-                    📈 View Chart
-                  </button>
-                  <button
-                    className="text-[10px] font-bold py-1.5 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                  >
-                    🔔 Set Alert
-                  </button>
-                  <button
-                    onClick={() => {
-                      const text = encodeURIComponent(`${asset.symbol} ${sig?.signal?.toUpperCase() || ""} signal on Botvio`);
-                      window.open(`https://wa.me/?text=${text}`, "_blank");
-                    }}
-                    className="text-[10px] font-bold py-1.5 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
-                  >
-                    💬 WhatsApp
-                  </button>
-                </div>
+                {(() => {
+                  const binancePair = BINANCE_SYMBOL_MAP[asset.symbol];
+                  const hasBinance = !!binancePair;
+                  const binanceUrl = binanceLink
+                    ? `${binanceLink}`
+                    : `https://www.binance.com/en/trade/${binancePair}`;
+
+                  return (
+                    <div className={`grid gap-1.5 pt-1 border-t border-border/30 ${hasBinance ? "grid-cols-4" : "grid-cols-3"}`}>
+                      <button
+                        onClick={() => navigate(`/chart/${asset.symbol.replace("/", "")}`)}
+                        className="text-[10px] font-bold py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
+                      >
+                        📈 Chart
+                      </button>
+                      <button
+                        className="text-[10px] font-bold py-1.5 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                      >
+                        🔔 Alert
+                      </button>
+                      <button
+                        onClick={() => {
+                          const text = encodeURIComponent(`${asset.symbol} ${sig?.signal?.toUpperCase() || ""} signal on Botvio`);
+                          window.open(`https://wa.me/?text=${text}`, "_blank");
+                        }}
+                        className="text-[10px] font-bold py-1.5 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
+                      >
+                        💬 Share
+                      </button>
+                      {hasBinance && (
+                        <a
+                          href={binanceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1 text-[10px] font-bold py-1.5 rounded-lg bg-[hsl(45,100%,51%)]/10 border border-[hsl(45,100%,51%)]/30 text-[hsl(45,100%,41%)] hover:bg-[hsl(45,100%,51%)]/20 transition-all"
+                        >
+                          🔶 Binance
+                        </a>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Empty state */}
                 {!quote && !sig && !metrics && (
