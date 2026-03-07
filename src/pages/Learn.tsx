@@ -301,12 +301,12 @@ const Learn = () => {
           ) : (
             lessons.map((lesson, index) => {
               const Icon = lessonIcons[lesson.slug] || BookOpen;
-              // For paid mentorship courses, check specific product entitlement
               const paidCourse = COURSE_PROGRAMS.find(p => p.category === activeCategory);
-              // Free courses (like Forex Beginner Mentorship) are always fully unlocked
               const isFreeCategory = paidCourse?.isFree === true;
+              // Free course: 3 lessons free, rest require signup
+              const isLockedFree = isFreeCategory && index >= FREE_COURSE_PREVIEW_LIMIT && !user;
               const isLocked = isFreeCategory
-                ? false
+                ? isLockedFree
                 : paidCourse
                   ? index >= FREE_LESSON_LIMIT && !ownsCourse
                   : !ownsCourse && index >= FREE_LESSON_LIMIT;
