@@ -39,6 +39,10 @@ const ChartPage = () => {
   const [showLevels, setShowLevels] = useState(true);
   const [showNews, setShowNews] = useState(true);
 
+  // Resolve chart provider
+  const instrument = useMemo(() => resolveInstrument(symbol || "XAUUSD"), [symbol]);
+  const useTradingView = instrument.provider === "tradingview";
+
   const displaySymbol = symbol
     ? symbol.replace(/([A-Z]{3})([A-Z]{3,})/, "$1/$2")
     : "";
