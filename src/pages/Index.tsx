@@ -284,7 +284,7 @@ const Index = () => {
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="https://wtradex.com/register?ref=botvio" target="_blank" rel="noopener noreferrer" className="block">
+            <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="block">
               <Card className="glass-card hover:border-warning/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
