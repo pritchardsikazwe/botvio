@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { ChartView } from "@/components/chart/ChartView";
+import { TradingViewEmbed } from "@/components/chart/TradingViewEmbed";
 import { SymbolHeaderCard } from "@/components/chart/SymbolHeaderCard";
 import { KeyLevelsCard } from "@/components/chart/KeyLevelsCard";
 import { TradeIdeaCard } from "@/components/chart/TradeIdeaCard";
@@ -25,7 +26,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, TrendingUp, TrendingDown, Target, Shield, BarChart3, Activity, Newspaper, Clock, BookOpen } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { resolveInstrument } from "@/lib/symbolRouter";
 
 const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
 
@@ -36,6 +38,10 @@ const ChartPage = () => {
   const [showSessions, setShowSessions] = useState(true);
   const [showLevels, setShowLevels] = useState(true);
   const [showNews, setShowNews] = useState(true);
+
+  // Resolve chart provider
+  const instrument = useMemo(() => resolveInstrument(symbol || "XAUUSD"), [symbol]);
+  const useTradingView = instrument.provider === "tradingview";
 
   const displaySymbol = symbol
     ? symbol.replace(/([A-Z]{3})([A-Z]{3,})/, "$1/$2")
@@ -182,23 +188,34 @@ const ChartPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               {/* LEFT COLUMN */}
               <div className="lg:col-span-8 xl:col-span-9 space-y-4">
-                {/* Chart */}
-                <ChartView
-                  candles={candles || []}
-                  symbol={displaySymbol}
-                  timeframe={timeframe}
-                  onTimeframeChange={setTimeframe}
-                  showSessions={showSessions}
-                  showLevels={showLevels}
-                  showNews={showNews}
-                  onToggleSessions={() => setShowSessions(!showSessions)}
-                  onToggleLevels={() => setShowLevels(!showLevels)}
-                  onToggleNews={() => setShowNews(!showNews)}
-                  metrics={metrics}
-                  signal={signal}
-                />
+                {/* Chart — TradingView for standard instruments, lightweight-charts for Deriv synthetics */}
+                {useTradingView ? (
+                  <TradingViewEmbed
+                    tvSymbol={instrument.sourceSymbol}
+                    displaySymbol={displaySymbol}
+                    timeframe={timeframe}
+                    height={520}
+                  />
+                ) : (
+                  <ChartView
+                    candles={candles || []}
+                    symbol={displaySymbol}
+                    timeframe={timeframe}
+                    onTimeframeChange={setTimeframe}
+                    showSessions={showSessions}
+                    showLevels={showLevels}
+                    showNews={showNews}
+                    onToggleSessions={() => setShowSessions(!showSessions)}
+                    onToggleLevels={() => setShowLevels(!showLevels)}
+                    onToggleNews={() => setShowNews(!showNews)}
+                    metrics={metrics}
+                    signal={signal}
+                  />
+                )}
                 <p className="text-[10px] text-muted-foreground text-center italic">
-                  Use this chart for analysis. Execute trades through your broker.
+                  {useTradingView
+                    ? "Analyze on Botvio, trade on WELTRADE. Chart powered by TradingView."
+                    : "Use this chart for analysis. Execute trades through your broker."}
                 </p>
 
                 {/* Key Levels */}
