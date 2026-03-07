@@ -20,7 +20,7 @@ export interface InstrumentMapping {
   enabled: boolean;
 }
 
-const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
+const WELTRADE_LINK = "https://gowt.net/ib67505";
 
 // TradingView symbol map for standard instruments
 const TV_SYMBOLS: Record<string, { tv: string; asset: AssetClass }> = {

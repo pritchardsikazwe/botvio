@@ -29,7 +29,7 @@ import { ArrowLeft, ExternalLink, TrendingUp, TrendingDown, Target, Shield, BarC
 import { useState, useMemo } from "react";
 import { resolveInstrument } from "@/lib/symbolRouter";
 
-const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
+const WELTRADE_LINK = "https://gowt.net/ib67505";
 
 const ChartPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
