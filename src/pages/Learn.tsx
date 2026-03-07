@@ -148,6 +148,7 @@ const Learn = () => {
   const navigate = useNavigate();
   
   const FREE_LESSON_LIMIT = 2;
+  const FREE_COURSE_PREVIEW_LIMIT = 3;
   
   const activeCategory = searchParams.get("category") || "botvio-sniper";
 
