@@ -233,7 +233,7 @@ const Index = () => {
                   <Button size="sm" variant="outline" asChild className="flex-1">
                     <Link to="/chart/XAUUSD"><BarChart3 className="h-4 w-4 mr-1" />View Chart</Link>
                   </Button>
-                  <a href="https://wtradex.com/register?ref=botvio" target="_blank" rel="noopener noreferrer" className="flex-1">
+                  <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="flex-1">
                     <Button size="sm" className="w-full bg-warning hover:bg-warning/90 text-warning-foreground font-semibold">
                       Trade on WELTRADE →
                     </Button>
@@ -264,7 +264,7 @@ const Index = () => {
                   <Button size="sm" variant="outline" asChild className="flex-1">
                     <Link to="/chart/EURUSD"><BarChart3 className="h-4 w-4 mr-1" />View Chart</Link>
                   </Button>
-                  <a href="https://wtradex.com/register?ref=botvio" target="_blank" rel="noopener noreferrer" className="flex-1">
+                  <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="flex-1">
                     <Button size="sm" className="w-full bg-warning hover:bg-warning/90 text-warning-foreground font-semibold">
                       Trade on WELTRADE →
                     </Button>
@@ -284,7 +284,7 @@ const Index = () => {
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="https://wtradex.com/register?ref=botvio" target="_blank" rel="noopener noreferrer" className="block">
+            <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="block">
               <Card className="glass-card hover:border-warning/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">

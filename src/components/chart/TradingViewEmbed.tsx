@@ -106,7 +106,7 @@ function TradingViewEmbedInner({ tvSymbol, displaySymbol, timeframe = "1h", heig
         <span className="text-[10px] text-muted-foreground">
           Chart powered by TradingView • Analyze on Botvio, Trade on WELTRADE
         </span>
-        <a href="https://wtradex.com/register?ref=botvio" target="_blank" rel="noopener noreferrer">
+        <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">
           <Button size="sm" className="h-6 text-[10px] bg-success hover:bg-success/90 text-success-foreground font-bold">
             <ExternalLink className="h-3 w-3 mr-1" /> Trade on WELTRADE
           </Button>
