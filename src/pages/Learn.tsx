@@ -48,7 +48,7 @@ const strategyCategories: StrategyCategory[] = [
   {
     id: "forex-beginner-mentorship",
     name: "Forex Beginner Mentorship",
-    description: "Complete 4-week beginner course — $49",
+    description: "Free beginner course — learn forex & crypto basics",
     icon: GraduationCap,
     color: "text-emerald-500",
   },
