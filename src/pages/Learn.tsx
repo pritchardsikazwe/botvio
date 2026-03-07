@@ -337,7 +337,11 @@ const Learn = () => {
                       {lesson.title}
                     </CardTitle>
                     <CardDescription>
-                      {isLocked ? "Upgrade to a paid plan to access this lesson" : lesson.content.substring(0, 100).replace(/[#*`]/g, '') + '...'}
+                      {isLocked 
+                        ? (isLockedFree 
+                            ? "Sign up for free and open a broker account to unlock all lessons" 
+                            : "Upgrade to a paid plan to access this lesson")
+                        : lesson.content.substring(0, 100).replace(/[#*`]/g, '') + '...'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
