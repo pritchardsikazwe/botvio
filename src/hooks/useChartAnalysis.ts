@@ -52,7 +52,7 @@ export const useDailyChartUsage = () => {
         .gte("created_at", `${today}T00:00:00Z`);
 
       if (error) throw error;
-      return { count: count || 0, canUpload: (count || 0) < 1 };
+      return { count: count || 0, canUpload: true };
     },
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds
