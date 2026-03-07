@@ -326,9 +326,8 @@ const Learn = () => {
                           Lesson {lesson.lesson_number}
                         </Badge>
                         {isLocked && (
-                          <Badge variant="outline" className="border-warning text-warning">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Premium
+                          <Badge variant="outline" className={isLockedFree ? "border-primary text-primary" : "border-warning text-warning"}>
+                            {isLockedFree ? <><Lock className="w-3 h-3 mr-1" />Sign Up</> : <><Crown className="w-3 h-3 mr-1" />Premium</>}
                           </Badge>
                         )}
                       </div>
