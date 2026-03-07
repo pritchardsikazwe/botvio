@@ -12,7 +12,7 @@ import { TrendingUp, TrendingDown, Minus, Sparkles, ChevronDown, Star, Share2, E
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const WELTRADE_LINK = "https://gowt.net/ib67505";
+const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
 
 const CHART_PAIRS = [
   { category: "Metals", pairs: [

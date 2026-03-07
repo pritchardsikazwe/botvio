@@ -199,83 +199,7 @@ const Index = () => {
         </section>
 
 
-        {/* 6 — WELTRADE Chart Analysis */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              Chart Analysis — Trade on WELTRADE
-            </h2>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/chart/XAUUSD">All Charts <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* XAUUSD Card */}
-            <Card className="glass-card border-warning/30 hover:border-warning/60 transition-all hover:scale-[1.01] overflow-hidden">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-warning/20 to-yellow-600/20 border border-warning/30">
-                      <TrendingUp className="h-5 w-5 text-warning" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">XAUUSD — Gold</CardTitle>
-                      <CardDescription className="text-xs">Forex / Metals</CardDescription>
-                    </div>
-                  </div>
-                  <Badge className="bg-success/20 text-success border-0">Bullish</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-muted-foreground">Analyze gold price action, key levels & session timing. Execute your setup on WELTRADE.</p>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" asChild className="flex-1">
-                    <Link to="/chart/XAUUSD"><BarChart3 className="h-4 w-4 mr-1" />View Chart</Link>
-                  </Button>
-                  <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="flex-1">
-                    <Button size="sm" className="w-full bg-warning hover:bg-warning/90 text-warning-foreground font-semibold">
-                      Trade on WELTRADE →
-                    </Button>
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* EURUSD Card */}
-            <Card className="glass-card border-primary/30 hover:border-primary/60 transition-all hover:scale-[1.01] overflow-hidden">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-blue-600/20 border border-primary/30">
-                      <TrendingDown className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">EURUSD — Euro</CardTitle>
-                      <CardDescription className="text-xs">Forex / Major</CardDescription>
-                    </div>
-                  </div>
-                  <Badge className="bg-destructive/20 text-destructive border-0">Bearish</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-muted-foreground">Track EUR/USD structure, demand zones & breakout levels. Trade with confidence on WELTRADE.</p>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" asChild className="flex-1">
-                    <Link to="/chart/EURUSD"><BarChart3 className="h-4 w-4 mr-1" />View Chart</Link>
-                  </Button>
-                  <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="flex-1">
-                    <Button size="sm" className="w-full bg-warning hover:bg-warning/90 text-warning-foreground font-semibold">
-                      Trade on WELTRADE →
-                    </Button>
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* 6b — Quick Links */}
+        {/* 6 — Quick Links */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
@@ -284,24 +208,8 @@ const Index = () => {
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="block">
-              <Card className="glass-card hover:border-warning/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-warning/20 to-yellow-600/20 border border-warning/30">
-                      <TrendingUp className="h-6 w-6 text-warning" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">WELTRADE</CardTitle>
-                      <CardDescription className="text-xs">Forex & CFDs broker</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent><Badge variant="outline" className="text-xs text-warning border-warning/30">Open Account →</Badge></CardContent>
-              </Card>
-            </a>
             <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="block">
-              <Card className="glass-card hover:border-destructive/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
+              <Card className="glass-card hover:border-primary/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/30">
@@ -330,6 +238,22 @@ const Index = () => {
                   </div>
                 </CardHeader>
                 <CardContent><Badge variant="outline" className="text-xs text-warning border-warning/30">Open Account →</Badge></CardContent>
+              </Card>
+            </a>
+            <a href="https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" target="_blank" rel="noopener noreferrer" className="block">
+              <Card className="glass-card hover:border-yellow-500/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30">
+                      <Target className="h-6 w-6 text-yellow-500" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Binance</CardTitle>
+                      <CardDescription className="text-xs">Crypto exchange</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent><Badge variant="outline" className="text-xs text-yellow-500 border-yellow-500/30">Open Account →</Badge></CardContent>
               </Card>
             </a>
             <a href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ" target="_blank" rel="noopener noreferrer" className="block">

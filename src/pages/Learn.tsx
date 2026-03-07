@@ -48,7 +48,7 @@ const strategyCategories: StrategyCategory[] = [
   {
     id: "forex-beginner-mentorship",
     name: "Forex Beginner Mentorship",
-    description: "Free beginner course — learn forex & crypto basics",
+    description: "Complete 4-week beginner course — $49",
     icon: GraduationCap,
     color: "text-emerald-500",
   },
@@ -148,7 +148,6 @@ const Learn = () => {
   const navigate = useNavigate();
   
   const FREE_LESSON_LIMIT = 2;
-  const FREE_COURSE_PREVIEW_LIMIT = 3;
   
   const activeCategory = searchParams.get("category") || "botvio-sniper";
 
@@ -301,12 +300,12 @@ const Learn = () => {
           ) : (
             lessons.map((lesson, index) => {
               const Icon = lessonIcons[lesson.slug] || BookOpen;
+              // For paid mentorship courses, check specific product entitlement
               const paidCourse = COURSE_PROGRAMS.find(p => p.category === activeCategory);
+              // Free courses (like Forex Beginner Mentorship) are always fully unlocked
               const isFreeCategory = paidCourse?.isFree === true;
-              // Free course: 3 lessons free, rest require signup
-              const isLockedFree = isFreeCategory && index >= FREE_COURSE_PREVIEW_LIMIT && !user;
               const isLocked = isFreeCategory
-                ? isLockedFree
+                ? false
                 : paidCourse
                   ? index >= FREE_LESSON_LIMIT && !ownsCourse
                   : !ownsCourse && index >= FREE_LESSON_LIMIT;
@@ -326,8 +325,9 @@ const Learn = () => {
                           Lesson {lesson.lesson_number}
                         </Badge>
                         {isLocked && (
-                          <Badge variant="outline" className={isLockedFree ? "border-primary text-primary" : "border-warning text-warning"}>
-                            {isLockedFree ? <><Lock className="w-3 h-3 mr-1" />Sign Up</> : <><Crown className="w-3 h-3 mr-1" />Premium</>}
+                          <Badge variant="outline" className="border-warning text-warning">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Premium
                           </Badge>
                         )}
                       </div>
@@ -336,41 +336,17 @@ const Learn = () => {
                       {lesson.title}
                     </CardTitle>
                     <CardDescription>
-                      {isLocked 
-                        ? (isLockedFree 
-                            ? "Sign up for free and open a broker account to unlock all lessons" 
-                            : "Upgrade to a paid plan to access this lesson")
-                        : lesson.content.substring(0, 100).replace(/[#*`]/g, '') + '...'}
+                      {isLocked ? "Upgrade to a paid plan to access this lesson" : lesson.content.substring(0, 100).replace(/[#*`]/g, '') + '...'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {isLocked ? (
-                      isLockedFree ? (
-                        <div className="space-y-2">
-                          <Button variant="default" className="w-full" onClick={() => navigate('/learn?category=forex-beginner-mentorship&signup=1')}>
-                            <GraduationCap className="w-4 h-4 mr-2" />
-                            Sign Up Free to Unlock
-                          </Button>
-                          <div className="flex gap-2">
-                            <a href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full text-xs">Open Deriv</Button>
-                            </a>
-                            <a href="https://one.exnesstrack.org/a/up2tpvqknx" target="_blank" rel="noopener noreferrer" className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full text-xs">Open Exness</Button>
-                            </a>
-                            <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full text-xs">Open Weltrade</Button>
-                            </a>
-                          </div>
-                        </div>
-                      ) : (
                       <Button variant="gold" className="w-full" asChild>
                         <a href="/marketplace">
                           <Crown className="w-4 h-4 mr-2" />
                           Buy Course to Unlock
                         </a>
                       </Button>
-                      )
                     ) : (
                       <Button variant="ghost" className="w-full justify-between group-hover:text-primary">
                         Start Learning

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Zap, Globe, Shield, BookOpen } from "lucide-react";
 
-const WELTRADE_LINK = "https://gowt.net/ib67505";
+const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
 
 export function BrokerCTACard() {
   return (
