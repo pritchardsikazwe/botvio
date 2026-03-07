@@ -346,12 +346,32 @@ const Learn = () => {
                   </CardHeader>
                   <CardContent>
                     {isLocked ? (
+                      isLockedFree ? (
+                        <div className="space-y-2">
+                          <Button variant="default" className="w-full" onClick={() => navigate('/learn?category=forex-beginner-mentorship&signup=1')}>
+                            <GraduationCap className="w-4 h-4 mr-2" />
+                            Sign Up Free to Unlock
+                          </Button>
+                          <div className="flex gap-2">
+                            <a href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                              <Button variant="outline" size="sm" className="w-full text-xs">Open Deriv</Button>
+                            </a>
+                            <a href="https://one.exnesstrack.org/a/up2tpvqknx" target="_blank" rel="noopener noreferrer" className="flex-1">
+                              <Button variant="outline" size="sm" className="w-full text-xs">Open Exness</Button>
+                            </a>
+                            <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="flex-1">
+                              <Button variant="outline" size="sm" className="w-full text-xs">Open Weltrade</Button>
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
                       <Button variant="gold" className="w-full" asChild>
                         <a href="/marketplace">
                           <Crown className="w-4 h-4 mr-2" />
                           Buy Course to Unlock
                         </a>
                       </Button>
+                      )
                     ) : (
                       <Button variant="ghost" className="w-full justify-between group-hover:text-primary">
                         Start Learning
