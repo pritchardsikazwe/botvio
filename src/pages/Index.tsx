@@ -264,7 +264,7 @@ const Index = () => {
                   <Button size="sm" variant="outline" asChild className="flex-1">
                     <Link to="/chart/EURUSD"><BarChart3 className="h-4 w-4 mr-1" />View Chart</Link>
                   </Button>
-                  <a href="https://wtradex.com/register?ref=botvio" target="_blank" rel="noopener noreferrer" className="flex-1">
+                  <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="flex-1">
                     <Button size="sm" className="w-full bg-warning hover:bg-warning/90 text-warning-foreground font-semibold">
                       Trade on WELTRADE →
                     </Button>
