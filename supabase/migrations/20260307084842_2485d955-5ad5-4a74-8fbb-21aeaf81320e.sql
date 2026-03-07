@@ -1,0 +1,2 @@
+ALTER TABLE public.orders DROP CONSTRAINT orders_product_type_check;
+ALTER TABLE public.orders ADD CONSTRAINT orders_product_type_check CHECK (product_type = ANY (ARRAY['bot'::text, 'strategy'::text, 'subscription'::text, 'course'::text, 'signal_pack'::text]));
