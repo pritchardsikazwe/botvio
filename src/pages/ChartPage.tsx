@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { ChartView } from "@/components/chart/ChartView";
+import { TradingViewEmbed } from "@/components/chart/TradingViewEmbed";
 import { SymbolHeaderCard } from "@/components/chart/SymbolHeaderCard";
 import { KeyLevelsCard } from "@/components/chart/KeyLevelsCard";
 import { TradeIdeaCard } from "@/components/chart/TradeIdeaCard";
@@ -25,7 +26,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, TrendingUp, TrendingDown, Target, Shield, BarChart3, Activity, Newspaper, Clock, BookOpen } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { resolveInstrument } from "@/lib/symbolRouter";
 
 const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
 
