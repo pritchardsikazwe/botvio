@@ -188,23 +188,34 @@ const ChartPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               {/* LEFT COLUMN */}
               <div className="lg:col-span-8 xl:col-span-9 space-y-4">
-                {/* Chart */}
-                <ChartView
-                  candles={candles || []}
-                  symbol={displaySymbol}
-                  timeframe={timeframe}
-                  onTimeframeChange={setTimeframe}
-                  showSessions={showSessions}
-                  showLevels={showLevels}
-                  showNews={showNews}
-                  onToggleSessions={() => setShowSessions(!showSessions)}
-                  onToggleLevels={() => setShowLevels(!showLevels)}
-                  onToggleNews={() => setShowNews(!showNews)}
-                  metrics={metrics}
-                  signal={signal}
-                />
+                {/* Chart — TradingView for standard instruments, lightweight-charts for Deriv synthetics */}
+                {useTradingView ? (
+                  <TradingViewEmbed
+                    tvSymbol={instrument.sourceSymbol}
+                    displaySymbol={displaySymbol}
+                    timeframe={timeframe}
+                    height={520}
+                  />
+                ) : (
+                  <ChartView
+                    candles={candles || []}
+                    symbol={displaySymbol}
+                    timeframe={timeframe}
+                    onTimeframeChange={setTimeframe}
+                    showSessions={showSessions}
+                    showLevels={showLevels}
+                    showNews={showNews}
+                    onToggleSessions={() => setShowSessions(!showSessions)}
+                    onToggleLevels={() => setShowLevels(!showLevels)}
+                    onToggleNews={() => setShowNews(!showNews)}
+                    metrics={metrics}
+                    signal={signal}
+                  />
+                )}
                 <p className="text-[10px] text-muted-foreground text-center italic">
-                  Use this chart for analysis. Execute trades through your broker.
+                  {useTradingView
+                    ? "Analyze on Botvio, trade on WELTRADE. Chart powered by TradingView."
+                    : "Use this chart for analysis. Execute trades through your broker."}
                 </p>
 
                 {/* Key Levels */}
