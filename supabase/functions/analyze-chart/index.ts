@@ -56,18 +56,10 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   let userId: string | null = null;
+  let isGuest = false;
 
   try {
     const authHeader = req.headers.get("Authorization") || "";
-    if (!authHeader.startsWith("Bearer ")) {
-      await logError(supabase, "analyze-chart", null, ERROR_CODES.UNAUTHORIZED, "Missing auth header", null, 401);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized", error_code: ERROR_CODES.UNAUTHORIZED }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const token = authHeader.replace("Bearer ", "");
     const { imageUrl, symbol, timeframe, analysisType, jobId } = await req.json();
 
     if (!imageUrl) {
@@ -78,16 +70,22 @@ serve(async (req) => {
       );
     }
 
-    // Validate user via getUser
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData?.user?.id) {
-      await logError(supabase, "analyze-chart", null, ERROR_CODES.UNAUTHORIZED, "Invalid token", null, 401);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized", error_code: ERROR_CODES.UNAUTHORIZED }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Try to authenticate - guests are allowed
+    if (authHeader.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      try {
+        const { data: userData, error: userError } = await supabase.auth.getUser(token);
+        if (!userError && userData?.user?.id) {
+          userId = userData.user.id;
+        } else {
+          isGuest = true;
+        }
+      } catch {
+        isGuest = true;
+      }
+    } else {
+      isGuest = true;
     }
-    userId = userData.user.id;
 
     // If jobId provided, update job status to running
     if (jobId) {
