@@ -15,7 +15,7 @@ export function SyntxSignalsSection() {
       const { data } = await supabase
         .from("trading_signals")
         .select("*")
-        .eq("broker", "weltrade")
+        .contains("broker", ["weltrade"])
         .eq("status", "ACTIVE")
         .order("created_at", { ascending: false })
         .limit(6);
