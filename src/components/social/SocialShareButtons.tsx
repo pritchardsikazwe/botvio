@@ -34,7 +34,8 @@ export const SocialShareButtons = ({
     ? `${window.location.origin}/analysis/${analysisId}` 
     : window.location.href;
   
-  const shareText = `${title}${description ? ` - ${description.slice(0, 100)}...` : ''}`;
+  const plainDescription = description?.replace(/\*\*/g, '') || '';
+  const shareText = `${title}${plainDescription ? `\n${plainDescription}` : ''}`;
   
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText);
