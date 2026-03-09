@@ -177,7 +177,7 @@ void SendHeartbeat()
    char result[];
    string resultHeaders;
    
-   StringToCharArray(body, data, 0, StringLen(body), CP_UTF8);
+   StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8);
    ArrayResize(data, ArraySize(data) - 1);
    
    int res = WebRequest("POST", url, headers, 3000, data, result, resultHeaders);
