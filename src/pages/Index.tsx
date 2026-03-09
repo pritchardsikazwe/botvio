@@ -91,6 +91,32 @@ const Index = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-8">
+        {/* 0 — Shortcuts */}
+        <section>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
+              <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold text-sm gap-2">
+                <TrendingUp className="h-4 w-4" /> Trade on Exness
+              </Button>
+            </a>
+            <Link to="/gold" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
+                <Sparkles className="h-4 w-4" /> Gold Hub
+              </Button>
+            </Link>
+            <a href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ" target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-success/40 text-success hover:bg-success/10">
+                <MessageCircle className="h-4 w-4" /> WhatsApp Signals
+              </Button>
+            </a>
+            <a href="https://www.youtube.com/@Forexsmartmoneyconcept" target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-destructive/40 text-destructive hover:bg-destructive/10">
+                <ExternalLink className="h-4 w-4" /> YouTube
+              </Button>
+            </a>
+          </div>
+        </section>
+
         {/* 1 — Latest Trading Signals */}
         <section>
           <HomeSignalsWidget />
@@ -100,7 +126,8 @@ const Index = () => {
         <section>
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold">AI Chart Analysis</h2>
+            <h2 className="text-xl font-extrabold text-foreground">AI Chart Analysis</h2>
+            <Badge className="bg-primary/20 text-primary border-primary/30 text-xs font-bold">Free</Badge>
           </div>
           <ChartUpload />
         </section>
