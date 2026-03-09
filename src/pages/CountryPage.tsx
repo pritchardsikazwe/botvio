@@ -22,7 +22,6 @@ const CountryPage = () => {
   
   // Skip file-like paths (e.g. sitemap.xml, robots.txt) — let static files serve
   if (country?.includes(".")) {
-    window.location.href = `/${country}`;
     return null;
   }
 
