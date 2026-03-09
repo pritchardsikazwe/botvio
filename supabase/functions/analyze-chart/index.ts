@@ -95,46 +95,49 @@ serve(async (req) => {
         .eq("id", jobId);
     }
 
-    // Check subscription
-    const { data: subscription } = await supabase
-      .from("user_plan_subscriptions")
-      .select("pricing_plan_id, pricing_plans(code)")
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .maybeSingle();
-
-    const planCode = (subscription?.pricing_plans as any)?.code;
-    const isPremium = planCode && planCode !== "free" && planCode !== "starter";
-
-    // Check daily limit for non-premium
-    if (!isPremium) {
-      const today = new Date().toISOString().split("T")[0];
-      const { count } = await supabase
-        .from("chart_analyses")
-        .select("*", { count: "exact", head: true })
+    // Check subscription & daily limits (skip for guests - they get unlimited)
+    let isPremium = false;
+    if (userId) {
+      const { data: subscription } = await supabase
+        .from("user_plan_subscriptions")
+        .select("pricing_plan_id, pricing_plans(code)")
         .eq("user_id", userId)
-        .gte("created_at", `${today}T00:00:00Z`);
+        .eq("status", "active")
+        .maybeSingle();
 
-      if ((count || 0) >= 3) {
-        if (jobId) {
-          await supabase
-            .from("analysis_jobs")
-            .update({ 
-              status: "failed", 
+      const planCode = (subscription?.pricing_plans as any)?.code;
+      isPremium = !!(planCode && planCode !== "free" && planCode !== "starter");
+
+      // Check daily limit for non-premium authenticated users
+      if (!isPremium) {
+        const today = new Date().toISOString().split("T")[0];
+        const { count } = await supabase
+          .from("chart_analyses")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .gte("created_at", `${today}T00:00:00Z`);
+
+        if ((count || 0) >= 3) {
+          if (jobId) {
+            await supabase
+              .from("analysis_jobs")
+              .update({ 
+                status: "failed", 
+                error_code: ERROR_CODES.DAILY_LIMIT,
+                error_message: "Daily limit reached. Upgrade to Premium for unlimited analyses.",
+                completed_at: new Date().toISOString()
+              })
+              .eq("id", jobId);
+          }
+          return new Response(
+            JSON.stringify({ 
+              error: "Daily limit reached", 
               error_code: ERROR_CODES.DAILY_LIMIT,
-              error_message: "Daily limit reached. Upgrade to Premium for unlimited analyses.",
-              completed_at: new Date().toISOString()
-            })
-            .eq("id", jobId);
+              message: "Free users can only analyze 3 charts per day. Upgrade to Premium for unlimited analyses."
+            }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
-        return new Response(
-          JSON.stringify({ 
-            error: "Daily limit reached", 
-            error_code: ERROR_CODES.DAILY_LIMIT,
-            message: "Free users can only analyze 3 charts per day. Upgrade to Premium for unlimited analyses."
-          }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
       }
     }
 
