@@ -22,6 +22,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Bot, Play, Pause, Square, Settings, Plus, Lock, Zap, TrendingUp, Shield } from "lucide-react";
 import { toast } from "sonner";
 import type { Bot as BotType } from "@/types/botvio";
+import { SEOHead } from "@/components/seo/SEOHead";
 
 const Bots = () => {
   const { user } = useAuth();
