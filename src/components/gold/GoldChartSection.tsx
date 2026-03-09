@@ -90,11 +90,6 @@ export function GoldChartSection() {
       calendar: false,
       studies: [
         "RSI@tv-basicstudies",
-        "MACD@tv-basicstudies",
-        "BB@tv-basicstudies",
-        "PivotPointsStandard@tv-basicstudies",
-        "ZigZag@tv-basicstudies",
-        "LinearRegression@tv-basicstudies",
       ],
       support_host: "https://www.tradingview.com",
     });
