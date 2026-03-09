@@ -165,7 +165,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 <Input id="signup-password" type="password" placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required className="bg-secondary/50" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-country" className="flex items-center gap-2">
+               <Label htmlFor="signup-country" className="flex items-center gap-2">
                   <Globe className="w-4 h-4" /> Country
                 </Label>
                 <Select value={country} onValueChange={setCountry}>
@@ -178,6 +178,19 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-whatsapp" className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" /> WhatsApp Number
+                </Label>
+                <Input
+                  id="signup-whatsapp"
+                  type="tel"
+                  placeholder="+260 97 1234567"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  className="bg-secondary/50"
+                />
               </div>
               <Button type="submit" disabled={loading} className="w-full" variant="gold">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</> : "Create Account"}
