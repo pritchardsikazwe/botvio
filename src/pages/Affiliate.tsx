@@ -293,6 +293,7 @@ const Affiliate = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Affiliate Dashboard – Track Earnings & Referrals" description="Track your affiliate clicks, conversions, and earnings. Manage campaign links and request payouts via crypto or mobile money." noIndex />
       <Header />
       
       <main className="container mx-auto px-4 py-6">
