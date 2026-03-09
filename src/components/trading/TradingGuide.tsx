@@ -67,7 +67,7 @@ const TRADING_STEPS = [
       "Fast deposit & withdrawal options",
       "Great for beginners & pros",
     ],
-    link: "https://gowt.net/ib67505m",
+    link: "https://gowt.net/ib67505",
     linkLabel: "Sign Up on Weltrade",
   },
   {

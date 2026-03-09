@@ -9,7 +9,7 @@ import type { ManualSignal } from "@/hooks/useManualSignals";
 
 const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 const DERIV_LINK = "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827";
-const WELTRADE_LINK = "https://gowt.net/ib67505m";
+const WELTRADE_LINK = "https://gowt.net/ib67505";
 
 function getBrokerForSymbol(symbol: string): { name: string; link: string; color: string } {
   const s = (symbol || "").toUpperCase();
