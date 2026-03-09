@@ -102,8 +102,20 @@ export function SymbolHeaderCard({ symbol, price, changePercent, signal, confide
   };
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Chart link copied!");
+    const lines: string[] = [];
+    lines.push(`📊 *${symbol}*${signal ? ` — *${signal.toUpperCase()}*` : ""}`);
+    if (price != null) {
+      lines.push(`💰 Price: ${formatPrice(price, symbol)}${changePercent != null ? ` (${changePercent >= 0 ? "+" : ""}${changePercent.toFixed(2)}%)` : ""}`);
+    }
+    if (trend) lines.push(`📈 Trend: ${trend.charAt(0).toUpperCase() + trend.slice(1)}`);
+    if (confidence) lines.push(`🎯 Confidence: ${Math.round(confidence)}%`);
+    if (spread != null) lines.push(`📏 Spread: ${spread.toFixed(1)}`);
+    lines.push(`🏦 Session: ${session.name} (${session.status})`);
+    lines.push(`\n🔗 ${window.location.href}`);
+    lines.push(`_Powered by Botvio — AI Trading Signals_`);
+    const text = lines.join("\n");
+    navigator.clipboard.writeText(text);
+    toast.success("Full signal details copied!");
   };
 
   return (
