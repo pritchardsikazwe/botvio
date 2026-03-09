@@ -12,7 +12,7 @@ import { NewsEventsCard } from "@/components/chart/NewsEventsCard";
 import { QuickActionsCard } from "@/components/chart/QuickActionsCard";
 import { MarketStatsCard } from "@/components/chart/MarketStatsCard";
 import { WatchlistCard } from "@/components/chart/WatchlistCard";
-import { BrokerCTACard } from "@/components/chart/BrokerCTACard";
+
 import { EducationMiniCard } from "@/components/chart/EducationMiniCard";
 import { ChartAnalysisPanel } from "@/components/chart/ChartAnalysisPanel";
 import { ChartBrokerLinks } from "@/components/chart/ChartBrokerLinks";
@@ -225,7 +225,6 @@ const ChartPage = () => {
                 <QuickActionsCard />
                 <MarketStatsCard metrics={metrics} indicator={indicator} />
                 <WatchlistCard activeSymbol={displaySymbol} />
-                <BrokerCTACard />
                 <EducationMiniCard />
                 <ChartAnalysisPanel
                   signal={signal}
@@ -233,7 +232,7 @@ const ChartPage = () => {
                   indicator={indicator}
                   symbol={displaySymbol}
                 />
-                <ChartBrokerLinks symbol={displaySymbol} />
+                <ChartBrokerLinks />
               </div>
             </div>
 
