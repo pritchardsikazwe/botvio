@@ -75,6 +75,15 @@ const GoldTradingHub = () => {
         {/* Sentiment Gauge Row */}
         <GoldSentimentGauge />
 
+        {/* Active Gold Signals */}
+        <div>
+          <h2 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+            <Signal className="h-5 w-5 text-primary" />
+            Active Gold Signals
+          </h2>
+          <GoldSignalsSection />
+        </div>
+
         {/* Tabbed Sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-5 bg-card border border-border/50 h-12">
