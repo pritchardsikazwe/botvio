@@ -807,6 +807,28 @@ serve(async (req) => {
 
     await supabase.from("market_card_metrics").insert(metricsRow);
 
+    // Trigger AI signal generation after fresh data ingestion
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+      const aiRes = await fetch(`${supabaseUrl}/functions/v1/generate-ai-signal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({ symbol, timeframe: "1h" }),
+      });
+      if (aiRes.ok) {
+        const aiData = await aiRes.json();
+        console.log(`AI signal generated for ${symbol}: ${aiData?.signal?.signal} (confidence: ${aiData?.signal?.confidence})`);
+      } else {
+        console.warn(`AI signal generation failed for ${symbol}: ${aiRes.status}`);
+      }
+    } catch (aiErr: any) {
+      console.warn(`AI signal trigger error for ${symbol}:`, aiErr.message);
+    }
+
     console.log(`Done: ${symbol} - ${candlesFetched} candles (via ${candleProvider}), price=${price} (via ${priceProvider}), session=${currentSession}`);
 
     return new Response(
