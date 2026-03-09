@@ -386,8 +386,8 @@ export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: numb
       return results;
     },
     enabled: assetIds.length > 0,
-    staleTime: 30 * 1000,
-    refetchInterval: 60 * 1000,
+    staleTime: 15 * 1000,
+    refetchInterval: 30 * 1000,
   });
 
   const { data: indicators } = useQuery({
