@@ -217,6 +217,7 @@ const Affiliate = () => {
   if (!profileLoading && !profile) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead title="Affiliate Program – Earn Commissions Referring Traders" description="Join Botvio's affiliate program and earn commissions for every trader you refer. Share your unique link on social media, YouTube, or your website and get paid in crypto or mobile money." />
         <Header />
         <main className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">
