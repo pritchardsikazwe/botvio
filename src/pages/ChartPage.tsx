@@ -16,6 +16,7 @@ import { WatchlistCard } from "@/components/chart/WatchlistCard";
 import { EducationMiniCard } from "@/components/chart/EducationMiniCard";
 import { ChartAnalysisPanel } from "@/components/chart/ChartAnalysisPanel";
 import { ChartBrokerLinks } from "@/components/chart/ChartBrokerLinks";
+import { HauzaStrategyCard } from "@/components/chart/HauzaStrategyCard";
 import { ChartTipsPanel } from "@/components/chart/ChartTipsPanel";
 import { SessionsPanel } from "@/components/chart/SessionsPanel";
 import { StrategyNotesPanel } from "@/components/chart/StrategyNotesPanel";

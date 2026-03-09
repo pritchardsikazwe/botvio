@@ -8,8 +8,9 @@ import { GoldTipsSection } from "@/components/gold/GoldTipsSection";
 import { GoldCommunitySection } from "@/components/gold/GoldCommunitySection";
 import { GoldSentimentGauge } from "@/components/gold/GoldSentimentGauge";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
+import { GoldHauzaStrategy } from "@/components/gold/GoldHauzaStrategy";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, Signal, Lightbulb, Users } from "lucide-react";
+import { BarChart3, Signal, Lightbulb, Users, Crosshair } from "lucide-react";
 
 const GoldTradingHub = () => {
   const [activeTab, setActiveTab] = useState("charts");
@@ -36,7 +37,7 @@ const GoldTradingHub = () => {
                 Gold Trading <span className="text-primary">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                Real-time charts, AI signals, expert tips & community — everything you need to trade gold profitably.
+                Real-time charts, AI signals, Hauza strategies, expert tips & community — everything you need to trade gold profitably.
               </p>
             </div>
             <GoldPriceHeader />
@@ -48,12 +49,15 @@ const GoldTradingHub = () => {
 
         {/* Tabbed Sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-4 bg-card border border-border/50 h-12">
+          <TabsList className="w-full grid grid-cols-5 bg-card border border-border/50 h-12">
             <TabsTrigger value="charts" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
               <BarChart3 className="h-4 w-4" /> Charts
             </TabsTrigger>
             <TabsTrigger value="signals" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
               <Signal className="h-4 w-4" /> Signals
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
+              <Crosshair className="h-4 w-4" /> Strategy
             </TabsTrigger>
             <TabsTrigger value="tips" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
               <Lightbulb className="h-4 w-4" /> Tips
@@ -68,6 +72,9 @@ const GoldTradingHub = () => {
           </TabsContent>
           <TabsContent value="signals" className="mt-6">
             <GoldSignalsSection />
+          </TabsContent>
+          <TabsContent value="strategy" className="mt-6">
+            <GoldHauzaStrategy />
           </TabsContent>
           <TabsContent value="tips" className="mt-6">
             <GoldTipsSection />
