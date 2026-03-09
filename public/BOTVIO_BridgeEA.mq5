@@ -120,16 +120,23 @@ bool RegisterTerminal()
    string url = InpBridgeURL + "/bridge-register-terminal";
    string headers = "Content-Type: application/json\r\nx-bridge-secret: " + InpBridgeSecret;
    
+   // Escape JSON-unsafe characters in broker strings
+   string brokerName = EscapeJson(AccountInfoString(ACCOUNT_COMPANY));
+   string serverName = EscapeJson(AccountInfoString(ACCOUNT_SERVER));
+   string currency = EscapeJson(AccountInfoString(ACCOUNT_CURRENCY));
+   
    string body = StringFormat(
       "{\"terminal_uid\":\"%s\",\"user_id\":\"%s\",\"broker_name\":\"%s\",\"server\":\"%s\",\"login\":\"%s\",\"account_currency\":\"%s\",\"leverage\":%d}",
       InpTerminalUID,
-      InpTerminalUID, // Will be parsed on server
-      AccountInfoString(ACCOUNT_COMPANY),
-      AccountInfoString(ACCOUNT_SERVER),
+      InpTerminalUID,
+      brokerName,
+      serverName,
       IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)),
-      AccountInfoString(ACCOUNT_CURRENCY),
+      currency,
       (int)AccountInfoInteger(ACCOUNT_LEVERAGE)
    );
+   
+   Print("Register body: ", body);
    
    char data[];
    char result[];
