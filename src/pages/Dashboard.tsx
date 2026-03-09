@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCircle, BarChart3 } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { MarketDataPanel } from "@/components/trading/MarketDataPanel";
+import { SEOHead } from "@/components/seo/SEOHead";
 
 const Dashboard = () => {
   const { user } = useAuth();
