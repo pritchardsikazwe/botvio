@@ -122,6 +122,7 @@ const App = () => (
               <Route path="/auth/deriv/callback" element={<DerivCallback />} />
               <Route path="/trading" element={<Trading />} />
               <Route path="/chart/:symbol" element={<ChartPage />} />
+              <Route path="/gold" element={<GoldTradingHub />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
