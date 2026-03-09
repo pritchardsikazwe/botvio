@@ -161,6 +161,14 @@ export const TradingGuide = ({ showOnboarding = false, onCloseOnboarding }: Trad
                         <span className="text-sm text-muted-foreground">{tip}</span>
                       </div>
                     ))}
+                    {step.link && (
+                      <a href={step.link} target="_blank" rel="noopener noreferrer" className="block mt-3">
+                        <Button size="sm" variant="gold" className="w-full">
+                          <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                          {step.linkLabel}
+                        </Button>
+                      </a>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
