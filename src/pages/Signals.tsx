@@ -92,6 +92,7 @@ const Signals = () => {
   });
 
   const isPremium = useHasProductType("signal_pack");
+  const { permission, requestPermission } = usePushNotifications();
 
   useEffect(() => {
     const channel = supabase
