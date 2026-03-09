@@ -224,6 +224,13 @@ const ChartPage = () => {
               {/* RIGHT COLUMN (Sidebar) */}
               <div className="lg:col-span-4 xl:col-span-3 space-y-4">
                 <QuickActionsCard />
+                <HauzaStrategyCard
+                  symbol={displaySymbol}
+                  signal={signal?.signal ?? null}
+                  trend={indicator?.trend as string | null}
+                  rsi={indicator?.rsi_14 ? Number(indicator.rsi_14) : null}
+                  confidence={signal?.confidence ?? null}
+                />
                 <MarketStatsCard metrics={metrics} indicator={indicator} />
                 <WatchlistCard activeSymbol={displaySymbol} />
                 <EducationMiniCard />
