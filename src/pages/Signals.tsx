@@ -5,6 +5,7 @@ import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals } from "@/hooks/useManualSignals";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
