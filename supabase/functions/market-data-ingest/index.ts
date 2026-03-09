@@ -600,9 +600,10 @@ serve(async (req) => {
   const avApiKey = Deno.env.get("ALPHAVANTAGE_API_KEY") ?? "";
   const fhApiKey = Deno.env.get("FINNHUB_API_KEY") ?? "";
   const fcsApiKey = Deno.env.get("FCS_API_KEY") ?? "";
+  const derivAppId = Deno.env.get("DERIV_APP_ID") ?? "1089";
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const keys = { td: tdApiKey, av: avApiKey, fh: fhApiKey };
+  const keys = { td: tdApiKey, av: avApiKey, fh: fhApiKey, derivAppId };
 
   if (!tdApiKey && !avApiKey && !fhApiKey) {
     return new Response(
