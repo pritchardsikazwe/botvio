@@ -366,7 +366,9 @@ const Signals = () => {
                       <p className="text-sm text-muted-foreground">Get instant notifications when new signals are posted</p>
                     </div>
                   </div>
-                  <Button variant="gold">Enable Notifications</Button>
+                  <Button variant="gold" onClick={requestPermission} disabled={permission === "granted"}>
+                    {permission === "granted" ? "✓ Notifications On" : "Enable Notifications"}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
