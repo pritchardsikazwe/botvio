@@ -3,9 +3,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Signal, ArrowRight, TrendingUp, TrendingDown, Clock, AlertCircle, Trophy, XCircle as XIcon } from "lucide-react";
+import { Signal, ArrowRight, TrendingUp, TrendingDown, Clock, AlertCircle, Trophy, XCircle as XIcon, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { ManualSignal } from "@/hooks/useManualSignals";
+
+const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
+const DERIV_LINK = "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827";
+const WELTRADE_LINK = "https://gowt.net/ib67505m";
+
+function getBrokerForSymbol(symbol: string): { name: string; link: string; color: string } {
+  const s = (symbol || "").toUpperCase();
+  // Deriv synthetics
+  if (/^(R_|1HZ|BOOM|CRASH|STEP|JUMP|RANGE|VOL)/i.test(s)) {
+    return { name: "Trade on Deriv", link: DERIV_LINK, color: "bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20" };
+  }
+  // Crypto
+  if (/BTC|ETH|SOL|BNB|XRP|DOGE|ADA|DOT|AVAX|MATIC|CRYPTO/i.test(s)) {
+    return { name: "Trade on Deriv", link: DERIV_LINK, color: "bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20" };
+  }
+  // Forex & Metals → Exness primary, Weltrade secondary
+  if (/XAU|XAG|GOLD|SILVER/i.test(s)) {
+    return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20" };
+  }
+  // Default forex pairs → Exness
+  return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20" };
+}
 
 // Map timeframe to ms for expiration
 function timeframeToMs(timeframe: string): number {
