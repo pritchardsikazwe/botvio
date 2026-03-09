@@ -5,14 +5,14 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 export function GoldPriceHeader() {
   const { data: quote } = useQuery({
     queryKey: ["gold-hub-quote"],
-    queryFn: async () => {
+    queryFn: async (): Promise<{ price: number; change_percent_24h: number } | null> => {
       const { data } = await supabase
         .from("market_quotes")
         .select("price, change_percent_24h")
         .eq("symbol", "XAUUSD")
         .order("fetched_at", { ascending: false })
         .limit(1);
-      return data?.[0] ?? null;
+      return (data?.[0] as { price: number; change_percent_24h: number } | undefined) ?? null;
     },
     refetchInterval: 15000,
   });
