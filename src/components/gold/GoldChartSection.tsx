@@ -119,7 +119,7 @@ export function GoldChartSection() {
 
       {/* Chart */}
       <Card className="bg-card border-border/50 overflow-hidden">
-        <div ref={containerRef} className="w-full h-[500px] md:h-[600px]" />
+        <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />
       </Card>
 
       {/* ── Hauza Strategy Quick-Reference ─────── */}
