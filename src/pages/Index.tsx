@@ -13,7 +13,7 @@ import {
   GraduationCap, Target, AlertTriangle, Bot, TrendingUp,
   ArrowRight, Zap, BookOpen, Package, MessageCircle,
   ExternalLink, Download, Smartphone, Sparkles, Signal,
-  BarChart3, Hash, TrendingDown
+  BarChart3, Hash, TrendingDown, Activity
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
@@ -108,6 +108,11 @@ const Index = () => {
             <Link to="/gold" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
                 <Sparkles className="h-4 w-4" /> Gold Hub
+              </Button>
+            </Link>
+            <Link to="/weltrade" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
+                <Activity className="h-4 w-4" /> SyntX Hub
               </Button>
             </Link>
             <Link to="/chart/XAUUSD" className="block">
