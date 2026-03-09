@@ -27,7 +27,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const rawBody = await req.text();
+    const rawBody = (await req.text()).trim();
     console.log('Raw body received:', rawBody.substring(0, 500));
     
     let body: any;
