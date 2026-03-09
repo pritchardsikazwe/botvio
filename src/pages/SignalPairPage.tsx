@@ -36,8 +36,8 @@ const SignalPairPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title={`${page.displayName} Signals — Free AI Trading Analysis`}
-        description={`Free ${page.displayName} trading signals with AI analysis. Entry, stop loss & take profit levels for ${page.pair}.`}
+        title={`${page.displayName} Signals — Free AI Trading Analysis & Live Alerts`}
+        description={`Get free ${page.displayName} trading signals powered by AI analysis. Real-time entry prices, stop loss & take profit levels for ${page.pair}. Updated daily with confidence scores and market context.`}
         jsonLd={jsonLd}
       />
       <Header />
