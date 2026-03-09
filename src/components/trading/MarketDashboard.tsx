@@ -451,9 +451,32 @@ export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: numb
       return results;
     },
     enabled: assetIds.length > 0,
-    staleTime: 60 * 1000,
-    refetchInterval: 2 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
   });
+
+  // Realtime subscriptions — invalidate queries when new data arrives
+  useEffect(() => {
+    const channel = supabase
+      .channel("market-dashboard-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "market_quotes" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["market-quotes"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "market_card_metrics" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["card-metrics"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "ai_signals" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["ai-signals"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "market_indicators" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["market-indicators"] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const quoteMap = new Map(quotes?.map((q) => [q.asset_id, q]) || []);
   const indicatorMap = new Map(indicators?.map((i) => [i.asset_id, i]) || []);
