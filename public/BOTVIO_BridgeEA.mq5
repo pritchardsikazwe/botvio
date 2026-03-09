@@ -33,6 +33,13 @@ int OnInit()
       return INIT_PARAMETERS_INCORRECT;
    }
    
+   // Validate UID doesn't contain characters that break JSON
+   if(StringFind(InpTerminalUID, "\"") >= 0 || StringFind(InpTerminalUID, "\\") >= 0)
+   {
+      Print("ERROR: Terminal UID contains invalid characters");
+      return INIT_PARAMETERS_INCORRECT;
+   }
+   
    if(StringLen(InpBridgeSecret) == 0)
    {
       Print("ERROR: Bridge Shared Secret is required");
