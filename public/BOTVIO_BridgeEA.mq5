@@ -527,6 +527,21 @@ bool ExecuteModifyCommand(string response, string &errorMsg)
 }
 
 //+------------------------------------------------------------------+
+//| Escape a string for safe JSON embedding                          |
+//+------------------------------------------------------------------+
+string EscapeJson(string input)
+{
+   string output = input;
+   // Must escape backslash first, then quotes
+   StringReplace(output, "\\", "\\\\");
+   StringReplace(output, "\"", "\\\"");
+   StringReplace(output, "\n", "\\n");
+   StringReplace(output, "\r", "\\r");
+   StringReplace(output, "\t", "\\t");
+   return output;
+}
+
+//+------------------------------------------------------------------+
 //| Acknowledge command completion                                   |
 //+------------------------------------------------------------------+
 void AckCommand(string commandId, string status, ulong ticket, string errorMsg)
