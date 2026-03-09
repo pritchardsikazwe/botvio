@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, TrendingUp, TrendingDown, Target, Shield, BarChart3, Activity, Newspaper, Clock, BookOpen } from "lucide-react";
 import { useState } from "react";
 
-const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
+const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 
 const ChartPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
