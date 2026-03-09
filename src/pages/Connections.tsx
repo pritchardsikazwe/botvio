@@ -4,14 +4,12 @@ import { useDeriv } from "@/contexts/DerivContext";
 import { Header } from "@/components/trading/Header";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
+import MT5BridgeSetupWizard from "@/components/broker/MT5BridgeSetupWizard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, ExternalLink, RefreshCw, Copy, Monitor } from "lucide-react";
-import { toast } from "sonner";
+import { Wallet, RefreshCw, Monitor } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -55,7 +53,6 @@ const Connections = () => {
   const copyTerminalUid = () => {
     const uid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
     navigator.clipboard.writeText(uid);
-    toast.success("Terminal UID copied!");
   };
 
   if (!user) {
@@ -154,114 +151,7 @@ const Connections = () => {
           </TabsContent>
 
           <TabsContent value="mt5" className="space-y-6">
-            {/* MT5 Bridge Setup */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Monitor className="h-5 w-5" />
-                  MT5 Bridge Setup
-                </CardTitle>
-                <CardDescription>
-                  Connect your MetaTrader 5 terminal using the BOTVIO EA
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Terminal UID */}
-                <div className="space-y-2">
-                  <Label>Your Terminal UID</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      value={`BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`}
-                      readOnly
-                      className="font-mono"
-                    />
-                    <Button variant="outline" onClick={copyTerminalUid}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Use this UID when configuring the BOTVIO EA in MetaTrader 5
-                  </p>
-                </div>
-
-                {/* Setup Steps */}
-                <div className="space-y-3">
-                  <h4 className="font-medium">Setup Instructions</h4>
-                  <ol className="space-y-3 text-sm">
-                    <li className="flex gap-3">
-                      <Badge variant="outline" className="shrink-0">1</Badge>
-                      <span>Download the BOTVIO_BridgeEA.ex5 file from the download section</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <Badge variant="outline" className="shrink-0">2</Badge>
-                      <span>Copy it to your MT5 Experts folder (File → Open Data Folder → MQL5 → Experts)</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <Badge variant="outline" className="shrink-0">3</Badge>
-                      <span>Restart MetaTrader 5 and attach the EA to any chart</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <Badge variant="outline" className="shrink-0">4</Badge>
-                      <span>Enter your Terminal UID in the EA settings</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <Badge variant="outline" className="shrink-0">5</Badge>
-                      <span>Enable "Allow WebRequest" in Tools → Options → Expert Advisors</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <Badge variant="outline" className="shrink-0">6</Badge>
-                      <span>Add *.supabase.co to allowed URLs</span>
-                    </li>
-                  </ol>
-                </div>
-
-                <Button variant="outline" asChild>
-                  <a href="#" download>
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Download BOTVIO EA
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Connected MT5 Terminals */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Connected MT5 Terminals</CardTitle>
-                <CardDescription>Your active MetaTrader 5 connections</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {mt5Accounts && mt5Accounts.length > 0 ? (
-                  <div className="space-y-3">
-                    {mt5Accounts.map((acc: any) => (
-                      <div 
-                        key={acc.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${
-                            acc.connection_status === 'connected' ? 'bg-success' : 'bg-muted-foreground'
-                          }`} />
-                          <div>
-                            <p className="font-medium">{acc.label}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {acc.login_id} • {acc.permissions_json?.broker_name || 'MT5'}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge variant={acc.connection_status === 'connected' ? "default" : "secondary"}>
-                          {acc.connection_status === 'connected' ? "Online" : "Offline"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">
-                    No MT5 terminals connected yet. Follow the setup instructions above.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            <MT5BridgeSetupWizard />
           </TabsContent>
         </Tabs>
       </main>
