@@ -53,7 +53,6 @@ const Connections = () => {
   const copyTerminalUid = () => {
     const uid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
     navigator.clipboard.writeText(uid);
-    toast.success("Terminal UID copied!");
   };
 
   if (!user) {
