@@ -12,7 +12,7 @@ import { NewsEventsCard } from "@/components/chart/NewsEventsCard";
 import { QuickActionsCard } from "@/components/chart/QuickActionsCard";
 import { MarketStatsCard } from "@/components/chart/MarketStatsCard";
 import { WatchlistCard } from "@/components/chart/WatchlistCard";
-import { BrokerCTACard } from "@/components/chart/BrokerCTACard";
+
 import { EducationMiniCard } from "@/components/chart/EducationMiniCard";
 import { ChartAnalysisPanel } from "@/components/chart/ChartAnalysisPanel";
 import { ChartBrokerLinks } from "@/components/chart/ChartBrokerLinks";
