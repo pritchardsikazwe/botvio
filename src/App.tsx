@@ -56,6 +56,7 @@ import { AdminLogin } from "@/components/admin/AdminLogin";
 import SignalPairPage from "./pages/SignalPairPage";
 import BotDetailPage from "./pages/BotDetailPage";
 import CountryTrafficPage from "./pages/CountryTrafficPage";
+import GoldTradingHub from "./pages/GoldTradingHub";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
@@ -121,6 +122,7 @@ const App = () => (
               <Route path="/auth/deriv/callback" element={<DerivCallback />} />
               <Route path="/trading" element={<Trading />} />
               <Route path="/chart/:symbol" element={<ChartPage />} />
+              <Route path="/gold" element={<GoldTradingHub />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
