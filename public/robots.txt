@@ -1,46 +1,74 @@
+# Default rule for all bots
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /billing/
+Disallow: /accounts/
+Disallow: /connections/
+Disallow: /trade-history/
+Disallow: /provider-dashboard/
+Disallow: /my-products/
+Disallow: /private/
+Disallow: /tmp/
+Disallow: /internal/
+Disallow: /*?token=
+Disallow: /*?session=
+
+# Googlebot specific rules
 User-agent: Googlebot
 Allow: /
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /settings
-Disallow: /billing
-Disallow: /accounts
-Disallow: /connections
-Disallow: /trade-history
-Disallow: /provider-dashboard
-Disallow: /my-products
-Disallow: /auth
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /billing/
+Disallow: /accounts/
+Disallow: /connections/
+Disallow: /trade-history/
+Disallow: /provider-dashboard/
+Disallow: /my-products/
 
+# Bingbot rules
 User-agent: Bingbot
 Allow: /
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /settings
-Disallow: /billing
-Disallow: /accounts
-Disallow: /connections
-Disallow: /trade-history
-Disallow: /provider-dashboard
-Disallow: /my-products
-Disallow: /auth
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /billing/
+Disallow: /accounts/
+Disallow: /connections/
+Disallow: /trade-history/
+Disallow: /provider-dashboard/
+Disallow: /my-products/
+
+# Social media crawlers (for link previews)
+User-agent: facebookexternalhit
+Allow: /
 
 User-agent: Twitterbot
 Allow: /
 
-User-agent: facebookexternalhit
+User-agent: LinkedInBot
 Allow: /
 
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /settings
-Disallow: /billing
-Disallow: /accounts
-Disallow: /connections
-Disallow: /trade-history
-Disallow: /provider-dashboard
-Disallow: /my-products
-Disallow: /auth
+# Block aggressive AI crawlers
+User-agent: GPTBot
+Disallow: /
 
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+# Sitemap
 Sitemap: https://botvio.live/sitemap.xml

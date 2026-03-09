@@ -1,8 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 Deno.serve(async (req) => {
@@ -23,59 +23,46 @@ Deno.serve(async (req) => {
   const siteUrl = settings?.site_url || "https://botvio.live";
   const allowIndex = settings?.robots_index !== false;
 
+  const privateRoutes = [
+    "/admin/", "/api/", "/auth/", "/login", "/register",
+    "/dashboard/", "/settings/", "/billing/", "/accounts/",
+    "/connections/", "/trade-history/", "/provider-dashboard/",
+    "/my-products/", "/private/", "/tmp/", "/internal/",
+  ];
+  const disallowBlock = privateRoutes.map(r => `Disallow: ${r}`).join("\n");
+
   let robotsTxt = "";
 
-  // Googlebot — specific rules for better crawl budget
-  robotsTxt += `User-agent: Googlebot\n`;
+  // Default
+  robotsTxt += `# Default rule for all bots\nUser-agent: *\n`;
   robotsTxt += allowIndex ? `Allow: /\n` : `Disallow: /\n`;
-  robotsTxt += `Disallow: /admin\n`;
-  robotsTxt += `Disallow: /dashboard\n`;
-  robotsTxt += `Disallow: /settings\n`;
-  robotsTxt += `Disallow: /auth\n`;
-  robotsTxt += `Disallow: /api\n`;
-  robotsTxt += `Disallow: /billing\n`;
-  robotsTxt += `Disallow: /accounts\n`;
-  robotsTxt += `Disallow: /trade-history\n`;
-  robotsTxt += `Disallow: /provider-dashboard\n`;
-  robotsTxt += `Disallow: /connections\n`;
-  robotsTxt += `Disallow: /my-products\n`;
-  robotsTxt += `\n`;
+  robotsTxt += disallowBlock + "\n";
+  robotsTxt += `Disallow: /*?token=\nDisallow: /*?session=\n\n`;
+
+  // Googlebot
+  robotsTxt += `# Googlebot specific rules\nUser-agent: Googlebot\n`;
+  robotsTxt += allowIndex ? `Allow: /\n` : `Disallow: /\n`;
+  robotsTxt += disallowBlock + "\n\n";
 
   // Bingbot
-  robotsTxt += `User-agent: Bingbot\n`;
+  robotsTxt += `# Bingbot rules\nUser-agent: Bingbot\n`;
   robotsTxt += allowIndex ? `Allow: /\n` : `Disallow: /\n`;
-  robotsTxt += `Disallow: /admin\n`;
-  robotsTxt += `Disallow: /dashboard\n`;
-  robotsTxt += `Disallow: /settings\n`;
-  robotsTxt += `Disallow: /auth\n`;
-  robotsTxt += `Disallow: /billing\n`;
-  robotsTxt += `Disallow: /accounts\n`;
-  robotsTxt += `Disallow: /trade-history\n`;
-  robotsTxt += `Disallow: /provider-dashboard\n`;
-  robotsTxt += `Disallow: /connections\n`;
-  robotsTxt += `Disallow: /my-products\n`;
-  robotsTxt += `\n`;
+  robotsTxt += disallowBlock + "\n\n";
 
-  // Social bots — allow everything for rich previews
-  robotsTxt += `User-agent: Twitterbot\nAllow: /\n\n`;
+  // Social crawlers
+  robotsTxt += `# Social media crawlers (for link previews)\n`;
   robotsTxt += `User-agent: facebookexternalhit\nAllow: /\n\n`;
+  robotsTxt += `User-agent: Twitterbot\nAllow: /\n\n`;
+  robotsTxt += `User-agent: LinkedInBot\nAllow: /\n\n`;
 
-  // Default
-  robotsTxt += `User-agent: *\n`;
-  robotsTxt += allowIndex ? `Allow: /\n` : `Disallow: /\n`;
-  robotsTxt += `Disallow: /admin\n`;
-  robotsTxt += `Disallow: /dashboard\n`;
-  robotsTxt += `Disallow: /settings\n`;
-  robotsTxt += `Disallow: /auth\n`;
-  robotsTxt += `Disallow: /api\n`;
-  robotsTxt += `Disallow: /billing\n`;
-  robotsTxt += `Disallow: /accounts\n`;
-  robotsTxt += `Disallow: /trade-history\n`;
-  robotsTxt += `Disallow: /provider-dashboard\n`;
-  robotsTxt += `Disallow: /connections\n`;
-  robotsTxt += `Disallow: /my-products\n`;
-  robotsTxt += `\n`;
-  robotsTxt += `Sitemap: ${siteUrl}/sitemap.xml\n`;
+  // Block AI crawlers
+  robotsTxt += `# Block aggressive AI crawlers\n`;
+  robotsTxt += `User-agent: GPTBot\nDisallow: /\n\n`;
+  robotsTxt += `User-agent: CCBot\nDisallow: /\n\n`;
+  robotsTxt += `User-agent: Bytespider\nDisallow: /\n\n`;
+
+  // Sitemap
+  robotsTxt += `# Sitemap\nSitemap: ${siteUrl}/sitemap.xml\n`;
 
   return new Response(robotsTxt, {
     headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8" },
