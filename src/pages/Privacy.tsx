@@ -1,10 +1,12 @@
 import { Header } from "@/components/trading/Header";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 const Privacy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Privacy Policy" description="Botvio's privacy policy explains how we collect, use, and protect your personal data including trading activity, broker connections, and account information. Learn about your data rights and our security practices." />
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-4xl">

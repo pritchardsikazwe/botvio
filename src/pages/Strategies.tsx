@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Download, Star, Share2, Filter, TrendingUp, DollarSign, Eye } from "lucide-react";
 import { Header } from "@/components/trading/Header";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { toast } from "sonner";
 
 const Strategies = () => {
@@ -102,6 +103,7 @@ const Strategies = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Strategy Marketplace — Forex & Gold Trading Strategies" description="Discover, share, and download profitable trading strategies for forex, gold, crypto, and synthetic indices. Community-built strategies with performance stats, risk profiles, and easy one-click deployment." />
       <Header />
       {/* Sub-Header */}
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">

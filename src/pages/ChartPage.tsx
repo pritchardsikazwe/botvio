@@ -152,8 +152,8 @@ const ChartPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title={`${displaySymbol} Chart — Botvio Market Analysis`}
-        description={`Live ${displaySymbol} chart with AI signals, support/resistance levels, key levels, trade ideas, and market analysis. Analyze on Botvio, trade on WELTRADE.`}
+        title={`${displaySymbol} Live Chart — AI Analysis, Key Levels & Trade Ideas`}
+        description={`Live ${displaySymbol} chart with TradingView integration, AI-powered signals, support & resistance levels, trade ideas, session timing, and market structure analysis. Free technical analysis tools for smarter trading.`}
         noIndex
       />
       <Header />
