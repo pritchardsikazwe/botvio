@@ -19,6 +19,7 @@ import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { MarketDashboard } from "@/components/trading/MarketDashboard";
+import { NotificationBanner } from "@/components/notifications/NotificationBanner";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -93,10 +94,15 @@ const Index = () => {
       <main className="container mx-auto px-4 py-6 space-y-8">
         {/* 0 — Shortcuts */}
         <section>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
               <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold text-sm gap-2">
                 <TrendingUp className="h-4 w-4" /> Trade on Exness
+              </Button>
+            </a>
+            <a href="https://gowt.net/ib67505m" target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
+                <TrendingUp className="h-4 w-4" /> Weltrade
               </Button>
             </a>
             <Link to="/gold" className="block">
@@ -104,9 +110,14 @@ const Index = () => {
                 <Sparkles className="h-4 w-4" /> Gold Hub
               </Button>
             </Link>
+            <Link to="/chart/XAUUSD" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-accent-foreground/20 text-foreground hover:bg-accent/50">
+                <BarChart3 className="h-4 w-4" /> Chart Analysis
+              </Button>
+            </Link>
             <a href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ" target="_blank" rel="noopener noreferrer" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-success/40 text-success hover:bg-success/10">
-                <MessageCircle className="h-4 w-4" /> WhatsApp Signals
+                <MessageCircle className="h-4 w-4" /> WhatsApp
               </Button>
             </a>
             <a href="https://www.youtube.com/@Forexsmartmoneyconcept" target="_blank" rel="noopener noreferrer" className="block">
@@ -335,22 +346,7 @@ const Index = () => {
 
         {/* 8 — Banners */}
         <section className="space-y-4">
-          <Card className="glass-card border-warning/30 overflow-hidden">
-            <CardContent className="py-6">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-warning to-orange-500 flex items-center justify-center">
-                    <AlertTriangle className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">🔔 Push Notifications — Coming Soon</h3>
-                    <p className="text-sm text-muted-foreground">Get instant alerts for signals, trade executions, and market moves.</p>
-                  </div>
-                </div>
-                <Button variant="gold" asChild><Link to="/install"><Download className="h-4 w-4 mr-2" />Install App</Link></Button>
-              </div>
-            </CardContent>
-          </Card>
+          <NotificationBanner />
           <Card className="glass-card border-primary/30 overflow-hidden">
             <CardContent className="py-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
