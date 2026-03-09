@@ -4,14 +4,12 @@ import { useDeriv } from "@/contexts/DerivContext";
 import { Header } from "@/components/trading/Header";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
+import MT5BridgeSetupWizard from "@/components/broker/MT5BridgeSetupWizard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, ExternalLink, RefreshCw, Copy, Monitor } from "lucide-react";
-import { toast } from "sonner";
+import { Wallet, RefreshCw, Monitor } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
