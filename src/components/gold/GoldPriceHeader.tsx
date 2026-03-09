@@ -8,7 +8,7 @@ export function GoldPriceHeader() {
     queryFn: async () => {
       const { data } = await supabase
         .from("market_quotes")
-        .select("*")
+        .select("price, change_percent_24h")
         .eq("symbol", "XAUUSD")
         .order("fetched_at", { ascending: false })
         .limit(1)
@@ -19,7 +19,7 @@ export function GoldPriceHeader() {
   });
 
   const price = quote?.price ?? 0;
-  const change = quote?.change_pct ?? 0;
+  const change = quote?.change_percent_24h ?? 0;
   const isUp = change >= 0;
 
   return (
