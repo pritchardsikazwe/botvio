@@ -76,13 +76,13 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password, country);
+    const { error } = await signUp(email, password, country, whatsapp);
     if (error) {
       toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Account created!", description: "Please check your email to verify your account." });
       onOpenChange(false);
-      setEmail(""); setPassword(""); setCountry("");
+      setEmail(""); setPassword(""); setCountry(""); setWhatsapp("");
     }
     setLoading(false);
   };
