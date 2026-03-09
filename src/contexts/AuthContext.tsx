@@ -195,23 +195,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, country?: string) => {
+  const signUp = async (email: string, password: string, country?: string, whatsapp?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { country: country || undefined },
+        data: { country: country || undefined, whatsapp_number: whatsapp || undefined },
       },
     });
 
-    // Update profile with country if provided
-    if (!error && data?.user && country) {
-      supabase
-        .from("profiles")
-        .update({ country })
-        .eq("user_id", data.user.id)
-        .then(() => {});
+    // Update profile with country and whatsapp if provided
+    if (!error && data?.user) {
+      const updates: Record<string, string> = {};
+      if (country) updates.country = country;
+      if (whatsapp) updates.whatsapp_number = whatsapp;
+      if (Object.keys(updates).length > 0) {
+        supabase
+          .from("profiles")
+          .update(updates)
+          .eq("user_id", data.user.id)
+          .then(() => {});
+      }
     }
 
     // Notify admin of new signup (fire and forget)
