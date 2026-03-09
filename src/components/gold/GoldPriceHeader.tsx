@@ -11,9 +11,8 @@ export function GoldPriceHeader() {
         .select("price, change_percent_24h")
         .eq("symbol", "XAUUSD")
         .order("fetched_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
+        .limit(1);
+      return data?.[0] ?? null;
     },
     refetchInterval: 15000,
   });
