@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { SEOHead } from "@/components/seo/SEOHead";
 
 // Campaign Link Form Component
 const CampaignLinkForm = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -216,6 +217,7 @@ const Affiliate = () => {
   if (!profileLoading && !profile) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead title="Affiliate Program – Earn Commissions Referring Traders" description="Join Botvio's affiliate program and earn commissions for every trader you refer. Share your unique link on social media, YouTube, or your website and get paid in crypto or mobile money." />
         <Header />
         <main className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">
@@ -291,6 +293,7 @@ const Affiliate = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Affiliate Dashboard – Track Earnings & Referrals" description="Track your affiliate clicks, conversions, and earnings. Manage campaign links and request payouts via crypto or mobile money." noIndex />
       <Header />
       
       <main className="container mx-auto px-4 py-6">
