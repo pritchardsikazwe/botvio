@@ -324,20 +324,84 @@ async function fetchCandlesAlphaVantage(symbol: string, tf: string, apiKey: stri
 }
 
 // --- Finnhub ---
+type FinnhubMarket = "forex" | "crypto";
+
+function getFinnhubMarket(symbol: string): FinnhubMarket | null {
+  const fhSymbol = FH_SYMBOL_MAP[symbol] || "";
+  if (fhSymbol.startsWith("OANDA:")) return "forex";
+  if (fhSymbol.startsWith("BINANCE:")) return "crypto";
+  return null;
+}
+
+function aggregateCandlesTo4H(candles: any[]): any[] {
+  if (!candles.length) return [];
+  const bucketMs = 4 * 60 * 60 * 1000;
+  const buckets = new Map<number, any[]>();
+
+  for (const candle of candles) {
+    const ts = new Date(candle.datetime).getTime();
+    if (!Number.isFinite(ts)) continue;
+    const bucketStart = Math.floor(ts / bucketMs) * bucketMs;
+    if (!buckets.has(bucketStart)) buckets.set(bucketStart, []);
+    buckets.get(bucketStart)!.push(candle);
+  }
+
+  return Array.from(buckets.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([bucketStart, list]) => {
+      const sorted = list.sort(
+        (a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+      );
+      return {
+        datetime: new Date(bucketStart).toISOString(),
+        open: sorted[0].open,
+        high: Math.max(...sorted.map((c) => c.high)),
+        low: Math.min(...sorted.map((c) => c.low)),
+        close: sorted[sorted.length - 1].close,
+        volume: sorted.reduce((sum, c) => sum + (toNumber(c.volume) || 0), 0),
+      };
+    });
+}
+
 async function fetchPriceFinnhub(symbol: string, apiKey: string): Promise<PriceResult | null> {
   const fhSymbol = FH_SYMBOL_MAP[symbol];
-  if (!fhSymbol || !apiKey) return null;
+  const market = getFinnhubMarket(symbol);
+  if (!fhSymbol || !apiKey || !market) return null;
 
   try {
-    const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(fhSymbol)}&token=${apiKey}`;
-    const res = await fetch(url);
-    if (res.status === 429) {
+    // 1) Fast path: quote endpoint (works for many symbols)
+    const quoteUrl = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(fhSymbol)}&token=${apiKey}`;
+    const quoteRes = await fetch(quoteUrl);
+    if (quoteRes.status !== 429) {
+      const quoteJson = await quoteRes.json();
+      const quotePrice = toNumber(quoteJson?.c);
+      if (quotePrice != null && quotePrice > 0) {
+        return { price: quotePrice, provider: "finnhub" };
+      }
+    } else {
       console.warn("Finnhub rate-limited");
       return null;
     }
-    const json = await res.json();
-    const price = toNumber(json?.c);
-    return price != null && price > 0 ? { price, provider: "finnhub" } : null;
+
+    // 2) Fallback: derive latest price from candle close
+    const now = Math.floor(Date.now() / 1000);
+    const from = now - 24 * 3600;
+    const candleUrl = `https://finnhub.io/api/v1/${market}/candle?symbol=${encodeURIComponent(fhSymbol)}&resolution=60&from=${from}&to=${now}&token=${apiKey}`;
+    const candleRes = await fetch(candleUrl);
+    if (candleRes.status === 429) {
+      console.warn("Finnhub candles rate-limited while resolving price");
+      return null;
+    }
+
+    const candleJson = await candleRes.json();
+    if (candleJson?.s !== "ok" || !Array.isArray(candleJson?.c) || candleJson.c.length === 0) {
+      return null;
+    }
+
+    const latestClose = toNumber(candleJson.c[candleJson.c.length - 1]);
+    return latestClose != null && latestClose > 0
+      ? { price: latestClose, provider: "finnhub" }
+      : null;
   } catch (e) {
     console.error("Finnhub price error:", e);
     return null;
@@ -346,32 +410,37 @@ async function fetchPriceFinnhub(symbol: string, apiKey: string): Promise<PriceR
 
 async function fetchCandlesFinnhub(symbol: string, tf: string, apiKey: string): Promise<CandleResult | null> {
   const fhSymbol = FH_SYMBOL_MAP[symbol];
-  if (!fhSymbol || !apiKey) return null;
+  const market = getFinnhubMarket(symbol);
+  if (!fhSymbol || !apiKey || !market) return null;
 
-  const resolutionMap: Record<string, string> = { "1h": "60", "4h": "240" };
-  const resolution = resolutionMap[tf] || "60";
+  // Finnhub supports 1, 5, 15, 30, 60, D, W, M. Use 60 and aggregate to 4h.
+  const resolution = "60";
   const now = Math.floor(Date.now() / 1000);
-  const from = now - 120 * 3600; // ~5 days of hourly data
+  const from = now - 14 * 24 * 3600; // 14 days hourly history
 
   try {
-    const url = `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(fhSymbol)}&resolution=${resolution}&from=${from}&to=${now}&token=${apiKey}`;
+    const url = `https://finnhub.io/api/v1/${market}/candle?symbol=${encodeURIComponent(fhSymbol)}&resolution=${resolution}&from=${from}&to=${now}&token=${apiKey}`;
     const res = await fetch(url);
     if (res.status === 429) {
       console.warn("Finnhub candles rate-limited");
       return null;
     }
-    const json = await res.json();
-    if (json.s !== "ok" || !json.c) return null;
 
-    const candles = json.t.map((t: number, i: number) => ({
+    const json = await res.json();
+    if (json?.s !== "ok" || !Array.isArray(json?.t) || !Array.isArray(json?.c) || json.c.length === 0) {
+      return null;
+    }
+
+    const candles1h = json.t.map((t: number, i: number) => ({
       datetime: new Date(t * 1000).toISOString(),
-      open: json.o[i],
-      high: json.h[i],
-      low: json.l[i],
-      close: json.c[i],
-      volume: json.v?.[i] || 0,
+      open: toNumber(json.o?.[i]) || 0,
+      high: toNumber(json.h?.[i]) || 0,
+      low: toNumber(json.l?.[i]) || 0,
+      close: toNumber(json.c?.[i]) || 0,
+      volume: toNumber(json.v?.[i]) || 0,
     }));
 
+    const candles = tf === "4h" ? aggregateCandlesTo4H(candles1h) : candles1h;
     return candles.length > 0 ? { candles, provider: "finnhub" } : null;
   } catch (e) {
     console.error("Finnhub candles error:", e);
