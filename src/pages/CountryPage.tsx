@@ -22,7 +22,11 @@ const CountryPage = () => {
   
   // Skip file-like paths (e.g. sitemap.xml, robots.txt) — let static files serve
   if (country?.includes(".")) {
-    window.location.href = `/${country}`;
+    // Force a full page reload to bypass SPA and serve the static file
+    if (typeof window !== "undefined" && !window.__staticFileRedirecting) {
+      window.__staticFileRedirecting = true;
+      window.location.replace(`/${country}`);
+    }
     return null;
   }
 
