@@ -225,7 +225,6 @@ const ChartPage = () => {
                 <QuickActionsCard />
                 <MarketStatsCard metrics={metrics} indicator={indicator} />
                 <WatchlistCard activeSymbol={displaySymbol} />
-                <BrokerCTACard />
                 <EducationMiniCard />
                 <ChartAnalysisPanel
                   signal={signal}
@@ -233,7 +232,7 @@ const ChartPage = () => {
                   indicator={indicator}
                   symbol={displaySymbol}
                 />
-                <ChartBrokerLinks symbol={displaySymbol} />
+                <ChartBrokerLinks />
               </div>
             </div>
 
