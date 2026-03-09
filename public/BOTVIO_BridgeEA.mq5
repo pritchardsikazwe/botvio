@@ -529,16 +529,12 @@ bool ExecuteModifyCommand(string response, string &errorMsg)
 //+------------------------------------------------------------------+
 //| Escape a string for safe JSON embedding                          |
 //+------------------------------------------------------------------+
-string EscapeJson(string input)
+string EscapeJson(string str)
 {
-   string output = input;
-   // Must escape backslash first, then quotes
-   StringReplace(output, "\\", "\\\\");
-   StringReplace(output, "\"", "\\\"");
-   StringReplace(output, "\n", "\\n");
-   StringReplace(output, "\r", "\\r");
-   StringReplace(output, "\t", "\\t");
-   return output;
+   string result = str;
+   StringReplace(result, "\\", "\\\\");
+   StringReplace(result, "\"", "\\\"");
+   return result;
 }
 
 //+------------------------------------------------------------------+
