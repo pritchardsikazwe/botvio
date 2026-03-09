@@ -88,12 +88,7 @@ export function GoldChartSection() {
       hide_top_toolbar: false,
       hide_side_toolbar: false,
       calendar: false,
-      studies: [
-        "BB@tv-basicstudies",
-        "PivotPointsStandard@tv-basicstudies",
-        "ZigZag@tv-basicstudies",
-        "LinearRegression@tv-basicstudies",
-      ],
+      studies: [],
       support_host: "https://www.tradingview.com",
     });
     containerRef.current.appendChild(script);
