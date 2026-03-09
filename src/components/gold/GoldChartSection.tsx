@@ -88,9 +88,8 @@ export function GoldChartSection() {
       hide_top_toolbar: false,
       hide_side_toolbar: false,
       calendar: false,
-      studies: [
-        "PivotPointsStandard@tv-basicstudies",
-      ],
+      studies: [],
+      drawings_access: { type: "rectangle", tools: [{ name: "Trend Line" }, { name: "Horizontal Line" }] },
       support_host: "https://www.tradingview.com",
     });
     containerRef.current.appendChild(script);
