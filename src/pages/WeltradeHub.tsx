@@ -43,7 +43,7 @@ const WeltradeHub = () => {
             </div>
             <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
               <Button variant="gold" className="font-bold">
-                <ExternalLink className="h-4 w-4 mr-2" /> Open Weltrade Account
+                <ExternalLink className="h-4 w-4 mr-2" /> Open Weltrade
               </Button>
             </a>
           </div>
