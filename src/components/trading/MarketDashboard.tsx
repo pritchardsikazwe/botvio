@@ -747,7 +747,25 @@ export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: numb
                       </button>
                       <button
                         onClick={() => {
-                          const text = encodeURIComponent(`${asset.symbol} ${sig?.signal?.toUpperCase() || ""} signal on Botvio`);
+                          const lines: string[] = [];
+                          lines.push(`📊 *${asset.symbol}*${sig ? ` — *${sig.signal.toUpperCase()}*` : ""}`);
+                          if (quote) {
+                            lines.push(`💰 Price: ${formatPrice(quote.price, asset.symbol)}${quote.change_percent_24h != null ? ` (${quote.change_percent_24h >= 0 ? "+" : ""}${quote.change_percent_24h.toFixed(2)}%)` : ""}`);
+                          }
+                          if (ind?.trend) lines.push(`📈 Trend: ${ind.trend.charAt(0).toUpperCase() + ind.trend.slice(1)}`);
+                          if (ind?.rsi_14 != null) lines.push(`⚡ RSI: ${Number(ind.rsi_14).toFixed(1)}${Number(ind.rsi_14) > 70 ? " (Overbought)" : Number(ind.rsi_14) < 30 ? " (Oversold)" : ""}`);
+                          if (sig?.confidence) lines.push(`🎯 Confidence: ${Math.round(sig.confidence)}%`);
+                          if (sig?.entry_price) lines.push(`🟢 Entry: ${formatPrice(Number(sig.entry_price), asset.symbol)}`);
+                          if (sig?.stop_loss) lines.push(`🔴 SL: ${formatPrice(Number(sig.stop_loss), asset.symbol)}`);
+                          if (sig?.take_profit_1) lines.push(`🟢 TP1: ${formatPrice(Number(sig.take_profit_1), asset.symbol)}`);
+                          if (sig?.take_profit_2) lines.push(`🟢 TP2: ${formatPrice(Number(sig.take_profit_2), asset.symbol)}`);
+                          if (metrics?.support_1 || metrics?.resistance_1) {
+                            lines.push(`📐 S1: ${metrics.support_1 ? formatPrice(Number(metrics.support_1), asset.symbol) : "—"} | R1: ${metrics.resistance_1 ? formatPrice(Number(metrics.resistance_1), asset.symbol) : "—"}`);
+                          }
+                          if (sig?.ai_summary) lines.push(`\n💡 ${sig.ai_summary.slice(0, 150)}`);
+                          lines.push(`\n🔗 View chart: https://botvio.live/chart/${asset.symbol.replace("/", "")}`);
+                          lines.push(`_Powered by Botvio — AI Trading Signals_`);
+                          const text = encodeURIComponent(lines.join("\n"));
                           window.open(`https://wa.me/?text=${text}`, "_blank");
                         }}
                         className="text-[10px] font-bold py-1.5 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
