@@ -12,17 +12,14 @@ const ALL_SYMBOLS = [
 ];
 const TIMEFRAMES = ["1h", "4h"];
 
-// Forex session windows (UTC hours)
 const SESSIONS = [
   { name: "Sydney", open: 22, close: 7 },
   { name: "Tokyo", open: 0, close: 9 },
   { name: "London", open: 8, close: 17 },
   { name: "New York", open: 13, close: 22 },
 ];
-
 const SESSION_ORDER = ["Sydney", "Tokyo", "London", "New York"];
 
-// Currency relevance for news
 const SYMBOL_CURRENCIES: Record<string, string[]> = {
   "XAU/USD": ["USD"],
   "XAG/USD": ["USD"],
@@ -31,6 +28,34 @@ const SYMBOL_CURRENCIES: Record<string, string[]> = {
   "USD/JPY": ["USD", "JPY"],
   "EUR/USD": ["EUR", "USD"],
   "AUD/USD": ["AUD", "USD"],
+};
+
+// AlphaVantage symbol mapping
+const AV_SYMBOL_MAP: Record<string, string> = {
+  "XAU/USD": "XAUUSD",
+  "XAG/USD": "XAGUSD",
+  "BTC/USD": "BTCUSD",
+  "GBP/USD": "GBPUSD",
+  "USD/JPY": "USDJPY",
+  "EUR/USD": "EURUSD",
+  "AUD/USD": "AUDUSD",
+};
+
+// Finnhub symbol mapping
+const FH_SYMBOL_MAP: Record<string, string> = {
+  "XAU/USD": "OANDA:XAU_USD",
+  "XAG/USD": "OANDA:XAG_USD",
+  "BTC/USD": "BINANCE:BTCUSDT",
+  "GBP/USD": "OANDA:GBP_USD",
+  "USD/JPY": "OANDA:USD_JPY",
+  "EUR/USD": "OANDA:EUR_USD",
+  "AUD/USD": "OANDA:AUD_USD",
+};
+
+// AlphaVantage timeframe mapping
+const AV_INTERVAL_MAP: Record<string, string> = {
+  "1h": "60min",
+  "4h": "60min", // AV doesn't have 4h; we'll aggregate from 60min
 };
 
 function toNumber(value: unknown): number | null {
@@ -97,22 +122,16 @@ function detectTrend(ema20: number | null, ema50: number | null, rsi14: number |
   return "neutral";
 }
 
-// ---- Session Logic ----
 function getSessionInfo(nowUtc: Date) {
   const hour = nowUtc.getUTCHours();
-  
   const isInSession = (s: typeof SESSIONS[0]) => {
     if (s.open < s.close) return hour >= s.open && hour < s.close;
     return hour >= s.open || hour < s.close;
   };
-
   const active = SESSIONS.filter(isInSession).map(s => s.name);
   const currentSession = active.length > 0 ? active[active.length - 1] : "Off-hours";
-
-  // Find next session to open
   let nextSession = "";
   let nextOpenAt: Date | null = null;
-  
   for (const s of SESSION_ORDER) {
     const sess = SESSIONS.find(x => x.name === s)!;
     if (!isInSession(sess)) {
@@ -124,11 +143,9 @@ function getSessionInfo(nowUtc: Date) {
       break;
     }
   }
-
   return { currentSession, nextSession, nextOpenAt };
 }
 
-// ---- 4H Block Logic ----
 function get4HBlock(nowUtc: Date) {
   const hour = nowUtc.getUTCHours();
   const blockStart = Math.floor(hour / 4) * 4;
@@ -136,12 +153,10 @@ function get4HBlock(nowUtc: Date) {
   return `${String(blockStart).padStart(2, '0')}:00–${String(blockEnd % 24).padStart(2, '0')}:00 UTC`;
 }
 
-// ---- Tip Logic ----
 function buildMarketTip(price: number, s1: number, r1: number, atr: number | null, trend: string, minutesToNews: number | null): string {
   const atrVal = atr || 0;
   const nearSupport = atrVal > 0 && Math.abs(price - s1) <= atrVal * 0.15;
   const nearResistance = atrVal > 0 && Math.abs(price - r1) <= atrVal * 0.15;
-
   if (minutesToNews != null && minutesToNews <= 30) return "⚠️ News risk soon — reduce position size or wait.";
   if (trend === "bullish" && nearResistance) return "Breakout watch at resistance. A clean break may extend higher.";
   if (trend === "bullish" && nearSupport) return "Support bounce watch. Good risk/reward for longs if support holds.";
@@ -152,37 +167,29 @@ function buildMarketTip(price: number, s1: number, r1: number, atr: number | nul
   return "Range or mixed structure — wait for clearer setups.";
 }
 
-// ---- FCS Economic Calendar ----
 async function fetchNextHighImpactEvent(fcsApiKey: string, currencies: string[]): Promise<{
   title: string; currency: string; impact: string; time: Date;
 } | null> {
   if (!fcsApiKey) return null;
-  
   try {
     const url = `https://fcsapi.com/api-v3/forex/economy_cal?access_key=${fcsApiKey}`;
     const res = await fetch(url);
     const json = await res.json();
-    
     if (!json.response || !Array.isArray(json.response)) return null;
-    
     const now = new Date();
     const events = json.response
       .filter((e: any) => {
         const eventCurrency = (e.country || "").toUpperCase();
         const impact = (e.impact || e.importance || "").toLowerCase();
         const eventTime = new Date(e.date + " " + (e.time || "00:00"));
-        return currencies.includes(eventCurrency) && 
-               (impact === "high" || impact === "3") &&
-               eventTime > now;
+        return currencies.includes(eventCurrency) && (impact === "high" || impact === "3") && eventTime > now;
       })
       .sort((a: any, b: any) => {
         const ta = new Date(a.date + " " + (a.time || "00:00")).getTime();
         const tb = new Date(b.date + " " + (b.time || "00:00")).getTime();
         return ta - tb;
       });
-
     if (events.length === 0) return null;
-    
     const e = events[0];
     return {
       title: e.title || e.event || "Economic Event",
@@ -196,6 +203,230 @@ async function fetchNextHighImpactEvent(fcsApiKey: string, currencies: string[])
   }
 }
 
+// ============ PROVIDER ABSTRACTION ============
+
+type PriceResult = { price: number; provider: string };
+type CandleResult = { candles: any[]; provider: string };
+
+// --- TwelveData ---
+async function fetchPriceTwelveData(providerSymbol: string, apiKey: string): Promise<PriceResult | null> {
+  const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(providerSymbol)}&apikey=${apiKey}`;
+  const res = await fetch(url);
+  const json = await res.json();
+  if (json.code === 429 || json.status === "error") {
+    console.warn(`TwelveData price rate-limited or error: ${json.message || json.code}`);
+    return null;
+  }
+  const price = toNumber(json?.price);
+  return price != null ? { price, provider: "twelvedata" } : null;
+}
+
+async function fetchCandlesTwelveData(providerSymbol: string, tf: string, apiKey: string): Promise<CandleResult | null> {
+  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(providerSymbol)}&interval=${tf}&outputsize=120&format=JSON&apikey=${apiKey}`;
+  const res = await fetch(url);
+  const json = await res.json();
+  if (json.code === 429 || json.status === "error") {
+    console.warn(`TwelveData candles rate-limited or error for ${tf}: ${json.message || json.code}`);
+    return null;
+  }
+  const values = json.values || [];
+  if (!values.length) return null;
+  const candles = values.map((v: any) => ({
+    datetime: v.datetime,
+    open: toNumber(v.open) || 0,
+    high: toNumber(v.high) || 0,
+    low: toNumber(v.low) || 0,
+    close: toNumber(v.close) || 0,
+    volume: toNumber(v.volume) || 0,
+  })).reverse();
+  return { candles, provider: "twelvedata" };
+}
+
+// --- AlphaVantage ---
+async function fetchPriceAlphaVantage(symbol: string, apiKey: string): Promise<PriceResult | null> {
+  const avSymbol = AV_SYMBOL_MAP[symbol];
+  if (!avSymbol || !apiKey) return null;
+
+  // Use GLOBAL_QUOTE for forex/crypto
+  const isCrypto = symbol.includes("BTC") || symbol.includes("ETH");
+  let url: string;
+  if (isCrypto) {
+    const base = avSymbol.replace("USD", "");
+    url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${base}&to_currency=USD&apikey=${apiKey}`;
+  } else {
+    const from = avSymbol.substring(0, 3);
+    const to = avSymbol.substring(3, 6);
+    url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${from}&to_currency=${to}&apikey=${apiKey}`;
+  }
+
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json["Note"] || json["Information"]) {
+      console.warn(`AlphaVantage rate-limited: ${json["Note"] || json["Information"]}`);
+      return null;
+    }
+    const rateData = json["Realtime Currency Exchange Rate"];
+    if (!rateData) return null;
+    const price = toNumber(rateData["5. Exchange Rate"]);
+    return price != null ? { price, provider: "alphavantage" } : null;
+  } catch (e) {
+    console.error("AlphaVantage price error:", e);
+    return null;
+  }
+}
+
+async function fetchCandlesAlphaVantage(symbol: string, tf: string, apiKey: string): Promise<CandleResult | null> {
+  const avSymbol = AV_SYMBOL_MAP[symbol];
+  if (!avSymbol || !apiKey) return null;
+
+  const isCrypto = symbol.includes("BTC") || symbol.includes("ETH");
+  const interval = AV_INTERVAL_MAP[tf] || "60min";
+
+  let url: string;
+  if (isCrypto) {
+    const base = avSymbol.replace("USD", "");
+    url = `https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol=${base}&market=USD&interval=${interval}&outputsize=full&apikey=${apiKey}`;
+  } else {
+    const from = avSymbol.substring(0, 3);
+    const to = avSymbol.substring(3, 6);
+    url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${from}&to_symbol=${to}&interval=${interval}&outputsize=full&apikey=${apiKey}`;
+  }
+
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json["Note"] || json["Information"]) {
+      console.warn(`AlphaVantage candles rate-limited: ${json["Note"] || json["Information"]}`);
+      return null;
+    }
+
+    const tsKey = Object.keys(json).find(k => k.startsWith("Time Series"));
+    if (!tsKey) return null;
+
+    const series = json[tsKey];
+    const entries = Object.entries(series).slice(0, 120);
+
+    const candles = entries.map(([dt, v]: [string, any]) => ({
+      datetime: dt,
+      open: toNumber(v["1. open"]) || 0,
+      high: toNumber(v["2. high"]) || 0,
+      low: toNumber(v["3. low"]) || 0,
+      close: toNumber(v["4. close"]) || 0,
+      volume: toNumber(v["5. volume"] || v["6. volume"]) || 0,
+    })).reverse();
+
+    return candles.length > 0 ? { candles, provider: "alphavantage" } : null;
+  } catch (e) {
+    console.error("AlphaVantage candles error:", e);
+    return null;
+  }
+}
+
+// --- Finnhub ---
+async function fetchPriceFinnhub(symbol: string, apiKey: string): Promise<PriceResult | null> {
+  const fhSymbol = FH_SYMBOL_MAP[symbol];
+  if (!fhSymbol || !apiKey) return null;
+
+  try {
+    const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(fhSymbol)}&token=${apiKey}`;
+    const res = await fetch(url);
+    if (res.status === 429) {
+      console.warn("Finnhub rate-limited");
+      return null;
+    }
+    const json = await res.json();
+    const price = toNumber(json?.c);
+    return price != null && price > 0 ? { price, provider: "finnhub" } : null;
+  } catch (e) {
+    console.error("Finnhub price error:", e);
+    return null;
+  }
+}
+
+async function fetchCandlesFinnhub(symbol: string, tf: string, apiKey: string): Promise<CandleResult | null> {
+  const fhSymbol = FH_SYMBOL_MAP[symbol];
+  if (!fhSymbol || !apiKey) return null;
+
+  const resolutionMap: Record<string, string> = { "1h": "60", "4h": "240" };
+  const resolution = resolutionMap[tf] || "60";
+  const now = Math.floor(Date.now() / 1000);
+  const from = now - 120 * 3600; // ~5 days of hourly data
+
+  try {
+    const url = `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(fhSymbol)}&resolution=${resolution}&from=${from}&to=${now}&token=${apiKey}`;
+    const res = await fetch(url);
+    if (res.status === 429) {
+      console.warn("Finnhub candles rate-limited");
+      return null;
+    }
+    const json = await res.json();
+    if (json.s !== "ok" || !json.c) return null;
+
+    const candles = json.t.map((t: number, i: number) => ({
+      datetime: new Date(t * 1000).toISOString(),
+      open: json.o[i],
+      high: json.h[i],
+      low: json.l[i],
+      close: json.c[i],
+      volume: json.v?.[i] || 0,
+    }));
+
+    return candles.length > 0 ? { candles, provider: "finnhub" } : null;
+  } catch (e) {
+    console.error("Finnhub candles error:", e);
+    return null;
+  }
+}
+
+// ============ FALLBACK CHAIN ============
+
+async function fetchPriceWithFallback(
+  symbol: string,
+  providerSymbol: string,
+  keys: { td: string; av: string; fh: string }
+): Promise<PriceResult | null> {
+  // 1. TwelveData
+  if (keys.td) {
+    const result = await fetchPriceTwelveData(providerSymbol, keys.td);
+    if (result) return result;
+  }
+  // 2. AlphaVantage
+  if (keys.av) {
+    const result = await fetchPriceAlphaVantage(symbol, keys.av);
+    if (result) return result;
+  }
+  // 3. Finnhub
+  if (keys.fh) {
+    const result = await fetchPriceFinnhub(symbol, keys.fh);
+    if (result) return result;
+  }
+  return null;
+}
+
+async function fetchCandlesWithFallback(
+  symbol: string,
+  providerSymbol: string,
+  tf: string,
+  keys: { td: string; av: string; fh: string }
+): Promise<CandleResult | null> {
+  if (keys.td) {
+    const result = await fetchCandlesTwelveData(providerSymbol, tf, keys.td);
+    if (result) return result;
+  }
+  if (keys.av) {
+    const result = await fetchCandlesAlphaVantage(symbol, tf, keys.av);
+    if (result) return result;
+  }
+  if (keys.fh) {
+    const result = await fetchCandlesFinnhub(symbol, tf, keys.fh);
+    if (result) return result;
+  }
+  return null;
+}
+
+// ============ MAIN ============
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -204,12 +435,16 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const tdApiKey = Deno.env.get("TWELVE_DATA_API_KEY") ?? "";
+  const avApiKey = Deno.env.get("ALPHAVANTAGE_API_KEY") ?? "";
+  const fhApiKey = Deno.env.get("FINNHUB_API_KEY") ?? "";
   const fcsApiKey = Deno.env.get("FCS_API_KEY") ?? "";
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  if (!tdApiKey) {
+  const keys = { td: tdApiKey, av: avApiKey, fh: fhApiKey };
+
+  if (!tdApiKey && !avApiKey && !fhApiKey) {
     return new Response(
-      JSON.stringify({ error: "TWELVE_DATA_API_KEY not configured" }),
+      JSON.stringify({ error: "No market data API keys configured" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
@@ -217,12 +452,12 @@ serve(async (req) => {
   try {
     let body: any = {};
     try { body = await req.json(); } catch {}
-    
+
     let symbolIndex = body.symbol_index;
     if (symbolIndex == null) {
       symbolIndex = new Date().getMinutes() % ALL_SYMBOLS.length;
     }
-    
+
     const symbol = ALL_SYMBOLS[symbolIndex % ALL_SYMBOLS.length];
     console.log(`Processing symbol: ${symbol} (index ${symbolIndex})`);
 
@@ -233,7 +468,7 @@ serve(async (req) => {
       .eq("is_active", true)
       .limit(1);
     if (assetsErr) throw assetsErr;
-    
+
     const asset = assets?.[0];
     if (!asset) {
       return new Response(
@@ -244,45 +479,44 @@ serve(async (req) => {
 
     const nowUtc = new Date();
 
-    // 1. Fetch price (1 API credit)
-    const priceUrl = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(asset.provider_symbol)}&apikey=${tdApiKey}`;
-    const priceRes = await fetch(priceUrl);
-    const priceJson = await priceRes.json();
-    const price = toNumber(priceJson?.price);
-    
+    // 1. Fetch price with fallback
+    const priceResult = await fetchPriceWithFallback(symbol, asset.provider_symbol, keys);
+    const price = priceResult?.price ?? null;
+    const priceProvider = priceResult?.provider ?? "none";
+
     if (price != null) {
       await supabase.from("market_quotes").insert({ asset_id: asset.id, price });
     }
 
-    // 2. Fetch candles for each timeframe
+    console.log(`Price for ${symbol}: ${price} (via ${priceProvider})`);
+
+    // 2. Fetch candles with fallback
     let candlesFetched = 0;
     let latestIndicators: any = null;
     let allCandles1h: any[] = [];
-    
+    let candleProvider = "none";
+
     for (const tf of TIMEFRAMES) {
       try {
-        const tsUrl = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(asset.provider_symbol)}&interval=${tf}&outputsize=120&format=JSON&apikey=${tdApiKey}`;
-        const tsRes = await fetch(tsUrl);
-        const tsJson = await tsRes.json();
-        
-        if (tsJson.status === "error") {
-          console.error(`Twelve Data error for ${symbol} ${tf}: ${tsJson.message}`);
+        const candleResult = await fetchCandlesWithFallback(symbol, asset.provider_symbol, tf, keys);
+        if (!candleResult) {
+          console.warn(`No candle data for ${symbol} ${tf} from any provider`);
           continue;
         }
 
-        const values = tsJson.values || [];
-        if (!values.length) continue;
+        candleProvider = candleResult.provider;
+        const candles = candleResult.candles;
 
-        const candleRows = values.map((v: any) => ({
+        const candleRows = candles.map((c: any) => ({
           asset_id: asset.id,
           timeframe: tf,
-          candle_time: new Date(v.datetime).toISOString(),
-          open: toNumber(v.open),
-          high: toNumber(v.high),
-          low: toNumber(v.low),
-          close: toNumber(v.close),
-          volume: toNumber(v.volume),
-          provider: "twelvedata",
+          candle_time: new Date(c.datetime).toISOString(),
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close,
+          volume: c.volume,
+          provider: candleProvider,
         }));
 
         await supabase
@@ -290,17 +524,6 @@ serve(async (req) => {
           .upsert(candleRows, { onConflict: "asset_id,timeframe,candle_time" });
 
         candlesFetched += candleRows.length;
-
-        const candles = values
-          .map((v: any) => ({
-            datetime: v.datetime,
-            open: toNumber(v.open) || 0,
-            high: toNumber(v.high) || 0,
-            low: toNumber(v.low) || 0,
-            close: toNumber(v.close) || 0,
-            volume: toNumber(v.volume) || 0,
-          }))
-          .reverse();
 
         if (tf === "1h") allCandles1h = candles;
 
@@ -312,16 +535,15 @@ serve(async (req) => {
         const { macd, signal: macdSignal } = calculateMACD(closes);
         const trend = detectTrend(ema20, ema50, rsi14);
 
-        // Support/Resistance from recent swing points
         const recent = candles.slice(-20);
         const lows = recent.map((c: any) => c.low).sort((a: number, b: number) => a - b);
         const highs = recent.map((c: any) => c.high).sort((a: number, b: number) => b - a);
-        
+
         const support1 = lows[0];
         const support2 = lows.length > 2 ? lows[2] : lows[0];
         const resistance1 = highs[0];
         const resistance2 = highs.length > 2 ? highs[2] : highs[0];
-        
+
         const latest = candles[candles.length - 1];
 
         await supabase.from("market_indicators").upsert({
@@ -351,7 +573,6 @@ serve(async (req) => {
     const { currentSession, nextSession, nextOpenAt } = getSessionInfo(nowUtc);
     const current4hBlock = get4HBlock(nowUtc);
 
-    // Day high/low from 1h candles (last 24h)
     let dayLow: number | null = null;
     let dayHigh: number | null = null;
     let h4High: number | null = null;
@@ -361,30 +582,25 @@ serve(async (req) => {
       const last24 = allCandles1h.slice(-24);
       dayLow = Math.min(...last24.map((c: any) => c.low));
       dayHigh = Math.max(...last24.map((c: any) => c.high));
-      
-      // Current 4H block high/low (last 4 hourly candles)
       const last4 = allCandles1h.slice(-4);
       h4High = Math.max(...last4.map((c: any) => c.high));
       h4Low = Math.min(...last4.map((c: any) => c.low));
     }
 
-    // Fetch economic calendar news
     const currencies = SYMBOL_CURRENCIES[symbol] || ["USD"];
     const newsEvent = await fetchNextHighImpactEvent(fcsApiKey, currencies);
-    
+
     let minutesToNews: number | null = null;
     if (newsEvent) {
       minutesToNews = (newsEvent.time.getTime() - nowUtc.getTime()) / 60000;
     }
 
-    // Build market tip
     const s1 = latestIndicators?.support1 ?? dayLow ?? 0;
     const r1 = latestIndicators?.resistance1 ?? dayHigh ?? 0;
     const tip = price != null
       ? buildMarketTip(price, s1, r1, latestIndicators?.atr14, latestIndicators?.trend || "neutral", minutesToNews)
       : "Awaiting price data.";
 
-    // Upsert card metrics
     const metricsRow = {
       asset_id: asset.id,
       timeframe: "15min",
@@ -410,14 +626,16 @@ serve(async (req) => {
 
     await supabase.from("market_card_metrics").insert(metricsRow);
 
-    console.log(`Done: ${symbol} - ${candlesFetched} candles, price=${price}, session=${currentSession}`);
+    console.log(`Done: ${symbol} - ${candlesFetched} candles (via ${candleProvider}), price=${price} (via ${priceProvider}), session=${currentSession}`);
 
     return new Response(
       JSON.stringify({
         success: true,
         symbol,
         price_saved: price != null,
+        price_provider: priceProvider,
         candles_fetched: candlesFetched,
+        candle_provider: candleProvider,
         session: currentSession,
         news: newsEvent?.title || null,
       }),
