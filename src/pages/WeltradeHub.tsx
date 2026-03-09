@@ -19,7 +19,7 @@ const WeltradeHub = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Weltrade SyntX Hub – PainX, GainX & TrendX Charts & Signals"
+        title="Weltrade Hub – PainX, GainX & TrendX Charts & Signals"
         description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Hauza Sniper strategies, signals, tips & community for Weltrade synthetic indices."
       />
       <Header />
