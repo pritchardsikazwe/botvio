@@ -41,6 +41,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
