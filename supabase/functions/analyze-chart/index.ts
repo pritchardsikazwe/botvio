@@ -56,18 +56,10 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   let userId: string | null = null;
+  let isGuest = false;
 
   try {
     const authHeader = req.headers.get("Authorization") || "";
-    if (!authHeader.startsWith("Bearer ")) {
-      await logError(supabase, "analyze-chart", null, ERROR_CODES.UNAUTHORIZED, "Missing auth header", null, 401);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized", error_code: ERROR_CODES.UNAUTHORIZED }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const token = authHeader.replace("Bearer ", "");
     const { imageUrl, symbol, timeframe, analysisType, jobId } = await req.json();
 
     if (!imageUrl) {
@@ -78,16 +70,22 @@ serve(async (req) => {
       );
     }
 
-    // Validate user via getUser
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData?.user?.id) {
-      await logError(supabase, "analyze-chart", null, ERROR_CODES.UNAUTHORIZED, "Invalid token", null, 401);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized", error_code: ERROR_CODES.UNAUTHORIZED }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Try to authenticate - guests are allowed
+    if (authHeader.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      try {
+        const { data: userData, error: userError } = await supabase.auth.getUser(token);
+        if (!userError && userData?.user?.id) {
+          userId = userData.user.id;
+        } else {
+          isGuest = true;
+        }
+      } catch {
+        isGuest = true;
+      }
+    } else {
+      isGuest = true;
     }
-    userId = userData.user.id;
 
     // If jobId provided, update job status to running
     if (jobId) {
@@ -97,46 +95,49 @@ serve(async (req) => {
         .eq("id", jobId);
     }
 
-    // Check subscription
-    const { data: subscription } = await supabase
-      .from("user_plan_subscriptions")
-      .select("pricing_plan_id, pricing_plans(code)")
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .maybeSingle();
-
-    const planCode = (subscription?.pricing_plans as any)?.code;
-    const isPremium = planCode && planCode !== "free" && planCode !== "starter";
-
-    // Check daily limit for non-premium
-    if (!isPremium) {
-      const today = new Date().toISOString().split("T")[0];
-      const { count } = await supabase
-        .from("chart_analyses")
-        .select("*", { count: "exact", head: true })
+    // Check subscription & daily limits (skip for guests - they get unlimited)
+    let isPremium = false;
+    if (userId) {
+      const { data: subscription } = await supabase
+        .from("user_plan_subscriptions")
+        .select("pricing_plan_id, pricing_plans(code)")
         .eq("user_id", userId)
-        .gte("created_at", `${today}T00:00:00Z`);
+        .eq("status", "active")
+        .maybeSingle();
 
-      if ((count || 0) >= 3) {
-        if (jobId) {
-          await supabase
-            .from("analysis_jobs")
-            .update({ 
-              status: "failed", 
+      const planCode = (subscription?.pricing_plans as any)?.code;
+      isPremium = !!(planCode && planCode !== "free" && planCode !== "starter");
+
+      // Check daily limit for non-premium authenticated users
+      if (!isPremium) {
+        const today = new Date().toISOString().split("T")[0];
+        const { count } = await supabase
+          .from("chart_analyses")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .gte("created_at", `${today}T00:00:00Z`);
+
+        if ((count || 0) >= 3) {
+          if (jobId) {
+            await supabase
+              .from("analysis_jobs")
+              .update({ 
+                status: "failed", 
+                error_code: ERROR_CODES.DAILY_LIMIT,
+                error_message: "Daily limit reached. Upgrade to Premium for unlimited analyses.",
+                completed_at: new Date().toISOString()
+              })
+              .eq("id", jobId);
+          }
+          return new Response(
+            JSON.stringify({ 
+              error: "Daily limit reached", 
               error_code: ERROR_CODES.DAILY_LIMIT,
-              error_message: "Daily limit reached. Upgrade to Premium for unlimited analyses.",
-              completed_at: new Date().toISOString()
-            })
-            .eq("id", jobId);
+              message: "Free users can only analyze 3 charts per day. Upgrade to Premium for unlimited analyses."
+            }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
-        return new Response(
-          JSON.stringify({ 
-            error: "Daily limit reached", 
-            error_code: ERROR_CODES.DAILY_LIMIT,
-            message: "Free users can only analyze 3 charts per day. Upgrade to Premium for unlimited analyses."
-          }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
       }
     }
 
@@ -441,22 +442,24 @@ Keep the response structured and actionable.`;
       analyzed_at: new Date().toISOString(),
     };
 
-    // Save to chart_analyses - use detected instrument if no symbol was provided
-    const { error: saveError } = await supabase
-      .from("chart_analyses")
-      .insert({
-        user_id: userId,
-        image_url: imageUrl,
-        symbol: symbol || detectedInstrument || null,
-        timeframe: timeframe || null,
-        analysis_result: analysisResult,
-        ai_response: analysisText,
-        is_premium_analysis: isPremium,
-      });
+    // Save to chart_analyses (only for authenticated users)
+    if (userId) {
+      const { error: saveError } = await supabase
+        .from("chart_analyses")
+        .insert({
+          user_id: userId,
+          image_url: imageUrl,
+          symbol: symbol || detectedInstrument || null,
+          timeframe: timeframe || null,
+          analysis_result: analysisResult,
+          ai_response: analysisText,
+          is_premium_analysis: isPremium,
+        });
 
-    if (saveError) {
-      console.error("Error saving analysis:", saveError);
-      await logError(supabase, "analyze-chart", userId, ERROR_CODES.DB_ERROR, saveError.message, { symbol }, 500);
+      if (saveError) {
+        console.error("Error saving analysis:", saveError);
+        await logError(supabase, "analyze-chart", userId, ERROR_CODES.DB_ERROR, saveError.message, { symbol }, 500);
+      }
     }
 
     // Update job if provided
@@ -472,13 +475,20 @@ Keep the response structured and actionable.`;
         .eq("id", jobId);
     }
 
+    let remainingToday: string | number = "unlimited";
+    if (userId && !isPremium) {
+      const { count } = await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`);
+      remainingToday = Math.max(0, 3 - (count || 0));
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         analysis: analysisText,
         structured: analysisResult,
         is_premium: isPremium,
-        remaining_today: isPremium ? "unlimited" : Math.max(0, 3 - ((await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`)).count || 0) - 1),
+        is_guest: isGuest,
+        remaining_today: remainingToday,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
