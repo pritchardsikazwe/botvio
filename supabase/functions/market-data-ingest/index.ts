@@ -546,7 +546,7 @@ async function fetchCandlesFinnhub(symbol: string, tf: string, apiKey: string): 
 async function fetchPriceWithFallback(
   symbol: string,
   providerSymbol: string,
-  keys: { td: string; av: string; fh: string }
+  keys: { td: string; av: string; fh: string; derivAppId: string }
 ): Promise<PriceResult | null> {
   // 1. TwelveData
   if (keys.td) {
@@ -563,6 +563,10 @@ async function fetchPriceWithFallback(
     const result = await fetchPriceFinnhub(symbol, keys.fh);
     if (result) return result;
   }
+  // 4. Deriv
+  const derivResult = await fetchPriceDeriv(symbol, keys.derivAppId);
+  if (derivResult) return derivResult;
+
   return null;
 }
 
@@ -570,7 +574,7 @@ async function fetchCandlesWithFallback(
   symbol: string,
   providerSymbol: string,
   tf: string,
-  keys: { td: string; av: string; fh: string }
+  keys: { td: string; av: string; fh: string; derivAppId: string }
 ): Promise<CandleResult | null> {
   if (keys.td) {
     const result = await fetchCandlesTwelveData(providerSymbol, tf, keys.td);
@@ -584,6 +588,10 @@ async function fetchCandlesWithFallback(
     const result = await fetchCandlesFinnhub(symbol, tf, keys.fh);
     if (result) return result;
   }
+
+  const derivResult = await fetchCandlesDeriv(symbol, tf, keys.derivAppId);
+  if (derivResult) return derivResult;
+
   return null;
 }
 
