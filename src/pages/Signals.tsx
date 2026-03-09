@@ -5,6 +5,7 @@ import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals } from "@/hooks/useManualSignals";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,6 +92,7 @@ const Signals = () => {
   });
 
   const isPremium = useHasProductType("signal_pack");
+  const { permission, requestPermission } = usePushNotifications();
 
   useEffect(() => {
     const channel = supabase
@@ -364,7 +366,9 @@ const Signals = () => {
                       <p className="text-sm text-muted-foreground">Get instant notifications when new signals are posted</p>
                     </div>
                   </div>
-                  <Button variant="gold">Enable Notifications</Button>
+                  <Button variant="gold" onClick={requestPermission} disabled={permission === "granted"}>
+                    {permission === "granted" ? "✓ Notifications On" : "Enable Notifications"}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
