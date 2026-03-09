@@ -35,7 +35,7 @@ const WeltradeHub = () => {
                 <Badge variant="outline" className="border-success/40 text-success text-xs">24/5 Market</Badge>
               </div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
-                Weltrade SyntX <span className="text-warning">Hub</span>
+                Weltrade <span className="text-warning">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-lg">
                 PainX, GainX, TrendX & Volatility indices — charts, Hauza strategies, signals & community all in one place.
