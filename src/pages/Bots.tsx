@@ -161,14 +161,18 @@ const Bots = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="AI Trading Bots – Automate Deriv & Binance Strategies"
+        description="Deploy AI-powered trading bots on Deriv and Binance. Automate Boom/Crash, Volatility indices, Digits, and crypto strategies with risk management and 24/7 execution."
+      />
       <Header />
       
       <main className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Trading Bots</h1>
+            <h1 className="text-3xl font-bold mb-2">AI Trading Bots</h1>
             <p className="text-muted-foreground">
-              Automated trading strategies for Deriv and Binance
+              Automated trading strategies for Deriv synthetic indices, forex & Binance crypto markets
             </p>
           </div>
           <div className="text-right text-sm text-muted-foreground">

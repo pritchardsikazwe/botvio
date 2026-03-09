@@ -107,6 +107,10 @@ const Providers = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Copy Trading – Follow Top Traders on Deriv & Exness"
+        description="Subscribe to verified signal providers and automatically copy their trades on Deriv and Exness. Choose from top-performing gold, forex, and synthetic indices traders with real track records."
+      />
       <Header />
       
       <main className="container mx-auto px-4 py-6">
@@ -114,7 +118,7 @@ const Providers = () => {
           <div>
             <h1 className="text-3xl font-bold mb-2">Copy Trading Providers</h1>
             <p className="text-muted-foreground">
-              Subscribe to top traders and automatically copy their trades
+              Subscribe to top traders and automatically copy their winning trades on Deriv & Exness
             </p>
           </div>
           

@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { SEOHead } from "@/components/seo/SEOHead";
 
 // Campaign Link Form Component
 const CampaignLinkForm = ({ onSuccess }: { onSuccess: () => void }) => {

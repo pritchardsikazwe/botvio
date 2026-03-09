@@ -58,12 +58,13 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Trading Dashboard" description="Monitor your active trading bots, copy trading subscriptions, and portfolio performance across Deriv and Binance in real time." noIndex />
       <Header />
       
       <main className="container mx-auto px-4 py-6">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back!</h1>
+          <h1 className="text-3xl font-bold mb-2">Trading Dashboard</h1>
           <p className="text-muted-foreground">
             Manage your trading bots and copy trading subscriptions
           </p>
