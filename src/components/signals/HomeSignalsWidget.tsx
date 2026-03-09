@@ -272,6 +272,23 @@ export const HomeSignalsWidget = () => {
                     </Badge>
                   )}
                 </div>
+
+                  {/* Broker CTA */}
+                  {(() => {
+                    const broker = getBrokerForSymbol(signal.symbol);
+                    return (
+                      <a href={broker.link} target="_blank" rel="noopener noreferrer" className="block">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`w-full font-bold text-xs mt-1 ${broker.color}`}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1.5" />
+                          {broker.name}
+                        </Button>
+                      </a>
+                    );
+                  })()}
               </CardContent>
             </Card>
           );
