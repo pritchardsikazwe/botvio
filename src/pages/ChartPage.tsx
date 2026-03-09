@@ -56,6 +56,8 @@ const ChartPage = () => {
     enabled: !!displaySymbol,
   });
 
+  const LIVE_REFETCH_MS = 30_000;
+
   const { data: quote } = useQuery({
     queryKey: ["chart-quote", asset?.id],
     queryFn: async () => {
@@ -70,7 +72,7 @@ const ChartPage = () => {
       return data;
     },
     enabled: !!asset,
-    refetchInterval: 30000,
+    refetchInterval: LIVE_REFETCH_MS,
   });
 
   const { data: signal } = useQuery({
@@ -87,6 +89,7 @@ const ChartPage = () => {
       return data;
     },
     enabled: !!asset,
+    refetchInterval: LIVE_REFETCH_MS,
   });
 
   const { data: metrics } = useQuery({
@@ -103,6 +106,7 @@ const ChartPage = () => {
       return data;
     },
     enabled: !!asset,
+    refetchInterval: LIVE_REFETCH_MS,
   });
 
   const { data: indicator } = useQuery({
@@ -120,6 +124,7 @@ const ChartPage = () => {
       return data;
     },
     enabled: !!asset,
+    refetchInterval: LIVE_REFETCH_MS,
   });
 
   const { data: candles } = useQuery({
@@ -137,7 +142,8 @@ const ChartPage = () => {
       return data || [];
     },
     enabled: !!asset,
-    staleTime: 60000,
+    staleTime: 15_000,
+    refetchInterval: LIVE_REFETCH_MS,
   });
 
   const isLoading = !asset;
