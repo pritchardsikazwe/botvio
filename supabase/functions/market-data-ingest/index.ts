@@ -374,43 +374,53 @@ function aggregateCandlesTo4H(candles: any[]): any[] {
     });
 }
 
-async function requestDeriv(payload: Record<string, unknown>, appId: string): Promise<any | null> {
-  return await new Promise((resolve) => {
-    const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${appId}`);
-    const timeout = setTimeout(() => {
-      try { ws.close(); } catch {}
-      resolve(null);
-    }, 7000);
+async function requestDeriv(payload: Record<string, unknown>, preferredAppId: string): Promise<any | null> {
+  const appIds = Array.from(new Set([preferredAppId, "124208", "99139"].filter(Boolean)));
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify(payload));
-    };
+  for (const appId of appIds) {
+    const result = await new Promise<any | null>((resolve) => {
+      const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${appId}`);
+      const timeout = setTimeout(() => {
+        try { ws.close(); } catch {}
+        resolve(null);
+      }, 7000);
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data as string);
-        if (data?.error) {
+      ws.onopen = () => {
+        ws.send(JSON.stringify(payload));
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data as string);
+          clearTimeout(timeout);
+          try { ws.close(); } catch {}
+          if (data?.error) {
+            resolve(null);
+            return;
+          }
+          resolve(data);
+        } catch {
           clearTimeout(timeout);
           try { ws.close(); } catch {}
           resolve(null);
-          return;
         }
-        clearTimeout(timeout);
-        try { ws.close(); } catch {}
-        resolve(data);
-      } catch {
+      };
+
+      ws.onerror = () => {
         clearTimeout(timeout);
         try { ws.close(); } catch {}
         resolve(null);
-      }
-    };
+      };
 
-    ws.onerror = () => {
-      clearTimeout(timeout);
-      try { ws.close(); } catch {}
-      resolve(null);
-    };
-  });
+      ws.onclose = () => {
+        clearTimeout(timeout);
+      };
+    });
+
+    if (result) return result;
+  }
+
+  return null;
 }
 
 async function fetchPriceDeriv(symbol: string, appId: string): Promise<PriceResult | null> {
