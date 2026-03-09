@@ -46,7 +46,7 @@ export function SyntxSignalsSection() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {isBuy ? <ArrowUpRight className="h-5 w-5 text-success" /> : <ArrowDownRight className="h-5 w-5 text-destructive" />}
-                        <span className="font-bold text-sm text-foreground">{sig.pair}</span>
+                        <span className="font-bold text-sm text-foreground">{sig.symbol}</span>
                       </div>
                       <Badge className={isBuy ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"}>
                         {sig.direction?.toUpperCase()}
