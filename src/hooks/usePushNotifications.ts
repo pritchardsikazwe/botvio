@@ -40,9 +40,8 @@ export function usePushNotifications() {
             reg.showNotification(title, {
               icon: "/icon-192.png",
               badge: "/favicon.png",
-              vibrate: [200, 100, 200],
               ...options,
-            });
+            } as any);
           });
         } else {
           new Notification(title, {
