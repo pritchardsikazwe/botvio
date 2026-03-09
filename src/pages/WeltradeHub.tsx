@@ -21,6 +21,7 @@ const WeltradeHub = () => {
       <SEOHead
         title="Weltrade Hub – PainX, GainX & TrendX Charts & Signals"
         description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Hauza Sniper strategies, signals, tips & community for Weltrade synthetic indices."
+        ogImage="https://botvio.live/icon-512.png"
       />
       <Header />
 
@@ -49,20 +50,20 @@ const WeltradeHub = () => {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Strategy & Tips — Always visible outside tabs */}
+        <section className="space-y-6">
+          <SyntxHauzaStrategy />
+          <SyntxTipsSection />
+        </section>
+
+        {/* Tabs for Charts, Signals, Community */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-5 bg-card border border-border/50 h-12">
+          <TabsList className="w-full grid grid-cols-3 bg-card border border-border/50 h-12">
             <TabsTrigger value="charts" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
               <BarChart3 className="h-4 w-4" /> Charts
             </TabsTrigger>
             <TabsTrigger value="signals" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
               <Signal className="h-4 w-4" /> Signals
-            </TabsTrigger>
-            <TabsTrigger value="strategy" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
-              <Crosshair className="h-4 w-4" /> Strategy
-            </TabsTrigger>
-            <TabsTrigger value="tips" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
-              <Lightbulb className="h-4 w-4" /> Tips
             </TabsTrigger>
             <TabsTrigger value="community" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
               <Users className="h-4 w-4" /> Community
@@ -74,12 +75,6 @@ const WeltradeHub = () => {
           </TabsContent>
           <TabsContent value="signals" className="mt-6">
             <SyntxSignalsSection />
-          </TabsContent>
-          <TabsContent value="strategy" className="mt-6">
-            <SyntxHauzaStrategy />
-          </TabsContent>
-          <TabsContent value="tips" className="mt-6">
-            <SyntxTipsSection />
           </TabsContent>
           <TabsContent value="community" className="mt-6">
             <SyntxCommunitySection />
