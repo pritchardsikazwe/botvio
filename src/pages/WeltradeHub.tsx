@@ -19,7 +19,7 @@ const WeltradeHub = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Weltrade SyntX Hub – PainX, GainX & TrendX Charts & Signals"
+        title="Weltrade Hub – PainX, GainX & TrendX Charts & Signals"
         description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Hauza Sniper strategies, signals, tips & community for Weltrade synthetic indices."
       />
       <Header />
@@ -35,7 +35,7 @@ const WeltradeHub = () => {
                 <Badge variant="outline" className="border-success/40 text-success text-xs">24/5 Market</Badge>
               </div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
-                Weltrade SyntX <span className="text-warning">Hub</span>
+                Weltrade <span className="text-warning">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-lg">
                 PainX, GainX, TrendX & Volatility indices — charts, Hauza strategies, signals & community all in one place.
@@ -43,7 +43,7 @@ const WeltradeHub = () => {
             </div>
             <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
               <Button variant="gold" className="font-bold">
-                <ExternalLink className="h-4 w-4 mr-2" /> Open Weltrade Account
+                <ExternalLink className="h-4 w-4 mr-2" /> Open Weltrade
               </Button>
             </a>
           </div>

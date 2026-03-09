@@ -112,7 +112,7 @@ const Index = () => {
             </Link>
             <Link to="/weltrade" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
-                <Activity className="h-4 w-4" /> SyntX Hub
+                <Activity className="h-4 w-4" /> Weltrade Hub
               </Button>
             </Link>
             <Link to="/chart/XAUUSD" className="block">
