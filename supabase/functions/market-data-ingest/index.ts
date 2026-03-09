@@ -52,6 +52,17 @@ const FH_SYMBOL_MAP: Record<string, string> = {
   "AUD/USD": "OANDA:AUD_USD",
 };
 
+// Deriv symbol mapping (reliable fallback)
+const DERIV_SYMBOL_MAP: Record<string, string> = {
+  "XAU/USD": "frxXAUUSD",
+  "XAG/USD": "frxXAGUSD",
+  "BTC/USD": "cryBTCUSD",
+  "GBP/USD": "frxGBPUSD",
+  "USD/JPY": "frxUSDJPY",
+  "EUR/USD": "frxEURUSD",
+  "AUD/USD": "frxAUDUSD",
+};
+
 // AlphaVantage timeframe mapping
 const AV_INTERVAL_MAP: Record<string, string> = {
   "1h": "60min",
@@ -324,20 +335,176 @@ async function fetchCandlesAlphaVantage(symbol: string, tf: string, apiKey: stri
 }
 
 // --- Finnhub ---
+type FinnhubMarket = "forex" | "crypto";
+
+function getFinnhubMarket(symbol: string): FinnhubMarket | null {
+  const fhSymbol = FH_SYMBOL_MAP[symbol] || "";
+  if (fhSymbol.startsWith("OANDA:")) return "forex";
+  if (fhSymbol.startsWith("BINANCE:")) return "crypto";
+  return null;
+}
+
+function aggregateCandlesTo4H(candles: any[]): any[] {
+  if (!candles.length) return [];
+  const bucketMs = 4 * 60 * 60 * 1000;
+  const buckets = new Map<number, any[]>();
+
+  for (const candle of candles) {
+    const ts = new Date(candle.datetime).getTime();
+    if (!Number.isFinite(ts)) continue;
+    const bucketStart = Math.floor(ts / bucketMs) * bucketMs;
+    if (!buckets.has(bucketStart)) buckets.set(bucketStart, []);
+    buckets.get(bucketStart)!.push(candle);
+  }
+
+  return Array.from(buckets.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([bucketStart, list]) => {
+      const sorted = list.sort(
+        (a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+      );
+      return {
+        datetime: new Date(bucketStart).toISOString(),
+        open: sorted[0].open,
+        high: Math.max(...sorted.map((c) => c.high)),
+        low: Math.min(...sorted.map((c) => c.low)),
+        close: sorted[sorted.length - 1].close,
+        volume: sorted.reduce((sum, c) => sum + (toNumber(c.volume) || 0), 0),
+      };
+    });
+}
+
+async function requestDeriv(payload: Record<string, unknown>, preferredAppId: string): Promise<any | null> {
+  const appIds = Array.from(new Set([preferredAppId, "124208", "99139"].filter(Boolean)));
+
+  for (const appId of appIds) {
+    const result = await new Promise<any | null>((resolve) => {
+      const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${appId}`);
+      const timeout = setTimeout(() => {
+        try { ws.close(); } catch {}
+        resolve(null);
+      }, 7000);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify(payload));
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data as string);
+          clearTimeout(timeout);
+          try { ws.close(); } catch {}
+          if (data?.error) {
+            resolve(null);
+            return;
+          }
+          resolve(data);
+        } catch {
+          clearTimeout(timeout);
+          try { ws.close(); } catch {}
+          resolve(null);
+        }
+      };
+
+      ws.onerror = () => {
+        clearTimeout(timeout);
+        try { ws.close(); } catch {}
+        resolve(null);
+      };
+
+      ws.onclose = () => {
+        clearTimeout(timeout);
+      };
+    });
+
+    if (result) return result;
+  }
+
+  return null;
+}
+
+async function fetchPriceDeriv(symbol: string, appId: string): Promise<PriceResult | null> {
+  const derivSymbol = DERIV_SYMBOL_MAP[symbol];
+  if (!derivSymbol) return null;
+
+  const response = await requestDeriv({
+    ticks_history: derivSymbol,
+    count: 1,
+    end: "latest",
+    style: "ticks",
+  }, appId);
+
+  const price = toNumber(response?.history?.prices?.[0]);
+  return price != null ? { price, provider: "deriv" } : null;
+}
+
+async function fetchCandlesDeriv(symbol: string, tf: string, appId: string): Promise<CandleResult | null> {
+  const derivSymbol = DERIV_SYMBOL_MAP[symbol];
+  if (!derivSymbol) return null;
+
+  const response = await requestDeriv({
+    ticks_history: derivSymbol,
+    style: "candles",
+    granularity: 3600,
+    count: 240,
+    end: "latest",
+  }, appId);
+
+  const baseCandles = Array.isArray(response?.candles)
+    ? response.candles.map((c: any) => ({
+        datetime: new Date(Number(c.epoch) * 1000).toISOString(),
+        open: toNumber(c.open) || 0,
+        high: toNumber(c.high) || 0,
+        low: toNumber(c.low) || 0,
+        close: toNumber(c.close) || 0,
+        volume: toNumber(c.volume) || 0,
+      }))
+    : [];
+
+  if (!baseCandles.length) return null;
+  const candles = tf === "4h" ? aggregateCandlesTo4H(baseCandles) : baseCandles;
+  return candles.length ? { candles, provider: "deriv" } : null;
+}
+
 async function fetchPriceFinnhub(symbol: string, apiKey: string): Promise<PriceResult | null> {
   const fhSymbol = FH_SYMBOL_MAP[symbol];
-  if (!fhSymbol || !apiKey) return null;
+  const market = getFinnhubMarket(symbol);
+  if (!fhSymbol || !apiKey || !market) return null;
 
   try {
-    const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(fhSymbol)}&token=${apiKey}`;
-    const res = await fetch(url);
-    if (res.status === 429) {
+    // 1) Fast path: quote endpoint (works for many symbols)
+    const quoteUrl = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(fhSymbol)}&token=${apiKey}`;
+    const quoteRes = await fetch(quoteUrl);
+    if (quoteRes.status !== 429) {
+      const quoteJson = await quoteRes.json();
+      const quotePrice = toNumber(quoteJson?.c);
+      if (quotePrice != null && quotePrice > 0) {
+        return { price: quotePrice, provider: "finnhub" };
+      }
+    } else {
       console.warn("Finnhub rate-limited");
       return null;
     }
-    const json = await res.json();
-    const price = toNumber(json?.c);
-    return price != null && price > 0 ? { price, provider: "finnhub" } : null;
+
+    // 2) Fallback: derive latest price from candle close
+    const now = Math.floor(Date.now() / 1000);
+    const from = now - 24 * 3600;
+    const candleUrl = `https://finnhub.io/api/v1/${market}/candle?symbol=${encodeURIComponent(fhSymbol)}&resolution=60&from=${from}&to=${now}&token=${apiKey}`;
+    const candleRes = await fetch(candleUrl);
+    if (candleRes.status === 429) {
+      console.warn("Finnhub candles rate-limited while resolving price");
+      return null;
+    }
+
+    const candleJson = await candleRes.json();
+    if (candleJson?.s !== "ok" || !Array.isArray(candleJson?.c) || candleJson.c.length === 0) {
+      return null;
+    }
+
+    const latestClose = toNumber(candleJson.c[candleJson.c.length - 1]);
+    return latestClose != null && latestClose > 0
+      ? { price: latestClose, provider: "finnhub" }
+      : null;
   } catch (e) {
     console.error("Finnhub price error:", e);
     return null;
@@ -346,32 +513,37 @@ async function fetchPriceFinnhub(symbol: string, apiKey: string): Promise<PriceR
 
 async function fetchCandlesFinnhub(symbol: string, tf: string, apiKey: string): Promise<CandleResult | null> {
   const fhSymbol = FH_SYMBOL_MAP[symbol];
-  if (!fhSymbol || !apiKey) return null;
+  const market = getFinnhubMarket(symbol);
+  if (!fhSymbol || !apiKey || !market) return null;
 
-  const resolutionMap: Record<string, string> = { "1h": "60", "4h": "240" };
-  const resolution = resolutionMap[tf] || "60";
+  // Finnhub supports 1, 5, 15, 30, 60, D, W, M. Use 60 and aggregate to 4h.
+  const resolution = "60";
   const now = Math.floor(Date.now() / 1000);
-  const from = now - 120 * 3600; // ~5 days of hourly data
+  const from = now - 14 * 24 * 3600; // 14 days hourly history
 
   try {
-    const url = `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(fhSymbol)}&resolution=${resolution}&from=${from}&to=${now}&token=${apiKey}`;
+    const url = `https://finnhub.io/api/v1/${market}/candle?symbol=${encodeURIComponent(fhSymbol)}&resolution=${resolution}&from=${from}&to=${now}&token=${apiKey}`;
     const res = await fetch(url);
     if (res.status === 429) {
       console.warn("Finnhub candles rate-limited");
       return null;
     }
-    const json = await res.json();
-    if (json.s !== "ok" || !json.c) return null;
 
-    const candles = json.t.map((t: number, i: number) => ({
+    const json = await res.json();
+    if (json?.s !== "ok" || !Array.isArray(json?.t) || !Array.isArray(json?.c) || json.c.length === 0) {
+      return null;
+    }
+
+    const candles1h = json.t.map((t: number, i: number) => ({
       datetime: new Date(t * 1000).toISOString(),
-      open: json.o[i],
-      high: json.h[i],
-      low: json.l[i],
-      close: json.c[i],
-      volume: json.v?.[i] || 0,
+      open: toNumber(json.o?.[i]) || 0,
+      high: toNumber(json.h?.[i]) || 0,
+      low: toNumber(json.l?.[i]) || 0,
+      close: toNumber(json.c?.[i]) || 0,
+      volume: toNumber(json.v?.[i]) || 0,
     }));
 
+    const candles = tf === "4h" ? aggregateCandlesTo4H(candles1h) : candles1h;
     return candles.length > 0 ? { candles, provider: "finnhub" } : null;
   } catch (e) {
     console.error("Finnhub candles error:", e);
@@ -384,7 +556,7 @@ async function fetchCandlesFinnhub(symbol: string, tf: string, apiKey: string): 
 async function fetchPriceWithFallback(
   symbol: string,
   providerSymbol: string,
-  keys: { td: string; av: string; fh: string }
+  keys: { td: string; av: string; fh: string; derivAppId: string }
 ): Promise<PriceResult | null> {
   // 1. TwelveData
   if (keys.td) {
@@ -401,6 +573,10 @@ async function fetchPriceWithFallback(
     const result = await fetchPriceFinnhub(symbol, keys.fh);
     if (result) return result;
   }
+  // 4. Deriv
+  const derivResult = await fetchPriceDeriv(symbol, keys.derivAppId);
+  if (derivResult) return derivResult;
+
   return null;
 }
 
@@ -408,7 +584,7 @@ async function fetchCandlesWithFallback(
   symbol: string,
   providerSymbol: string,
   tf: string,
-  keys: { td: string; av: string; fh: string }
+  keys: { td: string; av: string; fh: string; derivAppId: string }
 ): Promise<CandleResult | null> {
   if (keys.td) {
     const result = await fetchCandlesTwelveData(providerSymbol, tf, keys.td);
@@ -422,6 +598,10 @@ async function fetchCandlesWithFallback(
     const result = await fetchCandlesFinnhub(symbol, tf, keys.fh);
     if (result) return result;
   }
+
+  const derivResult = await fetchCandlesDeriv(symbol, tf, keys.derivAppId);
+  if (derivResult) return derivResult;
+
   return null;
 }
 
@@ -438,13 +618,14 @@ serve(async (req) => {
   const avApiKey = Deno.env.get("ALPHAVANTAGE_API_KEY") ?? "";
   const fhApiKey = Deno.env.get("FINNHUB_API_KEY") ?? "";
   const fcsApiKey = Deno.env.get("FCS_API_KEY") ?? "";
+  const derivAppId = Deno.env.get("DERIV_APP_ID") ?? "1089";
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const keys = { td: tdApiKey, av: avApiKey, fh: fhApiKey };
+  const keys = { td: tdApiKey, av: avApiKey, fh: fhApiKey, derivAppId };
 
-  if (!tdApiKey && !avApiKey && !fhApiKey) {
+  if (!tdApiKey && !avApiKey && !fhApiKey && !derivAppId) {
     return new Response(
-      JSON.stringify({ error: "No market data API keys configured" }),
+      JSON.stringify({ error: "No market data providers configured" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
