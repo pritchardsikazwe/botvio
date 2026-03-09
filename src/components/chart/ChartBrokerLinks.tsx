@@ -124,7 +124,7 @@ export function ChartBrokerLinks({ symbol }: ChartBrokerLinksProps) {
                 Lowest trading fees starting at 0.1%
               </li>
             </ul>
-            <a href={`https://www.binance.com/en/trade/${binancePair}?ref=CPA_0047GJ3KHU`} target="_blank" rel="noopener noreferrer">
+            <a href="https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" target="_blank" rel="noopener noreferrer">
               <Button size="sm" className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
                 Trade {binancePair} on Binance →
               </Button>
