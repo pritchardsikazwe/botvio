@@ -52,6 +52,17 @@ const FH_SYMBOL_MAP: Record<string, string> = {
   "AUD/USD": "OANDA:AUD_USD",
 };
 
+// Deriv symbol mapping (reliable fallback)
+const DERIV_SYMBOL_MAP: Record<string, string> = {
+  "XAU/USD": "frxXAUUSD",
+  "XAG/USD": "frxXAGUSD",
+  "BTC/USD": "cryBTCUSD",
+  "GBP/USD": "frxGBPUSD",
+  "USD/JPY": "frxUSDJPY",
+  "EUR/USD": "frxEURUSD",
+  "AUD/USD": "frxAUDUSD",
+};
+
 // AlphaVantage timeframe mapping
 const AV_INTERVAL_MAP: Record<string, string> = {
   "1h": "60min",
