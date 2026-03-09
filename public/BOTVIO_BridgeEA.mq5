@@ -142,8 +142,8 @@ bool RegisterTerminal()
    char result[];
    string resultHeaders;
    
-   StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8);
-   ArrayResize(data, ArraySize(data) - 1); // Remove null terminator added by WHOLE_ARRAY
+   int len = StringToCharArray(body, data, 0, -1, CP_UTF8);
+   if(len > 0) ArrayResize(data, len - 1);
    
    int res = WebRequest("POST", url, headers, 5000, data, result, resultHeaders);
    
@@ -177,8 +177,8 @@ void SendHeartbeat()
    char result[];
    string resultHeaders;
    
-   StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8);
-   ArrayResize(data, ArraySize(data) - 1);
+   int len = StringToCharArray(body, data, 0, -1, CP_UTF8);
+   if(len > 0) ArrayResize(data, len - 1);
    
    int res = WebRequest("POST", url, headers, 3000, data, result, resultHeaders);
    
@@ -233,8 +233,8 @@ void PushState()
    char result[];
    string resultHeaders;
    
-   StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8);
-   ArrayResize(data, ArraySize(data) - 1);
+   int len = StringToCharArray(body, data, 0, -1, CP_UTF8);
+   if(len > 0) ArrayResize(data, len - 1);
    
    int res = WebRequest("POST", url, headers, 5000, data, result, resultHeaders);
    
@@ -258,8 +258,8 @@ void PollCommands()
    char result[];
    string resultHeaders;
    
-   StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8);
-   ArrayResize(data, ArraySize(data) - 1);
+   int len = StringToCharArray(body, data, 0, -1, CP_UTF8);
+   if(len > 0) ArrayResize(data, len - 1);
    
    int res = WebRequest("POST", url, headers, 5000, data, result, resultHeaders);
    
@@ -566,8 +566,8 @@ void AckCommand(string commandId, string status, ulong ticket, string errorMsg)
    char result[];
    string resultHeaders;
    
-   StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8);
-   ArrayResize(data, ArraySize(data) - 1);
+   int len = StringToCharArray(body, data, 0, -1, CP_UTF8);
+   if(len > 0) ArrayResize(data, len - 1);
    
    WebRequest("POST", url, headers, 3000, data, result, resultHeaders);
 }
