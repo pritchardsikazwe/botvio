@@ -65,7 +65,7 @@ const CHART_STRATEGIES = [
 export function GoldChartSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tf, setTf] = useState<string>("60");
-  const [activeStrat, setActiveStrat] = useState<number | null>(null);
+  const [activeStrat, setActiveStrat] = useState<number | null>(0);
 
   useEffect(() => {
     if (!containerRef.current) return;
