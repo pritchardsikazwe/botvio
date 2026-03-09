@@ -613,9 +613,9 @@ serve(async (req) => {
 
   const keys = { td: tdApiKey, av: avApiKey, fh: fhApiKey, derivAppId };
 
-  if (!tdApiKey && !avApiKey && !fhApiKey) {
+  if (!tdApiKey && !avApiKey && !fhApiKey && !derivAppId) {
     return new Response(
-      JSON.stringify({ error: "No market data API keys configured" }),
+      JSON.stringify({ error: "No market data providers configured" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
