@@ -33,6 +33,13 @@ int OnInit()
       return INIT_PARAMETERS_INCORRECT;
    }
    
+   // Validate UID doesn't contain characters that break JSON
+   if(StringFind(InpTerminalUID, "\"") >= 0 || StringFind(InpTerminalUID, "\\") >= 0)
+   {
+      Print("ERROR: Terminal UID contains invalid characters");
+      return INIT_PARAMETERS_INCORRECT;
+   }
+   
    if(StringLen(InpBridgeSecret) == 0)
    {
       Print("ERROR: Bridge Shared Secret is required");
@@ -113,16 +120,23 @@ bool RegisterTerminal()
    string url = InpBridgeURL + "/bridge-register-terminal";
    string headers = "Content-Type: application/json\r\nx-bridge-secret: " + InpBridgeSecret;
    
+   // Escape JSON-unsafe characters in broker strings
+   string brokerName = EscapeJson(AccountInfoString(ACCOUNT_COMPANY));
+   string serverName = EscapeJson(AccountInfoString(ACCOUNT_SERVER));
+   string currency = EscapeJson(AccountInfoString(ACCOUNT_CURRENCY));
+   
    string body = StringFormat(
       "{\"terminal_uid\":\"%s\",\"user_id\":\"%s\",\"broker_name\":\"%s\",\"server\":\"%s\",\"login\":\"%s\",\"account_currency\":\"%s\",\"leverage\":%d}",
       InpTerminalUID,
-      InpTerminalUID, // Will be parsed on server
-      AccountInfoString(ACCOUNT_COMPANY),
-      AccountInfoString(ACCOUNT_SERVER),
+      InpTerminalUID,
+      brokerName,
+      serverName,
       IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)),
-      AccountInfoString(ACCOUNT_CURRENCY),
+      currency,
       (int)AccountInfoInteger(ACCOUNT_LEVERAGE)
    );
+   
+   Print("Register body: ", body);
    
    char data[];
    char result[];
@@ -510,6 +524,21 @@ bool ExecuteModifyCommand(string response, string &errorMsg)
       errorMsg = StringFormat("Modify failed. Error: %d", GetLastError());
       return false;
    }
+}
+
+//+------------------------------------------------------------------+
+//| Escape a string for safe JSON embedding                          |
+//+------------------------------------------------------------------+
+string EscapeJson(string input)
+{
+   string output = input;
+   // Must escape backslash first, then quotes
+   StringReplace(output, "\\", "\\\\");
+   StringReplace(output, "\"", "\\\"");
+   StringReplace(output, "\n", "\\n");
+   StringReplace(output, "\r", "\\r");
+   StringReplace(output, "\t", "\\t");
+   return output;
 }
 
 //+------------------------------------------------------------------+
