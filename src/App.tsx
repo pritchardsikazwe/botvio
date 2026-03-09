@@ -57,6 +57,7 @@ import SignalPairPage from "./pages/SignalPairPage";
 import BotDetailPage from "./pages/BotDetailPage";
 import CountryTrafficPage from "./pages/CountryTrafficPage";
 import GoldTradingHub from "./pages/GoldTradingHub";
+import WeltradeHub from "./pages/WeltradeHub";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
