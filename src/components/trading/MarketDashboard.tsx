@@ -758,7 +758,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: numb
                           if (sig?.entry_price) lines.push(`🟢 Entry: ${formatPrice(Number(sig.entry_price), asset.symbol)}`);
                           if (sig?.stop_loss) lines.push(`🔴 SL: ${formatPrice(Number(sig.stop_loss), asset.symbol)}`);
                           if (sig?.take_profit_1) lines.push(`🟢 TP1: ${formatPrice(Number(sig.take_profit_1), asset.symbol)}`);
-                          if (sig?.take_profit_2) lines.push(`🟢 TP2: ${formatPrice(Number(sig.take_profit_2), asset.symbol)}`);
+                          
                           if (metrics?.support_1 || metrics?.resistance_1) {
                             lines.push(`📐 S1: ${metrics.support_1 ? formatPrice(Number(metrics.support_1), asset.symbol) : "—"} | R1: ${metrics.resistance_1 ? formatPrice(Number(metrics.resistance_1), asset.symbol) : "—"}`);
                           }
