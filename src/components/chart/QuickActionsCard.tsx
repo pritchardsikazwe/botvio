@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, MessageCircle, Copy, BarChart3, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 
-const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
+const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 const WHATSAPP_LINK = "https://chat.whatsapp.com/botvio-signals";
 
 export function QuickActionsCard() {
@@ -12,9 +12,9 @@ export function QuickActionsCard() {
       <CardContent className="p-4 space-y-2">
         <h3 className="text-sm font-bold text-foreground mb-3">Quick Actions</h3>
 
-        <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="block">
-          <Button className="w-full bg-[hsl(145_70%_45%)] hover:bg-[hsl(145_70%_40%)] text-white font-bold" size="sm">
-            <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Trade on WELTRADE
+        <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="block">
+          <Button className="w-full bg-[hsl(145_70%_45%)] hover:bg-[hsl(145_70%_45%/0.9)] text-white font-bold" size="sm">
+            <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Trade on Exness
           </Button>
         </a>
 

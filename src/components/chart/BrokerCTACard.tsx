@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Zap, Globe, Shield, BookOpen } from "lucide-react";
 
-const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
+const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 
 export function BrokerCTACard() {
   return (
@@ -34,10 +34,10 @@ export function BrokerCTACard() {
           </div>
         </div>
 
-        <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="block">
+        <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="block">
           <Button className="w-full bg-[hsl(145_70%_45%)] hover:bg-[hsl(145_70%_40%)] text-white font-extrabold text-sm h-11 shadow-lg shadow-[hsl(145_70%_45%)]/20">
             <ExternalLink className="h-4 w-4 mr-2" />
-            Trade on WELTRADE
+            Trade on Exness
           </Button>
         </a>
 

@@ -12,7 +12,7 @@ import { TrendingUp, TrendingDown, Minus, Sparkles, ChevronDown, Star, Share2, E
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const WELTRADE_LINK = "https://wtradex.com/register?ref=botvio";
+const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 
 const CHART_PAIRS = [
   { category: "Metals", pairs: [
@@ -193,10 +193,10 @@ export function SymbolHeaderCard({ symbol, price, changePercent, signal, confide
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
               <Share2 className="h-4 w-4" />
             </Button>
-            <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
+            <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer">
               <Button size="sm" className="bg-[hsl(145_70%_45%)] hover:bg-[hsl(145_70%_40%)] text-white font-bold">
                 <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                Trade on WELTRADE
+                Trade on Exness
               </Button>
             </a>
           </div>
