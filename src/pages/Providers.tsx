@@ -16,6 +16,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Users, TrendingUp, Award, Star, CheckCircle, Copy, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import type { Provider } from "@/types/botvio";
+import { SEOHead } from "@/components/seo/SEOHead";
 
 const Providers = () => {
   const { user } = useAuth();
