@@ -375,6 +375,20 @@ const Index = () => {
 
       <footer className="border-t border-border/50 mt-8 py-6 px-4">
         <div className="container mx-auto">
+          {/* Internal navigation links */}
+          <nav className="flex flex-wrap justify-center gap-4 text-sm mb-4" aria-label="Footer navigation">
+            <Link to="/signals" className="text-muted-foreground hover:text-primary transition-colors">Forex Signals</Link>
+            <Link to="/gold" className="text-muted-foreground hover:text-primary transition-colors">Gold Hub</Link>
+            <Link to="/bots" className="text-muted-foreground hover:text-primary transition-colors">Trading Bots</Link>
+            <Link to="/providers" className="text-muted-foreground hover:text-primary transition-colors">Copy Trading</Link>
+            <Link to="/learn" className="text-muted-foreground hover:text-primary transition-colors">Learn Trading</Link>
+            <Link to="/chart/XAUUSD" className="text-muted-foreground hover:text-primary transition-colors">Chart Analysis</Link>
+            <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+            <Link to="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQ</Link>
+            <Link to="/affiliate" className="text-muted-foreground hover:text-primary transition-colors">Affiliate</Link>
+            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link>
+            <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
+          </nav>
           <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto mb-2">
             <strong>Risk Warning:</strong> Trading binary options and CFDs involves significant risk. Past performance is not indicative of future results.
           </p>

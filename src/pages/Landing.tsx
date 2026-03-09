@@ -400,8 +400,13 @@ const Landing = () => {
               <Link to="/signals" className="hover:text-foreground">Signals</Link>
               <Link to="/bots" className="hover:text-foreground">Bots</Link>
               <Link to="/providers" className="hover:text-foreground">Copy Trading</Link>
+              <Link to="/gold" className="hover:text-foreground">Gold Hub</Link>
               <Link to="/learn" className="hover:text-foreground">Learn</Link>
+              <Link to="/blog" className="hover:text-foreground">Blog</Link>
+              <Link to="/faq" className="hover:text-foreground">FAQ</Link>
               <Link to="/affiliate" className="hover:text-foreground">Affiliate</Link>
+              <Link to="/terms" className="hover:text-foreground">Terms</Link>
+              <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2025 Botvio. All rights reserved.

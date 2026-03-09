@@ -1,6 +1,10 @@
+import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, Bot, Signal, Users, BarChart3 } from "lucide-react";
 
 const faqs = [
   { q: "What is Botvio?", a: "Botvio is an AI-powered trading bot platform for Deriv synthetic indices. Botvio automates trading using advanced signal engines like EMA crossovers, Markov transition analysis, and spike detection. Botvio supports 8 trading modes including Digits, Rise/Fall, Boom/Crash, Multipliers, and more." },
@@ -33,13 +37,18 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="FAQ" description="Frequently asked questions about Botvio AI trading bot. Learn about safety, pricing, trading modes, and how to get started." jsonLd={jsonLd} />
+      <SEOHead
+        title="FAQ – Botvio AI Trading Bot Questions Answered"
+        description="Get answers to common questions about Botvio AI trading bot. Learn about safety, pricing, supported trading modes, Deriv integration, Hauza Sniper strategies, and how to automate your trades."
+        jsonLd={jsonLd}
+      />
       <Header />
       <main className="container mx-auto px-4 py-10 max-w-3xl space-y-8">
         <div className="text-center space-y-3">
           <h1 className="text-4xl font-extrabold tracking-tight">Frequently Asked Questions</h1>
-          <p className="text-muted-foreground">Everything you need to know about Botvio.</p>
+          <p className="text-muted-foreground max-w-xl mx-auto">Everything you need to know about Botvio — from safety and pricing to strategies and automation.</p>
         </div>
+
         <Accordion type="multiple" className="space-y-2">
           {faqs.map((f, i) => (
             <AccordionItem key={i} value={`faq-${i}`} className="border rounded-lg px-4">
@@ -48,6 +57,61 @@ const FAQ = () => {
             </AccordionItem>
           ))}
         </Accordion>
+
+        {/* Internal links section */}
+        <section className="pt-6 border-t border-border">
+          <h2 className="text-xl font-bold mb-4">Explore Botvio</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link to="/bots">
+              <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                <CardContent className="flex items-center gap-3 py-4">
+                  <Bot className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Trading Bots</p>
+                    <p className="text-xs text-muted-foreground">Deploy AI strategies on Deriv</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/signals">
+              <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                <CardContent className="flex items-center gap-3 py-4">
+                  <Signal className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Live Signals</p>
+                    <p className="text-xs text-muted-foreground">Free forex & gold signals</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/providers">
+              <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                <CardContent className="flex items-center gap-3 py-4">
+                  <Users className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Copy Trading</p>
+                    <p className="text-xs text-muted-foreground">Follow top traders automatically</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/chart/XAUUSD">
+              <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                <CardContent className="flex items-center gap-3 py-4">
+                  <BarChart3 className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">AI Chart Analysis</p>
+                    <p className="text-xs text-muted-foreground">Upload any chart for AI analysis</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );
