@@ -7,19 +7,22 @@ interface QuoteData {
   change_percent_24h: number;
 }
 
+async function fetchGoldQuote(): Promise<QuoteData | null> {
+  const { data, error } = await (supabase
+    .from("market_quotes") as any)
+    .select("price, change_percent_24h")
+    .eq("symbol", "XAUUSD")
+    .order("fetched_at", { ascending: false })
+    .limit(1)
+    .single();
+  if (error || !data) return null;
+  return data as QuoteData;
+}
+
 export function GoldPriceHeader() {
   const { data: quote } = useQuery<QuoteData | null>({
     queryKey: ["gold-hub-quote"],
-    queryFn: async () => {
-      const res = await supabase
-        .from("market_quotes")
-        .select("price, change_percent_24h")
-        .eq("symbol", "XAUUSD")
-        .order("fetched_at", { ascending: false })
-        .limit(1)
-        .single();
-      return (res.data as QuoteData | null) ?? null;
-    },
+    queryFn: fetchGoldQuote,
     refetchInterval: 15000,
   });
 
