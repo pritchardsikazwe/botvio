@@ -110,6 +110,11 @@ const Index = () => {
                 <Sparkles className="h-4 w-4" /> Gold Hub
               </Button>
             </Link>
+            <Link to="/weltrade" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
+                <Activity className="h-4 w-4" /> SyntX Hub
+              </Button>
+            </Link>
             <Link to="/chart/XAUUSD" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-accent-foreground/20 text-foreground hover:bg-accent/50">
                 <BarChart3 className="h-4 w-4" /> Chart Analysis
