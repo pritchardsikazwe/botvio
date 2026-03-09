@@ -374,6 +374,88 @@ function aggregateCandlesTo4H(candles: any[]): any[] {
     });
 }
 
+async function requestDeriv(payload: Record<string, unknown>, appId: string): Promise<any | null> {
+  return await new Promise((resolve) => {
+    const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${appId}`);
+    const timeout = setTimeout(() => {
+      try { ws.close(); } catch {}
+      resolve(null);
+    }, 7000);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify(payload));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data as string);
+        if (data?.error) {
+          clearTimeout(timeout);
+          try { ws.close(); } catch {}
+          resolve(null);
+          return;
+        }
+        clearTimeout(timeout);
+        try { ws.close(); } catch {}
+        resolve(data);
+      } catch {
+        clearTimeout(timeout);
+        try { ws.close(); } catch {}
+        resolve(null);
+      }
+    };
+
+    ws.onerror = () => {
+      clearTimeout(timeout);
+      try { ws.close(); } catch {}
+      resolve(null);
+    };
+  });
+}
+
+async function fetchPriceDeriv(symbol: string, appId: string): Promise<PriceResult | null> {
+  const derivSymbol = DERIV_SYMBOL_MAP[symbol];
+  if (!derivSymbol) return null;
+
+  const response = await requestDeriv({
+    ticks_history: derivSymbol,
+    count: 1,
+    end: "latest",
+    style: "ticks",
+  }, appId);
+
+  const price = toNumber(response?.history?.prices?.[0]);
+  return price != null ? { price, provider: "deriv" } : null;
+}
+
+async function fetchCandlesDeriv(symbol: string, tf: string, appId: string): Promise<CandleResult | null> {
+  const derivSymbol = DERIV_SYMBOL_MAP[symbol];
+  if (!derivSymbol) return null;
+
+  const response = await requestDeriv({
+    ticks_history: derivSymbol,
+    style: "candles",
+    granularity: 3600,
+    count: 240,
+    end: "latest",
+  }, appId);
+
+  const baseCandles = Array.isArray(response?.candles)
+    ? response.candles.map((c: any) => ({
+        datetime: new Date(Number(c.epoch) * 1000).toISOString(),
+        open: toNumber(c.open) || 0,
+        high: toNumber(c.high) || 0,
+        low: toNumber(c.low) || 0,
+        close: toNumber(c.close) || 0,
+        volume: toNumber(c.volume) || 0,
+      }))
+    : [];
+
+  if (!baseCandles.length) return null;
+  const candles = tf === "4h" ? aggregateCandlesTo4H(baseCandles) : baseCandles;
+  return candles.length ? { candles, provider: "deriv" } : null;
+}
+
 async function fetchPriceFinnhub(symbol: string, apiKey: string): Promise<PriceResult | null> {
   const fhSymbol = FH_SYMBOL_MAP[symbol];
   const market = getFinnhubMarket(symbol);
