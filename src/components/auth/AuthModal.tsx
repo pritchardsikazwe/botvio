@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, Globe } from "lucide-react";
+import { Loader2, Mail, Lock, User, Globe, Phone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { lovable } from "@/integrations/lovable/index";
@@ -41,6 +41,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -75,13 +76,13 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password, country);
+    const { error } = await signUp(email, password, country, whatsapp);
     if (error) {
       toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Account created!", description: "Please check your email to verify your account." });
       onOpenChange(false);
-      setEmail(""); setPassword(""); setCountry("");
+      setEmail(""); setPassword(""); setCountry(""); setWhatsapp("");
     }
     setLoading(false);
   };
@@ -164,7 +165,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 <Input id="signup-password" type="password" placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required className="bg-secondary/50" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-country" className="flex items-center gap-2">
+               <Label htmlFor="signup-country" className="flex items-center gap-2">
                   <Globe className="w-4 h-4" /> Country
                 </Label>
                 <Select value={country} onValueChange={setCountry}>
@@ -177,6 +178,19 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-whatsapp" className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" /> WhatsApp Number
+                </Label>
+                <Input
+                  id="signup-whatsapp"
+                  type="tel"
+                  placeholder="+260 97 1234567"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  className="bg-secondary/50"
+                />
               </div>
               <Button type="submit" disabled={loading} className="w-full" variant="gold">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</> : "Create Account"}
