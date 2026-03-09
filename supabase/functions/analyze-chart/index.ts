@@ -442,22 +442,24 @@ Keep the response structured and actionable.`;
       analyzed_at: new Date().toISOString(),
     };
 
-    // Save to chart_analyses - use detected instrument if no symbol was provided
-    const { error: saveError } = await supabase
-      .from("chart_analyses")
-      .insert({
-        user_id: userId,
-        image_url: imageUrl,
-        symbol: symbol || detectedInstrument || null,
-        timeframe: timeframe || null,
-        analysis_result: analysisResult,
-        ai_response: analysisText,
-        is_premium_analysis: isPremium,
-      });
+    // Save to chart_analyses (only for authenticated users)
+    if (userId) {
+      const { error: saveError } = await supabase
+        .from("chart_analyses")
+        .insert({
+          user_id: userId,
+          image_url: imageUrl,
+          symbol: symbol || detectedInstrument || null,
+          timeframe: timeframe || null,
+          analysis_result: analysisResult,
+          ai_response: analysisText,
+          is_premium_analysis: isPremium,
+        });
 
-    if (saveError) {
-      console.error("Error saving analysis:", saveError);
-      await logError(supabase, "analyze-chart", userId, ERROR_CODES.DB_ERROR, saveError.message, { symbol }, 500);
+      if (saveError) {
+        console.error("Error saving analysis:", saveError);
+        await logError(supabase, "analyze-chart", userId, ERROR_CODES.DB_ERROR, saveError.message, { symbol }, 500);
+      }
     }
 
     // Update job if provided
@@ -473,13 +475,20 @@ Keep the response structured and actionable.`;
         .eq("id", jobId);
     }
 
+    let remainingToday: string | number = "unlimited";
+    if (userId && !isPremium) {
+      const { count } = await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`);
+      remainingToday = Math.max(0, 3 - (count || 0));
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         analysis: analysisText,
         structured: analysisResult,
         is_premium: isPremium,
-        remaining_today: isPremium ? "unlimited" : Math.max(0, 3 - ((await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`)).count || 0) - 1),
+        is_guest: isGuest,
+        remaining_today: remainingToday,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
