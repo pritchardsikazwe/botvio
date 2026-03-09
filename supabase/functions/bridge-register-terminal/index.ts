@@ -27,18 +27,34 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const rawBody = (await req.text()).trim();
+    let rawBody = (await req.text()).trim();
+    // Remove trailing null bytes or control chars
+    rawBody = rawBody.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]+$/g, '').trim();
     console.log('Raw body received:', rawBody.substring(0, 500));
     
     let body: any;
     try {
       body = JSON.parse(rawBody);
     } catch (parseErr) {
-      console.error('JSON parse error:', parseErr.message, 'Body:', rawBody.substring(0, 500));
-      return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: parseErr.message }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400
-      });
+      // Try to fix truncated JSON by appending closing brace
+      if (!rawBody.endsWith('}')) {
+        try {
+          body = JSON.parse(rawBody + '}');
+          console.log('Fixed truncated JSON by appending }');
+        } catch (parseErr2) {
+          console.error('JSON parse error:', parseErr.message, 'Body:', rawBody.substring(0, 500));
+          return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: parseErr.message }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400
+          });
+        }
+      } else {
+        console.error('JSON parse error:', parseErr.message, 'Body:', rawBody.substring(0, 500));
+        return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: parseErr.message }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400
+        });
+      }
     }
     
     const { 
