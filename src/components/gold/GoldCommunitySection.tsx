@@ -158,7 +158,7 @@ export function GoldCommunitySection() {
                 <ExternalLink className="h-4 w-4 mr-2" /> Trade on Exness
               </Button>
             </a>
-            <a href="https://gowt.net/ib67505m" target="_blank" rel="noopener noreferrer">
+            <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="font-bold border-primary/30 text-primary">
                 <ExternalLink className="h-4 w-4 mr-2" /> Open Weltrade
               </Button>

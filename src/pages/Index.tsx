@@ -100,7 +100,7 @@ const Index = () => {
                 <TrendingUp className="h-4 w-4" /> Trade on Exness
               </Button>
             </a>
-            <a href="https://gowt.net/ib67505m" target="_blank" rel="noopener noreferrer" className="block">
+            <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
                 <TrendingUp className="h-4 w-4" /> Weltrade
               </Button>
