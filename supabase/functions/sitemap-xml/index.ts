@@ -23,35 +23,65 @@ Deno.serve(async (req) => {
   const siteUrl = settings?.site_url || "https://botvio.live";
   const now = new Date().toISOString().split("T")[0];
 
-  // Static public pages
+  // ═══ Static public pages ═══
   const staticPages = [
+    // Core (sitelink candidates)
     { loc: "/", priority: "1.0", changefreq: "daily" },
     { loc: "/landing", priority: "0.9", changefreq: "weekly" },
-    { loc: "/signals", priority: "0.8", changefreq: "daily" },
+    { loc: "/signals", priority: "0.9", changefreq: "daily" },
     { loc: "/bots", priority: "0.8", changefreq: "weekly" },
-    { loc: "/providers", priority: "0.7", changefreq: "weekly" },
     { loc: "/marketplace", priority: "0.8", changefreq: "daily" },
+    { loc: "/providers", priority: "0.7", changefreq: "weekly" },
     { loc: "/learn", priority: "0.7", changefreq: "weekly" },
     { loc: "/strategies", priority: "0.7", changefreq: "weekly" },
+    { loc: "/blog", priority: "0.9", changefreq: "daily" },
+    { loc: "/faq", priority: "0.6", changefreq: "monthly" },
     { loc: "/affiliate", priority: "0.5", changefreq: "monthly" },
     { loc: "/install", priority: "0.5", changefreq: "monthly" },
+    { loc: "/testimonials", priority: "0.5", changefreq: "monthly" },
+    { loc: "/p2p", priority: "0.6", changefreq: "daily" },
     { loc: "/terms", priority: "0.3", changefreq: "yearly" },
     { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
-    { loc: "/p2p", priority: "0.6", changefreq: "daily" },
+
+    // Category hub pages
+    { loc: "/gold", priority: "0.9", changefreq: "daily" },
+    { loc: "/weltrade", priority: "0.8", changefreq: "weekly" },
+    { loc: "/trade-modes", priority: "0.8", changefreq: "weekly" },
+    { loc: "/trading", priority: "0.8", changefreq: "daily" },
+    { loc: "/authority-signals", priority: "0.7", changefreq: "daily" },
+
+    // Chart pages
+    { loc: "/chart/XAUUSD", priority: "0.8", changefreq: "daily" },
+    { loc: "/chart/EURUSD", priority: "0.7", changefreq: "daily" },
+    { loc: "/chart/GBPUSD", priority: "0.7", changefreq: "daily" },
+    { loc: "/chart/USDJPY", priority: "0.7", changefreq: "daily" },
+    { loc: "/chart/GBPJPY", priority: "0.7", changefreq: "daily" },
+    { loc: "/chart/AUDUSD", priority: "0.7", changefreq: "daily" },
+    { loc: "/chart/BTCUSD", priority: "0.7", changefreq: "daily" },
+    { loc: "/chart/ETHUSD", priority: "0.7", changefreq: "daily" },
+    { loc: "/chart/XAGUSD", priority: "0.6", changefreq: "daily" },
+    { loc: "/chart/NAS100", priority: "0.6", changefreq: "daily" },
   ];
 
-  // Dynamic: education lessons
+  // ═══ Dynamic: education lessons ═══
   const { data: lessons } = await supabase
     .from("education_lessons")
     .select("slug, created_at")
     .order("lesson_number");
 
-  // Dynamic: public strategies
+  // ═══ Dynamic: public strategies ═══
   const { data: strategies } = await supabase
     .from("strategies")
     .select("slug, updated_at")
     .eq("is_public", true);
 
+  // ═══ Dynamic: SEO pages from DB ═══
+  const { data: seoPages } = await supabase
+    .from("seo_pages")
+    .select("slug, updated_at")
+    .eq("is_active", true);
+
+  // Build URLs
   let urls = staticPages.map(
     (p) =>
       `  <url>
@@ -78,6 +108,19 @@ Deno.serve(async (req) => {
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`);
+  });
+
+  seoPages?.forEach((p) => {
+    // Avoid duplicates with static pages
+    const isDuplicate = staticPages.some(sp => sp.loc === `/${p.slug}`);
+    if (!isDuplicate) {
+      urls.push(`  <url>
+    <loc>${siteUrl}/${p.slug}</loc>
+    <lastmod>${p.updated_at?.split("T")[0] || now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`);
+    }
   });
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

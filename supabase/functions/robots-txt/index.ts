@@ -23,15 +23,46 @@ Deno.serve(async (req) => {
   const siteUrl = settings?.site_url || "https://botvio.live";
   const allowIndex = settings?.robots_index !== false;
 
-  let robotsTxt = `User-agent: *\n`;
+  let robotsTxt = "";
 
-  if (allowIndex) {
-    robotsTxt += `Allow: /\n`;
-  } else {
-    robotsTxt += `Disallow: /\n`;
-  }
+  // Googlebot — specific rules for better crawl budget
+  robotsTxt += `User-agent: Googlebot\n`;
+  robotsTxt += allowIndex ? `Allow: /\n` : `Disallow: /\n`;
+  robotsTxt += `Disallow: /admin\n`;
+  robotsTxt += `Disallow: /dashboard\n`;
+  robotsTxt += `Disallow: /settings\n`;
+  robotsTxt += `Disallow: /auth\n`;
+  robotsTxt += `Disallow: /api\n`;
+  robotsTxt += `Disallow: /billing\n`;
+  robotsTxt += `Disallow: /accounts\n`;
+  robotsTxt += `Disallow: /trade-history\n`;
+  robotsTxt += `Disallow: /provider-dashboard\n`;
+  robotsTxt += `Disallow: /connections\n`;
+  robotsTxt += `Disallow: /my-products\n`;
+  robotsTxt += `\n`;
 
-  // Always block private routes
+  // Bingbot
+  robotsTxt += `User-agent: Bingbot\n`;
+  robotsTxt += allowIndex ? `Allow: /\n` : `Disallow: /\n`;
+  robotsTxt += `Disallow: /admin\n`;
+  robotsTxt += `Disallow: /dashboard\n`;
+  robotsTxt += `Disallow: /settings\n`;
+  robotsTxt += `Disallow: /auth\n`;
+  robotsTxt += `Disallow: /billing\n`;
+  robotsTxt += `Disallow: /accounts\n`;
+  robotsTxt += `Disallow: /trade-history\n`;
+  robotsTxt += `Disallow: /provider-dashboard\n`;
+  robotsTxt += `Disallow: /connections\n`;
+  robotsTxt += `Disallow: /my-products\n`;
+  robotsTxt += `\n`;
+
+  // Social bots — allow everything for rich previews
+  robotsTxt += `User-agent: Twitterbot\nAllow: /\n\n`;
+  robotsTxt += `User-agent: facebookexternalhit\nAllow: /\n\n`;
+
+  // Default
+  robotsTxt += `User-agent: *\n`;
+  robotsTxt += allowIndex ? `Allow: /\n` : `Disallow: /\n`;
   robotsTxt += `Disallow: /admin\n`;
   robotsTxt += `Disallow: /dashboard\n`;
   robotsTxt += `Disallow: /settings\n`;
