@@ -105,10 +105,28 @@ const Marketplace = () => {
     setShowCheckout(true);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!selectedProduct || !paymentMethod) {
       toast.error("Please select a payment method");
       return;
+    }
+    if (!proofFile) {
+      toast.error("Please attach your payment proof screenshot");
+      return;
+    }
+
+    // Upload proof
+    let proofUrl: string | undefined;
+    if (user && proofFile) {
+      const ext = proofFile.name.split(".").pop();
+      const path = `proofs/${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("charts")
+        .upload(path, proofFile);
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from("charts").getPublicUrl(path);
+        proofUrl = urlData.publicUrl;
+      }
     }
 
     const storedRef = localStorage.getItem("botvio_referral");
@@ -125,11 +143,13 @@ const Marketplace = () => {
     purchaseMutation.mutate({
       product: selectedProduct,
       paymentMethod,
+      proofUrl,
       affiliateCode,
     });
     setShowCheckout(false);
     setSelectedProduct(null);
     setPaymentMethod("");
+    setProofFile(null);
   };
 
   const getProductIcon = (type: string) => {
