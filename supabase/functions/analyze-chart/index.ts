@@ -153,17 +153,51 @@ serve(async (req) => {
       );
     }
 
-    const analysisPrompt = `You are an expert trading chart analyst. Analyze this chart image carefully.
+    // Map symbol codes to readable names
+    const SYMBOL_NAME_MAP: Record<string, string> = {
+      "XAUUSD": "Gold", "XAU/USD": "Gold",
+      "XAGUSD": "Silver", "XAG/USD": "Silver",
+      "EURUSD": "EUR/USD", "GBPUSD": "GBP/USD", "USDJPY": "USD/JPY",
+      "AUDUSD": "AUD/USD", "NZDUSD": "NZD/USD", "USDCAD": "USD/CAD",
+      "USDCHF": "USD/CHF", "GBPJPY": "GBP/JPY", "EURJPY": "EUR/JPY",
+      "NAS100": "NASDAQ", "US30": "US30", "SPX500": "S&P 500",
+      "BTCUSD": "Bitcoin", "ETHUSD": "Ethereum",
+      "BOOM1000": "Boom 1000", "BOOM500": "Boom 500",
+      "CRASH1000": "Crash 1000", "CRASH500": "Crash 500",
+      "Volatility_75_Index": "Volatility 75", "R_75": "Volatility 75",
+      "R_100": "Volatility 100", "R_50": "Volatility 50",
+      "R_25": "Volatility 25", "R_10": "Volatility 10",
+    };
+    const resolvedSymbol = symbol ? (SYMBOL_NAME_MAP[symbol] || symbol) : null;
 
-${symbol ? `CRITICAL: The user has confirmed this chart is for **${symbol}**. Use "${symbol}" as the instrument name. Do NOT guess a different instrument. The user knows what they uploaded.` : `FIRST LINE MUST BE exactly: **Instrument**: <NAME>
+    const analysisPrompt = resolvedSymbol
+      ? `You are an expert trading chart analyst. The user has uploaded a chart for **${resolvedSymbol}**. This is confirmed — do NOT identify or guess a different instrument. The instrument IS ${resolvedSymbol}.
+
+**Instrument**: ${resolvedSymbol}
+
+Analyze the chart and provide:
+**Direction**: BUY or SELL
+**Entry Price**: <exact number from chart>
+**Stop Loss**: <exact number>
+**Take Profit 1**: <exact number>
+**Take Profit 2**: <exact number> (if applicable)
+**Take Profit 3**: <exact number> (if applicable)
+**Confidence**: <number>%
+
+1. **Trend Analysis**: Bullish, Bearish, or Ranging
+2. **Key Levels**: Support and resistance
+3. **Pattern Recognition**: Chart patterns visible
+4. **Risk Assessment**: Low, Medium, or High
+${timeframe ? `Current Timeframe: ${timeframe}` : ""}
+
+Keep the response structured and actionable.`
+      : `You are an expert trading chart analyst. Analyze this chart image carefully.
+
+FIRST LINE MUST BE exactly: **Instrument**: <NAME>
 Rules for instrument name:
 - Use ONLY the short trading name: Gold, EUR/USD, Crash 500, Volatility 75, NASDAQ, Bitcoin, US30, GBP/JPY, Step Index, Boom 1000, Crude Oil, Silver etc.
-- NEVER use long descriptions, exchange codes, or contract IDs
 - Look at the chart title, axis labels, watermarks, and price range to identify the instrument
 - Common price ranges: 1800-3500 = Gold (XAU/USD), 0.5-2.0 = Forex pairs, 30000-45000 = US30/Dow, 15000-22000 = NASDAQ, 50000-120000 = Bitcoin
-- You MUST identify the instrument. Do NOT say Unknown.`}
-
-**Instrument**: ${symbol || "<identify from chart>"}
 
 REQUIRED STRUCTURED DATA (use exact format):
 **Direction**: BUY or SELL
@@ -174,7 +208,6 @@ REQUIRED STRUCTURED DATA (use exact format):
 **Take Profit 3**: <exact number> (if applicable)
 **Confidence**: <number>%
 
-ALSO PROVIDE:
 1. **Trend Analysis**: Bullish, Bearish, or Ranging
 2. **Key Levels**: Support and resistance
 3. **Pattern Recognition**: Chart patterns visible
@@ -313,8 +346,8 @@ Keep the response structured and actionable.`;
                    || analysisText.match(/Confidence[:\s]*(\d+)/i);
     const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL)/i);
 
-    // Extract instrument name
-    let detectedInstrument = symbol || null;
+    // Extract instrument name — always trust user-provided symbol
+    let detectedInstrument = resolvedSymbol || null;
     if (!detectedInstrument) {
       const instrumentLineMatch = analysisText.match(/\*\*Instrument\*\*[:\s]*(.+?)(?:\n|$)/i);
       if (instrumentLineMatch) {
