@@ -665,6 +665,9 @@ export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: numb
                 {/* Key Levels */}
                 {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
+                {/* Hauza Signal Button */}
+                <HauzaSignalButton sig={sig} symbol={asset.symbol} navigate={navigate} />
+
                 {sig && (sig.signal === "buy" || sig.signal === "sell") && (
                   <div className="border-t border-border/40 pt-2 space-y-1.5">
                     <div className="flex items-center gap-1.5">
