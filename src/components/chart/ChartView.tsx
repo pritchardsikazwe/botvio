@@ -112,14 +112,14 @@ export function ChartView({
       const lastTime = candleTime(candles[candles.length - 1]) as any;
 
       // helper to draw a horizontal line
-      const drawHLine = (price: number, color: string, width: number, style: number, label?: string) => {
+      const drawHLine = (price: number, color: string, width: number, style: number, _label?: string) => {
         const s = chart.addSeries(LineSeries, {
           color,
           lineWidth: width as any,
           lineStyle: style,
           priceLineVisible: false,
-          lastValueVisible: !!label,
-          title: label || "",
+          lastValueVisible: false,
+          title: "",
         });
         s.setData([
           { time: firstTime, value: price },
