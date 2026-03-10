@@ -400,39 +400,6 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
               )}
             </div>
 
-            {/* Symbol and Timeframe Selection */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Symbol (optional)</Label>
-                <Select value={symbol} onValueChange={setSymbol}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select symbol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SYMBOLS.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Timeframe (optional)</Label>
-                <Select value={timeframe} onValueChange={setTimeframe}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select timeframe" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIMEFRAMES.map((tf) => (
-                      <SelectItem key={tf.value} value={tf.value}>
-                        {tf.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
 
             {/* Action Buttons */}
             <div className="flex gap-3">
