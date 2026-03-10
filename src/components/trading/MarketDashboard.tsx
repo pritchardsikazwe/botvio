@@ -339,6 +339,99 @@ function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol
   );
 }
 
+const HAUZA_BTN_CONFIG: Record<string, {
+  bg: string; border: string; text: string; glow: string; icon: typeof TrendingUp; pulse: string; label: string;
+}> = {
+  buy: {
+    bg: "from-emerald-500/20 via-emerald-500/10 to-transparent",
+    border: "border-success/50", text: "text-success", glow: "shadow-[0_0_25px_hsl(var(--success)/0.25)]",
+    icon: TrendingUp, pulse: "animate-[pulse_1.5s_ease-in-out_infinite]", label: "BUY",
+  },
+  sell: {
+    bg: "from-red-500/20 via-red-500/10 to-transparent",
+    border: "border-destructive/50", text: "text-destructive", glow: "shadow-[0_0_25px_hsl(var(--destructive)/0.25)]",
+    icon: TrendingDown, pulse: "animate-[pulse_1.5s_ease-in-out_infinite]", label: "SELL",
+  },
+  hold: {
+    bg: "from-blue-500/20 via-blue-500/10 to-transparent",
+    border: "border-blue-500/50", text: "text-blue-400", glow: "",
+    icon: Shield, pulse: "", label: "HOLD",
+  },
+  wait: {
+    bg: "from-amber-500/20 via-amber-500/10 to-transparent",
+    border: "border-warning/50", text: "text-warning", glow: "",
+    icon: Pause, pulse: "", label: "WAIT",
+  },
+  avoid: {
+    bg: "from-gray-500/10 to-transparent",
+    border: "border-border", text: "text-muted-foreground", glow: "",
+    icon: Pause, pulse: "", label: "WAIT",
+  },
+};
+
+function HauzaSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefined; symbol: string; navigate: ReturnType<typeof useNavigate> }) {
+  const signalKey = sig?.signal?.toLowerCase() || "wait";
+  const config = HAUZA_BTN_CONFIG[signalKey] || HAUZA_BTN_CONFIG.wait;
+  const Icon = config.icon;
+  const isActive = signalKey === "buy" || signalKey === "sell";
+  const chartSlug = symbol.replace("/", "");
+
+  return (
+    <button
+      onClick={() => navigate(`/chart/${chartSlug}`)}
+      className={`w-full relative overflow-hidden rounded-xl bg-gradient-to-r ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-300 hover:scale-[1.02] cursor-pointer group`}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.04),transparent_70%)]" />
+      <div className="relative px-4 py-3 flex items-center justify-between gap-3">
+        {/* Left: Icon + Signal */}
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${config.bg} border ${config.border} flex items-center justify-center ${config.pulse}`}>
+            <Icon className={`h-5 w-5 ${config.text}`} />
+          </div>
+          <div className="text-left">
+            <div className="flex items-center gap-2">
+              <Crosshair className="h-3 w-3 text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Hauza Signal</span>
+            </div>
+            <span className={`text-lg font-black tracking-tight ${config.text}`}>
+              {config.label} {isActive ? symbol.replace("/", "") : ""}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Entry/SL or Wait message */}
+        <div className="text-right shrink-0">
+          {isActive && sig ? (
+            <div className="space-y-0.5">
+              {sig.entry_price && (
+                <div className="text-[10px]">
+                  <span className="text-muted-foreground">Entry </span>
+                  <span className="font-mono font-bold text-foreground">{formatPrice(Number(sig.entry_price), symbol)}</span>
+                </div>
+              )}
+              {sig.stop_loss && (
+                <div className="text-[10px]">
+                  <span className="text-muted-foreground">SL </span>
+                  <span className="font-mono font-bold text-destructive">{formatPrice(Number(sig.stop_loss), symbol)}</span>
+                </div>
+              )}
+              {sig.take_profit_1 && (
+                <div className="text-[10px]">
+                  <span className="text-muted-foreground">TP </span>
+                  <span className="font-mono font-bold text-success">{formatPrice(Number(sig.take_profit_1), symbol)}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <span className="text-[10px] text-muted-foreground">Wait for setup<br />confirmation</span>
+          )}
+        </div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+    </button>
+  );
+}
+
 export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: number; maxBinanceCards?: number } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
