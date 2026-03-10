@@ -346,8 +346,8 @@ Keep the response structured and actionable.`;
                    || analysisText.match(/Confidence[:\s]*(\d+)/i);
     const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL)/i);
 
-    // Extract instrument name
-    let detectedInstrument = symbol || null;
+    // Extract instrument name — always trust user-provided symbol
+    let detectedInstrument = resolvedSymbol || null;
     if (!detectedInstrument) {
       const instrumentLineMatch = analysisText.match(/\*\*Instrument\*\*[:\s]*(.+?)(?:\n|$)/i);
       if (instrumentLineMatch) {
