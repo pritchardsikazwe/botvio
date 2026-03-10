@@ -224,8 +224,8 @@ export function ChartView({
             lineWidth: 2,
             lineStyle: 0,
             priceLineVisible: false,
-            lastValueVisible: true,
-            title: tl.type === "ascending" ? "Trend↑" : "Trend↓",
+            lastValueVisible: false,
+            title: "",
           });
           s.setData(tl.points.map((p) => ({ time: p.time as any, value: p.value })));
         });
