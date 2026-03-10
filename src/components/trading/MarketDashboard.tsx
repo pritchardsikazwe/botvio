@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   TrendingUp, TrendingDown, Minus, Activity, Sparkles, Clock,
   Newspaper, BarChart3, Shield, Target, Lightbulb, ArrowDown, ArrowUp,
-  Crosshair, Zap,
+  Crosshair, Zap, Pause,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
