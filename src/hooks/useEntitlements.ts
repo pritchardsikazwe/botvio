@@ -37,6 +37,8 @@ export function useEntitlements() {
       return data as Entitlement[];
     },
     enabled: !!user,
+    refetchOnWindowFocus: true,
+    staleTime: 30_000, // 30 seconds
   });
 }
 

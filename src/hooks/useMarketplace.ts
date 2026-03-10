@@ -38,6 +38,8 @@ export function useMarketplaceProducts(type?: string) {
       if (error) throw error;
       return data as MarketplaceProduct[];
     },
+    refetchOnWindowFocus: true,
+    staleTime: 30_000,
   });
 }
 
