@@ -68,6 +68,7 @@ interface ChartUploadProps {
 }
 
 export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
+  const navigate = useNavigate();
   const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
