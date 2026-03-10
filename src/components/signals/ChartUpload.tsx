@@ -232,6 +232,11 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       if (analysisError) throw analysisError;
 
       if (analysisData.error) {
+        if (analysisData.error_code === "daily_limit" || analysisData.redirect) {
+          toast.error("Daily limit reached! Subscribe to Premium Signals for unlimited AI analysis.");
+          navigate("/billing");
+          return;
+        }
         toast.error(analysisData.error);
         return;
       }
