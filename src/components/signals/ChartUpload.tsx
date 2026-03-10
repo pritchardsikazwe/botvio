@@ -191,8 +191,6 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       return;
     }
 
-    // No limits — everyone can use freely
-
     try {
       setIsUploading(true);
 

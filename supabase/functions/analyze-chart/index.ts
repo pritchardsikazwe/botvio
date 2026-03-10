@@ -470,7 +470,7 @@ Keep the response structured and actionable.`;
     let remainingToday: string | number = "unlimited";
     if (userId && !isPremium) {
       const { count } = await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`);
-      remainingToday = Math.max(0, 3 - (count || 0));
+      remainingToday = Math.max(0, MAX_FREE_DAILY - (count || 0));
     }
 
     return new Response(
