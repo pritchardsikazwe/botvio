@@ -153,15 +153,17 @@ serve(async (req) => {
       );
     }
 
-    const analysisPrompt = `You are an expert trading chart analyst. Analyze this chart image.
+    const analysisPrompt = `You are an expert trading chart analyst. Analyze this chart image carefully.
 
-FIRST LINE MUST BE exactly: **Instrument**: <NAME>
+${symbol ? `CRITICAL: The user has confirmed this chart is for **${symbol}**. Use "${symbol}" as the instrument name. Do NOT guess a different instrument. The user knows what they uploaded.` : `FIRST LINE MUST BE exactly: **Instrument**: <NAME>
 Rules for instrument name:
 - Use ONLY the short trading name: Gold, EUR/USD, Crash 500, Volatility 75, NASDAQ, Bitcoin, US30, GBP/JPY, Step Index, Boom 1000, Crude Oil, Silver etc.
 - NEVER use long descriptions, exchange codes, or contract IDs
 - Look at the chart title, axis labels, watermarks, and price range to identify the instrument
-- Common price ranges: 1800-2700 = Gold, 0.5-2.0 = Forex pairs, 30000-45000 = US30/Dow, 15000-22000 = NASDAQ, 50000-110000 = Bitcoin
-${symbol ? `- The user has specified the symbol as: ${symbol} — use this as the instrument name` : "- You MUST identify the instrument. Do NOT say Unknown."}
+- Common price ranges: 1800-3500 = Gold (XAU/USD), 0.5-2.0 = Forex pairs, 30000-45000 = US30/Dow, 15000-22000 = NASDAQ, 50000-120000 = Bitcoin
+- You MUST identify the instrument. Do NOT say Unknown.`}
+
+**Instrument**: ${symbol || "<identify from chart>"}
 
 REQUIRED STRUCTURED DATA (use exact format):
 **Direction**: BUY or SELL
@@ -182,7 +184,7 @@ ${timeframe ? `Current Timeframe: ${timeframe}` : ""}
 Keep the response structured and actionable.`;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     let aiResponse;
     try {
@@ -193,7 +195,7 @@ Keep the response structured and actionable.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "google/gemini-2.5-pro",
           messages: [
             {
               role: "user",
