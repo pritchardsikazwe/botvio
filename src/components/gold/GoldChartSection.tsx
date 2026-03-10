@@ -116,10 +116,15 @@ export function GoldChartSection() {
         ))}
       </div>
 
-      {/* Chart */}
-      <Card className="bg-card border-border/50 overflow-hidden">
-        <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />
-      </Card>
+      {/* Hauza Signal + Chart side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-1">
+          <GoldHauzaSignalButton />
+        </div>
+        <Card className="lg:col-span-3 bg-card border-border/50 overflow-hidden">
+          <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />
+        </Card>
+      </div>
 
       {/* ── Hauza Strategy Quick-Reference ─────── */}
       <div>
