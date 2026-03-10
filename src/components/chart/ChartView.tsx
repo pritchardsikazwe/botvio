@@ -182,8 +182,8 @@ export function ChartView({
             lineWidth: 3,
             lineStyle: 0,
             priceLineVisible: false,
-            lastValueVisible: true,
-            title: bo.direction === "up" ? "BO↑" : "BO↓",
+            lastValueVisible: false,
+            title: "",
           });
           // Draw a short bold horizontal dash at breakout point
           const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
