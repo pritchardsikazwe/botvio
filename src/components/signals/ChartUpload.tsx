@@ -402,10 +402,10 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             </div>
 
             {/* Tip */}
-            <div className="flex items-start gap-2 rounded-lg bg-accent/50 border border-accent p-3">
-              <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">Tip:</span> Make sure the instrument symbol (e.g. XAUUSD, EURUSD) is visible on your chart before uploading — this helps the AI identify the correct market.
+            <div className="flex items-start gap-2 rounded-lg bg-yellow-500/15 border border-yellow-500/40 p-3">
+              <Info className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-yellow-400">
+                <span className="font-semibold text-yellow-300">Tip:</span> Make sure the instrument symbol (e.g. XAUUSD, EURUSD) is visible on your chart before uploading — this helps the AI identify the correct market.
               </p>
             </div>
 
