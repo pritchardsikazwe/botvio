@@ -143,8 +143,8 @@ export function ChartView({
           color: "hsl(200 80% 55%)",
           lineWidth: 1,
           priceLineVisible: false,
-          lastValueVisible: true,
-          title: "EMA50",
+          lastValueVisible: false,
+          title: "",
         });
         ema50Series.setData(calculateEMA(candles, 50));
       }
