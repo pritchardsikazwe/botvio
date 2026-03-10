@@ -21,11 +21,46 @@ import { toast } from "sonner";
 
 const PRODUCT_TABS = [
   { value: "all", label: "All", icon: Package },
-  { value: "bot", label: "Bots", icon: Bot },
   { value: "signal_pack", label: "Signals", icon: Signal },
   { value: "course", label: "Courses", icon: GraduationCap },
   { value: "strategy", label: "Strategies", icon: Zap },
+  { value: "bot", label: "Bots", icon: Bot },
 ];
+
+// Sort priority: signal_pack first, then course, strategy, bot
+const TYPE_ORDER: Record<string, number> = {
+  signal_pack: 0,
+  course: 1,
+  strategy: 2,
+  bot: 3,
+};
+
+const TYPE_COLORS: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
+  signal_pack: {
+    bg: "bg-emerald-500/15",
+    text: "text-emerald-400",
+    border: "border-emerald-500/40",
+    gradient: "from-emerald-500/20 to-teal-500/10",
+  },
+  course: {
+    bg: "bg-blue-500/15",
+    text: "text-blue-400",
+    border: "border-blue-500/40",
+    gradient: "from-blue-500/20 to-indigo-500/10",
+  },
+  strategy: {
+    bg: "bg-violet-500/15",
+    text: "text-violet-400",
+    border: "border-violet-500/40",
+    gradient: "from-violet-500/20 to-purple-500/10",
+  },
+  bot: {
+    bg: "bg-amber-500/15",
+    text: "text-amber-400",
+    border: "border-amber-500/40",
+    gradient: "from-amber-500/20 to-orange-500/10",
+  },
+};
 
 const Marketplace = () => {
   const { user } = useAuth();
@@ -42,6 +77,17 @@ const Marketplace = () => {
   const isOwned = (productId: string) =>
     entitlements?.some((e) => e.product_id === productId && e.status === "active") ?? false;
 
+  // Sort products by type priority then featured
+  const sortedProducts = products
+    ? [...products].sort((a, b) => {
+        const aOrder = TYPE_ORDER[a.type] ?? 99;
+        const bOrder = TYPE_ORDER[b.type] ?? 99;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
+        return 0;
+      })
+    : [];
+
   const handleBuy = (product: MarketplaceProduct) => {
     if (!user) {
       toast.error("Please sign in to purchase");
@@ -52,7 +98,6 @@ const Marketplace = () => {
       return;
     }
     if (product.price_usd === 0) {
-      // Free product — claim immediately
       purchaseMutation.mutate({ product, paymentMethod: "free" });
       return;
     }
@@ -66,7 +111,6 @@ const Marketplace = () => {
       return;
     }
 
-    // Get stored referral code
     const storedRef = localStorage.getItem("botvio_referral");
     let affiliateCode: string | undefined;
     if (storedRef) {
@@ -108,6 +152,8 @@ const Marketplace = () => {
     }
   };
 
+  const colors = (type: string) => TYPE_COLORS[type] || TYPE_COLORS.bot;
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead title="Marketplace — Trading Bots, Signal Packs & Courses" description="Browse and purchase premium trading bots, signal packs, strategy templates, and forex mentorship courses. Find tools for gold scalping, Deriv automation, Exness copy trading, and crypto strategies." />
@@ -115,32 +161,37 @@ const Marketplace = () => {
 
       <main className="container mx-auto px-4 py-6">
         {/* Hero */}
-        <div className="glass-card p-8 mb-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-warning/10" />
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-warning/10 p-8 md:p-12 mb-8">
+          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-warning/5 blur-3xl" />
           <div className="relative z-10 text-center">
-            <Badge variant="outline" className="mb-4 border-primary text-primary">
-              <ShoppingCart className="w-3 h-3 mr-1" />
+            <Badge variant="outline" className="mb-4 border-primary/40 text-primary bg-primary/10 px-4 py-1">
+              <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
               Botvio Marketplace
             </Badge>
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">
+            <h1 className="text-3xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
               Trading Tools & Education
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Buy bots, subscribe to signals, and access premium courses. 
-              Everything you need to trade smarter.
+              Subscribe to signals, access premium courses, and supercharge your trading with bots & strategies.
             </p>
           </div>
         </div>
 
         {/* Product Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid grid-cols-5 w-full max-w-xl mx-auto">
+          <TabsList className="grid grid-cols-5 w-full max-w-2xl mx-auto h-12 bg-muted/50 border border-border/50 rounded-xl p-1">
             {PRODUCT_TABS.map((tab) => {
               const Icon = tab.icon;
+              const c = colors(tab.value);
               return (
-                <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-1.5">
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="flex items-center gap-1.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
                   <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="hidden sm:inline font-medium">{tab.label}</span>
                 </TabsTrigger>
               );
             })}
@@ -151,37 +202,39 @@ const Marketplace = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-72 rounded-xl" />
+              <Skeleton key={i} className="h-80 rounded-xl" />
             ))}
           </div>
-        ) : products && products.length > 0 ? (
+        ) : sortedProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => {
+            {sortedProducts.map((product) => {
               const owned = isOwned(product.id);
+              const c = colors(product.type);
               return (
                 <Card
                   key={product.id}
-                  className={`glass-card overflow-hidden transition-all hover:border-primary/50 ${
-                    product.is_featured ? "ring-2 ring-warning/30" : ""
+                  className={`group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg border ${c.border} bg-gradient-to-br ${c.gradient} ${
+                    product.is_featured ? "ring-2 ring-warning/40 shadow-warning/10 shadow-lg" : ""
                   }`}
                 >
                   {product.is_featured && (
-                    <div className="bg-gradient-to-r from-warning to-amber-500 text-white text-xs px-3 py-1 text-center font-medium">
-                      ⭐ Featured
+                    <div className="bg-gradient-to-r from-warning to-amber-500 text-white text-xs px-3 py-1.5 text-center font-semibold tracking-wide">
+                      ⭐ Featured Product
                     </div>
                   )}
                   {product.type === "course" && (
-                    <div className="bg-gradient-to-r from-primary to-blue-500 text-white text-xs px-3 py-1 text-center font-medium flex items-center justify-center gap-1">
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs px-3 py-1.5 text-center font-medium flex items-center justify-center gap-1">
                       🎓 Coming Soon — Lessons Being Prepared
                     </div>
                   )}
 
                   {product.cover_image_url && (
-                    <div className="h-40 bg-muted overflow-hidden">
+                    <div className="h-44 bg-muted overflow-hidden">
                       <img
                         src={product.cover_image_url}
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
                       />
                     </div>
                   )}
@@ -189,18 +242,18 @@ const Marketplace = () => {
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <div className={`w-11 h-11 rounded-xl ${c.bg} flex items-center justify-center ${c.text} ring-1 ring-white/10`}>
                           {getProductIcon(product.type)}
                         </div>
                         <div>
-                          <CardTitle className="text-lg">{product.name}</CardTitle>
-                          <Badge variant="outline" className="text-xs capitalize mt-1">
+                          <CardTitle className="text-lg leading-tight">{product.name}</CardTitle>
+                          <Badge variant="outline" className={`text-xs capitalize mt-1.5 ${c.border} ${c.text} bg-transparent`}>
                             {getTypeLabel(product.type)}
                           </Badge>
                         </div>
                       </div>
                       {owned && (
-                        <Badge className="bg-success text-success-foreground">
+                        <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           <Check className="h-3 w-3 mr-1" />
                           Owned
                         </Badge>
@@ -217,28 +270,34 @@ const Marketplace = () => {
 
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <span className="text-2xl font-bold">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                           {product.price_usd === 0 ? "Free" : `$${product.price_usd}`}
                         </span>
                         {product.billing_type === "recurring" && product.price_usd > 0 && (
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-muted-foreground ml-0.5">
                             /{product.billing_interval || "month"}
                           </span>
                         )}
                       </div>
                       {product.billing_type === "one_time" && product.price_usd > 0 && (
-                        <Badge variant="secondary">One-time</Badge>
+                        <Badge variant="secondary" className="text-xs">One-time</Badge>
                       )}
                     </div>
 
                     {owned ? (
-                      <Button className="w-full" variant="outline">
+                      <Button className="w-full border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" variant="outline">
                         <Check className="h-4 w-4 mr-2" />
                         Open
                       </Button>
                     ) : (
                       <Button
-                        className="w-full"
+                        className={`w-full font-semibold transition-all ${
+                          product.price_usd === 0
+                            ? "border-primary/30 hover:bg-primary/10"
+                            : product.type === "signal_pack"
+                              ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/20"
+                              : ""
+                        }`}
                         variant={product.price_usd === 0 ? "outline" : "default"}
                         onClick={() => handleBuy(product)}
                         disabled={purchaseMutation.isPending}
@@ -267,7 +326,7 @@ const Marketplace = () => {
             })}
           </div>
         ) : (
-          <Card className="glass-card">
+          <Card className="glass-card border-dashed">
             <CardContent className="py-16 text-center">
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No Products Yet</h3>
@@ -279,15 +338,15 @@ const Marketplace = () => {
         )}
 
         {/* Affiliate CTA */}
-        <Card className="glass-card mt-8 border-primary/30">
+        <Card className="mt-8 border-primary/30 bg-gradient-to-r from-primary/5 via-background to-warning/5 overflow-hidden">
           <CardContent className="py-6">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/20">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-warning/20 ring-1 ring-primary/20">
                   <Star className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Earn Commissions</h3>
+                  <h3 className="font-bold text-base">Earn Commissions</h3>
                   <p className="text-sm text-muted-foreground">
                     Refer products and earn up to 20% on every sale
                   </p>
