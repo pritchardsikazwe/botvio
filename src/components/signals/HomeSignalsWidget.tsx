@@ -23,10 +23,10 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
   }
   // Forex & Metals → Exness primary, Weltrade secondary
   if (/XAU|XAG|GOLD|SILVER/i.test(s)) {
-    return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20" };
+    return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
   }
   // Default forex pairs → Exness
-  return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20" };
+  return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
 }
 
 // Map timeframe to ms for expiration

@@ -112,14 +112,14 @@ export function ChartView({
       const lastTime = candleTime(candles[candles.length - 1]) as any;
 
       // helper to draw a horizontal line
-      const drawHLine = (price: number, color: string, width: number, style: number, label?: string) => {
+      const drawHLine = (price: number, color: string, width: number, style: number, _label?: string) => {
         const s = chart.addSeries(LineSeries, {
           color,
           lineWidth: width as any,
           lineStyle: style,
           priceLineVisible: false,
-          lastValueVisible: !!label,
-          title: label || "",
+          lastValueVisible: false,
+          title: "",
         });
         s.setData([
           { time: firstTime, value: price },
@@ -133,8 +133,8 @@ export function ChartView({
           color: "hsl(45 100% 51%)",
           lineWidth: 1,
           priceLineVisible: false,
-          lastValueVisible: true,
-          title: "EMA20",
+          lastValueVisible: false,
+          title: "",
         });
         ema20Series.setData(calculateEMA(candles, 20));
       }
@@ -143,8 +143,8 @@ export function ChartView({
           color: "hsl(200 80% 55%)",
           lineWidth: 1,
           priceLineVisible: false,
-          lastValueVisible: true,
-          title: "EMA50",
+          lastValueVisible: false,
+          title: "",
         });
         ema50Series.setData(calculateEMA(candles, 50));
       }
@@ -182,8 +182,8 @@ export function ChartView({
             lineWidth: 3,
             lineStyle: 0,
             priceLineVisible: false,
-            lastValueVisible: true,
-            title: bo.direction === "up" ? "BO↑" : "BO↓",
+            lastValueVisible: false,
+            title: "",
           });
           // Draw a short bold horizontal dash at breakout point
           const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
@@ -203,8 +203,8 @@ export function ChartView({
             lineWidth: 1,
             lineStyle: 1,
             priceLineVisible: false,
-            lastValueVisible: true,
-            title: isHigh ? "WR↓" : "WR↑",
+            lastValueVisible: false,
+            title: "",
           });
           const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
           s.setData([
@@ -224,8 +224,8 @@ export function ChartView({
             lineWidth: 2,
             lineStyle: 0,
             priceLineVisible: false,
-            lastValueVisible: true,
-            title: tl.type === "ascending" ? "Trend↑" : "Trend↓",
+            lastValueVisible: false,
+            title: "",
           });
           s.setData(tl.points.map((p) => ({ time: p.time as any, value: p.value })));
         });
