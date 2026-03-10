@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useMarketplaceProducts, usePurchaseProduct, MarketplaceProduct } from "@/hooks/useMarketplace";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -105,10 +106,28 @@ const Marketplace = () => {
     setShowCheckout(true);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!selectedProduct || !paymentMethod) {
       toast.error("Please select a payment method");
       return;
+    }
+    if (!proofFile) {
+      toast.error("Please attach your payment proof screenshot");
+      return;
+    }
+
+    // Upload proof
+    let proofUrl: string | undefined;
+    if (user && proofFile) {
+      const ext = proofFile.name.split(".").pop();
+      const path = `proofs/${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("charts")
+        .upload(path, proofFile);
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from("charts").getPublicUrl(path);
+        proofUrl = urlData.publicUrl;
+      }
     }
 
     const storedRef = localStorage.getItem("botvio_referral");
@@ -125,11 +144,13 @@ const Marketplace = () => {
     purchaseMutation.mutate({
       product: selectedProduct,
       paymentMethod,
+      proofUrl,
       affiliateCode,
     });
     setShowCheckout(false);
     setSelectedProduct(null);
     setPaymentMethod("");
+    setProofFile(null);
   };
 
   const getProductIcon = (type: string) => {
@@ -362,7 +383,7 @@ const Marketplace = () => {
 
       {/* Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Checkout</DialogTitle>
             <DialogDescription>
@@ -378,31 +399,21 @@ const Marketplace = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <PaymentMethodSelector
-              planCode={selectedProduct?.slug || "product"}
-              planName={selectedProduct?.name || "Product"}
-              amount={selectedProduct?.price_usd || 0}
-              onPaymentInitiated={(method, details) => {
-                setPaymentMethod(method);
-              }}
-            />
-
-            <div className="space-y-2">
-              <Label>Payment Proof (optional)</Label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-              />
-            </div>
-          </div>
+          <PaymentMethodSelector
+            planCode={selectedProduct?.slug || "product"}
+            planName={selectedProduct?.name || "Product"}
+            amount={selectedProduct?.price_usd || 0}
+            embedded
+            onPaymentInitiated={(method) => setPaymentMethod(method)}
+            onMethodChange={(method) => setPaymentMethod(method)}
+            onProofFileChange={(file) => setProofFile(file)}
+          />
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCheckout(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCheckout} disabled={!paymentMethod || purchaseMutation.isPending}>
+            <Button onClick={handleCheckout} disabled={!paymentMethod || !proofFile || purchaseMutation.isPending}>
               {purchaseMutation.isPending ? "Processing..." : "Complete Purchase"}
             </Button>
           </DialogFooter>

@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { GraduationCap, Clock, Users, CheckCircle, Star, Crown, Lock, ArrowRight, Signal, MessageCircle, Sparkles, Infinity } from "lucide-react";
+import { GraduationCap, Clock, CheckCircle, Star, ArrowRight, Signal, MessageCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 
 interface CourseProgram {
   id: string;
@@ -83,7 +84,7 @@ const COURSE_PROGRAMS: CourseProgram[] = [
   },
   {
     id: "premium-signals-lifetime",
-    productId: "f64b75b6-6293-49e1-9953-7130177bc8b3",
+    productId: "f64b75b6-6293-49e1-9953-7130177bc3f",
     title: "Premium Signals — Lifetime",
     description: "One-time payment for lifetime access to all signals, courses, and future content forever.",
     price: 99,
@@ -112,10 +113,11 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
   const [enrollingId, setEnrollingId] = useState<string | null>(null);
   const [showPayDialog, setShowPayDialog] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<CourseProgram | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [proofFile, setProofFile] = useState<File | null>(null);
 
   const handleEnrollClick = (course: CourseProgram) => {
     if (course.isFree) {
-      // Free course — go directly to learn page
       if (onEnroll) onEnroll(course.category);
       else navigate(`/learn?category=${course.category}`);
       return;
@@ -125,14 +127,36 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
       return;
     }
     setSelectedCourse(course);
+    setPaymentMethod("");
+    setProofFile(null);
     setShowPayDialog(true);
   };
 
   const handleConfirmEnrollment = async () => {
     if (!selectedCourse || !user) return;
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+    if (!proofFile) {
+      toast.error("Please attach your payment proof screenshot");
+      return;
+    }
     setEnrollingId(selectedCourse.id);
-    
+
     try {
+      // Upload proof image
+      let proofUrl: string | undefined;
+      const ext = proofFile.name.split(".").pop();
+      const path = `proofs/${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("charts")
+        .upload(path, proofFile);
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from("charts").getPublicUrl(path);
+        proofUrl = urlData.publicUrl;
+      }
+
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
@@ -152,14 +176,15 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
         .insert({
           user_id: user.id,
           amount_usd: selectedCourse.price,
-          method: "manual",
+          method: paymentMethod,
+          proof_upload_url: proofUrl || null,
           status: "submitted",
           plan_id: null,
         });
 
       if (payError) throw payError;
 
-      toast.success("Subscription request submitted! Complete payment to activate.", { duration: 5000 });
+      toast.success("Order submitted! Admin will confirm your payment shortly.", { duration: 5000 });
       queryClient.invalidateQueries({ queryKey: ["entitlements"] });
       setShowPayDialog(false);
 
@@ -189,9 +214,9 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
         ))}
       </div>
 
-      {/* Payment Dialog */}
+      {/* Payment Dialog — uses same PaymentMethodSelector as marketplace */}
       <Dialog open={showPayDialog} onOpenChange={setShowPayDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Signal className="h-5 w-5 text-primary" />
@@ -205,43 +230,23 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
           </DialogHeader>
 
           {selectedCourse && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div>
-                  <p className="font-semibold">{selectedCourse.title}</p>
-                  <p className="text-sm text-muted-foreground">{selectedCourse.duration} • Signals + Courses</p>
-                </div>
-                <Badge className="bg-gradient-to-r from-warning to-amber-500 text-white text-lg px-4 py-1">
-                  ${selectedCourse.price}
-                </Badge>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm font-medium">What's included:</p>
-                {selectedCourse.features.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
-                    {f}
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
-                <p className="font-medium text-warning mb-1">Payment Instructions</p>
-                <p className="text-muted-foreground">
-                  After clicking "Confirm", you'll receive payment details via WhatsApp. 
-                  Access activates once payment is confirmed by admin.
-                </p>
-              </div>
-            </div>
+            <PaymentMethodSelector
+              planCode={selectedCourse.id}
+              planName={selectedCourse.title}
+              amount={selectedCourse.price}
+              embedded
+              onMethodChange={(method) => setPaymentMethod(method)}
+              onProofFileChange={(file) => setProofFile(file)}
+              onPaymentInitiated={(method) => setPaymentMethod(method)}
+            />
           )}
 
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setShowPayDialog(false)}>Cancel</Button>
-            <Button 
-              variant="gold" 
+            <Button
+              variant="gold"
               onClick={handleConfirmEnrollment}
-              disabled={enrollingId !== null}
+              disabled={enrollingId !== null || !paymentMethod || !proofFile}
             >
               {enrollingId ? "Processing..." : `Confirm — $${selectedCourse?.price}`}
             </Button>
