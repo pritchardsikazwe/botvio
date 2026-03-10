@@ -52,7 +52,7 @@ const COURSE_PROGRAMS: CourseProgram[] = [
     productId: "048325ee-c379-491c-8b4f-ec80fcfc89d9",
     title: "Premium Signals — Monthly",
     description: "Daily premium forex, crypto & indices signals plus access to all paid strategy courses.",
-    price: 19,
+    price: 10,
     duration: "1 Month",
     features: ["Daily premium signals", "Forex Strategies Masterclass access", "Pro Trading Bootcamp access", "AI chart analysis", "WhatsApp signals group"],
     level: "All Levels",

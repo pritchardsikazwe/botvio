@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -67,6 +68,7 @@ interface ChartUploadProps {
 }
 
 export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
+  const navigate = useNavigate();
   const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -191,8 +193,6 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       return;
     }
 
-    // No limits — everyone can use freely
-
     try {
       setIsUploading(true);
 
@@ -232,6 +232,11 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       if (analysisError) throw analysisError;
 
       if (analysisData.error) {
+        if (analysisData.error_code === "daily_limit" || analysisData.redirect) {
+          toast.error("Daily limit reached! Subscribe to Premium Signals for unlimited AI analysis.");
+          navigate("/billing");
+          return;
+        }
         toast.error(analysisData.error);
         return;
       }
@@ -255,7 +260,14 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       }
     } catch (error: any) {
       console.error("Analysis error:", error);
-      toast.error(error.message || "Failed to analyze chart");
+      // Check if the error message indicates daily limit
+      const msg = error?.message || "";
+      if (msg.includes("daily limit") || msg.includes("Daily limit") || msg.includes("403")) {
+        toast.error("Daily limit reached! Subscribe to Premium Signals for unlimited AI analysis.");
+        navigate("/billing");
+        return;
+      }
+      toast.error(msg || "Failed to analyze chart");
     } finally {
       setIsUploading(false);
       setIsAnalyzing(false);
