@@ -67,11 +67,53 @@ serve(async (req) => {
       leverage 
     } = body;
 
-    if (!terminal_uid || !user_id) {
-      throw new Error('Missing required fields: terminal_uid, user_id');
+    if (!terminal_uid) {
+      throw new Error('Missing required field: terminal_uid');
     }
 
-    // Check if terminal already exists
+    // Determine real user UUID: try user_id from body, then look up from existing records
+    let realUserId: string | null = null;
+
+    // Check if user_id is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (user_id && uuidRegex.test(user_id)) {
+      realUserId = user_id;
+    } else {
+      // Try to find user from existing trading_accounts with this terminal_uid
+      const { data: existing } = await supabase
+        .from('trading_accounts')
+        .select('user_id')
+        .eq('login_id', terminal_uid)
+        .eq('broker', 'mt5')
+        .single();
+      if (existing) {
+        realUserId = existing.user_id;
+      }
+    }
+
+    // Always upsert mt5_states regardless of user mapping
+    await supabase
+      .from('mt5_states')
+      .upsert({
+        terminal_uid: terminal_uid,
+        balance: 0,
+        equity: 0,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'terminal_uid' });
+
+    // If no real user found, return success but note no account linked
+    if (!realUserId) {
+      console.log('No valid user_id for terminal', terminal_uid, '- registered in mt5_states only');
+      return new Response(JSON.stringify({
+        success: true,
+        connection_id: null,
+        message: 'Terminal registered (no user linked yet). Set up the connection from your dashboard first.'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check if terminal already exists in trading_accounts
     const { data: existingTerminal } = await supabase
       .from('trading_accounts')
       .select('id')
@@ -80,7 +122,6 @@ serve(async (req) => {
       .single();
 
     if (existingTerminal) {
-      // Update existing terminal
       await supabase
         .from('trading_accounts')
         .update({
@@ -102,10 +143,10 @@ serve(async (req) => {
     const { data: newAccount, error: accountError } = await supabase
       .from('trading_accounts')
       .insert({
-        user_id: user_id,
+        user_id: realUserId,
         broker: 'mt5',
         label: `${broker_name || 'MT5'} - ${login || terminal_uid}`,
-        api_key_encrypted: terminal_uid, // Store terminal_uid as identifier
+        api_key_encrypted: terminal_uid,
         login_id: terminal_uid,
         connection_type: 'mt5_bridge',
         connection_status: 'connected',
@@ -124,14 +165,6 @@ serve(async (req) => {
     if (accountError) {
       throw new Error(`Failed to create account: ${accountError.message}`);
     }
-
-    // Create state entry
-    await supabase
-      .from('mt5_states')
-      .upsert({
-        terminal_uid: terminal_uid,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'terminal_uid' });
 
     return new Response(JSON.stringify({
       success: true,
