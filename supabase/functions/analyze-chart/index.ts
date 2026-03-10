@@ -474,6 +474,7 @@ Keep the response structured and actionable.`;
       take_profit_2: tp2Match ? tp2Match[1].replace(/,/g, '') : null,
       take_profit_3: tp3Match ? tp3Match[1].replace(/,/g, '') : null,
       confidence: confMatch ? confMatch[1] : null,
+      timeframe: detectedTimeframe || timeframe || null,
       analyzed_at: new Date().toISOString(),
     };
 
