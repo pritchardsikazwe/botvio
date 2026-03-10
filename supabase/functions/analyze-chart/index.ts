@@ -350,6 +350,9 @@ Keep the response structured and actionable.`;
     const confMatch = analysisText.match(/\*\*Confidence\*\*[:\s]*(\d+)/i)
                    || analysisText.match(/Confidence[:\s]*(\d+)/i);
     const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL)/i);
+    const tfMatch = analysisText.match(/\*\*Timeframe\*\*[:\s]*(M1|M5|M15|M30|H1|H4|D1|W1|MN)/i)
+                 || analysisText.match(/Timeframe[:\s]*(M1|M5|M15|M30|H1|H4|D1|W1|MN)/i);
+    const detectedTimeframe = tfMatch ? tfMatch[1].toUpperCase() : null;
 
     // Extract instrument name — always trust user-provided symbol
     let detectedInstrument = resolvedSymbol || null;
