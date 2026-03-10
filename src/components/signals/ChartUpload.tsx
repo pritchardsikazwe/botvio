@@ -150,7 +150,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
           entry_price: structured.entry_price ? parseFloat(structured.entry_price) : 0,
           stop_loss: structured.stop_loss ? parseFloat(structured.stop_loss) : null,
           take_profit: structured.take_profit ? parseFloat(structured.take_profit) : null,
-          timeframe: tf || "M5",
+          timeframe: tf || structured.timeframe || "M5",
           category: "forex",
           confidence: structured.confidence ? parseInt(structured.confidence) : null,
           reason: parts.join(" | "),
