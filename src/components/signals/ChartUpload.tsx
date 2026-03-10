@@ -260,7 +260,14 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       }
     } catch (error: any) {
       console.error("Analysis error:", error);
-      toast.error(error.message || "Failed to analyze chart");
+      // Check if the error message indicates daily limit
+      const msg = error?.message || "";
+      if (msg.includes("daily limit") || msg.includes("Daily limit") || msg.includes("403")) {
+        toast.error("Daily limit reached! Subscribe to Premium Signals for unlimited AI analysis.");
+        navigate("/billing");
+        return;
+      }
+      toast.error(msg || "Failed to analyze chart");
     } finally {
       setIsUploading(false);
       setIsAnalyzing(false);
