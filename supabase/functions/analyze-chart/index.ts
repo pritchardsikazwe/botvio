@@ -95,8 +95,43 @@ serve(async (req) => {
         .eq("id", jobId);
     }
 
-    // No daily limits - unlimited for all users
-    const isPremium = false;
+    // Check if user has an active premium entitlement (signal_pack product)
+    let isPremium = false;
+    if (userId) {
+      const { data: entitlement } = await supabase
+        .from("entitlements")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+      isPremium = !!entitlement;
+    }
+
+    // Enforce 10 uploads/day limit for non-premium users
+    const MAX_FREE_DAILY = 10;
+    if (!isPremium) {
+      const today = new Date().toISOString().split("T")[0];
+      if (userId) {
+        const { count } = await supabase
+          .from("chart_analyses")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .gte("created_at", `${today}T00:00:00Z`);
+        if ((count || 0) >= MAX_FREE_DAILY) {
+          await logError(supabase, "analyze-chart", userId, ERROR_CODES.DAILY_LIMIT, "Daily free limit reached", null, 403);
+          if (jobId) {
+            await supabase.from("analysis_jobs").update({ status: "failed", error_code: ERROR_CODES.DAILY_LIMIT, error_message: "Daily limit reached", completed_at: new Date().toISOString() }).eq("id", jobId);
+          }
+          return new Response(
+            JSON.stringify({ error: "You've reached your daily limit of 10 free analyses. Subscribe to Premium Signals for unlimited access.", error_code: ERROR_CODES.DAILY_LIMIT, redirect: "/billing" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        // Guest — we can't enforce server-side, client handles it
+      }
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
