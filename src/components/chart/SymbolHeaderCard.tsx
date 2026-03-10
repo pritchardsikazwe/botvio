@@ -206,7 +206,7 @@ export function SymbolHeaderCard({ symbol, price, changePercent, signal, confide
               <Share2 className="h-4 w-4" />
             </Button>
             <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer">
-              <Button size="sm" className="bg-[hsl(145_70%_45%)] hover:bg-[hsl(145_70%_40%)] text-white font-bold">
+              <Button size="sm" className="bg-warning hover:bg-warning/90 text-warning-foreground font-bold">
                 <ExternalLink className="h-3.5 w-3.5 mr-1" />
                 Trade on Exness
               </Button>

@@ -35,7 +35,7 @@ export function BrokerCTACard() {
         </div>
 
         <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="block">
-          <Button className="w-full bg-[hsl(145_70%_45%)] hover:bg-[hsl(145_70%_40%)] text-white font-extrabold text-sm h-11 shadow-lg shadow-[hsl(145_70%_45%)]/20">
+          <Button className="w-full bg-warning hover:bg-warning/90 text-warning-foreground font-extrabold text-sm h-11 shadow-lg shadow-warning/20">
             <ExternalLink className="h-4 w-4 mr-2" />
             Trade on Exness
           </Button>

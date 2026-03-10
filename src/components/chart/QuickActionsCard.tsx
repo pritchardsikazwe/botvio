@@ -13,7 +13,7 @@ export function QuickActionsCard() {
         <h3 className="text-sm font-bold text-foreground mb-3">Quick Actions</h3>
 
         <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="block">
-          <Button className="w-full bg-[hsl(145_70%_45%)] hover:bg-[hsl(145_70%_45%/0.9)] text-white font-bold" size="sm">
+          <Button className="w-full bg-warning hover:bg-warning/90 text-warning-foreground font-bold" size="sm">
             <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Trade on Exness
           </Button>
         </a>
