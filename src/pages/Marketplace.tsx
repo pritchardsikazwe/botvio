@@ -362,7 +362,7 @@ const Marketplace = () => {
 
       {/* Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Checkout</DialogTitle>
             <DialogDescription>
@@ -378,31 +378,21 @@ const Marketplace = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <PaymentMethodSelector
-              planCode={selectedProduct?.slug || "product"}
-              planName={selectedProduct?.name || "Product"}
-              amount={selectedProduct?.price_usd || 0}
-              onPaymentInitiated={(method, details) => {
-                setPaymentMethod(method);
-              }}
-            />
-
-            <div className="space-y-2">
-              <Label>Payment Proof (optional)</Label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-              />
-            </div>
-          </div>
+          <PaymentMethodSelector
+            planCode={selectedProduct?.slug || "product"}
+            planName={selectedProduct?.name || "Product"}
+            amount={selectedProduct?.price_usd || 0}
+            embedded
+            onPaymentInitiated={(method) => setPaymentMethod(method)}
+            onMethodChange={(method) => setPaymentMethod(method)}
+            onProofFileChange={(file) => setProofFile(file)}
+          />
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCheckout(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCheckout} disabled={!paymentMethod || purchaseMutation.isPending}>
+            <Button onClick={handleCheckout} disabled={!paymentMethod || !proofFile || purchaseMutation.isPending}>
               {purchaseMutation.isPending ? "Processing..." : "Complete Purchase"}
             </Button>
           </DialogFooter>
