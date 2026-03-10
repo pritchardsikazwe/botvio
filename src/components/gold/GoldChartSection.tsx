@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { GoldHauzaSignalButton } from "./GoldHauzaSignalButton";
 
 const TIMEFRAMES = ["1", "5", "15", "60", "D", "W"] as const;
 const TIMEFRAME_LABELS: Record<string, string> = { "1": "1m", "5": "5m", "15": "15m", "60": "1H", "D": "Daily", "W": "Weekly" };
@@ -115,10 +116,15 @@ export function GoldChartSection() {
         ))}
       </div>
 
-      {/* Chart */}
-      <Card className="bg-card border-border/50 overflow-hidden">
-        <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />
-      </Card>
+      {/* Hauza Signal + Chart side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-1">
+          <GoldHauzaSignalButton />
+        </div>
+        <Card className="lg:col-span-3 bg-card border-border/50 overflow-hidden">
+          <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />
+        </Card>
+      </div>
 
       {/* ── Hauza Strategy Quick-Reference ─────── */}
       <div>
