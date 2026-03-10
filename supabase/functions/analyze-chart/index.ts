@@ -170,6 +170,9 @@ serve(async (req) => {
     };
     const resolvedSymbol = symbol ? (SYMBOL_NAME_MAP[symbol] || symbol) : null;
 
+    const timeframeInstruction = `
+**Timeframe**: <detected timeframe from chart, e.g. M1, M5, M15, M30, H1, H4, D1, W1. Look at the chart's time axis, candle spacing, or any timeframe label visible on the chart. This is REQUIRED.>`;
+
     const analysisPrompt = resolvedSymbol
       ? `You are an expert trading chart analyst. The user has uploaded a chart for **${resolvedSymbol}**. This is confirmed — do NOT identify or guess a different instrument. The instrument IS ${resolvedSymbol}.
 
@@ -183,6 +186,7 @@ Analyze the chart and provide:
 **Take Profit 2**: <exact number> (if applicable)
 **Take Profit 3**: <exact number> (if applicable)
 **Confidence**: <number>%
+${timeframeInstruction}
 
 1. **Trend Analysis**: Bullish, Bearish, or Ranging
 2. **Key Levels**: Support and resistance
@@ -207,6 +211,7 @@ REQUIRED STRUCTURED DATA (use exact format):
 **Take Profit 2**: <exact number> (if applicable)
 **Take Profit 3**: <exact number> (if applicable)
 **Confidence**: <number>%
+${timeframeInstruction}
 
 1. **Trend Analysis**: Bullish, Bearish, or Ranging
 2. **Key Levels**: Support and resistance
@@ -345,6 +350,9 @@ Keep the response structured and actionable.`;
     const confMatch = analysisText.match(/\*\*Confidence\*\*[:\s]*(\d+)/i)
                    || analysisText.match(/Confidence[:\s]*(\d+)/i);
     const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL)/i);
+    const tfMatch = analysisText.match(/\*\*Timeframe\*\*[:\s]*(M1|M5|M15|M30|H1|H4|D1|W1|MN)/i)
+                 || analysisText.match(/Timeframe[:\s]*(M1|M5|M15|M30|H1|H4|D1|W1|MN)/i);
+    const detectedTimeframe = tfMatch ? tfMatch[1].toUpperCase() : null;
 
     // Extract instrument name — always trust user-provided symbol
     let detectedInstrument = resolvedSymbol || null;
@@ -466,6 +474,7 @@ Keep the response structured and actionable.`;
       take_profit_2: tp2Match ? tp2Match[1].replace(/,/g, '') : null,
       take_profit_3: tp3Match ? tp3Match[1].replace(/,/g, '') : null,
       confidence: confMatch ? confMatch[1] : null,
+      timeframe: detectedTimeframe || timeframe || null,
       analyzed_at: new Date().toISOString(),
     };
 
