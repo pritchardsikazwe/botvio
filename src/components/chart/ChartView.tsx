@@ -203,8 +203,8 @@ export function ChartView({
             lineWidth: 1,
             lineStyle: 1,
             priceLineVisible: false,
-            lastValueVisible: true,
-            title: isHigh ? "WR↓" : "WR↑",
+            lastValueVisible: false,
+            title: "",
           });
           const halfSpan = Math.max(1, Math.floor((lastTime - firstTime) / candles.length));
           s.setData([
