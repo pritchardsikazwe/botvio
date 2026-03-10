@@ -27,7 +27,8 @@ import {
   Shield,
   BarChart3,
   History,
-  Clock
+  Clock,
+  Info
 } from "lucide-react";
 import { SocialShareButtons } from "@/components/social/SocialShareButtons";
 import { toast } from "sonner";
