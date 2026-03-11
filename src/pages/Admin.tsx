@@ -49,6 +49,7 @@ import { SignalManagersTab } from "@/components/admin/SignalManagersTab";
 import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab";
 import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
 import { AdminSEOPagesTab } from "@/components/admin/AdminSEOPagesTab";
+import { AdminNewsEventsTab } from "@/components/admin/AdminNewsEventsTab";
 
 interface Provider {
   id: string;
