@@ -119,8 +119,8 @@ export const HomeSignalsWidget = () => {
             Latest Trading Signals
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="glass-card animate-pulse">
               <CardContent className="p-4">
                 <div className="h-32 bg-muted/30 rounded-lg" />
