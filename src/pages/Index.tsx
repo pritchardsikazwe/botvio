@@ -13,7 +13,7 @@ import {
   GraduationCap, Target, AlertTriangle, Bot, TrendingUp,
   ArrowRight, Zap, BookOpen, Package, MessageCircle,
   ExternalLink, Download, Smartphone, Sparkles, Signal,
-  BarChart3, Hash, TrendingDown, Activity
+  BarChart3, Hash, TrendingDown, Activity, Newspaper
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
@@ -114,6 +114,11 @@ const Index = () => {
             <Link to="/weltrade" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
                 <Activity className="h-4 w-4" /> Weltrade Hub
+              </Button>
+            </Link>
+            <Link to="/news-calendar" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-destructive/40 text-destructive hover:bg-destructive/10 animate-pulse">
+                <Newspaper className="h-4 w-4" /> 📰 News Calendar
               </Button>
             </Link>
             <Link to="/chart/XAUUSD" className="block">

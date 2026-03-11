@@ -58,6 +58,7 @@ import BotDetailPage from "./pages/BotDetailPage";
 import CountryTrafficPage from "./pages/CountryTrafficPage";
 import GoldTradingHub from "./pages/GoldTradingHub";
 import WeltradeHub from "./pages/WeltradeHub";
+import NewsCalendar from "./pages/NewsCalendar";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
@@ -125,6 +126,7 @@ const App = () => (
               <Route path="/chart/:symbol" element={<ChartPage />} />
               <Route path="/gold" element={<GoldTradingHub />} />
               <Route path="/weltrade" element={<WeltradeHub />} />
+              <Route path="/news-calendar" element={<NewsCalendar />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
