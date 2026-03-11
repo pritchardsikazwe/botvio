@@ -139,7 +139,7 @@ export const HomeSignalsWidget = () => {
     // Active signals that haven't expired
     if (s.status === "ACTIVE" && !isSignalExpired(s)) return true;
     return false;
-  }).slice(0, 3);
+  }).slice(0, 6);
 
   if (displaySignals.length === 0) {
     return (
