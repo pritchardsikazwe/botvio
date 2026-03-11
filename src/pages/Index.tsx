@@ -20,6 +20,7 @@ import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { MarketDashboard } from "@/components/trading/MarketDashboard";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
+import { NewsEventCards } from "@/components/news/NewsEventCard";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
