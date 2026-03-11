@@ -1011,6 +1011,10 @@ const Admin = () => {
               <FileText className="w-4 h-4" />
               SEO Pages
             </TabsTrigger>
+            <TabsTrigger value="news_events" className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              News Events
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
