@@ -49,6 +49,7 @@ import { SignalManagersTab } from "@/components/admin/SignalManagersTab";
 import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab";
 import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
 import { AdminSEOPagesTab } from "@/components/admin/AdminSEOPagesTab";
+import { AdminNewsEventsTab } from "@/components/admin/AdminNewsEventsTab";
 
 interface Provider {
   id: string;
@@ -1010,6 +1011,10 @@ const Admin = () => {
               <FileText className="w-4 h-4" />
               SEO Pages
             </TabsTrigger>
+            <TabsTrigger value="news_events" className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              News Events
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1040,6 +1045,11 @@ const Admin = () => {
           {/* SEO Pages Management Tab */}
           <TabsContent value="seo_pages">
             <AdminSEOPagesTab />
+          </TabsContent>
+
+          {/* News Events Tab */}
+          <TabsContent value="news_events">
+            <AdminNewsEventsTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

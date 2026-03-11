@@ -1988,6 +1988,93 @@ export type Database = {
         }
         Relationships: []
       }
+      news_event_cards: {
+        Row: {
+          actual_value: string | null
+          admin_notes: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          event_code: string
+          event_date: string
+          event_name: string
+          event_time_utc: string | null
+          forecast: string | null
+          fundamentals_summary: string | null
+          hauza_confidence: number | null
+          hauza_direction: string | null
+          hauza_entry_price: number | null
+          hauza_stop_loss: number | null
+          hauza_take_profit_1: number | null
+          hauza_take_profit_2: number | null
+          id: string
+          instrument: string
+          is_active: boolean
+          previous_direction: string | null
+          previous_performance: string | null
+          previous_result: string | null
+          previous_value: string | null
+          technical_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_value?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          event_code: string
+          event_date: string
+          event_name: string
+          event_time_utc?: string | null
+          forecast?: string | null
+          fundamentals_summary?: string | null
+          hauza_confidence?: number | null
+          hauza_direction?: string | null
+          hauza_entry_price?: number | null
+          hauza_stop_loss?: number | null
+          hauza_take_profit_1?: number | null
+          hauza_take_profit_2?: number | null
+          id?: string
+          instrument?: string
+          is_active?: boolean
+          previous_direction?: string | null
+          previous_performance?: string | null
+          previous_result?: string | null
+          previous_value?: string | null
+          technical_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_value?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          event_code?: string
+          event_date?: string
+          event_name?: string
+          event_time_utc?: string | null
+          forecast?: string | null
+          fundamentals_summary?: string | null
+          hauza_confidence?: number | null
+          hauza_direction?: string | null
+          hauza_entry_price?: number | null
+          hauza_stop_loss?: number | null
+          hauza_take_profit_1?: number | null
+          hauza_take_profit_2?: number | null
+          id?: string
+          instrument?: string
+          is_active?: boolean
+          previous_direction?: string | null
+          previous_performance?: string | null
+          previous_result?: string | null
+          previous_value?: string | null
+          technical_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

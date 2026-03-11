@@ -20,6 +20,7 @@ import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { MarketDashboard } from "@/components/trading/MarketDashboard";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
+import { NewsEventCards } from "@/components/news/NewsEventCard";
 import { useNavigate, Link } from "react-router-dom";
 
 const Index = () => {
@@ -132,6 +133,9 @@ const Index = () => {
             </a>
           </div>
         </section>
+
+        {/* 0.5 — High-Impact News Events */}
+        <NewsEventCards />
 
         {/* 1 — Latest Trading Signals */}
         <section>
