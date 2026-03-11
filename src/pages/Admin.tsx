@@ -1047,6 +1047,11 @@ const Admin = () => {
             <AdminSEOPagesTab />
           </TabsContent>
 
+          {/* News Events Tab */}
+          <TabsContent value="news_events">
+            <AdminNewsEventsTab />
+          </TabsContent>
+
           {/* Subscription Requests Tab */}
           <TabsContent value="subscription_requests">
             <SubscriptionRequestsTab />
