@@ -134,6 +134,13 @@ const App = () => (
               <Route path="/gold" element={<GoldTradingHub />} />
               <Route path="/weltrade" element={<WeltradeHub />} />
               <Route path="/news-calendar" element={<NewsCalendar />} />
+              <Route path="/markets" element={<GlobalMarkets />} />
+              <Route path="/markets/us" element={<USMarket />} />
+              <Route path="/markets/europe" element={<EuropeMarket />} />
+              <Route path="/markets/middle-east" element={<MiddleEastMarket />} />
+              <Route path="/markets/asia" element={<AsiaMarket />} />
+              <Route path="/markets/crypto" element={<CryptoMarket />} />
+              <Route path="/markets/africa" element={<AfricaMarket />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
