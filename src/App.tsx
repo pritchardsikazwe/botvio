@@ -59,6 +59,13 @@ import CountryTrafficPage from "./pages/CountryTrafficPage";
 import GoldTradingHub from "./pages/GoldTradingHub";
 import WeltradeHub from "./pages/WeltradeHub";
 import NewsCalendar from "./pages/NewsCalendar";
+import GlobalMarkets from "./pages/markets/GlobalMarkets";
+import USMarket from "./pages/markets/USMarket";
+import EuropeMarket from "./pages/markets/EuropeMarket";
+import MiddleEastMarket from "./pages/markets/MiddleEastMarket";
+import AsiaMarket from "./pages/markets/AsiaMarket";
+import CryptoMarket from "./pages/markets/CryptoMarket";
+import AfricaMarket from "./pages/markets/AfricaMarket";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
