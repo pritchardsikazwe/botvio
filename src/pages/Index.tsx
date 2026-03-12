@@ -13,7 +13,7 @@ import {
   GraduationCap, Target, AlertTriangle, Bot, TrendingUp,
   ArrowRight, Zap, BookOpen, Package, MessageCircle,
   ExternalLink, Download, Smartphone, Sparkles, Signal,
-  BarChart3, Hash, TrendingDown, Activity, Newspaper
+  BarChart3, Hash, TrendingDown, Activity, Newspaper, Globe
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
@@ -136,6 +136,30 @@ const Index = () => {
                 <ExternalLink className="h-4 w-4" /> YouTube
               </Button>
             </a>
+          </div>
+
+          {/* Market Dashboard Shortcuts */}
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-3">
+            <Link to="/markets" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-primary/40 text-primary hover:bg-primary/10">
+                <Globe className="h-3 w-3" /> All Markets
+              </Button>
+            </Link>
+            <Link to="/markets/us" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1">🇺🇸 US</Button>
+            </Link>
+            <Link to="/markets/europe" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1">🇪🇺 Europe</Button>
+            </Link>
+            <Link to="/markets/middle-east" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1">🇸🇦 Middle East</Button>
+            </Link>
+            <Link to="/markets/crypto" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1">₿ Crypto</Button>
+            </Link>
+            <Link to="/markets/africa" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1">🌍 Africa</Button>
+            </Link>
           </div>
         </section>
 

@@ -59,6 +59,13 @@ import CountryTrafficPage from "./pages/CountryTrafficPage";
 import GoldTradingHub from "./pages/GoldTradingHub";
 import WeltradeHub from "./pages/WeltradeHub";
 import NewsCalendar from "./pages/NewsCalendar";
+import GlobalMarkets from "./pages/markets/GlobalMarkets";
+import USMarket from "./pages/markets/USMarket";
+import EuropeMarket from "./pages/markets/EuropeMarket";
+import MiddleEastMarket from "./pages/markets/MiddleEastMarket";
+import AsiaMarket from "./pages/markets/AsiaMarket";
+import CryptoMarket from "./pages/markets/CryptoMarket";
+import AfricaMarket from "./pages/markets/AfricaMarket";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
@@ -127,6 +134,13 @@ const App = () => (
               <Route path="/gold" element={<GoldTradingHub />} />
               <Route path="/weltrade" element={<WeltradeHub />} />
               <Route path="/news-calendar" element={<NewsCalendar />} />
+              <Route path="/markets" element={<GlobalMarkets />} />
+              <Route path="/markets/us" element={<USMarket />} />
+              <Route path="/markets/europe" element={<EuropeMarket />} />
+              <Route path="/markets/middle-east" element={<MiddleEastMarket />} />
+              <Route path="/markets/asia" element={<AsiaMarket />} />
+              <Route path="/markets/crypto" element={<CryptoMarket />} />
+              <Route path="/markets/africa" element={<AfricaMarket />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
