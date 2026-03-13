@@ -8,12 +8,14 @@ import {
   Newspaper, BarChart3, Shield, Target, Lightbulb, ArrowDown, ArrowUp,
   Crosshair, Zap, Pause,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { TradingChecklist } from "./market/TradingChecklist";
 import { NewsImpactBanner } from "./market/NewsImpactBanner";
 import { PatternAlerts } from "./market/PatternAlerts";
 import { usePartnerLinks } from "@/hooks/useSiteSettings";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 
 interface Asset {
   id: string;
@@ -437,6 +439,7 @@ const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "EUR/U
 export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCards?: number; maxBinanceCards?: number; homeMode?: boolean } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isBasicOrAbove, isLoading: gateLoading } = useSubscriptionGate();
   const { data: assets, isLoading: assetsLoading } = useQuery({
     queryKey: ["market-assets"],
     queryFn: async () => {
@@ -901,10 +904,28 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const orderedAssets = HOME_PREFERRED_ORDER
             .map(sym => assets.find(a => a.symbol === sym))
             .filter(Boolean) as Asset[];
+          const freePreview = isBasicOrAbove ? orderedAssets : orderedAssets.slice(0, 2);
           return (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {orderedAssets.map(renderCard)}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {freePreview.map(renderCard)}
+              </div>
+              {!isBasicOrAbove && !gateLoading && (
+                <UpgradePrompt feature="Live Market Intelligence" requiredPlan="Basic" className="mt-4" />
+              )}
+            </>
+          );
+        }
+
+        if (!isBasicOrAbove && !gateLoading) {
+          const preview = limitedNonBinance.slice(0, 2);
+          return (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {preview.map(renderCard)}
+              </div>
+              <UpgradePrompt feature="Full Market Intelligence" requiredPlan="Basic" className="mt-4" />
+            </>
           );
         }
 
