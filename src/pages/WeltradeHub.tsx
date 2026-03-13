@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart3, Signal, Lightbulb, Users, Crosshair, ExternalLink } from "lucide-react";
 import { SyntxChartSection } from "@/components/weltrade/SyntxChartSection";
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
-import { SyntxHauzaStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
+import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
 import { SyntxTipsSection } from "@/components/weltrade/SyntxTipsSection";
 import { SyntxCommunitySection } from "@/components/weltrade/SyntxCommunitySection";
 
