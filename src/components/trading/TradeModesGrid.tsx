@@ -16,7 +16,7 @@ const TRADE_MODES = [
     title: "Digits",
     description: "Matches/Differs, Over/Under, Even/Odd",
     icon: <Hash className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Fast"],
+    badges: ["Botvio AI", "Fast"],
     gradient: "from-violet-500/20 to-purple-600/20",
     borderColor: "border-violet-500/30",
     iconColor: "text-violet-400",
