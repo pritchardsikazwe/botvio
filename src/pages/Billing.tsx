@@ -418,7 +418,7 @@ const Billing = () => {
           <DialogHeader>
             <DialogTitle>Upgrade to {selectedPlan?.name}</DialogTitle>
             <DialogDescription>
-              Choose your preferred payment method
+              Choose your preferred payment method, send payment, and attach proof.
             </DialogDescription>
           </DialogHeader>
           <PaymentMethodSelector
@@ -426,6 +426,27 @@ const Billing = () => {
             planCode={selectedPlan?.code || "vip"}
             planName={selectedPlan?.name || "VIP"}
             onPaymentInitiated={handlePaymentInitiated}
+            onOfflinePayment={async (method: string, proofFile?: File) => {
+              if (!selectedPlan) return;
+              setUploading(true);
+              try {
+                let proofUrl: string | undefined;
+                if (proofFile) {
+                  proofUrl = await uploadProof.mutateAsync(proofFile);
+                }
+                await createPaymentRequest.mutateAsync({
+                  plan_id: selectedPlan.id,
+                  amount_usd: selectedPlan.price_usd,
+                  method,
+                  proof_upload_url: proofUrl,
+                });
+                setShowPaymentModal(false);
+              } catch (err) {
+                // handled by mutation
+              } finally {
+                setUploading(false);
+              }
+            }}
           />
         </DialogContent>
       </Dialog>
