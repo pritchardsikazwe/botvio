@@ -272,8 +272,8 @@ function TipBlock({ tip, breakoutPrice, symbol }: { tip: string | null; breakout
   );
 }
 
-// Map asset symbols to relevant Hauza Sniper strategies
-const HAUZA_STRATEGIES: { id: string; label: string; emoji: string; route: string }[] = [
+// Map asset symbols to relevant Botvio AI strategies
+const BOTVIO_STRATEGIES: { id: string; label: string; emoji: string; route: string }[] = [
   { id: "digit-contracts", label: "Digits", emoji: "🔢", route: "/trade/style/digit-contracts" },
   { id: "rise-fall-scalping", label: "Rise/Fall", emoji: "📈", route: "/trade/style/rise-fall-scalping" },
   { id: "boom-crash", label: "Boom/Crash", emoji: "💥", route: "/trade/style/boom-crash" },
