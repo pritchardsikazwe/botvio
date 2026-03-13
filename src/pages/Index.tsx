@@ -191,7 +191,86 @@ const Index = () => {
           <ChartUpload />
         </section>
 
-        {/* 3 — Premium Mentorship Programs */}
+        {/* 3 — Subscription Plans */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Crown className="h-5 w-5 text-primary" />
+              Subscription Plans
+            </h2>
+            <Badge className="bg-success/20 text-success border-success/30 text-xs font-bold">Start Free</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Free Trial */}
+            <Card className="glass-card border-muted-foreground/20 hover:border-primary/40 transition-all">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">Free Trial</CardTitle>
+                <p className="text-2xl font-extrabold text-foreground">$0<span className="text-sm font-normal text-muted-foreground">/forever</span></p>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 5 chart analyses / day</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Community signals</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Basic education</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 1 trading account</div>
+                <Button variant="outline" className="w-full mt-3 text-xs" size="sm" asChild>
+                  <Link to="/billing">Get Started</Link>
+                </Button>
+              </CardContent>
+            </Card>
+            {/* Basic */}
+            <Card className="glass-card border-primary/30 hover:border-primary/60 transition-all">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">Basic <Badge className="text-[10px] bg-primary/20 text-primary">Popular</Badge></CardTitle>
+                <p className="text-2xl font-extrabold text-foreground">$10<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 50 chart analyses / week</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Premium signals</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> All courses access</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 2 trading accounts</div>
+                <Button className="w-full mt-3 text-xs bg-primary hover:bg-primary/90" size="sm" asChild>
+                  <Link to="/billing">Subscribe</Link>
+                </Button>
+              </CardContent>
+            </Card>
+            {/* Standard */}
+            <Card className="glass-card border-warning/30 hover:border-warning/60 transition-all">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">Standard <Star className="h-4 w-4 text-warning" /></CardTitle>
+                <p className="text-2xl font-extrabold text-foreground">$25<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 100 chart analyses / month</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Copy trading access</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Premium bots</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 5 trading accounts</div>
+                <Button className="w-full mt-3 text-xs bg-warning hover:bg-warning/90 text-warning-foreground" size="sm" asChild>
+                  <Link to="/billing">Subscribe</Link>
+                </Button>
+              </CardContent>
+            </Card>
+            {/* VIP */}
+            <Card className="glass-card border-destructive/30 hover:border-destructive/60 transition-all relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-destructive text-destructive-foreground text-[10px] font-bold px-3 py-0.5 rounded-bl-lg">BEST VALUE</div>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">VIP <Crown className="h-4 w-4 text-destructive" /></CardTitle>
+                <p className="text-2xl font-extrabold text-foreground">$49<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Unlimited chart analyses</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> All strategies included</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Provider listing</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Unlimited accounts & bots</div>
+                <Button className="w-full mt-3 text-xs bg-destructive hover:bg-destructive/90 text-destructive-foreground" size="sm" asChild>
+                  <Link to="/billing">Go VIP</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          <p className="text-xs text-muted-foreground text-center mt-3">All plans include chart analysis usage. Strategies can also be purchased individually from the <Link to="/marketplace" className="text-primary underline">Marketplace</Link>.</p>
+        </section>
+
+        {/* 4 — Premium Mentorship Programs */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
@@ -205,12 +284,12 @@ const Index = () => {
           <CourseEnrollmentCards compact />
         </section>
 
-        {/* 3c — Live Market Intelligence */}
+        {/* 5 — Live Market Intelligence */}
         <section>
           <MarketDashboard homeMode />
         </section>
 
-        {/* 5 — Deriv Options Shortcut */}
+        {/* 6 — Deriv Options Shortcut */}
         <section>
           <Link to="/deriv-options" className="block">
             <Card className="glass-card border-primary/30 hover:border-primary/60 transition-all hover:scale-[1.01] cursor-pointer overflow-hidden">
