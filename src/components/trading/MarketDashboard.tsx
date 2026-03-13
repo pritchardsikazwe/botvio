@@ -896,6 +896,18 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           );
         };
 
+        // Home mode: show specific ordered subset (merged, no sections)
+        if (homeMode) {
+          const orderedAssets = HOME_PREFERRED_ORDER
+            .map(sym => assets.find(a => a.symbol === sym))
+            .filter(Boolean) as Asset[];
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {orderedAssets.map(renderCard)}
+            </div>
+          );
+        }
+
         return (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
