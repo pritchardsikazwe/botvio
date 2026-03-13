@@ -94,7 +94,7 @@ const TRADE_MODES = [
     title: "Accumulators",
     description: "Accumulate gains with each tick",
     icon: <BarChart3 className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Steady"],
+    badges: ["Botvio AI", "Steady"],
     gradient: "from-teal-500/20 to-emerald-600/20",
     borderColor: "border-teal-500/30",
     iconColor: "text-teal-400",
