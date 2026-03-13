@@ -16,7 +16,7 @@ import { BarChart3, Signal, Lightbulb, Users, Crosshair, Target, TrendingUp, Clo
 const QUICK_STATS = [
   { icon: Target, label: "Key Levels", value: "S/R + Round Numbers", color: "text-primary" },
   { icon: Clock, label: "Best Sessions", value: "London & NY Overlap", color: "text-warning" },
-  { icon: TrendingUp, label: "Strategy Focus", value: "Hauza Sniper", color: "text-success" },
+  { icon: TrendingUp, label: "Strategy Focus", value: "Botvio AI", color: "text-success" },
   { icon: ShieldCheck, label: "Risk Rule", value: "Max 2% per trade", color: "text-destructive" },
 ];
 
