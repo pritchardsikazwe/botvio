@@ -439,6 +439,7 @@ const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "EUR/U
 export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCards?: number; maxBinanceCards?: number; homeMode?: boolean } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isBasicOrAbove, isLoading: gateLoading } = useSubscriptionGate();
   const { data: assets, isLoading: assetsLoading } = useQuery({
     queryKey: ["market-assets"],
     queryFn: async () => {
