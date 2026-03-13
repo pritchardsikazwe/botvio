@@ -16,7 +16,7 @@ const TRADE_MODES = [
     title: "Digits",
     description: "Matches/Differs, Over/Under, Even/Odd",
     icon: <Hash className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Fast"],
+    badges: ["Botvio AI", "Fast"],
     gradient: "from-violet-500/20 to-purple-600/20",
     borderColor: "border-violet-500/30",
     iconColor: "text-violet-400",
@@ -29,7 +29,7 @@ const TRADE_MODES = [
     title: "Multipliers",
     description: "Amplify gains with controlled risk",
     icon: <Layers className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "All Markets"],
+    badges: ["Botvio AI", "All Markets"],
     gradient: "from-blue-500/20 to-cyan-600/20",
     borderColor: "border-blue-500/30",
     iconColor: "text-blue-400",
@@ -42,7 +42,7 @@ const TRADE_MODES = [
     title: "Rise / Fall",
     description: "Predict short-term direction",
     icon: <TrendingUp className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Beginner"],
+    badges: ["Botvio AI", "Beginner"],
     gradient: "from-emerald-500/20 to-green-600/20",
     borderColor: "border-emerald-500/30",
     iconColor: "text-emerald-400",
@@ -81,7 +81,7 @@ const TRADE_MODES = [
     title: "Ticks",
     description: "Tick-by-tick price stream trading",
     icon: <Timer className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Fast"],
+    badges: ["Botvio AI", "Fast"],
     gradient: "from-pink-500/20 to-rose-600/20",
     borderColor: "border-pink-500/30",
     iconColor: "text-pink-400",
@@ -94,7 +94,7 @@ const TRADE_MODES = [
     title: "Accumulators",
     description: "Accumulate gains with each tick",
     icon: <BarChart3 className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Steady"],
+    badges: ["Botvio AI", "Steady"],
     gradient: "from-teal-500/20 to-emerald-600/20",
     borderColor: "border-teal-500/30",
     iconColor: "text-teal-400",
@@ -175,8 +175,8 @@ export const TradeModesGrid = () => {
                   {mode.badges.map((b) => (
                     <Badge
                       key={b}
-                      variant={b === "Hauza Sniper" ? "default" : "outline"}
-                      className={`text-[9px] px-1.5 py-0 ${b === "Hauza Sniper" ? "bg-primary/80 text-primary-foreground" : ""}`}
+                      variant={b === "Botvio AI" ? "default" : "outline"}
+                      className={`text-[9px] px-1.5 py-0 ${b === "Botvio AI" ? "bg-primary/80 text-primary-foreground" : ""}`}
                     >
                       {b}
                     </Badge>

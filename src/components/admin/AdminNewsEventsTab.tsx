@@ -240,7 +240,7 @@ export function AdminNewsEventsTab() {
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Instrument</Label><Input value={form.instrument} onChange={(e) => F("instrument", e.target.value)} /></div>
               <div>
-                <Label>Hauza Direction</Label>
+                <Label>Botvio Direction</Label>
                 <Select value={form.hauza_direction} onValueChange={(v) => F("hauza_direction", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>

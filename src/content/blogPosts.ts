@@ -24,7 +24,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio operates through several key components that work together seamlessly:</p>
 
 <h3>1. Signal Generation Engine</h3>
-<p>At the heart of Botvio is the Hauza Sniper signal engine. This proprietary system uses a combination of EMA (Exponential Moving Average) crossovers, RSI (Relative Strength Index) analysis, and advanced Markov transition models to generate trade signals. Botvio processes hundreds of ticks per second to identify the optimal entry points.</p>
+<p>At the heart of Botvio is the Botvio AI signal engine. This proprietary system uses a combination of EMA (Exponential Moving Average) crossovers, RSI (Relative Strength Index) analysis, and advanced pattern detection models to generate trade signals. Botvio processes hundreds of ticks per second to identify the optimal entry points.</p>
 
 <h3>2. Risk Management</h3>
 <p>Botvio includes built-in risk guardrails that protect your capital. Features include daily loss limits, maximum trade frequency controls, and intelligent stake sizing based on your account balance. Botvio never risks more than what you configure, ensuring your trading stays within safe boundaries.</p>
@@ -335,7 +335,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio uses advanced machine learning algorithms to analyze market data in real-time. The Botvio AI engine processes hundreds of price ticks per second, identifying patterns that human traders often miss. Here's how Botvio creates earning opportunities:</p>
 
 <h3>1. AI-Powered Signal Generation</h3>
-<p>Botvio's Hauza Sniper engine generates trading signals across 8 different contract types on Deriv. Each signal includes a confidence score, suggested duration, and risk assessment. Botvio only triggers trades when conditions meet strict quality thresholds.</p>
+<p>Botvio's AI engine generates trading signals across 8 different contract types on Deriv. Each signal includes a confidence score, suggested duration, and risk assessment. Botvio only triggers trades when conditions meet strict quality thresholds.</p>
 
 <h3>2. Automated Trade Execution</h3>
 <p>Once you configure your risk settings, Botvio can execute trades automatically. The Auto Mode feature places trades when Botvio's confidence score exceeds 70%, ensuring only high-probability setups are taken.</p>
@@ -419,7 +419,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <h2>5 Ways to Earn with Botvio</h2>
 
 <h3>1. AI Signal Trading</h3>
-<p>Let Botvio generate trading signals and execute them on your <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a>. Botvio's Hauza Sniper engine analyzes market data continuously and alerts you to high-probability opportunities.</p>
+<p>Let Botvio generate trading signals and execute them on your <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a>. Botvio's AI engine analyzes market data continuously and alerts you to high-probability opportunities.</p>
 
 <h3>2. Copy Trading</h3>
 <p>Follow successful signal providers on Botvio's marketplace. When they profit, you profit. Botvio automatically mirrors their trades to your account.</p>
@@ -535,7 +535,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio provides a demo token so you can practice risk-free. Use the demo token <strong>03Ddx1HRu2yFRJ8</strong> to connect instantly and practice trading without risking real money.</p>
 
 <h2>Step 4: Use Botvio's AI</h2>
-<p>Botvio's Hauza Sniper engine uses EMA crossovers, RSI analysis, and Markov transitions to identify high-probability trade setups. Enable Auto Mode and let Botvio trade for you 24/7.</p>
+<p>Botvio's AI engine uses EMA crossovers, RSI analysis, and pattern detection to identify high-probability trade setups. Enable Auto Mode and let Botvio trade for you 24/7.</p>
 
 <h2>Step 5: Manage Risk</h2>
 <p>Never risk more than 1-2% of your balance per trade. Botvio's built-in risk guardrails help enforce discipline. Set daily loss limits and use the minimum stake to learn.</p>

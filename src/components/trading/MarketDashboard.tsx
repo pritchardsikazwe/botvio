@@ -272,8 +272,8 @@ function TipBlock({ tip, breakoutPrice, symbol }: { tip: string | null; breakout
   );
 }
 
-// Map asset symbols to relevant Hauza Sniper strategies
-const HAUZA_STRATEGIES: { id: string; label: string; emoji: string; route: string }[] = [
+// Map asset symbols to relevant Botvio AI strategies
+const BOTVIO_STRATEGIES: { id: string; label: string; emoji: string; route: string }[] = [
   { id: "digit-contracts", label: "Digits", emoji: "🔢", route: "/trade/style/digit-contracts" },
   { id: "rise-fall-scalping", label: "Rise/Fall", emoji: "📈", route: "/trade/style/rise-fall-scalping" },
   { id: "boom-crash", label: "Boom/Crash", emoji: "💥", route: "/trade/style/boom-crash" },
@@ -289,25 +289,25 @@ function getStrategiesForAsset(assetType: string, symbol: string) {
   const sym = symbol.toUpperCase();
   // Forex & commodities: Rise/Fall, Multipliers
   if (type === "forex" || type === "commodity" || type === "metal") {
-    return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
   }
   // Crypto: Rise/Fall, Multipliers
   if (type === "crypto") {
-    return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers"].includes(s.id));
   }
   // Boom/Crash symbols
   if (sym.includes("BOOM") || sym.includes("CRASH")) {
-    return HAUZA_STRATEGIES.filter(s => ["boom-crash", "rise-fall-scalping"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["boom-crash", "rise-fall-scalping"].includes(s.id));
   }
   // Synthetic / volatility indices
   if (type === "synthetic" || sym.startsWith("R_") || sym.includes("HZ")) {
-    return HAUZA_STRATEGIES.filter(s => ["digit-contracts", "rise-fall-scalping", "accumulators", "turbo", "ticks", "multipliers"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["digit-contracts", "rise-fall-scalping", "accumulators", "turbo", "ticks", "multipliers"].includes(s.id));
   }
   // Default: show core modes
-  return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
+  return BOTVIO_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
 }
 
-function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol: string }) {
+function BotvioStrategiesBlock({ assetType, symbol }: { assetType: string; symbol: string }) {
   const navigate = useNavigate();
   const strategies = getStrategiesForAsset(assetType, symbol);
   if (!strategies.length) return null;
@@ -317,7 +317,7 @@ function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol
       <div className="flex items-center gap-1.5">
         <Crosshair className="h-3.5 w-3.5 text-primary" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-          Hauza Strategies
+          Botvio AI Strategies
         </span>
         <Zap className="h-3 w-3 text-warning" />
       </div>
@@ -339,7 +339,7 @@ function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol
   );
 }
 
-const HAUZA_BTN_CONFIG: Record<string, {
+const BOTVIO_BTN_CONFIG: Record<string, {
   bg: string; border: string; text: string; glow: string; icon: typeof TrendingUp; pulse: string; label: string;
 }> = {
   buy: {
@@ -369,9 +369,9 @@ const HAUZA_BTN_CONFIG: Record<string, {
   },
 };
 
-function HauzaSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefined; symbol: string; navigate: ReturnType<typeof useNavigate> }) {
+function BotvioSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefined; symbol: string; navigate: ReturnType<typeof useNavigate> }) {
   const signalKey = sig?.signal?.toLowerCase() || "wait";
-  const config = HAUZA_BTN_CONFIG[signalKey] || HAUZA_BTN_CONFIG.wait;
+  const config = BOTVIO_BTN_CONFIG[signalKey] || BOTVIO_BTN_CONFIG.wait;
   const Icon = config.icon;
   const isActive = signalKey === "buy" || signalKey === "sell";
   const chartSlug = symbol.replace("/", "");
@@ -391,7 +391,7 @@ function HauzaSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefine
           <div className="text-left">
             <div className="flex items-center gap-2">
               <Crosshair className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Hauza Signal</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Botvio Signal</span>
             </div>
             <span className={`text-lg font-black tracking-tight ${config.text}`}>
               {config.label} {isActive ? symbol.replace("/", "") : ""}
@@ -760,8 +760,8 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 {/* Key Levels */}
                 {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
-                {/* Hauza Signal Button */}
-                <HauzaSignalButton sig={sig} symbol={asset.symbol} navigate={navigate} />
+                {/* Botvio Signal Button */}
+                <BotvioSignalButton sig={sig} symbol={asset.symbol} navigate={navigate} />
 
                 {sig && (sig.signal === "buy" || sig.signal === "sell") && (
                   <div className="border-t border-border/40 pt-2 space-y-1.5">

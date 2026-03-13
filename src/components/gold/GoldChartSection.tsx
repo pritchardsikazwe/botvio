@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { GoldHauzaSignalButton } from "./GoldHauzaSignalButton";
+import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
 
 const TIMEFRAMES = ["1", "5", "15", "60", "D", "W"] as const;
 const TIMEFRAME_LABELS: Record<string, string> = { "1": "1m", "5": "5m", "15": "15m", "60": "1H", "D": "Daily", "W": "Weekly" };
@@ -116,22 +116,22 @@ export function GoldChartSection() {
         ))}
       </div>
 
-      {/* Hauza Signal + Chart side by side */}
+      {/* Botvio Signal + Chart side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-1">
-          <GoldHauzaSignalButton />
+          <GoldBotvioSignalButton />
         </div>
         <Card className="lg:col-span-3 bg-card border-border/50 overflow-hidden">
           <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />
         </Card>
       </div>
 
-      {/* ── Hauza Strategy Quick-Reference ─────── */}
-      <div>
-        <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 mb-3">
-          <Crosshair className="h-4 w-4 text-primary" />
-          Hauza Gold Strategies — Quick Reference
-          <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Use with chart above</Badge>
+       {/* ── Botvio Strategy Quick-Reference ─────── */}
+       <div>
+         <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 mb-3">
+           <Crosshair className="h-4 w-4 text-primary" />
+           Botvio AI Gold Strategies — Quick Reference
+           <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Use with chart above</Badge>
         </h3>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">

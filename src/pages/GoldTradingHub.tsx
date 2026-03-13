@@ -8,7 +8,7 @@ import { GoldTipsSection } from "@/components/gold/GoldTipsSection";
 import { GoldCommunitySection } from "@/components/gold/GoldCommunitySection";
 import { GoldSentimentGauge } from "@/components/gold/GoldSentimentGauge";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
-import { GoldHauzaStrategy } from "@/components/gold/GoldHauzaStrategy";
+import { GoldBotvioStrategy } from "@/components/gold/GoldHauzaStrategy";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, Signal, Lightbulb, Users, Crosshair, Target, TrendingUp, Clock, ShieldCheck } from "lucide-react";
@@ -16,7 +16,7 @@ import { BarChart3, Signal, Lightbulb, Users, Crosshair, Target, TrendingUp, Clo
 const QUICK_STATS = [
   { icon: Target, label: "Key Levels", value: "S/R + Round Numbers", color: "text-primary" },
   { icon: Clock, label: "Best Sessions", value: "London & NY Overlap", color: "text-warning" },
-  { icon: TrendingUp, label: "Strategy Focus", value: "Hauza Sniper", color: "text-success" },
+  { icon: TrendingUp, label: "Strategy Focus", value: "Botvio AI", color: "text-success" },
   { icon: ShieldCheck, label: "Risk Rule", value: "Max 2% per trade", color: "text-destructive" },
 ];
 
@@ -27,7 +27,7 @@ const GoldTradingHub = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Gold Trading Hub – Live XAUUSD Charts, Signals & Strategies"
-        description="Your complete gold trading terminal. Real-time XAUUSD charts with Hauza Sniper strategies, AI-powered signals, expert analysis, risk management tips, and a community of gold traders."
+        description="Your complete gold trading terminal. Real-time XAUUSD charts with Botvio AI strategies, AI-powered signals, expert analysis, risk management tips, and a community of gold traders."
       />
       <Header />
 
@@ -41,13 +41,13 @@ const GoldTradingHub = () => {
               <div className="flex items-center gap-2 mb-2">
                 <Badge className="bg-primary/20 text-primary border-primary/30 font-mono text-xs">XAUUSD</Badge>
                 <Badge variant="outline" className="border-success/40 text-success text-xs">Market Open</Badge>
-                <Badge variant="outline" className="border-warning/30 text-warning text-xs">Hauza Strategies Live</Badge>
+                <Badge variant="outline" className="border-warning/30 text-warning text-xs">Botvio AI Strategies Live</Badge>
               </div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 Gold Trading <span className="text-primary">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                Real-time charts with built-in Hauza Sniper strategies, AI signals, expert tips & community — everything you need to trade gold profitably.
+                Real-time charts with built-in Botvio AI strategies, AI signals, expert tips & community — everything you need to trade gold profitably.
               </p>
             </div>
             <GoldPriceHeader />
@@ -111,7 +111,7 @@ const GoldTradingHub = () => {
             <GoldSignalsSection />
           </TabsContent>
           <TabsContent value="strategy" className="mt-6">
-            <GoldHauzaStrategy />
+            <GoldBotvioStrategy />
           </TabsContent>
           <TabsContent value="tips" className="mt-6">
             <GoldTipsSection />

@@ -112,13 +112,13 @@ export function NewsEventCards() {
               </CardHeader>
 
               <CardContent className="space-y-3">
-                {/* Hauza Direction Button */}
+                {/* Botvio Direction Button */}
                 {dir && dir !== "WAIT" && (
                   <div className={`rounded-xl p-3 bg-gradient-to-r ${dir === "BUY" ? "from-emerald-500/20 to-emerald-500/5" : "from-red-500/20 to-red-500/5"} border ${dir === "BUY" ? "border-emerald-500/30" : "border-red-500/30"}`}>
                     <div className="flex items-center gap-2 mb-2">
                       <Icon className={`h-5 w-5 ${cfg.text}`} />
                       <span className={`text-base font-extrabold ${cfg.text}`}>
-                        Hauza Signal: {dir} {ev.instrument}
+                        Botvio Signal: {dir} {ev.instrument}
                       </span>
                       {ev.hauza_confidence && (
                         <Badge className={`ml-auto text-xs ${dir === "BUY" ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"}`}>

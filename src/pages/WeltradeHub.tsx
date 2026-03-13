@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart3, Signal, Lightbulb, Users, Crosshair, ExternalLink } from "lucide-react";
 import { SyntxChartSection } from "@/components/weltrade/SyntxChartSection";
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
-import { SyntxHauzaStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
+import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
 import { SyntxTipsSection } from "@/components/weltrade/SyntxTipsSection";
 import { SyntxCommunitySection } from "@/components/weltrade/SyntxCommunitySection";
 
@@ -20,7 +20,7 @@ const WeltradeHub = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Weltrade Hub – PainX, GainX & TrendX Charts & Signals"
-        description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Hauza Sniper strategies, signals, tips & community for Weltrade synthetic indices."
+        description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Botvio AI strategies, signals, tips & community for Weltrade synthetic indices."
         ogImage="https://botvio.live/icon-512.png"
       />
       <Header />
@@ -39,7 +39,7 @@ const WeltradeHub = () => {
                 Weltrade <span className="text-warning">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                PainX, GainX, TrendX & Volatility indices — charts, Hauza strategies, signals & community all in one place.
+                PainX, GainX, TrendX & Volatility indices — charts, Botvio AI strategies, signals & community all in one place.
               </p>
             </div>
             <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
@@ -52,7 +52,7 @@ const WeltradeHub = () => {
 
         {/* Strategy & Tips — Always visible outside tabs */}
         <section className="space-y-6">
-          <SyntxHauzaStrategy />
+          <SyntxBotvioStrategy />
           <SyntxTipsSection />
         </section>
 

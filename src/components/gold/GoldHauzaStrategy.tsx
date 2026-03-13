@@ -101,7 +101,7 @@ const GOLD_ENHANCED_TIPS = [
   { icon: ShieldCheck, title: "Spread Trap Avoidance", desc: "Gold spreads widen to 30-50 pips during news. Close positions or widen stops before high-impact USD events. Check your broker's spread before entry." },
 ];
 
-export function GoldHauzaStrategy() {
+export function GoldBotvioStrategy() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
@@ -111,7 +111,7 @@ export function GoldHauzaStrategy() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-extrabold text-foreground flex items-center gap-2">
             <Crosshair className="h-5 w-5 text-primary" />
-            Hauza Gold Sniper Strategies
+            Botvio AI Gold Strategies
           </h2>
           <Badge className="bg-primary/20 text-primary border-primary/30 text-xs font-bold">4 Setups</Badge>
         </div>
@@ -188,7 +188,7 @@ export function GoldHauzaStrategy() {
       <section>
         <h2 className="text-lg font-extrabold text-foreground mb-4 flex items-center gap-2">
           <Zap className="h-5 w-5 text-primary" />
-          Hauza Gold Pro Tips
+           Botvio Gold Pro Tips
           <Badge variant="outline" className="text-xs border-primary/30 text-primary">Exclusive</Badge>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -220,7 +220,7 @@ export function GoldHauzaStrategy() {
         </Link>
         <Link to="/trade-modes" className="flex-1">
           <Button variant="outline" className="w-full font-bold border-primary/30 text-primary">
-            <Crosshair className="h-4 w-4 mr-2" /> All Hauza Modes
+            <Crosshair className="h-4 w-4 mr-2" /> All Botvio Modes
           </Button>
         </Link>
       </div>

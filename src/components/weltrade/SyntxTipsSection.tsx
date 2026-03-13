@@ -33,7 +33,7 @@ const TIPS_BEGINNER = [
 ];
 
 const TIPS_PRO = [
-  { icon: BarChart3, title: "Spike Drought Detection", desc: "Count candles since the last spike on PainX. After 30-50 calm candles, spike probability increases. This is the foundation of the Hauza Spike Scalper strategy." },
+  { icon: BarChart3, title: "Spike Drought Detection", desc: "Count candles since the last spike on PainX. After 30-50 calm candles, spike probability increases. This is the foundation of the Botvio AI Spike Scalper strategy." },
   { icon: Zap, title: "Cross-Index Correlation", desc: "PainX 50 and PainX 100 often spike within minutes of each other. Use the lower-numbered index as a leading indicator for the higher one." },
   { icon: Target, title: "Volume Profile on TrendX", desc: "TrendX respects volume-weighted levels. Mark high-volume zones as support/resistance for better entry precision." },
   { icon: DollarSign, title: "Session-Based Edge", desc: "SyntX liquidity peaks during European hours (08:00-16:00 GMT). Spikes are more predictable during this window. Avoid late-night trading." },

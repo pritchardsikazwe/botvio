@@ -174,7 +174,7 @@ const BEST_FOR_SMALL = [
   { index: "FlipX", difficulty: "Hard", style: "Random range", color: "text-muted-foreground" },
 ];
 
-export function SyntxHauzaStrategy() {
+export function SyntxBotvioStrategy() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
   const [showFlip, setShowFlip] = useState(false);
   const [showIndicators, setShowIndicators] = useState(false);
@@ -514,7 +514,7 @@ export function SyntxHauzaStrategy() {
         </a>
         <Link to="/trade-modes" className="flex-1">
           <Button variant="outline" className="w-full font-bold border-primary/30 text-primary">
-            <Crosshair className="h-4 w-4 mr-2" /> All Hauza Modes
+            <Crosshair className="h-4 w-4 mr-2" /> All Botvio Modes
           </Button>
         </Link>
       </div>
