@@ -24,14 +24,14 @@ const API_FEATURES = [
 ];
 
 const SUPPORTED_CONTRACTS = [
-  { name: "Digits (Matches/Differs)", icon: Hash, badge: "Fast", color: "text-violet-400", border: "border-violet-500/30" },
-  { name: "Rise / Fall", icon: TrendingUp, badge: "Beginner", color: "text-emerald-400", border: "border-emerald-500/30" },
-  { name: "Multipliers (10x–1000x)", icon: Layers, badge: "All Markets", color: "text-blue-400", border: "border-blue-500/30" },
-  { name: "Accumulators", icon: BarChart3, badge: "Steady", color: "text-teal-400", border: "border-teal-500/30" },
-  { name: "Boom / Crash Spikes", icon: Zap, badge: "Advanced", color: "text-orange-400", border: "border-orange-500/30" },
-  { name: "Ticks Trading", icon: Timer, badge: "Ultra-Fast", color: "text-pink-400", border: "border-pink-500/30" },
-  { name: "Higher / Lower", icon: Target, badge: "Timed", color: "text-sky-400", border: "border-sky-500/30" },
-  { name: "Turbo Contracts", icon: Crosshair, badge: "Speed", color: "text-amber-400", border: "border-amber-500/30" },
+  { name: "Digits (Matches/Differs)", icon: Hash, badge: "Fast", color: "text-violet-400", border: "border-violet-500/30", styleId: "digit-contracts" },
+  { name: "Rise / Fall", icon: TrendingUp, badge: "Beginner", color: "text-emerald-400", border: "border-emerald-500/30", styleId: "rise-fall-scalping" },
+  { name: "Multipliers (10x–1000x)", icon: Layers, badge: "All Markets", color: "text-blue-400", border: "border-blue-500/30", styleId: "multipliers" },
+  { name: "Accumulators", icon: BarChart3, badge: "Steady", color: "text-teal-400", border: "border-teal-500/30", styleId: "accumulators" },
+  { name: "Boom / Crash Spikes", icon: Zap, badge: "Advanced", color: "text-orange-400", border: "border-orange-500/30", styleId: "boom-crash" },
+  { name: "Ticks Trading", icon: Timer, badge: "Ultra-Fast", color: "text-pink-400", border: "border-pink-500/30", styleId: "ticks" },
+  { name: "Higher / Lower", icon: Target, badge: "Timed", color: "text-sky-400", border: "border-sky-500/30", styleId: "synthetic-indices" },
+  { name: "Turbo Contracts", icon: Crosshair, badge: "Speed", color: "text-amber-400", border: "border-amber-500/30", styleId: "turbo" },
 ];
 
 const POPULAR_MARKETS = [
