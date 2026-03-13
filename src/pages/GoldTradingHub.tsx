@@ -27,7 +27,7 @@ const GoldTradingHub = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Gold Trading Hub – Live XAUUSD Charts, Signals & Strategies"
-        description="Your complete gold trading terminal. Real-time XAUUSD charts with Hauza Sniper strategies, AI-powered signals, expert analysis, risk management tips, and a community of gold traders."
+        description="Your complete gold trading terminal. Real-time XAUUSD charts with Botvio AI strategies, AI-powered signals, expert analysis, risk management tips, and a community of gold traders."
       />
       <Header />
 
