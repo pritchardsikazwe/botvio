@@ -297,7 +297,7 @@ function getStrategiesForAsset(assetType: string, symbol: string) {
   }
   // Boom/Crash symbols
   if (sym.includes("BOOM") || sym.includes("CRASH")) {
-    return HAUZA_STRATEGIES.filter(s => ["boom-crash", "rise-fall-scalping"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["boom-crash", "rise-fall-scalping"].includes(s.id));
   }
   // Synthetic / volatility indices
   if (type === "synthetic" || sym.startsWith("R_") || sym.includes("HZ")) {
