@@ -3,6 +3,8 @@ import { MarketSignalCard } from "@/components/markets/MarketSignalCard";
 import { MarketSentimentGauge } from "@/components/markets/MarketSentimentGauge";
 import { EconomicEventsCard } from "@/components/markets/EconomicEventsCard";
 import { SectorHeatmap } from "@/components/markets/SectorHeatmap";
+import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { VolatilityCard } from "@/components/markets/VolatilityCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
@@ -38,7 +40,10 @@ const AsiaMarket = () => (
       </CardContent>
     </Card>
 
-    <MarketSentimentGauge bullish={54} label="Asia Sentiment" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <MarketSentimentGauge bullish={54} label="Asia Sentiment" />
+      <VolatilityCard label="Asia Volatility" value="18.5" level="Medium" description="Moderate volatility — standard position sizing appropriate." />
+    </div>
 
     <div>
       <h2 className="text-lg font-extrabold text-foreground mb-3">📊 Trading Opportunities</h2>
@@ -53,6 +58,7 @@ const AsiaMarket = () => (
         { time: "02:00 GMT", currency: "CNY", event: "China CPI y/y", impact: "HIGH" },
         { time: "00:30 GMT", currency: "AUD", event: "RBA Rate Statement", impact: "HIGH" },
         { time: "01:30 GMT", currency: "JPY", event: "Average Cash Earnings", impact: "MEDIUM" },
+        { time: "04:30 GMT", currency: "AUD", event: "Employment Change", impact: "HIGH" },
       ]} />
       <SectorHeatmap sectors={[
         { name: "Technology", change: 0.8 }, { name: "Automotive", change: 0.5 },
@@ -60,6 +66,23 @@ const AsiaMarket = () => (
         { name: "Consumer", change: 0.3 }, { name: "Mining", change: 1.1 },
       ]} />
     </div>
+
+    <TradingTipsCard
+      title="Asia Market Do's & Don'ts"
+      dos={[
+        "Trade USD/JPY during Tokyo session (00:00-06:00 GMT) for best JPY liquidity",
+        "Watch China data releases — they move AUD, NZD, and copper",
+        "Use Nikkei as a leading indicator for European equity opens",
+        "Monitor BOJ intervention levels — JPY often reverses sharply at 150-155",
+      ]}
+      donts={[
+        "Don't ignore BOJ verbal intervention — they warn before they act",
+        "Don't trade China A50 without understanding capital controls",
+        "Avoid AUD/USD when China PMI data is pending",
+        "Don't short USD/JPY aggressively — BOJ intervention risk is real",
+      ]}
+      proTip="When Nikkei futures gap up overnight, European indices (DAX, CAC) tend to follow at their open — use this for early positioning."
+    />
   </MarketPageLayout>
 );
 

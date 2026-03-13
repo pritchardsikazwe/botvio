@@ -3,6 +3,8 @@ import { MarketSignalCard } from "@/components/markets/MarketSignalCard";
 import { MarketSentimentGauge } from "@/components/markets/MarketSentimentGauge";
 import { EconomicEventsCard } from "@/components/markets/EconomicEventsCard";
 import { SectorHeatmap } from "@/components/markets/SectorHeatmap";
+import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -19,7 +21,6 @@ const ME_SIGNALS = [
 
 const MiddleEastMarket = () => (
   <MarketPageLayout title="Middle East Market Dashboard" description="Saudi Tadawul, Dubai DFM, Aramco, Al Rajhi trading signals. Foreign investors now welcome." emoji="🇸🇦">
-    {/* Saudi Reform Banner */}
     <Card className="border-primary/30 bg-primary/5">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
@@ -32,13 +33,13 @@ const MiddleEastMarket = () => (
               <Badge variant="outline" className="text-[10px]">Energy</Badge>
               <Badge variant="outline" className="text-[10px]">Banking</Badge>
               <Badge variant="outline" className="text-[10px]">Real Estate</Badge>
+              <Badge variant="outline" className="text-[10px]">Renewables</Badge>
             </div>
           </div>
         </div>
       </CardContent>
     </Card>
 
-    {/* Index Overview */}
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">Market Overview</CardTitle></CardHeader>
       <CardContent>
@@ -59,7 +60,6 @@ const MiddleEastMarket = () => (
       </CardContent>
     </Card>
 
-    {/* Oil Impact */}
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">🛢️ Oil Market Impact</CardTitle></CardHeader>
       <CardContent>
@@ -90,17 +90,45 @@ const MiddleEastMarket = () => (
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <InstitutionalFlowCard
+        title="Saudi Institutional Flow"
+        flows={[
+          { label: "Foreign Investors", value: "+120M SAR", direction: "in" },
+          { label: "Local Institutions", value: "+85M SAR", direction: "in" },
+          { label: "Retail", value: "-60M SAR", direction: "out" },
+        ]}
+        bias="Institutional Accumulation"
+      />
       <EconomicEventsCard events={[
         { time: "12:00 GMT", currency: "SAR", event: "Saudi Interest Rate", impact: "HIGH" },
         { time: "14:00 GMT", currency: "OIL", event: "OPEC Meeting", impact: "HIGH" },
         { time: "10:00 GMT", currency: "AED", event: "UAE GDP Release", impact: "MEDIUM" },
-      ]} />
-      <SectorHeatmap sectors={[
-        { name: "Energy", change: 1.8 }, { name: "Banking", change: 1.1 },
-        { name: "Real Estate", change: 0.7 }, { name: "Telecom", change: 0.3 },
-        { name: "Petrochemicals", change: 1.4 }, { name: "Infrastructure", change: 0.9 },
+        { time: "08:00 GMT", currency: "SAR", event: "Saudi GDP q/q", impact: "MEDIUM" },
       ]} />
     </div>
+
+    <SectorHeatmap sectors={[
+      { name: "Energy", change: 1.8 }, { name: "Banking", change: 1.1 },
+      { name: "Real Estate", change: 0.7 }, { name: "Telecom", change: 0.3 },
+      { name: "Petrochemicals", change: 1.4 }, { name: "Infrastructure", change: 0.9 },
+    ]} />
+
+    <TradingTipsCard
+      title="Middle East Market Do's & Don'ts"
+      dos={[
+        "Always check oil prices before trading Saudi/UAE stocks — 80% correlation",
+        "Trade during Riyadh session (07:00-12:00 GMT) for Saudi stocks",
+        "Focus on Vision 2030 sectors: renewable energy, tourism, fintech",
+        "Watch OPEC meeting dates — they move the entire region",
+      ]}
+      donts={[
+        "Don't ignore SAR currency peg risk (pegged to USD at 3.75)",
+        "Don't trade Gulf stocks during Ramadan — reduced hours & volume",
+        "Avoid holding through OPEC surprises without a stop loss",
+        "Don't assume Dubai = Saudi — different exchanges, different dynamics",
+      ]}
+      proTip="Saudi Aramco trades like an oil proxy. When Brent breaks above $85, Aramco tends to rally 2-3% in the following week."
+    />
   </MarketPageLayout>
 );
 
