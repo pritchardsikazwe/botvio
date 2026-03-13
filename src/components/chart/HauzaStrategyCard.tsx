@@ -170,7 +170,7 @@ export function BotvioStrategyCard({ symbol, signal, trend, rsi, confidence }: B
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
             <Crosshair className="h-4 w-4 text-primary" />
-            Hauza Sniper Strategy
+            Botvio AI Strategy
           </h3>
           <Badge className={`text-[10px] font-bold ${contextBadge}`}>
             {signal?.toUpperCase() || "WATCH"}
