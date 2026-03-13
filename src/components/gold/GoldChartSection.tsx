@@ -116,7 +116,7 @@ export function GoldChartSection() {
         ))}
       </div>
 
-      {/* Hauza Signal + Chart side by side */}
+      {/* Botvio Signal + Chart side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-1">
           <GoldBotvioSignalButton />
