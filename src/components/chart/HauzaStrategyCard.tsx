@@ -7,7 +7,7 @@ import {
   Target, Zap, BarChart3, Activity, Layers, AlertTriangle,
 } from "lucide-react";
 
-interface HauzaStrategyCardProps {
+interface BotvioStrategyCardProps {
   symbol: string;
   signal?: string | null;
   trend?: string | null;
