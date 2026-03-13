@@ -82,6 +82,8 @@ interface UserSubscription {
   profiles: {
     email: string | null;
     display_name: string | null;
+    whatsapp_number: string | null;
+    country: string | null;
   } | null;
 }
 
