@@ -39,7 +39,7 @@ const WeltradeHub = () => {
                 Weltrade <span className="text-warning">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                PainX, GainX, TrendX & Volatility indices — charts, Hauza strategies, signals & community all in one place.
+                PainX, GainX, TrendX & Volatility indices — charts, Botvio AI strategies, signals & community all in one place.
               </p>
             </div>
             <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
