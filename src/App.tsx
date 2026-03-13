@@ -58,6 +58,7 @@ import BotDetailPage from "./pages/BotDetailPage";
 import CountryTrafficPage from "./pages/CountryTrafficPage";
 import GoldTradingHub from "./pages/GoldTradingHub";
 import WeltradeHub from "./pages/WeltradeHub";
+import DerivOptions from "./pages/DerivOptions";
 import NewsCalendar from "./pages/NewsCalendar";
 import GlobalMarkets from "./pages/markets/GlobalMarkets";
 import USMarket from "./pages/markets/USMarket";
