@@ -12,7 +12,7 @@ import {
   GraduationCap, Target, AlertTriangle, Bot, TrendingUp,
   ArrowRight, Zap, BookOpen, Package, MessageCircle,
   ExternalLink, Download, Smartphone, Sparkles, Signal,
-  BarChart3, Hash, TrendingDown, Activity, Newspaper, Globe
+  BarChart3, Hash, TrendingDown, Activity, Newspaper, Globe, Wifi
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
