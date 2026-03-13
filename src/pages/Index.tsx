@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
-import { DerivConnection } from "@/components/trading/DerivConnection";
 import { TradingGuide, TradingHelpPanel } from "@/components/trading/TradingGuide";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
