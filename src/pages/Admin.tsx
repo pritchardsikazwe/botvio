@@ -50,6 +50,8 @@ import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab"
 import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
 import { AdminSEOPagesTab } from "@/components/admin/AdminSEOPagesTab";
 import { AdminNewsEventsTab } from "@/components/admin/AdminNewsEventsTab";
+import { AdminProfilesTab } from "@/components/admin/AdminProfilesTab";
+import { AdminNewsletterTab } from "@/components/admin/AdminNewsletterTab";
 
 interface Provider {
   id: string;
