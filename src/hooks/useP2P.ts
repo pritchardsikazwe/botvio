@@ -64,11 +64,12 @@ export interface P2PReview {
   created_at: string;
 }
 
-// Realtime subscription for P2P offers
+// Realtime subscription for P2P offers with polling fallback
 export function useP2PRealtimeSync() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // Primary: realtime subscription
     const channel = supabase
       .channel("p2p-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "p2p_offers" }, () => {
@@ -80,8 +81,16 @@ export function useP2PRealtimeSync() {
       })
       .subscribe();
 
+    // Fallback: polling every 15s to ensure data freshness
+    const pollInterval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["p2p_offers"] });
+      queryClient.invalidateQueries({ queryKey: ["my_p2p_trades"] });
+      queryClient.invalidateQueries({ queryKey: ["trader_stats"] });
+    }, 15000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, [queryClient]);
 }
