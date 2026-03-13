@@ -15,7 +15,7 @@ import {
   Wallet, TrendingUp, ArrowRight, Plus, Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useP2POffers, useCreateP2POffer, useCreateP2PTrade, P2POffer } from "@/hooks/useP2P";
+import { useP2POffers, useCreateP2POffer, useCreateP2PTrade, useP2PRealtimeSync, P2POffer } from "@/hooks/useP2P";
 import { toast } from "sonner";
 
 const P2P = () => {
@@ -32,6 +32,7 @@ const P2P = () => {
   const { data: offers, isLoading } = useP2POffers(selectedTab, selectedCurrency);
   const createOffer = useCreateP2POffer();
   const createTrade = useCreateP2PTrade();
+  useP2PRealtimeSync();
 
   const [newOffer, setNewOffer] = useState({
     type: "sell" as "buy" | "sell",
