@@ -141,6 +141,11 @@ const Index = () => {
                 <Wifi className="h-4 w-4" /> Deriv AI Options
               </Button>
             </Link>
+            <Link to="/trade/style/boom-crash" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-orange-500/40 text-orange-500 hover:bg-orange-500/10 animate-pulse">
+                <Brain className="h-4 w-4" /> AI Spike Predict
+              </Button>
+            </Link>
           </div>
 
           {/* Market Dashboard Shortcuts */}
