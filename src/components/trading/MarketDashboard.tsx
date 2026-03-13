@@ -432,7 +432,9 @@ function HauzaSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefine
   );
 }
 
-export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: number; maxBinanceCards?: number } = {}) {
+const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "EUR/USD"];
+
+export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCards?: number; maxBinanceCards?: number; homeMode?: boolean } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: assets, isLoading: assetsLoading } = useQuery({
