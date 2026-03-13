@@ -665,17 +665,6 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
 
       {/* Asset Cards */}
       {(() => {
-        // Home mode: show specific ordered subset (merged, no sections)
-        if (homeMode) {
-          const orderedAssets = HOME_PREFERRED_ORDER
-            .map(sym => assets.find(a => a.symbol === sym))
-            .filter(Boolean) as Asset[];
-          return (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {orderedAssets.map(renderCard)}
-            </div>
-          );
-        }
         // Separate crypto (Binance-supported) from non-crypto
         const nonBinanceAssets = assets.filter(a => !BINANCE_SYMBOL_MAP[a.symbol]);
         const binanceAssets = assets.filter(a => !!BINANCE_SYMBOL_MAP[a.symbol]);
