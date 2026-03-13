@@ -239,38 +239,33 @@ const Index = () => {
           </section>
         )}
 
-        {/* 5 — Deriv API Connection + Trading Modes */}
+        {/* 5 — Deriv Options Shortcut */}
         <section>
-          <DerivConnection />
-          <div className="mt-4">
-            <p className="text-sm font-medium text-muted-foreground mb-3">Quick Trade Modes</p>
-            <div className="grid grid-cols-3 gap-3">
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5"
-                onClick={() => navigate('/trade/style/ticks')}
-              >
-                <BarChart3 className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Ticks</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5"
-                onClick={() => navigate('/trade/style/multipliers')}
-              >
-                <TrendingUp className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Multipliers</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5"
-                onClick={() => navigate('/trade/style/digits')}
-              >
-                <Hash className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Digits</span>
-              </Button>
-            </div>
-          </div>
+          <Link to="/deriv-options" className="block">
+            <Card className="glass-card border-primary/30 hover:border-primary/60 transition-all hover:scale-[1.01] cursor-pointer overflow-hidden">
+              <CardContent className="py-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-destructive flex items-center justify-center">
+                      <Wifi className="h-6 w-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Deriv Options & API Trading</h3>
+                      <p className="text-sm text-muted-foreground">Connect your Deriv account • 8+ contract types • 50+ markets • Auto trading bots</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Digits</Badge>
+                    <Badge variant="outline" className="text-xs">Multipliers</Badge>
+                    <Badge variant="outline" className="text-xs">Boom/Crash</Badge>
+                    <Button variant="gold" size="sm">
+                      <Zap className="h-4 w-4 mr-2" /> Open Trading Hub <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </section>
 
 
