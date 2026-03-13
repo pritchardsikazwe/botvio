@@ -47,7 +47,7 @@ const GoldTradingHub = () => {
                 Gold Trading <span className="text-primary">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                Real-time charts with built-in Hauza Sniper strategies, AI signals, expert tips & community — everything you need to trade gold profitably.
+                Real-time charts with built-in Botvio AI strategies, AI signals, expert tips & community — everything you need to trade gold profitably.
               </p>
             </div>
             <GoldPriceHeader />

@@ -535,7 +535,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio provides a demo token so you can practice risk-free. Use the demo token <strong>03Ddx1HRu2yFRJ8</strong> to connect instantly and practice trading without risking real money.</p>
 
 <h2>Step 4: Use Botvio's AI</h2>
-<p>Botvio's Hauza Sniper engine uses EMA crossovers, RSI analysis, and Markov transitions to identify high-probability trade setups. Enable Auto Mode and let Botvio trade for you 24/7.</p>
+<p>Botvio's AI engine uses EMA crossovers, RSI analysis, and pattern detection to identify high-probability trade setups. Enable Auto Mode and let Botvio trade for you 24/7.</p>
 
 <h2>Step 5: Manage Risk</h2>
 <p>Never risk more than 1-2% of your balance per trade. Botvio's built-in risk guardrails help enforce discipline. Set daily loss limits and use the minimum stake to learn.</p>

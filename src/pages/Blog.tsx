@@ -13,7 +13,7 @@ const blogPosts = [
   {
     slug: "what-is-botvio-ai-trading-bot",
     title: "What is Botvio AI Trading Bot?",
-    excerpt: "Botvio is an AI-powered trading bot platform that automates your Deriv trading with advanced strategies like Hauza Sniper.",
+    excerpt: "Botvio is an AI-powered trading bot platform that automates your Deriv trading with advanced Botvio AI strategies.",
     category: "Guide",
     readTime: "8 min",
     date: "2026-02-20",

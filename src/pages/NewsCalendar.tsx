@@ -71,7 +71,7 @@ const NewsCalendar = () => {
             </h1>
           </div>
           <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-            Track the most market-moving economic events. CPI, NFP, Fed decisions & geopolitical catalysts — with Hauza trading strategies.
+            Track the most market-moving economic events. CPI, NFP, Fed decisions & geopolitical catalysts — with Botvio AI trading strategies.
           </p>
           <div className="flex items-center justify-center gap-2">
             <Timer className="h-4 w-4 text-primary" />
