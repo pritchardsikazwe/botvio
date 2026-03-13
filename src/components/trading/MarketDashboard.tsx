@@ -307,7 +307,7 @@ function getStrategiesForAsset(assetType: string, symbol: string) {
   return BOTVIO_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
 }
 
-function HauzaStrategiesBlock({ assetType, symbol }: { assetType: string; symbol: string }) {
+function BotvioStrategiesBlock({ assetType, symbol }: { assetType: string; symbol: string }) {
   const navigate = useNavigate();
   const strategies = getStrategiesForAsset(assetType, symbol);
   if (!strategies.length) return null;
