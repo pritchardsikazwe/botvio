@@ -8,12 +8,14 @@ import {
   Newspaper, BarChart3, Shield, Target, Lightbulb, ArrowDown, ArrowUp,
   Crosshair, Zap, Pause,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { TradingChecklist } from "./market/TradingChecklist";
 import { NewsImpactBanner } from "./market/NewsImpactBanner";
 import { PatternAlerts } from "./market/PatternAlerts";
 import { usePartnerLinks } from "@/hooks/useSiteSettings";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 
 interface Asset {
   id: string;
