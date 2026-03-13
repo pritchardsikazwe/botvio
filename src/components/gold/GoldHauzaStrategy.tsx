@@ -101,7 +101,7 @@ const GOLD_ENHANCED_TIPS = [
   { icon: ShieldCheck, title: "Spread Trap Avoidance", desc: "Gold spreads widen to 30-50 pips during news. Close positions or widen stops before high-impact USD events. Check your broker's spread before entry." },
 ];
 
-export function GoldHauzaStrategy() {
+export function GoldBotvioStrategy() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
