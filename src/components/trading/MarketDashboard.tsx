@@ -339,7 +339,7 @@ function BotvioStrategiesBlock({ assetType, symbol }: { assetType: string; symbo
   );
 }
 
-const HAUZA_BTN_CONFIG: Record<string, {
+const BOTVIO_BTN_CONFIG: Record<string, {
   bg: string; border: string; text: string; glow: string; icon: typeof TrendingUp; pulse: string; label: string;
 }> = {
   buy: {
