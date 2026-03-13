@@ -317,7 +317,7 @@ function BotvioStrategiesBlock({ assetType, symbol }: { assetType: string; symbo
       <div className="flex items-center gap-1.5">
         <Crosshair className="h-3.5 w-3.5 text-primary" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-          Hauza Strategies
+          Botvio AI Strategies
         </span>
         <Zap className="h-3 w-3 text-warning" />
       </div>
