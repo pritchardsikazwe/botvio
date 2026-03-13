@@ -760,8 +760,8 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 {/* Key Levels */}
                 {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
-                {/* Hauza Signal Button */}
-                <HauzaSignalButton sig={sig} symbol={asset.symbol} navigate={navigate} />
+                {/* Botvio Signal Button */}
+                <BotvioSignalButton sig={sig} symbol={asset.symbol} navigate={navigate} />
 
                 {sig && (sig.signal === "buy" || sig.signal === "sell") && (
                   <div className="border-t border-border/40 pt-2 space-y-1.5">

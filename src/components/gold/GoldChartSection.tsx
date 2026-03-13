@@ -119,7 +119,7 @@ export function GoldChartSection() {
       {/* Hauza Signal + Chart side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-1">
-          <GoldHauzaSignalButton />
+          <GoldBotvioSignalButton />
         </div>
         <Card className="lg:col-span-3 bg-card border-border/50 overflow-hidden">
           <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />

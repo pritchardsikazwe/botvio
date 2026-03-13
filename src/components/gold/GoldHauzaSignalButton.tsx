@@ -177,7 +177,7 @@ export function GoldBotvioSignalButton() {
 
         {/* Disclaimer */}
         <p className="text-[10px] text-muted-foreground/60 text-center">
-          Signal based on Hauza strategy rules • Not financial advice • Always manage risk
+          Signal based on Botvio AI strategy rules • Not financial advice • Always manage risk
         </p>
       </div>
     </Card>
