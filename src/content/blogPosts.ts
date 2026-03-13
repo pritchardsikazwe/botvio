@@ -335,7 +335,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio uses advanced machine learning algorithms to analyze market data in real-time. The Botvio AI engine processes hundreds of price ticks per second, identifying patterns that human traders often miss. Here's how Botvio creates earning opportunities:</p>
 
 <h3>1. AI-Powered Signal Generation</h3>
-<p>Botvio's Hauza Sniper engine generates trading signals across 8 different contract types on Deriv. Each signal includes a confidence score, suggested duration, and risk assessment. Botvio only triggers trades when conditions meet strict quality thresholds.</p>
+<p>Botvio's AI engine generates trading signals across 8 different contract types on Deriv. Each signal includes a confidence score, suggested duration, and risk assessment. Botvio only triggers trades when conditions meet strict quality thresholds.</p>
 
 <h3>2. Automated Trade Execution</h3>
 <p>Once you configure your risk settings, Botvio can execute trades automatically. The Auto Mode feature places trades when Botvio's confidence score exceeds 70%, ensuring only high-probability setups are taken.</p>
