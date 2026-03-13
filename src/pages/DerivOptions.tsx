@@ -18,7 +18,7 @@ const API_FEATURES = [
   { icon: Zap, title: "Real-Time Execution", desc: "Sub-second trade placement via WebSocket API", color: "text-amber-400" },
   { icon: Shield, title: "Risk Controls", desc: "Built-in stop-loss, take-profit & stake limits", color: "text-emerald-400" },
   { icon: BarChart3, title: "Live Tick Stream", desc: "Real-time price feeds for all synthetic indices", color: "text-blue-400" },
-  { icon: Bot, title: "Auto Trading Bots", desc: "Hauza Sniper & custom strategy automation", color: "text-violet-400" },
+  { icon: Bot, title: "Auto Trading Bots", desc: "Botvio AI & custom strategy automation", color: "text-violet-400" },
   { icon: Globe, title: "50+ Markets", desc: "Synthetics, forex, commodities, crypto & stocks", color: "text-cyan-400" },
   { icon: Layers, title: "Multi-Contract", desc: "Digits, Multipliers, Rise/Fall, Accumulators & more", color: "text-pink-400" },
 ];
