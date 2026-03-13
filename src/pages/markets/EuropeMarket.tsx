@@ -3,6 +3,8 @@ import { MarketSignalCard } from "@/components/markets/MarketSignalCard";
 import { MarketSentimentGauge } from "@/components/markets/MarketSentimentGauge";
 import { EconomicEventsCard } from "@/components/markets/EconomicEventsCard";
 import { SectorHeatmap } from "@/components/markets/SectorHeatmap";
+import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
@@ -48,17 +50,44 @@ const EuropeMarket = () => (
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <InstitutionalFlowCard
+        flows={[
+          { label: "ECB Bond Buying", value: "€1.2B", direction: "in" },
+          { label: "Foreign Outflow", value: "€420M", direction: "out" },
+          { label: "ETF Inflows", value: "€680M", direction: "in" },
+        ]}
+        bias="Net Positive"
+      />
       <EconomicEventsCard events={[
         { time: "10:00 GMT", currency: "EUR", event: "German Factory Orders", impact: "HIGH" },
         { time: "12:00 GMT", currency: "GBP", event: "BOE Rate Decision", impact: "HIGH" },
         { time: "09:30 GMT", currency: "EUR", event: "ECB Press Conference", impact: "HIGH" },
-      ]} />
-      <SectorHeatmap sectors={[
-        { name: "Automotive", change: 1.1 }, { name: "Luxury", change: 0.6 },
-        { name: "Banking", change: -0.3 }, { name: "Energy", change: 0.9 },
-        { name: "Pharma", change: 0.2 }, { name: "Telecom", change: -0.1 },
+        { time: "07:00 GMT", currency: "EUR", event: "German CPI", impact: "MEDIUM" },
       ]} />
     </div>
+
+    <SectorHeatmap sectors={[
+      { name: "Automotive", change: 1.1 }, { name: "Luxury", change: 0.6 },
+      { name: "Banking", change: -0.3 }, { name: "Energy", change: 0.9 },
+      { name: "Pharma", change: 0.2 }, { name: "Telecom", change: -0.1 },
+    ]} />
+
+    <TradingTipsCard
+      title="Europe Market Do's & Don'ts"
+      dos={[
+        "Trade London session (08:00-16:30 GMT) for peak EUR/GBP liquidity",
+        "Watch ECB rhetoric for EUR direction — even hints move markets",
+        "DAX follows US futures — check pre-market S&P for direction",
+        "Use EUR/GBP as a relative strength gauge between EUR and GBP",
+      ]}
+      donts={[
+        "Don't trade EUR/USD during thin Asian hours — spreads widen",
+        "Don't hold GBP positions through BOE meetings without protection",
+        "Avoid German DAX if you haven't checked US futures first",
+        "Don't ignore Brexit-related regulatory risks for UK stocks",
+      ]}
+      proTip="The London-New York overlap (13:00-16:30 GMT) is the highest-volume window for EUR and GBP pairs."
+    />
   </MarketPageLayout>
 );
 

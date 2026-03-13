@@ -3,8 +3,9 @@ import { MarketSignalCard } from "@/components/markets/MarketSignalCard";
 import { MarketSentimentGauge } from "@/components/markets/MarketSentimentGauge";
 import { EconomicEventsCard } from "@/components/markets/EconomicEventsCard";
 import { SectorHeatmap } from "@/components/markets/SectorHeatmap";
+import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
 
@@ -19,7 +20,6 @@ const AFRICA_SIGNALS = [
 
 const AfricaMarket = () => (
   <MarketPageLayout title="Africa Market Dashboard" description="JSE, NGX, LuSE market signals. South Africa, Nigeria, Zambia stock trading intelligence." emoji="🌍">
-    {/* Exchange Overview */}
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">African Exchanges</CardTitle></CardHeader>
       <CardContent>
@@ -40,7 +40,6 @@ const AfricaMarket = () => (
       </CardContent>
     </Card>
 
-    {/* Commodity Impact */}
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">⛏️ Commodity Impact on Africa</CardTitle></CardHeader>
       <CardContent>
@@ -64,7 +63,18 @@ const AfricaMarket = () => (
       </CardContent>
     </Card>
 
-    <MarketSentimentGauge bullish={64} label="Africa Market Sentiment" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <MarketSentimentGauge bullish={64} label="Africa Market Sentiment" />
+      <InstitutionalFlowCard
+        title="Cross-Border Flows"
+        flows={[
+          { label: "Foreign (JSE)", value: "R1.2B", direction: "in" },
+          { label: "Foreign (NGX)", value: "₦8.5B", direction: "in" },
+          { label: "Local Retail (LuSE)", value: "K12M", direction: "out" },
+        ]}
+        bias="Net Foreign Inflow"
+      />
+    </div>
 
     <div>
       <h2 className="text-lg font-extrabold text-foreground mb-3">📊 Trading Opportunities</h2>
@@ -78,6 +88,7 @@ const AfricaMarket = () => (
         { time: "08:00 GMT", currency: "ZAR", event: "SARB Rate Decision", impact: "HIGH" },
         { time: "10:00 GMT", currency: "NGN", event: "CBN Policy Rate", impact: "HIGH" },
         { time: "09:00 GMT", currency: "ZMW", event: "BOZ Rate Decision", impact: "MEDIUM" },
+        { time: "08:30 GMT", currency: "ZAR", event: "SA GDP q/q", impact: "HIGH" },
       ]} />
       <SectorHeatmap sectors={[
         { name: "Mining", change: 1.2 }, { name: "Banking", change: 0.8 },
@@ -85,6 +96,24 @@ const AfricaMarket = () => (
         { name: "Energy", change: 0.9 }, { name: "Real Estate", change: 0.3 },
       ]} title="Africa Sector Performance" />
     </div>
+
+    <TradingTipsCard
+      title="Africa Market Do's & Don'ts"
+      dos={[
+        "Track commodity prices daily — gold drives JSE, copper drives LuSE, oil drives NGX",
+        "Focus on dividend-paying stocks in Zambia (ZCCM, CEC) for steady returns",
+        "Watch ZAR strength — weak Rand boosts JSE exporters (miners, Naspers)",
+        "Use JSE Top 40 as a proxy for overall African market health",
+      ]}
+      donts={[
+        "Don't trade NGX stocks without understanding Naira FX restrictions",
+        "Don't ignore load-shedding risk for South African industrial stocks",
+        "Avoid illiquid LuSE stocks — some trade only a few times per week",
+        "Don't hold large ZAR positions through SARB announcements without a hedge",
+        "Don't assume African markets follow US direction — commodities drive them",
+      ]}
+      proTip="When gold breaks above a key level, JSE mining stocks (Anglo American, Gold Fields, Sibanye) tend to outperform by 2-5x the percentage move in gold."
+    />
   </MarketPageLayout>
 );
 

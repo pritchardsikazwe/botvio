@@ -3,9 +3,9 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, ArrowRight, Globe } from "lucide-react";
+import { TrendingUp, ArrowRight, Globe, Activity, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
-import { MarketSentimentGauge } from "@/components/markets/MarketSentimentGauge";
+import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
 
 const REGIONS = [
   { emoji: "🇺🇸", name: "U.S. Market", path: "/markets/us", desc: "S&P 500, Nasdaq, Dow, Gold, Oil", indices: ["SPX +0.31%", "NAS +0.16%", "DJI -0.20%"], sentiment: 62 },
@@ -37,6 +37,31 @@ const GlobalMarkets = () => (
               <div key={r.path} className={`p-2 rounded text-center text-xs font-bold ${r.sentiment > 65 ? "bg-success/10 text-success" : r.sentiment > 55 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                 <span className="text-lg">{r.emoji}</span>
                 <p className="mt-1">{r.sentiment > 65 ? "Bullish" : r.sentiment > 55 ? "Mixed" : "Cautious"}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Cross-Market Correlation */}
+      <Card>
+        <CardContent className="p-4">
+          <h2 className="text-sm font-extrabold text-foreground mb-3 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-warning" /> Cross-Market Correlations
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {[
+              { trigger: "Oil ↑", effect: "Saudi / NGX positive, CAD strengthens" },
+              { trigger: "Gold ↑", effect: "JSE miners positive, USD weakens" },
+              { trigger: "DXY ↑", effect: "EM equities pressured, commodities down" },
+              { trigger: "VIX ↑", effect: "Risk-off: equities sell, bonds/gold rally" },
+              { trigger: "US Yields ↑", effect: "USD strengthens, gold/EM pressured" },
+              { trigger: "BTC ↑", effect: "Risk-on signal, positive for Nasdaq" },
+            ].map((c, i) => (
+              <div key={i} className="flex items-center gap-3 text-xs p-2 rounded bg-secondary/50">
+                <span className="font-bold text-primary w-24 shrink-0">{c.trigger}</span>
+                <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{c.effect}</span>
               </div>
             ))}
           </div>
@@ -84,7 +109,7 @@ const GlobalMarkets = () => (
         ))}
       </div>
 
-      {/* Global Opportunity Radar */}
+      {/* Opportunity Radar */}
       <Card className="border-primary/30">
         <CardContent className="p-4">
           <h2 className="text-sm font-extrabold text-foreground mb-3">🎯 Opportunity Radar — Top 5 Trades Now</h2>
@@ -105,6 +130,24 @@ const GlobalMarkets = () => (
           </div>
         </CardContent>
       </Card>
+
+      {/* Global Trading Tips */}
+      <TradingTipsCard
+        title="Global Market Do's & Don'ts"
+        dos={[
+          "Diversify across regions — don't put everything in one market",
+          "Check cross-market correlations before entering trades",
+          "Trade during peak session hours for best liquidity",
+          "Always check the economic calendar before market open",
+        ]}
+        donts={[
+          "Don't ignore currency risk when trading foreign markets",
+          "Don't assume one market's trend applies to all regions",
+          "Avoid trading illiquid markets during off-hours",
+          "Never ignore geopolitical risks in emerging markets",
+        ]}
+        proTip="The best global traders focus on 2-3 markets they understand deeply rather than spreading thin across all regions."
+      />
     </main>
   </div>
 );

@@ -3,8 +3,10 @@ import { MarketSignalCard } from "@/components/markets/MarketSignalCard";
 import { MarketSentimentGauge } from "@/components/markets/MarketSentimentGauge";
 import { EconomicEventsCard } from "@/components/markets/EconomicEventsCard";
 import { SectorHeatmap } from "@/components/markets/SectorHeatmap";
+import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { VolatilityCard } from "@/components/markets/VolatilityCard";
+import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
 
@@ -17,26 +19,10 @@ const US_SIGNALS = [
   { instrument: "US Dollar Index", symbol: "DXY", price: "99.12", change: "+0.29", changePercent: "+0.29%", signal: "HOLD" as const, entry: "99.00", stopLoss: "98.50", takeProfit: "99.80", strategy: "Range Consolidation", session: "All Sessions", confidence: 55, bias: "Neutral" as const, isPremium: true },
 ];
 
-const US_EVENTS = [
-  { time: "14:30 GMT", currency: "USD", event: "CPI Release", impact: "HIGH" as const },
-  { time: "15:00 GMT", currency: "USD", event: "Fed Chair Speech", impact: "HIGH" as const },
-  { time: "20:00 GMT", currency: "USD", event: "FOMC Minutes", impact: "HIGH" as const },
-  { time: "14:30 GMT", currency: "USD", event: "Retail Sales", impact: "MEDIUM" as const },
-];
-
-const US_SECTORS = [
-  { name: "Technology", change: 1.3 }, { name: "Energy", change: 0.8 },
-  { name: "Banking", change: -0.2 }, { name: "Healthcare", change: 0.5 },
-  { name: "Consumer", change: -0.4 }, { name: "Industrials", change: 0.3 },
-];
-
 const USMarket = () => (
   <MarketPageLayout title="U.S. Market Dashboard" description="Real-time US market signals, S&P 500, Nasdaq, Dow Jones, Gold & Oil trading intelligence." emoji="🇺🇸">
-    {/* Market Overview */}
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Market Overview</CardTitle>
-      </CardHeader>
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Market Overview</CardTitle></CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
@@ -55,7 +41,6 @@ const USMarket = () => (
       </CardContent>
     </Card>
 
-    {/* Mini Metrics */}
     <div className="grid grid-cols-3 gap-3">
       {[{ l: "VIX", v: "24.74" }, { l: "10Y Yield", v: "4.10%" }, { l: "DXY", v: "99.12" }].map((m) => (
         <Card key={m.l}>
@@ -69,7 +54,6 @@ const USMarket = () => (
 
     <MarketSentimentGauge bullish={62} />
 
-    {/* Signal Cards */}
     <div>
       <h2 className="text-lg font-extrabold text-foreground mb-3">📊 Trading Opportunities</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -81,9 +65,47 @@ const USMarket = () => (
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <EconomicEventsCard events={US_EVENTS} title="High Impact Events" />
-      <SectorHeatmap sectors={US_SECTORS} />
+      <VolatilityCard label="VIX — Market Fear Index" value="24.74" level="Medium" description="Elevated volatility — use tighter risk management and smaller positions." />
+      <InstitutionalFlowCard
+        flows={[
+          { label: "Buy Volume", value: "$2.1B", direction: "in" },
+          { label: "Sell Volume", value: "$1.4B", direction: "out" },
+          { label: "Foreign Inflow", value: "$380M", direction: "in" },
+        ]}
+        bias="Bullish Accumulation"
+      />
     </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <EconomicEventsCard events={[
+        { time: "14:30 GMT", currency: "USD", event: "CPI Release", impact: "HIGH" },
+        { time: "15:00 GMT", currency: "USD", event: "Fed Chair Speech", impact: "HIGH" },
+        { time: "20:00 GMT", currency: "USD", event: "FOMC Minutes", impact: "HIGH" },
+        { time: "14:30 GMT", currency: "USD", event: "Retail Sales", impact: "MEDIUM" },
+      ]} title="High Impact Events" />
+      <SectorHeatmap sectors={[
+        { name: "Technology", change: 1.3 }, { name: "Energy", change: 0.8 },
+        { name: "Banking", change: -0.2 }, { name: "Healthcare", change: 0.5 },
+        { name: "Consumer", change: -0.4 }, { name: "Industrials", change: 0.3 },
+      ]} />
+    </div>
+
+    <TradingTipsCard
+      title="U.S. Market Do's & Don'ts"
+      dos={[
+        "Trade during NY session (14:30-21:00 GMT) for best liquidity",
+        "Watch VIX — above 25 means higher risk, reduce position sizes",
+        "Use S&P 500 as the leading indicator for overall US sentiment",
+        "Check 10Y yield direction before trading growth stocks",
+      ]}
+      donts={[
+        "Don't fight the Fed — trade in the direction of monetary policy",
+        "Don't hold leveraged positions through FOMC announcements",
+        "Avoid trading US indices during thin Asian session liquidity",
+        "Don't ignore DXY — dollar strength pressures commodities & EM",
+      ]}
+      proTip="The first 30 minutes after NY open (14:30-15:00 GMT) sees the most volume. Wait for initial range to establish before entering."
+    />
   </MarketPageLayout>
 );
 
