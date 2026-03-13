@@ -289,7 +289,7 @@ function getStrategiesForAsset(assetType: string, symbol: string) {
   const sym = symbol.toUpperCase();
   // Forex & commodities: Rise/Fall, Multipliers
   if (type === "forex" || type === "commodity" || type === "metal") {
-    return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
   }
   // Crypto: Rise/Fall, Multipliers
   if (type === "crypto") {
