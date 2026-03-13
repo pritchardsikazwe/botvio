@@ -190,18 +190,9 @@ const TICKS_RISE_FALL: ContractTypeConfig = {
 // ── Styles ──────────────────────────────────────────────────────────
 export const TRADING_STYLES: TradingStyle[] = [
   {
-    id: "synthetic-indices",
-    title: "Synthetic Indices",
-    description: "24/7 markets made for algorithms. Smooth behavior, no news shocks.",
-    riskTag: "Beginner Friendly",
-    tempoTag: "Steady",
-    contractTypes: [RISE_FALL, HIGHER_LOWER],
-    instruments: RISE_FALL_INSTRUMENTS,
-  },
-  {
     id: "digit-contracts",
-    title: "Digit Contracts",
-    description: "Hauza Sniper — Fast micro-trades based on last-digit movement.",
+    title: "Fast Digits Strategy",
+    description: "Botvio AI — Trade DIFFERS when digits repeat. Watch last 5 ticks, enter when 3-4 digits repeat. 85-92% expected win rate.",
     riskTag: "Advanced",
     tempoTag: "Fast",
     contractTypes: [DIGITS_MATCH_DIFFER, DIGITS_OVER_UNDER, DIGITS_EVEN_ODD],
@@ -209,8 +200,8 @@ export const TRADING_STYLES: TradingStyle[] = [
   },
   {
     id: "rise-fall-scalping",
-    title: "Rise/Fall Scalping",
-    description: "Hauza Sniper — Predict short-term direction using momentum + timing logic.",
+    title: "Rise/Fall Momentum",
+    description: "Botvio AI — EMA 20/50 crossover + pullback retest. Enter Rise when EMA20 > EMA50, Fall when EMA20 < EMA50. 70-80% win rate.",
     riskTag: "Medium Risk",
     tempoTag: "Active",
     contractTypes: [RISE_FALL],
@@ -218,8 +209,8 @@ export const TRADING_STYLES: TradingStyle[] = [
   },
   {
     id: "boom-crash",
-    title: "Boom/Crash Spike Logic",
-    description: "Catch spikes using multipliers + accumulator contracts on Boom/Crash indices.",
+    title: "Boom/Crash Spike Strategy",
+    description: "Botvio AI — Wait for spike drought (80+ candles without spike on Boom, 70+ on Crash), then enter. AI-powered spike probability scoring.",
     riskTag: "High Volatility",
     tempoTag: "Precision",
     contractTypes: [MULTIPLIERS, ACCUMULATORS],
@@ -227,8 +218,8 @@ export const TRADING_STYLES: TradingStyle[] = [
   },
   {
     id: "multipliers",
-    title: "Multipliers",
-    description: "Hauza Sniper — Amplify gains with controlled risk using multiplier contracts.",
+    title: "Multipliers Trend Strategy",
+    description: "Botvio AI — Price above MA200 + RSI > 55 = BUY. Price below MA200 + RSI < 45 = SELL. 50x-200x multiplier. SL 3%, TP 8%.",
     riskTag: "Medium Risk",
     tempoTag: "Flexible",
     contractTypes: [MULTIPLIERS],
@@ -236,17 +227,26 @@ export const TRADING_STYLES: TradingStyle[] = [
   },
   {
     id: "accumulators",
-    title: "Accumulators",
-    description: "Hauza Sniper — Accumulate gains with each tick in your favour.",
+    title: "Accumulator Safe Growth",
+    description: "Botvio AI — Enter when price stays inside Bollinger Bands. 1-3% growth rate. 90%+ win rate in ranging markets. Duration 10-30 min.",
     riskTag: "Beginner Friendly",
     tempoTag: "Steady",
     contractTypes: [ACCUMULATORS],
     instruments: ACCU_INSTRUMENTS,
   },
   {
+    id: "higher-lower",
+    title: "Higher/Lower Barrier Strategy",
+    description: "Botvio AI — BUY near support with RSI oversold, barrier below support. SELL near resistance with RSI overbought, barrier above resistance.",
+    riskTag: "Beginner Friendly",
+    tempoTag: "Timed",
+    contractTypes: [HIGHER_LOWER],
+    instruments: RISE_FALL_INSTRUMENTS,
+  },
+  {
     id: "turbo",
-    title: "Turbo",
-    description: "Ultra-short breakout contracts for fast results.",
+    title: "Turbo Breakout Strategy",
+    description: "Botvio AI — Enter when candle breaks Bollinger Band with volume spike. Duration 30s-2min. Ultra-short breakout contracts.",
     riskTag: "Advanced",
     tempoTag: "Speed",
     contractTypes: [TURBO],
@@ -254,15 +254,14 @@ export const TRADING_STYLES: TradingStyle[] = [
   },
   {
     id: "ticks",
-    title: "Ticks",
-    description: "Hauza Sniper — Tick-by-tick momentum scalping on synthetic indices.",
+    title: "Ultra Fast Tick Scalping",
+    description: "Botvio AI — 1-5 tick contracts. Enter RISE when last 3 ticks are bullish. Pure price action micro-momentum. 65-75% win rate.",
     riskTag: "Intermediate",
     tempoTag: "Fast",
     contractTypes: [TICKS_RISE_FALL],
     instruments: TICK_INSTRUMENTS,
   },
 ];
-
 export function getStyleById(id: string): TradingStyle | undefined {
   return TRADING_STYLES.find(s => s.id === id);
 }
