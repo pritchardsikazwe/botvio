@@ -25,7 +25,7 @@ function getAssetType(symbol: string) {
 const STRATEGIES: Record<string, { title: string; icon: typeof Crosshair; steps: string[]; rules: string[]; riskNote: string }[]> = {
   metals: [
     {
-      title: "Hauza Gold Sniper — S/R Bounce",
+      title: "Botvio Gold — S/R Bounce",
       icon: Target,
       steps: [
         "Identify Daily support/resistance zones (round numbers: $2300, $2350, $2400)",
@@ -43,7 +43,7 @@ const STRATEGIES: Record<string, { title: string; icon: typeof Crosshair; steps:
       riskNote: "Risk 1-2% per trade. Gold moves fast — always use a stop loss.",
     },
     {
-      title: "Hauza Gold Sniper — Breakout Momentum",
+      title: "Botvio Gold — Breakout Momentum",
       icon: Zap,
       steps: [
         "Mark the 4H consolidation range (at least 3 candles in a tight range)",
@@ -62,7 +62,7 @@ const STRATEGIES: Record<string, { title: string; icon: typeof Crosshair; steps:
   ],
   forex: [
     {
-      title: "Hauza Forex Sniper — EMA Pullback",
+      title: "Botvio Forex — EMA Pullback",
       icon: TrendingUp,
       steps: [
         "Determine Daily trend using EMA 50 — above = bullish, below = bearish",
@@ -80,7 +80,7 @@ const STRATEGIES: Record<string, { title: string; icon: typeof Crosshair; steps:
       riskNote: "Risk 1% per trade on forex. Majors have tighter spreads.",
     },
     {
-      title: "Hauza Forex Sniper — Liquidity Sweep",
+      title: "Botvio Forex — Liquidity Sweep",
       icon: Crosshair,
       steps: [
         "Mark previous day high/low and session highs/lows",
@@ -99,7 +99,7 @@ const STRATEGIES: Record<string, { title: string; icon: typeof Crosshair; steps:
   ],
   crypto: [
     {
-      title: "Hauza Crypto Sniper — Momentum Surge",
+      title: "Botvio Crypto — Momentum Surge",
       icon: Activity,
       steps: [
         "Check 4H trend direction using EMA 20/50 crossover",
@@ -118,35 +118,36 @@ const STRATEGIES: Record<string, { title: string; icon: typeof Crosshair; steps:
   ],
   synthetic: [
     {
-      title: "Hauza Boom/Crash Sniper — Spike Catcher",
+      title: "Botvio Boom/Crash — AI Spike Catcher",
       icon: Zap,
       steps: [
         "Count candles since last spike (drought detection)",
-        "When drought exceeds 20-40 candles, probability of spike increases",
-        "Watch for volatility compression (tight candle bodies)",
-        "Enter with small stake when overdue threshold (0.7) is reached",
-        "Use martingale recovery only with strict 3-step limit",
+        "AI scores spike probability based on drought + compression + momentum",
+        "When AI probability ≥ 78% AND drought threshold met, enter",
+        "Enter with small stake when overdue threshold is reached",
+        "Max 3-5 attempts per session",
       ],
       rules: [
         "Only on Boom 1000/500 and Crash 1000/500",
-        "Never chase spikes — wait for setup",
-        "Maximum daily loss: 5% of account",
+        "Never chase spikes — wait for AI confirmation",
+        "Maximum daily loss: 10% of account",
+        "AI + rules must both agree before entry",
       ],
-      riskNote: "Synthetics are 24/7 but can be addictive. Set session limits.",
+      riskNote: "Synthetics are 24/7 but can be addictive. Set session limits. 1-2% risk per trade.",
     },
     {
-      title: "Hauza Volatility Sniper — Digit Strategy",
+      title: "Botvio Digits — Fast DIFFERS Strategy",
       icon: BarChart3,
       steps: [
-        "Analyze last 25+ ticks for digit frequency distribution",
-        "Identify overrepresented digits (>25% for DIFFER) or transition patterns",
-        "Use Markov probability matrix — MATCH when transition > 40%",
-        "Enter DIFFER on overrepresented digits, MATCH on high-transition pairs",
-        "Keep stakes consistent — don't increase after losses",
+        "Watch last 5 ticks digits for repeating patterns",
+        "If 3-4 of the same digit appear, enter DIFFERS",
+        "Duration: 1 tick only",
+        "Stake: 1-2% balance. Martingale off or 1 level max",
+        "Expected win rate: 85-92%",
       ],
       rules: [
         "Only on Volatility 10/25/50/75/100 indices",
-        "Minimum 25-tick sample before making decisions",
+        "Minimum 5-tick sample before decisions",
         "DIFFER signals take priority over MATCH when both trigger",
       ],
       riskNote: "Digit trading is statistical. Losses are part of the edge — don't overtrade.",
