@@ -146,7 +146,7 @@ const DerivOptions = () => {
                     {c.name.includes("Turbo") && "Speed-focused contracts with tight barriers. High reward, requires precision timing."}
                   </p>
                   <Button variant="outline" size="sm" className="w-full text-xs" asChild>
-                    <Link to={`/trade/style/${c.name.split(" ")[0].toLowerCase()}`}>
+                    <Link to={`/trade/style/${c.styleId}`}>
                       <ArrowRight className="h-3 w-3 mr-1" /> Trade Now
                     </Link>
                   </Button>
