@@ -111,7 +111,7 @@ export function GoldBotvioStrategy() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-extrabold text-foreground flex items-center gap-2">
             <Crosshair className="h-5 w-5 text-primary" />
-            Hauza Gold Sniper Strategies
+            Botvio AI Gold Strategies
           </h2>
           <Badge className="bg-primary/20 text-primary border-primary/30 text-xs font-bold">4 Setups</Badge>
         </div>
