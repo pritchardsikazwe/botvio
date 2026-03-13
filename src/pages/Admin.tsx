@@ -1019,6 +1019,14 @@ const Admin = () => {
               <AlertTriangle className="w-4 h-4" />
               News Events
             </TabsTrigger>
+            <TabsTrigger value="profiles" className="flex items-center gap-2">
+              <Contact className="w-4 h-4" />
+              Profiles
+            </TabsTrigger>
+            <TabsTrigger value="newsletter" className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Newsletter
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
