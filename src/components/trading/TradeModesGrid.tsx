@@ -175,8 +175,8 @@ export const TradeModesGrid = () => {
                   {mode.badges.map((b) => (
                     <Badge
                       key={b}
-                      variant={b === "Hauza Sniper" ? "default" : "outline"}
-                      className={`text-[9px] px-1.5 py-0 ${b === "Hauza Sniper" ? "bg-primary/80 text-primary-foreground" : ""}`}
+                      variant={b === "Botvio AI" ? "default" : "outline"}
+                      className={`text-[9px] px-1.5 py-0 ${b === "Botvio AI" ? "bg-primary/80 text-primary-foreground" : ""}`}
                     >
                       {b}
                     </Badge>
