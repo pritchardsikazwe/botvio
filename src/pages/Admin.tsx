@@ -1257,9 +1257,10 @@ const Admin = () => {
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => updateUserPlan(sub.id, 'starter')} disabled={sub.pricing_plans?.code === 'starter'}>Starter</Button>
-                              <Button size="sm" variant="outline" onClick={() => updateUserPlan(sub.id, 'pro')} disabled={sub.pricing_plans?.code === 'pro'}>Pro</Button>
+                            <div className="flex gap-2 flex-wrap">
+                              <Button size="sm" variant="outline" onClick={() => updateUserPlan(sub.id, 'free')} disabled={sub.pricing_plans?.code === 'free'}>Free</Button>
+                              <Button size="sm" variant="outline" onClick={() => updateUserPlan(sub.id, 'basic')} disabled={sub.pricing_plans?.code === 'basic'}>Basic</Button>
+                              <Button size="sm" variant="outline" onClick={() => updateUserPlan(sub.id, 'standard')} disabled={sub.pricing_plans?.code === 'standard'}>Standard</Button>
                               <Button size="sm" variant="default" onClick={() => updateUserPlan(sub.id, 'vip')} disabled={sub.pricing_plans?.code === 'vip'}>VIP</Button>
                             </div>
                           </TableCell>
