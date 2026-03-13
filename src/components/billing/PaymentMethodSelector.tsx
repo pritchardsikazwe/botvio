@@ -91,7 +91,9 @@ export const PaymentMethodSelector = ({
       toast.error("Please attach your payment confirmation screenshot");
       return;
     }
-    onOfflinePayment?.(selectedWallet, proofFile);
+    // Map raw wallet key to DB-allowed method value
+    const method = MOBILE_MONEY.find(m => m.key === selectedWallet) ? "mobile_money" : "crypto";
+    onOfflinePayment?.(method, proofFile);
     toast.success("Order submitted! Admin will confirm your payment shortly.");
   };
 
