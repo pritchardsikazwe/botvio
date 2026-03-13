@@ -112,7 +112,7 @@ export function NewsEventCards() {
               </CardHeader>
 
               <CardContent className="space-y-3">
-                {/* Hauza Direction Button */}
+                {/* Botvio Direction Button */}
                 {dir && dir !== "WAIT" && (
                   <div className={`rounded-xl p-3 bg-gradient-to-r ${dir === "BUY" ? "from-emerald-500/20 to-emerald-500/5" : "from-red-500/20 to-red-500/5"} border ${dir === "BUY" ? "border-emerald-500/30" : "border-red-500/30"}`}>
                     <div className="flex items-center gap-2 mb-2">
