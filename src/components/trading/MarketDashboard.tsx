@@ -369,9 +369,9 @@ const BOTVIO_BTN_CONFIG: Record<string, {
   },
 };
 
-function HauzaSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefined; symbol: string; navigate: ReturnType<typeof useNavigate> }) {
+function BotvioSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefined; symbol: string; navigate: ReturnType<typeof useNavigate> }) {
   const signalKey = sig?.signal?.toLowerCase() || "wait";
-  const config = HAUZA_BTN_CONFIG[signalKey] || HAUZA_BTN_CONFIG.wait;
+  const config = BOTVIO_BTN_CONFIG[signalKey] || BOTVIO_BTN_CONFIG.wait;
   const Icon = config.icon;
   const isActive = signalKey === "buy" || signalKey === "sell";
   const chartSlug = symbol.replace("/", "");
