@@ -32,6 +32,7 @@ const P2P = () => {
   const { data: offers, isLoading } = useP2POffers(selectedTab, selectedCurrency);
   const createOffer = useCreateP2POffer();
   const createTrade = useCreateP2PTrade();
+  useP2PRealtimeSync();
 
   const [newOffer, setNewOffer] = useState({
     type: "sell" as "buy" | "sell",
