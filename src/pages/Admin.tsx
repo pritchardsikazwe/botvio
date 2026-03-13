@@ -34,7 +34,9 @@ import {
   Settings,
   Package,
   ClipboardCheck,
-  Globe
+  Globe,
+  Mail,
+  Contact
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
