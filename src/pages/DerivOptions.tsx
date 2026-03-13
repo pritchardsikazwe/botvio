@@ -1,7 +1,7 @@
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { DerivConnection } from "@/components/trading/DerivConnection";
-import { TradeModesGrid } from "@/components/trading/TradeModesGrid";
+
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
