@@ -58,6 +58,7 @@ import BotDetailPage from "./pages/BotDetailPage";
 import CountryTrafficPage from "./pages/CountryTrafficPage";
 import GoldTradingHub from "./pages/GoldTradingHub";
 import WeltradeHub from "./pages/WeltradeHub";
+import DerivOptions from "./pages/DerivOptions";
 import NewsCalendar from "./pages/NewsCalendar";
 import GlobalMarkets from "./pages/markets/GlobalMarkets";
 import USMarket from "./pages/markets/USMarket";
@@ -142,6 +143,7 @@ const App = () => (
               <Route path="/markets/crypto" element={<CryptoMarket />} />
               <Route path="/markets/africa" element={<AfricaMarket />} />
               <Route path="/trade-modes" element={<TradeModes />} />
+              <Route path="/deriv-options" element={<DerivOptions />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
