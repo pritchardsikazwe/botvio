@@ -350,36 +350,18 @@ const Index = () => {
           </div>
         </section>
 
-        {/* 7 — Courses */}
-        {displayCourses.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-primary" />
-                Learn Trading Strategies
-              </h2>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/learn">All Courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {displayCourses.map((course) => (
-                <Card key={course.id} className="glass-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate(`/learn/${course.slug}`)}>
-                  <CardHeader className="pb-2">
-                    <Badge variant="outline" className="w-fit mb-2">{course.category}</Badge>
-                    <CardTitle className="text-base">{course.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">{course.lessons} lessons</span>
-                      <Button size="sm" variant="gold"><GraduationCap className="h-4 w-4 mr-2" />Start</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* 7 — All Courses Link */}
+        <section>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Trading Education
+            </h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/learn">All Courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </div>
+        </section>
 
         {/* 8 — Banners */}
         <section className="space-y-4">
