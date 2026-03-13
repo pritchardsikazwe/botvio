@@ -64,6 +64,28 @@ export interface P2PReview {
   created_at: string;
 }
 
+// Realtime subscription for P2P offers
+export function useP2PRealtimeSync() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("p2p-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "p2p_offers" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["p2p_offers"] });
+        queryClient.invalidateQueries({ queryKey: ["my_p2p_offers"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "p2p_trades" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["my_p2p_trades"] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+}
+
 // Fetch all active P2P offers
 export function useP2POffers(type?: "buy" | "sell", currency?: string) {
   return useQuery({
