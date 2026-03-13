@@ -102,20 +102,27 @@ export const useCreatePaymentRequest = () => {
     }) => {
       if (!user) throw new Error("Not authenticated");
       
+      // Ensure method matches DB constraint: mobile_money | crypto | cash | bank_transfer | manual
+      const allowedMethods = ["mobile_money", "crypto", "cash", "bank_transfer", "manual"];
+      const safeMethod = allowedMethods.includes(method) ? method : "manual";
+
       const { data, error } = await supabase
         .from("payment_requests")
         .insert({
           user_id: user.id,
           plan_id,
           amount_usd,
-          method,
+          method: safeMethod,
           proof_upload_url: proof_upload_url || null,
           status: "submitted"
         })
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Payment request insert error:", error.code, error.message, error.details);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
