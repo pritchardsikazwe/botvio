@@ -85,25 +85,29 @@ const DerivOptions = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-8">
-        {/* Hero */}
-        <section className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
-            <Wifi className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">Deriv API Integration</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold">
-            Deriv Options & <span className="text-primary">API Trading</span>
-          </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Connect your Deriv account, choose from 8+ contract types, and trade 50+ markets — all powered by Botvio's intelligent execution engine.
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <DerivAffiliateButton label="Open Deriv Account" />
-            <Button variant="outline" asChild>
-              <Link to="/connections">
-                <Activity className="h-4 w-4 mr-2" /> Manage Connections
-              </Link>
-            </Button>
+        {/* Big CTA Hero */}
+        <section className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background to-primary/5 p-8 md:p-12 text-center space-y-5">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.15),transparent_60%)]" />
+          <div className="relative z-10 space-y-5">
+            <Badge className="bg-primary/20 text-primary border-primary/40 text-sm px-4 py-1">
+              <Bot className="h-4 w-4 mr-1.5" /> AI-Powered
+            </Badge>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1]">
+              Trade Deriv Options
+              <br />
+              <span className="text-primary">with AI</span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Connect your real account and let Botvio's intelligent engine execute across 8+ contract types and 50+ markets — automatically.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <DerivAffiliateButton label="Open Deriv Account" />
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/connections">
+                  <Wifi className="h-4 w-4 mr-2" /> Connect Real Account
+                </Link>
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -115,51 +119,41 @@ const DerivOptions = () => {
           <DerivConnection />
         </section>
 
-        {/* API Features Grid */}
+        {/* Quick Trade Modes as Info Cards */}
         <section>
           <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
-            <Zap className="h-5 w-5 text-primary" /> API Capabilities
+            <Layers className="h-5 w-5 text-primary" /> Quick Trade Modes
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {API_FEATURES.map((f) => (
-              <Card key={f.title} className="glass-card hover:border-primary/40 transition-colors">
-                <CardContent className="pt-6 flex items-start gap-3">
-                  <div className={`p-2 rounded-lg bg-muted/50 ${f.color}`}>
-                    <f.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">{f.title}</p>
-                    <p className="text-xs text-muted-foreground">{f.desc}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Supported Contract Types */}
-        <section>
-          <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
-            <Layers className="h-5 w-5 text-primary" /> Supported Contract Types
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {SUPPORTED_CONTRACTS.map((c) => (
-              <Card key={c.name} className={`glass-card ${c.border} hover:scale-[1.02] transition-transform cursor-pointer`}>
-                <CardContent className="pt-5 pb-4 flex flex-col items-center text-center gap-2">
-                  <div className={`p-2.5 rounded-xl bg-muted/50 ${c.color}`}>
-                    <c.icon className="h-6 w-6" />
+              <Card key={c.name} className={`glass-card ${c.border} hover:scale-[1.02] transition-all hover:shadow-lg hover:shadow-primary/5`}>
+                <CardContent className="pt-6 pb-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-xl bg-muted/50 ${c.color}`}>
+                      <c.icon className="h-6 w-6" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">{c.badge}</Badge>
                   </div>
                   <p className="font-bold text-sm">{c.name}</p>
-                  <Badge variant="outline" className="text-[10px]">{c.badge}</Badge>
+                  <p className="text-xs text-muted-foreground">
+                    {c.name.includes("Digit") && "Predict the last digit of the price. Fast 1-10 tick contracts with 90%+ win rates on Differs."}
+                    {c.name.includes("Rise") && "Predict if the price will rise or fall. Best for beginners — simple, clean entries."}
+                    {c.name.includes("Multiplier") && "Amplify your gains up to 1000x. Set SL/TP for risk control on forex & synthetics."}
+                    {c.name.includes("Accumulator") && "Grow your payout steadily with 1-5% growth rate. Best in calm, ranging markets."}
+                    {c.name.includes("Boom") && "Catch explosive spike movements. Wait for drought patterns before entering."}
+                    {c.name.includes("Ticks") && "Ultra-fast 1-5 tick contracts. Pure price action with instant results."}
+                    {c.name.includes("Higher") && "Set a barrier and predict if price closes above or below. Timed expiry contracts."}
+                    {c.name.includes("Turbo") && "Speed-focused contracts with tight barriers. High reward, requires precision timing."}
+                  </p>
+                  <Button variant="outline" size="sm" className="w-full text-xs" asChild>
+                    <Link to={`/trade/style/${c.name.split(" ")[0].toLowerCase()}`}>
+                      <ArrowRight className="h-3 w-3 mr-1" /> Trade Now
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </section>
-
-        {/* Trade Modes Grid (full interactive) */}
-        <section>
-          <TradeModesGrid />
         </section>
 
         {/* Popular Markets */}
