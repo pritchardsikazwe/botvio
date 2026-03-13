@@ -432,7 +432,9 @@ function HauzaSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefine
   );
 }
 
-export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: number; maxBinanceCards?: number } = {}) {
+const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "EUR/USD"];
+
+export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCards?: number; maxBinanceCards?: number; homeMode?: boolean } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: assets, isLoading: assetsLoading } = useQuery({
@@ -893,6 +895,18 @@ export function MarketDashboard({ maxCards, maxBinanceCards }: { maxCards?: numb
             </Card>
           );
         };
+
+        // Home mode: show specific ordered subset (merged, no sections)
+        if (homeMode) {
+          const orderedAssets = HOME_PREFERRED_ORDER
+            .map(sym => assets.find(a => a.symbol === sym))
+            .filter(Boolean) as Asset[];
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {orderedAssets.map(renderCard)}
+            </div>
+          );
+        }
 
         return (
           <>

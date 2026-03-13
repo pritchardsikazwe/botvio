@@ -201,7 +201,7 @@ const Index = () => {
 
         {/* 3c — Live Market Intelligence */}
         <section>
-          <MarketDashboard />
+          <MarketDashboard homeMode />
         </section>
 
         {/* 4 — Featured Products (4 max) */}
