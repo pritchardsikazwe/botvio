@@ -111,7 +111,7 @@ const GoldTradingHub = () => {
             <GoldSignalsSection />
           </TabsContent>
           <TabsContent value="strategy" className="mt-6">
-            <GoldHauzaStrategy />
+            <GoldBotvioStrategy />
           </TabsContent>
           <TabsContent value="tips" className="mt-6">
             <GoldTipsSection />

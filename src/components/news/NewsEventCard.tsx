@@ -118,7 +118,7 @@ export function NewsEventCards() {
                     <div className="flex items-center gap-2 mb-2">
                       <Icon className={`h-5 w-5 ${cfg.text}`} />
                       <span className={`text-base font-extrabold ${cfg.text}`}>
-                        Hauza Signal: {dir} {ev.instrument}
+                        Botvio Signal: {dir} {ev.instrument}
                       </span>
                       {ev.hauza_confidence && (
                         <Badge className={`ml-auto text-xs ${dir === "BUY" ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"}`}>

@@ -52,7 +52,7 @@ const WeltradeHub = () => {
 
         {/* Strategy & Tips — Always visible outside tabs */}
         <section className="space-y-6">
-          <SyntxHauzaStrategy />
+          <SyntxBotvioStrategy />
           <SyntxTipsSection />
         </section>
 

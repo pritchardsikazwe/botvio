@@ -514,7 +514,7 @@ export function SyntxBotvioStrategy() {
         </a>
         <Link to="/trade-modes" className="flex-1">
           <Button variant="outline" className="w-full font-bold border-primary/30 text-primary">
-            <Crosshair className="h-4 w-4 mr-2" /> All Hauza Modes
+            <Crosshair className="h-4 w-4 mr-2" /> All Botvio Modes
           </Button>
         </Link>
       </div>
