@@ -24,7 +24,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio operates through several key components that work together seamlessly:</p>
 
 <h3>1. Signal Generation Engine</h3>
-<p>At the heart of Botvio is the Hauza Sniper signal engine. This proprietary system uses a combination of EMA (Exponential Moving Average) crossovers, RSI (Relative Strength Index) analysis, and advanced Markov transition models to generate trade signals. Botvio processes hundreds of ticks per second to identify the optimal entry points.</p>
+<p>At the heart of Botvio is the Botvio AI signal engine. This proprietary system uses a combination of EMA (Exponential Moving Average) crossovers, RSI (Relative Strength Index) analysis, and advanced pattern detection models to generate trade signals. Botvio processes hundreds of ticks per second to identify the optimal entry points.</p>
 
 <h3>2. Risk Management</h3>
 <p>Botvio includes built-in risk guardrails that protect your capital. Features include daily loss limits, maximum trade frequency controls, and intelligent stake sizing based on your account balance. Botvio never risks more than what you configure, ensuring your trading stays within safe boundaries.</p>
