@@ -134,7 +134,7 @@ export function GoldBotvioSignalButton() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Crosshair className="h-4 w-4 text-primary" />
-            <span className="text-xs font-bold text-foreground uppercase tracking-wider">Hauza Signal</span>
+            <span className="text-xs font-bold text-foreground uppercase tracking-wider">Botvio Signal</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Activity className={`h-3 w-3 ${config.text} ${config.pulse}`} />
