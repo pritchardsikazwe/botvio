@@ -102,20 +102,27 @@ export const useCreatePaymentRequest = () => {
     }) => {
       if (!user) throw new Error("Not authenticated");
       
+      // Ensure method matches DB constraint: mobile_money | crypto | cash | bank_transfer | manual
+      const allowedMethods = ["mobile_money", "crypto", "cash", "bank_transfer", "manual"];
+      const safeMethod = allowedMethods.includes(method) ? method : "manual";
+
       const { data, error } = await supabase
         .from("payment_requests")
         .insert({
           user_id: user.id,
           plan_id,
           amount_usd,
-          method,
+          method: safeMethod,
           proof_upload_url: proof_upload_url || null,
           status: "submitted"
         })
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Payment request insert error:", error.code, error.message, error.details);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -175,18 +182,21 @@ export const useActivateTrial = () => {
       
       if (error) throw error;
       
-      // Update user subscription to VIP temporarily
+      // Upsert user subscription to VIP trial (handles users without existing row)
       const { error: subError } = await supabase
         .from("user_plan_subscriptions")
-        .update({
+        .upsert({
+          user_id: user.id,
           pricing_plan_id: vipPlan.id,
           current_period_start: now.toISOString(),
           current_period_end: endsAt.toISOString(),
           status: "trial"
-        })
-        .eq("user_id", user.id);
+        }, { onConflict: "user_id" });
       
-      if (subError) throw subError;
+      if (subError) {
+        console.error("Subscription upsert error:", subError.code, subError.message, subError.details);
+        throw subError;
+      }
       
       return data;
     },

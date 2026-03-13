@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Header } from "@/components/trading/Header";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { useNavigate, Link } from "react-router-dom";
-import { Check, Crown, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle, Sparkles, Shield, Zap } from "lucide-react";
+import { Check, Crown, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle, Sparkles, Shield, Zap, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
 const Billing = () => {
@@ -263,6 +263,19 @@ const Billing = () => {
                         </div>
 
                         <ul className="space-y-3 mb-6 text-left">
+                          {/* Chart Analyses */}
+                          <li className="flex items-center gap-2">
+                            <div className="p-1 rounded-full bg-success/10">
+                              <Check className="h-3 w-3 text-success" />
+                            </div>
+                            <span className="text-sm flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4" />
+                              {plan.code === "free" ? "5 chart analyses / day" :
+                               plan.code === "basic" ? "50 chart analyses / week" :
+                               plan.code === "standard" ? "100 chart analyses / month" :
+                               "Unlimited chart analyses"}
+                            </span>
+                          </li>
                           <li className="flex items-center gap-2">
                             <div className="p-1 rounded-full bg-success/10">
                               <Check className="h-3 w-3 text-success" />
@@ -467,10 +480,10 @@ const Billing = () => {
                 onChange={(e) => setOfflineMethod(e.target.value)}
               >
                 <option value="">Select method...</option>
-                <option value="airtel_money">Airtel Money</option>
-                <option value="mtn_money">MTN Money</option>
+                <option value="mobile_money">Airtel Money</option>
+                <option value="mobile_money">MTN Money</option>
                 <option value="bank_transfer">Bank Transfer</option>
-                <option value="crypto_usdt">USDT (Crypto)</option>
+                <option value="crypto">USDT (Crypto)</option>
               </select>
             </div>
             <div>
