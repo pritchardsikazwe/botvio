@@ -155,7 +155,7 @@ const STRATEGIES: Record<string, { title: string; icon: typeof Crosshair; steps:
   ],
 };
 
-export function HauzaStrategyCard({ symbol, signal, trend, rsi, confidence }: HauzaStrategyCardProps) {
+export function BotvioStrategyCard({ symbol, signal, trend, rsi, confidence }: BotvioStrategyCardProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
   const assetType = getAssetType(symbol);
   const strategies = STRATEGIES[assetType] || STRATEGIES.forex;
