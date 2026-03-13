@@ -16,7 +16,7 @@ const faqs = [
   { q: "Does Botvio guarantee profits?", a: "No. No trading system guarantees profits. Botvio uses statistical models that identify high-probability setups, but markets are inherently unpredictable. Always trade responsibly." },
   { q: "How does Botvio's Auto Mode work?", a: "When Auto Mode is enabled, Botvio automatically executes trades when signals reach 70+ confidence. Botvio respects your risk limits and stake settings at all times." },
   { q: "Can I use Botvio on mobile?", a: "Yes. Botvio is a web-based platform that works on any device with a modern browser. Botvio is fully responsive and optimized for mobile trading." },
-  { q: "What is the Hauza Sniper strategy?", a: "Hauza Sniper is Botvio's core strategy suite. It includes specialized engines for each trading mode: EMA crossovers for Rise/Fall, Markov analysis for Digits, spike detection for Boom/Crash, and more." },
+  { q: "What is the Botvio AI Strategy?", a: "Botvio AI Strategy is Botvio's core strategy suite. It includes specialized engines for each trading mode: EMA crossovers for Rise/Fall, digit pattern analysis for Digits, AI spike detection for Boom/Crash, and more." },
   { q: "How do I change my stake amount?", a: "Set your stake in Botvio's trading panel. Your stake stays fixed until you manually change it — Botvio never auto-adjusts your stake without permission." },
   { q: "Does Botvio work when my computer is off?", a: "Yes. Botvio's bot worker runs on the server 24/7. Once Auto Mode is enabled, Botvio continues trading even when your device is offline." },
   { q: "What payment methods does Botvio accept?", a: "Botvio accepts cryptocurrency (Bitcoin, USDT TRC20/ERC20) and mobile money (Airtel, MTN) for premium plans." },
