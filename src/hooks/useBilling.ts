@@ -182,18 +182,21 @@ export const useActivateTrial = () => {
       
       if (error) throw error;
       
-      // Update user subscription to VIP temporarily
+      // Upsert user subscription to VIP trial (handles users without existing row)
       const { error: subError } = await supabase
         .from("user_plan_subscriptions")
-        .update({
+        .upsert({
+          user_id: user.id,
           pricing_plan_id: vipPlan.id,
           current_period_start: now.toISOString(),
           current_period_end: endsAt.toISOString(),
           status: "trial"
-        })
-        .eq("user_id", user.id);
+        }, { onConflict: "user_id" });
       
-      if (subError) throw subError;
+      if (subError) {
+        console.error("Subscription upsert error:", subError.code, subError.message, subError.details);
+        throw subError;
+      }
       
       return data;
     },
