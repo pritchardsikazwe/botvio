@@ -59,25 +59,23 @@ const JUMP: InstrumentConfig[] = [
 ];
 
 const BOOM_CRASH: InstrumentConfig[] = [
-  { symbol: "BOOM300N", displayName: "Boom 300" },
   { symbol: "BOOM500", displayName: "Boom 500" },
   { symbol: "BOOM1000", displayName: "Boom 1000" },
-  { symbol: "CRASH300N", displayName: "Crash 300" },
   { symbol: "CRASH500", displayName: "Crash 500" },
   { symbol: "CRASH1000", displayName: "Crash 1000" },
 ];
 
-// Digits: only Volatility indices + Vol 1s
+// Digits: only Volatility indices + Vol 1s (confirmed tradable)
 const DIGIT_INSTRUMENTS: InstrumentConfig[] = [
   ...VOL_INDICES, ...VOL_1S,
 ];
 
-// Rise/Fall, Higher/Lower: broad support
+// Rise/Fall, Higher/Lower: synthetics that support time-based contracts
 const RISE_FALL_INSTRUMENTS: InstrumentConfig[] = [
   ...VOL_INDICES, ...VOL_1S, ...STEP, ...JUMP, ...BOOM_CRASH,
 ];
 
-// Multipliers: limited set
+// Multipliers: limited set (only symbols that support MULTUP/MULTDOWN)
 const MULTIPLIER_INSTRUMENTS: InstrumentConfig[] = [
   { symbol: "R_75", displayName: "Volatility 75" },
   { symbol: "R_100", displayName: "Volatility 100" },
@@ -87,19 +85,19 @@ const MULTIPLIER_INSTRUMENTS: InstrumentConfig[] = [
   ...BOOM_CRASH,
 ];
 
-// Accumulators: Volatility only
+// Accumulators: Volatility indices + Vol 1s only
 const ACCU_INSTRUMENTS: InstrumentConfig[] = [
   ...VOL_INDICES, ...VOL_1S,
 ];
 
-// Turbo: Volatility + Vol 1s
+// Turbo: Volatility + Vol 1s only
 const TURBO_INSTRUMENTS: InstrumentConfig[] = [
   ...VOL_INDICES, ...VOL_1S,
 ];
 
-// Ticks: Volatility + Vol 1s + Step
+// Ticks: Volatility + Vol 1s only (Step doesn't support tick-duration)
 const TICK_INSTRUMENTS: InstrumentConfig[] = [
-  ...VOL_INDICES, ...VOL_1S, ...STEP,
+  ...VOL_INDICES, ...VOL_1S,
 ];
 
 // ── Contract type presets ───────────────────────────────────────────
