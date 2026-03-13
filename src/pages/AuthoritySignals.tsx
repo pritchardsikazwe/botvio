@@ -29,7 +29,7 @@ const AuthoritySignals = () => {
         <div className="text-center space-y-3">
           <Badge className="text-sm px-3 py-1"><Zap className="h-3 w-3 mr-1" /> Live Signals</Badge>
           <h1 className="text-4xl font-extrabold tracking-tight">Botvio Authority Signals</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">AI-generated trading signals powered by Botvio's Hauza Sniper engine. Every signal includes confidence scores, reasoning, and real-time tracking.</p>
+          <p className="text-muted-foreground max-w-2xl mx-auto">AI-generated trading signals powered by Botvio's AI engine. Every signal includes confidence scores, reasoning, and real-time tracking.</p>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
