@@ -219,10 +219,10 @@ export const TRADING_STYLES: TradingStyle[] = [
   {
     id: "boom-crash",
     title: "Boom/Crash Spike Logic",
-    description: "Catch spikes using volatility + impulse detection algorithms.",
+    description: "Catch spikes using multipliers + accumulator contracts on Boom/Crash indices.",
     riskTag: "High Volatility",
     tempoTag: "Precision",
-    contractTypes: [RISE_FALL],
+    contractTypes: [MULTIPLIERS, ACCUMULATORS],
     instruments: BOOM_CRASH,
   },
   {
