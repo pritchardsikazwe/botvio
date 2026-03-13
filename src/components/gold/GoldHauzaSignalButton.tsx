@@ -108,7 +108,7 @@ const SIGNAL_CONFIG: Record<SignalType, {
   },
 };
 
-export function GoldHauzaSignalButton() {
+export function GoldBotvioSignalButton() {
   const [signalState, setSignalState] = useState<SignalState>(generateSignal);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
