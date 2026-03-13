@@ -29,7 +29,7 @@ const TRADE_MODES = [
     title: "Multipliers",
     description: "Amplify gains with controlled risk",
     icon: <Layers className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "All Markets"],
+    badges: ["Botvio AI", "All Markets"],
     gradient: "from-blue-500/20 to-cyan-600/20",
     borderColor: "border-blue-500/30",
     iconColor: "text-blue-400",
