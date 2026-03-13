@@ -174,7 +174,7 @@ const BEST_FOR_SMALL = [
   { index: "FlipX", difficulty: "Hard", style: "Random range", color: "text-muted-foreground" },
 ];
 
-export function SyntxHauzaStrategy() {
+export function SyntxBotvioStrategy() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
   const [showFlip, setShowFlip] = useState(false);
   const [showIndicators, setShowIndicators] = useState(false);
