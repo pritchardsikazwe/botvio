@@ -84,8 +84,8 @@ const Docs = () => {
 
           <TabsContent value="strategies" className="space-y-6 mt-6">
             <div className="prose dark:prose-invert max-w-none">
-              <h2>Hauza Sniper Strategy Suite</h2>
-              <p>Core indicators: EMA 9/21, RSI(14), ATR, Markov Transitions.</p>
+               <h2>Botvio AI Strategy Suite</h2>
+               <p>Core indicators: EMA 20/50, RSI(14), MA200, Bollinger Bands, ATR.</p>
             </div>
           </TabsContent>
 

@@ -126,12 +126,12 @@ export function GoldChartSection() {
         </Card>
       </div>
 
-      {/* ── Hauza Strategy Quick-Reference ─────── */}
-      <div>
-        <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 mb-3">
-          <Crosshair className="h-4 w-4 text-primary" />
-          Hauza Gold Strategies — Quick Reference
-          <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Use with chart above</Badge>
+       {/* ── Botvio Strategy Quick-Reference ─────── */}
+       <div>
+         <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 mb-3">
+           <Crosshair className="h-4 w-4 text-primary" />
+           Botvio AI Gold Strategies — Quick Reference
+           <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Use with chart above</Badge>
         </h3>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
