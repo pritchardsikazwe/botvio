@@ -204,46 +204,6 @@ const Index = () => {
           <MarketDashboard homeMode />
         </section>
 
-        {/* 4 — Featured Products (4 max) */}
-        {displayProducts.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
-                Featured Products
-              </h2>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/marketplace">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {displayProducts.map((product) => {
-                const productLink = product.type === "bot" ? "/bots" : product.type === "signal_pack" ? "/signals" : product.type === "course" ? "/learn" : "/marketplace";
-                return (
-                  <Card key={product.id} className="glass-card hover:border-primary/50 transition-colors">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          {product.type === "bot" ? <Bot className="h-4 w-4 text-primary" /> : product.type === "signal_pack" ? <Target className="h-4 w-4 text-primary" /> : product.type === "course" ? <GraduationCap className="h-4 w-4 text-primary" /> : <Zap className="h-4 w-4 text-primary" />}
-                          {product.name}
-                        </CardTitle>
-                        {product.price_usd > 0 ? <Badge variant="secondary">${product.price_usd}</Badge> : <Badge variant="outline">Free</Badge>}
-                      </div>
-                      <CardDescription>{product.short_description || "Trading tool"}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="capitalize">{product.type?.replace("_", " ") || "Product"}</Badge>
-                        <Button size="sm" variant="outline" asChild><Link to={productLink}>View</Link></Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
         {/* 5 — Deriv Options Shortcut */}
         <section>
           <Link to="/deriv-options" className="block">
@@ -271,6 +231,52 @@ const Index = () => {
               </CardContent>
             </Card>
           </Link>
+
+          {/* Quick Trade Mode Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+            <Link to="/trade/style/digit-contracts" className="block">
+              <Card className="glass-card border-violet-500/30 hover:border-violet-500/60 hover:scale-[1.02] transition-all cursor-pointer h-full">
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-muted/50 text-violet-400">
+                      <Hash className="h-5 w-5" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">Fast</Badge>
+                  </div>
+                  <p className="font-bold text-sm">Digits (Matches/Differs)</p>
+                  <p className="text-xs text-muted-foreground">Predict the last digit. 1-10 tick contracts with 90%+ win rates on Differs.</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/trade/style/boom-crash" className="block">
+              <Card className="glass-card border-orange-500/30 hover:border-orange-500/60 hover:scale-[1.02] transition-all cursor-pointer h-full">
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-muted/50 text-orange-400">
+                      <Zap className="h-5 w-5" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">Advanced</Badge>
+                  </div>
+                  <p className="font-bold text-sm">Boom / Crash Spikes</p>
+                  <p className="text-xs text-muted-foreground">Catch explosive spike movements. Wait for drought patterns before entering.</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/trade/style/ticks" className="block">
+              <Card className="glass-card border-pink-500/30 hover:border-pink-500/60 hover:scale-[1.02] transition-all cursor-pointer h-full">
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-muted/50 text-pink-400">
+                      <Activity className="h-5 w-5" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">Ultra-Fast</Badge>
+                  </div>
+                  <p className="font-bold text-sm">Ticks Trading</p>
+                  <p className="text-xs text-muted-foreground">Ultra-fast 1-5 tick contracts. Pure price action with instant results.</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
         </section>
 
 
