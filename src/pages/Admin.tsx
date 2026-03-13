@@ -1195,6 +1195,7 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>User</TableHead>
+                      <TableHead>Contact</TableHead>
                       <TableHead>Current Plan</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Period</TableHead>
