@@ -74,10 +74,8 @@ const Billing = () => {
     setShowPaymentModal(true);
   };
 
-  const handlePaymentInitiated = (method: string, details: any) => {
-    // Payment initiated
-    toast.success("Payment initiated! You'll receive confirmation shortly.");
-    setShowPaymentModal(false);
+  const handlePaymentInitiated = (_method: string, _details: any) => {
+    // Method selected — keep modal open so user can see wallet details and upload proof
   };
 
   const handleSubmitOfflinePayment = async () => {
