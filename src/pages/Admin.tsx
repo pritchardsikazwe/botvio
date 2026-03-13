@@ -34,7 +34,10 @@ import {
   Settings,
   Package,
   ClipboardCheck,
-  Globe
+  Globe,
+  Mail,
+  Contact,
+  Phone
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -50,6 +53,8 @@ import { ProductsManagementTab } from "@/components/admin/ProductsManagementTab"
 import { AdminSEOTab } from "@/components/admin/AdminSEOTab";
 import { AdminSEOPagesTab } from "@/components/admin/AdminSEOPagesTab";
 import { AdminNewsEventsTab } from "@/components/admin/AdminNewsEventsTab";
+import { AdminProfilesTab } from "@/components/admin/AdminProfilesTab";
+import { AdminNewsletterTab } from "@/components/admin/AdminNewsletterTab";
 
 interface Provider {
   id: string;
@@ -78,6 +83,8 @@ interface UserSubscription {
   profiles: {
     email: string | null;
     display_name: string | null;
+    whatsapp_number: string | null;
+    country: string | null;
   } | null;
 }
 
@@ -476,7 +483,7 @@ const Admin = () => {
       const userIds = subsData.map(s => s.user_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("user_id, email, display_name")
+        .select("user_id, email, display_name, whatsapp_number, country")
         .in("user_id", userIds);
 
       if (profilesError) {
@@ -1015,6 +1022,14 @@ const Admin = () => {
               <AlertTriangle className="w-4 h-4" />
               News Events
             </TabsTrigger>
+            <TabsTrigger value="profiles" className="flex items-center gap-2">
+              <Contact className="w-4 h-4" />
+              Profiles
+            </TabsTrigger>
+            <TabsTrigger value="newsletter" className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Newsletter
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1050,6 +1065,16 @@ const Admin = () => {
           {/* News Events Tab */}
           <TabsContent value="news_events">
             <AdminNewsEventsTab />
+          </TabsContent>
+
+          {/* Profiles Tab */}
+          <TabsContent value="profiles">
+            <AdminProfilesTab />
+          </TabsContent>
+
+          {/* Newsletter Tab */}
+          <TabsContent value="newsletter">
+            <AdminNewsletterTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}
@@ -1171,6 +1196,7 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>User</TableHead>
+                      <TableHead>Contact</TableHead>
                       <TableHead>Current Plan</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Period</TableHead>
@@ -1180,7 +1206,7 @@ const Admin = () => {
                   <TableBody>
                     {subscriptions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                           No subscriptions found
                         </TableCell>
                       </TableRow>
@@ -1191,6 +1217,23 @@ const Admin = () => {
                             <div>
                               <p className="font-medium">{sub.profiles?.display_name || 'Unknown'}</p>
                               <p className="text-sm text-muted-foreground">{sub.profiles?.email || 'No email'}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {sub.profiles?.whatsapp_number && (
+                                <a href={`https://wa.me/${sub.profiles.whatsapp_number.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-emerald-400 hover:underline">
+                                  <Phone className="h-3 w-3" /> {sub.profiles.whatsapp_number}
+                                </a>
+                              )}
+                              {sub.profiles?.country && (
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Globe className="h-3 w-3" /> {sub.profiles.country}
+                                </span>
+                              )}
+                              {!sub.profiles?.whatsapp_number && !sub.profiles?.country && (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>

@@ -2075,6 +2075,48 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscribers: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          display_name: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          source: string | null
+          subscribed_at: string | null
+          unsubscribed_at: string | null
+          user_id: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          source?: string | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+          user_id?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          source?: string | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+          user_id?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
