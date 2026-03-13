@@ -42,7 +42,7 @@ const TRADE_MODES = [
     title: "Rise / Fall",
     description: "Predict short-term direction",
     icon: <TrendingUp className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Beginner"],
+    badges: ["Botvio AI", "Beginner"],
     gradient: "from-emerald-500/20 to-green-600/20",
     borderColor: "border-emerald-500/30",
     iconColor: "text-emerald-400",
