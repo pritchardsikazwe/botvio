@@ -8,7 +8,7 @@ import { GoldTipsSection } from "@/components/gold/GoldTipsSection";
 import { GoldCommunitySection } from "@/components/gold/GoldCommunitySection";
 import { GoldSentimentGauge } from "@/components/gold/GoldSentimentGauge";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
-import { GoldHauzaStrategy } from "@/components/gold/GoldHauzaStrategy";
+import { GoldBotvioStrategy } from "@/components/gold/GoldHauzaStrategy";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, Signal, Lightbulb, Users, Crosshair, Target, TrendingUp, Clock, ShieldCheck } from "lucide-react";
