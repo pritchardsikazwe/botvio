@@ -48,7 +48,7 @@ const POPULAR_MARKETS = [
 const DOS = [
   "Always start with a Demo account to practice risk-free",
   "Set Stop Loss on every Multiplier trade",
-  "Use the Hauza Sniper strategy guides for each mode",
+  "Use the Botvio AI strategy guides for each mode",
   "Start with small stakes ($0.35 – $1.00)",
   "Diversify across contract types, don't stick to one",
   "Monitor your daily P&L and set loss limits",
