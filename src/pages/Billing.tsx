@@ -480,10 +480,10 @@ const Billing = () => {
                 onChange={(e) => setOfflineMethod(e.target.value)}
               >
                 <option value="">Select method...</option>
-                <option value="airtel_money">Airtel Money</option>
-                <option value="mtn_money">MTN Money</option>
+                <option value="mobile_money">Airtel Money</option>
+                <option value="mobile_money">MTN Money</option>
                 <option value="bank_transfer">Bank Transfer</option>
-                <option value="crypto_usdt">USDT (Crypto)</option>
+                <option value="crypto">USDT (Crypto)</option>
               </select>
             </div>
             <div>
