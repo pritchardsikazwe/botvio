@@ -81,7 +81,7 @@ const TRADE_MODES = [
     title: "Ticks",
     description: "Tick-by-tick price stream trading",
     icon: <Timer className="h-6 w-6" />,
-    badges: ["Hauza Sniper", "Fast"],
+    badges: ["Botvio AI", "Fast"],
     gradient: "from-pink-500/20 to-rose-600/20",
     borderColor: "border-pink-500/30",
     iconColor: "text-pink-400",
