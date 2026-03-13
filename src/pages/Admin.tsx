@@ -1205,7 +1205,7 @@ const Admin = () => {
                   <TableBody>
                     {subscriptions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                           No subscriptions found
                         </TableCell>
                       </TableRow>
@@ -1216,6 +1216,23 @@ const Admin = () => {
                             <div>
                               <p className="font-medium">{sub.profiles?.display_name || 'Unknown'}</p>
                               <p className="text-sm text-muted-foreground">{sub.profiles?.email || 'No email'}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {sub.profiles?.whatsapp_number && (
+                                <a href={`https://wa.me/${sub.profiles.whatsapp_number.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-emerald-400 hover:underline">
+                                  <Phone className="h-3 w-3" /> {sub.profiles.whatsapp_number}
+                                </a>
+                              )}
+                              {sub.profiles?.country && (
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Globe className="h-3 w-3" /> {sub.profiles.country}
+                                </span>
+                              )}
+                              {!sub.profiles?.whatsapp_number && !sub.profiles?.country && (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
