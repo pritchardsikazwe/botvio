@@ -15,7 +15,7 @@ import {
   Wallet, TrendingUp, ArrowRight, Plus, Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useP2POffers, useCreateP2POffer, useCreateP2PTrade, P2POffer } from "@/hooks/useP2P";
+import { useP2POffers, useCreateP2POffer, useCreateP2PTrade, useP2PRealtimeSync, P2POffer } from "@/hooks/useP2P";
 import { toast } from "sonner";
 
 const P2P = () => {
