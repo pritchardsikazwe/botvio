@@ -1064,6 +1064,16 @@ const Admin = () => {
             <AdminNewsEventsTab />
           </TabsContent>
 
+          {/* Profiles Tab */}
+          <TabsContent value="profiles">
+            <AdminProfilesTab />
+          </TabsContent>
+
+          {/* Newsletter Tab */}
+          <TabsContent value="newsletter">
+            <AdminNewsletterTab />
+          </TabsContent>
+
           {/* Subscription Requests Tab */}
           <TabsContent value="subscription_requests">
             <SubscriptionRequestsTab />
