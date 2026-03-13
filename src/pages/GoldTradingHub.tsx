@@ -41,7 +41,7 @@ const GoldTradingHub = () => {
               <div className="flex items-center gap-2 mb-2">
                 <Badge className="bg-primary/20 text-primary border-primary/30 font-mono text-xs">XAUUSD</Badge>
                 <Badge variant="outline" className="border-success/40 text-success text-xs">Market Open</Badge>
-                <Badge variant="outline" className="border-warning/30 text-warning text-xs">Hauza Strategies Live</Badge>
+                <Badge variant="outline" className="border-warning/30 text-warning text-xs">Botvio AI Strategies Live</Badge>
               </div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 Gold Trading <span className="text-primary">Hub</span>
