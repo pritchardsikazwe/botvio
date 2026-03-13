@@ -301,7 +301,7 @@ function getStrategiesForAsset(assetType: string, symbol: string) {
   }
   // Synthetic / volatility indices
   if (type === "synthetic" || sym.startsWith("R_") || sym.includes("HZ")) {
-    return HAUZA_STRATEGIES.filter(s => ["digit-contracts", "rise-fall-scalping", "accumulators", "turbo", "ticks", "multipliers"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["digit-contracts", "rise-fall-scalping", "accumulators", "turbo", "ticks", "multipliers"].includes(s.id));
   }
   // Default: show core modes
   return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers", "synthetic-indices"].includes(s.id));
