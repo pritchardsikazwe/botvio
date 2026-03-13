@@ -20,7 +20,7 @@ const WeltradeHub = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Weltrade Hub – PainX, GainX & TrendX Charts & Signals"
-        description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Hauza Sniper strategies, signals, tips & community for Weltrade synthetic indices."
+        description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Botvio AI strategies, signals, tips & community for Weltrade synthetic indices."
         ogImage="https://botvio.live/icon-512.png"
       />
       <Header />
