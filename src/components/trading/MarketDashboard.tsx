@@ -293,7 +293,7 @@ function getStrategiesForAsset(assetType: string, symbol: string) {
   }
   // Crypto: Rise/Fall, Multipliers
   if (type === "crypto") {
-    return HAUZA_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers"].includes(s.id));
+    return BOTVIO_STRATEGIES.filter(s => ["rise-fall-scalping", "multipliers"].includes(s.id));
   }
   // Boom/Crash symbols
   if (sym.includes("BOOM") || sym.includes("CRASH")) {
