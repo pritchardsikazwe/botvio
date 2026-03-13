@@ -904,10 +904,28 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const orderedAssets = HOME_PREFERRED_ORDER
             .map(sym => assets.find(a => a.symbol === sym))
             .filter(Boolean) as Asset[];
+          const freePreview = isBasicOrAbove ? orderedAssets : orderedAssets.slice(0, 2);
           return (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {orderedAssets.map(renderCard)}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {freePreview.map(renderCard)}
+              </div>
+              {!isBasicOrAbove && !gateLoading && (
+                <UpgradePrompt feature="Live Market Intelligence" requiredPlan="Basic" className="mt-4" />
+              )}
+            </>
+          );
+        }
+
+        if (!isBasicOrAbove && !gateLoading) {
+          const preview = limitedNonBinance.slice(0, 2);
+          return (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {preview.map(renderCard)}
+              </div>
+              <UpgradePrompt feature="Full Market Intelligence" requiredPlan="Basic" className="mt-4" />
+            </>
           );
         }
 
