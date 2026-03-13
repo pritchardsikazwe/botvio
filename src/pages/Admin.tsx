@@ -482,7 +482,7 @@ const Admin = () => {
       const userIds = subsData.map(s => s.user_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("user_id, email, display_name")
+        .select("user_id, email, display_name, whatsapp_number, country")
         .in("user_id", userIds);
 
       if (profilesError) {
