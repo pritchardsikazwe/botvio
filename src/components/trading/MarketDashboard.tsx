@@ -391,7 +391,7 @@ function BotvioSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefin
           <div className="text-left">
             <div className="flex items-center gap-2">
               <Crosshair className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Hauza Signal</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Botvio Signal</span>
             </div>
             <span className={`text-lg font-black tracking-tight ${config.text}`}>
               {config.label} {isActive ? symbol.replace("/", "") : ""}
