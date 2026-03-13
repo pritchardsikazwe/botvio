@@ -188,7 +188,7 @@ export function GoldBotvioStrategy() {
       <section>
         <h2 className="text-lg font-extrabold text-foreground mb-4 flex items-center gap-2">
           <Zap className="h-5 w-5 text-primary" />
-          Hauza Gold Pro Tips
+           Botvio Gold Pro Tips
           <Badge variant="outline" className="text-xs border-primary/30 text-primary">Exclusive</Badge>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
