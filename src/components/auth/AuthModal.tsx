@@ -85,7 +85,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password, country, whatsapp);
+    const { error } = await signUp(email, password, country, whatsapp, selectedPlan);
     if (error) {
       toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
     } else {
