@@ -27,12 +27,11 @@ const PRODUCT_TABS = [
   { value: "bot", label: "Bots", icon: Bot },
 ];
 
-// Sort priority: signal_pack first, then course, strategy, bot
+// Sort priority: course first, then strategy, bot
 const TYPE_ORDER: Record<string, number> = {
-  signal_pack: 0,
-  course: 1,
-  strategy: 2,
-  bot: 3,
+  course: 0,
+  strategy: 1,
+  bot: 2,
 };
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
