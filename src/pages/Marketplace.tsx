@@ -195,7 +195,7 @@ const Marketplace = () => {
 
         {/* Product Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl mx-auto h-12 bg-muted/50 border border-border/50 rounded-xl p-1">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto h-12 bg-muted/50 border border-border/50 rounded-xl p-1">
             {PRODUCT_TABS.map((tab) => {
               const Icon = tab.icon;
               const c = colors(tab.value);
