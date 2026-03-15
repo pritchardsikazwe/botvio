@@ -70,15 +70,17 @@ const Marketplace = () => {
   const isOwned = (productId: string) =>
     entitlements?.some((e) => e.product_id === productId && e.status === "active") ?? false;
 
-  // Sort products by type priority then featured
+  // Sort products by type priority then featured, exclude signal_packs
   const sortedProducts = products
-    ? [...products].sort((a, b) => {
-        const aOrder = TYPE_ORDER[a.type] ?? 99;
-        const bOrder = TYPE_ORDER[b.type] ?? 99;
-        if (aOrder !== bOrder) return aOrder - bOrder;
-        if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
-        return 0;
-      })
+    ? [...products]
+        .filter((p) => p.type !== "signal_pack")
+        .sort((a, b) => {
+          const aOrder = TYPE_ORDER[a.type] ?? 99;
+          const bOrder = TYPE_ORDER[b.type] ?? 99;
+          if (aOrder !== bOrder) return aOrder - bOrder;
+          if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
+          return 0;
+        })
     : [];
 
   const handleBuy = (product: MarketplaceProduct) => {
