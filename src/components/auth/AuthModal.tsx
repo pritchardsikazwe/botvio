@@ -6,10 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, Globe, Phone } from "lucide-react";
+import { Loader2, Mail, Lock, User, Globe, Phone, Crown, Zap, Star, Gift } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { lovable } from "@/integrations/lovable/index";
+
+const PLANS = [
+  { code: "free", name: "Free Trial", price: "$0/mo", icon: Gift, description: "5 chart analyses/day" },
+  { code: "basic", name: "Basic", price: "$10/mo", icon: Star, description: "50 analyses/week + signals" },
+  { code: "standard", name: "Standard", price: "$25/mo", icon: Zap, description: "100 analyses/month + copy trade" },
+  { code: "vip", name: "VIP", price: "$49/mo", icon: Crown, description: "Unlimited + all strategies" },
+];
 
 const COUNTRIES = [
   { code: "ZM", name: "Zambia" }, { code: "KE", name: "Kenya" }, { code: "NG", name: "Nigeria" },
@@ -42,6 +50,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("free");
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -76,7 +85,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password, country, whatsapp);
+    const { error } = await signUp(email, password, country, whatsapp, selectedPlan);
     if (error) {
       toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
     } else {
@@ -191,6 +200,35 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   onChange={(e) => setWhatsapp(e.target.value)}
                   className="bg-secondary/50"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Crown className="w-4 h-4" /> Choose Your Plan
+                </Label>
+                <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="grid grid-cols-2 gap-2">
+                  {PLANS.map((plan) => {
+                    const Icon = plan.icon;
+                    return (
+                      <Label
+                        key={plan.code}
+                        htmlFor={`plan-${plan.code}`}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-xs ${
+                          selectedPlan === plan.code
+                            ? "border-primary bg-primary/10 ring-1 ring-primary"
+                            : "border-border bg-secondary/30 hover:border-primary/50"
+                        }`}
+                      >
+                        <RadioGroupItem value={plan.code} id={`plan-${plan.code}`} className="sr-only" />
+                        <Icon className="w-4 h-4 shrink-0 text-primary" />
+                        <div className="min-w-0">
+                          <p className="font-semibold truncate">{plan.name}</p>
+                          <p className="text-muted-foreground text-[10px]">{plan.price}</p>
+                        </div>
+                      </Label>
+                    );
+                  })}
+                </RadioGroup>
+                <p className="text-[10px] text-muted-foreground text-center">You can upgrade anytime from Billing</p>
               </div>
               <Button type="submit" disabled={loading} className="w-full" variant="gold">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</> : "Create Account"}
