@@ -22,7 +22,6 @@ import { toast } from "sonner";
 
 const PRODUCT_TABS = [
   { value: "all", label: "All", icon: Package },
-  { value: "signal_pack", label: "Signals", icon: Signal },
   { value: "course", label: "Courses", icon: GraduationCap },
   { value: "strategy", label: "Strategies", icon: Zap },
   { value: "bot", label: "Bots", icon: Bot },
