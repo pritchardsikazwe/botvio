@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { 
-  Bot, Signal, GraduationCap, ShoppingCart, Check, Crown, 
+  Bot, GraduationCap, ShoppingCart, Check, Crown, 
   Package, Star, Zap, Lock, Upload
 } from "lucide-react";
 import { toast } from "sonner";
