@@ -201,6 +201,35 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   className="bg-secondary/50"
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Crown className="w-4 h-4" /> Choose Your Plan
+                </Label>
+                <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="grid grid-cols-2 gap-2">
+                  {PLANS.map((plan) => {
+                    const Icon = plan.icon;
+                    return (
+                      <Label
+                        key={plan.code}
+                        htmlFor={`plan-${plan.code}`}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-xs ${
+                          selectedPlan === plan.code
+                            ? "border-primary bg-primary/10 ring-1 ring-primary"
+                            : "border-border bg-secondary/30 hover:border-primary/50"
+                        }`}
+                      >
+                        <RadioGroupItem value={plan.code} id={`plan-${plan.code}`} className="sr-only" />
+                        <Icon className="w-4 h-4 shrink-0 text-primary" />
+                        <div className="min-w-0">
+                          <p className="font-semibold truncate">{plan.name}</p>
+                          <p className="text-muted-foreground text-[10px]">{plan.price}</p>
+                        </div>
+                      </Label>
+                    );
+                  })}
+                </RadioGroup>
+                <p className="text-[10px] text-muted-foreground text-center">You can upgrade anytime from Billing</p>
+              </div>
               <Button type="submit" disabled={loading} className="w-full" variant="gold">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</> : "Create Account"}
               </Button>
