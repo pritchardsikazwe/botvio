@@ -150,7 +150,6 @@ const Marketplace = () => {
   const getProductIcon = (type: string) => {
     switch (type) {
       case "bot": return <Bot className="h-6 w-6" />;
-      case "signal_pack": return <Signal className="h-6 w-6" />;
       case "course": return <GraduationCap className="h-6 w-6" />;
       case "strategy": return <Zap className="h-6 w-6" />;
       default: return <Package className="h-6 w-6" />;
