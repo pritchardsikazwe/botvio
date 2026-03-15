@@ -159,7 +159,6 @@ const Marketplace = () => {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case "bot": return "Trading Bot";
-      case "signal_pack": return "Signal Pack";
       case "course": return "Course";
       case "strategy": return "Strategy";
       default: return type;
