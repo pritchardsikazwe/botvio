@@ -15,34 +15,26 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { 
-  Bot, Signal, GraduationCap, ShoppingCart, Check, Crown, 
+  Bot, GraduationCap, ShoppingCart, Check, Crown, 
   Package, Star, Zap, Lock, Upload
 } from "lucide-react";
 import { toast } from "sonner";
 
 const PRODUCT_TABS = [
   { value: "all", label: "All", icon: Package },
-  { value: "signal_pack", label: "Signals", icon: Signal },
   { value: "course", label: "Courses", icon: GraduationCap },
   { value: "strategy", label: "Strategies", icon: Zap },
   { value: "bot", label: "Bots", icon: Bot },
 ];
 
-// Sort priority: signal_pack first, then course, strategy, bot
+// Sort priority: course first, then strategy, bot
 const TYPE_ORDER: Record<string, number> = {
-  signal_pack: 0,
-  course: 1,
-  strategy: 2,
-  bot: 3,
+  course: 0,
+  strategy: 1,
+  bot: 2,
 };
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
-  signal_pack: {
-    bg: "bg-emerald-500/15",
-    text: "text-emerald-400",
-    border: "border-emerald-500/40",
-    gradient: "from-emerald-500/20 to-teal-500/10",
-  },
   course: {
     bg: "bg-blue-500/15",
     text: "text-blue-400",
@@ -78,15 +70,17 @@ const Marketplace = () => {
   const isOwned = (productId: string) =>
     entitlements?.some((e) => e.product_id === productId && e.status === "active") ?? false;
 
-  // Sort products by type priority then featured
+  // Sort products by type priority then featured, exclude signal_packs
   const sortedProducts = products
-    ? [...products].sort((a, b) => {
-        const aOrder = TYPE_ORDER[a.type] ?? 99;
-        const bOrder = TYPE_ORDER[b.type] ?? 99;
-        if (aOrder !== bOrder) return aOrder - bOrder;
-        if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
-        return 0;
-      })
+    ? [...products]
+        .filter((p) => p.type !== "signal_pack")
+        .sort((a, b) => {
+          const aOrder = TYPE_ORDER[a.type] ?? 99;
+          const bOrder = TYPE_ORDER[b.type] ?? 99;
+          if (aOrder !== bOrder) return aOrder - bOrder;
+          if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
+          return 0;
+        })
     : [];
 
   const handleBuy = (product: MarketplaceProduct) => {
@@ -156,7 +150,6 @@ const Marketplace = () => {
   const getProductIcon = (type: string) => {
     switch (type) {
       case "bot": return <Bot className="h-6 w-6" />;
-      case "signal_pack": return <Signal className="h-6 w-6" />;
       case "course": return <GraduationCap className="h-6 w-6" />;
       case "strategy": return <Zap className="h-6 w-6" />;
       default: return <Package className="h-6 w-6" />;
@@ -166,7 +159,6 @@ const Marketplace = () => {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case "bot": return "Trading Bot";
-      case "signal_pack": return "Signal Pack";
       case "course": return "Course";
       case "strategy": return "Strategy";
       default: return type;
@@ -177,7 +169,7 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Marketplace — Trading Bots, Signal Packs & Courses" description="Browse and purchase premium trading bots, signal packs, strategy templates, and forex mentorship courses. Find tools for gold scalping, Deriv automation, Exness copy trading, and crypto strategies." />
+      <SEOHead title="Marketplace — Trading Bots, Courses & Strategies" description="Browse and purchase premium trading bots, strategy templates, and forex mentorship courses. Find tools for gold scalping, Deriv automation, Exness copy trading, and crypto strategies." />
       <Header />
 
       <main className="container mx-auto px-4 py-6">
@@ -201,7 +193,7 @@ const Marketplace = () => {
 
         {/* Product Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl mx-auto h-12 bg-muted/50 border border-border/50 rounded-xl p-1">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto h-12 bg-muted/50 border border-border/50 rounded-xl p-1">
             {PRODUCT_TABS.map((tab) => {
               const Icon = tab.icon;
               const c = colors(tab.value);
