@@ -195,13 +195,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, country?: string, whatsapp?: string) => {
+  const signUp = async (email: string, password: string, country?: string, whatsapp?: string, planCode?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { country: country || undefined, whatsapp_number: whatsapp || undefined },
+        data: { country: country || undefined, whatsapp_number: whatsapp || undefined, selected_plan: planCode || 'free' },
       },
     });
 
@@ -217,6 +217,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .eq("user_id", data.user.id)
           .then(() => {});
       }
+
+      // Assign selected plan subscription
+      if (planCode && planCode !== 'free') {
+        const { data: planData } = await supabase
+          .from("pricing_plans")
+          .select("id")
+          .eq("code", planCode)
+          .eq("is_active", true)
+          .maybeSingle();
+        if (planData) {
+          await supabase
+            .from("user_plan_subscriptions")
+            .upsert({
+              user_id: data.user.id,
+              pricing_plan_id: planData.id,
+              status: "pending_payment",
+              current_period_start: new Date().toISOString(),
+            }, { onConflict: "user_id" });
+        }
+      }
     }
 
     // Notify admin of new signup (fire and forget)
@@ -226,6 +246,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email,
           user_id: data.user.id,
           created_at: new Date().toISOString(),
+          selected_plan: planCode || 'free',
         },
       }).catch(() => {});
     }
