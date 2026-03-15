@@ -122,6 +122,48 @@ const strategyCategories: StrategyCategory[] = [
     icon: Shield,
     color: "text-primary",
   },
+  {
+    id: "boom-crash-course",
+    name: "Boom & Crash Trading",
+    description: "Master Boom & Crash spike trading on Deriv",
+    icon: Zap,
+    color: "text-destructive",
+  },
+  {
+    id: "binance-practical-trading",
+    name: "Binance Practical Trading",
+    description: "Spot, futures, P2P & Binance Earn",
+    icon: BarChart3,
+    color: "text-amber-500",
+  },
+  {
+    id: "forex-trading-masterclass",
+    name: "Forex Trading Masterclass",
+    description: "Complete forex fundamentals & strategies",
+    icon: TrendingUp,
+    color: "text-blue-500",
+  },
+  {
+    id: "forex-advanced-course",
+    name: "Forex Advanced Course",
+    description: "SMC, liquidity, order flow & session trading",
+    icon: Shield,
+    color: "text-violet-500",
+  },
+  {
+    id: "smart-money-concepts",
+    name: "Smart Money Concepts",
+    description: "Full SMC course — OBs, liquidity, structure",
+    icon: Target,
+    color: "text-emerald-500",
+  },
+  {
+    id: "trading-strategies-masterclass",
+    name: "Trading Strategies Masterclass",
+    description: "Price action, indicators, risk & backtesting",
+    icon: LineChart,
+    color: "text-cyan-500",
+  },
 ];
 
 const lessonIcons: { [key: string]: React.ComponentType<{ className?: string }> } = {
