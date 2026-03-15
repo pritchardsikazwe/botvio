@@ -50,6 +50,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("free");
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
