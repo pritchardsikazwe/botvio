@@ -35,12 +35,6 @@ const TYPE_ORDER: Record<string, number> = {
 };
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
-  signal_pack: {
-    bg: "bg-emerald-500/15",
-    text: "text-emerald-400",
-    border: "border-emerald-500/40",
-    gradient: "from-emerald-500/20 to-teal-500/10",
-  },
   course: {
     bg: "bg-blue-500/15",
     text: "text-blue-400",
