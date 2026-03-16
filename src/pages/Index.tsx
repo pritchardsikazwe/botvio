@@ -497,11 +497,31 @@ const Index = () => {
           <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto mb-2">
             <strong>Risk Warning:</strong> Trading binary options and CFDs involves significant risk. Past performance is not indicative of future results.
           </p>
-          <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto">
+          <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto mb-2">
             Botvio is powered by Deriv API. Botvio is not affiliated with or endorsed by Deriv.
           </p>
+          {/* Official Contact Disclaimer */}
+          <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border/50 max-w-2xl mx-auto">
+            <p className="text-xs text-muted-foreground text-center">
+              <strong className="text-foreground">⚠️ Official Contact Disclaimer:</strong> Our only official contact channels are email{" "}
+              <a href="mailto:info@botvio.live" className="text-primary hover:underline font-medium">info@botvio.live</a>{" "}
+              and WhatsApp numbers provided on this platform. Do not trust any other contact claiming to represent Botvio.
+            </p>
+          </div>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Support Button */}
+      <a
+        href="https://wa.me/260966284085?text=Hi%20Botvio%20Support%2C%20I%20need%20help"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-all hover:scale-105 animate-pulse hover:animate-none"
+        aria-label="WhatsApp Support"
+      >
+        <MessageCircle className="h-5 w-5" />
+        <span className="text-sm font-medium hidden sm:inline">Support</span>
+      </a>
     </div>
   );
 };

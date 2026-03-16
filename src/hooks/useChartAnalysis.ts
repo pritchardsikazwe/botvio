@@ -45,7 +45,7 @@ interface ChartLimitConfig {
 }
 
 const CHART_LIMITS: Record<string, ChartLimitConfig> = {
-  free:     { maxUploads: 5,   periodLabel: "per day",    periodDays: 1 },
+  free:     { maxUploads: 3,   periodLabel: "per day",    periodDays: 1 },
   basic:    { maxUploads: 50,  periodLabel: "per 7 days", periodDays: 7 },
   standard: { maxUploads: 100, periodLabel: "per month",  periodDays: 30 },
   vip:      { maxUploads: -1,  periodLabel: "unlimited",  periodDays: 30 },

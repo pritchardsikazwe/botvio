@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Bitcoin, Check, ArrowRight, Wallet, Copy, Upload, Phone, Smartphone } from "lucide-react";
+import { Bitcoin, Check, ArrowRight, Wallet, Copy, Upload, Phone, Smartphone, MessageCircle } from "lucide-react";
 
 const MOBILE_MONEY = [
   {
