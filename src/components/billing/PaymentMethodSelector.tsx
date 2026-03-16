@@ -236,9 +236,29 @@ export const PaymentMethodSelector = ({
           </Button>
         )}
 
-        <p className="text-xs text-muted-foreground text-center">
-          After payment, admin will verify and activate your access within 24 hours.
-        </p>
+        <div className="space-y-3 mt-2">
+          <p className="text-xs text-muted-foreground text-center">
+            After payment, admin will verify and activate your access within 24 hours.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+            <a
+              href="https://wa.me/260966284085?text=Hi%20Botvio%20Support%2C%20I%20need%20help%20with%20my%20payment"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Contact Support on WhatsApp
+            </a>
+            <a
+              href="mailto:info@botvio.live"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+            >
+              <Phone className="h-4 w-4" />
+              Email: info@botvio.live
+            </a>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
