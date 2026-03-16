@@ -291,7 +291,7 @@ const Strategies = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredStrategies.map((strategy) => (
-                  <Card key={strategy.id} className="group hover:shadow-lg transition-shadow">
+                  <Card key={strategy.id} className="group hover:shadow-lg transition-shadow border-border/60">
                     {strategy.cover_image_url && (
                       <div className="h-40 overflow-hidden rounded-t-lg">
                         <img
@@ -305,12 +305,12 @@ const Strategies = () => {
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
                           <CardTitle className="line-clamp-1">{strategy.title}</CardTitle>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant="outline">{strategy.market}</Badge>
                             <Badge variant={strategy.pricing_type === "free" ? "secondary" : "default"}>
                               {strategy.pricing_type === "free" 
                                 ? t("strategies.free", "Free") 
-                                : `$${strategy.price_usd}`}
+                                : `$${strategy.price_usd || 10}`}
                             </Badge>
                           </div>
                         </div>
@@ -321,13 +321,29 @@ const Strategies = () => {
                         {strategy.description || t("strategies.noDescription", "No description provided")}
                       </CardDescription>
                       
+                      {/* Symbols */}
+                      {strategy.symbols && strategy.symbols.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {strategy.symbols.slice(0, 4).map((sym: string) => (
+                            <Badge key={sym} variant="outline" className="text-[10px] px-1.5 py-0">
+                              {sym}
+                            </Badge>
+                          ))}
+                          {strategy.symbols.length > 4 && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                              +{strategy.symbols.length - 4}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
                       <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Download className="h-4 w-4" />
                           {strategy.downloads || 0}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Star className="h-4 w-4" />
+                          <Star className="h-4 w-4 text-amber-500" />
                           {strategy.rating?.toFixed(1) || "N/A"}
                         </span>
                       </div>
