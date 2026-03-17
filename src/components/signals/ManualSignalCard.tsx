@@ -6,9 +6,12 @@ import {
   Clock, 
   Target, 
   Shield,
-  Zap
+  Zap,
+  Brain
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { BrokerButtons } from "./BrokerButtons";
+import { useSignalBrokers } from "@/hooks/useSignalBrokers";
 
 interface ManualSignalCardProps {
   signal: {
@@ -25,13 +28,18 @@ interface ManualSignalCardProps {
     status: string;
     created_at: string;
     reason?: string | null;
+    ai_win_probability?: number | null;
+    explanation_json?: Record<string, unknown> | null;
+    expiry_seconds?: number | null;
   };
   compact?: boolean;
+  showBrokerButtons?: boolean;
 }
 
-export const ManualSignalCard = ({ signal, compact = false }: ManualSignalCardProps) => {
+export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = true }: ManualSignalCardProps) => {
   const isBuy = signal.direction.toUpperCase() === 'BUY' || signal.direction.toUpperCase() === 'CALL';
   const timeAgo = formatDistanceToNow(new Date(signal.created_at), { addSuffix: true });
+  const { data: brokers } = useSignalBrokers();
 
   const getCategoryColor = (category: string) => {
     switch (category?.toLowerCase()) {
@@ -49,6 +57,15 @@ export const ManualSignalCard = ({ signal, compact = false }: ManualSignalCardPr
     if (confidence >= 60) return 'text-warning';
     return 'text-destructive';
   };
+
+  const getRiskLabel = (confidence: number | null) => {
+    if (!confidence) return null;
+    if (confidence >= 80) return { label: "Low Risk", color: "bg-success/20 text-success border-success/30" };
+    if (confidence >= 60) return { label: "Medium Risk", color: "bg-warning/20 text-warning border-warning/30" };
+    return { label: "High Risk", color: "bg-destructive/20 text-destructive border-destructive/30" };
+  };
+
+  const riskLabel = getRiskLabel(signal.confidence);
 
   if (compact) {
     return (
@@ -117,6 +134,9 @@ export const ManualSignalCard = ({ signal, compact = false }: ManualSignalCardPr
               <h3 className="font-bold text-lg">{signal.symbol}</h3>
               <p className={`text-sm font-semibold ${isBuy ? 'text-success' : 'text-destructive'}`}>
                 {signal.direction.toUpperCase()}
+                {signal.expiry_seconds && (
+                  <span className="text-muted-foreground font-normal ml-2">· {signal.expiry_seconds}s expiry</span>
+                )}
               </p>
             </div>
           </div>
@@ -128,6 +148,11 @@ export const ManualSignalCard = ({ signal, compact = false }: ManualSignalCardPr
             <Badge variant={signal.status === 'ACTIVE' ? 'default' : 'secondary'}>
               {signal.status}
             </Badge>
+            {riskLabel && (
+              <Badge variant="outline" className={`text-[10px] ${riskLabel.color}`}>
+                {riskLabel.label}
+              </Badge>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -164,16 +189,7 @@ export const ManualSignalCard = ({ signal, compact = false }: ManualSignalCardPr
           </div>
         </div>
 
-        {/* Brokers */}
-        <div className="flex flex-wrap gap-2">
-          {signal.broker?.map((b) => (
-            <Badge key={b} variant="outline" className="text-xs capitalize">
-              {b}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Confidence and Timeframe */}
+        {/* AI Score & Confidence */}
         <div className="flex items-center justify-between pt-2 border-t border-border/50">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
@@ -182,12 +198,17 @@ export const ManualSignalCard = ({ signal, compact = false }: ManualSignalCardPr
             </div>
             {signal.confidence && (
               <div className={`flex items-center gap-1.5 ${getConfidenceColor(signal.confidence)}`}>
+                <Brain className="h-4 w-4" />
+                <span className="text-sm font-medium">{signal.confidence}%</span>
+              </div>
+            )}
+            {signal.ai_win_probability && (
+              <div className="flex items-center gap-1.5 text-primary">
                 <Zap className="h-4 w-4" />
-                <span className="text-sm font-medium">{signal.confidence}% confidence</span>
+                <span className="text-sm font-medium">{Math.round(signal.ai_win_probability * 100)}% win prob</span>
               </div>
             )}
           </div>
-          
           <span className="text-xs text-muted-foreground">{timeAgo}</span>
         </div>
 
@@ -195,6 +216,29 @@ export const ManualSignalCard = ({ signal, compact = false }: ManualSignalCardPr
         {signal.reason && (
           <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
             <p className="text-sm text-muted-foreground">{signal.reason}</p>
+          </div>
+        )}
+
+        {/* Explanation tags */}
+        {signal.explanation_json && typeof signal.explanation_json === 'object' && (signal.explanation_json as any)?.reason_codes && (
+          <div className="flex flex-wrap gap-1">
+            {((signal.explanation_json as any).reason_codes as string[]).slice(0, 4).map((code: string) => (
+              <Badge key={code} variant="outline" className="text-[10px] px-1.5 py-0 capitalize">
+                {code.replace(/_/g, ' ')}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Broker Buttons */}
+        {showBrokerButtons && brokers && brokers.length > 0 && (
+          <div className="pt-3 border-t border-border/50">
+            <BrokerButtons
+              brokers={brokers}
+              signalId={signal.id}
+              signalCategory={signal.category}
+              signalSymbol={signal.symbol}
+            />
           </div>
         )}
       </CardContent>

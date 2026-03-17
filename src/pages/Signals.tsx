@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
@@ -7,6 +8,7 @@ import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals } from "@/hooks/useManualSignals";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSignalBrokers } from "@/hooks/useSignalBrokers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,8 @@ import {
   ImageIcon,
   Crown,
   Search,
-  X
+  X,
+  ExternalLink
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
@@ -49,6 +52,10 @@ const BROKERS = [
   { value: "deriv", label: "Deriv" },
   { value: "weltrade", label: "Weltrade" },
   { value: "exness", label: "Exness" },
+  { value: "pocket-option", label: "Pocket Option" },
+  { value: "quotex", label: "Quotex" },
+  { value: "iq-option", label: "IQ Option" },
+  { value: "binomo", label: "Binomo" },
 ];
 
 const STATUS_OPTIONS = [
@@ -77,6 +84,7 @@ const TIMEFRAME_OPTIONS = [
 
 const Signals = () => {
   const { user, isSignalManager } = useAuth();
+  const { data: signalBrokers } = useSignalBrokers();
   const [category, setCategory] = useState("all");
   const [broker, setBroker] = useState("all");
   const [status, setStatus] = useState("ACTIVE");
@@ -372,6 +380,31 @@ const Signals = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Broker Comparison Strip */}
+            {signalBrokers && signalBrokers.length > 0 && (
+              <Card className="glass-card mt-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">Supported Brokers</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    {signalBrokers.map((b) => (
+                      <Link key={b.slug} to={`/brokers/${b.slug}`}>
+                        <Card className="glass-card hover:border-primary/50 transition-all text-center p-4 cursor-pointer">
+                          <p className="font-semibold text-sm">{b.name}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">{b.best_for}</p>
+                          <Badge variant="outline" className="mt-2 text-[10px]">
+                            <ExternalLink className="h-2.5 w-2.5 mr-1" />
+                            View Signals
+                          </Badge>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </main>

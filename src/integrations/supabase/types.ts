@@ -510,6 +510,51 @@ export type Database = {
         }
         Relationships: []
       }
+      broker_click_events: {
+        Row: {
+          broker_id: string
+          clicked_at: string
+          country_code: string | null
+          device_type: string | null
+          id: string
+          signal_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          broker_id: string
+          clicked_at?: string
+          country_code?: string | null
+          device_type?: string | null
+          id?: string
+          signal_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          broker_id?: string
+          clicked_at?: string
+          country_code?: string | null
+          device_type?: string | null
+          id?: string
+          signal_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_click_events_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "signal_brokers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_click_events_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broker_tokens: {
         Row: {
           broker_name: string
@@ -3360,6 +3405,137 @@ export type Database = {
           },
         ]
       }
+      signal_broker_assets: {
+        Row: {
+          asset_symbol: string
+          broker_id: string
+          expiry_options: Json | null
+          id: string
+          market_type: string
+          supported: boolean
+        }
+        Insert: {
+          asset_symbol: string
+          broker_id: string
+          expiry_options?: Json | null
+          id?: string
+          market_type?: string
+          supported?: boolean
+        }
+        Update: {
+          asset_symbol?: string
+          broker_id?: string
+          expiry_options?: Json | null
+          id?: string
+          market_type?: string
+          supported?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_broker_assets_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "signal_brokers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signal_broker_routes: {
+        Row: {
+          broker_id: string
+          created_at: string
+          id: string
+          is_recommended: boolean
+          reason_codes: string[] | null
+          route_score: number
+          signal_id: string
+        }
+        Insert: {
+          broker_id: string
+          created_at?: string
+          id?: string
+          is_recommended?: boolean
+          reason_codes?: string[] | null
+          route_score?: number
+          signal_id: string
+        }
+        Update: {
+          broker_id?: string
+          created_at?: string
+          id?: string
+          is_recommended?: boolean
+          reason_codes?: string[] | null
+          route_score?: number
+          signal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_broker_routes_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "signal_brokers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signal_broker_routes_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signal_brokers: {
+        Row: {
+          affiliate_url: string
+          best_for: string | null
+          country_rules: Json | null
+          created_at: string
+          description: string | null
+          execution_mode: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          routing_priority: number
+          slug: string
+          supported_expiries: Json | null
+          supported_market_types: string[] | null
+        }
+        Insert: {
+          affiliate_url?: string
+          best_for?: string | null
+          country_rules?: Json | null
+          created_at?: string
+          description?: string | null
+          execution_mode?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          routing_priority?: number
+          slug: string
+          supported_expiries?: Json | null
+          supported_market_types?: string[] | null
+        }
+        Update: {
+          affiliate_url?: string
+          best_for?: string | null
+          country_rules?: Json | null
+          created_at?: string
+          description?: string | null
+          execution_mode?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          routing_priority?: number
+          slug?: string
+          supported_expiries?: Json | null
+          supported_market_types?: string[] | null
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           bing_verification_code: string | null
@@ -3797,6 +3973,8 @@ export type Database = {
       }
       trading_signals: {
         Row: {
+          ai_model_version: string | null
+          ai_win_probability: number | null
           approved_at: string | null
           approved_by: string | null
           broker: string[] | null
@@ -3806,24 +3984,35 @@ export type Database = {
           direction: string
           entry_price: number
           expires_at: string | null
+          expiry_seconds: number | null
+          explanation_json: Json | null
           id: string
           is_manual: boolean | null
+          market_context_score: number | null
           outcome: string | null
           outcome_updated_at: string | null
           outcome_updated_by: string | null
           posted_by: string | null
           reason: string | null
           rejection_reason: string | null
+          session_fit_score: number | null
+          settled_at: string | null
+          settled_price: number | null
+          signal_lifecycle: string | null
           status: string | null
           stop_loss: number | null
           strategy_name: string
+          strategy_quality_score: number | null
           symbol: string
           take_profit: number | null
           timeframe: string
+          volatility_fit_score: number | null
           zone_max: number | null
           zone_min: number | null
         }
         Insert: {
+          ai_model_version?: string | null
+          ai_win_probability?: number | null
           approved_at?: string | null
           approved_by?: string | null
           broker?: string[] | null
@@ -3833,24 +4022,35 @@ export type Database = {
           direction: string
           entry_price: number
           expires_at?: string | null
+          expiry_seconds?: number | null
+          explanation_json?: Json | null
           id?: string
           is_manual?: boolean | null
+          market_context_score?: number | null
           outcome?: string | null
           outcome_updated_at?: string | null
           outcome_updated_by?: string | null
           posted_by?: string | null
           reason?: string | null
           rejection_reason?: string | null
+          session_fit_score?: number | null
+          settled_at?: string | null
+          settled_price?: number | null
+          signal_lifecycle?: string | null
           status?: string | null
           stop_loss?: number | null
           strategy_name?: string
+          strategy_quality_score?: number | null
           symbol?: string
           take_profit?: number | null
           timeframe?: string
+          volatility_fit_score?: number | null
           zone_max?: number | null
           zone_min?: number | null
         }
         Update: {
+          ai_model_version?: string | null
+          ai_win_probability?: number | null
           approved_at?: string | null
           approved_by?: string | null
           broker?: string[] | null
@@ -3860,20 +4060,29 @@ export type Database = {
           direction?: string
           entry_price?: number
           expires_at?: string | null
+          expiry_seconds?: number | null
+          explanation_json?: Json | null
           id?: string
           is_manual?: boolean | null
+          market_context_score?: number | null
           outcome?: string | null
           outcome_updated_at?: string | null
           outcome_updated_by?: string | null
           posted_by?: string | null
           reason?: string | null
           rejection_reason?: string | null
+          session_fit_score?: number | null
+          settled_at?: string | null
+          settled_price?: number | null
+          signal_lifecycle?: string | null
           status?: string | null
           stop_loss?: number | null
           strategy_name?: string
+          strategy_quality_score?: number | null
           symbol?: string
           take_profit?: number | null
           timeframe?: string
+          volatility_fit_score?: number | null
           zone_max?: number | null
           zone_min?: number | null
         }

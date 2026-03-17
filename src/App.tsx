@@ -67,6 +67,7 @@ import MiddleEastMarket from "./pages/markets/MiddleEastMarket";
 import AsiaMarket from "./pages/markets/AsiaMarket";
 import CryptoMarket from "./pages/markets/CryptoMarket";
 import AfricaMarket from "./pages/markets/AfricaMarket";
+import BrokerPage from "./pages/BrokerPage";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
@@ -144,6 +145,8 @@ const App = () => (
               <Route path="/markets/africa" element={<AfricaMarket />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/deriv-options" element={<DerivOptions />} />
+              {/* Broker SEO pages */}
+              <Route path="/brokers/:slug" element={<BrokerPage />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
