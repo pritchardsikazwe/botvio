@@ -274,21 +274,23 @@ export const HomeSignalsWidget = () => {
                 </div>
 
                   {/* Broker CTAs */}
-                  <div className="flex gap-1.5 mt-1">
-                    <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 bg-warning/15 text-warning border-warning/30 hover:bg-warning/25">
-                        <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
-                        Exness
-                      </Button>
-                    </a>
-                    <a href={DERIV_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20">
-                        <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
-                        Deriv
-                      </Button>
-                    </a>
-                    <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
+                  <div className="flex flex-col gap-1.5 mt-1">
+                    <div className="flex gap-1.5">
+                      <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-warning/15 text-warning border-warning/30 hover:bg-warning/25">
+                          <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                          Exness
+                        </Button>
+                      </a>
+                      <a href={DERIV_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20">
+                          <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                          Deriv
+                        </Button>
+                      </a>
+                    </div>
+                    <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="w-full">
+                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
                         <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
                         Weltrade
                       </Button>
