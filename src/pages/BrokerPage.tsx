@@ -4,46 +4,108 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useSignalBrokers, useTrackBrokerClick } from "@/hooks/useSignalBrokers";
+import { useSignalBrokers, useTrackBrokerClick, rankBrokersForSignal } from "@/hooks/useSignalBrokers";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { useManualSignals } from "@/hooks/useManualSignals";
-import { ExternalLink, Shield, Zap, Clock, TrendingUp, Star, ArrowLeft } from "lucide-react";
+import {
+  ExternalLink, Shield, Zap, Clock, TrendingUp, Star, ArrowLeft,
+  Target, BarChart3, Brain, Activity, Layers, Flame, ArrowUpDown
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BrokerButtons } from "@/components/signals/BrokerButtons";
 
-const BROKER_META: Record<string, { title: string; description: string; features: string[]; bestFor: string[]; color: string }> = {
+// ── Broker-specific strategies ──
+const BROKER_STRATEGIES: Record<string, Array<{
+  name: string; icon: string; description: string; bestExpiry: string;
+  winRate: string; markets: string[]; difficulty: string;
+}>> = {
+  "pocket-option": [
+    { name: "Momentum Continuation", icon: "🔥", description: "Ride strong OTC breakout candles with EMA alignment. Enter on pullback confirmation for 60s expiry.", bestExpiry: "60s", winRate: "72%", markets: ["EURUSD_otc", "GBPUSD_otc", "USDJPY_otc"], difficulty: "Beginner" },
+    { name: "S/R Rejection Scalp", icon: "🛡️", description: "Identify key support/resistance levels on OTC pairs. Trade rejection wicks with tight 30–60s entries.", bestExpiry: "30-60s", winRate: "68%", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Intermediate" },
+    { name: "Exhaustion Reversal", icon: "♻️", description: "3–5 consecutive candles in one direction signal exhaustion. Enter reverse on wick confirmation.", bestExpiry: "60s", winRate: "65%", markets: ["GBPUSD_otc", "EURJPY_otc"], difficulty: "Intermediate" },
+    { name: "OTC Range Fade", icon: "📊", description: "Trade edges of compressed OTC ranges. Fade support/resistance touches during low-volatility windows.", bestExpiry: "120s", winRate: "70%", markets: ["EURUSD_otc", "USDJPY_otc"], difficulty: "Beginner" },
+    { name: "News Spike Recovery", icon: "📰", description: "After major news spikes, wait for reversion to mean. Enter with trend alignment post-cooldown.", bestExpiry: "300s", winRate: "62%", markets: ["XAUUSD", "GBPUSD"], difficulty: "Advanced" },
+  ],
+  "quotex": [
+    { name: "EMA Crossover Entry", icon: "📈", description: "Use 5/20 EMA cross on 1-min chart. Enter CALL on bullish cross, PUT on bearish. Clean signals on Quotex charts.", bestExpiry: "60s", winRate: "69%", markets: ["EURUSD", "GBPUSD", "BTCUSD"], difficulty: "Beginner" },
+    { name: "Bollinger Bounce", icon: "🎯", description: "Enter when price touches outer Bollinger Band and reverses. Best during ranging sessions.", bestExpiry: "60-120s", winRate: "71%", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Beginner" },
+    { name: "Breakout Retest", icon: "🚀", description: "Wait for a key level to break, then enter on the retest. Continuation candle confirms direction.", bestExpiry: "120s", winRate: "67%", markets: ["GBPJPY", "EURJPY"], difficulty: "Intermediate" },
+    { name: "Micro Pullback", icon: "⚡", description: "In strong trends, enter on small 1–2 candle pullbacks. Use momentum indicators for confirmation.", bestExpiry: "60s", winRate: "73%", markets: ["XAUUSD", "EURUSD"], difficulty: "Intermediate" },
+  ],
+  "deriv": [
+    { name: "Boom & Crash Sniper", icon: "💥", description: "Detect spike patterns on Boom 500/1000 and Crash indices. Enter after spike confirmation with tight SL.", bestExpiry: "5 ticks", winRate: "74%", markets: ["Boom 500", "Boom 1000", "Crash 500", "Crash 1000"], difficulty: "Advanced" },
+    { name: "V75 Momentum Rider", icon: "🌊", description: "Volatility 75 Index trending strategy. Use EMA 9/20 alignment with RSI confirmation for direction.", bestExpiry: "1-5 min", winRate: "70%", markets: ["Volatility 75", "Volatility 100"], difficulty: "Intermediate" },
+    { name: "Step Index Range", icon: "📏", description: "Step Index moves in fixed increments. Trade range boundaries with high probability reversals.", bestExpiry: "10 ticks", winRate: "76%", markets: ["Step Index"], difficulty: "Beginner" },
+    { name: "Multiplier Trend Follow", icon: "✖️", description: "Use Deriv multipliers to ride trends. AI detects trend start, sets multiplier + stop out level.", bestExpiry: "Open", winRate: "66%", markets: ["EURUSD", "BTCUSD", "XAUUSD"], difficulty: "Advanced" },
+    { name: "Accumulator Edge", icon: "📐", description: "Trade accumulators on low-volatility pairs. AI picks optimal growth rate and barrier distance.", bestExpiry: "Open", winRate: "68%", markets: ["EURUSD", "GBPUSD", "AUDUSD"], difficulty: "Intermediate" },
+  ],
+  "iq-option": [
+    { name: "Alligator Trend Entry", icon: "🐊", description: "Use Bill Williams Alligator indicator for trend detection. Enter when jaws open with momentum confirmation.", bestExpiry: "3-5 min", winRate: "67%", markets: ["EURUSD", "GBPUSD", "USDJPY"], difficulty: "Intermediate" },
+    { name: "RSI Divergence", icon: "📉", description: "Spot bullish/bearish RSI divergence for reversal entries. Works best on higher timeframes.", bestExpiry: "5 min", winRate: "64%", markets: ["XAUUSD", "EURUSD", "GBPJPY"], difficulty: "Advanced" },
+    { name: "Stock Binary Scalp", icon: "🏢", description: "Trade stock binaries during market hours. Use pre-market data for directional bias.", bestExpiry: "5 min", winRate: "62%", markets: ["AAPL", "TSLA", "AMZN"], difficulty: "Advanced" },
+    { name: "Crypto Breakout", icon: "₿", description: "Trade crypto binaries on breakout from consolidation. Use volume proxy for confirmation.", bestExpiry: "3 min", winRate: "65%", markets: ["BTCUSD", "ETHUSD"], difficulty: "Intermediate" },
+  ],
+  "binomo": [
+    { name: "Simple Trend Follow", icon: "📈", description: "Follow the dominant 5-min trend with 1-min entries. Best for beginners learning directional trading.", bestExpiry: "60s", winRate: "70%", markets: ["EURUSD", "GBPUSD"], difficulty: "Beginner" },
+    { name: "Candle Pattern Entry", icon: "🕯️", description: "Identify basic patterns like engulfing, doji, hammer. Enter on confirmation candle close.", bestExpiry: "60-120s", winRate: "66%", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Beginner" },
+    { name: "Tournament Scalp", icon: "🏆", description: "Quick aggressive entries for Binomo tournaments. High frequency, low risk per trade.", bestExpiry: "30s", winRate: "58%", markets: ["EURUSD_otc", "GBPUSD_otc"], difficulty: "Intermediate" },
+  ],
+};
+
+const BROKER_META: Record<string, {
+  title: string; description: string; features: string[]; bestFor: string[];
+  color: string; gradient: string; signalTypes: string[];
+  pros: string[]; cons: string[];
+}> = {
   "pocket-option": {
-    title: "Pocket Option Signals — AI Trading Signals for Pocket Option",
+    title: "Pocket Option Signals — AI Trading Signals for Binary Options",
     description: "Get real-time AI-powered trading signals optimized for Pocket Option. 1-minute binary options, OTC signals, and high-confidence setups.",
-    features: ["Fast execution (< 1s)", "High payouts up to 92%", "OTC market access 24/7", "Demo account available", "$5 minimum deposit"],
+    features: ["Fast execution (< 1s)", "High payouts up to 92%", "OTC market access 24/7", "Demo account available", "$5 minimum deposit", "Social trading"],
     bestFor: ["OTC binary options", "1-minute expiry signals", "Quick scalping", "Weekend trading"],
-    color: "from-blue-600 to-blue-400",
+    color: "text-blue-400", gradient: "from-blue-600 to-blue-400",
+    signalTypes: ["CALL/PUT", "OTC Forex", "1-min Expiry", "Turbo Trades"],
+    pros: ["Fastest OTC execution", "Highest payout rates", "24/7 OTC availability", "Copy trading built-in"],
+    cons: ["No official API", "Limited automation", "Manual execution required"],
   },
   "quotex": {
     title: "Quotex Signals — Free Trading Signals for Quotex Platform",
-    description: "Premium AI trading signals for Quotex binary options. Real-time alerts for forex, crypto, and OTC markets with entry times and expiry.",
-    features: ["Modern charting interface", "High payouts up to 95%", "Copy trading feature", "Demo with $10,000", "$10 minimum deposit"],
+    description: "Premium AI trading signals for Quotex binary options. Real-time alerts for forex, crypto, and OTC markets.",
+    features: ["Modern charting interface", "High payouts up to 95%", "Copy trading feature", "Demo with $10,000", "$10 minimum deposit", "Crypto deposits"],
     bestFor: ["Beginner binary trading", "Copy trading", "Crypto binary options", "Advanced charting"],
-    color: "from-emerald-600 to-emerald-400",
+    color: "text-emerald-400", gradient: "from-emerald-600 to-emerald-400",
+    signalTypes: ["CALL/PUT", "Crypto Binary", "Copy Signals", "OTC Pairs"],
+    pros: ["Best charting tools", "Highest payouts (95%)", "Crypto payment support", "Clean modern UI"],
+    cons: ["Newer platform", "Limited education", "No API access"],
   },
   "deriv": {
     title: "Deriv Signals — AI Signals for Synthetics, Forex & Binary",
-    description: "Botvio AI signals for Deriv platform. Trade synthetic indices, Boom & Crash, multipliers, and forex with automated execution.",
-    features: ["Official API for automation", "Synthetic indices 24/7", "Boom & Crash indices", "Multipliers & Accumulators", "$5 minimum deposit"],
+    description: "Botvio AI signals for Deriv platform. Trade synthetic indices, Boom & Crash, multipliers, and forex.",
+    features: ["Official API for automation", "Synthetic indices 24/7", "Boom & Crash indices", "Multipliers & Accumulators", "$5 minimum deposit", "DTrader + DBot"],
     bestFor: ["Synthetic indices", "Automated trading", "Boom & Crash", "API-based execution"],
-    color: "from-red-600 to-red-400",
+    color: "text-red-400", gradient: "from-red-600 to-red-400",
+    signalTypes: ["Synthetics", "Boom/Crash", "Multipliers", "Accumulators", "Rise/Fall"],
+    pros: ["Full API automation", "Unique synthetic markets", "24/7 trading", "Regulated & trusted"],
+    cons: ["Complex for beginners", "Synthetic-only unique", "Higher learning curve"],
   },
   "iq-option": {
     title: "IQ Option Signals — Professional Binary Options Signals",
-    description: "AI-powered trading signals for IQ Option. Professional-grade forex, crypto, and stock signals with clear entry points.",
-    features: ["Professional interface", "Stock & ETF trading", "Education center", "Social trading", "$10 minimum deposit"],
+    description: "AI-powered trading signals for IQ Option. Professional-grade forex, crypto, and stock signals.",
+    features: ["Professional interface", "Stock & ETF trading", "Education center", "Social trading", "$10 minimum deposit", "CFD trading"],
     bestFor: ["Professional traders", "Stock binary options", "Long-term expiries", "Education"],
-    color: "from-amber-600 to-amber-400",
+    color: "text-amber-400", gradient: "from-amber-600 to-amber-400",
+    signalTypes: ["CALL/PUT", "Stock Binary", "CFD Signals", "Crypto Binary"],
+    pros: ["Most recognized brand", "Stock & ETF access", "Great education", "Professional tools"],
+    cons: ["Restricted in some countries", "Lower OTC payouts", "No API"],
   },
   "binomo": {
     title: "Binomo Signals — Beginner Trading Signals for Binomo",
-    description: "Easy-to-follow AI trading signals for Binomo platform. Perfect for beginners starting their binary options journey.",
-    features: ["Simplest UI available", "Tournaments & bonuses", "Fixed-time trades", "Demo account", "$10 minimum deposit"],
+    description: "Easy-to-follow AI trading signals for Binomo. Perfect for beginners starting binary options.",
+    features: ["Simplest UI available", "Tournaments & bonuses", "Fixed-time trades", "Demo account", "$10 minimum deposit", "Mobile-first"],
     bestFor: ["Complete beginners", "Tournament trading", "Low capital start", "Mobile trading"],
-    color: "from-purple-600 to-purple-400",
+    color: "text-purple-400", gradient: "from-purple-600 to-purple-400",
+    signalTypes: ["CALL/PUT", "Fixed-Time", "Tournament", "OTC"],
+    pros: ["Easiest to learn", "Fun tournaments", "Great mobile app", "Low minimum"],
+    cons: ["Limited assets", "Lower payouts", "Basic charting"],
   },
 };
 
@@ -55,18 +117,23 @@ const BrokerPage = () => {
 
   const broker = brokers?.find((b) => b.slug === slug);
   const meta = BROKER_META[slug || ""] || {
-    title: "Broker Signals",
-    description: "AI-powered signals",
-    features: [],
-    bestFor: [],
-    color: "from-primary to-primary/80",
+    title: "Broker Signals", description: "AI-powered signals", features: [], bestFor: [],
+    color: "text-primary", gradient: "from-primary to-primary/80", signalTypes: [],
+    pros: [], cons: [],
   };
+  const strategies = BROKER_STRATEGIES[slug || ""] || [];
 
   const handleOpenBroker = () => {
     if (broker) {
       trackClick.mutate({ brokerId: broker.id });
       window.open(broker.affiliate_url, "_blank", "noopener,noreferrer");
     }
+  };
+
+  const getDifficultyColor = (d: string) => {
+    if (d === "Beginner") return "bg-success/20 text-success border-success/30";
+    if (d === "Intermediate") return "bg-warning/20 text-warning border-warning/30";
+    return "bg-destructive/20 text-destructive border-destructive/30";
   };
 
   return (
@@ -81,155 +148,286 @@ const BrokerPage = () => {
         </Link>
 
         {/* Hero */}
-        <div className={`rounded-2xl bg-gradient-to-r ${meta.color} p-8 mb-8`}>
+        <div className={`rounded-2xl bg-gradient-to-r ${meta.gradient} p-8 mb-8`}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <Badge className="bg-white/20 text-white border-white/30 mb-3">Official Partner</Badge>
-              <h1 className="text-3xl font-bold text-white mb-2">{broker?.name || slug} Trading Signals</h1>
-              <p className="text-white/80 max-w-xl">
-                {broker?.description || meta.description}
-              </p>
-            </div>
-            <Button
-              size="lg"
-              className="bg-white text-foreground hover:bg-white/90 shrink-0"
-              onClick={handleOpenBroker}
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open {broker?.name || slug}
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="text-xl font-bold">Live Signals for {broker?.name}</h2>
-            {signals && signals.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {signals.slice(0, 6).map((signal) => (
-                  <ManualSignalCard key={signal.id} signal={signal} compact />
+              <h1 className="text-3xl font-bold text-white mb-2">{broker?.name || slug} Binary Options Signals</h1>
+              <p className="text-white/80 max-w-xl">{broker?.description || meta.description}</p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {meta.signalTypes.map(t => (
+                  <Badge key={t} className="bg-white/15 text-white border-white/20">{t}</Badge>
                 ))}
               </div>
-            ) : (
-              <Card className="glass-card">
-                <CardContent className="py-12 text-center">
-                  <TrendingUp className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">No active signals right now. Check back soon.</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* How it works */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>How Botvio Signals Work with {broker?.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/20 shrink-0"><Zap className="h-4 w-4 text-primary" /></div>
-                  <div>
-                    <h3 className="font-semibold">1. AI Generates Signal</h3>
-                    <p className="text-sm text-muted-foreground">Our engine analyzes price action, momentum, volatility, and support/resistance in real-time.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/20 shrink-0"><Clock className="h-4 w-4 text-primary" /></div>
-                  <div>
-                    <h3 className="font-semibold">2. Entry Window Opens</h3>
-                    <p className="text-sm text-muted-foreground">You receive the signal with asset, direction, entry price, and recommended expiry.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/20 shrink-0"><Shield className="h-4 w-4 text-primary" /></div>
-                  <div>
-                    <h3 className="font-semibold">3. Execute on {broker?.name}</h3>
-                    <p className="text-sm text-muted-foreground">Open {broker?.name}, select the asset, set the direction and expiry, then place your trade.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Features */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-warning" /> Key Features
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {meta.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Best for */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Best For</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {meta.bestFor.map((b) => (
-                    <Badge key={b} variant="outline">{b}</Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* CTA */}
-            <Card className="glass-card border-primary/30">
-              <CardContent className="py-6 text-center">
-                <h3 className="font-bold mb-2">Start Trading Now</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Open a free {broker?.name} account and start receiving signals.
-                </p>
-                <Button className="w-full" onClick={handleOpenBroker}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open {broker?.name} Account
-                </Button>
-                <p className="text-xs text-muted-foreground mt-3">
-                  ⚠️ Trading involves risk. Only trade with money you can afford to lose.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Other brokers */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Other Supported Brokers</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {brokers
-                    ?.filter((b) => b.slug !== slug)
-                    .map((b) => (
-                      <Link key={b.slug} to={`/brokers/${b.slug}`}>
-                        <Button variant="ghost" className="w-full justify-start text-sm">
-                          <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                          {b.name} Signals
-                        </Button>
-                      </Link>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
+            </div>
+            <div className="flex flex-col gap-3 shrink-0">
+              <Button size="lg" className="bg-white text-foreground hover:bg-white/90" onClick={handleOpenBroker}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open {broker?.name || slug}
+              </Button>
+              <p className="text-white/60 text-xs text-center">Free demo account available</p>
+            </div>
           </div>
         </div>
 
+        {/* Tabs */}
+        <Tabs defaultValue="signals" className="mb-8">
+          <TabsList className="bg-card border border-border mb-6">
+            <TabsTrigger value="signals" className="gap-2"><Activity className="h-4 w-4" /> Live Signals</TabsTrigger>
+            <TabsTrigger value="strategies" className="gap-2"><Brain className="h-4 w-4" /> Strategies</TabsTrigger>
+            <TabsTrigger value="about" className="gap-2"><Star className="h-4 w-4" /> Platform Info</TabsTrigger>
+          </TabsList>
+
+          {/* ── SIGNALS TAB ── */}
+          <TabsContent value="signals">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-primary" /> Live Signals for {broker?.name}
+                  </h2>
+                  <Badge variant="outline">{signals?.length || 0} active</Badge>
+                </div>
+                {signals && signals.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {signals.slice(0, 8).map((signal) => (
+                      <ManualSignalCard key={signal.id} signal={signal} />
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="glass-card">
+                    <CardContent className="py-12 text-center">
+                      <TrendingUp className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No active signals right now. Check back soon.</p>
+                      <Button variant="outline" className="mt-4" onClick={handleOpenBroker}>
+                        Practice on {broker?.name} Demo
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Quick Trade CTA */}
+                <Card className="glass-card border-primary/30">
+                  <CardContent className="py-6 text-center">
+                    <Flame className="h-8 w-8 text-primary mx-auto mb-3" />
+                    <h3 className="font-bold mb-2">Start Trading Now</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Open {broker?.name} and start executing signals instantly.
+                    </p>
+                    <Button className="w-full" onClick={handleOpenBroker}>
+                      <ExternalLink className="h-4 w-4 mr-2" /> Open {broker?.name}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* How it works */}
+                <Card className="glass-card">
+                  <CardHeader><CardTitle className="text-base">How It Works</CardTitle></CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { icon: Brain, title: "AI Generates Signal", desc: "Real-time analysis of momentum, price action & levels" },
+                      { icon: Zap, title: "You Get Alerted", desc: "Asset, direction, expiry & confidence score" },
+                      { icon: Target, title: `Execute on ${broker?.name}`, desc: "Open your broker, match the setup, place trade" },
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="p-1.5 rounded-lg bg-primary/20 shrink-0">
+                          <step.icon className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">{i + 1}. {step.title}</p>
+                          <p className="text-xs text-muted-foreground">{step.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Other brokers */}
+                <Card className="glass-card">
+                  <CardHeader><CardTitle className="text-base">Also Trade On</CardTitle></CardHeader>
+                  <CardContent className="space-y-1.5">
+                    {brokers?.filter(b => b.slug !== slug).map(b => {
+                      const bMeta = BROKER_META[b.slug];
+                      return (
+                        <Link key={b.slug} to={`/brokers/${b.slug}`}>
+                          <Button variant="ghost" className="w-full justify-between text-sm h-auto py-2">
+                            <span className={`font-semibold ${bMeta?.color || "text-foreground"}`}>{b.name}</span>
+                            <Badge variant="outline" className="text-[10px]">{b.best_for?.split("&")[0]?.trim()}</Badge>
+                          </Button>
+                        </Link>
+                      );
+                    })}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ── STRATEGIES TAB ── */}
+          <TabsContent value="strategies">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" /> {broker?.name} Strategies
+                </h2>
+                <Badge variant="secondary">{strategies.length} strategies</Badge>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {strategies.map((s, i) => (
+                  <Card key={i} className="glass-card hover:border-primary/50 transition-all group overflow-hidden">
+                    <div className={`h-1 bg-gradient-to-r ${meta.gradient}`} />
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <span className="text-lg">{s.icon}</span> {s.name}
+                        </CardTitle>
+                        <Badge variant="outline" className={getDifficultyColor(s.difficulty)}>
+                          {s.difficulty}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2 rounded bg-background/50 border border-border/50">
+                          <span className="text-muted-foreground">Best Expiry</span>
+                          <p className="font-bold mt-0.5">{s.bestExpiry}</p>
+                        </div>
+                        <div className="p-2 rounded bg-success/10 border border-success/20">
+                          <span className="text-success">Win Rate</span>
+                          <p className="font-bold text-success mt-0.5">{s.winRate}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        {s.markets.map(m => (
+                          <Badge key={m} variant="secondary" className="text-[10px] px-1.5">{m}</Badge>
+                        ))}
+                      </div>
+
+                      <Button className="w-full mt-2" size="sm" onClick={handleOpenBroker}>
+                        <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Try on {broker?.name}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Strategy disclaimer */}
+              <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                <p className="text-xs text-muted-foreground">
+                  ⚠️ Win rates are based on historical backtesting and may vary. Past performance does not guarantee future results.
+                  Always practice on a demo account before trading live.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ── ABOUT TAB ── */}
+          <TabsContent value="about">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pros & Cons */}
+              <Card className="glass-card">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Star className="h-5 w-5 text-warning" /> Why {broker?.name}?</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-success mb-2">✅ Advantages</h4>
+                    <ul className="space-y-1.5">
+                      {meta.pros.map(p => (
+                        <li key={p} className="flex items-center gap-2 text-sm">
+                          <div className="h-1.5 w-1.5 rounded-full bg-success shrink-0" />{p}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-destructive mb-2">⚠️ Limitations</h4>
+                    <ul className="space-y-1.5">
+                      {meta.cons.map(c => (
+                        <li key={c} className="flex items-center gap-2 text-sm">
+                          <div className="h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />{c}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Features */}
+              <Card className="glass-card">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5 text-primary" /> Key Features</CardTitle></CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {meta.features.map(f => (
+                      <li key={f} className="flex items-center gap-2 text-sm">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />{f}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Best for */}
+              <Card className="glass-card">
+                <CardHeader><CardTitle>Best For</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {meta.bestFor.map(b => <Badge key={b} variant="outline">{b}</Badge>)}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* CTA */}
+              <Card className="glass-card border-primary/30">
+                <CardContent className="py-8 text-center">
+                  <Flame className="h-10 w-10 text-primary mx-auto mb-3" />
+                  <h3 className="text-xl font-bold mb-2">Ready to Trade?</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Create your free {broker?.name} account and start receiving AI-powered signals.
+                  </p>
+                  <Button size="lg" className="w-full" onClick={handleOpenBroker}>
+                    <ExternalLink className="h-4 w-4 mr-2" /> Open Free {broker?.name} Account
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    ⚠️ Trading involves risk. Only trade with money you can afford to lose.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Broker comparison strip */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <ArrowUpDown className="h-5 w-5 text-primary" /> Compare Brokers
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {brokers?.map(b => {
+              const bMeta = BROKER_META[b.slug];
+              const isCurrent = b.slug === slug;
+              return (
+                <Link key={b.slug} to={`/brokers/${b.slug}`}>
+                  <Card className={`glass-card text-center p-4 transition-all hover:border-primary/50 ${isCurrent ? "border-primary ring-1 ring-primary" : ""}`}>
+                    <p className={`font-bold text-sm ${bMeta?.color || "text-foreground"}`}>{b.name}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{b.best_for}</p>
+                    {isCurrent && <Badge className="mt-2 text-[10px]">Current</Badge>}
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
         {/* Risk Disclaimer */}
-        <div className="mt-12 p-4 rounded-lg bg-muted/30 border border-border text-center">
+        <div className="p-4 rounded-lg bg-muted/30 border border-border text-center">
           <p className="text-xs text-muted-foreground">
-            ⚠️ <strong>Risk Disclaimer:</strong> Trading binary options and financial markets involves substantial risk and may not be suitable for all investors.
+            ⚠️ <strong>Risk Disclaimer:</strong> Trading binary options involves substantial risk and may not be suitable for all investors.
             Past performance is not indicative of future results. Botvio provides signals for educational purposes only.
             Always use proper risk management and only trade with capital you can afford to lose.
           </p>
