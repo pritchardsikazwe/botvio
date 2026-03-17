@@ -80,3 +80,12 @@ verify_jwt = false
 
 [functions.follower-report]
 verify_jwt = false
+
+[functions.evaluate-expiry]
+verify_jwt = false
+
+[functions.signal-quality-optimizer]
+verify_jwt = false
+
+[functions.top-assets-ranking]
+verify_jwt = false

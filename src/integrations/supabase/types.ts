@@ -283,6 +283,103 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_daily_scores: {
+        Row: {
+          accuracy_score: number
+          asset_id: string | null
+          broker_slug: string
+          created_at: string
+          final_score: number
+          id: string
+          metadata_json: Json | null
+          opportunity_score: number
+          reliability_score: number
+          sample_size: number
+          score_date: string
+          trend_score: number
+          volatility_score: number
+        }
+        Insert: {
+          accuracy_score?: number
+          asset_id?: string | null
+          broker_slug?: string
+          created_at?: string
+          final_score?: number
+          id?: string
+          metadata_json?: Json | null
+          opportunity_score?: number
+          reliability_score?: number
+          sample_size?: number
+          score_date?: string
+          trend_score?: number
+          volatility_score?: number
+        }
+        Update: {
+          accuracy_score?: number
+          asset_id?: string | null
+          broker_slug?: string
+          created_at?: string
+          final_score?: number
+          id?: string
+          metadata_json?: Json | null
+          opportunity_score?: number
+          reliability_score?: number
+          sample_size?: number
+          score_date?: string
+          trend_score?: number
+          volatility_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_daily_scores_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_expiry_performance: {
+        Row: {
+          asset_id: string | null
+          avg_confidence: number | null
+          broker_slug: string
+          expiry_seconds: number
+          id: string
+          sample_size: number
+          updated_at: string
+          win_rate: number
+        }
+        Insert: {
+          asset_id?: string | null
+          avg_confidence?: number | null
+          broker_slug?: string
+          expiry_seconds: number
+          id?: string
+          sample_size?: number
+          updated_at?: string
+          win_rate?: number
+        }
+        Update: {
+          asset_id?: string | null
+          avg_confidence?: number | null
+          broker_slug?: string
+          expiry_seconds?: number
+          id?: string
+          sample_size?: number
+          updated_at?: string
+          win_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_expiry_performance_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assets: {
         Row: {
           asset_type: string
@@ -1601,6 +1698,63 @@ export type Database = {
             columns: ["trade_intent_id"]
             isOneToOne: false
             referencedRelation: "trade_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expiry_model_predictions: {
+        Row: {
+          asset_id: string | null
+          broker_slug: string
+          calibrated_probability: number | null
+          created_at: string
+          expiry_seconds: number
+          features_json: Json | null
+          id: string
+          is_backup: boolean
+          is_recommended: boolean
+          signal_candidate_id: string | null
+          win_probability: number
+        }
+        Insert: {
+          asset_id?: string | null
+          broker_slug?: string
+          calibrated_probability?: number | null
+          created_at?: string
+          expiry_seconds: number
+          features_json?: Json | null
+          id?: string
+          is_backup?: boolean
+          is_recommended?: boolean
+          signal_candidate_id?: string | null
+          win_probability?: number
+        }
+        Update: {
+          asset_id?: string | null
+          broker_slug?: string
+          calibrated_probability?: number | null
+          created_at?: string
+          expiry_seconds?: number
+          features_json?: Json | null
+          id?: string
+          is_backup?: boolean
+          is_recommended?: boolean
+          signal_candidate_id?: string | null
+          win_probability?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expiry_model_predictions_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expiry_model_predictions_signal_candidate_id_fkey"
+            columns: ["signal_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
             referencedColumns: ["id"]
           },
         ]
@@ -3536,6 +3690,62 @@ export type Database = {
         }
         Relationships: []
       }
+      signal_quality_logs: {
+        Row: {
+          approved: boolean
+          asset_health: number | null
+          created_at: string
+          expiry_fit: number | null
+          final_quality_score: number
+          historical_reliability: number | null
+          id: string
+          model_score: number | null
+          rejection_reason: string | null
+          session_fit: number | null
+          signal_id: string | null
+          strategy_health: number | null
+          volatility_fit: number | null
+        }
+        Insert: {
+          approved?: boolean
+          asset_health?: number | null
+          created_at?: string
+          expiry_fit?: number | null
+          final_quality_score?: number
+          historical_reliability?: number | null
+          id?: string
+          model_score?: number | null
+          rejection_reason?: string | null
+          session_fit?: number | null
+          signal_id?: string | null
+          strategy_health?: number | null
+          volatility_fit?: number | null
+        }
+        Update: {
+          approved?: boolean
+          asset_health?: number | null
+          created_at?: string
+          expiry_fit?: number | null
+          final_quality_score?: number
+          historical_reliability?: number | null
+          id?: string
+          model_score?: number | null
+          rejection_reason?: string | null
+          session_fit?: number | null
+          signal_id?: string | null
+          strategy_health?: number | null
+          volatility_fit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_quality_logs_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           bing_verification_code: string | null
@@ -3653,6 +3863,48 @@ export type Database = {
         }
         Relationships: []
       }
+      strategy_daily_scores: {
+        Row: {
+          avg_confidence: number | null
+          broker_slug: string
+          created_at: string
+          health_score: number
+          id: string
+          losses: number
+          max_loss_streak: number
+          metadata_json: Json | null
+          score_date: string
+          strategy_name: string
+          wins: number
+        }
+        Insert: {
+          avg_confidence?: number | null
+          broker_slug?: string
+          created_at?: string
+          health_score?: number
+          id?: string
+          losses?: number
+          max_loss_streak?: number
+          metadata_json?: Json | null
+          score_date?: string
+          strategy_name: string
+          wins?: number
+        }
+        Update: {
+          avg_confidence?: number | null
+          broker_slug?: string
+          created_at?: string
+          health_score?: number
+          id?: string
+          losses?: number
+          max_loss_streak?: number
+          metadata_json?: Json | null
+          score_date?: string
+          strategy_name?: string
+          wins?: number
+        }
+        Relationships: []
+      }
       strategy_purchases: {
         Row: {
           created_at: string
@@ -3754,6 +4006,62 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      top_asset_snapshots: {
+        Row: {
+          accuracy_today: number | null
+          asset_id: string | null
+          best_broker: string | null
+          best_expiry_seconds: number | null
+          best_strategy: string | null
+          created_at: string
+          id: string
+          metadata_json: Json | null
+          opportunities_today: number | null
+          rank_position: number
+          ranking_type: string
+          score: number
+          snapshot_date: string
+        }
+        Insert: {
+          accuracy_today?: number | null
+          asset_id?: string | null
+          best_broker?: string | null
+          best_expiry_seconds?: number | null
+          best_strategy?: string | null
+          created_at?: string
+          id?: string
+          metadata_json?: Json | null
+          opportunities_today?: number | null
+          rank_position: number
+          ranking_type?: string
+          score?: number
+          snapshot_date?: string
+        }
+        Update: {
+          accuracy_today?: number | null
+          asset_id?: string | null
+          best_broker?: string | null
+          best_expiry_seconds?: number | null
+          best_strategy?: string | null
+          created_at?: string
+          id?: string
+          metadata_json?: Json | null
+          opportunities_today?: number | null
+          rank_position?: number
+          ranking_type?: string
+          score?: number
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "top_asset_snapshots_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
             referencedColumns: ["id"]
           },
         ]

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { TopAssetsWidget } from "@/components/trading/TopAssetsWidget";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useSignalBrokers, SignalBroker } from "@/hooks/useSignalBrokers";
@@ -228,6 +229,11 @@ const BinaryOptions = () => {
             ))}
           </div>
         )}
+
+        {/* Top 5 Assets Today */}
+        <div className="mt-8">
+          <TopAssetsWidget />
+        </div>
 
         {/* CTA */}
         <Card className="glass-card mt-8 border-primary/30">

@@ -7,7 +7,8 @@ import {
   Target, 
   Shield,
   Zap,
-  Brain
+  Brain,
+  Timer
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { BrokerButtons } from "./BrokerButtons";
@@ -31,12 +32,22 @@ interface ManualSignalCardProps {
     ai_win_probability?: number | null;
     explanation_json?: Record<string, unknown> | null;
     expiry_seconds?: number | null;
+    best_expiry?: number | null;
+    backup_expiry?: number | null;
+    quality_score?: number | null;
   };
   compact?: boolean;
   showBrokerButtons?: boolean;
 }
 
 export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = true }: ManualSignalCardProps) => {
+  const formatExpiryLabel = (seconds: number): string => {
+    if (seconds <= 10) return `${seconds} ticks`;
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    return `${Math.floor(seconds / 3600)}h`;
+  };
+
   const isBuy = signal.direction.toUpperCase() === 'BUY' || signal.direction.toUpperCase() === 'CALL';
   const timeAgo = formatDistanceToNow(new Date(signal.created_at), { addSuffix: true });
   const { data: brokers } = useSignalBrokers();
@@ -134,8 +145,13 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
               <h3 className="font-bold text-lg">{signal.symbol}</h3>
               <p className={`text-sm font-semibold ${isBuy ? 'text-success' : 'text-destructive'}`}>
                 {signal.direction.toUpperCase()}
-                {signal.expiry_seconds && (
-                  <span className="text-muted-foreground font-normal ml-2">· {signal.expiry_seconds}s expiry</span>
+                {(signal.best_expiry || signal.expiry_seconds) && (
+                  <span className="text-muted-foreground font-normal ml-2">
+                    · Best: {formatExpiryLabel(signal.best_expiry || signal.expiry_seconds || 60)}
+                    {signal.backup_expiry && (
+                      <span className="text-muted-foreground/60"> / Backup: {formatExpiryLabel(signal.backup_expiry)}</span>
+                    )}
+                  </span>
                 )}
               </p>
             </div>
