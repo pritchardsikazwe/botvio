@@ -52,6 +52,10 @@ const BROKERS = [
   { value: "deriv", label: "Deriv" },
   { value: "weltrade", label: "Weltrade" },
   { value: "exness", label: "Exness" },
+  { value: "pocket-option", label: "Pocket Option" },
+  { value: "quotex", label: "Quotex" },
+  { value: "iq-option", label: "IQ Option" },
+  { value: "binomo", label: "Binomo" },
 ];
 
 const STATUS_OPTIONS = [
