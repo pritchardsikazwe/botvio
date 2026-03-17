@@ -372,7 +372,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
               {(isAdmin || isSuperAdmin || isSignalManager) && (
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
-                    <Signal className="h-4 w-4 text-primary" />
+                    <Zap className="h-4 w-4 text-primary" />
                     Post signal to brokers
                   </Label>
                   <div className="flex flex-wrap gap-3">
