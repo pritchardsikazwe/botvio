@@ -211,6 +211,93 @@ const Index = () => {
         {/* 0.5 — High-Impact News Events */}
         <NewsEventCards />
 
+        {/* How It Works — Steps */}
+        <section>
+          <div className="flex items-center gap-2 mb-5">
+            <Rocket className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-extrabold text-foreground">How It Works</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { step: 1, icon: <UserPlus className="h-6 w-6" />, title: "Sign Up Free", desc: "Create your Botvio account in seconds. No credit card needed.", color: "text-primary", border: "border-primary/30", bg: "bg-primary/10" },
+              { step: 2, icon: <Search className="h-6 w-6" />, title: "Choose Your Broker", desc: "Connect Exness, Deriv, Pocket Option, Quotex, IQ Option or any broker.", color: "text-success", border: "border-success/30", bg: "bg-success/10" },
+              { step: 3, icon: <BarChart2 className="h-6 w-6" />, title: "Get AI Signals", desc: "Upload charts for AI analysis or follow our live trading signals.", color: "text-warning", border: "border-warning/30", bg: "bg-warning/10" },
+              { step: 4, icon: <TrendingUp className="h-6 w-6" />, title: "Start Trading", desc: "Execute trades with confidence using our signals, bots & strategies.", color: "text-destructive", border: "border-destructive/30", bg: "bg-destructive/10" },
+            ].map((s) => (
+              <Card key={s.step} className={`glass-card ${s.border} hover:scale-[1.02] transition-all`}>
+                <CardContent className="pt-5 pb-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-xl ${s.bg} ${s.color}`}>{s.icon}</div>
+                    <span className={`text-3xl font-black ${s.color} opacity-30`}>0{s.step}</span>
+                  </div>
+                  <h3 className="font-bold text-foreground">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground">{s.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Trading Tips — Do's & Don'ts */}
+        <section>
+          <div className="flex items-center gap-2 mb-5">
+            <Lightbulb className="h-5 w-5 text-warning" />
+            <h2 className="text-xl font-extrabold text-foreground">Trading Tips for Beginners</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="glass-card border-success/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2 text-success">
+                  <CheckCircle className="h-5 w-5" /> ✅ Do's
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                {[
+                  "Always use Stop Loss on every trade",
+                  "Risk only 1-2% of your account per trade",
+                  "Follow the trend — it's your friend",
+                  "Practice on demo before going live",
+                  "Wait for confirmation before entering",
+                  "Keep a trading journal to track progress",
+                ].map((tip, i) => (
+                  <div key={i} className="flex items-start gap-2.5 text-sm">
+                    <CheckCircle className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                    <span className="text-foreground/90">{tip}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card className="glass-card border-destructive/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2 text-destructive">
+                  <XCircle className="h-5 w-5" /> ❌ Don'ts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                {[
+                  "Never trade without a plan or strategy",
+                  "Don't revenge trade after a loss",
+                  "Avoid over-leveraging your account",
+                  "Don't risk money you can't afford to lose",
+                  "Never ignore high-impact news events",
+                  "Don't follow random signals without verification",
+                ].map((tip, i) => (
+                  <div key={i} className="flex items-start gap-2.5 text-sm">
+                    <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                    <span className="text-foreground/90">{tip}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+          <div className="mt-4 p-4 rounded-xl bg-primary/10 border border-primary/30">
+            <p className="text-sm text-foreground font-semibold flex items-start gap-2">
+              <Lightbulb className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <span>💡 <strong className="text-primary">Pro Tip:</strong> Use our AI Chart Analysis to get instant support/resistance levels, trend direction, and trade ideas before placing any trade. It's free!</span>
+            </p>
+          </div>
+        </section>
+
         {/* 1 — Latest Trading Signals */}
         <section>
           <HomeSignalsWidget />
