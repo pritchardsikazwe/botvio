@@ -339,11 +339,25 @@ const BrokerPage = () => {
                 )}
 
                 {/* Live Signals */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <Activity className="h-5 w-5 text-primary" /> Live Signals for {broker?.name}
                   </h2>
-                  <Badge variant="outline">{signals?.length || 0} active</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">{signals?.length || 0} active</Badge>
+                    <Button
+                      size="sm"
+                      onClick={handleGenerateSignals}
+                      disabled={isGenerating}
+                      className="gap-1.5"
+                    >
+                      {isGenerating ? (
+                        <><RefreshCw className="h-3.5 w-3.5 animate-spin" /> Generating...</>
+                      ) : (
+                        <><Sparkles className="h-3.5 w-3.5" /> Generate AI Signals</>
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 {signals && signals.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
