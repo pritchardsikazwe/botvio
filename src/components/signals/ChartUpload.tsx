@@ -37,10 +37,20 @@ import {
   Infinity
 } from "lucide-react";
 import { SocialShareButtons } from "@/components/social/SocialShareButtons";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useChartUsageGate, getGuestUploadCount, incrementGuestUploadCount, GUEST_DAILY_LIMIT } from "@/hooks/useChartAnalysis";
+
+const CHART_BROKERS = [
+  { value: "exness", label: "Exness" },
+  { value: "deriv", label: "Deriv" },
+  { value: "weltrade", label: "Weltrade" },
+  { value: "pocket-option", label: "Pocket Option" },
+  { value: "quotex", label: "Quotex" },
+  { value: "iq-option", label: "IQ Option" },
+];
 
 const ANALYSIS_TYPES = [
   { value: "full", label: "Full Analysis", description: "Complete technical breakdown" },
