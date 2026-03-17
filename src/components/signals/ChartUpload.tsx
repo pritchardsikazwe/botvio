@@ -118,7 +118,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   };
 
   const autoPostSignal = useCallback(async (
-    structured: any, sym: string, tf: string, chartImageUrl: string,
+    structured: any, sym: string, tf: string, chartImageUrl: string, brokers: string[],
   ) => {
     if (!user) return;
     try {
