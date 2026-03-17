@@ -230,6 +230,11 @@ const BinaryOptions = () => {
           </div>
         )}
 
+        {/* Top 5 Assets Today */}
+        <div className="mt-8">
+          <TopAssetsWidget />
+        </div>
+
         {/* CTA */}
         <Card className="glass-card mt-8 border-primary/30">
           <CardContent className="py-6 text-center">

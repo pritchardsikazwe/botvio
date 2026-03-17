@@ -492,6 +492,9 @@ const BrokerPage = () => {
                   </div>
                 )}
 
+                {/* Top 5 Assets for this broker */}
+                <TopAssetsWidget brokerSlug={slug} compact />
+
                 {/* Other brokers */}
                 <Card className="glass-card">
                   <CardHeader><CardTitle className="text-base">Also Trade On</CardTitle></CardHeader>
