@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrokerButtons } from "@/components/signals/BrokerButtons";
+import { TopAssetsWidget } from "@/components/trading/TopAssetsWidget";
 
 // ── Broker-specific strategies ──
 const BROKER_STRATEGIES: Record<string, Array<{
