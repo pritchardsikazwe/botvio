@@ -7,7 +7,8 @@ import {
   Target, 
   Shield,
   Zap,
-  Brain
+  Brain,
+  Timer
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { BrokerButtons } from "./BrokerButtons";
