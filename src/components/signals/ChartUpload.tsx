@@ -79,6 +79,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const [activeTab, setActiveTab] = useState("upload");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedBrokers, setSelectedBrokers] = useState<string[]>(["exness", "deriv", "weltrade"]);
 
   const usageGate = useChartUsageGate();
 
