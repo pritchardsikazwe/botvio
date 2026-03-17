@@ -123,7 +123,7 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/chart/XAUUSD" className="block">
-              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-accent-foreground/20 text-foreground hover:bg-accent/50">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
                 <BarChart3 className="h-4 w-4" /> Chart Analysis
               </Button>
             </Link>
