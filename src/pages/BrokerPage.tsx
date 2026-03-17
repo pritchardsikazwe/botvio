@@ -116,8 +116,10 @@ const BROKER_META: Record<string, {
 const BrokerPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: brokers } = useSignalBrokers();
-  const { data: signals } = useManualSignals({ status: "ACTIVE", broker: slug || "all" });
+  const { data: signals, refetch } = useManualSignals({ status: "ACTIVE", broker: slug || "all" });
   const trackClick = useTrackBrokerClick();
+  const queryClient = useQueryClient();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const broker = brokers?.find((b) => b.slug === slug);
   const meta = BROKER_META[slug || ""] || {
@@ -131,6 +133,24 @@ const BrokerPage = () => {
     if (broker) {
       trackClick.mutate({ brokerId: broker.id });
       window.open(broker.affiliate_url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleGenerateSignals = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-binary-signals", {
+        body: { broker: slug, count: 3 },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`${data.generated || 0} live signals generated for ${broker?.name || slug}!`);
+      queryClient.invalidateQueries({ queryKey: ["manual-signals"] });
+      refetch();
+    } catch (err: any) {
+      toast.error(`Signal generation failed: ${err.message}`);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
