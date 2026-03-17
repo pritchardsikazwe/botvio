@@ -10,8 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar } from "lucide-react";
+import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar, ShieldAlert, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ProfileRow {
   user_id: string;
@@ -40,9 +41,10 @@ interface SubscriptionInfo {
 
 export const AdminProfilesTab = () => {
   const queryClient = useQueryClient();
+  const { isSuperAdmin } = useAuth();
   const [search, setSearch] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all"); // all, active, inactive
+  const [statusFilter, setStatusFilter] = useState("all");
   const [planDialog, setPlanDialog] = useState<{ open: boolean; userId: string; userName: string; currentPlanId: string | null; subId: string | null }>({
     open: false, userId: "", userName: "", currentPlanId: null, subId: null,
   });
@@ -108,7 +110,6 @@ export const AdminProfilesTab = () => {
         if (error) throw error;
       }
 
-      // Notify user
       const plan = plans?.find(p => p.id === planId);
       await supabase.from("notifications").insert({
         user_id: userId,
@@ -133,16 +134,20 @@ export const AdminProfilesTab = () => {
     return plans?.find(p => p.id === sub.pricing_plan_id) || null;
   };
 
-  // Get unique countries for filter
   const countries = [...new Set(profiles?.map(p => p.country).filter(Boolean) as string[])].sort();
 
+  // Enhanced search: match email or display_name
   const filtered = profiles?.filter(p => {
     if (search) {
       const s = search.toLowerCase();
       const matches = p.email?.toLowerCase().includes(s) ||
         p.display_name?.toLowerCase().includes(s) ||
-        p.country?.toLowerCase().includes(s) ||
-        p.whatsapp_number?.includes(s);
+        p.country?.toLowerCase().includes(s);
+      // Only super_admin can search by WhatsApp
+      if (isSuperAdmin) {
+        if (matches || p.whatsapp_number?.includes(s)) return true;
+        return false;
+      }
       if (!matches) return false;
     }
     if (countryFilter !== "all" && p.country !== countryFilter) return false;
@@ -170,6 +175,21 @@ export const AdminProfilesTab = () => {
     });
   };
 
+  // Mask sensitive info for non-super admins
+  const maskEmail = (email: string | null) => {
+    if (!email) return "—";
+    if (isSuperAdmin) return email;
+    const [user, domain] = email.split("@");
+    if (!domain) return "***@***";
+    return `${user.charAt(0)}***@${domain}`;
+  };
+
+  const maskWhatsApp = (number: string | null) => {
+    if (!number) return "—";
+    if (isSuperAdmin) return number;
+    return `***${number.slice(-4)}`;
+  };
+
   return (
     <Card className="glass-card">
       <CardHeader>
@@ -179,7 +199,14 @@ export const AdminProfilesTab = () => {
               <Users className="h-5 w-5" /> User Profiles
               {profiles && <Badge variant="secondary">{profiles.length} users</Badge>}
             </CardTitle>
-            <CardDescription>Manage users, plans, and filter by country/status</CardDescription>
+            <CardDescription className="flex items-center gap-2">
+              Manage users, plans, and filter by country/status
+              {!isSuperAdmin && (
+                <Badge variant="outline" className="text-xs border-warning/50 text-warning gap-1">
+                  <ShieldAlert className="h-3 w-3" /> Restricted View
+                </Badge>
+              )}
+            </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="w-4 h-4" />
@@ -190,7 +217,7 @@ export const AdminProfilesTab = () => {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name, email, country..."
+              placeholder={isSuperAdmin ? "Search by name, email, country, WhatsApp..." : "Search by name, email, country..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -231,7 +258,9 @@ export const AdminProfilesTab = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead><Phone className="h-3 w-3 inline mr-1" />WhatsApp</TableHead>
+                  {isSuperAdmin && (
+                    <TableHead><Phone className="h-3 w-3 inline mr-1" />WhatsApp</TableHead>
+                  )}
                   <TableHead><Globe className="h-3 w-3 inline mr-1" />Country</TableHead>
                   <TableHead>Current Plan</TableHead>
                   <TableHead>Expires</TableHead>
@@ -249,19 +278,21 @@ export const AdminProfilesTab = () => {
                         <div>
                           <p className="font-medium">{p.display_name || "—"}</p>
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Mail className="h-3 w-3" /> {p.email || "No email"}
+                            <Mail className="h-3 w-3" /> {maskEmail(p.email)}
                           </p>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {p.whatsapp_number ? (
-                          <a href={`https://wa.me/${p.whatsapp_number.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline text-sm font-mono">
-                            {p.whatsapp_number}
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
-                        )}
-                      </TableCell>
+                      {isSuperAdmin && (
+                        <TableCell>
+                          {p.whatsapp_number ? (
+                            <a href={`https://wa.me/${p.whatsapp_number.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline text-sm font-mono">
+                              {p.whatsapp_number}
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">—</span>
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell>
                         {p.country ? (
                           <Badge variant="outline" className="text-xs">{p.country}</Badge>
@@ -281,9 +312,15 @@ export const AdminProfilesTab = () => {
                         {new Date(p.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Button size="sm" variant="outline" onClick={() => openPlanDialog(p)}>
-                          <Crown className="h-4 w-4 mr-1" /> Change Plan
-                        </Button>
+                        {isSuperAdmin ? (
+                          <Button size="sm" variant="outline" onClick={() => openPlanDialog(p)}>
+                            <Crown className="h-4 w-4 mr-1" /> Change Plan
+                          </Button>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-muted-foreground">
+                            <EyeOff className="h-3 w-3 mr-1" /> View Only
+                          </Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
@@ -298,59 +335,61 @@ export const AdminProfilesTab = () => {
         )}
       </CardContent>
 
-      {/* Change Plan Dialog */}
-      <Dialog open={planDialog.open} onOpenChange={(open) => setPlanDialog({ ...planDialog, open })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Crown className="h-5 w-5" /> Change Plan
-            </DialogTitle>
-            <DialogDescription>
-              Update subscription for <strong>{planDialog.userName}</strong>
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Select Plan</Label>
-              <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a plan..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {plans?.map(p => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name} ({p.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {/* Change Plan Dialog - Super Admin only */}
+      {isSuperAdmin && (
+        <Dialog open={planDialog.open} onOpenChange={(open) => setPlanDialog({ ...planDialog, open })}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5" /> Change Plan
+              </DialogTitle>
+              <DialogDescription>
+                Update subscription for <strong>{planDialog.userName}</strong>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Plan</Label>
+                <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a plan..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {plans?.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} ({p.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" /> Expiry Date
+                </Label>
+                <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" /> Expiry Date
-              </Label>
-              <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPlanDialog({ ...planDialog, open: false })}>Cancel</Button>
-            <Button
-              onClick={() => {
-                if (!selectedPlanId) { toast.error("Select a plan"); return; }
-                changePlan.mutate({
-                  userId: planDialog.userId,
-                  planId: selectedPlanId,
-                  subId: planDialog.subId,
-                  expires: new Date(expiresAt).toISOString(),
-                });
-              }}
-              disabled={changePlan.isPending || !selectedPlanId}
-            >
-              {changePlan.isPending ? "Updating..." : "Update Plan"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPlanDialog({ ...planDialog, open: false })}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!selectedPlanId) { toast.error("Select a plan"); return; }
+                  changePlan.mutate({
+                    userId: planDialog.userId,
+                    planId: selectedPlanId,
+                    subId: planDialog.subId,
+                    expires: new Date(expiresAt).toISOString(),
+                  });
+                }}
+                disabled={changePlan.isPending || !selectedPlanId}
+              >
+                {changePlan.isPending ? "Updating..." : "Update Plan"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 };
