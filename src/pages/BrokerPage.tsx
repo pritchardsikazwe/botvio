@@ -428,27 +428,67 @@ const BrokerPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* How it works */}
-                <Card className="glass-card">
-                  <CardHeader><CardTitle className="text-base">How It Works</CardTitle></CardHeader>
-                  <CardContent className="space-y-3">
-                    {[
-                      { icon: Brain, title: "AI Generates Signal", desc: "Real-time analysis of momentum, price action & levels" },
-                      { icon: Zap, title: "You Get Alerted", desc: "Asset, direction, expiry & confidence score" },
-                      { icon: Target, title: `Execute on ${broker?.name}`, desc: "Open your broker, match the setup, place trade" },
-                    ].map((step, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="p-1.5 rounded-lg bg-primary/20 shrink-0">
-                          <step.icon className="h-4 w-4 text-primary" />
+                {/* Step-by-step guide */}
+                <Card className="glass-card border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Rocket className="h-5 w-5 text-primary" /> How to Trade on {broker?.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-0">
+                    {(tips?.steps || []).map((step, i) => (
+                      <div key={i} className="flex items-start gap-3 py-2.5 border-b border-border/30 last:border-0">
+                        <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-xs font-black text-primary">{i + 1}</span>
                         </div>
-                        <div>
-                          <p className="font-semibold text-sm">{i + 1}. {step.title}</p>
-                          <p className="text-xs text-muted-foreground">{step.desc}</p>
-                        </div>
+                        <p className="text-sm text-foreground/90 leading-relaxed">{step}</p>
                       </div>
                     ))}
                   </CardContent>
                 </Card>
+
+                {/* Do's & Don'ts */}
+                <Card className="glass-card border-success/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-success">
+                      <CheckCircle className="h-5 w-5" /> ✅ Do's
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {(tips?.dos || []).map((d, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="h-3.5 w-3.5 text-success shrink-0 mt-1" />
+                        <span className="text-foreground/90">{d}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card border-destructive/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-destructive">
+                      <XCircle className="h-5 w-5" /> ❌ Don'ts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {(tips?.donts || []).map((d, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm">
+                        <XCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-1" />
+                        <span className="text-foreground/90">{d}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Pro Tip */}
+                {tips?.proTip && (
+                  <div className="p-4 rounded-xl bg-primary/10 border border-primary/30">
+                    <p className="text-sm text-foreground font-semibold flex items-start gap-2">
+                      <Lightbulb className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span>💡 <strong className="text-primary">Pro Tip:</strong> {tips.proTip}</span>
+                    </p>
+                  </div>
+                )}
 
                 {/* Other brokers */}
                 <Card className="glass-card">
