@@ -41,6 +41,13 @@ interface ManualSignalCardProps {
 }
 
 export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = true }: ManualSignalCardProps) => {
+  const formatExpiryLabel = (seconds: number): string => {
+    if (seconds <= 10) return `${seconds} ticks`;
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    return `${Math.floor(seconds / 3600)}h`;
+  };
+
   const isBuy = signal.direction.toUpperCase() === 'BUY' || signal.direction.toUpperCase() === 'CALL';
   const timeAgo = formatDistanceToNow(new Date(signal.created_at), { addSuffix: true });
   const { data: brokers } = useSignalBrokers();
