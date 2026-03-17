@@ -380,6 +380,31 @@ const Signals = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Broker Comparison Strip */}
+            {signalBrokers && signalBrokers.length > 0 && (
+              <Card className="glass-card mt-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">Supported Brokers</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    {signalBrokers.map((b) => (
+                      <Link key={b.slug} to={`/brokers/${b.slug}`}>
+                        <Card className="glass-card hover:border-primary/50 transition-all text-center p-4 cursor-pointer">
+                          <p className="font-semibold text-sm">{b.name}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">{b.best_for}</p>
+                          <Badge variant="outline" className="mt-2 text-[10px]">
+                            <ExternalLink className="h-2.5 w-2.5 mr-1" />
+                            View Signals
+                          </Badge>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </main>
