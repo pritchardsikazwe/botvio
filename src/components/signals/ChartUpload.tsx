@@ -138,6 +138,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
         take_profit: structured.take_profit ? parseFloat(structured.take_profit) : null,
         timeframe: tf || structured.timeframe || "M5",
         category: "forex",
+        broker: brokers.length > 0 ? brokers : null,
         confidence: structured.confidence ? parseInt(structured.confidence) : null,
         reason: parts.join(" | "),
         is_manual: true, posted_by: user.id, status: "ACTIVE",
@@ -146,7 +147,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       if (error) {
         toast.error("Analysis complete but failed to auto-post signal");
       } else {
-        toast.success(`Signal for ${instrumentName} auto-posted!`);
+        toast.success(`Signal for ${instrumentName} auto-posted to ${brokers.join(", ")}!`);
       }
     } catch (err: any) {
       console.error("Auto-post signal exception:", err);
