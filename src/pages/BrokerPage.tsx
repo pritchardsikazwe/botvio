@@ -198,7 +198,8 @@ const BrokerPage = () => {
                           expiry: "5 Ticks",
                           payout: "Up to 900%",
                           color: "border-primary/40",
-                          link: "/deriv-options",
+                          tradeRoute: "/trade/style/digits",
+                          brokers: ["Deriv"],
                         },
                         {
                           name: "Ticks (Rise/Fall)",
@@ -208,7 +209,8 @@ const BrokerPage = () => {
                           expiry: "1-10 Ticks",
                           payout: "Up to 95%",
                           color: "border-success/40",
-                          link: "/deriv-options",
+                          tradeRoute: "/trade/style/ticks",
+                          brokers: ["Deriv"],
                         },
                         {
                           name: "Multipliers",
@@ -218,7 +220,8 @@ const BrokerPage = () => {
                           expiry: "Open-ended",
                           payout: "Unlimited upside",
                           color: "border-warning/40",
-                          link: "/deriv-options",
+                          tradeRoute: "/trade/style/multipliers",
+                          brokers: ["Deriv", "Exness"],
                         },
                         {
                           name: "Accumulators",
@@ -228,7 +231,8 @@ const BrokerPage = () => {
                           expiry: "Open-ended",
                           payout: "Compounding",
                           color: "border-purple-500/40",
-                          link: "/deriv-options",
+                          tradeRoute: "/trade/style/accumulators",
+                          brokers: ["Deriv"],
                         },
                         {
                           name: "Boom & Crash",
@@ -238,7 +242,8 @@ const BrokerPage = () => {
                           expiry: "Varies",
                           payout: "Up to 95%",
                           color: "border-destructive/40",
-                          link: "/deriv-options",
+                          tradeRoute: "/trade/style/boom-crash",
+                          brokers: ["Deriv", "Weltrade"],
                         },
                         {
                           name: "Higher/Lower",
@@ -248,7 +253,8 @@ const BrokerPage = () => {
                           expiry: "5 min – 24h",
                           payout: "Up to 95%",
                           color: "border-blue-500/40",
-                          link: "/deriv-options",
+                          tradeRoute: "/trade/style/higher-lower",
+                          brokers: ["Deriv", "Exness", "Weltrade"],
                         },
                       ].map((contract) => (
                         <Card key={contract.name} className={`glass-card ${contract.color} hover:shadow-lg transition-all`}>
@@ -278,12 +284,27 @@ const BrokerPage = () => {
                                 <Badge variant="secondary" className="text-[9px]">+{contract.markets.length - 3}</Badge>
                               )}
                             </div>
+                            {/* Recommended Brokers */}
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] text-muted-foreground">Trade on:</span>
+                              {contract.brokers.map((b) => (
+                                <Badge key={b} variant="outline" className={`text-[9px] px-1.5 py-0 ${
+                                  b === "Deriv" ? "border-destructive/40 text-destructive" :
+                                  b === "Exness" ? "border-warning/40 text-warning" :
+                                  "border-primary/40 text-primary"
+                                }`}>
+                                  {b}
+                                </Badge>
+                              ))}
+                            </div>
                             <div className="flex gap-2">
-                              <Button size="sm" className="flex-1" onClick={handleOpenBroker}>
-                                <ExternalLink className="h-3 w-3 mr-1" /> Trade Now
+                              <Button size="sm" className="flex-1" asChild>
+                                <Link to={contract.tradeRoute}>
+                                  <Zap className="h-3 w-3 mr-1" /> Trade Now
+                                </Link>
                               </Button>
                               <Button size="sm" variant="outline" className="flex-1" asChild>
-                                <Link to={contract.link}>Learn More</Link>
+                                <Link to="/deriv-options">Learn More</Link>
                               </Button>
                             </div>
                           </CardContent>
