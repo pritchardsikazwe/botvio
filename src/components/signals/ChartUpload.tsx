@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,10 +37,20 @@ import {
   Infinity
 } from "lucide-react";
 import { SocialShareButtons } from "@/components/social/SocialShareButtons";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useChartUsageGate, getGuestUploadCount, incrementGuestUploadCount, GUEST_DAILY_LIMIT } from "@/hooks/useChartAnalysis";
+
+const CHART_BROKERS = [
+  { value: "exness", label: "Exness" },
+  { value: "deriv", label: "Deriv" },
+  { value: "weltrade", label: "Weltrade" },
+  { value: "pocket-option", label: "Pocket Option" },
+  { value: "quotex", label: "Quotex" },
+  { value: "iq-option", label: "IQ Option" },
+];
 
 const ANALYSIS_TYPES = [
   { value: "full", label: "Full Analysis", description: "Complete technical breakdown" },
@@ -68,6 +79,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const [activeTab, setActiveTab] = useState("upload");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedBrokers, setSelectedBrokers] = useState<string[]>(["exness", "deriv", "weltrade"]);
 
   const usageGate = useChartUsageGate();
 
@@ -106,7 +118,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   };
 
   const autoPostSignal = useCallback(async (
-    structured: any, sym: string, tf: string, chartImageUrl: string,
+    structured: any, sym: string, tf: string, chartImageUrl: string, brokers: string[],
   ) => {
     if (!user) return;
     try {
@@ -126,6 +138,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
         take_profit: structured.take_profit ? parseFloat(structured.take_profit) : null,
         timeframe: tf || structured.timeframe || "M5",
         category: "forex",
+        broker: brokers.length > 0 ? brokers : null,
         confidence: structured.confidence ? parseInt(structured.confidence) : null,
         reason: parts.join(" | "),
         is_manual: true, posted_by: user.id, status: "ACTIVE",
@@ -134,7 +147,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       if (error) {
         toast.error("Analysis complete but failed to auto-post signal");
       } else {
-        toast.success(`Signal for ${instrumentName} auto-posted!`);
+        toast.success(`Signal for ${instrumentName} auto-posted to ${brokers.join(", ")}!`);
       }
     } catch (err: any) {
       console.error("Auto-post signal exception:", err);
@@ -210,7 +223,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       }
 
       if ((isAdmin || isSuperAdmin || isSignalManager) && analysisData.structured) {
-        await autoPostSignal(analysisData.structured, symbol, timeframe, imageUrl);
+        await autoPostSignal(analysisData.structured, symbol, timeframe, imageUrl, selectedBrokers);
       }
     } catch (error: any) {
       const msg = error?.message || "";
@@ -354,6 +367,36 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                   </Button>
                 ))}
               </div>
+
+              {/* Broker Selection — Admin/Signal Manager only */}
+              {(isAdmin || isSuperAdmin || isSignalManager) && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-primary" />
+                    Post signal to brokers
+                  </Label>
+                  <div className="flex flex-wrap gap-3">
+                    {CHART_BROKERS.map(b => (
+                      <div key={b.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`chart-broker-${b.value}`}
+                          checked={selectedBrokers.includes(b.value)}
+                          onCheckedChange={() =>
+                            setSelectedBrokers(prev =>
+                              prev.includes(b.value)
+                                ? prev.filter(x => x !== b.value)
+                                : [...prev, b.value]
+                            )
+                          }
+                        />
+                        <label htmlFor={`chart-broker-${b.value}`} className="text-sm leading-none cursor-pointer">
+                          {b.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Upload Area */}
               <div
