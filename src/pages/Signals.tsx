@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
@@ -7,6 +8,7 @@ import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
 import { useManualSignals } from "@/hooks/useManualSignals";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSignalBrokers } from "@/hooks/useSignalBrokers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,8 @@ import {
   ImageIcon,
   Crown,
   Search,
-  X
+  X,
+  ExternalLink
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
