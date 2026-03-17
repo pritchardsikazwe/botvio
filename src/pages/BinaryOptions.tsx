@@ -15,7 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const BROKER_DETAILS: Record<string, { emoji: string; color: string; features: string[]; minDeposit: string; payout: string }> = {
   "deriv": { emoji: "🔴", color: "border-destructive/40", features: ["Synthetic Indices", "Boom & Crash", "Volatility Index", "24/7 Trading"], minDeposit: "$5", payout: "Up to 95%" },
   "pocket-option": { emoji: "🔵", color: "border-blue-500/40", features: ["OTC Markets", "1-Min Trades", "Social Trading", "50+ Assets"], minDeposit: "$5", payout: "Up to 92%" },
-  "quotex": { emoji: "🟢", color: "border-green-500/40", features: ["Fast Execution", "Copy Trading", "Demo Account", "OTC Pairs"], minDeposit: "$10", payout: "Up to 98%" },
+  
   "iq-option": { emoji: "🟡", color: "border-yellow-500/40", features: ["300+ Assets", "Tournaments", "Education Hub", "Multi-Chart"], minDeposit: "$10", payout: "Up to 95%" },
   "binomo": { emoji: "🟣", color: "border-purple-500/40", features: ["Easy Interface", "Low Entry", "Quick Trades", "Mobile App"], minDeposit: "$10", payout: "Up to 90%" },
 };
