@@ -13,7 +13,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ExternalLink, Shield, Zap, Clock, TrendingUp, Star, ArrowLeft,
-  Target, BarChart3, Brain, Activity, Layers, Flame, ArrowUpDown, RefreshCw, Sparkles
+  Target, BarChart3, Brain, Activity, Layers, Flame, ArrowUpDown, RefreshCw, Sparkles,
+  CheckCircle, XCircle, Lightbulb, UserPlus, Search, BarChart2, Rocket
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrokerButtons } from "@/components/signals/BrokerButtons";
