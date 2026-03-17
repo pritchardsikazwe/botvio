@@ -143,8 +143,8 @@ const BrokerPage = () => {
 
       <main className="container mx-auto px-4 py-6">
         {/* Back link */}
-        <Link to="/signals" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="h-4 w-4" /> Back to Signals
+        <Link to="/binary-options" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="h-4 w-4" /> Back to Binary Options
         </Link>
 
         {/* Hero */}
