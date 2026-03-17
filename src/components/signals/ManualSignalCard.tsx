@@ -32,6 +32,9 @@ interface ManualSignalCardProps {
     ai_win_probability?: number | null;
     explanation_json?: Record<string, unknown> | null;
     expiry_seconds?: number | null;
+    best_expiry?: number | null;
+    backup_expiry?: number | null;
+    quality_score?: number | null;
   };
   compact?: boolean;
   showBrokerButtons?: boolean;
