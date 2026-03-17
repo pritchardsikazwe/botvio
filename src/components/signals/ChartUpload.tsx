@@ -223,7 +223,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       }
 
       if ((isAdmin || isSuperAdmin || isSignalManager) && analysisData.structured) {
-        await autoPostSignal(analysisData.structured, symbol, timeframe, imageUrl);
+        await autoPostSignal(analysisData.structured, symbol, timeframe, imageUrl, selectedBrokers);
       }
     } catch (error: any) {
       const msg = error?.message || "";
