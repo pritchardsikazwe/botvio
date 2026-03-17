@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
@@ -7,9 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { useSignalBrokers, useTrackBrokerClick, rankBrokersForSignal } from "@/hooks/useSignalBrokers";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { useManualSignals } from "@/hooks/useManualSignals";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   ExternalLink, Shield, Zap, Clock, TrendingUp, Star, ArrowLeft,
-  Target, BarChart3, Brain, Activity, Layers, Flame, ArrowUpDown
+  Target, BarChart3, Brain, Activity, Layers, Flame, ArrowUpDown, RefreshCw, Sparkles
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrokerButtons } from "@/components/signals/BrokerButtons";
