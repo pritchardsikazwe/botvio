@@ -18,7 +18,7 @@ const BROKER_FILTERS = [
   { value: "deriv", label: "Deriv" },
   { value: "weltrade", label: "Weltrade" },
   { value: "pocket-option", label: "Pocket Option" },
-  { value: "quotex", label: "Quotex" },
+  
   { value: "iq-option", label: "IQ Option" },
 ];
 
