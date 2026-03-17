@@ -154,7 +154,7 @@ const Index = () => {
           </div>
 
           {/* Broker Quick Links */}
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
             <Link to="/brokers/deriv" className="block">
               <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-destructive/40 text-destructive hover:bg-destructive/10">
                 🔴 Deriv
@@ -163,11 +163,6 @@ const Index = () => {
             <Link to="/brokers/pocket-option" className="block">
               <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-blue-500/40 text-blue-500 hover:bg-blue-500/10">
                 🔵 Pocket Option
-              </Button>
-            </Link>
-            <Link to="/brokers/quotex" className="block">
-              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-green-500/40 text-green-500 hover:bg-green-500/10">
-                🟢 Quotex
               </Button>
             </Link>
             <Link to="/brokers/iq-option" className="block">
