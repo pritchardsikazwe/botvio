@@ -112,7 +112,7 @@ const BROKER_META: Record<string, {
 const BrokerPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: brokers } = useSignalBrokers();
-  const { data: signals } = useManualSignals({ status: "ACTIVE" });
+  const { data: signals } = useManualSignals({ status: "ACTIVE", broker: slug || "all" });
   const trackClick = useTrackBrokerClick();
 
   const broker = brokers?.find((b) => b.slug === slug);
