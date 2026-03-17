@@ -182,6 +182,118 @@ const BrokerPage = () => {
           <TabsContent value="signals">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
+                {/* Deriv API Contract Type Cards */}
+                {slug === "deriv" && (
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                      <Layers className="h-5 w-5 text-primary" /> Deriv API Trade Types
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        {
+                          name: "Digits (Matches/Differs)",
+                          icon: "🔢",
+                          desc: "Predict the last digit of the price. Matches = exact digit, Differs = not that digit. Fast 5-tick contracts.",
+                          markets: ["Volatility 10", "Volatility 25", "Volatility 50", "Volatility 75", "Volatility 100"],
+                          expiry: "5 Ticks",
+                          payout: "Up to 900%",
+                          color: "border-primary/40",
+                          link: "/deriv-options",
+                        },
+                        {
+                          name: "Ticks (Rise/Fall)",
+                          icon: "📊",
+                          desc: "Predict if price will rise or fall after 1–10 ticks. Fastest binary contract on Deriv.",
+                          markets: ["Volatility 10", "Volatility 25", "Volatility 50", "Volatility 75", "Volatility 100"],
+                          expiry: "1-10 Ticks",
+                          payout: "Up to 95%",
+                          color: "border-success/40",
+                          link: "/deriv-options",
+                        },
+                        {
+                          name: "Multipliers",
+                          icon: "✖️",
+                          desc: "Amplify profits without losing more than your stake. Ride trends with x10–x1000 leverage on synthetics & forex.",
+                          markets: ["Volatility 75", "Boom 500", "Crash 1000", "EURUSD", "XAUUSD"],
+                          expiry: "Open-ended",
+                          payout: "Unlimited upside",
+                          color: "border-warning/40",
+                          link: "/deriv-options",
+                        },
+                        {
+                          name: "Accumulators",
+                          icon: "📐",
+                          desc: "Grow your payout with each tick the price stays within a barrier range. Pick 1%–5% growth rate.",
+                          markets: ["Volatility 10", "Volatility 25", "Volatility 50", "Volatility 75", "Volatility 100"],
+                          expiry: "Open-ended",
+                          payout: "Compounding",
+                          color: "border-purple-500/40",
+                          link: "/deriv-options",
+                        },
+                        {
+                          name: "Boom & Crash",
+                          icon: "💥",
+                          desc: "Trade unique spike indices. Boom = upward spikes, Crash = downward spikes. Use multipliers or accumulators.",
+                          markets: ["Boom 500", "Boom 1000", "Crash 500", "Crash 1000"],
+                          expiry: "Varies",
+                          payout: "Up to 95%",
+                          color: "border-destructive/40",
+                          link: "/deriv-options",
+                        },
+                        {
+                          name: "Higher/Lower",
+                          icon: "⬆️⬇️",
+                          desc: "Predict if exit price will be higher or lower than a barrier. Longer duration than Rise/Fall for bigger moves.",
+                          markets: ["Volatility 75", "Volatility 100", "EURUSD", "GBPUSD"],
+                          expiry: "5 min – 24h",
+                          payout: "Up to 95%",
+                          color: "border-blue-500/40",
+                          link: "/deriv-options",
+                        },
+                      ].map((contract) => (
+                        <Card key={contract.name} className={`glass-card ${contract.color} hover:shadow-lg transition-all`}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <span className="text-xl">{contract.icon}</span>
+                              {contract.name}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <p className="text-xs text-muted-foreground">{contract.desc}</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="rounded bg-muted/30 p-1.5 text-center">
+                                <p className="text-[10px] text-muted-foreground">Expiry</p>
+                                <p className="font-bold text-xs">{contract.expiry}</p>
+                              </div>
+                              <div className="rounded bg-muted/30 p-1.5 text-center">
+                                <p className="text-[10px] text-muted-foreground">Payout</p>
+                                <p className="font-bold text-xs text-success">{contract.payout}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {contract.markets.slice(0, 3).map((m) => (
+                                <Badge key={m} variant="secondary" className="text-[9px]">{m}</Badge>
+                              ))}
+                              {contract.markets.length > 3 && (
+                                <Badge variant="secondary" className="text-[9px]">+{contract.markets.length - 3}</Badge>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" className="flex-1" onClick={handleOpenBroker}>
+                                <ExternalLink className="h-3 w-3 mr-1" /> Trade Now
+                              </Button>
+                              <Button size="sm" variant="outline" className="flex-1" asChild>
+                                <Link to={contract.link}>Learn More</Link>
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Live Signals */}
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <Activity className="h-5 w-5 text-primary" /> Live Signals for {broker?.name}
