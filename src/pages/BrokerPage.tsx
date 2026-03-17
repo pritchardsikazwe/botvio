@@ -13,7 +13,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ExternalLink, Shield, Zap, Clock, TrendingUp, Star, ArrowLeft,
-  Target, BarChart3, Brain, Activity, Layers, Flame, ArrowUpDown, RefreshCw, Sparkles
+  Target, BarChart3, Brain, Activity, Layers, Flame, ArrowUpDown, RefreshCw, Sparkles,
+  CheckCircle, XCircle, Lightbulb, UserPlus, Search, BarChart2, Rocket
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrokerButtons } from "@/components/signals/BrokerButtons";
@@ -113,6 +114,39 @@ const BROKER_META: Record<string, {
   },
 };
 
+const BROKER_TIPS: Record<string, { dos: string[]; donts: string[]; proTip: string; steps: string[] }> = {
+  "pocket-option": {
+    dos: ["Use demo first to master OTC timing", "Focus on 60s expiry for best payout", "Trade during high-volume OTC sessions", "Follow Botvio signals for entry confirmation"],
+    donts: ["Don't trade all assets at once", "Avoid Martingale money management", "Don't chase losses with bigger stakes", "Never skip your trading plan"],
+    proTip: "OTC markets on Pocket Option are available 24/7 — trade weekends when Forex is closed for consistent opportunities.",
+    steps: ["Open Pocket Option account (free demo)", "Connect to Botvio signals page", "Wait for a CALL/PUT signal alert", "Match the asset & expiry on your broker", "Execute the trade within 30 seconds"],
+  },
+  "quotex": {
+    dos: ["Use the built-in charting tools for confirmation", "Start with $10 demo to test strategies", "Focus on EMA crossover setups", "Trade liquid pairs like EURUSD"],
+    donts: ["Don't ignore the trend direction", "Avoid trading during major news releases", "Don't use more than 3% per trade", "Never trade without checking the signal confidence"],
+    proTip: "Quotex offers up to 98% payouts on some assets — check the payout percentage before entering each trade.",
+    steps: ["Create free Quotex demo account", "Browse Botvio signals for Quotex", "Check signal confidence (aim for 70%+)", "Open the same asset on Quotex chart", "Place trade matching signal direction & expiry"],
+  },
+  "deriv": {
+    dos: ["Use API automation for faster execution", "Practice Boom & Crash on demo first", "Set stop-out levels on multipliers", "Use Botvio AI for spike detection"],
+    donts: ["Don't trade synthetics without understanding volatility", "Avoid high multipliers as a beginner", "Don't ignore the accumulator barrier distance", "Never trade Boom/Crash without spike pattern confirmation"],
+    proTip: "Deriv is the only broker with full API support — connect your account to Botvio for automated signal execution.",
+    steps: ["Open Deriv account & get API token", "Connect to Botvio via Deriv Options page", "Choose contract type (Digits, Ticks, Multipliers)", "Follow AI signals or use auto-trading", "Monitor trades in your Botvio dashboard"],
+  },
+  "iq-option": {
+    dos: ["Use the Alligator indicator for trend entries", "Trade stocks during market hours only", "Start with 3-5 min expiries", "Verify signals with RSI divergence"],
+    donts: ["Don't trade too many assets simultaneously", "Avoid 30-second expiry as a beginner", "Don't ignore fundamental analysis for stocks", "Never over-leverage on CFD positions"],
+    proTip: "IQ Option's education center is excellent — combine their tutorials with Botvio signals for the best learning experience.",
+    steps: ["Register on IQ Option (demo available)", "Open Botvio broker signals page", "Select an active signal with high confidence", "Open the same pair on IQ Option", "Execute trade with matching direction & timeframe"],
+  },
+  "binomo": {
+    dos: ["Start with simple trend-following strategies", "Use the mobile app for quick trades", "Practice in tournaments for experience", "Keep trade sizes small and consistent"],
+    donts: ["Don't enter trades without candle confirmation", "Avoid trading during low-liquidity hours", "Don't chase tournament rankings with big stakes", "Never trade real money before mastering demo"],
+    proTip: "Binomo tournaments are a great way to practice trading under pressure — enter free tournaments to build confidence.",
+    steps: ["Sign up on Binomo (free demo included)", "Follow Botvio beginner-friendly signals", "Start with EURUSD 60s fixed-time trades", "Use candle pattern confirmation before entry", "Graduate to live trading after 100+ demo wins"],
+  },
+};
+
 const BrokerPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: brokers } = useSignalBrokers();
@@ -128,6 +162,7 @@ const BrokerPage = () => {
     pros: [], cons: [],
   };
   const strategies = BROKER_STRATEGIES[slug || ""] || [];
+  const tips = BROKER_TIPS[slug || ""] || { dos: [], donts: [], proTip: "", steps: [] };
 
   const handleOpenBroker = () => {
     if (broker) {
@@ -394,27 +429,67 @@ const BrokerPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* How it works */}
-                <Card className="glass-card">
-                  <CardHeader><CardTitle className="text-base">How It Works</CardTitle></CardHeader>
-                  <CardContent className="space-y-3">
-                    {[
-                      { icon: Brain, title: "AI Generates Signal", desc: "Real-time analysis of momentum, price action & levels" },
-                      { icon: Zap, title: "You Get Alerted", desc: "Asset, direction, expiry & confidence score" },
-                      { icon: Target, title: `Execute on ${broker?.name}`, desc: "Open your broker, match the setup, place trade" },
-                    ].map((step, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="p-1.5 rounded-lg bg-primary/20 shrink-0">
-                          <step.icon className="h-4 w-4 text-primary" />
+                {/* Step-by-step guide */}
+                <Card className="glass-card border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Rocket className="h-5 w-5 text-primary" /> How to Trade on {broker?.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-0">
+                    {(tips?.steps || []).map((step, i) => (
+                      <div key={i} className="flex items-start gap-3 py-2.5 border-b border-border/30 last:border-0">
+                        <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-xs font-black text-primary">{i + 1}</span>
                         </div>
-                        <div>
-                          <p className="font-semibold text-sm">{i + 1}. {step.title}</p>
-                          <p className="text-xs text-muted-foreground">{step.desc}</p>
-                        </div>
+                        <p className="text-sm text-foreground/90 leading-relaxed">{step}</p>
                       </div>
                     ))}
                   </CardContent>
                 </Card>
+
+                {/* Do's & Don'ts */}
+                <Card className="glass-card border-success/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-success">
+                      <CheckCircle className="h-5 w-5" /> ✅ Do's
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {(tips?.dos || []).map((d, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="h-3.5 w-3.5 text-success shrink-0 mt-1" />
+                        <span className="text-foreground/90">{d}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card border-destructive/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-destructive">
+                      <XCircle className="h-5 w-5" /> ❌ Don'ts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {(tips?.donts || []).map((d, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm">
+                        <XCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-1" />
+                        <span className="text-foreground/90">{d}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Pro Tip */}
+                {tips?.proTip && (
+                  <div className="p-4 rounded-xl bg-primary/10 border border-primary/30">
+                    <p className="text-sm text-foreground font-semibold flex items-start gap-2">
+                      <Lightbulb className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span>💡 <strong className="text-primary">Pro Tip:</strong> {tips.proTip}</span>
+                    </p>
+                  </div>
+                )}
 
                 {/* Other brokers */}
                 <Card className="glass-card">
