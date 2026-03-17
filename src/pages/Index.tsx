@@ -13,8 +13,7 @@ import {
   ArrowRight, Zap, BookOpen, Package, MessageCircle,
   ExternalLink, Download, Smartphone, Sparkles, Signal,
   BarChart3, Hash, TrendingDown, Activity, Newspaper, Globe, Wifi,
-  Crown, Check, Star, Brain, CheckCircle, XCircle, Lightbulb,
-  UserPlus, Search, BarChart2, Rocket
+  Crown, Check, Star, Brain
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
