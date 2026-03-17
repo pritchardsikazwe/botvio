@@ -273,22 +273,27 @@ export const HomeSignalsWidget = () => {
                   )}
                 </div>
 
-                  {/* Broker CTA */}
-                  {(() => {
-                    const broker = getBrokerForSymbol(signal.symbol);
-                    return (
-                      <a href={broker.link} target="_blank" rel="noopener noreferrer" className="block">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`w-full font-bold text-xs mt-1 ${broker.color}`}
-                        >
-                          <ExternalLink className="h-3 w-3 mr-1.5" />
-                          {broker.name}
-                        </Button>
-                      </a>
-                    );
-                  })()}
+                  {/* Broker CTAs */}
+                  <div className="flex gap-1.5 mt-1">
+                    <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 bg-warning/15 text-warning border-warning/30 hover:bg-warning/25">
+                        <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                        Exness
+                      </Button>
+                    </a>
+                    <a href={DERIV_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20">
+                        <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                        Deriv
+                      </Button>
+                    </a>
+                    <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
+                        <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                        Weltrade
+                      </Button>
+                    </a>
+                  </div>
               </CardContent>
             </Card>
           );
