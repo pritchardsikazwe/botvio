@@ -368,6 +368,36 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 ))}
               </div>
 
+              {/* Broker Selection — Admin/Signal Manager only */}
+              {(isAdmin || isSuperAdmin || isSignalManager) && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Signal className="h-4 w-4 text-primary" />
+                    Post signal to brokers
+                  </Label>
+                  <div className="flex flex-wrap gap-3">
+                    {CHART_BROKERS.map(b => (
+                      <div key={b.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`chart-broker-${b.value}`}
+                          checked={selectedBrokers.includes(b.value)}
+                          onCheckedChange={() =>
+                            setSelectedBrokers(prev =>
+                              prev.includes(b.value)
+                                ? prev.filter(x => x !== b.value)
+                                : [...prev, b.value]
+                            )
+                          }
+                        />
+                        <label htmlFor={`chart-broker-${b.value}`} className="text-sm leading-none cursor-pointer">
+                          {b.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Upload Area */}
               <div
                 onClick={() => {
