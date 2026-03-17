@@ -48,6 +48,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [country, setCountry] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [selectedPlan, setSelectedPlan] = useState("free");
@@ -84,14 +85,22 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!displayName.trim()) {
+      toast({ title: "Name required", description: "Please enter your full name.", variant: "destructive" });
+      return;
+    }
+    if (!whatsapp.trim()) {
+      toast({ title: "WhatsApp required", description: "Please enter your WhatsApp number.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
-    const { error } = await signUp(email, password, country, whatsapp, selectedPlan);
+    const { error } = await signUp(email, password, country, whatsapp, selectedPlan, displayName.trim());
     if (error) {
       toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Account created!", description: "Please check your email to verify your account." });
       onOpenChange(false);
-      setEmail(""); setPassword(""); setCountry(""); setWhatsapp("");
+      setEmail(""); setPassword(""); setCountry(""); setWhatsapp(""); setDisplayName("");
     }
     setLoading(false);
   };
@@ -160,16 +169,22 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
           </TabsContent>
 
           <TabsContent value="signup" className="mt-4">
-            <form onSubmit={handleSignUp} className="space-y-4">
+            <form onSubmit={handleSignUp} className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="signup-name" className="flex items-center gap-2">
+                  <User className="w-4 h-4" /> Full Name <span className="text-destructive">*</span>
+                </Label>
+                <Input id="signup-name" type="text" placeholder="John Doe" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required className="bg-secondary/50" />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-email" className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" /> Email
+                  <Mail className="w-4 h-4" /> Email <span className="text-destructive">*</span>
                 </Label>
                 <Input id="signup-email" type="email" placeholder="trader@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-secondary/50" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password" className="flex items-center gap-2">
-                  <Lock className="w-4 h-4" /> Password
+                  <Lock className="w-4 h-4" /> Password <span className="text-destructive">*</span>
                 </Label>
                 <Input id="signup-password" type="password" placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required className="bg-secondary/50" />
               </div>
@@ -190,7 +205,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-whatsapp" className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" /> WhatsApp Number
+                  <Phone className="w-4 h-4" /> WhatsApp Number <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="signup-whatsapp"
@@ -198,6 +213,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   placeholder="+260 97 1234567"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
+                  required
                   className="bg-secondary/50"
                 />
               </div>
