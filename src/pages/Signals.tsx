@@ -84,6 +84,7 @@ const TIMEFRAME_OPTIONS = [
 
 const Signals = () => {
   const { user, isSignalManager } = useAuth();
+  const { data: signalBrokers } = useSignalBrokers();
   const [category, setCategory] = useState("all");
   const [broker, setBroker] = useState("all");
   const [status, setStatus] = useState("ACTIVE");
