@@ -195,21 +195,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, country?: string, whatsapp?: string, planCode?: string) => {
+  const signUp = async (email: string, password: string, country?: string, whatsapp?: string, planCode?: string, displayName?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { country: country || undefined, whatsapp_number: whatsapp || undefined, selected_plan: planCode || 'free' },
+        data: { country: country || undefined, whatsapp_number: whatsapp || undefined, selected_plan: planCode || 'free', display_name: displayName || undefined },
       },
     });
 
-    // Update profile with country and whatsapp if provided
+    // Update profile with country, whatsapp, and display name if provided
     if (!error && data?.user) {
       const updates: Record<string, string> = {};
       if (country) updates.country = country;
       if (whatsapp) updates.whatsapp_number = whatsapp;
+      if (displayName) updates.display_name = displayName;
       if (Object.keys(updates).length > 0) {
         supabase
           .from("profiles")
