@@ -222,7 +222,7 @@ const BrokerPage = () => {
                           expiry: "5 Ticks",
                           payout: "Up to 900%",
                           color: "border-primary/40",
-                          tradeRoute: "/trade/style/digits",
+                          tradeRoute: "/trade/style/digit-contracts",
                           brokers: ["Deriv"],
                         },
                         {
