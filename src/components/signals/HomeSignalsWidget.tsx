@@ -18,8 +18,8 @@ const BROKER_FILTERS = [
   { value: "deriv", label: "Deriv" },
   { value: "weltrade", label: "Weltrade" },
   { value: "pocket-option", label: "Pocket Option" },
-  
   { value: "iq-option", label: "IQ Option" },
+  { value: "binomo", label: "Binomo" },
 ];
 
 function getBrokerForSymbol(symbol: string): { name: string; link: string; color: string } {
