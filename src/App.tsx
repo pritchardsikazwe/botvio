@@ -68,6 +68,7 @@ import AsiaMarket from "./pages/markets/AsiaMarket";
 import CryptoMarket from "./pages/markets/CryptoMarket";
 import AfricaMarket from "./pages/markets/AfricaMarket";
 import BrokerPage from "./pages/BrokerPage";
+import BinaryOptions from "./pages/BinaryOptions";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
