@@ -153,6 +153,35 @@ const Index = () => {
             </Link>
           </div>
 
+          {/* Broker Quick Links */}
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2">
+            <Link to="/brokers/deriv" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-destructive/40 text-destructive hover:bg-destructive/10">
+                🔴 Deriv
+              </Button>
+            </Link>
+            <Link to="/brokers/pocket-option" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-blue-500/40 text-blue-500 hover:bg-blue-500/10">
+                🔵 Pocket Option
+              </Button>
+            </Link>
+            <Link to="/brokers/quotex" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-green-500/40 text-green-500 hover:bg-green-500/10">
+                🟢 Quotex
+              </Button>
+            </Link>
+            <Link to="/brokers/iq-option" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-yellow-500/40 text-yellow-500 hover:bg-yellow-500/10">
+                🟡 IQ Option
+              </Button>
+            </Link>
+            <Link to="/brokers/binomo" className="block">
+              <Button variant="outline" className="w-full h-10 text-xs font-bold gap-1 border-purple-500/40 text-purple-500 hover:bg-purple-500/10">
+                🟣 Binomo
+              </Button>
+            </Link>
+          </div>
+
           {/* Market Dashboard Shortcuts */}
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-3">
             <Link to="/markets" className="block">
