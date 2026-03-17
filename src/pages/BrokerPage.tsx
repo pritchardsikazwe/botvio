@@ -162,6 +162,7 @@ const BrokerPage = () => {
     pros: [], cons: [],
   };
   const strategies = BROKER_STRATEGIES[slug || ""] || [];
+  const tips = BROKER_TIPS[slug || ""] || { dos: [], donts: [], proTip: "", steps: [] };
 
   const handleOpenBroker = () => {
     if (broker) {
