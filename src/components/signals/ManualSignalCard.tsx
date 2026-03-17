@@ -138,8 +138,13 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
               <h3 className="font-bold text-lg">{signal.symbol}</h3>
               <p className={`text-sm font-semibold ${isBuy ? 'text-success' : 'text-destructive'}`}>
                 {signal.direction.toUpperCase()}
-                {signal.expiry_seconds && (
-                  <span className="text-muted-foreground font-normal ml-2">· {signal.expiry_seconds}s expiry</span>
+                {(signal.best_expiry || signal.expiry_seconds) && (
+                  <span className="text-muted-foreground font-normal ml-2">
+                    · Best: {formatExpiryLabel(signal.best_expiry || signal.expiry_seconds || 60)}
+                    {signal.backup_expiry && (
+                      <span className="text-muted-foreground/60"> / Backup: {formatExpiryLabel(signal.backup_expiry)}</span>
+                    )}
+                  </span>
                 )}
               </p>
             </div>
