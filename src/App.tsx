@@ -146,7 +146,7 @@ const App = () => (
               <Route path="/markets/africa" element={<AfricaMarket />} />
               <Route path="/trade-modes" element={<TradeModes />} />
               <Route path="/deriv-options" element={<DerivOptions />} />
-              {/* Broker SEO pages */}
+              <Route path="/binary-options" element={<BinaryOptions />} />
               <Route path="/brokers/:slug" element={<BrokerPage />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
