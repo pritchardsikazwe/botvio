@@ -146,6 +146,11 @@ const Index = () => {
                 <Brain className="h-4 w-4" /> AI Spike Predict
               </Button>
             </Link>
+            <Link to="/signals" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-success/40 text-success hover:bg-success/10 animate-pulse">
+                <Signal className="h-4 w-4" /> 🎯 Binary Signals
+              </Button>
+            </Link>
           </div>
 
           {/* Market Dashboard Shortcuts */}
