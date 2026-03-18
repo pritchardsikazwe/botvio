@@ -155,31 +155,8 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
     // Acquire mutex
     if (!acquireLogin()) return;
 
-    // Use the new PKCE-based OAuth flow — redirect instead of popup
+    // Use the new PKCE-based OAuth flow — full page redirect
     startDerivOAuthLogin();
-    releaseLogin(false);
-    return;
-    if (!w || w.closed) {
-      releaseLogin(false);
-      toast.error("Popup was blocked. Please allow popups or use the API Token method.");
-      return;
-    }
-    oauthPopupRef.current = w;
-    toast.info("Complete the login in the popup window");
-
-    // Watch for popup close (user cancelled)
-    const pollId = setInterval(() => {
-      if (w.closed) {
-        clearInterval(pollId);
-        // Don't release mutex here — the callback page handles success.
-        // But if no callback arrived in 5s, release as failure.
-        setTimeout(() => {
-          if (loginInProgress) {
-            releaseLogin(false);
-          }
-        }, 5000);
-      }
-    }, 1000);
   };
 
   const handleDisconnect = async () => {
