@@ -149,6 +149,16 @@ export function ChartAnalysisPanel({ signal, metrics, indicator, symbol }: Chart
           </div>
         )}
 
+        {/* Small Account Warning */}
+        <div className="bg-warning/10 border border-warning/25 rounded-lg px-3 py-2.5">
+          <div className="flex items-start gap-2">
+            <Shield className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+            <p className="text-xs text-foreground leading-relaxed font-medium">
+              This signal may not be suitable for very small accounts because the stop loss and take profit are far apart. If your balance is small, reduce your lot size, risk less, or wait for a tighter setup.
+            </p>
+          </div>
+        </div>
+
         {/* AI Summary */}
         {signal?.ai_summary && (
           <div className="border-t border-border/30 pt-3">
