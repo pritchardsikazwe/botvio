@@ -139,16 +139,12 @@ export const AdminProfilesTab = () => {
   // Enhanced search: match email or display_name
   const filtered = profiles?.filter(p => {
     if (search) {
-      const s = search.toLowerCase();
-      const matches = p.email?.toLowerCase().includes(s) ||
-        p.display_name?.toLowerCase().includes(s) ||
-        p.country?.toLowerCase().includes(s);
-      // Only super_admin can search by WhatsApp
-      if (isSuperAdmin) {
-        if (matches || p.whatsapp_number?.includes(s)) return true;
-        return false;
-      }
-      if (!matches) return false;
+      const s = search.toLowerCase().trim();
+      const matchName = p.display_name?.toLowerCase().includes(s);
+      const matchEmail = p.email?.toLowerCase().includes(s);
+      const matchCountry = p.country?.toLowerCase().includes(s);
+      const matchWhatsApp = isSuperAdmin && p.whatsapp_number?.includes(s);
+      if (!matchName && !matchEmail && !matchCountry && !matchWhatsApp) return false;
     }
     if (countryFilter !== "all" && p.country !== countryFilter) return false;
     if (statusFilter === "active") {
