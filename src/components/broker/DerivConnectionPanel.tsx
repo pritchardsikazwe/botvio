@@ -154,8 +154,10 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
     // Acquire mutex
     if (!acquireLogin()) return;
 
-    const oauthUrl = buildDerivOAuthUrl();
-    const w = window.open(oauthUrl, "deriv_oauth", "width=600,height=700,popup=yes");
+    // Use the new PKCE-based OAuth flow — redirect instead of popup
+    startDerivOAuthLogin();
+    releaseLogin(false);
+    return;
     if (!w || w.closed) {
       releaseLogin(false);
       toast.error("Popup was blocked. Please allow popups or use the API Token method.");
