@@ -153,8 +153,8 @@ export function ChartAnalysisPanel({ signal, metrics, indicator, symbol }: Chart
         <div className="bg-warning/10 border border-warning/25 rounded-lg px-3 py-2.5">
           <div className="flex items-start gap-2">
             <Shield className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-            <p className="text-xs text-foreground leading-relaxed font-medium">
-              This signal may not be suitable for very small accounts because the stop loss and take profit are far apart. If your balance is small, reduce your lot size, risk less, or wait for a tighter setup.
+            <p className="text-sm text-foreground leading-relaxed font-medium">
+              This signal may have a wide stop loss and take profit. Traders with small accounts should adjust position size carefully.
             </p>
           </div>
         </div>

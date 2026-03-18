@@ -462,8 +462,8 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 </div>
                 <div className="flex items-start gap-2 rounded-lg bg-warning/15 border border-warning/40 p-3">
                   <Shield className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-                  <p className="text-sm text-foreground">
-                    <span className="font-semibold text-warning">Tip:</span> This signal may not be suitable for very small accounts because the stop loss and take profit are far apart. If your balance is small, reduce your lot size, risk less, or wait for a tighter setup.
+                  <p className="text-base text-foreground">
+                    <span className="font-semibold text-warning">Tip:</span> This signal may have a wide stop loss and take profit. Traders with small accounts should adjust position size carefully.
                   </p>
                 </div>
               </div>
@@ -473,7 +473,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 <Button
                   onClick={handleAnalyze}
                   disabled={!selectedFile || isUploading || isAnalyzing}
-                  className="flex-1"
+                  className="flex-1 text-base text-white font-semibold"
                   variant="gold"
                 >
                   {isUploading ? (
