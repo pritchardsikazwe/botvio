@@ -473,8 +473,8 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 <Button
                   onClick={handleAnalyze}
                   disabled={!selectedFile || isUploading || isAnalyzing}
-                  className="flex-1 text-base text-white font-semibold"
-                  variant="gold"
+                  className="flex-1 text-base font-semibold bg-black text-white hover:bg-black/90 border-none"
+                  variant="outline"
                 >
                   {isUploading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</>
