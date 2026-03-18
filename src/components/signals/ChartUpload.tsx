@@ -452,12 +452,20 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 )}
               </div>
 
-              {/* Tip */}
-              <div className="flex items-start gap-2 rounded-lg bg-yellow-500/15 border border-yellow-500/40 p-3">
-                <Info className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
-                <p className="text-sm text-yellow-400">
-                  <span className="font-semibold text-yellow-300">Tip:</span> Make sure the instrument symbol is visible on your chart before uploading.
-                </p>
+              {/* Tips */}
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 rounded-lg bg-yellow-500/15 border border-yellow-500/40 p-3">
+                  <Info className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
+                  <p className="text-sm text-yellow-400">
+                    <span className="font-semibold text-yellow-300">Tip:</span> Make sure the instrument symbol is visible on your chart before uploading.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2 rounded-lg bg-warning/15 border border-warning/40 p-3">
+                  <Shield className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+                  <p className="text-sm text-foreground">
+                    <span className="font-semibold text-warning">Tip:</span> This signal may not be suitable for very small accounts because the stop loss and take profit are far apart. If your balance is small, reduce your lot size, risk less, or wait for a tighter setup.
+                  </p>
+                </div>
               </div>
 
               {/* Action Buttons */}
