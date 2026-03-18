@@ -291,7 +291,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         </div>
         
         <div className="mt-2 p-2 rounded bg-muted/50 text-xs text-muted-foreground">
-          <p>App ID: <strong>{derivConfig.appId}</strong> | Domain: <strong>{derivConfig.baseDomain}</strong></p>
+          <p>Client ID: <strong>{derivConfig.clientId}</strong> | Domain: <strong>{derivConfig.baseDomain}</strong></p>
         </div>
       </CardHeader>
       <CardContent>
