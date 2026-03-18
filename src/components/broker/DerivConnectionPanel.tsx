@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { getDerivConfig, buildDerivOAuthUrl, resolveDerivEnv } from "@/config/derivEnv";
+import { getDerivConfig, resolveDerivEnv } from "@/config/derivEnv";
+import { startDerivOAuthLogin } from "@/lib/derivAuth";
 import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
 
 interface DerivConnectionPanelProps {
