@@ -47,7 +47,7 @@ export const useDerivAPI = () => {
   const service = useMemo(() => {
     const s = new DerivWebSocketService();
     return s;
-  }, [derivConfig.appId]);
+  }, [derivConfig.clientId]);
 
   const [tickSubscriptions, setTickSubscriptions] = useState<Record<string, string>>({});
 

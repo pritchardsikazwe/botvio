@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { getDerivConfig, buildDerivOAuthUrl, resolveDerivEnv } from "@/config/derivEnv";
+import { getDerivConfig, resolveDerivEnv } from "@/config/derivEnv";
+import { startDerivOAuthLogin } from "@/lib/derivAuth";
 import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
 
 interface DerivConnectionPanelProps {
@@ -154,29 +155,8 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
     // Acquire mutex
     if (!acquireLogin()) return;
 
-    const oauthUrl = buildDerivOAuthUrl();
-    const w = window.open(oauthUrl, "deriv_oauth", "width=600,height=700,popup=yes");
-    if (!w || w.closed) {
-      releaseLogin(false);
-      toast.error("Popup was blocked. Please allow popups or use the API Token method.");
-      return;
-    }
-    oauthPopupRef.current = w;
-    toast.info("Complete the login in the popup window");
-
-    // Watch for popup close (user cancelled)
-    const pollId = setInterval(() => {
-      if (w.closed) {
-        clearInterval(pollId);
-        // Don't release mutex here — the callback page handles success.
-        // But if no callback arrived in 5s, release as failure.
-        setTimeout(() => {
-          if (loginInProgress) {
-            releaseLogin(false);
-          }
-        }, 5000);
-      }
-    }, 1000);
+    // Use the new PKCE-based OAuth flow — full page redirect
+    startDerivOAuthLogin();
   };
 
   const handleDisconnect = async () => {
@@ -289,7 +269,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         </div>
         
         <div className="mt-2 p-2 rounded bg-muted/50 text-xs text-muted-foreground">
-          <p>App ID: <strong>{derivConfig.appId}</strong> | Domain: <strong>{derivConfig.baseDomain}</strong></p>
+          <p>Client ID: <strong>{derivConfig.clientId}</strong> | Domain: <strong>{derivConfig.baseDomain}</strong></p>
         </div>
       </CardHeader>
       <CardContent>

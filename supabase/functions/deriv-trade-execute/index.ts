@@ -1,13 +1,12 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const DERIV_APP_ID = Deno.env.get("DERIV_APP_ID") || "99139";
 const TOKEN_ENCRYPTION_KEY = Deno.env.get("TOKEN_ENCRYPTION_KEY");
+const DERIV_CLIENT_ID = "32JZaZ9lNagFr75qPkuhO";
 
 // Simple XOR encryption/decryption for tokens
 function decryptToken(encrypted: string): string {
@@ -21,25 +20,84 @@ function decryptToken(encrypted: string): string {
   return result;
 }
 
-async function connectDerivWS(token: string): Promise<WebSocket> {
+/**
+ * Get an OTP-authenticated WebSocket URL for the given account
+ */
+async function getOtpWebSocketUrl(derivToken: string, accountId: string): Promise<string> {
+  const response = await fetch(
+    `https://api.derivws.com/trading/v1/options/accounts/${accountId}/otp`,
+    {
+      method: "POST",
+      headers: {
+        "Deriv-App-ID": DERIV_CLIENT_ID,
+        "Authorization": `Bearer ${derivToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`OTP request failed (${response.status}): ${errText}`);
+  }
+
+  const data = await response.json();
+  const wsUrl = data?.data?.url || data?.url;
+  if (!wsUrl) {
+    throw new Error("No WebSocket URL in OTP response");
+  }
+  return wsUrl;
+}
+
+/**
+ * Connect to Deriv WebSocket using OTP URL (new API).
+ * Falls back to legacy authorize if OTP fails.
+ */
+async function connectDerivWS(derivToken: string, accountId?: string): Promise<WebSocket> {
+  let wsUrl: string;
+  let useOtp = false;
+
+  // Try new OTP-based connection first
+  if (accountId) {
+    try {
+      wsUrl = await getOtpWebSocketUrl(derivToken, accountId);
+      useOtp = true;
+    } catch (e) {
+      console.warn("OTP connection failed, falling back to legacy:", e);
+      // Fallback to legacy
+      const legacyAppId = Deno.env.get("DERIV_APP_ID") || "99139";
+      wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${legacyAppId}`;
+    }
+  } else {
+    // No account ID — use legacy flow
+    const legacyAppId = Deno.env.get("DERIV_APP_ID") || "99139";
+    wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${legacyAppId}`;
+  }
+
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
+    const ws = new WebSocket(wsUrl);
     const timeout = setTimeout(() => {
       ws.close();
       reject(new Error("WebSocket connection timeout"));
-    }, 10000);
+    }, 15000);
     
     ws.onopen = () => {
-      clearTimeout(timeout);
-      // Authorize first
-      ws.send(JSON.stringify({ authorize: token }));
+      if (useOtp) {
+        // OTP-based: already authenticated, no authorize needed
+        clearTimeout(timeout);
+        resolve(ws);
+      } else {
+        // Legacy: send authorize message
+        ws.send(JSON.stringify({ authorize: derivToken }));
+      }
     };
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.authorize) {
+        clearTimeout(timeout);
         resolve(ws);
       } else if (data.error) {
+        clearTimeout(timeout);
         ws.close();
         reject(new Error(data.error.message));
       }
@@ -73,7 +131,7 @@ async function sendAndReceive(ws: WebSocket, request: any): Promise<any> {
   });
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -119,7 +177,7 @@ serve(async (req) => {
       throw new Error(`Trading disabled: ${killSwitch.value.reason || 'Kill switch active'}`);
     }
 
-    // Check idempotency - prevent duplicate trades
+    // Check idempotency
     const { data: existingIntent } = await supabase
       .from('trade_intents')
       .select('id, status')
@@ -180,10 +238,10 @@ serve(async (req) => {
       throw new Error(`Failed to create trade intent: ${intentError.message}`);
     }
 
-    // Connect to Deriv WebSocket
+    // Connect to Deriv WebSocket (tries OTP first, falls back to legacy)
     let ws: WebSocket;
     try {
-      ws = await connectDerivWS(derivToken);
+      ws = await connectDerivWS(derivToken, connection.login_id || undefined);
     } catch (err: any) {
       await supabase
         .from('trade_intents')
@@ -204,10 +262,7 @@ serve(async (req) => {
 
       switch (contract_family) {
         case 'MULTIPLIERS': {
-          proposalRequest.contract_type = payload.contract_type; // MULTUP or MULTDOWN
-          // Dynamically accept multiplier from client - Deriv validates per-symbol
-          // Common values: 10, 20, 30, 40, 50, 100, 150, 200, 250, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000
-          // Do NOT hardcode allowed range - let Deriv API validate per symbol
+          proposalRequest.contract_type = payload.contract_type;
           proposalRequest.multiplier = payload.multiplier || 100;
           if (payload.limit_order) {
             proposalRequest.limit_order = payload.limit_order;
@@ -215,7 +270,7 @@ serve(async (req) => {
           break;
         }
         case 'DIGITS':
-          proposalRequest.contract_type = payload.contract_type; // DIGITDIFF, DIGITMATCH, DIGITOVER, DIGITUNDER, DIGITEVEN, DIGITODD
+          proposalRequest.contract_type = payload.contract_type;
           proposalRequest.duration = payload.duration;
           proposalRequest.duration_unit = payload.duration_unit || 't';
           if (payload.barrier !== undefined) {
@@ -224,7 +279,7 @@ serve(async (req) => {
           break;
           
         case 'RISEFALL':
-          proposalRequest.contract_type = payload.contract_type; // CALL or PUT
+          proposalRequest.contract_type = payload.contract_type;
           proposalRequest.duration = payload.duration;
           proposalRequest.duration_unit = payload.duration_unit || 't';
           break;
@@ -290,7 +345,7 @@ serve(async (req) => {
         });
       }
 
-      // Trade successful - update intent and create execution
+      // Trade successful
       const contractId = buyResponse.buy.contract_id;
       
       await supabase
@@ -309,7 +364,7 @@ serve(async (req) => {
           trade_intent_id: tradeIntent.id,
           broker_ref: contractId.toString(),
           fill_price: buyResponse.buy.buy_price,
-          stake_or_lot: buyResponse.buy.balance_after - buyResponse.buy.balance_after + payload.stake,
+          stake_or_lot: payload.stake,
           status: 'OPEN',
           raw: buyResponse
         })

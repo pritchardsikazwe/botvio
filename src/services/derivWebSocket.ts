@@ -1,5 +1,5 @@
 import type { DerivMessage, DerivTick, DerivBalance, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
-import { getDerivWebSocketUrl } from "@/config/derivEnv";
+import { getDerivWebSocketUrl, getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 
 type ConnectionStatus = "idle" | "connecting" | "open" | "closed";
 
@@ -23,11 +23,9 @@ type DerivWebSocketOptions = {
 
 /**
  * Deriv WebSocket service (browser)
- * - single onmessage dispatcher
- * - request/response routing using req_id
- * - tick subscriptions + unsubscribe by subscription id
- * - auto-reconnect with backoff
- * - Uses environment-based configuration
+ * Supports both:
+ * - Legacy: wss://ws.derivws.com/websockets/v3?app_id=X + { authorize: token }
+ * - New API: OTP-based URL from deriv-get-otp edge function (pre-authenticated)
  */
 export class DerivWebSocketService {
   private ws: WebSocket | null = null;
@@ -45,6 +43,9 @@ export class DerivWebSocketService {
   private pingTimer: number | null = null;
 
   private token: string | null = null;
+  /** If set, we connected via OTP and don't need to send authorize */
+  private otpMode = false;
+  private otpUrlGetter: (() => Promise<string>) | null = null;
   private lastBalance: DerivBalance | null = null;
   private loginid: string | null = null;
   private accountInfo: DerivAccountInfo | null = null;
@@ -57,15 +58,16 @@ export class DerivWebSocketService {
   private balanceListeners = new Set<Listener<DerivBalance>>();
 
   private tickSubscriptionBySymbol = new Map<string, string>();
-  private activeContractSubscriptions = new Set<number>(); // Track contract IDs for re-subscribe on reconnect
+  private activeContractSubscriptions = new Set<number>();
 
   // Rate limiting protection
   private lastTickRequestTime = 0;
   private lastForgetRequestTime = 0;
-  private readonly minRequestIntervalMs = 500; // Minimum 500ms between tick/forget requests
-  private pendingTickRequests = new Map<string, boolean>(); // Track pending subscriptions
+  private readonly minRequestIntervalMs = 500;
+  private pendingTickRequests = new Map<string, boolean>();
 
-  private readonly url: string;
+  private readonly defaultUrl: string;
+  private currentUrl: string;
   private readonly autoReconnect: boolean;
   private readonly reconnectBaseDelayMs: number;
   private readonly reconnectMaxDelayMs: number;
@@ -73,19 +75,18 @@ export class DerivWebSocketService {
   private readonly pingIntervalMs: number;
 
   constructor(opts: DerivWebSocketOptions = {}) {
-    // Use environment-based URL by default
-    this.url = opts.url ?? getDerivWebSocketUrl();
+    this.defaultUrl = opts.url ?? getDerivWebSocketUrl();
+    this.currentUrl = this.defaultUrl;
     this.autoReconnect = opts.autoReconnect ?? true;
     this.reconnectBaseDelayMs = opts.reconnectBaseDelayMs ?? 1000;
     this.reconnectMaxDelayMs = opts.reconnectMaxDelayMs ?? 15000;
     this.keepAlive = opts.keepAlive ?? true;
     this.pingIntervalMs = opts.pingIntervalMs ?? 25000;
     
-    // Debug log for troubleshooting
-    console.log("[Deriv] WebSocket URL:", this.url, "| Host:", typeof window !== "undefined" ? window.location.hostname : "N/A");
+    console.log("[Deriv] WebSocket default URL:", this.defaultUrl);
   }
 
-  // Rate limit helper - returns delay needed before next request
+  // Rate limit helper
   private getRateLimitDelay(lastTime: number): number {
     const elapsed = Date.now() - lastTime;
     return Math.max(0, this.minRequestIntervalMs - elapsed);
@@ -104,21 +105,10 @@ export class DerivWebSocketService {
     }
   }
 
-  get connectionStatus() {
-    return this.status;
-  }
-
-  get authorizedLoginId() {
-    return this.loginid;
-  }
-
-  get latestBalance() {
-    return this.lastBalance;
-  }
-
-  get account() {
-    return this.accountInfo;
-  }
+  get connectionStatus() { return this.status; }
+  get authorizedLoginId() { return this.loginid; }
+  get latestBalance() { return this.lastBalance; }
+  get account() { return this.accountInfo; }
 
   onTick(listener: Listener<DerivTick>) {
     this.tickListeners.add(listener);
@@ -181,24 +171,30 @@ export class DerivWebSocketService {
     this.clearPingTimer();
     if (!this.keepAlive) return;
     this.pingTimer = window.setInterval(() => {
-      // ping is a standard Deriv call; response msg_type is "ping"
-      this.send({ ping: 1 }).catch(() => {
-        // ignore; if socket is dead, reconnect handler will run
-      });
+      this.send({ ping: 1 }).catch(() => {});
     }, this.pingIntervalMs);
   }
 
-  async open(): Promise<void> {
+  /**
+   * Set a function that returns the OTP WebSocket URL.
+   * When set, open() will use this to get a fresh OTP URL.
+   */
+  setOtpUrlGetter(getter: () => Promise<string>) {
+    this.otpUrlGetter = getter;
+  }
+
+  async open(url?: string): Promise<void> {
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
+    const connectUrl = url || this.currentUrl;
     this.isManualClose = false;
     this.emitStatus("connecting");
-    this.log(`Connecting: ${this.url}`);
+    this.log(`Connecting: ${connectUrl}`);
 
     await new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(this.url);
+      const ws = new WebSocket(connectUrl);
       this.ws = ws;
 
       const onOpen = () => {
@@ -242,6 +238,7 @@ export class DerivWebSocketService {
     this.tickSubscriptionBySymbol.clear();
     this.activeContractSubscriptions.clear();
     this.token = null;
+    this.otpMode = false;
     this.loginid = null;
     this.lastBalance = null;
     this.rejectAllPending(new Error("Disconnected"));
@@ -262,36 +259,54 @@ export class DerivWebSocketService {
     this.log(`Reconnecting in ${delay}ms...`);
     this.reconnectTimer = window.setTimeout(async () => {
       try {
-        await this.open();
-        // Re-authorize with stored token if we had one — but do NOT trigger
-        // a new OAuth flow. This simply resumes the existing session.
-        if (this.token) {
-          console.log("[RECONNECT] Re-authorizing with stored token (no new OAuth)");
-          await this.authorize(this.token);
-          // Re-subscribe to balance stream (CRITICAL - without this, balance stops updating after reconnect)
+        if (this.otpMode && this.otpUrlGetter) {
+          // For OTP mode, get a fresh OTP URL before reconnecting
+          console.log("[RECONNECT] Getting fresh OTP URL");
           try {
-            console.log("[RECONNECT] Re-subscribing to balance stream");
-            await this.send({ balance: 1, account: "current", subscribe: 1 }, 15000);
+            const freshUrl = await this.otpUrlGetter();
+            this.currentUrl = freshUrl;
+            await this.open(freshUrl);
           } catch (e) {
-            console.warn("[RECONNECT] Failed to re-subscribe balance:", e);
-          }
-          // Re-subscribe to tick streams
-          for (const [symbol] of this.tickSubscriptionBySymbol.entries()) {
-            await this.subscribeTicks(symbol);
-          }
-          // Re-subscribe to active contract streams (critical for Rise/Fall, Multipliers, etc.)
-          for (const contractId of this.activeContractSubscriptions) {
-            console.log(`[RECONNECT] Re-subscribing to contract ${contractId}`);
-            try {
-              await this.send({ proposal_open_contract: 1, contract_id: contractId, subscribe: 1 }, 15000);
-            } catch (e) {
-              console.warn(`[RECONNECT] Failed to re-subscribe contract ${contractId}:`, e);
-              this.activeContractSubscriptions.delete(contractId);
+            console.warn("[RECONNECT] Failed to get OTP URL, falling back to legacy");
+            this.currentUrl = this.defaultUrl;
+            await this.open();
+            if (this.token) {
+              await this.authorize(this.token);
             }
+          }
+        } else {
+          await this.open();
+          if (this.token) {
+            console.log("[RECONNECT] Re-authorizing with stored token");
+            await this.authorize(this.token);
+          }
+        }
+
+        // Re-subscribe to balance stream
+        try {
+          console.log("[RECONNECT] Re-subscribing to balance stream");
+          await this.send({ balance: 1, account: "current", subscribe: 1 }, 15000);
+        } catch (e) {
+          console.warn("[RECONNECT] Failed to re-subscribe balance:", e);
+        }
+
+        // Re-subscribe to tick streams
+        for (const [symbol] of this.tickSubscriptionBySymbol.entries()) {
+          await this.subscribeTicks(symbol);
+        }
+
+        // Re-subscribe to active contract streams
+        for (const contractId of this.activeContractSubscriptions) {
+          console.log(`[RECONNECT] Re-subscribing to contract ${contractId}`);
+          try {
+            await this.send({ proposal_open_contract: 1, contract_id: contractId, subscribe: 1 }, 15000);
+          } catch (e) {
+            console.warn(`[RECONNECT] Failed to re-subscribe contract ${contractId}:`, e);
+            this.activeContractSubscriptions.delete(contractId);
           }
         }
       } catch {
-        // open() will trigger close/error handlers and schedule another reconnect if applicable
+        // open() will trigger close/error handlers and schedule another reconnect
       }
     }, delay);
   }
@@ -353,7 +368,6 @@ export class DerivWebSocketService {
       };
       const prevBalance = this.lastBalance?.balance;
       this.lastBalance = newBal;
-      // Always emit to all balance listeners for real-time sync
       console.log(`[BALANCE STREAM] ${prevBalance} -> ${newBal.balance} ${newBal.currency} (loginid=${newBal.loginid})`);
       this.balanceListeners.forEach((l) => l(newBal));
     }
@@ -382,7 +396,7 @@ export class DerivWebSocketService {
         sell_price: c.sell_price,
         current_spot: c.current_spot,
         current_spot_time: c.current_spot_time,
-        profit: c.profit, // Deriv's profit is already signed (+win/-loss)
+        profit: c.profit,
         profit_percentage: c.profit_percentage || 0,
         status: c.is_sold ? "sold" : c.is_expired ? (c.profit >= 0 ? "won" : "lost") : "open",
         is_expired: !!c.is_expired,
@@ -399,7 +413,6 @@ export class DerivWebSocketService {
 
       // Auto-forget subscription on settlement and force balance refresh
       if (isSettled) {
-        // Remove from active contract tracking
         this.activeContractSubscriptions.delete(c.contract_id);
         const subId = (data as any).subscription?.id;
         if (subId) {
@@ -407,12 +420,9 @@ export class DerivWebSocketService {
         }
         console.log(`[SETTLED] contract_id=${c.contract_id} profit=${c.profit} sell_price=${c.sell_price} status=${update.status}`);
         
-        // Force balance refresh after settlement using simple one-shot requests
-        // The balance subscription stream should also auto-push, but we poll as backup
         const refreshBalanceNow = async () => {
           if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
           try {
-            // Simple one-shot balance request (no subscribe field to avoid "already subscribed" errors)
             const res: any = await this.send({ balance: 1, account: "current" }, 10000);
             if (res?.balance) {
               const freshBal: DerivBalance = {
@@ -429,7 +439,6 @@ export class DerivWebSocketService {
           }
         };
         
-        // Poll at 500ms, 2s, 5s, and 8s to catch delayed payout credits
         setTimeout(refreshBalanceNow, 500);
         setTimeout(refreshBalanceNow, 2000);
         setTimeout(refreshBalanceNow, 5000);
@@ -474,14 +483,46 @@ export class DerivWebSocketService {
   }
 
   /**
-   * Authorize with token.
+   * Connect via OTP-based WebSocket URL (new API).
+   * The URL is already authenticated — no authorize message needed.
+   * Returns balance info from a balance request after connecting.
+   */
+  async connectWithOtpUrl(wsUrl: string, otpUrlGetter?: () => Promise<string>): Promise<DerivBalance> {
+    this.otpMode = true;
+    this.currentUrl = wsUrl;
+    if (otpUrlGetter) {
+      this.otpUrlGetter = otpUrlGetter;
+    }
+    
+    await this.open(wsUrl);
+
+    // After OTP connection, the session is already authenticated.
+    // Request balance to get account info.
+    const balRes: any = await this.send({ balance: 1, account: "current", subscribe: 1 }, 15000);
+    
+    if (balRes?.balance) {
+      const balance: DerivBalance = {
+        balance: balRes.balance.balance,
+        currency: balRes.balance.currency,
+        loginid: balRes.balance.loginid,
+      };
+      this.lastBalance = balance;
+      this.loginid = balance.loginid;
+      return balance;
+    }
+
+    throw new Error("Failed to get balance after OTP connection");
+  }
+
+  /**
+   * Authorize with token (legacy flow).
    * Must be called after open().
-   * Extended timeout for slow connections.
    */
   async authorize(token: string): Promise<DerivBalance> {
     this.token = token;
+    this.otpMode = false;
     try {
-      const res: any = await this.send({ authorize: token }, 45000); // Extended to 45 seconds
+      const res: any = await this.send({ authorize: token }, 45000);
       if (!res?.authorize) throw new Error("Authorization failed - no response");
 
       const balance: DerivBalance = {
@@ -499,9 +540,8 @@ export class DerivWebSocketService {
     }
   }
 
-  /** Subscribe ticks with rate limiting (stores subscription id from tick stream). */
+  /** Subscribe ticks with rate limiting */
   async subscribeTicks(symbol: string): Promise<void> {
-    // Check if already subscribed or pending
     if (this.tickSubscriptionBySymbol.has(symbol)) {
       console.log(`[Deriv] Already subscribed to ${symbol}, skipping`);
       return;
@@ -511,11 +551,9 @@ export class DerivWebSocketService {
       return;
     }
 
-    // Mark as pending
     this.pendingTickRequests.set(symbol, true);
 
     try {
-      // Wait for rate limit
       await this.waitForRateLimit('tick');
       await this.send({ ticks: symbol, subscribe: 1 }, 15000);
     } finally {
@@ -523,13 +561,13 @@ export class DerivWebSocketService {
     }
   }
 
-  /** Unsubscribe by subscription id with rate limiting. */
+  /** Unsubscribe by subscription id with rate limiting */
   async unsubscribe(subscriptionId: string): Promise<void> {
     await this.waitForRateLimit('forget');
     await this.send({ forget: subscriptionId }, 15000);
   }
 
-  /** Convenience: unsubscribe current symbol subscription (if we have it). */
+  /** Convenience: unsubscribe current symbol subscription */
   async unsubscribeTicks(symbol: string): Promise<void> {
     const subId = this.tickSubscriptionBySymbol.get(symbol);
     if (!subId) {
@@ -540,10 +578,8 @@ export class DerivWebSocketService {
     this.tickSubscriptionBySymbol.delete(symbol);
   }
 
-  /** Request balance; optionally subscribe for streaming updates. */
+  /** Request balance; optionally subscribe for streaming updates */
   async getBalance(subscribe = true): Promise<DerivBalance> {
-    // IMPORTANT: Don't send subscribe: 0 — Deriv doesn't support it.
-    // Either send subscribe: 1 or omit the field entirely for one-shot.
     const payload: Record<string, unknown> = { balance: 1, account: "current" };
     if (subscribe) {
       payload.subscribe = 1;
