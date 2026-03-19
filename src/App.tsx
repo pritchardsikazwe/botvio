@@ -69,6 +69,7 @@ import CryptoMarket from "./pages/markets/CryptoMarket";
 import AfricaMarket from "./pages/markets/AfricaMarket";
 import BrokerPage from "./pages/BrokerPage";
 import BinaryOptions from "./pages/BinaryOptions";
+import LiveFeed from "./pages/LiveFeed";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
@@ -148,6 +149,7 @@ const App = () => (
               <Route path="/deriv-options" element={<DerivOptions />} />
               <Route path="/binary-options" element={<BinaryOptions />} />
               <Route path="/brokers/:slug" element={<BrokerPage />} />
+              <Route path="/live" element={<LiveFeed />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
