@@ -149,6 +149,7 @@ const App = () => (
               <Route path="/deriv-options" element={<DerivOptions />} />
               <Route path="/binary-options" element={<BinaryOptions />} />
               <Route path="/brokers/:slug" element={<BrokerPage />} />
+              <Route path="/live" element={<LiveFeed />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
