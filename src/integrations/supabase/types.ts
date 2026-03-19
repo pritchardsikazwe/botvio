@@ -1813,6 +1813,258 @@ export type Database = {
           },
         ]
       }
+      live_comments: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          is_deleted: boolean | null
+          is_flagged: boolean | null
+          is_pinned: boolean | null
+          parent_comment_id: string | null
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          is_flagged?: boolean | null
+          is_pinned?: boolean | null
+          parent_comment_id?: string | null
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          is_flagged?: boolean | null
+          is_pinned?: boolean | null
+          parent_comment_id?: string | null
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "live_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_comments_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      live_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          reaction_type: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reaction_type: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reaction_type?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_reactions_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      live_stream_participants: {
+        Row: {
+          id: string
+          is_active: boolean | null
+          joined_at: string | null
+          left_at: string | null
+          role: string | null
+          stream_id: string
+          user_id: string | null
+          watch_seconds: number | null
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          role?: string | null
+          stream_id: string
+          user_id?: string | null
+          watch_seconds?: number | null
+        }
+        Update: {
+          id?: string
+          is_active?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          role?: string | null
+          stream_id?: string
+          user_id?: string | null
+          watch_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_stream_participants_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_stream_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      live_streams: {
+        Row: {
+          broker_name: string | null
+          comments_enabled: boolean | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          ended_at: string | null
+          id: string
+          instrument: string | null
+          is_public: boolean | null
+          is_recording_enabled: boolean | null
+          livekit_creator_token: string | null
+          livekit_ingress_id: string | null
+          livekit_room_sid: string | null
+          market_type: string | null
+          playback_url: string | null
+          reactions_enabled: boolean | null
+          replay_url: string | null
+          risk_warning_accepted: boolean | null
+          room_name: string
+          started_at: string | null
+          status: string
+          strategy_tag: string | null
+          stream_mode: string
+          thumbnail_url: string | null
+          timeframe: string | null
+          title: string
+          total_unique_viewers: number | null
+          updated_at: string | null
+          viewers_current: number | null
+          viewers_peak: number | null
+        }
+        Insert: {
+          broker_name?: string | null
+          comments_enabled?: boolean | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          instrument?: string | null
+          is_public?: boolean | null
+          is_recording_enabled?: boolean | null
+          livekit_creator_token?: string | null
+          livekit_ingress_id?: string | null
+          livekit_room_sid?: string | null
+          market_type?: string | null
+          playback_url?: string | null
+          reactions_enabled?: boolean | null
+          replay_url?: string | null
+          risk_warning_accepted?: boolean | null
+          room_name: string
+          started_at?: string | null
+          status?: string
+          strategy_tag?: string | null
+          stream_mode?: string
+          thumbnail_url?: string | null
+          timeframe?: string | null
+          title: string
+          total_unique_viewers?: number | null
+          updated_at?: string | null
+          viewers_current?: number | null
+          viewers_peak?: number | null
+        }
+        Update: {
+          broker_name?: string | null
+          comments_enabled?: boolean | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          instrument?: string | null
+          is_public?: boolean | null
+          is_recording_enabled?: boolean | null
+          livekit_creator_token?: string | null
+          livekit_ingress_id?: string | null
+          livekit_room_sid?: string | null
+          market_type?: string | null
+          playback_url?: string | null
+          reactions_enabled?: boolean | null
+          replay_url?: string | null
+          risk_warning_accepted?: boolean | null
+          room_name?: string
+          started_at?: string | null
+          status?: string
+          strategy_tag?: string | null
+          stream_mode?: string
+          thumbnail_url?: string | null
+          timeframe?: string | null
+          title?: string
+          total_unique_viewers?: number | null
+          updated_at?: string | null
+          viewers_current?: number | null
+          viewers_peak?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_streams_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       market_candles: {
         Row: {
           asset_id: string
@@ -2084,6 +2336,58 @@ export type Database = {
           timezone?: string
         }
         Relationships: []
+      }
+      moderation_actions: {
+        Row: {
+          action_type: string
+          admin_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          stream_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          stream_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          stream_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       mt5_accounts: {
         Row: {
@@ -3944,6 +4248,201 @@ export type Database = {
           },
         ]
       }
+      stream_analytics_daily: {
+        Row: {
+          analytics_date: string
+          avg_watch_seconds: number | null
+          created_at: string | null
+          id: string
+          peak_viewers: number | null
+          stream_id: string
+          total_comments: number | null
+          total_reactions: number | null
+          unique_viewers: number | null
+        }
+        Insert: {
+          analytics_date: string
+          avg_watch_seconds?: number | null
+          created_at?: string | null
+          id?: string
+          peak_viewers?: number | null
+          stream_id: string
+          total_comments?: number | null
+          total_reactions?: number | null
+          unique_viewers?: number | null
+        }
+        Update: {
+          analytics_date?: string
+          avg_watch_seconds?: number | null
+          created_at?: string | null
+          id?: string
+          peak_viewers?: number | null
+          stream_id?: string
+          total_comments?: number | null
+          total_reactions?: number | null
+          unique_viewers?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_analytics_daily_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_follows: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          follower_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_follows_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "stream_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      stream_replays: {
+        Row: {
+          created_at: string | null
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          id: string
+          replay_url: string | null
+          storage_provider: string | null
+          stream_id: string
+          thumbnail_url: string | null
+          views_count: number | null
+          visibility: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          replay_url?: string | null
+          storage_provider?: string | null
+          stream_id: string
+          thumbnail_url?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          replay_url?: string | null
+          storage_provider?: string | null
+          stream_id?: string
+          thumbnail_url?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_replays_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: true
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_reports: {
+        Row: {
+          comment_id: string | null
+          created_at: string | null
+          details: string | null
+          id: string
+          reason: string
+          report_type: string
+          reporter_id: string
+          resolved_at: string | null
+          status: string | null
+          stream_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason: string
+          report_type: string
+          reporter_id: string
+          resolved_at?: string | null
+          status?: string | null
+          stream_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason?: string
+          report_type?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          status?: string | null
+          stream_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_reports_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "live_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stream_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "stream_reports_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stream_reports_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       subscription_requests: {
         Row: {
           admin_note: string | null
@@ -4219,6 +4718,68 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "strategies"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      trader_profiles: {
+        Row: {
+          badge_level: string | null
+          created_at: string | null
+          display_name: string | null
+          favorite_broker: string | null
+          favorite_market: string | null
+          followers_count: number | null
+          peak_viewers: number | null
+          risk_level: string | null
+          total_streams: number | null
+          total_views: number | null
+          total_watch_seconds: number | null
+          trading_style: string | null
+          updated_at: string | null
+          user_id: string
+          win_rate: number | null
+        }
+        Insert: {
+          badge_level?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          favorite_broker?: string | null
+          favorite_market?: string | null
+          followers_count?: number | null
+          peak_viewers?: number | null
+          risk_level?: string | null
+          total_streams?: number | null
+          total_views?: number | null
+          total_watch_seconds?: number | null
+          trading_style?: string | null
+          updated_at?: string | null
+          user_id: string
+          win_rate?: number | null
+        }
+        Update: {
+          badge_level?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          favorite_broker?: string | null
+          favorite_market?: string | null
+          followers_count?: number | null
+          peak_viewers?: number | null
+          risk_level?: string | null
+          total_streams?: number | null
+          total_views?: number | null
+          total_watch_seconds?: number | null
+          trading_style?: string | null
+          updated_at?: string | null
+          user_id?: string
+          win_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trader_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -4733,6 +5294,7 @@ export type Database = {
     }
     Functions: {
       auto_expire_signals: { Args: never; Returns: undefined }
+      finalize_stream: { Args: { p_stream_id: string }; Returns: undefined }
       get_p2p_trader_stats: {
         Args: { trader_id: string }
         Returns: {
@@ -4757,6 +5319,10 @@ export type Database = {
       is_provider_owner: { Args: { provider_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       owns_mt5_account: { Args: { acct_id: string }; Returns: boolean }
+      refresh_follower_count: {
+        Args: { target_creator_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
