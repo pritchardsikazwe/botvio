@@ -3,6 +3,7 @@ import { useLiveFeed } from "@/hooks/useLiveFeed";
 import { LiveStreamCard } from "@/components/live/LiveStreamCard";
 import { GoLiveDialog } from "@/components/live/GoLiveDialog";
 import { LiveCommentPanel } from "@/components/live/LiveCommentPanel";
+import { useLiveKit } from "@/hooks/useLiveKit";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -18,6 +19,8 @@ import {
   Rocket,
   X,
   TrendingUp,
+  Loader2,
+  WifiOff,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
