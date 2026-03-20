@@ -1,8 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { AccessToken } from "npm:livekit-server-sdk@2.9.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
@@ -12,6 +13,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const LIVEKIT_API_KEY = Deno.env.get("LIVEKIT_API_KEY");
+    const LIVEKIT_API_SECRET = Deno.env.get("LIVEKIT_API_SECRET");
+    if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET) {
+      throw new Error("LiveKit credentials not configured");
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -39,6 +46,21 @@ Deno.serve(async (req) => {
     if (streamErr || !stream) throw new Error("Stream not found");
     if (stream.status !== "live") throw new Error("Stream is not live");
 
+    const viewerIdentity = userId ?? `guest-${crypto.randomUUID()}`;
+
+    // Generate LiveKit viewer token (subscribe only)
+    const token = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+      identity: viewerIdentity,
+      name: `viewer-${viewerIdentity.slice(0, 8)}`,
+    });
+    token.addGrant({
+      room: stream.room_name,
+      roomJoin: true,
+      canPublish: false,
+      canSubscribe: true,
+    });
+    const viewerToken = await token.toJwt();
+
     if (userId) {
       await supabaseAdmin.from("live_stream_participants").insert({
         stream_id,
@@ -64,7 +86,13 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, stream }),
+      JSON.stringify({
+        success: true,
+        token: viewerToken,
+        ws_url: Deno.env.get("LIVEKIT_WS_URL") || "wss://botvio-knua21jl.livekit.cloud",
+        room_name: stream.room_name,
+        stream,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

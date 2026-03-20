@@ -123,10 +123,10 @@ export default function LiveFeed() {
                 <div className="text-center space-y-3">
                   <Radio className="w-16 h-16 text-destructive animate-pulse mx-auto" />
                   <p className="text-muted-foreground text-sm">
-                    Live stream preview
+                    Live stream – connecting to LiveKit…
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Video streaming requires LiveKit integration
+                    wss://botvio-knua21jl.livekit.cloud
                   </p>
                 </div>
 

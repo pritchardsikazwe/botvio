@@ -151,6 +151,11 @@ const Index = () => {
                 <Signal className="h-4 w-4" /> 🎯 Binary Signals
               </Button>
             </Link>
+            <Link to="/live" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-destructive/40 text-destructive hover:bg-destructive/10 animate-pulse">
+                <Wifi className="h-4 w-4" /> 🔴 Botvio Live
+              </Button>
+            </Link>
           </div>
 
           {/* Broker Quick Links */}

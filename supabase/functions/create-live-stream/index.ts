@@ -1,8 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { AccessToken } from "npm:livekit-server-sdk@2.9.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
@@ -14,6 +15,12 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Missing authorization header");
+
+    const LIVEKIT_API_KEY = Deno.env.get("LIVEKIT_API_KEY");
+    const LIVEKIT_API_SECRET = Deno.env.get("LIVEKIT_API_SECRET");
+    if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET) {
+      throw new Error("LiveKit credentials not configured");
+    }
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -48,6 +55,19 @@ Deno.serve(async (req) => {
     const streamId = crypto.randomUUID();
     const roomName = `botvio-live-${streamId}`;
 
+    // Generate LiveKit token for creator (can publish + subscribe)
+    const token = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+      identity: userId,
+      name: title,
+    });
+    token.addGrant({
+      room: roomName,
+      roomJoin: true,
+      canPublish: true,
+      canSubscribe: true,
+    });
+    const creatorToken = await token.toJwt();
+
     const { data, error } = await supabaseAdmin
       .from("live_streams")
       .insert({
@@ -58,6 +78,7 @@ Deno.serve(async (req) => {
         status: "live",
         stream_mode,
         room_name: roomName,
+        livekit_creator_token: creatorToken,
         broker_name,
         market_type,
         instrument,
@@ -82,11 +103,15 @@ Deno.serve(async (req) => {
       is_active: true,
     });
 
-    // Update trader profile stream count
-    await supabaseAdmin.rpc("increment_stream_count_or_noop", {}).catch(() => {});
-
     return new Response(
-      JSON.stringify({ success: true, stream_id: streamId, room_name: roomName, stream: data }),
+      JSON.stringify({
+        success: true,
+        stream_id: streamId,
+        room_name: roomName,
+        token: creatorToken,
+        ws_url: Deno.env.get("LIVEKIT_WS_URL") || "wss://botvio-knua21jl.livekit.cloud",
+        stream: data,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
   } catch (err) {
