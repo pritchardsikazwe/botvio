@@ -27,47 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
-export default function LiveFeed() {
-  const { liveStreams, recentStreams, isLoading } = useLiveFeed();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [selectedStream, setSelectedStream] = useState<any | null>(null);
-  const [reacting, setReacting] = useState(false);
-
-  const reactions = [
-    { type: "like", icon: Heart, label: "❤️" },
-    { type: "fire", icon: Flame, label: "🔥" },
-    { type: "rocket", icon: Rocket, label: "🚀" },
-  ];
-
-  const handleReaction = async (streamId: string, reactionType: string) => {
-    if (!user) return;
-    setReacting(true);
-    try {
-      await supabase.from("live_reactions").insert({
-        stream_id: streamId,
-        user_id: user.id,
-        reaction_type: reactionType,
-      });
-    } catch {
-      // silent
-    } finally {
-      setReacting(false);
-    }
-  };
-
-  const endedStreams = recentStreams.filter((s) => s.status === "ended");
-
-  return (
-    <>
-      <SEOHead
-        title="Botvio Live – Watch Traders Stream in Real-Time"
-        description="Watch live trading sessions, interact with traders, and learn strategies in real-time on Botvio Live."
-      />
-      {/* rest handled below */}
-    </>
-  );
-}
+// Old default export removed — LiveFeedPage below is the real page
 
 function LiveStreamViewer({
   stream,
