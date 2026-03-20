@@ -311,3 +311,5 @@ function LiveFeedPage() {
     </>
   );
 }
+
+export default LiveFeedPage;
