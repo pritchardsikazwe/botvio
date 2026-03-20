@@ -99,94 +99,13 @@ export default function LiveFeed() {
 
         {/* Selected stream view */}
         {selectedStream && (
-          <div className="fixed inset-0 z-50 bg-background flex flex-col lg:flex-row">
-            {/* Main stream area */}
-            <div className="flex-1 flex flex-col">
-              {/* Stream header */}
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-destructive text-destructive-foreground gap-1 animate-pulse">
-                    <span className="w-2 h-2 bg-white rounded-full" />
-                    LIVE
-                  </Badge>
-                  <h2 className="font-bold text-foreground truncate">{selectedStream.title}</h2>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedStream(null)}
-                  className="text-muted-foreground"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* Video placeholder */}
-              <div className="flex-1 bg-secondary flex items-center justify-center relative">
-                <div className="text-center space-y-3">
-                  <Radio className="w-16 h-16 text-destructive animate-pulse mx-auto" />
-                  <p className="text-muted-foreground text-sm">
-                    Live stream – connecting to LiveKit…
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    wss://botvio-knua21jl.livekit.cloud
-                  </p>
-                </div>
-
-                {/* Viewer count */}
-                <div className="absolute top-4 right-4 bg-background/80 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">
-                    {selectedStream.viewers_current || 0}
-                  </span>
-                </div>
-
-                {/* Reactions bar */}
-                <div className="absolute bottom-4 right-4 flex flex-col gap-2">
-                  {reactions.map((r) => (
-                    <Button
-                      key={r.type}
-                      variant="ghost"
-                      size="icon"
-                      className="bg-background/60 backdrop-blur hover:bg-background/80 rounded-full w-10 h-10"
-                      onClick={() => handleReaction(selectedStream.id, r.type)}
-                      disabled={reacting}
-                    >
-                      <span className="text-lg">{r.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Stream meta */}
-              <div className="p-4 border-t border-border flex flex-wrap gap-2">
-                {selectedStream.instrument && (
-                  <Badge variant="outline" className="text-xs border-primary/30 text-primary gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    {selectedStream.instrument}
-                  </Badge>
-                )}
-                {selectedStream.broker_name && (
-                  <Badge variant="outline" className="text-xs">{selectedStream.broker_name}</Badge>
-                )}
-                {selectedStream.timeframe && (
-                  <Badge variant="outline" className="text-xs">{selectedStream.timeframe}</Badge>
-                )}
-                {selectedStream.strategy_tag && (
-                  <Badge variant="outline" className="text-xs">{selectedStream.strategy_tag}</Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Comments sidebar */}
-            <div className="w-full lg:w-96 border-l border-border flex flex-col h-64 lg:h-auto">
-              <div className="p-3 border-b border-border flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-foreground">Live Chat</span>
-              </div>
-              <LiveCommentPanel streamId={selectedStream.id} />
-            </div>
-          </div>
+          <LiveStreamViewer
+            stream={selectedStream}
+            onClose={() => setSelectedStream(null)}
+            onReaction={handleReaction}
+            reacting={reacting}
+            reactions={reactions}
+          />
         )}
 
         {/* Feed content */}
