@@ -66,7 +66,7 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
       if (!data?.success) throw new Error(data?.error || "Failed to create stream");
 
       toast({ title: "You're now live! 🔴" });
-      onStreamCreated?.(data);
+      onStreamCreated?.({ ...data, title: form.title, stream_mode: form.stream_mode });
       setOpen(false);
       setForm({
         title: "",
