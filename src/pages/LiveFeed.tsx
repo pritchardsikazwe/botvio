@@ -3,6 +3,7 @@ import { useLiveFeed } from "@/hooks/useLiveFeed";
 import { LiveStreamCard } from "@/components/live/LiveStreamCard";
 import { GoLiveDialog } from "@/components/live/GoLiveDialog";
 import { LiveCommentPanel } from "@/components/live/LiveCommentPanel";
+import { CreatorStreamView } from "@/components/live/CreatorStreamView";
 import { useLiveKit } from "@/hooks/useLiveKit";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +26,6 @@ import {
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
-
-// Old default export removed — LiveFeedPage below is the real page
 
 function LiveStreamViewer({
   stream,
@@ -55,7 +53,6 @@ function LiveStreamViewer({
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col lg:flex-row">
       <div className="flex-1 flex flex-col">
-        {/* Stream header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <Badge className="bg-destructive text-destructive-foreground gap-1 animate-pulse">
@@ -84,41 +81,25 @@ function LiveStreamViewer({
           </Button>
         </div>
 
-        {/* Video area */}
         <div className="flex-1 bg-black flex items-center justify-center relative">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted={false}
-            className="w-full h-full object-contain"
-          />
+          <video ref={videoRef} autoPlay playsInline muted={false} className="w-full h-full object-contain" />
           <audio ref={audioRef} autoPlay />
-
-          {/* Connecting overlay */}
           {status === "connecting" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80">
               <Loader2 className="w-12 h-12 text-destructive animate-spin mb-3" />
               <p className="text-muted-foreground text-sm">Connecting to LiveKit…</p>
             </div>
           )}
-
           {status === "error" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80">
               <WifiOff className="w-12 h-12 text-destructive mb-3" />
               <p className="text-muted-foreground text-sm">{error || "Connection failed"}</p>
             </div>
           )}
-
-          {/* Viewer count */}
           <div className="absolute top-4 right-4 bg-background/80 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2">
             <Eye className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">
-              {stream.viewers_current || 0}
-            </span>
+            <span className="text-sm font-medium text-foreground">{stream.viewers_current || 0}</span>
           </div>
-
-          {/* Reactions */}
           <div className="absolute bottom-4 right-4 flex flex-col gap-2">
             {reactions.map((r) => (
               <Button
@@ -135,7 +116,6 @@ function LiveStreamViewer({
           </div>
         </div>
 
-        {/* Stream meta */}
         <div className="p-4 border-t border-border flex flex-wrap gap-2">
           {stream.instrument && (
             <Badge variant="outline" className="text-xs border-primary/30 text-primary gap-1">
@@ -143,19 +123,12 @@ function LiveStreamViewer({
               {stream.instrument}
             </Badge>
           )}
-          {stream.broker_name && (
-            <Badge variant="outline" className="text-xs">{stream.broker_name}</Badge>
-          )}
-          {stream.timeframe && (
-            <Badge variant="outline" className="text-xs">{stream.timeframe}</Badge>
-          )}
-          {stream.strategy_tag && (
-            <Badge variant="outline" className="text-xs">{stream.strategy_tag}</Badge>
-          )}
+          {stream.broker_name && <Badge variant="outline" className="text-xs">{stream.broker_name}</Badge>}
+          {stream.timeframe && <Badge variant="outline" className="text-xs">{stream.timeframe}</Badge>}
+          {stream.strategy_tag && <Badge variant="outline" className="text-xs">{stream.strategy_tag}</Badge>}
         </div>
       </div>
 
-      {/* Comments sidebar */}
       <div className="w-full lg:w-96 border-l border-border flex flex-col h-64 lg:h-auto">
         <div className="p-3 border-b border-border flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-primary" />
