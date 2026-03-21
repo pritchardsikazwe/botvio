@@ -146,6 +146,7 @@ function LiveFeedPage() {
   const { toast } = useToast();
   const [selectedStream, setSelectedStream] = useState<any | null>(null);
   const [reacting, setReacting] = useState(false);
+  const [creatorStream, setCreatorStream] = useState<{ id: string; title: string; stream_mode: string } | null>(null);
 
   const reactions = [
     { type: "like", icon: Heart, label: "❤️" },
