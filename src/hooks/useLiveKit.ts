@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Room, RoomEvent, Track, RemoteTrackPublication, RemoteParticipant, VideoPresets } from "livekit-client";
+import { Room, RoomEvent, Track, RemoteTrackPublication, RemoteParticipant, VideoPresets, LocalTrackPublication, createLocalVideoTrack, facingModeFromLocalTrack } from "livekit-client";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UseLiveKitParams {
@@ -12,15 +12,19 @@ interface UseLiveKitReturn {
   status: "idle" | "connecting" | "connected" | "error" | "disconnected";
   error: string | null;
   videoRef: React.RefObject<HTMLVideoElement>;
+  screenVideoRef: React.RefObject<HTMLVideoElement>;
   audioRef: React.RefObject<HTMLAudioElement>;
   room: Room | null;
   disconnect: () => void;
   cameraEnabled: boolean;
   micEnabled: boolean;
   screenEnabled: boolean;
+  facingMode: "user" | "environment";
   toggleCamera: () => Promise<void>;
   toggleMic: () => Promise<void>;
   toggleScreen: () => Promise<void>;
+  flipCamera: () => Promise<void>;
+  viewerCount: number;
 }
 
 export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" }: UseLiveKitParams): UseLiveKitReturn {
@@ -29,7 +33,10 @@ export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" 
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
   const [screenEnabled, setScreenEnabled] = useState(false);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [viewerCount, setViewerCount] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null!);
+  const screenVideoRef = useRef<HTMLVideoElement>(null!);
   const audioRef = useRef<HTMLAudioElement>(null!);
   const roomRef = useRef<Room | null>(null);
 
@@ -48,13 +55,17 @@ export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" 
     const room = roomRef.current;
     if (!room) return;
     const next = !cameraEnabled;
-    await room.localParticipant.setCameraEnabled(next);
-    setCameraEnabled(next);
-    if (next) {
-      const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
-      if (pub?.track && videoRef.current) {
-        pub.track.attach(videoRef.current);
+    try {
+      await room.localParticipant.setCameraEnabled(next);
+      setCameraEnabled(next);
+      if (next) {
+        const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
+        if (pub?.track && videoRef.current) {
+          pub.track.attach(videoRef.current);
+        }
       }
+    } catch (err) {
+      console.error("Toggle camera error:", err);
     }
   }, [cameraEnabled]);
 
@@ -62,8 +73,12 @@ export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" 
     const room = roomRef.current;
     if (!room) return;
     const next = !micEnabled;
-    await room.localParticipant.setMicrophoneEnabled(next);
-    setMicEnabled(next);
+    try {
+      await room.localParticipant.setMicrophoneEnabled(next);
+      setMicEnabled(next);
+    } catch (err) {
+      console.error("Toggle mic error:", err);
+    }
   }, [micEnabled]);
 
   const toggleScreen = useCallback(async () => {
@@ -74,15 +89,42 @@ export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" 
       await room.localParticipant.setScreenShareEnabled(next);
       setScreenEnabled(next);
       if (next) {
+        // Attach screen share to the screen video element or main video
         const pub = room.localParticipant.getTrackPublication(Track.Source.ScreenShare);
-        if (pub?.track && videoRef.current) {
-          pub.track.attach(videoRef.current);
+        const target = screenVideoRef.current || videoRef.current;
+        if (pub?.track && target) {
+          pub.track.attach(target);
         }
       }
     } catch (err: any) {
       console.error("Screen share error:", err);
+      // User cancelled the screen picker
     }
   }, [screenEnabled]);
+
+  const flipCamera = useCallback(async () => {
+    const room = roomRef.current;
+    if (!room || !cameraEnabled) return;
+    try {
+      const nextFacing = facingMode === "user" ? "environment" : "user";
+      // Disable current camera
+      await room.localParticipant.setCameraEnabled(false);
+      // Create new track with opposite facing mode
+      const newTrack = await createLocalVideoTrack({
+        facingMode: nextFacing,
+        resolution: VideoPresets.h720.resolution,
+      });
+      await room.localParticipant.publishTrack(newTrack);
+      setFacingMode(nextFacing);
+      if (videoRef.current) {
+        newTrack.attach(videoRef.current);
+      }
+    } catch (err) {
+      console.error("Flip camera error:", err);
+      // Re-enable original camera on failure
+      await room.localParticipant.setCameraEnabled(true);
+    }
+  }, [facingMode, cameraEnabled]);
 
   useEffect(() => {
     if (!streamId) return;
@@ -124,10 +166,17 @@ export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" 
 
         setStatus("connected");
 
+        // Track viewer count from participant count
+        const updateViewerCount = () => {
+          setViewerCount(room.remoteParticipants.size);
+        };
+        room.on(RoomEvent.ParticipantConnected, updateViewerCount);
+        room.on(RoomEvent.ParticipantDisconnected, updateViewerCount);
+        updateViewerCount();
+
         // For creator: enable media based on stream mode
         if (isCreator) {
           try {
-            // Always enable mic
             await room.localParticipant.setMicrophoneEnabled(true);
             setMicEnabled(true);
 
@@ -144,24 +193,29 @@ export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" 
               await room.localParticipant.setScreenShareEnabled(true);
               setScreenEnabled(true);
               const screenPub = room.localParticipant.getTrackPublication(Track.Source.ScreenShare);
-              if (screenPub?.track && videoRef.current) {
-                screenPub.track.attach(videoRef.current);
+              const target = screenVideoRef.current || videoRef.current;
+              if (screenPub?.track && target) {
+                screenPub.track.attach(target);
               }
             }
           } catch (mediaErr: any) {
             console.error("Media enable error:", mediaErr);
-            // Still connected, just media failed
           }
         }
 
         // For viewer: attach remote tracks
         const handleTrackSubscribed = (
           track: any,
-          _publication: RemoteTrackPublication,
+          publication: RemoteTrackPublication,
           _participant: RemoteParticipant
         ) => {
-          if (track.kind === Track.Kind.Video && videoRef.current) {
-            track.attach(videoRef.current);
+          if (track.kind === Track.Kind.Video) {
+            // If it's screen share, try to use screen ref
+            if (publication.source === Track.Source.ScreenShare && screenVideoRef.current) {
+              track.attach(screenVideoRef.current);
+            } else if (videoRef.current) {
+              track.attach(videoRef.current);
+            }
           }
           if (track.kind === Track.Kind.Audio && audioRef.current) {
             track.attach(audioRef.current);
@@ -207,9 +261,10 @@ export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" 
   }, [streamId, isCreator, streamMode]);
 
   return {
-    status, error, videoRef, audioRef,
+    status, error, videoRef, screenVideoRef, audioRef,
     room: roomRef.current, disconnect,
     cameraEnabled, micEnabled, screenEnabled,
-    toggleCamera, toggleMic, toggleScreen,
+    facingMode, viewerCount,
+    toggleCamera, toggleMic, toggleScreen, flipCamera,
   };
 }
