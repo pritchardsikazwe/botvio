@@ -273,7 +273,11 @@ function LiveFeedPage() {
                 Be the first to go live and share your trading session with the Botvio community.
               </p>
               {user && (
-                <GoLiveDialog>
+                <GoLiveDialog onStreamCreated={(data) => setCreatorStream({
+                  id: data.stream_id || data.id,
+                  title: data.title || "Live Stream",
+                  stream_mode: data.stream_mode || "camera",
+                })}>
                   <Button className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold gap-2">
                     <Radio className="w-4 h-4" />
                     Start Streaming
