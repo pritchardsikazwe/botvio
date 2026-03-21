@@ -215,8 +215,18 @@ function LiveFeedPage() {
           </div>
         </header>
 
+        {/* Creator stream view */}
+        {creatorStream && (
+          <CreatorStreamView
+            streamId={creatorStream.id}
+            streamMode={creatorStream.stream_mode as any}
+            title={creatorStream.title}
+            onEnd={() => setCreatorStream(null)}
+          />
+        )}
+
         {/* Selected stream view */}
-        {selectedStream && (
+        {selectedStream && !creatorStream && (
           <LiveStreamViewer
             stream={selectedStream}
             onClose={() => setSelectedStream(null)}
