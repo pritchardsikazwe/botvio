@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface UseLiveKitParams {
   streamId: string | null;
   isCreator?: boolean;
+  streamMode?: "camera" | "screen" | "camera_screen";
 }
 
 interface UseLiveKitReturn {
@@ -14,11 +15,20 @@ interface UseLiveKitReturn {
   audioRef: React.RefObject<HTMLAudioElement>;
   room: Room | null;
   disconnect: () => void;
+  cameraEnabled: boolean;
+  micEnabled: boolean;
+  screenEnabled: boolean;
+  toggleCamera: () => Promise<void>;
+  toggleMic: () => Promise<void>;
+  toggleScreen: () => Promise<void>;
 }
 
-export function useLiveKit({ streamId, isCreator = false }: UseLiveKitParams): UseLiveKitReturn {
+export function useLiveKit({ streamId, isCreator = false, streamMode = "camera" }: UseLiveKitParams): UseLiveKitReturn {
   const [status, setStatus] = useState<UseLiveKitReturn["status"]>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
+  const [micEnabled, setMicEnabled] = useState(false);
+  const [screenEnabled, setScreenEnabled] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null!);
   const audioRef = useRef<HTMLAudioElement>(null!);
   const roomRef = useRef<Room | null>(null);
@@ -29,7 +39,50 @@ export function useLiveKit({ streamId, isCreator = false }: UseLiveKitParams): U
       roomRef.current = null;
     }
     setStatus("disconnected");
+    setCameraEnabled(false);
+    setMicEnabled(false);
+    setScreenEnabled(false);
   }, []);
+
+  const toggleCamera = useCallback(async () => {
+    const room = roomRef.current;
+    if (!room) return;
+    const next = !cameraEnabled;
+    await room.localParticipant.setCameraEnabled(next);
+    setCameraEnabled(next);
+    if (next) {
+      const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
+      if (pub?.track && videoRef.current) {
+        pub.track.attach(videoRef.current);
+      }
+    }
+  }, [cameraEnabled]);
+
+  const toggleMic = useCallback(async () => {
+    const room = roomRef.current;
+    if (!room) return;
+    const next = !micEnabled;
+    await room.localParticipant.setMicrophoneEnabled(next);
+    setMicEnabled(next);
+  }, [micEnabled]);
+
+  const toggleScreen = useCallback(async () => {
+    const room = roomRef.current;
+    if (!room) return;
+    const next = !screenEnabled;
+    try {
+      await room.localParticipant.setScreenShareEnabled(next);
+      setScreenEnabled(next);
+      if (next) {
+        const pub = room.localParticipant.getTrackPublication(Track.Source.ScreenShare);
+        if (pub?.track && videoRef.current) {
+          pub.track.attach(videoRef.current);
+        }
+      }
+    } catch (err: any) {
+      console.error("Screen share error:", err);
+    }
+  }, [screenEnabled]);
 
   useEffect(() => {
     if (!streamId) return;
@@ -49,7 +102,6 @@ export function useLiveKit({ streamId, isCreator = false }: UseLiveKitParams): U
       setError(null);
 
       try {
-        // Get token from edge function
         const fnName = isCreator ? "create-live-stream" : "join-live-stream";
         const body = isCreator ? { title: "Live Stream" } : { stream_id: streamId };
 
@@ -63,7 +115,6 @@ export function useLiveKit({ streamId, isCreator = false }: UseLiveKitParams): U
 
         if (cancelled) return;
 
-        // Connect to LiveKit room
         await room.connect(wsUrl, token);
 
         if (cancelled) {
@@ -73,20 +124,41 @@ export function useLiveKit({ streamId, isCreator = false }: UseLiveKitParams): U
 
         setStatus("connected");
 
-        // For creator: enable camera + mic
+        // For creator: enable media based on stream mode
         if (isCreator) {
-          await room.localParticipant.enableCameraAndMicrophone();
-          const camTrack = room.localParticipant.getTrackPublication(Track.Source.Camera);
-          if (camTrack?.track && videoRef.current) {
-            camTrack.track.attach(videoRef.current);
+          try {
+            // Always enable mic
+            await room.localParticipant.setMicrophoneEnabled(true);
+            setMicEnabled(true);
+
+            if (streamMode === "camera" || streamMode === "camera_screen") {
+              await room.localParticipant.setCameraEnabled(true);
+              setCameraEnabled(true);
+              const camPub = room.localParticipant.getTrackPublication(Track.Source.Camera);
+              if (camPub?.track && videoRef.current) {
+                camPub.track.attach(videoRef.current);
+              }
+            }
+
+            if (streamMode === "screen" || streamMode === "camera_screen") {
+              await room.localParticipant.setScreenShareEnabled(true);
+              setScreenEnabled(true);
+              const screenPub = room.localParticipant.getTrackPublication(Track.Source.ScreenShare);
+              if (screenPub?.track && videoRef.current) {
+                screenPub.track.attach(videoRef.current);
+              }
+            }
+          } catch (mediaErr: any) {
+            console.error("Media enable error:", mediaErr);
+            // Still connected, just media failed
           }
         }
 
         // For viewer: attach remote tracks
         const handleTrackSubscribed = (
           track: any,
-          publication: RemoteTrackPublication,
-          participant: RemoteParticipant
+          _publication: RemoteTrackPublication,
+          _participant: RemoteParticipant
         ) => {
           if (track.kind === Track.Kind.Video && videoRef.current) {
             track.attach(videoRef.current);
@@ -132,7 +204,12 @@ export function useLiveKit({ streamId, isCreator = false }: UseLiveKitParams): U
       room.disconnect();
       roomRef.current = null;
     };
-  }, [streamId, isCreator]);
+  }, [streamId, isCreator, streamMode]);
 
-  return { status, error, videoRef, audioRef, room: roomRef.current, disconnect };
+  return {
+    status, error, videoRef, audioRef,
+    room: roomRef.current, disconnect,
+    cameraEnabled, micEnabled, screenEnabled,
+    toggleCamera, toggleMic, toggleScreen,
+  };
 }
