@@ -1,10 +1,6 @@
 import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Radio, AlertTriangle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Radio, AlertTriangle, Video, Monitor, Layout, Globe, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +18,20 @@ interface GoLiveDialogProps {
   children: React.ReactNode;
   onStreamCreated?: (stream: any) => void;
 }
+
+const MARKET_TYPES = [
+  { value: "forex", label: "Forex" },
+  { value: "crypto", label: "Crypto" },
+  { value: "commodities", label: "Commodities" },
+  { value: "indices", label: "Indices" },
+  { value: "binary", label: "Binary Options" },
+  { value: "synthetic", label: "Synthetic Indices" },
+];
+
+const BROKERS = [
+  "Deriv", "Exness", "XM", "IC Markets", "FXGT", "OctaFX",
+  "Weltrade", "Binance", "Bybit", "Other",
+];
 
 export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
   const [open, setOpen] = useState(false);
@@ -33,12 +44,14 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
     description: "",
     stream_mode: "camera",
     broker_name: "",
+    market_type: "",
     instrument: "",
     timeframe: "",
     strategy_tag: "",
     comments_enabled: true,
     reactions_enabled: true,
     is_public: true,
+    is_recording_enabled: false,
     risk_warning_accepted: false,
   });
 
@@ -69,17 +82,10 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
       onStreamCreated?.({ ...data, title: form.title, stream_mode: form.stream_mode });
       setOpen(false);
       setForm({
-        title: "",
-        description: "",
-        stream_mode: "camera",
-        broker_name: "",
-        instrument: "",
-        timeframe: "",
-        strategy_tag: "",
-        comments_enabled: true,
-        reactions_enabled: true,
-        is_public: true,
-        risk_warning_accepted: false,
+        title: "", description: "", stream_mode: "camera",
+        broker_name: "", market_type: "", instrument: "", timeframe: "",
+        strategy_tag: "", comments_enabled: true, reactions_enabled: true,
+        is_public: true, is_recording_enabled: false, risk_warning_accepted: false,
       });
     } catch (err: any) {
       toast({ title: err.message || "Failed to go live", variant: "destructive" });
@@ -87,6 +93,12 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
       setLoading(false);
     }
   };
+
+  const streamModes = [
+    { value: "camera", label: "Camera", icon: Video, desc: "Face cam" },
+    { value: "screen", label: "Screen", icon: Monitor, desc: "Share MT5, charts" },
+    { value: "camera_screen", label: "Both", icon: Layout, desc: "Camera + screen" },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -100,6 +112,7 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Title */}
           <div>
             <Label className="text-foreground">Stream Title *</Label>
             <Input
@@ -110,6 +123,7 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
             />
           </div>
 
+          {/* Description */}
           <div>
             <Label className="text-foreground">Description</Label>
             <Textarea
@@ -121,16 +135,60 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
             />
           </div>
 
+          {/* Stream Mode Selection */}
+          <div>
+            <Label className="text-foreground mb-2 block">Stream Mode *</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {streamModes.map((mode) => (
+                <button
+                  key={mode.value}
+                  onClick={() => setForm({ ...form, stream_mode: mode.value })}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all ${
+                    form.stream_mode === mode.value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-secondary text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <mode.icon className="w-5 h-5" />
+                  <span className="text-xs font-semibold">{mode.label}</span>
+                  <span className="text-[10px] opacity-70">{mode.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Broker & Market Type */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-foreground">Broker</Label>
-              <Input
-                placeholder="e.g. Deriv, Exness"
-                value={form.broker_name}
-                onChange={(e) => setForm({ ...form, broker_name: e.target.value })}
-                className="bg-secondary border-border"
-              />
+              <Select value={form.broker_name} onValueChange={(v) => setForm({ ...form, broker_name: v })}>
+                <SelectTrigger className="bg-secondary border-border">
+                  <SelectValue placeholder="Select broker" />
+                </SelectTrigger>
+                <SelectContent>
+                  {BROKERS.map((b) => (
+                    <SelectItem key={b} value={b}>{b}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            <div>
+              <Label className="text-foreground">Market Type</Label>
+              <Select value={form.market_type} onValueChange={(v) => setForm({ ...form, market_type: v })}>
+                <SelectTrigger className="bg-secondary border-border">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MARKET_TYPES.map((mt) => (
+                    <SelectItem key={mt.value} value={mt.value}>{mt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Instrument & Timeframe */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-foreground">Instrument</Label>
               <Input
@@ -140,9 +198,6 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
                 className="bg-secondary border-border"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-foreground">Timeframe</Label>
               <Select value={form.timeframe} onValueChange={(v) => setForm({ ...form, timeframe: v })}>
@@ -150,50 +205,63 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  {["M1", "M5", "M15", "M30", "H1", "H4", "D1"].map((tf) => (
+                  {["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1"].map((tf) => (
                     <SelectItem key={tf} value={tf}>{tf}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-foreground">Stream Mode</Label>
-              <Select value={form.stream_mode} onValueChange={(v) => setForm({ ...form, stream_mode: v })}>
-                <SelectTrigger className="bg-secondary border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="camera">Camera</SelectItem>
-                  <SelectItem value="screen">Screen Share</SelectItem>
-                  <SelectItem value="camera_screen">Both</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
+          {/* Strategy Tag */}
           <div>
             <Label className="text-foreground">Strategy Tag</Label>
             <Input
-              placeholder="e.g. Hauza Scalp, SMC, ICT"
+              placeholder="e.g. Hauza Scalp, SMC, ICT, Price Action"
               value={form.strategy_tag}
               onChange={(e) => setForm({ ...form, strategy_tag: e.target.value })}
               className="bg-secondary border-border"
             />
           </div>
 
+          {/* Visibility */}
           <div className="flex items-center justify-between">
-            <Label className="text-foreground">Comments</Label>
+            <div className="flex items-center gap-2">
+              {form.is_public ? <Globe className="w-4 h-4 text-primary" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
+              <Label className="text-foreground">
+                {form.is_public ? "Public (anyone can watch)" : "Private (invite only)"}
+              </Label>
+            </div>
             <Switch
-              checked={form.comments_enabled}
-              onCheckedChange={(v) => setForm({ ...form, comments_enabled: v })}
+              checked={form.is_public}
+              onCheckedChange={(v) => setForm({ ...form, is_public: v })}
             />
           </div>
 
+          {/* Toggles row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center justify-between bg-secondary rounded-lg px-3 py-2">
+              <Label className="text-foreground text-sm">💬 Chat</Label>
+              <Switch
+                checked={form.comments_enabled}
+                onCheckedChange={(v) => setForm({ ...form, comments_enabled: v })}
+              />
+            </div>
+            <div className="flex items-center justify-between bg-secondary rounded-lg px-3 py-2">
+              <Label className="text-foreground text-sm">❤️ Reactions</Label>
+              <Switch
+                checked={form.reactions_enabled}
+                onCheckedChange={(v) => setForm({ ...form, reactions_enabled: v })}
+              />
+            </div>
+          </div>
+
+          {/* Recording toggle */}
           <div className="flex items-center justify-between">
-            <Label className="text-foreground">Reactions</Label>
+            <Label className="text-foreground">🎬 Record stream (replay)</Label>
             <Switch
-              checked={form.reactions_enabled}
-              onCheckedChange={(v) => setForm({ ...form, reactions_enabled: v })}
+              checked={form.is_recording_enabled}
+              onCheckedChange={(v) => setForm({ ...form, is_recording_enabled: v })}
             />
           </div>
 
