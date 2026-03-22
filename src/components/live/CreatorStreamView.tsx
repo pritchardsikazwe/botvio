@@ -3,27 +3,33 @@ import { useLiveKit } from "@/hooks/useLiveKit";
 import { LiveCommentPanel } from "@/components/live/LiveCommentPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import {
   Video, VideoOff, Mic, MicOff, Monitor, MonitorOff,
   X, Eye, Loader2, WifiOff, MessageCircle, PhoneOff,
-  SwitchCamera, Settings, Volume2, VolumeX, Timer,
-  Heart, Flame, Rocket, Share2, Maximize, Minimize,
+  SwitchCamera, Settings, Timer,
+  Heart, Share2, Maximize, Minimize, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface CreatorStreamViewProps {
   streamId: string;
   streamMode: "camera" | "screen" | "camera_screen";
   title: string;
+  accessToken?: string | null;
+  wsUrl?: string | null;
+  preferredFacingMode?: "user" | "environment";
   onEnd: () => void;
 }
 
-export function CreatorStreamView({ streamId, streamMode, title, onEnd }: CreatorStreamViewProps) {
+export function CreatorStreamView({ streamId, streamMode, title, accessToken, wsUrl, preferredFacingMode = "user", onEnd }: CreatorStreamViewProps) {
+  const { toast } = useToast();
   const {
     status, error, videoRef, screenVideoRef, audioRef, disconnect,
-    cameraEnabled, micEnabled, screenEnabled, facingMode, viewerCount,
+    cameraEnabled, micEnabled, screenEnabled, facingMode, canFlipCamera, viewerCount,
     toggleCamera, toggleMic, toggleScreen, flipCamera,
-  } = useLiveKit({ streamId, isCreator: true, streamMode });
+  } = useLiveKit({ streamId, isCreator: true, streamMode, accessToken, wsUrl, preferredFacingMode });
 
   const [showChat, setShowChat] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -76,13 +82,34 @@ export function CreatorStreamView({ streamId, streamMode, title, onEnd }: Creato
 
   const handleEnd = async () => {
     disconnect();
-    // Update stream status to ended
     try {
       await supabase.functions.invoke("end-live-stream", {
         body: { stream_id: streamId },
       });
+      toast({ title: "Live session ended" });
     } catch {}
     onEnd();
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm("Delete this live session and its chat, reactions, and history?");
+    if (!confirmed) return;
+
+    disconnect();
+
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-live-stream", {
+        body: { stream_id: streamId },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed to delete stream");
+
+      toast({ title: "Live session deleted" });
+      onEnd();
+    } catch (err: any) {
+      toast({ title: err.message || "Could not delete live session", variant: "destructive" });
+    }
   };
 
   const toggleFullscreen = () => {
@@ -101,6 +128,7 @@ export function CreatorStreamView({ streamId, streamMode, title, onEnd }: Creato
       await navigator.share({ title: `Botvio Live: ${title}`, url });
     } else {
       await navigator.clipboard.writeText(url);
+      toast({ title: "Live link copied" });
     }
   };
 
@@ -157,18 +185,15 @@ export function CreatorStreamView({ streamId, streamMode, title, onEnd }: Creato
             autoPlay
             playsInline
             muted
-            className={`w-full h-full object-contain ${screenEnabled && cameraEnabled ? "absolute bottom-4 right-4 w-32 h-24 rounded-lg z-10 border-2 border-border shadow-lg object-cover" : ""}`}
+            className={screenEnabled && cameraEnabled ? "absolute bottom-4 right-4 w-32 h-24 rounded-lg z-10 border-2 border-border shadow-lg object-cover" : screenEnabled ? "hidden" : "w-full h-full object-contain"}
           />
-          {/* Screen share video (full screen when both active) */}
-          {screenEnabled && cameraEnabled && (
-            <video
-              ref={screenVideoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-contain"
-            />
-          )}
+          <video
+            ref={screenVideoRef}
+            autoPlay
+            playsInline
+            muted
+            className={screenEnabled ? "w-full h-full object-contain" : "hidden"}
+          />
           <audio ref={audioRef} autoPlay />
 
           {status === "connecting" && (
@@ -182,6 +207,15 @@ export function CreatorStreamView({ streamId, streamMode, title, onEnd }: Creato
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80">
               <WifiOff className="w-12 h-12 text-destructive mb-3" />
               <p className="text-muted-foreground text-sm">{error || "Connection failed"}</p>
+            </div>
+          )}
+
+          {status === "connected" && !cameraEnabled && !screenEnabled && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 px-6 text-center">
+              <p className="text-sm font-semibold text-foreground">No source is live yet</p>
+              <p className="mt-2 max-w-sm text-xs text-muted-foreground">
+                Turn on camera, share your screen, or stream a browser tab like TradingView or a Google page.
+              </p>
             </div>
           )}
         </div>
@@ -200,7 +234,7 @@ export function CreatorStreamView({ streamId, streamMode, title, onEnd }: Creato
           </Button>
 
           {/* Camera flip (only when camera is on) */}
-          {cameraEnabled && (
+          {cameraEnabled && canFlipCamera && (
             <Button
               variant="outline"
               size="icon"
@@ -235,6 +269,16 @@ export function CreatorStreamView({ streamId, streamMode, title, onEnd }: Creato
           </Button>
 
           <div className="w-px h-8 bg-border mx-1" />
+
+          <Button
+            variant={showSettings ? "default" : "outline"}
+            size="icon"
+            onClick={() => setShowSettings(!showSettings)}
+            className={`h-10 w-10 rounded-full ${showSettings ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+            title="Live settings"
+          >
+            <Settings className="w-4 h-4" />
+          </Button>
 
           {/* Share */}
           <Button
@@ -280,7 +324,50 @@ export function CreatorStreamView({ streamId, streamMode, title, onEnd }: Creato
             <PhoneOff className="w-4 h-4" />
             End
           </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleDelete}
+            className="gap-2 h-10 rounded-full px-5 border-destructive/30 text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </Button>
         </div>
+
+        {showSettings && (
+          <div className="border-t border-border bg-card p-3">
+            <div className="grid gap-3 lg:grid-cols-3">
+              <Card className="border-border bg-secondary p-3">
+                <p className="text-sm font-semibold text-foreground">Source controls</p>
+                <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+                  <p>• Camera is best for face-to-camera teaching.</p>
+                  <p>• Screen share lets you stream MT5, TradingView, a browser tab, or a Google page.</p>
+                  <p>• You can use camera and screen together.</p>
+                </div>
+              </Card>
+
+              <Card className="border-border bg-secondary p-3">
+                <p className="text-sm font-semibold text-foreground">Device status</p>
+                <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+                  <p>Camera: <span className="text-foreground">{cameraEnabled ? "On" : "Off"}</span></p>
+                  <p>Mic: <span className="text-foreground">{micEnabled ? "On" : "Off"}</span></p>
+                  <p>Screen: <span className="text-foreground">{screenEnabled ? "Sharing" : "Not sharing"}</span></p>
+                  <p>Camera source: <span className="text-foreground">{facingMode === "user" ? "Front" : "Back"}</span></p>
+                </div>
+              </Card>
+
+              <Card className="border-border bg-secondary p-3">
+                <p className="text-sm font-semibold text-foreground">Mobile share note</p>
+                <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+                  <p>• Some phones pause screen share if you fully leave the browser.</p>
+                  <p>• Sharing a web page works best while that chosen tab stays active.</p>
+                  <p>• If your device has more than one camera, the switch button flips front/back.</p>
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Chat sidebar */}

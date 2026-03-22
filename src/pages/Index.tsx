@@ -156,6 +156,11 @@ const Index = () => {
                 <Wifi className="h-4 w-4" /> 🔴 Botvio Live
               </Button>
             </Link>
+            <Link to="/flipping-challenges" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
+                <Target className="h-4 w-4" /> Flipping Challenges
+              </Button>
+            </Link>
           </div>
 
           {/* Broker Quick Links */}
