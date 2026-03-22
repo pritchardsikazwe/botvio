@@ -12,7 +12,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Radio, ArrowLeft, Eye, MessageCircle,
-  Heart, Flame, Rocket, X, TrendingUp,
+  X, TrendingUp, Trash2, Settings2,
   Loader2, WifiOff, Share2, Maximize, Minimize, Timer,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -28,7 +28,7 @@ function LiveStreamViewer({
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { status, error, videoRef, screenVideoRef, audioRef, disconnect, viewerCount } = useLiveKit({
+  const { status, error, videoRef, screenVideoRef, audioRef, disconnect, viewerCount, cameraEnabled, screenEnabled } = useLiveKit({
     streamId: stream.id,
     isCreator: false,
   });
@@ -37,8 +37,6 @@ function LiveStreamViewer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [floatingReactions, setFloatingReactions] = useState<{ id: number; emoji: string }[]>([]);
-  let reactionIdCounter = 0;
-
   // Elapsed timer
   useEffect(() => {
     if (status !== "connected") return;
@@ -83,15 +81,29 @@ function LiveStreamViewer({
   ];
 
   const handleReaction = async (type: string) => {
-    if (!user || reacting) return;
+    if (!user) {
+      toast({ title: "Sign in to react during live streams", variant: "destructive" });
+      return;
+    }
+    if (reacting) return;
     setReacting(true);
     try {
-      await supabase.from("live_reactions").insert({
+      const emoji = type === "fire" ? "🔥" : type === "rocket" ? "🚀" : "❤️";
+      const id = Date.now() + Math.random();
+      setFloatingReactions((prev) => [...prev, { id, emoji }]);
+      setTimeout(() => {
+        setFloatingReactions((prev) => prev.filter((r) => r.id !== id));
+      }, 2000);
+
+      const { error } = await supabase.from("live_reactions").insert({
         stream_id: stream.id,
         user_id: user.id,
         reaction_type: type,
       });
-    } catch {}
+      if (error) throw error;
+    } catch (err: any) {
+      toast({ title: err.message || "Could not send reaction", variant: "destructive" });
+    }
     setTimeout(() => setReacting(false), 500);
   };
 
@@ -159,8 +171,14 @@ function LiveStreamViewer({
 
         {/* Video area */}
         <div className="flex-1 bg-black flex items-center justify-center relative">
-          <video ref={videoRef} autoPlay playsInline muted={false} className="w-full h-full object-contain" />
-          <video ref={screenVideoRef} autoPlay playsInline muted className="hidden" />
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted={false}
+            className={screenEnabled && cameraEnabled ? "absolute bottom-4 right-4 h-24 w-32 rounded-lg border-2 border-border object-cover shadow-lg z-10" : screenEnabled ? "hidden" : "w-full h-full object-contain"}
+          />
+          <video ref={screenVideoRef} autoPlay playsInline muted className={screenEnabled ? "w-full h-full object-contain" : "hidden"} />
           <audio ref={audioRef} autoPlay />
 
           {status === "connecting" && (
@@ -264,12 +282,33 @@ function LiveStreamViewer({
 
 function LiveFeedPage() {
   const { liveStreams, recentStreams, isLoading } = useLiveFeed();
-  const { user } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const [selectedStream, setSelectedStream] = useState<any | null>(null);
-  const [creatorStream, setCreatorStream] = useState<{ id: string; title: string; stream_mode: string } | null>(null);
+  const [creatorStream, setCreatorStream] = useState<{ id: string; title: string; stream_mode: string; token?: string | null; ws_url?: string | null; preferred_camera?: "user" | "environment" } | null>(null);
 
   const endedStreams = recentStreams.filter((s) => s.status === "ended");
+  const manageableStreams = user ? recentStreams.filter((stream) => isAdmin || isSuperAdmin || stream.creator_id === user.id) : [];
+
+  const handleDeleteStream = async (streamId: string) => {
+    const confirmed = window.confirm("Delete this live session and all related live data?");
+    if (!confirmed) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-live-stream", {
+        body: { stream_id: streamId },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Could not delete stream");
+
+      if (selectedStream?.id === streamId) setSelectedStream(null);
+      if (creatorStream?.id === streamId) setCreatorStream(null);
+      toast({ title: "Live session deleted" });
+    } catch (err: any) {
+      toast({ title: err.message || "Delete failed", variant: "destructive" });
+    }
+  };
 
   return (
     <>
@@ -300,9 +339,12 @@ function LiveFeedPage() {
 
             {user && (
               <GoLiveDialog onStreamCreated={(data) => setCreatorStream({
-                id: data.stream_id || data.id,
+                id: data.id,
                 title: data.title || "Live Stream",
                 stream_mode: data.stream_mode || "camera",
+                token: data.token,
+                ws_url: data.ws_url,
+                preferred_camera: data.preferred_camera || "user",
               })}>
                 <Button className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold gap-2">
                   <Radio className="w-4 h-4" />
@@ -318,6 +360,9 @@ function LiveFeedPage() {
             streamId={creatorStream.id}
             streamMode={creatorStream.stream_mode as any}
             title={creatorStream.title}
+            accessToken={creatorStream.token}
+            wsUrl={creatorStream.ws_url}
+            preferredFacingMode={creatorStream.preferred_camera}
             onEnd={() => setCreatorStream(null)}
           />
         )}
@@ -330,6 +375,55 @@ function LiveFeedPage() {
         )}
 
         <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+          {manageableStreams.length > 0 && (
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <Settings2 className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground">{isAdmin || isSuperAdmin ? "Admin Live Controls" : "Manage My Live Sessions"}</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {manageableStreams.slice(0, 6).map((stream) => (
+                  <Card key={`manage-${stream.id}`} className="border-border bg-card p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-foreground">{stream.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{stream.status === "live" ? "Live now" : "Ended stream"}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDeleteStream(stream.id)}
+                        className="h-8 w-8 border-destructive/30 text-destructive hover:bg-destructive/10"
+                        title="Delete live session"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setSelectedStream(stream)}>
+                        Open
+                      </Button>
+                      {stream.status === "live" && stream.creator_id === user?.id && (
+                        <Button
+                          size="sm"
+                          className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                          onClick={() => setCreatorStream({
+                            id: stream.id,
+                            title: stream.title,
+                            stream_mode: stream.stream_mode,
+                            preferred_camera: "user",
+                          })}
+                        >
+                          Return to controls
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
           {isLoading && (
             <div className="text-center py-20">
               <Radio className="w-10 h-10 text-destructive animate-pulse mx-auto mb-3" />
@@ -360,9 +454,12 @@ function LiveFeedPage() {
               </p>
               {user && (
                 <GoLiveDialog onStreamCreated={(data) => setCreatorStream({
-                  id: data.stream_id || data.id,
+                  id: data.id,
                   title: data.title || "Live Stream",
                   stream_mode: data.stream_mode || "camera",
+                  token: data.token,
+                  ws_url: data.ws_url,
+                  preferred_camera: data.preferred_camera || "user",
                 })}>
                   <Button className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold gap-2">
                     <Radio className="w-4 h-4" />

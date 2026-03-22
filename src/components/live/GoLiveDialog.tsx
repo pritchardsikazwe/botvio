@@ -1,6 +1,10 @@
 import { useState } from "react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Radio, AlertTriangle, Video, Monitor, Layout, Globe, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -43,6 +46,7 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
     title: "",
     description: "",
     stream_mode: "camera",
+    preferred_camera: "user",
     broker_name: "",
     market_type: "",
     instrument: "",
@@ -79,13 +83,31 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
       if (!data?.success) throw new Error(data?.error || "Failed to create stream");
 
       toast({ title: "You're now live! 🔴" });
-      onStreamCreated?.({ ...data, title: form.title, stream_mode: form.stream_mode });
+      onStreamCreated?.({
+        id: data.stream_id || data.id,
+        title: form.title,
+        stream_mode: form.stream_mode,
+        token: data.token,
+        ws_url: data.ws_url,
+        preferred_camera: form.preferred_camera,
+        stream: data.stream,
+      });
       setOpen(false);
       setForm({
-        title: "", description: "", stream_mode: "camera",
-        broker_name: "", market_type: "", instrument: "", timeframe: "",
-        strategy_tag: "", comments_enabled: true, reactions_enabled: true,
-        is_public: true, is_recording_enabled: false, risk_warning_accepted: false,
+        title: "",
+        description: "",
+        stream_mode: "camera",
+        preferred_camera: "user",
+        broker_name: "",
+        market_type: "",
+        instrument: "",
+        timeframe: "",
+        strategy_tag: "",
+        comments_enabled: true,
+        reactions_enabled: true,
+        is_public: true,
+        is_recording_enabled: false,
+        risk_warning_accepted: false,
       });
     } catch (err: any) {
       toast({ title: err.message || "Failed to go live", variant: "destructive" });
@@ -96,7 +118,7 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
 
   const streamModes = [
     { value: "camera", label: "Camera", icon: Video, desc: "Face cam" },
-    { value: "screen", label: "Screen", icon: Monitor, desc: "Share MT5, charts" },
+    { value: "screen", label: "Screen", icon: Monitor, desc: "Share charts or web pages" },
     { value: "camera_screen", label: "Both", icon: Layout, desc: "Camera + screen" },
   ];
 
@@ -141,6 +163,7 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
             <div className="grid grid-cols-3 gap-2">
               {streamModes.map((mode) => (
                 <button
+                  type="button"
                   key={mode.value}
                   onClick={() => setForm({ ...form, stream_mode: mode.value })}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all ${
@@ -154,6 +177,26 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
                   <span className="text-[10px] opacity-70">{mode.desc}</span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-foreground">Preferred Camera</Label>
+              <Select value={form.preferred_camera} onValueChange={(v) => setForm({ ...form, preferred_camera: v })}>
+                <SelectTrigger className="bg-secondary border-border">
+                  <SelectValue placeholder="Select camera" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Front Camera</SelectItem>
+                  <SelectItem value="environment">Back Camera</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <div className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs text-muted-foreground">
+                After going live, you can switch between camera and screen sharing any time.
+              </div>
             </div>
           </div>
 
@@ -263,6 +306,12 @@ export function GoLiveDialog({ children, onStreamCreated }: GoLiveDialogProps) {
               checked={form.is_recording_enabled}
               onCheckedChange={(v) => setForm({ ...form, is_recording_enabled: v })}
             />
+          </div>
+
+          <div className="rounded-lg border border-border bg-secondary p-3 text-xs text-muted-foreground space-y-1">
+            <p>• Screen sharing can stream charts, TradingView, MT5, or a web page.</p>
+            <p>• On some phones, screen sharing may pause if you fully leave the browser app.</p>
+            <p>• Use the live controls page to switch source, flip camera, end, or delete the session.</p>
           </div>
 
           {/* Risk disclaimer */}
