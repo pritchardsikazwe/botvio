@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, Search, RefreshCw, Download, Phone, Globe, UserPlus, Users } from "lucide-react";
+import { Mail, Search, RefreshCw, Download, Phone, Globe, UserPlus, Users, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NewsletterSubscriber {
   id: string;
@@ -21,10 +22,16 @@ interface NewsletterSubscriber {
   subscribed_at: string;
 }
 
+// Users restricted from viewing full subscriber details
+const RESTRICTED_EMAILS = ["zuzemanase@gmail.com"];
+
 export const AdminNewsletterTab = () => {
   const [search, setSearch] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const queryClient = useQueryClient();
+  const { user, isSuperAdmin } = useAuth();
+
+  const isRestricted = user?.email && RESTRICTED_EMAILS.includes(user.email.toLowerCase());
 
   const { data: subscribers, isLoading, refetch } = useQuery({
     queryKey: ["admin_newsletter"],
@@ -79,6 +86,10 @@ export const AdminNewsletterTab = () => {
   });
 
   const exportCSV = () => {
+    if (isRestricted) {
+      toast.error("You don't have permission to export subscriber data");
+      return;
+    }
     if (!subscribers) return;
     const active = subscribers.filter(s => s.is_active);
     const headers = ["Email", "Name", "WhatsApp", "Country", "Source", "Subscribed At"];
@@ -100,6 +111,67 @@ export const AdminNewsletterTab = () => {
     URL.revokeObjectURL(url);
     toast.success(`Exported ${active.length} active subscribers`);
   };
+
+  // Mask sensitive data for restricted users
+  const maskEmail = (email: string) => {
+    if (!isRestricted) return email;
+    const [local, domain] = email.split("@");
+    return `${local.slice(0, 2)}***@${domain}`;
+  };
+  const maskPhone = (phone: string | null) => {
+    if (!isRestricted || !phone) return phone;
+    return `${phone.slice(0, 4)}****${phone.slice(-2)}`;
+  };
+
+  // If restricted, show limited view
+  if (isRestricted) {
+    return (
+      <div className="space-y-6">
+        {/* Stats only */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <Card className="glass-card">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Subscribers</p>
+                <p className="text-2xl font-bold">{subscribers?.length || 0}</p>
+              </div>
+              <Users className="h-8 w-8 text-primary" />
+            </CardContent>
+          </Card>
+          <Card className="glass-card">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-2xl font-bold text-emerald-400">{activeCount}</p>
+              </div>
+              <Mail className="h-8 w-8 text-emerald-400" />
+            </CardContent>
+          </Card>
+          <Card className="glass-card">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">With WhatsApp</p>
+                <p className="text-2xl font-bold text-emerald-400">
+                  {subscribers?.filter(s => s.whatsapp_number).length || 0}
+                </p>
+              </div>
+              <Phone className="h-8 w-8 text-emerald-400" />
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="glass-card border-warning/30">
+          <CardContent className="p-6 text-center space-y-3">
+            <ShieldAlert className="h-10 w-10 text-warning mx-auto" />
+            <h3 className="font-bold text-lg text-foreground">Restricted Access</h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              You can view subscriber statistics but detailed subscriber information (emails, phone numbers, names) is restricted. Contact the Super Admin for full access.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
