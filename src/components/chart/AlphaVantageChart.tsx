@@ -251,7 +251,7 @@ export function AlphaVantageChart({ symbol = "XAUUSD", displaySymbol, showHauzaS
       const ema20 = computeEMA(closes, 20);
       const ema50 = computeEMA(closes, 50);
 
-      const ema20Series = chart.addLineSeries({
+      const ema20Series = chart.addSeries(LineSeries, {
         color: "hsl(45, 100%, 51%)",
         lineWidth: 1,
         priceLineVisible: false,
