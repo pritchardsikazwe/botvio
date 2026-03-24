@@ -234,7 +234,7 @@ export function AlphaVantageChart({ symbol = "XAUUSD", displaySymbol, showHauzaS
 
     chartRef.current = chart;
 
-    const candleSeries = chart.addCandlestickSeries({
+    const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: "hsl(142, 76%, 36%)",
       downColor: "hsl(0, 84%, 60%)",
       borderUpColor: "hsl(142, 76%, 36%)",
