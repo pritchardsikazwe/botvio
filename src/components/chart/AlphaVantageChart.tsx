@@ -277,7 +277,7 @@ export function AlphaVantageChart({ symbol = "XAUUSD", displaySymbol, showHauzaS
 
       // Draw SL/TP lines
       if (signal.entry && signal.sl && signal.tp) {
-        const slLine = chart.addLineSeries({
+        const slLine = chart.addSeries(LineSeries, {
           color: "hsl(0, 84%, 60%)",
           lineWidth: 1,
           lineStyle: 2,
