@@ -289,7 +289,7 @@ export function AlphaVantageChart({ symbol = "XAUUSD", displaySymbol, showHauzaS
           { time: candles[candles.length - 1].time, value: signal.sl },
         ]);
 
-        const tpLine = chart.addLineSeries({
+        const tpLine = chart.addSeries(LineSeries, {
           color: "hsl(142, 76%, 36%)",
           lineWidth: 1,
           lineStyle: 2,
