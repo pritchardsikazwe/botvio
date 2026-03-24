@@ -62,7 +62,7 @@ export const SEOHead = ({
         "@type": "Organization",
         name: siteName,
         url: baseUrl,
-        logo: toAbsoluteUrl(settings?.logo_url || "/icon-512.png", baseUrl),
+        logo: toAbsoluteUrl(settings?.logo_url || "/botvio-logo.png", baseUrl),
       },
       {
         "@type": "WebSite",
