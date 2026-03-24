@@ -434,7 +434,7 @@ function BotvioSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefin
   );
 }
 
-const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "EUR/USD"];
+const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "EUR/USD", "USD/JPY"];
 
 export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCards?: number; maxBinanceCards?: number; homeMode?: boolean } = {}) {
   const navigate = useNavigate();
@@ -865,6 +865,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                           }
                           if (sig?.ai_summary) lines.push(`\n💡 ${sig.ai_summary.slice(0, 150)}`);
                           lines.push(`\n🔗 View chart: https://botvio.live/chart/${asset.symbol.replace("/", "")}`);
+                          lines.push(`\n🖼️ https://botvio.live/botvio-logo.png`);
                           lines.push(`_Powered by Botvio — AI Trading Signals_`);
                           const text = encodeURIComponent(lines.join("\n"));
                           window.open(`https://wa.me/?text=${text}`, "_blank");
@@ -904,7 +905,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const orderedAssets = HOME_PREFERRED_ORDER
             .map(sym => assets.find(a => a.symbol === sym))
             .filter(Boolean) as Asset[];
-          const freePreview = isBasicOrAbove ? orderedAssets : orderedAssets.slice(0, 2);
+          const freePreview = isBasicOrAbove ? orderedAssets : orderedAssets.slice(0, 6);
           return (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

@@ -2,11 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, ShieldCheck } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
+import { AlphaVantageChart } from "@/components/chart/AlphaVantageChart";
 
-const TIMEFRAMES = ["1", "5", "15", "60", "D", "W"] as const;
-const TIMEFRAME_LABELS: Record<string, string> = { "1": "1m", "5": "5m", "15": "15m", "60": "1H", "D": "Daily", "W": "Weekly" };
 
 const CHART_STRATEGIES = [
   {
@@ -64,66 +63,18 @@ const CHART_STRATEGIES = [
 ];
 
 export function GoldChartSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [tf, setTf] = useState<string>("60");
   const [activeStrat, setActiveStrat] = useState<number | null>(0);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = "";
-    const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-    script.type = "text/javascript";
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      autosize: true,
-      symbol: "OANDA:XAUUSD",
-      interval: tf,
-      timezone: "Etc/UTC",
-      theme: "dark",
-      style: "1",
-      locale: "en",
-      backgroundColor: "rgba(0, 0, 0, 0)",
-      gridColor: "rgba(255, 255, 255, 0.04)",
-      allow_symbol_change: false,
-      hide_top_toolbar: false,
-      hide_side_toolbar: false,
-      calendar: false,
-      studies: [
-        "MAExp@tv-basicstudies",
-        "MAExp@tv-basicstudies|50",
-      ],
-      support_host: "https://www.tradingview.com",
-    });
-    containerRef.current.appendChild(script);
-  }, [tf]);
 
   return (
     <div className="space-y-4">
-      {/* Timeframe Selector */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs text-muted-foreground font-bold">Timeframe:</span>
-        {TIMEFRAMES.map((t) => (
-          <Button
-            key={t}
-            size="sm"
-            variant={tf === t ? "default" : "outline"}
-            className={`text-xs h-7 px-3 font-bold ${tf === t ? "bg-primary text-primary-foreground" : ""}`}
-            onClick={() => setTf(t)}
-          >
-            {TIMEFRAME_LABELS[t]}
-          </Button>
-        ))}
-      </div>
-
-      {/* Botvio Signal + Chart side by side */}
+      {/* Botvio Signal + Alpha Vantage Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-1">
           <GoldBotvioSignalButton />
         </div>
-        <Card className="lg:col-span-3 bg-card border-border/50 overflow-hidden">
-          <div ref={containerRef} className="w-full h-[70vh] min-h-[500px] max-h-[800px]" />
-        </Card>
+        <div className="lg:col-span-3">
+          <AlphaVantageChart symbol="XAUUSD" displaySymbol="XAU/USD" showHauzaStrategy />
+        </div>
       </div>
 
        {/* ── Botvio Strategy Quick-Reference ─────── */}

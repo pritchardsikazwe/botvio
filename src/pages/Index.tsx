@@ -533,6 +533,9 @@ const Index = () => {
             <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link>
             <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
           </nav>
+          <div className="flex justify-center mb-3">
+            <img src="/botvio-logo.png" alt="Botvio Logo" className="h-10 w-auto" />
+          </div>
           <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto mb-2">
             <strong>Risk Warning:</strong> Trading binary options and CFDs involves significant risk. Past performance is not indicative of future results.
           </p>

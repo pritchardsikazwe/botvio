@@ -3,3 +3,11 @@
 
 /robots.txt
   Content-Type: text/plain
+
+/botvio-logo.png
+  Content-Type: image/png
+  Cache-Control: public, max-age=31536000
+
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
