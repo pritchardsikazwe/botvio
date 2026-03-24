@@ -904,7 +904,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const orderedAssets = HOME_PREFERRED_ORDER
             .map(sym => assets.find(a => a.symbol === sym))
             .filter(Boolean) as Asset[];
-          const freePreview = isBasicOrAbove ? orderedAssets : orderedAssets.slice(0, 2);
+          const freePreview = isBasicOrAbove ? orderedAssets : orderedAssets.slice(0, 6);
           return (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
