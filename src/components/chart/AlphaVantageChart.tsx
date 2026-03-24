@@ -259,7 +259,7 @@ export function AlphaVantageChart({ symbol = "XAUUSD", displaySymbol, showHauzaS
       });
       ema20Series.setData(candles.map((c, i) => ({ time: c.time, value: ema20[i] })));
 
-      const ema50Series = chart.addLineSeries({
+      const ema50Series = chart.addSeries(LineSeries, {
         color: "hsl(271, 91%, 65%)",
         lineWidth: 1,
         priceLineVisible: false,
