@@ -45,7 +45,7 @@ export const SEOHead = ({
     "Automate your trading with AI bots, live signals, and copy trading.";
 
   // Prefer a proper 512px icon for rich previews
-  const ogImageRaw = ogImage || settings?.og_image_url || "/icon-512.png";
+  const ogImageRaw = ogImage || settings?.og_image_url || "/botvio-logo.png";
   const pageOgImage = toAbsoluteUrl(ogImageRaw, baseUrl);
 
   const canonicalUrl = `${baseUrl}${location.pathname}`;
