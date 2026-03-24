@@ -2,8 +2,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, ShieldCheck } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
+import { AlphaVantageChart } from "@/components/chart/AlphaVantageChart";
 
 const TIMEFRAMES = ["1", "5", "15", "60", "D", "W"] as const;
 const TIMEFRAME_LABELS: Record<string, string> = { "1": "1m", "5": "5m", "15": "15m", "60": "1H", "D": "Daily", "W": "Weekly" };
