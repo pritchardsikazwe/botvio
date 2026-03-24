@@ -6,8 +6,6 @@ import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
 import { AlphaVantageChart } from "@/components/chart/AlphaVantageChart";
 
-const TIMEFRAMES = ["1", "5", "15", "60", "D", "W"] as const;
-const TIMEFRAME_LABELS: Record<string, string> = { "1": "1m", "5": "5m", "15": "15m", "60": "1H", "D": "Daily", "W": "Weekly" };
 
 const CHART_STRATEGIES = [
   {
