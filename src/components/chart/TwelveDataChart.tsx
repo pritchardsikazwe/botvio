@@ -266,7 +266,9 @@ export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaSt
         <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => refetch()}>
           <RefreshCw className="h-3 w-3" />
         </Button>
-        <Badge variant="outline" className="text-[10px] border-primary/30 text-primary ml-auto">Twelve Data Live</Badge>
+        <Badge variant="outline" className={`text-[10px] ml-auto ${dataSource === "live" ? "border-success/30 text-success" : dataSource === "cached" ? "border-primary/30 text-primary" : "border-warning/30 text-warning"}`}>
+          {dataSource === "live" ? "● Live" : dataSource === "cached" ? "● Cached" : "● Simulated"}
+        </Badge>
       </div>
 
       {/* Hauza Signal Banner */}
