@@ -45,6 +45,7 @@ export const AdminProfilesTab = () => {
   const [search, setSearch] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [planFilter, setPlanFilter] = useState("all");
   const [planDialog, setPlanDialog] = useState<{ open: boolean; userId: string; userName: string; currentPlanId: string | null; subId: string | null }>({
     open: false, userId: "", userName: "", currentPlanId: null, subId: null,
   });
@@ -85,30 +86,19 @@ export const AdminProfilesTab = () => {
     mutationFn: async ({ userId, planId, subId, expires }: { userId: string; planId: string; subId: string | null; expires: string }) => {
       const periodEnd = expires || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
       
-      if (subId) {
-        const { error } = await supabase
-          .from("user_plan_subscriptions")
-          .update({
-            pricing_plan_id: planId,
-            status: "active",
-            current_period_start: new Date().toISOString(),
-            current_period_end: periodEnd,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", subId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("user_plan_subscriptions")
-          .insert({
-            user_id: userId,
-            pricing_plan_id: planId,
-            status: "active",
-            current_period_start: new Date().toISOString(),
-            current_period_end: periodEnd,
-          });
-        if (error) throw error;
-      }
+      // Always upsert to handle both existing and missing subscriptions
+      const { error } = await supabase
+        .from("user_plan_subscriptions")
+        .upsert({
+          ...(subId ? { id: subId } : {}),
+          user_id: userId,
+          pricing_plan_id: planId,
+          status: "active",
+          current_period_start: new Date().toISOString(),
+          current_period_end: periodEnd,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
+      if (error) throw error;
 
       const plan = plans?.find(p => p.id === planId);
       await supabase.from("notifications").insert({
@@ -153,6 +143,10 @@ export const AdminProfilesTab = () => {
     } else if (statusFilter === "inactive") {
       const sub = getUserSub(p.user_id);
       if (sub && sub.status === "active") return false;
+    }
+    if (planFilter !== "all") {
+      const plan = getUserPlan(p.user_id);
+      if (!plan || plan.code !== planFilter) return false;
     }
     return true;
   });
@@ -239,6 +233,18 @@ export const AdminProfilesTab = () => {
               <SelectItem value="all">All Users</SelectItem>
               <SelectItem value="active">Active Sub</SelectItem>
               <SelectItem value="inactive">No Active Sub</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={planFilter} onValueChange={setPlanFilter}>
+            <SelectTrigger className="w-[150px]">
+              <Crown className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Plan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Plans</SelectItem>
+              {plans?.map(p => (
+                <SelectItem key={p.code} value={p.code}>{p.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

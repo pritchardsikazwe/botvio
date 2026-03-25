@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Signal, ArrowRight, TrendingUp, TrendingDown, Clock, AlertCircle, Trophy, XCircle as XIcon, ExternalLink } from "lucide-react";
+import { Signal, ArrowRight, TrendingUp, TrendingDown, Clock, AlertCircle, Trophy, XCircle as XIcon, ExternalLink, Sparkles, BarChart3, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { ManualSignal } from "@/hooks/useManualSignals";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 const DERIV_LINK = "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827";
@@ -91,6 +93,8 @@ function isWinShowcaseActive(signal: ManualSignal): boolean {
 
 export const HomeSignalsWidget = () => {
   const [brokerFilter, setBrokerFilter] = useState("all");
+  const { user } = useAuth();
+  const { isBasicOrAbove } = useSubscriptionGate();
 
   const { data: signals, isLoading } = useQuery({
     queryKey: ["home-signals-with-wins"],
@@ -199,6 +203,31 @@ export const HomeSignalsWidget = () => {
     <div className="mt-8">
       {headerSection}
       {brokerTabs}
+
+      {/* Subscribe CTA Banner */}
+      {!isBasicOrAbove && (
+        <Card className="mb-4 border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-warning/5 to-transparent overflow-hidden">
+          <CardContent className="py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-warning flex items-center justify-center shrink-0">
+                <Crown className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">🔓 Unlock All Signals & AI Chart Analysis</p>
+                <p className="text-xs text-muted-foreground">
+                  Subscribe to get unlimited signals, premium AI chart uploads, and advanced market intelligence.
+                </p>
+              </div>
+            </div>
+            <Button asChild className="shrink-0">
+              <Link to="/billing">
+                <Sparkles className="h-4 w-4 mr-1" /> Subscribe Now
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {displaySignals.map((signal) => {
           const isWin = signal.outcome === "win";
