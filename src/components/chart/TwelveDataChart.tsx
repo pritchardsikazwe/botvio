@@ -145,46 +145,61 @@ export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaSt
 
   const isIntraday = !["1day", "1week"].includes(interval);
 
+  const [dataSource, setDataSource] = useState<"live" | "cached" | "simulated">("live");
+
   const { data: candles, isLoading, refetch } = useQuery({
     queryKey: ["td-chart", tdSymbol, interval],
     queryFn: async () => {
       const cacheKey = `${tdSymbol}-${interval}`;
-      const cached = requestCache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_TTL) return cached.data;
 
-      const params = new URLSearchParams({
-        symbol: tdSymbol,
-        interval,
-        outputsize: "100",
-        apikey: TWELVE_DATA_KEY,
-      });
-
-      const res = await fetch(`https://api.twelvedata.com/time_series?${params}`);
-      const json = await res.json();
-
-      if (json.status === "error") {
-        console.warn("TwelveData API:", json.message);
-        // Return cached data if available on rate limit
-        if (cached) return cached.data;
-        return [];
+      // 1. Check in-memory cache
+      const memCached = requestCache.get(cacheKey);
+      if (memCached && Date.now() - memCached.timestamp < CACHE_TTL) {
+        setDataSource("cached");
+        return memCached.data;
       }
 
-      const values = json.values;
-      if (!values || !Array.isArray(values)) return cached?.data || [];
+      // 2. Try API
+      try {
+        const params = new URLSearchParams({
+          symbol: tdSymbol, interval, outputsize: "100", apikey: TWELVE_DATA_KEY,
+        });
+        const res = await fetch(`https://api.twelvedata.com/time_series?${params}`);
+        const json = await res.json();
 
-      const result: CandlestickData<Time>[] = values.map((v: any) => ({
-        time: (Math.floor(new Date(v.datetime).getTime() / 1000)) as Time,
-        open: parseFloat(v.open),
-        high: parseFloat(v.high),
-        low: parseFloat(v.low),
-        close: parseFloat(v.close),
-      })).filter((c: any) => !isNaN(c.open)).sort((a: any, b: any) => (a.time as number) - (b.time as number));
+        if (json.status !== "error" && json.values && Array.isArray(json.values)) {
+          const result: CandlestickData<Time>[] = json.values.map((v: any) => ({
+            time: (Math.floor(new Date(v.datetime).getTime() / 1000)) as Time,
+            open: parseFloat(v.open), high: parseFloat(v.high),
+            low: parseFloat(v.low), close: parseFloat(v.close),
+          })).filter((c: any) => !isNaN(c.open)).sort((a: any, b: any) => (a.time as number) - (b.time as number));
 
-      requestCache.set(cacheKey, { data: result, timestamp: Date.now() });
-      return result;
+          requestCache.set(cacheKey, { data: result, timestamp: Date.now() });
+          saveToStorage(cacheKey, result);
+          setDataSource("live");
+          return result;
+        }
+        console.warn("TwelveData API:", json.message || "No values");
+      } catch (e) {
+        console.warn("TwelveData fetch error:", e);
+      }
+
+      // 3. Fallback: localStorage cache
+      const stored = loadFromStorage(cacheKey);
+      if (stored && stored.length > 0) {
+        requestCache.set(cacheKey, { data: stored, timestamp: Date.now() });
+        setDataSource("cached");
+        return stored;
+      }
+
+      // 4. Fallback: simulated data so chart always renders
+      const fallback = generateFallbackCandles(tdSymbol);
+      requestCache.set(cacheKey, { data: fallback, timestamp: Date.now() });
+      setDataSource("simulated");
+      return fallback;
     },
     staleTime: CACHE_TTL,
-    refetchInterval: 90_000, // every 90s to stay within rate limits
+    refetchInterval: 90_000,
     retry: 1,
   });
 
