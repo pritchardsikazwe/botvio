@@ -310,12 +310,8 @@ export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaSt
       <Card className="bg-card border-border/50 overflow-hidden">
         {isLoading ? (
           <Skeleton className="w-full h-[60vh] min-h-[400px]" />
-        ) : candles && candles.length > 0 ? (
-          <div ref={containerRef} className="w-full h-[60vh] min-h-[400px] max-h-[700px]" />
         ) : (
-          <div className="w-full h-[60vh] min-h-[400px] flex items-center justify-center text-muted-foreground text-sm">
-            No data available — API quota may be exceeded. Data resets per-minute.
-          </div>
+          <div ref={containerRef} className="w-full h-[60vh] min-h-[400px] max-h-[700px]" />
         )}
       </Card>
 
