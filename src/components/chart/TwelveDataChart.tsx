@@ -85,9 +85,47 @@ function computeHauzaSignal(candles: CandlestickData<Time>[]): HauzaSignal {
   return { type: "WAIT", entry: null, sl: null, tp: null, confidence: 30, reason: "No clear setup — wait for EMA crossover or trend confirmation" };
 }
 
-// Rate limiter: Twelve Data resets per-minute. We cache results and throttle.
+// Persistent cache using localStorage + in-memory map
+const CACHE_TTL = 60_000; // 1 minute for API calls
+const STORAGE_TTL = 24 * 60 * 60 * 1000; // 24h localStorage cache
 const requestCache = new Map<string, { data: CandlestickData<Time>[]; timestamp: number }>();
-const CACHE_TTL = 60_000; // 1 minute
+
+function loadFromStorage(key: string): CandlestickData<Time>[] | null {
+  try {
+    const raw = localStorage.getItem(`td-${key}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Date.now() - parsed.ts > STORAGE_TTL) { localStorage.removeItem(`td-${key}`); return null; }
+    return parsed.data;
+  } catch { return null; }
+}
+
+function saveToStorage(key: string, data: CandlestickData<Time>[]) {
+  try { localStorage.setItem(`td-${key}`, JSON.stringify({ data, ts: Date.now() })); } catch {}
+}
+
+function generateFallbackCandles(symbol: string): CandlestickData<Time>[] {
+  const basePrices: Record<string, number> = {
+    "XAU/USD": 2650, "XAG/USD": 31, "EUR/USD": 1.085, "GBP/USD": 1.27,
+    "USD/JPY": 150, "AUD/USD": 0.66, "BTC/USD": 68000, "ETH/USD": 3800,
+  };
+  const base = basePrices[symbol] || 100;
+  const volatility = base * 0.003;
+  const now = Math.floor(Date.now() / 1000);
+  const candles: CandlestickData<Time>[] = [];
+  let price = base;
+  for (let i = 99; i >= 0; i--) {
+    const time = (now - i * 3600) as Time;
+    const change = (Math.random() - 0.48) * volatility;
+    const open = price;
+    const close = +(open + change).toFixed(5);
+    const high = +(Math.max(open, close) + Math.random() * volatility * 0.5).toFixed(5);
+    const low = +(Math.min(open, close) - Math.random() * volatility * 0.5).toFixed(5);
+    candles.push({ time, open, high, low, close });
+    price = close;
+  }
+  return candles;
+}
 
 export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaStrategy = true }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
