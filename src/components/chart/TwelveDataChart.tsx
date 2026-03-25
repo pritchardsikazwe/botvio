@@ -85,9 +85,47 @@ function computeHauzaSignal(candles: CandlestickData<Time>[]): HauzaSignal {
   return { type: "WAIT", entry: null, sl: null, tp: null, confidence: 30, reason: "No clear setup — wait for EMA crossover or trend confirmation" };
 }
 
-// Rate limiter: Twelve Data resets per-minute. We cache results and throttle.
+// Persistent cache using localStorage + in-memory map
+const CACHE_TTL = 60_000; // 1 minute for API calls
+const STORAGE_TTL = 24 * 60 * 60 * 1000; // 24h localStorage cache
 const requestCache = new Map<string, { data: CandlestickData<Time>[]; timestamp: number }>();
-const CACHE_TTL = 60_000; // 1 minute
+
+function loadFromStorage(key: string): CandlestickData<Time>[] | null {
+  try {
+    const raw = localStorage.getItem(`td-${key}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Date.now() - parsed.ts > STORAGE_TTL) { localStorage.removeItem(`td-${key}`); return null; }
+    return parsed.data;
+  } catch { return null; }
+}
+
+function saveToStorage(key: string, data: CandlestickData<Time>[]) {
+  try { localStorage.setItem(`td-${key}`, JSON.stringify({ data, ts: Date.now() })); } catch {}
+}
+
+function generateFallbackCandles(symbol: string): CandlestickData<Time>[] {
+  const basePrices: Record<string, number> = {
+    "XAU/USD": 2650, "XAG/USD": 31, "EUR/USD": 1.085, "GBP/USD": 1.27,
+    "USD/JPY": 150, "AUD/USD": 0.66, "BTC/USD": 68000, "ETH/USD": 3800,
+  };
+  const base = basePrices[symbol] || 100;
+  const volatility = base * 0.003;
+  const now = Math.floor(Date.now() / 1000);
+  const candles: CandlestickData<Time>[] = [];
+  let price = base;
+  for (let i = 99; i >= 0; i--) {
+    const time = (now - i * 3600) as Time;
+    const change = (Math.random() - 0.48) * volatility;
+    const open = price;
+    const close = +(open + change).toFixed(5);
+    const high = +(Math.max(open, close) + Math.random() * volatility * 0.5).toFixed(5);
+    const low = +(Math.min(open, close) - Math.random() * volatility * 0.5).toFixed(5);
+    candles.push({ time, open, high, low, close });
+    price = close;
+  }
+  return candles;
+}
 
 export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaStrategy = true }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -107,46 +145,61 @@ export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaSt
 
   const isIntraday = !["1day", "1week"].includes(interval);
 
+  const [dataSource, setDataSource] = useState<"live" | "cached" | "simulated">("live");
+
   const { data: candles, isLoading, refetch } = useQuery({
     queryKey: ["td-chart", tdSymbol, interval],
     queryFn: async () => {
       const cacheKey = `${tdSymbol}-${interval}`;
-      const cached = requestCache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_TTL) return cached.data;
 
-      const params = new URLSearchParams({
-        symbol: tdSymbol,
-        interval,
-        outputsize: "100",
-        apikey: TWELVE_DATA_KEY,
-      });
-
-      const res = await fetch(`https://api.twelvedata.com/time_series?${params}`);
-      const json = await res.json();
-
-      if (json.status === "error") {
-        console.warn("TwelveData API:", json.message);
-        // Return cached data if available on rate limit
-        if (cached) return cached.data;
-        return [];
+      // 1. Check in-memory cache
+      const memCached = requestCache.get(cacheKey);
+      if (memCached && Date.now() - memCached.timestamp < CACHE_TTL) {
+        setDataSource("cached");
+        return memCached.data;
       }
 
-      const values = json.values;
-      if (!values || !Array.isArray(values)) return cached?.data || [];
+      // 2. Try API
+      try {
+        const params = new URLSearchParams({
+          symbol: tdSymbol, interval, outputsize: "100", apikey: TWELVE_DATA_KEY,
+        });
+        const res = await fetch(`https://api.twelvedata.com/time_series?${params}`);
+        const json = await res.json();
 
-      const result: CandlestickData<Time>[] = values.map((v: any) => ({
-        time: (Math.floor(new Date(v.datetime).getTime() / 1000)) as Time,
-        open: parseFloat(v.open),
-        high: parseFloat(v.high),
-        low: parseFloat(v.low),
-        close: parseFloat(v.close),
-      })).filter((c: any) => !isNaN(c.open)).sort((a: any, b: any) => (a.time as number) - (b.time as number));
+        if (json.status !== "error" && json.values && Array.isArray(json.values)) {
+          const result: CandlestickData<Time>[] = json.values.map((v: any) => ({
+            time: (Math.floor(new Date(v.datetime).getTime() / 1000)) as Time,
+            open: parseFloat(v.open), high: parseFloat(v.high),
+            low: parseFloat(v.low), close: parseFloat(v.close),
+          })).filter((c: any) => !isNaN(c.open)).sort((a: any, b: any) => (a.time as number) - (b.time as number));
 
-      requestCache.set(cacheKey, { data: result, timestamp: Date.now() });
-      return result;
+          requestCache.set(cacheKey, { data: result, timestamp: Date.now() });
+          saveToStorage(cacheKey, result);
+          setDataSource("live");
+          return result;
+        }
+        console.warn("TwelveData API:", json.message || "No values");
+      } catch (e) {
+        console.warn("TwelveData fetch error:", e);
+      }
+
+      // 3. Fallback: localStorage cache
+      const stored = loadFromStorage(cacheKey);
+      if (stored && stored.length > 0) {
+        requestCache.set(cacheKey, { data: stored, timestamp: Date.now() });
+        setDataSource("cached");
+        return stored;
+      }
+
+      // 4. Fallback: simulated data so chart always renders
+      const fallback = generateFallbackCandles(tdSymbol);
+      requestCache.set(cacheKey, { data: fallback, timestamp: Date.now() });
+      setDataSource("simulated");
+      return fallback;
     },
     staleTime: CACHE_TTL,
-    refetchInterval: 90_000, // every 90s to stay within rate limits
+    refetchInterval: 90_000,
     retry: 1,
   });
 
@@ -213,7 +266,9 @@ export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaSt
         <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => refetch()}>
           <RefreshCw className="h-3 w-3" />
         </Button>
-        <Badge variant="outline" className="text-[10px] border-primary/30 text-primary ml-auto">Twelve Data Live</Badge>
+        <Badge variant="outline" className={`text-[10px] ml-auto ${dataSource === "live" ? "border-success/30 text-success" : dataSource === "cached" ? "border-primary/30 text-primary" : "border-warning/30 text-warning"}`}>
+          {dataSource === "live" ? "● Live" : dataSource === "cached" ? "● Cached" : "● Simulated"}
+        </Badge>
       </div>
 
       {/* Hauza Signal Banner */}
@@ -255,12 +310,8 @@ export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaSt
       <Card className="bg-card border-border/50 overflow-hidden">
         {isLoading ? (
           <Skeleton className="w-full h-[60vh] min-h-[400px]" />
-        ) : candles && candles.length > 0 ? (
-          <div ref={containerRef} className="w-full h-[60vh] min-h-[400px] max-h-[700px]" />
         ) : (
-          <div className="w-full h-[60vh] min-h-[400px] flex items-center justify-center text-muted-foreground text-sm">
-            No data available — API quota may be exceeded. Data resets per-minute.
-          </div>
+          <div ref={containerRef} className="w-full h-[60vh] min-h-[400px] max-h-[700px]" />
         )}
       </Card>
 
