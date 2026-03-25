@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
-import { AlphaVantageChart } from "@/components/chart/AlphaVantageChart";
+import { TwelveDataChart } from "@/components/chart/TwelveDataChart";
 
 
 const CHART_STRATEGIES = [
@@ -73,7 +73,7 @@ export function GoldChartSection() {
           <GoldBotvioSignalButton />
         </div>
         <div className="lg:col-span-3">
-          <AlphaVantageChart symbol="XAUUSD" displaySymbol="XAU/USD" showHauzaStrategy />
+          <TwelveDataChart symbol="XAU/USD" displaySymbol="XAU/USD" showHauzaStrategy />
         </div>
       </div>
 
