@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar, ShieldAlert, Eye, EyeOff } from "lucide-react";
+import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar, ShieldAlert, Eye, EyeOff, BarChart3, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -81,6 +81,24 @@ export const AdminProfilesTab = () => {
       return data as SubscriptionInfo[];
     },
   });
+
+  // Fetch AI chart analysis usage counts per user
+  const { data: aiUsageCounts } = useQuery({
+    queryKey: ["admin-ai-usage-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chart_analyses")
+        .select("user_id");
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      data?.forEach(row => {
+        counts[row.user_id] = (counts[row.user_id] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
+  const getUserAiUsage = (userId: string) => aiUsageCounts?.[userId] || 0;
 
   const changePlan = useMutation({
     mutationFn: async ({ userId, planId, subId, expires }: { userId: string; planId: string; subId: string | null; expires: string }) => {
@@ -264,10 +282,11 @@ export const AdminProfilesTab = () => {
                     <TableHead><Phone className="h-3 w-3 inline mr-1" />WhatsApp</TableHead>
                   )}
                   <TableHead><Globe className="h-3 w-3 inline mr-1" />Country</TableHead>
-                  <TableHead>Current Plan</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead>Actions</TableHead>
+                   <TableHead>Current Plan</TableHead>
+                   <TableHead><BarChart3 className="h-3 w-3 inline mr-1" />AI Usage</TableHead>
+                   <TableHead>Expires</TableHead>
+                   <TableHead>Joined</TableHead>
+                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -307,6 +326,11 @@ export const AdminProfilesTab = () => {
                           {plan?.name || "Free"}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <BarChart3 className="h-3 w-3" /> {getUserAiUsage(p.user_id)} scans
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {sub?.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : "—"}
                       </TableCell>
@@ -314,15 +338,34 @@ export const AdminProfilesTab = () => {
                         {new Date(p.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        {isSuperAdmin ? (
-                          <Button size="sm" variant="outline" onClick={() => openPlanDialog(p)}>
-                            <Crown className="h-4 w-4 mr-1" /> Change Plan
-                          </Button>
-                        ) : (
-                          <Badge variant="outline" className="text-xs text-muted-foreground">
-                            <EyeOff className="h-3 w-3 mr-1" /> View Only
-                          </Badge>
-                        )}
+                        <div className="flex gap-1 flex-wrap">
+                          {isSuperAdmin && (
+                            <>
+                              <Button size="sm" variant="outline" onClick={() => openPlanDialog(p)}>
+                                <Crown className="h-4 w-4 mr-1" /> Plan
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  if (!p.email) return;
+                                  const { error } = await supabase.auth.resetPasswordForEmail(p.email, {
+                                    redirectTo: `${window.location.origin}/reset-password`,
+                                  });
+                                  if (error) toast.error(error.message);
+                                  else toast.success(`Password reset email sent to ${p.email}`);
+                                }}
+                              >
+                                <KeyRound className="h-4 w-4 mr-1" /> Reset PW
+                              </Button>
+                            </>
+                          )}
+                          {!isSuperAdmin && (
+                            <Badge variant="outline" className="text-xs text-muted-foreground">
+                              <EyeOff className="h-3 w-3 mr-1" /> View Only
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_permissions: {
+        Row: {
+          created_at: string
+          granted_by: string
+          id: string
+          permission: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by: string
+          id?: string
+          permission: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string
+          id?: string
+          permission?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       affiliate_earnings: {
         Row: {
           amount_usd: number
@@ -1758,6 +1782,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      flipping_challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string
+          current_balance: number
+          day_number: number
+          discipline_score: number
+          duration_days: number
+          ended_at: string | null
+          id: string
+          started_at: string
+          starting_balance: number
+          status: string
+          target_balance: number
+          title: string
+          total_trades: number
+          user_id: string
+          winning_trades: number
+        }
+        Insert: {
+          challenge_type: string
+          created_at?: string
+          current_balance?: number
+          day_number?: number
+          discipline_score?: number
+          duration_days?: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          starting_balance?: number
+          status?: string
+          target_balance?: number
+          title: string
+          total_trades?: number
+          user_id: string
+          winning_trades?: number
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string
+          current_balance?: number
+          day_number?: number
+          discipline_score?: number
+          duration_days?: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          starting_balance?: number
+          status?: string
+          target_balance?: number
+          title?: string
+          total_trades?: number
+          user_id?: string
+          winning_trades?: number
+        }
+        Relationships: []
       }
       follower_commands: {
         Row: {
