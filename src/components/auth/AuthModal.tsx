@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, User, Globe, Phone, Crown, Zap, Star, Gift } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -162,6 +163,27 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 </Label>
                 <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="bg-secondary/50" />
               </div>
+              <Button
+                type="button"
+                variant="link"
+                className="px-0 text-xs text-primary h-auto"
+                onClick={async () => {
+                  if (!email.trim()) {
+                    toast({ title: "Enter your email first", variant: "destructive" });
+                    return;
+                  }
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  if (error) {
+                    toast({ title: "Failed to send reset email", description: error.message, variant: "destructive" });
+                  } else {
+                    toast({ title: "Reset email sent!", description: "Check your inbox for a password reset link." });
+                  }
+                }}
+              >
+                Forgot password?
+              </Button>
               <Button type="submit" disabled={loading} className="w-full" variant="gold">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Signing in...</> : "Sign In"}
               </Button>
