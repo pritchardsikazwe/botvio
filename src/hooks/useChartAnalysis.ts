@@ -96,8 +96,8 @@ export const useChartUsageGate = () => {
   };
 };
 
-/** Guest-only daily limit (3 per day per IP via localStorage + IP fingerprint) */
-export const GUEST_DAILY_LIMIT = 3;
+/** Guest-only daily limit (1 per day per device — sign up for 2 more) */
+export const GUEST_DAILY_LIMIT = 1;
 
 /** Generate a simple device/IP fingerprint key */
 const getDeviceFingerprint = (): string => {
@@ -106,7 +106,6 @@ const getDeviceFingerprint = (): string => {
   ctx?.fillText("fp", 2, 2);
   const fp = canvas.toDataURL().slice(-20);
   const nav = `${navigator.language}-${navigator.hardwareConcurrency || 0}-${screen.width}x${screen.height}`;
-  // Simple hash
   let hash = 0;
   const raw = fp + nav;
   for (let i = 0; i < raw.length; i++) {
@@ -116,6 +115,35 @@ const getDeviceFingerprint = (): string => {
 };
 
 const GUEST_STORAGE_KEY = "botvio_guest_uploads";
+const DEVICE_LOCK_KEY = "botvio_device_email";
+
+/** Lock this device to a specific email once logged in */
+export const lockDeviceToEmail = (email: string) => {
+  const fp = getDeviceFingerprint();
+  const existing = localStorage.getItem(DEVICE_LOCK_KEY);
+  if (existing) {
+    try {
+      const data = JSON.parse(existing);
+      if (data.fp === fp && data.email !== email) {
+        // Different email on same device — flag it
+        console.warn("Device already locked to", data.email);
+      }
+    } catch {}
+  }
+  localStorage.setItem(DEVICE_LOCK_KEY, JSON.stringify({ fp, email }));
+};
+
+/** Check if current device is locked to a different email */
+export const isDeviceLockedToOtherEmail = (email: string): boolean => {
+  try {
+    const fp = getDeviceFingerprint();
+    const data = JSON.parse(localStorage.getItem(DEVICE_LOCK_KEY) || "{}");
+    if (data.fp === fp && data.email && data.email !== email) return true;
+    return false;
+  } catch {
+    return false;
+  }
+};
 
 export const getGuestUploadCount = (): number => {
   try {
