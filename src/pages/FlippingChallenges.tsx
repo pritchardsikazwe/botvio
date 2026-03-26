@@ -11,16 +11,20 @@ import {
   Shield, Target, Trophy, Brain, CalendarDays, CheckCircle2,
   TrendingUp, AlertTriangle, BarChart3, BookOpen, Clock3, Wallet,
   Flame, Star, Zap, Lock, Users, ArrowRight, Sparkles, Medal,
-  ChevronRight, Eye, LineChart, CircleDollarSign, Timer, Swords
+  ChevronRight, Eye, LineChart, CircleDollarSign, Timer, Swords, Loader2
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 const challengeCards = [
-  { title: "Beginner Flip", duration: "7 days", setup: "$10 → $50", risk: "Low", trades: "Max 2/day", focus: "Discipline first", icon: Shield, color: "border-primary/40 bg-primary/5", popular: false },
-  { title: "Smart Money", duration: "14 days", setup: "$20 → $100", risk: "Medium", trades: "Structure + liquidity", focus: "Confirmation entries", icon: Brain, color: "border-warning/40 bg-warning/5", popular: true },
-  { title: "Boom/Crash", duration: "14 days", setup: "$20 → $120", risk: "Strict", trades: "Spike hunting only", focus: "No revenge trading", icon: Zap, color: "border-destructive/40 bg-destructive/5", popular: false },
-  { title: "Binary Discipline", duration: "30 days", setup: "$50 → $300", risk: "Controlled", trades: "5–10 signals/day", focus: "Expiry precision", icon: Target, color: "border-success/40 bg-success/5", popular: false },
-  { title: "Weekly Sprint", duration: "7 days", setup: "$15 → $60", risk: "Low-Med", trades: "3/day max", focus: "Quick wins", icon: Timer, color: "border-blue-500/40 bg-blue-500/5", popular: false },
-  { title: "Gold Scalper", duration: "14 days", setup: "$30 → $150", risk: "Medium", trades: "XAU/USD only", focus: "Session timing", icon: CircleDollarSign, color: "border-yellow-500/40 bg-yellow-500/5", popular: true },
+  { title: "Beginner Flip", duration: "7 days", durationDays: 7, setup: "$10 → $50", start: 10, target: 50, risk: "Low", trades: "Max 2/day", focus: "Discipline first", icon: Shield, color: "border-primary/40 bg-primary/5", popular: false },
+  { title: "Smart Money", duration: "14 days", durationDays: 14, setup: "$20 → $100", start: 20, target: 100, risk: "Medium", trades: "Structure + liquidity", focus: "Confirmation entries", icon: Brain, color: "border-warning/40 bg-warning/5", popular: true },
+  { title: "Boom/Crash", duration: "14 days", durationDays: 14, setup: "$20 → $120", start: 20, target: 120, risk: "Strict", trades: "Spike hunting only", focus: "No revenge trading", icon: Zap, color: "border-destructive/40 bg-destructive/5", popular: false },
+  { title: "Binary Discipline", duration: "30 days", durationDays: 30, setup: "$50 → $300", start: 50, target: 300, risk: "Controlled", trades: "5–10 signals/day", focus: "Expiry precision", icon: Target, color: "border-success/40 bg-success/5", popular: false },
+  { title: "Weekly Sprint", duration: "7 days", durationDays: 7, setup: "$15 → $60", start: 15, target: 60, risk: "Low-Med", trades: "3/day max", focus: "Quick wins", icon: Timer, color: "border-blue-500/40 bg-blue-500/5", popular: false },
+  { title: "Gold Scalper", duration: "14 days", durationDays: 14, setup: "$30 → $150", start: 30, target: 150, risk: "Medium", trades: "XAU/USD only", focus: "Session timing", icon: CircleDollarSign, color: "border-yellow-500/40 bg-yellow-500/5", popular: true },
 ];
 
 const dailyChecklist = [
@@ -57,6 +61,54 @@ const strategyGuidance = [
 export default function FlippingChallenges() {
   const [activeTab, setActiveTab] = useState("challenges");
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+  const [startingChallenge, setStartingChallenge] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const { data: activeChallenge, refetch: refetchChallenge } = useQuery({
+    queryKey: ["my-active-challenge", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from("flipping_challenges")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const startChallenge = async (card: typeof challengeCards[0]) => {
+    if (!user) {
+      toast({ title: "Sign in to join a challenge", variant: "destructive" });
+      return;
+    }
+    if (activeChallenge) {
+      toast({ title: "You already have an active challenge", description: "Complete or end your current challenge first.", variant: "destructive" });
+      return;
+    }
+    setStartingChallenge(card.title);
+    const { error } = await supabase.from("flipping_challenges").insert({
+      user_id: user.id,
+      challenge_type: card.title.toLowerCase().replace(/\s+/g, "_"),
+      title: card.title,
+      duration_days: card.durationDays,
+      starting_balance: card.start,
+      target_balance: card.target,
+      current_balance: card.start,
+    });
+    setStartingChallenge(null);
+    if (error) {
+      toast({ title: "Failed to start challenge", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: `${card.title} Challenge Started! 🔥`, description: `Target: ${card.setup} in ${card.duration}` });
+      refetchChallenge();
+    }
+  };
 
   const toggleCheck = (idx: number) => {
     setCheckedItems(prev => {
@@ -198,7 +250,19 @@ export default function FlippingChallenges() {
                       <div className="flex items-center gap-1 text-muted-foreground"><BarChart3 className="h-3 w-3" /> {c.trades}</div>
                     </div>
                     <p className="text-xs text-muted-foreground flex items-center gap-1"><Target className="h-3 w-3" /> Focus: {c.focus}</p>
-                    <Button className="w-full font-bold"><Swords className="h-4 w-4 mr-2" /> Join Challenge</Button>
+                    <Button
+                      className="w-full font-bold"
+                      disabled={startingChallenge === c.title || !!activeChallenge}
+                      onClick={() => startChallenge(c)}
+                    >
+                      {startingChallenge === c.title ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Starting...</>
+                      ) : activeChallenge ? (
+                        <><Lock className="h-4 w-4 mr-2" /> Challenge Active</>
+                      ) : (
+                        <><Swords className="h-4 w-4 mr-2" /> Join Challenge</>
+                      )}
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
