@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar, ShieldAlert, Eye, EyeOff } from "lucide-react";
+import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar, ShieldAlert, Eye, EyeOff, BarChart3, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -81,6 +81,24 @@ export const AdminProfilesTab = () => {
       return data as SubscriptionInfo[];
     },
   });
+
+  // Fetch AI chart analysis usage counts per user
+  const { data: aiUsageCounts } = useQuery({
+    queryKey: ["admin-ai-usage-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chart_analyses")
+        .select("user_id");
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      data?.forEach(row => {
+        counts[row.user_id] = (counts[row.user_id] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
+  const getUserAiUsage = (userId: string) => aiUsageCounts?.[userId] || 0;
 
   const changePlan = useMutation({
     mutationFn: async ({ userId, planId, subId, expires }: { userId: string; planId: string; subId: string | null; expires: string }) => {
