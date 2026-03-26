@@ -282,10 +282,11 @@ export const AdminProfilesTab = () => {
                     <TableHead><Phone className="h-3 w-3 inline mr-1" />WhatsApp</TableHead>
                   )}
                   <TableHead><Globe className="h-3 w-3 inline mr-1" />Country</TableHead>
-                  <TableHead>Current Plan</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead>Actions</TableHead>
+                   <TableHead>Current Plan</TableHead>
+                   <TableHead><BarChart3 className="h-3 w-3 inline mr-1" />AI Usage</TableHead>
+                   <TableHead>Expires</TableHead>
+                   <TableHead>Joined</TableHead>
+                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
