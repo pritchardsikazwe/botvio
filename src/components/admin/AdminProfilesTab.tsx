@@ -326,6 +326,11 @@ export const AdminProfilesTab = () => {
                           {plan?.name || "Free"}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <BarChart3 className="h-3 w-3" /> {getUserAiUsage(p.user_id)} scans
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {sub?.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : "—"}
                       </TableCell>
@@ -333,15 +338,34 @@ export const AdminProfilesTab = () => {
                         {new Date(p.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        {isSuperAdmin ? (
-                          <Button size="sm" variant="outline" onClick={() => openPlanDialog(p)}>
-                            <Crown className="h-4 w-4 mr-1" /> Change Plan
-                          </Button>
-                        ) : (
-                          <Badge variant="outline" className="text-xs text-muted-foreground">
-                            <EyeOff className="h-3 w-3 mr-1" /> View Only
-                          </Badge>
-                        )}
+                        <div className="flex gap-1 flex-wrap">
+                          {isSuperAdmin && (
+                            <>
+                              <Button size="sm" variant="outline" onClick={() => openPlanDialog(p)}>
+                                <Crown className="h-4 w-4 mr-1" /> Plan
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  if (!p.email) return;
+                                  const { error } = await supabase.auth.resetPasswordForEmail(p.email, {
+                                    redirectTo: `${window.location.origin}/reset-password`,
+                                  });
+                                  if (error) toast.error(error.message);
+                                  else toast.success(`Password reset email sent to ${p.email}`);
+                                }}
+                              >
+                                <KeyRound className="h-4 w-4 mr-1" /> Reset PW
+                              </Button>
+                            </>
+                          )}
+                          {!isSuperAdmin && (
+                            <Badge variant="outline" className="text-xs text-muted-foreground">
+                              <EyeOff className="h-3 w-3 mr-1" /> View Only
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
