@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -177,7 +180,9 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
   const [selectedBrokers, setSelectedBrokers] = useState<string[]>(["deriv", "weltrade", "exness"]);
   const [confidence, setConfidence] = useState("");
   const [reason, setReason] = useState("");
-  const [expiresIn, setExpiresIn] = useState("24"); // Hours until expiration
+  const [expiresIn, setExpiresIn] = useState("24");
+  const [saveToHistory, setSaveToHistory] = useState(true);
+  const [autoTrackResult, setAutoTrackResult] = useState(true);
 
   const createSignal = useCreateSignal();
 
@@ -192,6 +197,8 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
     );
   };
 
+  const { user } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -199,7 +206,6 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
       return;
     }
 
-    // Calculate expiration time
     const expiresAt = expiresIn && expiresIn !== "none" ? new Date(Date.now() + parseInt(expiresIn) * 60 * 60 * 1000).toISOString() : undefined;
 
     await createSignal.mutateAsync({
@@ -216,7 +222,24 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
       expires_at: expiresAt,
     });
 
-    // Reset form
+    // Save to history if toggled
+    if (saveToHistory) {
+      try {
+        await supabase.from("signals_history").insert({
+          pair: symbol,
+          signal_type: direction,
+          entry_price: parseFloat(entryPrice),
+          take_profit: takeProfit ? parseFloat(takeProfit) : null,
+          stop_loss: stopLoss ? parseFloat(stopLoss) : null,
+          result: "RUNNING",
+          source: "MANUAL",
+          posted_by: user?.id || null,
+        });
+      } catch (err) {
+        console.error("Failed to save to history:", err);
+      }
+    }
+
     setSymbol("");
     setEntryPrice("");
     setStopLoss("");
@@ -420,6 +443,30 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
                   </label>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Save to History toggles */}
+          <div className="flex flex-wrap gap-6">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="save-history"
+                checked={saveToHistory}
+                onCheckedChange={(v) => setSaveToHistory(!!v)}
+              />
+              <label htmlFor="save-history" className="text-sm font-medium">
+                ✅ Save to History
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="auto-track"
+                checked={autoTrackResult}
+                onCheckedChange={(v) => setAutoTrackResult(!!v)}
+              />
+              <label htmlFor="auto-track" className="text-sm font-medium">
+                🔄 Auto Track Result
+              </label>
             </div>
           </div>
 
