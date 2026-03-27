@@ -56,6 +56,7 @@ import { AdminNewsEventsTab } from "@/components/admin/AdminNewsEventsTab";
 import { AdminProfilesTab } from "@/components/admin/AdminProfilesTab";
 import { AdminNewsletterTab } from "@/components/admin/AdminNewsletterTab";
 import { AdminRolesTab } from "@/components/admin/AdminRolesTab";
+import { AdminSignalHistoryTab } from "@/components/admin/AdminSignalHistoryTab";
 
 interface Provider {
   id: string;
@@ -1035,6 +1036,10 @@ const Admin = () => {
               <Shield className="w-4 h-4" />
               Admin Roles
             </TabsTrigger>
+            <TabsTrigger value="signal_history" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Signal History
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1085,6 +1090,11 @@ const Admin = () => {
           {/* Admin Roles Tab */}
           <TabsContent value="admin_roles">
             <AdminRolesTab />
+          </TabsContent>
+
+          {/* Signal History Tab */}
+          <TabsContent value="signal_history">
+            <AdminSignalHistoryTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

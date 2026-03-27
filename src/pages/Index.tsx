@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
+import { SignalsPerformanceTracker } from "@/components/signals/SignalsPerformanceTracker";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { MarketDashboard } from "@/components/trading/MarketDashboard";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
@@ -218,6 +219,11 @@ const Index = () => {
         {/* 1 — Latest Trading Signals */}
         <section>
           <HomeSignalsWidget />
+        </section>
+
+        {/* 2 — Trading Results */}
+        <section>
+          <SignalsPerformanceTracker />
         </section>
 
         {/* 2 — AI Chart Analysis */}

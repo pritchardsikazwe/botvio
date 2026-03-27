@@ -151,6 +151,10 @@ export const Header = () => {
                       <Wallet className="w-4 h-4 mr-2" />
                       Trading Accounts
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/connections')}>
+                      <ArrowLeftRight className="w-4 h-4 mr-2" />
+                      Broker Connections / MT5 Bridge
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/strategies')}>
                       <BarChart3 className="w-4 h-4 mr-2" />
                       Strategies

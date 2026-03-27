@@ -4075,6 +4075,41 @@ export type Database = {
         }
         Relationships: []
       }
+      signal_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_approved: boolean
+          signal_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          signal_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          signal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_comments_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signal_quality_logs: {
         Row: {
           approved: boolean
@@ -4124,6 +4159,71 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "signal_quality_logs_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signals_history: {
+        Row: {
+          created_at: string
+          date_closed: string | null
+          date_posted: string
+          entry_price: number
+          id: string
+          pair: string
+          posted_by: string | null
+          profit_pips: number | null
+          result: string
+          screenshot_url: string | null
+          signal_id: string | null
+          signal_type: string
+          source: string
+          stop_loss: number | null
+          strategy_name: string | null
+          take_profit: number | null
+        }
+        Insert: {
+          created_at?: string
+          date_closed?: string | null
+          date_posted?: string
+          entry_price: number
+          id?: string
+          pair: string
+          posted_by?: string | null
+          profit_pips?: number | null
+          result?: string
+          screenshot_url?: string | null
+          signal_id?: string | null
+          signal_type: string
+          source?: string
+          stop_loss?: number | null
+          strategy_name?: string | null
+          take_profit?: number | null
+        }
+        Update: {
+          created_at?: string
+          date_closed?: string | null
+          date_posted?: string
+          entry_price?: number
+          id?: string
+          pair?: string
+          posted_by?: string | null
+          profit_pips?: number | null
+          result?: string
+          screenshot_url?: string | null
+          signal_id?: string | null
+          signal_type?: string
+          source?: string
+          stop_loss?: number | null
+          strategy_name?: string | null
+          take_profit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signals_history_signal_id_fkey"
             columns: ["signal_id"]
             isOneToOne: false
             referencedRelation: "trading_signals"
