@@ -312,10 +312,10 @@ const NewsCalendar = () => {
               <CardTitle className="text-sm font-bold flex items-center gap-2">📌 Pre-Week Preparation</CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-1.5">
-              <p>• <span className="text-foreground font-medium">Monday:</span> Set weekly bias based on PMI + Ifo data. Mark key S/R levels.</p>
-              <p>• <span className="text-foreground font-medium">Tue-Wed:</span> Trade UK CPI reaction. Scalp opportunities on quieter Wednesday.</p>
-              <p>• <span className="text-foreground font-medium">Thursday:</span> GDP trade — position for Friday PCE based on GDP outcome.</p>
-              <p>• <span className="text-foreground font-medium">Friday:</span> Core PCE — THE event. Wait for initial spike, trade the reaction, close before weekend.</p>
+              <p>• <span className="text-foreground font-medium">Monday:</span> Set weekly bias from Eurozone CPI. Mark key S/R levels on USD pairs.</p>
+              <p>• <span className="text-foreground font-medium">Tuesday:</span> ISM Manufacturing + JOLTS — trade the reaction, set NFP expectations.</p>
+              <p>• <span className="text-foreground font-medium">Wednesday:</span> ADP Employment — NFP preview. Position for Friday based on ADP outcome.</p>
+              <p>• <span className="text-foreground font-medium">Friday:</span> NFP — THE event. Wait for initial spike, trade the reaction, close before weekend.</p>
             </CardContent>
           </Card>
 
@@ -328,8 +328,8 @@ const NewsCalendar = () => {
                 <Badge variant="outline" className="text-[8px] w-fit border-primary/30 text-primary">Before News</Badge>
               </CardHeader>
               <CardContent className="text-[11px] text-muted-foreground space-y-1.5">
-                <p>Place buy stop above resistance and sell stop below support before GDP/PCE release.</p>
-                <p>Best for <span className="text-foreground font-semibold">Thursday GDP and Friday PCE</span>.</p>
+                <p>Place buy stop above resistance and sell stop below support before NFP release.</p>
+                <p>Best for <span className="text-foreground font-semibold">Friday NFP and ISM Services</span>.</p>
                 <p className="text-destructive/80">⚠️ Risk: Slippage and whipsaws.</p>
                 <p className="text-success text-[10px] font-semibold mt-1">✅ Best for: Guaranteed volatility events</p>
               </CardContent>
@@ -343,8 +343,8 @@ const NewsCalendar = () => {
                 <Badge variant="outline" className="text-[8px] w-fit border-success/30 text-success">After News</Badge>
               </CardHeader>
               <CardContent className="text-[11px] text-muted-foreground space-y-1.5">
-                <p>Wait for PCE spike → if price overshoots → fade when exhaustion candle prints.</p>
-                <p>Example: Hot PCE → USD spikes → <span className="text-foreground font-semibold">fade when exhausted</span>.</p>
+                <p>Wait for NFP spike → if price overshoots → fade when exhaustion candle prints.</p>
+                <p>Example: Strong NFP → USD spikes → <span className="text-foreground font-semibold">fade when exhausted</span>.</p>
                 <p className="text-destructive/80">⚠️ Risk: Patience required.</p>
                 <p className="text-success text-[10px] font-semibold mt-1">✅ Best for: Experienced traders</p>
               </CardContent>
@@ -358,7 +358,7 @@ const NewsCalendar = () => {
                 <Badge variant="outline" className="text-[8px] w-fit border-warning/30 text-warning">Post News</Badge>
               </CardHeader>
               <CardContent className="text-[11px] text-muted-foreground space-y-1.5">
-                <p>If PCE aligns with USD trend → ride momentum after retracement.</p>
+                <p>If NFP aligns with USD trend → ride momentum after retracement.</p>
                 <p>Enter after <span className="text-foreground font-semibold">retracement</span> to avoid chasing.</p>
                 <p className="text-destructive/80">⚠️ Risk: False breakouts.</p>
                 <p className="text-success text-[10px] font-semibold mt-1">✅ Best for: Trend-following traders</p>
@@ -373,10 +373,10 @@ const NewsCalendar = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-1.5">
-              <p>• <span className="text-foreground font-medium">Use Smaller Lot Sizes:</span> PCE and GDP can widen spreads significantly — reduce by 50%.</p>
-              <p>• <span className="text-foreground font-medium">Set Wider Stops:</span> Use 1.5-2x normal SL on Thursday/Friday events.</p>
+              <p>• <span className="text-foreground font-medium">Use Smaller Lot Sizes:</span> NFP and ISM can widen spreads significantly — reduce by 50%.</p>
+              <p>• <span className="text-foreground font-medium">Set Wider Stops:</span> Use 1.5-2x normal SL on Friday NFP.</p>
               <p>• <span className="text-foreground font-medium">Avoid Overtrading:</span> 1-2 trades per event is enough.</p>
-              <p>• <span className="text-foreground font-medium">Close Before Weekend:</span> Q1 end + PCE Friday — close all by 4pm EST.</p>
+              <p>• <span className="text-foreground font-medium">Close Before Weekend:</span> NFP Friday — close all by 4pm EST.</p>
               <p>• <span className="text-foreground font-medium">Max Risk per Event:</span> Never risk more than 1-2% on a single news trade.</p>
             </CardContent>
           </Card>
@@ -389,8 +389,8 @@ const NewsCalendar = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-1">
-              <p><span className="text-foreground font-medium">Event:</span> Core PCE Price Index (Friday Mar 28)</p>
-              <p><span className="text-foreground font-medium">Forecast:</span> +0.3% MoM | <span className="text-foreground font-medium">If Actual:</span> +0.4% (hotter)</p>
+              <p><span className="text-foreground font-medium">Event:</span> Non-Farm Payrolls (Friday Apr 4)</p>
+              <p><span className="text-foreground font-medium">Forecast:</span> ~200K jobs | <span className="text-foreground font-medium">If Actual:</span> 250K+ (stronger)</p>
               <p><span className="text-foreground font-medium">Reaction:</span> USD strengthens → EUR/USD drops, Gold falls</p>
               <p><span className="text-foreground font-medium">Strategy:</span> Short EUR/USD after retracement to broken support, target next level.</p>
               <p><span className="text-foreground font-medium">Risk:</span> SL 25 pips above entry, TP 50 pips below = 1:2 RR</p>
@@ -405,7 +405,7 @@ const NewsCalendar = () => {
               <p className="text-xs text-foreground font-semibold flex items-start gap-2">
                 <ArrowRight className="h-4 w-4 text-success shrink-0 mt-0.5" />
                 <span>
-                  ✅ <strong>Week Summary:</strong> Core PCE on Friday is THE event. Use Mon-Wed to set bias, Thu GDP to confirm direction, and Fri PCE for the big move. Close everything before the weekend — it's quarter-end and liquidity will be thin.
+                  ✅ <strong>Week Summary:</strong> NFP on Friday is THE event. Use Mon-Wed to set bias with ISM + ADP, Thu to confirm direction, and Fri NFP for the big move. Close everything before the weekend — Q2 just started and positioning will be aggressive.
                 </span>
               </p>
             </CardContent>
