@@ -223,7 +223,7 @@ const NewsCalendar = () => {
           <Card className="bg-card border-primary/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-primary" /> 📅 Weekly Trading Plan — Mar 24-28
+                <CalendarDays className="h-4 w-4 text-primary" /> 📅 Weekly Trading Plan — Mar 31 – Apr 4
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
