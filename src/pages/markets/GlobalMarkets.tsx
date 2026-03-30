@@ -34,14 +34,14 @@ const GlobalMarkets = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Global Market Intelligence — Week of Mar 24-28 | Botvio" description="US, Europe, Middle East, Asia, Crypto & Africa market signals, analysis & trading intelligence." />
+      <SEOHead title="Global Market Intelligence — Week of Mar 31 – Apr 4 | Botvio" description="US, Europe, Middle East, Asia, Crypto & Africa market signals, analysis & trading intelligence. NFP week." />
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="animate-fade-in">
           <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
             <Globe className="h-6 w-6 text-primary" /> Global Market Intelligence
           </h1>
-          <p className="text-sm text-muted-foreground">Week of Mar 24-28, 2026 • Core PCE Friday • Q1 End Flows</p>
+          <p className="text-sm text-muted-foreground">Week of Mar 31 – Apr 4, 2026 • NFP Friday • Q2 Start Flows</p>
         </div>
 
         {/* Live Ticker Strip */}
@@ -84,10 +84,10 @@ const GlobalMarkets = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
-                { title: "Core PCE Friday", desc: "Fed's preferred inflation gauge — THE event of the week. All USD pairs + Gold.", badge: "HIGH", color: "border-destructive/30" },
-                { title: "US GDP Thursday", desc: "Final Q4 revision. Confirms economic strength or weakness.", badge: "HIGH", color: "border-warning/30" },
-                { title: "UK CPI Tuesday", desc: "BOE rate path depends on this. GBP/USD key mover.", badge: "HIGH", color: "border-primary/30" },
-                { title: "Q1 End Flows", desc: "Quarter-end rebalancing = erratic moves. Be cautious Thursday-Friday.", badge: "CAUTION", color: "border-warning/30" },
+                { title: "NFP Friday", desc: "Non-Farm Payrolls — THE biggest event of the month. All USD pairs + Gold + Indices.", badge: "HIGH", color: "border-destructive/30" },
+                { title: "ISM Manufacturing Tue", desc: "Factory sector health. Key for USD direction early in the week.", badge: "HIGH", color: "border-warning/30" },
+                { title: "ADP Employment Wed", desc: "Private payrolls — NFP preview. Sets expectations for Friday.", badge: "HIGH", color: "border-primary/30" },
+                { title: "Q2 Start Flows", desc: "New quarter positioning = institutional moves. Watch for trend shifts.", badge: "CAUTION", color: "border-warning/30" },
               ].map((f, i) => (
                 <div key={i} className={`rounded-lg border ${f.color} p-3`}>
                   <div className="flex items-center justify-between mb-1">
@@ -120,7 +120,7 @@ const GlobalMarkets = () => {
                     { trigger: "US Yields ↑", effect: "USD strengthens, gold pressured, EM currencies weaken" },
                     { trigger: "BTC ↑", effect: "Risk-on signal, positive for Nasdaq, ETH follows" },
                     { trigger: "PCE Hot ↑", effect: "USD rallies, Gold drops, rate cut bets shrink" },
-                    { trigger: "GDP Miss ↓", effect: "Risk-off, equities sell, bonds rally, USD mixed" },
+                    { trigger: "NFP Strong ↑", effect: "USD rallies, equities mixed, Gold pressured" },
                   ].map((c, i) => (
                     <div key={i} className="flex items-center gap-3 text-xs p-2 rounded bg-secondary/50">
                       <span className="font-bold text-primary w-24 shrink-0">{c.trigger}</span>
@@ -277,11 +277,11 @@ const GlobalMarkets = () => {
                 <h2 className="text-sm font-extrabold text-foreground mb-3">🎯 Opportunity Radar — Top Trades This Week</h2>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   {[
-                    { name: "Gold", dir: "BUY", c: "87%", reason: "Safe-haven + PCE play" },
-                    { name: "Nasdaq", dir: "BUY", c: "82%", reason: "Tech momentum strong" },
-                    { name: "GBP/USD", dir: "BUY", c: "78%", reason: "If UK CPI hot" },
-                    { name: "EUR/USD", dir: "SELL", c: "71%", reason: "Weak German data" },
-                    { name: "Bitcoin", dir: "BUY", c: "85%", reason: "Risk-on continuation" },
+                    { name: "Gold", dir: "BUY", c: "87%", reason: "Safe-haven + NFP play" },
+                    { name: "Nasdaq", dir: "BUY", c: "82%", reason: "Tech momentum Q2 start" },
+                    { name: "GBP/USD", dir: "BUY", c: "78%", reason: "USD weakness if NFP miss" },
+                    { name: "EUR/USD", dir: "SELL", c: "71%", reason: "ECB dovish + USD flows" },
+                    { name: "Bitcoin", dir: "BUY", c: "85%", reason: "Risk-on Q2 positioning" },
                   ].map((t) => (
                     <div key={t.name} className={`p-3 rounded-lg text-center ${t.dir === "BUY" ? "bg-success/10 border border-success/20" : "bg-destructive/10 border border-destructive/20"}`}>
                       <p className="font-bold text-foreground text-sm">{t.name}</p>
@@ -298,20 +298,20 @@ const GlobalMarkets = () => {
             <TradingTipsCard
               title="Global Market Do's & Don'ts — This Week"
               dos={[
-                "Focus on Core PCE Friday — it's THE event of the week",
-                "Use Mon-Wed to set directional bias based on PMI + CPI data",
+                "Focus on NFP Friday — it's THE event of the month",
+                "Use Mon-Wed ISM + ADP to set directional bias",
                 "Check cross-market correlations before every trade",
                 "Trade during peak London/NY overlap for best liquidity",
-                "Close positions before weekend — Q1 end flows are unpredictable",
+                "Close positions before weekend — Q2 start flows can be volatile",
               ]}
               donts={[
-                "Don't hold large positions through Thursday GDP + Friday PCE",
-                "Don't ignore UK CPI Tuesday — GBP pairs will move sharply",
+                "Don't hold large positions through Friday NFP",
+                "Don't ignore ISM Tuesday — USD pairs will move sharply",
                 "Avoid trading illiquid markets during off-hours this week",
-                "Don't assume Q1 end flows are directional — they're often chaotic",
+                "Don't assume Q2 start flows are directional — they're often chaotic",
                 "Never risk more than 1-2% on a single news-driven trade",
               ]}
-              proTip="This week is all about Friday Core PCE. Everything before that is positioning. Keep risk tight Mon-Thu and save capital for the main event."
+              proTip="This week is all about Friday NFP. Everything before that is positioning. Keep risk tight Mon-Thu and save capital for the main event."
             />
           </>
         )}
