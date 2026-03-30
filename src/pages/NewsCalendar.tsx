@@ -116,15 +116,15 @@ const NewsCalendar = () => {
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Flame className="h-4 w-4 text-destructive" /> Core PCE Price Index (Friday)
+                <Flame className="h-4 w-4 text-destructive" /> Non-Farm Payrolls (Friday)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-muted-foreground">
-              <p>The Fed's <span className="text-foreground font-semibold">preferred inflation gauge</span>. Expected +0.3% MoM for February.</p>
-              <p>Hot reading → USD strength, Gold weakness. Cool reading → rate cut bets rise, Gold + equities rally.</p>
+              <p>THE <span className="text-foreground font-semibold">biggest USD event of the month</span>. Expected ~200K jobs added.</p>
+              <p>Strong NFP → USD rally, Gold dip. Weak NFP → rate cut bets soar, Gold + equities rally.</p>
               <div className="flex gap-2">
                 <Badge variant="outline" className={IMPACT_COLORS["High"]}>High Impact</Badge>
-                <Badge variant="outline" className="text-[10px]">EUR/USD • GBP/USD • XAU/USD</Badge>
+                <Badge variant="outline" className="text-[10px]">EUR/USD • XAU/USD • US30</Badge>
               </div>
             </CardContent>
           </Card>
@@ -132,15 +132,15 @@ const NewsCalendar = () => {
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" /> US GDP Final (Thursday)
+                <BarChart3 className="h-4 w-4 text-primary" /> ISM Manufacturing PMI (Tuesday)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-muted-foreground">
-              <p>Final Q4 2025 GDP revision. Expected <span className="text-foreground font-semibold">+2.3% annualized</span>.</p>
-              <p>Upward revision = USD strength + equity support. Downward = risk-off sentiment.</p>
+              <p>Factory sector health. <span className="text-foreground font-semibold">Above 50 = expansion</span>. Below 50 = contraction.</p>
+              <p>Strong reading = USD bullish + equities supported. Weak = risk-off.</p>
               <div className="flex gap-2">
                 <Badge variant="outline" className={IMPACT_COLORS["High"]}>High Impact</Badge>
-                <Badge variant="outline" className="text-[10px]">US30 • NAS100 • USD pairs</Badge>
+                <Badge variant="outline" className="text-[10px]">EUR/USD • USD/JPY • NAS100</Badge>
               </div>
             </CardContent>
           </Card>
@@ -148,15 +148,15 @@ const NewsCalendar = () => {
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-success" /> UK CPI (Tuesday)
+                <TrendingUp className="h-4 w-4 text-success" /> ADP Employment (Wednesday)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-muted-foreground">
-              <p>UK inflation data. If <span className="text-foreground font-semibold">sticky above target</span>, BOE delays rate cuts → GBP strength.</p>
-              <p>Below forecast → rate cut expectations rise, GBP weakens.</p>
+              <p>Private payrolls — <span className="text-foreground font-semibold">NFP preview</span>. Sets expectations for Friday.</p>
+              <p>Strong ADP → markets position for strong NFP. Weak → early positioning for dovish Fed.</p>
               <div className="flex gap-2">
                 <Badge variant="outline" className={IMPACT_COLORS["High"]}>High Impact</Badge>
-                <Badge variant="outline" className="text-[10px]">GBP/USD • EUR/GBP</Badge>
+                <Badge variant="outline" className="text-[10px]">XAU/USD • GBP/USD • EUR/USD</Badge>
               </div>
             </CardContent>
           </Card>
@@ -164,14 +164,14 @@ const NewsCalendar = () => {
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Globe className="h-4 w-4 text-warning" /> German Ifo + Flash PMIs (Monday)
+                <Globe className="h-4 w-4 text-warning" /> Eurozone CPI Flash (Monday)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-muted-foreground">
-              <p>Sets the tone for the week. Weak German data = EUR under pressure. Strong PMIs = risk-on.</p>
+              <p>Sets EUR direction for the week. Hot CPI = ECB stays hawkish → EUR strength.</p>
               <div className="flex gap-2">
                 <Badge variant="outline" className={IMPACT_COLORS["High"]}>High Impact</Badge>
-                <Badge variant="outline" className="text-[10px]">EUR/USD • DAX • S&P500</Badge>
+                <Badge variant="outline" className="text-[10px]">EUR/USD • EUR/GBP • DAX</Badge>
               </div>
             </CardContent>
           </Card>
