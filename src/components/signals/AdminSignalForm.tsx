@@ -234,6 +234,8 @@ export const AdminSignalForm = ({ onSuccess }: AdminSignalFormProps) => {
           result: "RUNNING",
           source: "MANUAL",
           posted_by: user?.id || null,
+          date_posted: new Date().toISOString(),
+          strategy_name: reason ? `${symbol} ${direction}` : null,
         });
       } catch (err) {
         console.error("Failed to save to history:", err);

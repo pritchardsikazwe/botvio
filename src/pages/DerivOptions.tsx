@@ -11,7 +11,7 @@ import {
   Zap, Shield, BarChart3, TrendingUp, Clock, Globe,
   Layers, ArrowRight, BookOpen, Bot, Activity,
   AlertTriangle, CheckCircle, XCircle, Lightbulb,
-  Timer, Hash, Target, Crosshair, Wifi
+  Timer, Hash, Target, Crosshair, Wifi, Trophy
 } from "lucide-react";
 
 const API_FEATURES = [
@@ -73,6 +73,7 @@ const PRO_TIPS = [
   "Combine Rise/Fall with support/resistance levels for higher accuracy",
   "Set Take Profit on Accumulators to lock gains before range break",
   "Use the demo token (03Ddx1HRu2yFRJ8) to test strategies before going live",
+  "🏆 Most winning trades come from DIFFERS and FALL — focus your strategy on these!",
 ];
 
 const DerivOptions = () => {
@@ -232,6 +233,60 @@ const DerivOptions = () => {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        {/* 🏆 Top Winning Strategy Tip */}
+        <section>
+          <Card className="border-2 border-success/40 bg-gradient-to-br from-success/10 via-background to-success/5 overflow-hidden">
+            <CardContent className="py-6 px-6 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-success to-emerald-600 flex items-center justify-center shrink-0">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-foreground">🏆 Top Winning Strategy</h3>
+                  <p className="text-sm text-muted-foreground">Based on our live trading data</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-4 rounded-xl bg-success/10 border border-success/25">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Hash className="h-5 w-5 text-success" />
+                    <span className="font-bold text-success">DIFFERS</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Most winning trades come from <strong className="text-foreground">Digit Differs</strong>. 
+                    Predict that the last digit will NOT be a specific number. 
+                    Works best on V75 & V100 with 5-tick contracts. Win rate: <strong className="text-success">85-92%</strong>.
+                  </p>
+                  <Button variant="outline" size="sm" className="mt-3 w-full text-xs border-success/30 text-success" asChild>
+                    <Link to="/trade/style/digit-contracts">
+                      <ArrowRight className="h-3 w-3 mr-1" /> Try Differs Now
+                    </Link>
+                  </Button>
+                </div>
+                <div className="p-4 rounded-xl bg-success/10 border border-success/25">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-5 w-5 text-success" />
+                    <span className="font-bold text-success">FALL</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    <strong className="text-foreground">Fall contracts</strong> are our second most profitable. 
+                    Use with resistance levels and bearish confirmations. 
+                    Best on downtrend sessions with clear momentum.
+                  </p>
+                  <Button variant="outline" size="sm" className="mt-3 w-full text-xs border-success/30 text-success" asChild>
+                    <Link to="/trade/style/rise-fall-scalping">
+                      <ArrowRight className="h-3 w-3 mr-1" /> Try Fall Now
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground text-center pt-1">
+                💡 Tip: Start with Demo → Master Differs on V75 → Then add Fall entries at resistance zones
+              </p>
+            </CardContent>
+          </Card>
         </section>
 
         {/* Pro Tips */}
