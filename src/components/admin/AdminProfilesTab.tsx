@@ -88,17 +88,20 @@ export const AdminProfilesTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("chart_analyses")
-        .select("user_id");
+        .select("user_id, created_at");
       if (error) throw error;
-      const counts: Record<string, number> = {};
+      const today = new Date().toISOString().slice(0, 10);
+      const counts: Record<string, { total: number; today: number }> = {};
       data?.forEach(row => {
-        counts[row.user_id] = (counts[row.user_id] || 0) + 1;
+        if (!counts[row.user_id]) counts[row.user_id] = { total: 0, today: 0 };
+        counts[row.user_id].total += 1;
+        if (row.created_at?.slice(0, 10) === today) counts[row.user_id].today += 1;
       });
       return counts;
     },
   });
 
-  const getUserAiUsage = (userId: string) => aiUsageCounts?.[userId] || 0;
+  const getUserAiUsage = (userId: string) => aiUsageCounts?.[userId] || { total: 0, today: 0 };
 
   const changePlan = useMutation({
     mutationFn: async ({ userId, planId, subId, expires }: { userId: string; planId: string; subId: string | null; expires: string }) => {
@@ -327,9 +330,22 @@ export const AdminProfilesTab = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs gap-1">
-                          <BarChart3 className="h-3 w-3" /> {getUserAiUsage(p.user_id)} scans
-                        </Badge>
+                        {(() => {
+                          const usage = getUserAiUsage(p.user_id);
+                          const plan = getUserPlan(p.user_id);
+                          const planCode = plan?.code || "free";
+                          const limits: Record<string, string> = { free: "3/day", basic: "50/wk", standard: "100/mo", vip: "∞" };
+                          return (
+                            <div className="space-y-0.5">
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <BarChart3 className="h-3 w-3" /> {usage.total} total
+                              </Badge>
+                              <div className="text-[10px] text-muted-foreground">
+                                Today: {usage.today} • Limit: {limits[planCode] || "3/day"}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {sub?.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : "—"}
