@@ -166,44 +166,62 @@ export default function FlippingChallenges() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Starting", value: "$20", color: "" },
-                    { label: "Target", value: "$100", color: "text-success" },
-                    { label: "Current", value: "$62.40", color: "text-primary" },
-                    { label: "Day", value: "5 / 14", color: "" },
-                  ].map(s => (
-                    <div key={s.label} className="rounded-xl border border-border bg-card p-3">
-                      <p className="text-xs text-muted-foreground">{s.label}</p>
-                      <p className={`mt-1 text-xl font-bold text-foreground ${s.color}`}>{s.value}</p>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Challenge progress</span>
-                    <span className="font-bold text-primary">64%</span>
-                  </div>
-                  <Progress value={64} className="h-2" />
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-lg bg-success/10 p-2">
-                    <p className="text-lg font-bold text-success">71%</p>
-                    <p className="text-[10px] text-muted-foreground">Win Rate</p>
-                  </div>
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <p className="text-lg font-bold text-primary">84%</p>
-                    <p className="text-[10px] text-muted-foreground">Discipline</p>
-                  </div>
-                  <div className="rounded-lg bg-warning/10 p-2">
-                    <p className="text-lg font-bold text-warning">1.8</p>
-                    <p className="text-[10px] text-muted-foreground">Avg RR</p>
-                  </div>
-                </div>
-                <div className="rounded-xl border border-primary/20 bg-primary/10 p-3 text-sm text-foreground flex items-start gap-2">
-                  <Brain className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span className="text-muted-foreground text-xs">AI Coach: Your risk is tight — skip wide-stop setups. GBP/USD M15 looks clean today.</span>
-                </div>
+                {(() => {
+                  const ac = activeChallenge;
+                  const starting = ac ? ac.starting_balance : 20;
+                  const target = ac ? ac.target_balance : 100;
+                  const current = ac ? ac.current_balance : starting;
+                  const dayNum = ac ? ac.day_number : 0;
+                  const duration = ac ? ac.duration_days : 14;
+                  const progress = target > starting ? Math.min(100, Math.round(((current - starting) / (target - starting)) * 100)) : 0;
+                  const winRate = ac ? (ac.total_trades > 0 ? Math.round((ac.winning_trades / ac.total_trades) * 100) : 0) : 0;
+                  const discipline = ac ? ac.discipline_score : 0;
+
+                  return (
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { label: "Starting", value: `$${starting}`, color: "" },
+                          { label: "Target", value: `$${target}`, color: "text-success" },
+                          { label: "Current", value: `$${current.toFixed(2)}`, color: "text-primary" },
+                          { label: "Day", value: `${dayNum} / ${duration}`, color: "" },
+                        ].map(s => (
+                          <div key={s.label} className="rounded-xl border border-border bg-card p-3">
+                            <p className="text-xs text-muted-foreground">{s.label}</p>
+                            <p className={`mt-1 text-xl font-bold text-foreground ${s.color}`}>{s.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+                        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Challenge progress</span>
+                          <span className="font-bold text-primary">{progress}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="rounded-lg bg-success/10 p-2">
+                          <p className="text-lg font-bold text-success">{winRate}%</p>
+                          <p className="text-[10px] text-muted-foreground">Win Rate</p>
+                        </div>
+                        <div className="rounded-lg bg-primary/10 p-2">
+                          <p className="text-lg font-bold text-primary">{discipline}%</p>
+                          <p className="text-[10px] text-muted-foreground">Discipline</p>
+                        </div>
+                        <div className="rounded-lg bg-warning/10 p-2">
+                          <p className="text-lg font-bold text-warning">{ac ? ac.total_trades : 0}</p>
+                          <p className="text-[10px] text-muted-foreground">Trades</p>
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-primary/20 bg-primary/10 p-3 text-sm text-foreground flex items-start gap-2">
+                        <Brain className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <span className="text-muted-foreground text-xs">
+                          {ac ? `AI Coach: Day ${dayNum} of ${duration}. Balance at $${current.toFixed(2)} — ${current >= target ? "Target reached! 🎉" : current > starting ? "On track! Stay disciplined." : "Stay focused. Follow your strategy."}` : "AI Coach: Start a challenge below to begin tracking."}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </CardContent>
             </Card>
           </div>
