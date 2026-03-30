@@ -252,12 +252,12 @@ const NewsCalendar = () => {
             ]}
             donts={[
               "Don't trade 5 minutes before or after release — spreads widen",
-              "Don't hold large positions overnight before GDP/PCE",
+              "Don't hold large positions overnight before NFP Friday",
               "Never remove your stop loss during news volatility",
               "Don't chase the spike — wait for pullback confirmation",
               "Don't trade every news event — focus only on HIGH impact",
             ]}
-            proTip="Friday's Core PCE is THE event this week. Plan everything around it. Close risky positions Thursday night."
+            proTip="Friday's NFP is THE event this week. Plan everything around it. Close risky positions Thursday night."
           />
 
           <Card className="bg-card border-border/50">
@@ -268,12 +268,12 @@ const NewsCalendar = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               {[
-                { event: "Core PCE (Fri)", pairs: "EUR/USD, GBP/USD, XAU/USD, USD/JPY" },
-                { event: "US GDP (Thu)", pairs: "US30, NAS100, EUR/USD, USD/CAD" },
-                { event: "UK CPI (Tue)", pairs: "GBP/USD, EUR/GBP, FTSE 100" },
-                { event: "German Ifo (Mon)", pairs: "EUR/USD, DAX, EUR/GBP" },
-                { event: "Canada GDP (Fri)", pairs: "USD/CAD, CAD/JPY" },
-                { event: "Flash PMIs (Mon)", pairs: "EUR/USD, GBP/USD, S&P 500" },
+                { event: "NFP (Fri)", pairs: "EUR/USD, GBP/USD, XAU/USD, USD/JPY, US30" },
+                { event: "ISM Mfg (Tue)", pairs: "EUR/USD, USD/JPY, NAS100" },
+                { event: "ADP (Wed)", pairs: "XAU/USD, GBP/USD, EUR/USD" },
+                { event: "EU CPI (Mon)", pairs: "EUR/USD, EUR/GBP, DAX" },
+                { event: "ISM Services (Thu)", pairs: "US30, NAS100, USD pairs" },
+                { event: "Canada Jobs (Fri)", pairs: "USD/CAD, CAD/JPY" },
               ].map((p, i) => (
                 <div key={i} className="flex items-center justify-between text-xs p-2 rounded bg-secondary/50">
                   <span className="font-bold text-foreground">{p.event}</span>
@@ -293,10 +293,10 @@ const NewsCalendar = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-muted-foreground">
-              <div className="flex items-start gap-2"><Zap className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" /><p><span className="text-foreground font-semibold">Core PCE Whipsaw:</span> Friday PCE can cause sharp USD spikes before settling. Don't chase the first candle.</p></div>
-              <div className="flex items-start gap-2"><TrendingDown className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" /><p><span className="text-foreground font-semibold">End-of-Quarter Flows:</span> Q1 rebalancing may cause erratic moves across equities and bonds mid-week.</p></div>
+              <div className="flex items-start gap-2"><Zap className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" /><p><span className="text-foreground font-semibold">NFP Whipsaw:</span> Friday NFP can cause sharp USD spikes before settling. Don't chase the first candle.</p></div>
+              <div className="flex items-start gap-2"><TrendingDown className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" /><p><span className="text-foreground font-semibold">Q2 Start Flows:</span> New quarter rebalancing can cause erratic moves. Watch for institutional positioning.</p></div>
               <div className="flex items-start gap-2"><Globe className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" /><p><span className="text-foreground font-semibold">Geopolitical:</span> Middle East tensions ongoing. Oil-sensitive pairs (CAD, NOK) may gap on headlines.</p></div>
-              <div className="flex items-start gap-2"><Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" /><p><span className="text-foreground font-semibold">Liquidity:</span> Thin liquidity around GDP and PCE releases can widen spreads by 20-50x.</p></div>
+              <div className="flex items-start gap-2"><Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" /><p><span className="text-foreground font-semibold">Liquidity:</span> Thin liquidity around NFP and ISM releases can widen spreads by 20-50x.</p></div>
             </CardContent>
           </Card>
         </section>
