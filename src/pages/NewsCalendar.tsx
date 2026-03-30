@@ -182,7 +182,7 @@ const NewsCalendar = () => {
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-primary" /> 📊 Full Week Calendar — Mar 24-28, 2026
+                <CalendarDays className="h-4 w-4 text-primary" /> 📊 Full Week Calendar — Mar 31 – Apr 4, 2026
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
