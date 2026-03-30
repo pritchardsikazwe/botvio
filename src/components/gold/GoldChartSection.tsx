@@ -5,6 +5,7 @@ import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, Sh
 import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
 import { TwelveDataChart } from "@/components/chart/TwelveDataChart";
+import { TradingViewMiniWidget } from "@/components/chart/TradingViewMiniWidget";
 
 
 const CHART_STRATEGIES = [
@@ -67,7 +68,14 @@ export function GoldChartSection() {
 
   return (
     <div className="space-y-4">
-      {/* Botvio Signal + Alpha Vantage Chart */}
+      {/* Live TradingView Chart */}
+      <Card className="bg-card border-border/50 overflow-hidden">
+        <CardContent className="p-0">
+          <TradingViewMiniWidget symbol="XAUUSD" height={400} />
+        </CardContent>
+      </Card>
+
+      {/* Botvio Signal + Twelve Data Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-1">
           <GoldBotvioSignalButton />
