@@ -11,17 +11,17 @@ import {
 import { useEffect, useState } from "react";
 
 const CALENDAR_EVENTS = [
-  { date: "Mar 24 (Mon)", currency: "EUR", event: "German Ifo Business Climate", impact: "High", implication: "EUR strength gauge, impacts DAX" },
-  { date: "Mar 24 (Mon)", currency: "USD", event: "S&P Global PMI Flash", impact: "High", implication: "USD pairs — manufacturing/services outlook" },
-  { date: "Mar 25 (Tue)", currency: "USD", event: "Consumer Confidence (CB)", impact: "High", implication: "Sentiment shift for USD, equities" },
-  { date: "Mar 25 (Tue)", currency: "GBP", event: "UK CPI y/y", impact: "High", implication: "GBP/USD, EUR/GBP volatility" },
-  { date: "Mar 26 (Wed)", currency: "AUD", event: "Australia CPI Monthly", impact: "Medium", implication: "AUD/USD, RBA rate expectations" },
-  { date: "Mar 26 (Wed)", currency: "USD", event: "New Home Sales", impact: "Medium", implication: "Housing market health signal" },
-  { date: "Mar 27 (Thu)", currency: "USD", event: "Final GDP q/q", impact: "High", implication: "Major USD mover, confirms growth" },
-  { date: "Mar 27 (Thu)", currency: "USD", event: "Unemployment Claims", impact: "Medium", implication: "Labour market weekly pulse" },
-  { date: "Mar 28 (Fri)", currency: "USD", event: "Core PCE Price Index", impact: "High", implication: "Fed's preferred inflation gauge — ALL USD pairs + Gold" },
-  { date: "Mar 28 (Fri)", currency: "CAD", event: "Canada GDP m/m", impact: "High", implication: "USD/CAD directional trigger" },
-  { date: "Mar 28 (Fri)", currency: "JPY", event: "Tokyo CPI", impact: "Medium", implication: "JPY pairs, BOJ policy outlook" },
+  { date: "Mar 31 (Mon)", currency: "EUR", event: "Eurozone CPI Flash y/y", impact: "High", implication: "EUR pairs — inflation direction for ECB" },
+  { date: "Mar 31 (Mon)", currency: "USD", event: "Chicago PMI", impact: "Medium", implication: "Regional manufacturing gauge for USD" },
+  { date: "Apr 1 (Tue)", currency: "USD", event: "ISM Manufacturing PMI", impact: "High", implication: "Major USD mover — manufacturing health" },
+  { date: "Apr 1 (Tue)", currency: "USD", event: "JOLTS Job Openings", impact: "High", implication: "Labour market demand — Fed watch" },
+  { date: "Apr 2 (Wed)", currency: "USD", event: "ADP Non-Farm Employment", impact: "High", implication: "NFP preview — USD pairs + Gold" },
+  { date: "Apr 2 (Wed)", currency: "EUR", event: "Eurozone Unemployment Rate", impact: "Medium", implication: "EUR sentiment indicator" },
+  { date: "Apr 3 (Thu)", currency: "USD", event: "ISM Services PMI", impact: "High", implication: "Services sector — key for GDP outlook" },
+  { date: "Apr 3 (Thu)", currency: "USD", event: "Unemployment Claims", impact: "Medium", implication: "Weekly labour market pulse" },
+  { date: "Apr 4 (Fri)", currency: "USD", event: "Non-Farm Payrolls (NFP)", impact: "High", implication: "THE event — ALL USD pairs + Gold + Indices" },
+  { date: "Apr 4 (Fri)", currency: "USD", event: "Unemployment Rate", impact: "High", implication: "Fed rate path — risk sentiment" },
+  { date: "Apr 4 (Fri)", currency: "CAD", event: "Canada Employment Change", impact: "High", implication: "USD/CAD directional trigger" },
 ];
 
 const IMPACT_COLORS: Record<string, string> = {
@@ -31,18 +31,18 @@ const IMPACT_COLORS: Record<string, string> = {
 };
 
 const WEEKLY_PLAN = [
-  { day: "Monday 24th", focus: "Flash PMI + German Ifo — set weekly bias for EUR & USD. Mark key levels.", risk: "Medium", emoji: "📊" },
-  { day: "Tuesday 25th", focus: "UK CPI + US Consumer Confidence — GBP and USD volatility. Trade the reaction.", risk: "High", emoji: "🔥" },
-  { day: "Wednesday 26th", focus: "AUD CPI + US housing data — quieter day. Scalp setups or skip.", risk: "Low", emoji: "⏳" },
-  { day: "Thursday 27th", focus: "US GDP Final + Jobless Claims — confirm or deny trend. Position for Friday.", risk: "High", emoji: "⚡" },
-  { day: "Friday 28th", focus: "Core PCE (BIG ONE) + Canada GDP — Fed's favorite inflation number. Close all before weekend.", risk: "High", emoji: "🎯" },
+  { day: "Monday 31st", focus: "Eurozone CPI Flash + Chicago PMI — set EUR/USD bias for the week.", risk: "Medium", emoji: "📊" },
+  { day: "Tuesday 1st", focus: "ISM Manufacturing + JOLTS — USD pairs will move sharply. Key direction setter.", risk: "High", emoji: "🔥" },
+  { day: "Wednesday 2nd", focus: "ADP Employment — NFP preview. Position for Friday but don't overcommit.", risk: "High", emoji: "⚡" },
+  { day: "Thursday 3rd", focus: "ISM Services PMI — confirms economic health. Fine-tune Friday positioning.", risk: "Medium", emoji: "⏳" },
+  { day: "Friday 4th", focus: "NFP (BIG ONE) + Canada Employment — THE event of the month. Close all before weekend.", risk: "High", emoji: "🎯" },
 ];
 
 const THIS_WEEK_FOCUS = [
-  { title: "🎯 Core PCE Friday", desc: "The Fed's preferred inflation measure. Expected +0.3% MoM. If hot → USD rally, Gold dip. If cool → rate cut hopes rise.", pairs: "EUR/USD, XAU/USD, USD/JPY" },
-  { title: "📈 US GDP Thursday", desc: "Final Q4 GDP revision. Strong = USD strength. Weak = risk-off. Key for indices.", pairs: "US30, NAS100, USD pairs" },
-  { title: "🇬🇧 UK CPI Tuesday", desc: "Sticky UK inflation could delay BOE cuts. GBP strength if above forecast.", pairs: "GBP/USD, EUR/GBP" },
-  { title: "🇩🇪 German Ifo Monday", desc: "Business climate confidence — if weak, EUR under pressure early in week.", pairs: "EUR/USD, DAX" },
+  { title: "🎯 NFP Friday", desc: "Non-Farm Payrolls — THE biggest USD event of the month. Strong = USD rally, Gold dip. Weak = rate cut hopes, Gold rally.", pairs: "EUR/USD, XAU/USD, USD/JPY, US30" },
+  { title: "📈 ISM Manufacturing Tue", desc: "Factory health check. Below 50 = contraction worry. Above 50 = USD strength.", pairs: "EUR/USD, USD/CAD, NAS100" },
+  { title: "👷 ADP Wednesday", desc: "Private payroll preview for NFP. Sets expectations and early positioning.", pairs: "XAU/USD, EUR/USD, GBP/USD" },
+  { title: "🇪🇺 Eurozone CPI Monday", desc: "Flash inflation data. Hot = ECB stays hawkish → EUR strength. Cool = rate cut bets.", pairs: "EUR/USD, EUR/GBP, DAX" },
 ];
 
 function LiveClock() {
@@ -61,10 +61,10 @@ function LiveClock() {
 const NewsCalendar = () => {
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
-        title="Forex News Calendar — Week of Mar 24-28, 2026 | Botvio"
-        description="This week's high-impact forex events: Core PCE, US GDP, UK CPI, German Ifo. Trading strategies, entry levels, and risk management."
-      />
+        <SEOHead
+          title="Forex News Calendar — Week of Mar 31 – Apr 4, 2026 | Botvio"
+          description="This week's high-impact forex events: NFP, ISM Manufacturing, ADP, Eurozone CPI. Trading strategies, entry levels, and risk management."
+        />
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-8 max-w-5xl">
@@ -73,11 +73,11 @@ const NewsCalendar = () => {
           <div className="flex items-center justify-center gap-2">
             <Newspaper className="h-8 w-8 text-destructive" />
             <h1 className="text-2xl md:text-3xl font-black text-foreground">
-              News Calendar — Week of Mar 24-28
+              News Calendar — Week of Mar 31 – Apr 4
             </h1>
           </div>
           <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-            This week's biggest market movers: Core PCE, US GDP, UK CPI & German Ifo. Plan your trades with Botvio AI strategies.
+            This week's biggest market movers: NFP Friday, ISM Manufacturing, ADP Employment & Eurozone CPI. Plan your trades with Botvio AI strategies.
           </p>
           <div className="flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
@@ -85,7 +85,7 @@ const NewsCalendar = () => {
               <LiveClock />
             </div>
             <Badge className="bg-destructive/20 text-destructive border-destructive/30 animate-pulse">
-              <Flame className="h-3 w-3 mr-1" /> 4 High-Impact Events This Week
+              <Flame className="h-3 w-3 mr-1" /> NFP Week — 5 High-Impact Events
             </Badge>
           </div>
         </section>
