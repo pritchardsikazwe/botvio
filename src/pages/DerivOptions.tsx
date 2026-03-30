@@ -11,7 +11,7 @@ import {
   Zap, Shield, BarChart3, TrendingUp, Clock, Globe,
   Layers, ArrowRight, BookOpen, Bot, Activity,
   AlertTriangle, CheckCircle, XCircle, Lightbulb,
-  Timer, Hash, Target, Crosshair, Wifi
+  Timer, Hash, Target, Crosshair, Wifi, Trophy
 } from "lucide-react";
 
 const API_FEATURES = [
