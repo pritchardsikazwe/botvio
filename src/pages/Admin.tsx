@@ -37,7 +37,8 @@ import {
   Globe,
   Mail,
   Contact,
-  Phone
+  Phone,
+  Trophy
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
