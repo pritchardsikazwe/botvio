@@ -1,94 +1,75 @@
 project_id = "tqqkzeblmjapgbnsbtgw"
 
-[functions.analyze-chart]
-verify_jwt = false
-
-[functions.hauza-sniper]
-verify_jwt = false
-
-[functions.provider-execute-copy]
-verify_jwt = false
-
-[functions.bot-worker]
-verify_jwt = false
-
-[functions.deriv-verify-token]
-verify_jwt = false
-
-[functions.deriv-oauth-exchange]
-verify_jwt = false
-
-[functions.deriv-health-check]
-verify_jwt = false
-
-[functions.deriv-trade-execute]
-verify_jwt = false
-
-[functions.deriv-contracts-for-symbol]
-verify_jwt = false
-
-[functions.deriv-active-symbols]
-verify_jwt = false
-
-[functions.bridge-register-terminal]
-verify_jwt = false
-
-[functions.bridge-heartbeat]
-verify_jwt = false
-
-[functions.bridge-pull-commands]
-verify_jwt = false
-
-[functions.bridge-ack-command]
-verify_jwt = false
-
-[functions.bridge-push-state]
-verify_jwt = false
-
-[functions.binance-save-keys]
-verify_jwt = false
-
-[functions.binance-test-connection]
-verify_jwt = false
-
-[functions.binance-place-order]
-verify_jwt = false
-
-[functions.admin-signup-notification]
-verify_jwt = false
-
-[functions.botvio-sniper]
-verify_jwt = false
-
-[functions.robots-txt]
-verify_jwt = false
-
-[functions.sitemap-xml]
-verify_jwt = false
-
-[functions.ea-register]
-verify_jwt = false
-
-[functions.ea-heartbeat]
-verify_jwt = false
-
-[functions.provider-event]
-verify_jwt = false
-
-[functions.follower-commands]
-verify_jwt = false
-
-[functions.follower-report]
-verify_jwt = false
-
-[functions.evaluate-expiry]
-verify_jwt = false
-
-[functions.signal-quality-optimizer]
-verify_jwt = false
-
-[functions.top-assets-ranking]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
+[functions]
+  [functions.admin-signup-notification]
+    verify_jwt = false
+  [functions.analyze-chart]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.binance-place-order]
+    verify_jwt = false
+  [functions.binance-save-keys]
+    verify_jwt = false
+  [functions.binance-test-connection]
+    verify_jwt = false
+  [functions.bot-worker]
+    verify_jwt = false
+  [functions.botvio-sniper]
+    verify_jwt = false
+  [functions.bridge-ack-command]
+    verify_jwt = false
+  [functions.bridge-heartbeat]
+    verify_jwt = false
+  [functions.bridge-pull-commands]
+    verify_jwt = false
+  [functions.bridge-push-state]
+    verify_jwt = false
+  [functions.bridge-register-terminal]
+    verify_jwt = false
+  [functions.deriv-active-symbols]
+    verify_jwt = false
+  [functions.deriv-contracts-for-symbol]
+    verify_jwt = false
+  [functions.deriv-health-check]
+    verify_jwt = false
+  [functions.deriv-oauth-exchange]
+    verify_jwt = false
+  [functions.deriv-trade-execute]
+    verify_jwt = false
+  [functions.deriv-verify-token]
+    verify_jwt = false
+  [functions.ea-heartbeat]
+    verify_jwt = false
+  [functions.ea-register]
+    verify_jwt = false
+  [functions.evaluate-expiry]
+    verify_jwt = false
+  [functions.follower-commands]
+    verify_jwt = false
+  [functions.follower-report]
+    verify_jwt = false
+  [functions.hauza-sniper]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.provider-event]
+    verify_jwt = false
+  [functions.provider-execute-copy]
+    verify_jwt = false
+  [functions.robots-txt]
+    verify_jwt = false
+  [functions.signal-quality-optimizer]
+    verify_jwt = false
+  [functions.sitemap-xml]
+    verify_jwt = false
+  [functions.top-assets-ranking]
+    verify_jwt = false
+  [functions.send-transactional-email]
+    verify_jwt = true
+  [functions.preview-transactional-email]
+    verify_jwt = false
+  [functions.handle-email-unsubscribe]
+    verify_jwt = false
+  [functions.handle-email-suppression]
+    verify_jwt = false
