@@ -203,6 +203,7 @@ const SportsBetting = () => {
 
   // Generate daily picks
   const generateDailyPicks = async () => {
+    if (!hasAccess) { toast.error("VIP subscription required to generate daily picks"); return; }
     setGeneratingPicks(true);
     setDailyPicks(null);
     try {
