@@ -295,6 +295,22 @@ const SportsBetting = () => {
         </main>
       ) : (
       <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Upgrade Banner for non-subscribers */}
+        {!accessLoading && !hasAccess && (
+          <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 flex flex-col sm:flex-row items-center gap-3">
+            <Trophy className="h-6 w-6 text-warning shrink-0" />
+            <div className="flex-1 text-center sm:text-left">
+              <p className="font-semibold text-sm">VIP Subscription Required</p>
+              <p className="text-xs text-muted-foreground">
+                Subscribe to VIP to generate daily picks, upload bet slips, and use AI analysis.
+              </p>
+            </div>
+            <Button size="sm" onClick={() => window.location.href = "/billing"}>
+              Upgrade to VIP
+            </Button>
+          </div>
+        )}
+
         {/* Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
