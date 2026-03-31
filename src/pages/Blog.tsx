@@ -183,13 +183,42 @@ const blogPosts = [
   },
 ];
 
-const categories = ["All", "Guide", "Tutorial", "Strategy", "Gold", "Signals", "Forex", "Earn Online", "Comparison", "Security"];
+const categories = ["All", "Forex Basics", "Synthetic Indices", "AI Trading", "Strategies", "Money & Income", "Guide", "Tutorial", "Strategy", "Gold", "Signals", "Forex", "Earn Online", "Comparison", "Security"];
 
 const Blog = () => {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const filtered = blogPosts.filter(p => {
+  // Fetch DB posts
+  const { data: dbPosts } = useQuery({
+    queryKey: ["blog-posts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("posts")
+        .select("slug, title, excerpt, category, read_time, published_at, created_at, cover_image, keywords")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false });
+      return data || [];
+    },
+  });
+
+  // Merge: DB posts first, then static (skip duplicates)
+  const dbSlugs = new Set((dbPosts || []).map(p => p.slug));
+  const mergedPosts = [
+    ...(dbPosts || []).map(p => ({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt || "",
+      category: p.category || "Guide",
+      readTime: p.read_time || "5 min",
+      date: p.published_at || p.created_at,
+      featured: false,
+      image: "📝",
+    })),
+    ...blogPosts.filter(p => !dbSlugs.has(p.slug)),
+  ];
+
+  const filtered = mergedPosts.filter(p => {
     const matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.excerpt.toLowerCase().includes(search.toLowerCase());
     const matchCat = activeCategory === "All" || p.category === activeCategory;
     return matchSearch && matchCat;
