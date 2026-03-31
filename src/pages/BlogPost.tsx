@@ -4,7 +4,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Zap } from "lucide-react";
+import { ArrowLeft, Clock, Zap, Play } from "lucide-react";
 import { blogContent } from "@/content/blogPosts";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,10 +18,51 @@ const relatedPosts = [
   { slug: "botvio-vs-manual-trading", title: "Botvio vs Manual Trading" },
 ];
 
+/* ── Ad placeholder slot (for AdSense injection) ── */
+const AdSlot = ({ position }: { position: string }) => (
+  <div
+    className="my-8 flex items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-6 text-xs text-muted-foreground"
+    data-ad-slot={position}
+    aria-hidden
+  >
+    {/* Replace with AdSense code when approved */}
+    <span className="opacity-50">— Ad —</span>
+  </div>
+);
+
+/* ── YouTube embed ── */
+const YouTubeEmbed = ({ url }: { url: string }) => {
+  let videoId = "";
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtu.be")) videoId = u.pathname.slice(1);
+    else videoId = u.searchParams.get("v") || "";
+  } catch { return null; }
+  if (!videoId) return null;
+
+  return (
+    <div className="my-8">
+      <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground">
+        <Play className="h-4 w-4 text-primary" />
+        Watch the video guide
+      </div>
+      <div className="relative w-full overflow-hidden rounded-2xl border border-border shadow-sm" style={{ paddingBottom: "56.25%" }}>
+        <iframe
+          className="absolute inset-0 h-full w-full"
+          src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+          title="Video guide"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          loading="lazy"
+        />
+      </div>
+    </div>
+  );
+};
+
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  // Try Supabase first
   const { data: dbPost } = useQuery({
     queryKey: ["post", slug],
     queryFn: async () => {
@@ -36,7 +77,6 @@ const BlogPost = () => {
     enabled: !!slug,
   });
 
-  // Fallback to static content
   const staticPost = blogContent[slug || ""];
   const post = dbPost
     ? {
@@ -50,9 +90,10 @@ const BlogPost = () => {
         author: dbPost.author || "Botvio Team",
         metaTitle: dbPost.meta_title,
         metaDescription: dbPost.meta_description,
+        youtubeUrl: (dbPost as any).youtube_url as string | null,
       }
     : staticPost
-    ? { ...staticPost, coverImage: undefined, author: "Botvio Team", metaTitle: undefined, metaDescription: undefined }
+    ? { ...staticPost, coverImage: undefined, author: "Botvio Team", metaTitle: undefined, metaDescription: undefined, youtubeUrl: null }
     : null;
 
   if (!post) {
@@ -128,6 +169,12 @@ const BlogPost = () => {
           )}
         </header>
 
+        {/* Ad after intro */}
+        <AdSlot position="after-intro" />
+
+        {/* YouTube Video */}
+        {post.youtubeUrl && <YouTubeEmbed url={post.youtubeUrl} />}
+
         {/* Content */}
         <section
           className="
@@ -146,6 +193,9 @@ const BlogPost = () => {
           "
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
+
+        {/* Ad in middle */}
+        <AdSlot position="mid-article" />
 
         {/* Mid-article CTA */}
         <div className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-sm">
@@ -173,6 +223,9 @@ const BlogPost = () => {
             ))}
           </div>
         </div>
+
+        {/* Ad at end */}
+        <AdSlot position="end-article" />
 
         {/* Bottom nav */}
         <div className="mt-8 flex flex-wrap gap-3">
