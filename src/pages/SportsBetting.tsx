@@ -157,6 +157,7 @@ const SportsBetting = () => {
   // Upload screenshot + AI analysis
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const handleScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!hasAccess) { toast.error("VIP subscription required to upload bet slips"); return; }
     if (!e.target.files?.[0] || !user) return;
     setUploading(true);
     setAiAnalysis(null);
