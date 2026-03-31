@@ -157,6 +157,7 @@ const SportsBetting = () => {
   // Upload screenshot + AI analysis
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const handleScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!hasAccess) { toast.error("VIP subscription required to upload bet slips"); return; }
     if (!e.target.files?.[0] || !user) return;
     setUploading(true);
     setAiAnalysis(null);
@@ -178,6 +179,7 @@ const SportsBetting = () => {
   };
 
   const runAiAnalysis = async (imageUrl?: string) => {
+    if (!hasAccess) { toast.error("VIP subscription required for AI analysis"); return; }
     setAnalyzing(true);
     setAiAnalysis(null);
     try {
@@ -202,6 +204,7 @@ const SportsBetting = () => {
 
   // Generate daily picks
   const generateDailyPicks = async () => {
+    if (!hasAccess) { toast.error("VIP subscription required to generate daily picks"); return; }
     setGeneratingPicks(true);
     setDailyPicks(null);
     try {
@@ -222,6 +225,7 @@ const SportsBetting = () => {
   // Submit bet slip
   const submitMutation = useMutation({
     mutationFn: async () => {
+      if (!hasAccess) throw new Error("VIP subscription required to submit bet slips");
       if (!user) throw new Error("Login required");
       const { error } = await supabase.from("bet_slips").insert({
         user_id: user.id,
@@ -293,25 +297,24 @@ const SportsBetting = () => {
           <h1 className="text-2xl font-bold">Sign in to access Sports Betting Hub</h1>
           <p className="text-muted-foreground">This feature requires an account.</p>
         </main>
-      ) : accessLoading ? (
-        <main className="container mx-auto px-4 py-20 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground mt-2">Checking access...</p>
-        </main>
-      ) : !hasAccess ? (
-        <main className="container mx-auto px-4 py-20 text-center space-y-4">
-          <Trophy className="h-12 w-12 text-warning mx-auto" />
-          <h1 className="text-2xl font-bold">VIP Access Required</h1>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            The Sports Betting Hub is exclusively available to VIP subscribers. 
-            Upgrade your plan to unlock AI predictions, daily picks, and bet slip analysis.
-          </p>
-          <Button onClick={() => window.location.href = "/billing"} className="mt-4">
-            Upgrade to VIP
-          </Button>
-        </main>
       ) : (
       <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Upgrade Banner for non-subscribers */}
+        {!accessLoading && !hasAccess && (
+          <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 flex flex-col sm:flex-row items-center gap-3">
+            <Trophy className="h-6 w-6 text-warning shrink-0" />
+            <div className="flex-1 text-center sm:text-left">
+              <p className="font-semibold text-sm">VIP Subscription Required</p>
+              <p className="text-xs text-muted-foreground">
+                Subscribe to VIP to generate daily picks, upload bet slips, and use AI analysis.
+              </p>
+            </div>
+            <Button size="sm" onClick={() => window.location.href = "/billing"}>
+              Upgrade to VIP
+            </Button>
+          </div>
+        )}
+
         {/* Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
@@ -544,8 +547,9 @@ const SportsBetting = () => {
                     type="file"
                     accept="image/*"
                     className="mt-2"
-                    disabled={checkUploading}
+                    disabled={checkUploading || !hasAccess}
                     onChange={async (e) => {
+                      if (!hasAccess) { toast.error("VIP subscription required"); return; }
                       if (!e.target.files?.[0]) return;
                       setCheckUploading(true);
                       const file = e.target.files[0];
