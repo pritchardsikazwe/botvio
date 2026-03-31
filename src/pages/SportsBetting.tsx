@@ -59,12 +59,25 @@ const SLIP_SIZES = [
 ];
 
 const SportsBetting = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [activeMarket, setActiveMarket] = useState("over_under");
   const [uploading, setUploading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Check sports betting access (VIP or manual grant or admin)
+  const { data: hasAccess, isLoading: accessLoading } = useQuery({
+    queryKey: ["sports-betting-access", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("has_sports_betting_access", {
+        _user_id: user!.id,
+      });
+      if (error) throw error;
+      return data as boolean;
+    },
+    enabled: !!user,
+  });
 
   // Daily picks state
   const [slipSize, setSlipSize] = useState("3");
