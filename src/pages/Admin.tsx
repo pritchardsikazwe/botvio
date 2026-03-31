@@ -37,7 +37,8 @@ import {
   Globe,
   Mail,
   Contact,
-  Phone
+  Phone,
+  Trophy
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,6 +58,7 @@ import { AdminProfilesTab } from "@/components/admin/AdminProfilesTab";
 import { AdminNewsletterTab } from "@/components/admin/AdminNewsletterTab";
 import { AdminRolesTab } from "@/components/admin/AdminRolesTab";
 import { AdminSignalHistoryTab } from "@/components/admin/AdminSignalHistoryTab";
+import { AdminSportsBettingAccessTab } from "@/components/admin/AdminSportsBettingAccessTab";
 
 interface Provider {
   id: string;
@@ -1040,6 +1042,10 @@ const Admin = () => {
               <TrendingUp className="w-4 h-4" />
               Signal History
             </TabsTrigger>
+            <TabsTrigger value="sports_access" className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Sports Access
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1095,6 +1101,11 @@ const Admin = () => {
           {/* Signal History Tab */}
           <TabsContent value="signal_history">
             <AdminSignalHistoryTab />
+          </TabsContent>
+
+          {/* Sports Betting Access Tab */}
+          <TabsContent value="sports_access">
+            <AdminSportsBettingAccessTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

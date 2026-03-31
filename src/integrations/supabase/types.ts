@@ -4426,6 +4426,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sports_betting_access: {
+        Row: {
+          created_at: string
+          granted_by: string
+          id: string
+          is_active: boolean
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       strategies: {
         Row: {
           config_json: Json | null
@@ -5664,6 +5691,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_sports_betting_access: {
+        Args: { _user_id: string }
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
