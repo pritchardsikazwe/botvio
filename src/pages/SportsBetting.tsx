@@ -304,14 +304,17 @@ const SportsBetting = () => {
         )}
 
         <Tabs defaultValue="fixtures" className="space-y-4">
-          <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="fixtures" className="text-xs">Fixtures</TabsTrigger>
-            <TabsTrigger value="picks" className="text-xs">
-              <Sparkles className="h-3 w-3 mr-1" />Daily Picks
+          <TabsList className="grid grid-cols-6 w-full">
+            <TabsTrigger value="fixtures" className="text-[10px] px-1">Fixtures</TabsTrigger>
+            <TabsTrigger value="picks" className="text-[10px] px-1">
+              <Sparkles className="h-3 w-3 mr-0.5" />Picks
             </TabsTrigger>
-            <TabsTrigger value="strategy" className="text-xs">Strategy</TabsTrigger>
-            <TabsTrigger value="upload" className="text-xs">Bet Slip</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs">History</TabsTrigger>
+            <TabsTrigger value="check" className="text-[10px] px-1">
+              <Eye className="h-3 w-3 mr-0.5" />Check
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="text-[10px] px-1">Strategy</TabsTrigger>
+            <TabsTrigger value="upload" className="text-[10px] px-1">Slip</TabsTrigger>
+            <TabsTrigger value="history" className="text-[10px] px-1">History</TabsTrigger>
           </TabsList>
 
           {/* ===== FIXTURES TAB ===== */}
