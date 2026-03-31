@@ -224,6 +224,7 @@ const SportsBetting = () => {
   // Submit bet slip
   const submitMutation = useMutation({
     mutationFn: async () => {
+      if (!hasAccess) throw new Error("VIP subscription required to submit bet slips");
       if (!user) throw new Error("Login required");
       const { error } = await supabase.from("bet_slips").insert({
         user_id: user.id,
