@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet";
 import { useAuth } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
