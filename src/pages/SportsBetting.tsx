@@ -268,8 +268,18 @@ const SportsBetting = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <Header />
 
+      {!user ? (
+        <main className="container mx-auto px-4 py-20 text-center space-y-4">
+          <Trophy className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h1 className="text-2xl font-bold">Sign in to access Sports Betting Hub</h1>
+          <p className="text-muted-foreground">This feature requires an account.</p>
+        </main>
+      ) : (
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div>
