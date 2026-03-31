@@ -179,6 +179,7 @@ const SportsBetting = () => {
   };
 
   const runAiAnalysis = async (imageUrl?: string) => {
+    if (!hasAccess) { toast.error("VIP subscription required for AI analysis"); return; }
     setAnalyzing(true);
     setAiAnalysis(null);
     try {
