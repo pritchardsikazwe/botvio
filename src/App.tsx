@@ -72,6 +72,7 @@ import BinaryOptions from "./pages/BinaryOptions";
 import LiveFeed from "./pages/LiveFeed";
 import FlippingChallenges from "./pages/FlippingChallenges";
 import ResetPassword from "./pages/ResetPassword";
+import SportsBetting from "./pages/SportsBetting";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
