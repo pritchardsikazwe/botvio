@@ -482,7 +482,197 @@ const SportsBetting = () => {
             </Card>
           </TabsContent>
 
-          {/* ===== STRATEGY TAB ===== */}
+          {/* ===== CHECK SLIP TAB ===== */}
+          <TabsContent value="check" className="space-y-4">
+            <Card className="glass-card border-primary/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Search className="h-5 w-5 text-primary" /> Live Slip Checker
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Upload your bet slip or select from history — see live corners, goals, results & win/lose status
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Upload slip to check */}
+                <div className="p-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-center">
+                  <Eye className="h-8 w-8 mx-auto text-primary/60 mb-2" />
+                  <Label className="text-xs font-medium text-primary">Upload Bet Slip to Check Results</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    className="mt-2"
+                    disabled={checkUploading}
+                    onChange={async (e) => {
+                      if (!e.target.files?.[0]) return;
+                      setCheckUploading(true);
+                      const file = e.target.files[0];
+                      const path = `checks/${Date.now()}_${file.name}`;
+                      const { error } = await supabase.storage.from("bet-slips").upload(path, file);
+                      setCheckUploading(false);
+                      if (error) { toast.error("Upload failed"); return; }
+                      const { data: urlData } = supabase.storage.from("bet-slips").getPublicUrl(path);
+                      setCheckSlipUrl(urlData.publicUrl);
+                      toast.success("Slip uploaded! Checking...");
+                      // Auto-check
+                      setChecking(true);
+                      setCheckResult(null);
+                      try {
+                        const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
+                          body: { imageUrl: urlData.publicUrl },
+                        });
+                        if (fnErr) throw fnErr;
+                        if (data?.error) throw new Error(data.error);
+                        setCheckResult(data.result);
+                      } catch (err: any) {
+                        toast.error(err.message || "Check failed");
+                      } finally {
+                        setChecking(false);
+                      }
+                    }}
+                  />
+                  {checkUploading && (
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Uploading...
+                    </p>
+                  )}
+                  {checkSlipUrl && (
+                    <img src={checkSlipUrl} alt="Checking slip" className="mt-3 rounded-lg max-h-40 mx-auto object-contain" />
+                  )}
+                </div>
+
+                {/* Or check from history */}
+                {user && betSlips && betSlips.filter((b: any) => b.result === "pending").length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium">Or check a pending slip from your history:</Label>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      {betSlips
+                        .filter((b: any) => b.result === "pending")
+                        .map((bet: any) => (
+                          <div
+                            key={bet.id}
+                            className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                              selectedBetForCheck === bet.id ? "bg-primary/20 border border-primary/40" : "bg-muted/30 hover:bg-muted/50"
+                            }`}
+                            onClick={() => setSelectedBetForCheck(bet.id === selectedBetForCheck ? null : bet.id)}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-xs truncate">{bet.match_name}</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {bet.league} • {MARKET_TYPES.find((m) => m.value === bet.market_type)?.label} • {bet.prediction}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="text-[10px] shrink-0">⏳ Pending</Badge>
+                          </div>
+                        ))}
+                    </div>
+
+                    {selectedBetForCheck && (
+                      <Button
+                        className="w-full"
+                        size="sm"
+                        onClick={async () => {
+                          const bet = betSlips.find((b: any) => b.id === selectedBetForCheck);
+                          if (!bet) return;
+                          setChecking(true);
+                          setCheckResult(null);
+                          try {
+                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
+                              body: {
+                                imageUrl: bet.screenshot_url || null,
+                                matches: [{
+                                  match_name: bet.match_name,
+                                  market_type: bet.market_type,
+                                  prediction: bet.prediction,
+                                  league: bet.league,
+                                }],
+                                marketType: bet.market_type,
+                              },
+                            });
+                            if (fnErr) throw fnErr;
+                            if (data?.error) throw new Error(data.error);
+                            setCheckResult(data.result);
+                          } catch (err: any) {
+                            toast.error(err.message || "Check failed");
+                          } finally {
+                            setChecking(false);
+                          }
+                        }}
+                        disabled={checking}
+                      >
+                        {checking ? (
+                          <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Checking...</>
+                        ) : (
+                          <><Search className="h-4 w-4 mr-2" /> Check Selected Slip</>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {/* Checking indicator */}
+                {checking && (
+                  <div className="p-4 rounded-xl bg-muted/40 border border-primary/20 text-center">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary mb-2" />
+                    <p className="text-xs text-muted-foreground">Checking live scores, corners, goals...</p>
+                  </div>
+                )}
+
+                {/* Check Result */}
+                {checkResult && (
+                  <div className="p-4 rounded-xl bg-muted/40 border border-primary/20 space-y-1">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-primary" />
+                        <span className="font-semibold text-sm text-primary">Live Status Report</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7"
+                        onClick={async () => {
+                          setChecking(true);
+                          try {
+                            const body: any = {};
+                            if (checkSlipUrl) {
+                              body.imageUrl = checkSlipUrl;
+                            } else if (selectedBetForCheck && betSlips) {
+                              const bet = betSlips.find((b: any) => b.id === selectedBetForCheck);
+                              if (bet) {
+                                body.imageUrl = bet.screenshot_url || null;
+                                body.matches = [{
+                                  match_name: bet.match_name,
+                                  market_type: bet.market_type,
+                                  prediction: bet.prediction,
+                                  league: bet.league,
+                                }];
+                                body.marketType = bet.market_type;
+                              }
+                            }
+                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", { body });
+                            if (fnErr) throw fnErr;
+                            if (data?.error) throw new Error(data.error);
+                            setCheckResult(data.result);
+                          } catch (err: any) {
+                            toast.error(err.message || "Refresh failed");
+                          } finally {
+                            setChecking(false);
+                          }
+                        }}
+                        disabled={checking}
+                      >
+                        <RefreshCw className={`h-3 w-3 mr-1 ${checking ? "animate-spin" : ""}`} /> Refresh
+                      </Button>
+                    </div>
+                    <div className="max-h-[500px] overflow-y-auto pr-1">
+                      {renderAiText(checkResult)}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="strategy" className="space-y-4">
             <div className="flex flex-wrap gap-2 mb-4">
               {MARKET_TYPES.map((mt) => (
