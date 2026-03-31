@@ -162,6 +162,11 @@ const Index = () => {
                 <Target className="h-4 w-4" /> Flipping Challenges
               </Button>
             </Link>
+            <Link to="/sports-betting" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-success/40 text-success hover:bg-success/10">
+                ⚽ Sports Betting
+              </Button>
+            </Link>
           </div>
 
           {/* Broker Quick Links */}
