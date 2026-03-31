@@ -499,7 +499,7 @@ const SportsBetting = () => {
                   <Button
                     className="w-full"
                     disabled={!form.match_name || !form.prediction || submitMutation.isPending}
-                    onClick={() => submitMutation.mutate()}
+                    onClick={() => submitMutation.mutate(undefined)}
                   >
                     {submitMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Save Bet Slip
