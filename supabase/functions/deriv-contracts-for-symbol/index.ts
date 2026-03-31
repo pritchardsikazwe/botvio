@@ -5,7 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const DERIV_APP_ID = Deno.env.get("DERIV_APP_ID") || "99139";
+// Legacy WS API requires numeric app_id, not the new OAuth2 client_id
+const DERIV_APP_ID = "99139";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
