@@ -487,10 +487,7 @@ const SportsBetting = () => {
                     <Input
                       type="file"
                       accept="image/*"
-                      onChange={async (e) => {
-                        const url = await handleScreenshot(e);
-                        if (url) submitMutation.mutate(url);
-                      }}
+                      onChange={(e) => handleScreenshot(e)}
                       disabled={uploading}
                     />
                     {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
