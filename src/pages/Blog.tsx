@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, Search, Clock, TrendingUp, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
+import { supabase } from "@/integrations/supabase/client";
 
 const blogPosts = [
   {
