@@ -1065,6 +1065,7 @@ const SportsBetting = () => {
           </TabsContent>
         </Tabs>
       </main>
+      )}
     </div>
   );
 };
