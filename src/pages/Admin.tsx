@@ -57,6 +57,7 @@ import { AdminProfilesTab } from "@/components/admin/AdminProfilesTab";
 import { AdminNewsletterTab } from "@/components/admin/AdminNewsletterTab";
 import { AdminRolesTab } from "@/components/admin/AdminRolesTab";
 import { AdminSignalHistoryTab } from "@/components/admin/AdminSignalHistoryTab";
+import { AdminSportsBettingAccessTab } from "@/components/admin/AdminSportsBettingAccessTab";
 
 interface Provider {
   id: string;
