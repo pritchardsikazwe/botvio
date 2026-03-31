@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
     "/dashboard/", "/settings/", "/billing/", "/accounts/",
     "/connections/", "/trade-history/", "/provider-dashboard/",
     "/my-products/", "/private/", "/tmp/", "/internal/",
+    "/sports-betting",
   ];
   const disallowBlock = privateRoutes.map(r => `Disallow: ${r}`).join("\n");
 
