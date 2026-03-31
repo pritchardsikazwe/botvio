@@ -134,7 +134,7 @@ const SportsBetting = () => {
 
   // Submit bet slip
   const submitMutation = useMutation({
-    mutationFn: async (screenshotUrl?: string) => {
+    mutationFn: async (url?: string | undefined) => {
       if (!user) throw new Error("Login required");
       const { error } = await supabase.from("bet_slips").insert({
         user_id: user.id,
@@ -146,7 +146,7 @@ const SportsBetting = () => {
         stake: form.stake ? parseFloat(form.stake) : null,
         strategy_notes: form.strategy_notes || null,
         match_date: form.match_date || null,
-        screenshot_url: screenshotUrl || null,
+        screenshot_url: url || screenshotUrl || null,
         result: "pending",
       });
       if (error) throw error;
@@ -154,6 +154,7 @@ const SportsBetting = () => {
     onSuccess: () => {
       toast.success("Bet slip saved!");
       setForm({ match_name: "", league: "", market_type: "over_under", prediction: "", odds: "", stake: "", strategy_notes: "", match_date: "" });
+      setScreenshotUrl(null);
       queryClient.invalidateQueries({ queryKey: ["bet-slips"] });
     },
     onError: (e: any) => toast.error(e.message),
