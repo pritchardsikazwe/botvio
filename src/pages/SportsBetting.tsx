@@ -293,6 +293,23 @@ const SportsBetting = () => {
           <h1 className="text-2xl font-bold">Sign in to access Sports Betting Hub</h1>
           <p className="text-muted-foreground">This feature requires an account.</p>
         </main>
+      ) : accessLoading ? (
+        <main className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground mt-2">Checking access...</p>
+        </main>
+      ) : !hasAccess ? (
+        <main className="container mx-auto px-4 py-20 text-center space-y-4">
+          <Trophy className="h-12 w-12 text-warning mx-auto" />
+          <h1 className="text-2xl font-bold">VIP Access Required</h1>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            The Sports Betting Hub is exclusively available to VIP subscribers. 
+            Upgrade your plan to unlock AI predictions, daily picks, and bet slip analysis.
+          </p>
+          <Button onClick={() => window.location.href = "/billing"} className="mt-4">
+            Upgrade to VIP
+          </Button>
+        </main>
       ) : (
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
