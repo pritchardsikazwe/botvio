@@ -461,6 +461,60 @@ export type Database = {
         }
         Relationships: []
       }
+      bet_slips: {
+        Row: {
+          created_at: string
+          id: string
+          league: string | null
+          market_type: string
+          match_date: string | null
+          match_name: string
+          odds: number | null
+          prediction: string
+          profit_loss: number | null
+          result: string | null
+          screenshot_url: string | null
+          stake: number | null
+          strategy_notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          league?: string | null
+          market_type?: string
+          match_date?: string | null
+          match_name: string
+          odds?: number | null
+          prediction: string
+          profit_loss?: number | null
+          result?: string | null
+          screenshot_url?: string | null
+          stake?: number | null
+          strategy_notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          league?: string | null
+          market_type?: string
+          match_date?: string | null
+          match_name?: string
+          odds?: number | null
+          prediction?: string
+          profit_loss?: number | null
+          result?: string | null
+          screenshot_url?: string | null
+          stake?: number | null
+          strategy_notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bot_instances: {
         Row: {
           bot_id: string
