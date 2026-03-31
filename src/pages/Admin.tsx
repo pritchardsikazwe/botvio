@@ -1103,6 +1103,11 @@ const Admin = () => {
             <AdminSignalHistoryTab />
           </TabsContent>
 
+          {/* Sports Betting Access Tab */}
+          <TabsContent value="sports_access">
+            <AdminSportsBettingAccessTab />
+          </TabsContent>
+
           {/* Subscription Requests Tab */}
           <TabsContent value="subscription_requests">
             <SubscriptionRequestsTab />
