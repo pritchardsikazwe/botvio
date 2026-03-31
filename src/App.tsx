@@ -72,6 +72,7 @@ import BinaryOptions from "./pages/BinaryOptions";
 import LiveFeed from "./pages/LiveFeed";
 import FlippingChallenges from "./pages/FlippingChallenges";
 import ResetPassword from "./pages/ResetPassword";
+import SportsBetting from "./pages/SportsBetting";
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
 const queryClient = new QueryClient();
@@ -154,6 +155,7 @@ const App = () => (
               <Route path="/live" element={<LiveFeed />} />
               <Route path="/flipping-challenges" element={<FlippingChallenges />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/sports-betting" element={<SportsBetting />} />
               <Route path="/trade/style/:styleId" element={<StyleTrade />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
