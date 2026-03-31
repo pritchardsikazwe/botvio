@@ -1041,6 +1041,10 @@ const Admin = () => {
               <TrendingUp className="w-4 h-4" />
               Signal History
             </TabsTrigger>
+            <TabsTrigger value="sports_access" className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Sports Access
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
