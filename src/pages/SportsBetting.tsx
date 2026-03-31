@@ -547,8 +547,9 @@ const SportsBetting = () => {
                     type="file"
                     accept="image/*"
                     className="mt-2"
-                    disabled={checkUploading}
+                    disabled={checkUploading || !hasAccess}
                     onChange={async (e) => {
+                      if (!hasAccess) { toast.error("VIP subscription required"); return; }
                       if (!e.target.files?.[0]) return;
                       setCheckUploading(true);
                       const file = e.target.files[0];
