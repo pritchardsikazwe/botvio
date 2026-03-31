@@ -115,6 +115,7 @@ const SportsBetting = () => {
     : { total: 0, wins: 0, losses: 0, pending: 0, winRate: 0, profit: 0 };
 
   // Upload screenshot
+  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const handleScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0] || !user) return;
     setUploading(true);
@@ -124,10 +125,11 @@ const SportsBetting = () => {
     setUploading(false);
     if (error) {
       toast.error("Upload failed");
-      return "";
+      return;
     }
     const { data: urlData } = supabase.storage.from("bet-slips").getPublicUrl(path);
-    return urlData.publicUrl;
+    setScreenshotUrl(urlData.publicUrl);
+    toast.success("Screenshot uploaded!");
   };
 
   // Submit bet slip
