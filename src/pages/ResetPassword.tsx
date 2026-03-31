@@ -16,14 +16,26 @@ export default function ResetPassword() {
   const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
-    // Check for recovery event in URL hash
+    // Check for recovery event in URL hash or query params
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(hash.replace("#", "?"));
+    
+    if (
+      hash.includes("type=recovery") ||
+      params.get("type") === "recovery" ||
+      hashParams.get("type") === "recovery" ||
+      params.get("code") // PKCE flow
+    ) {
       setIsRecovery(true);
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+      }
+      // Also handle when user lands with a valid session from the recovery link
+      if (event === "SIGNED_IN" && session) {
         setIsRecovery(true);
       }
     });
