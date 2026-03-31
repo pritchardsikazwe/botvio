@@ -71,6 +71,13 @@ const SportsBetting = () => {
   const [dailyPicks, setDailyPicks] = useState<string | null>(null);
   const [generatingPicks, setGeneratingPicks] = useState(false);
 
+  // Check slip state
+  const [checkSlipUrl, setCheckSlipUrl] = useState<string | null>(null);
+  const [checkUploading, setCheckUploading] = useState(false);
+  const [checkResult, setCheckResult] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [selectedBetForCheck, setSelectedBetForCheck] = useState<string | null>(null);
+
   // Form state
   const [form, setForm] = useState({
     match_name: "",
