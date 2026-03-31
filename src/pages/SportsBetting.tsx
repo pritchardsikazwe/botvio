@@ -13,8 +13,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Trophy, Target, Upload, TrendingUp, TrendingDown, Clock, Activity,
-  CheckCircle, XCircle, Loader2, Goal, BarChart3, Percent
+  Trophy, Target, Upload, TrendingUp, Clock, Activity,
+  CheckCircle, XCircle, Loader2, Goal, BarChart3, Percent,
+  Sparkles, Brain, Zap, ListChecks, Image as ImageIcon
 } from "lucide-react";
 
 const MARKET_TYPES = [
@@ -47,11 +48,27 @@ const STRATEGIES: Record<string, { name: string; description: string; tip: strin
   },
 };
 
+const SLIP_SIZES = [
+  { value: "3", label: "3 Teams" },
+  { value: "6", label: "6 Teams" },
+  { value: "10", label: "10 Teams" },
+  { value: "20", label: "20 Teams" },
+];
+
 const SportsBetting = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [activeMarket, setActiveMarket] = useState("over_under");
   const [uploading, setUploading] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  // Daily picks state
+  const [slipSize, setSlipSize] = useState("3");
+  const [slipMarket, setSlipMarket] = useState("mixed");
+  const [slipType, setSlipType] = useState("combined");
+  const [dailyPicks, setDailyPicks] = useState<string | null>(null);
+  const [generatingPicks, setGeneratingPicks] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -114,11 +131,12 @@ const SportsBetting = () => {
       }
     : { total: 0, wins: 0, losses: 0, pending: 0, winRate: 0, profit: 0 };
 
-  // Upload screenshot
+  // Upload screenshot + AI analysis
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const handleScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0] || !user) return;
     setUploading(true);
+    setAiAnalysis(null);
     const file = e.target.files[0];
     const path = `${user.id}/${Date.now()}_${file.name}`;
     const { error } = await supabase.storage.from("bet-slips").upload(path, file);
@@ -128,13 +146,59 @@ const SportsBetting = () => {
       return;
     }
     const { data: urlData } = supabase.storage.from("bet-slips").getPublicUrl(path);
-    setScreenshotUrl(urlData.publicUrl);
-    toast.success("Screenshot uploaded!");
+    const publicUrl = urlData.publicUrl;
+    setScreenshotUrl(publicUrl);
+    toast.success("Screenshot uploaded! Analyzing...");
+
+    // Auto-trigger AI analysis
+    runAiAnalysis(publicUrl);
+  };
+
+  const runAiAnalysis = async (imageUrl?: string) => {
+    setAnalyzing(true);
+    setAiAnalysis(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-bet-slip", {
+        body: {
+          imageUrl: imageUrl || screenshotUrl,
+          marketType: form.market_type,
+          matchName: form.match_name,
+          league: form.league,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiAnalysis(data.analysis);
+      toast.success("AI analysis complete!");
+    } catch (err: any) {
+      toast.error(err.message || "Analysis failed");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  // Generate daily picks
+  const generateDailyPicks = async () => {
+    setGeneratingPicks(true);
+    setDailyPicks(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-daily-slips", {
+        body: { slipSize, marketType: slipMarket, slipType },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setDailyPicks(data.picks);
+      toast.success(`${slipSize}-team picks generated!`);
+    } catch (err: any) {
+      toast.error(err.message || "Generation failed");
+    } finally {
+      setGeneratingPicks(false);
+    }
   };
 
   // Submit bet slip
   const submitMutation = useMutation({
-    mutationFn: async (url?: string | undefined) => {
+    mutationFn: async () => {
       if (!user) throw new Error("Login required");
       const { error } = await supabase.from("bet_slips").insert({
         user_id: user.id,
@@ -146,7 +210,7 @@ const SportsBetting = () => {
         stake: form.stake ? parseFloat(form.stake) : null,
         strategy_notes: form.strategy_notes || null,
         match_date: form.match_date || null,
-        screenshot_url: url || screenshotUrl || null,
+        screenshot_url: screenshotUrl || null,
         result: "pending",
       });
       if (error) throw error;
@@ -155,6 +219,7 @@ const SportsBetting = () => {
       toast.success("Bet slip saved!");
       setForm({ match_name: "", league: "", market_type: "over_under", prediction: "", odds: "", stake: "", strategy_notes: "", match_date: "" });
       setScreenshotUrl(null);
+      setAiAnalysis(null);
       queryClient.invalidateQueries({ queryKey: ["bet-slips"] });
     },
     onError: (e: any) => toast.error(e.message),
@@ -173,8 +238,24 @@ const SportsBetting = () => {
   });
 
   const strategy = STRATEGIES[activeMarket];
-
   const matchList = fixtures?.matches?.slice(0, 20) || [];
+
+  // Render markdown-ish AI output
+  const renderAiText = (text: string) => {
+    return text.split("\n").map((line, i) => {
+      if (line.startsWith("## ") || line.startsWith("**") && line.endsWith("**")) {
+        return <h3 key={i} className="font-bold text-sm text-primary mt-3 mb-1">{line.replace(/[#*]/g, "").trim()}</h3>;
+      }
+      if (line.startsWith("### ")) {
+        return <h4 key={i} className="font-semibold text-xs text-foreground mt-2 mb-1">{line.replace(/###\s?/g, "").trim()}</h4>;
+      }
+      if (line.startsWith("- ") || line.startsWith("* ")) {
+        return <li key={i} className="text-xs text-muted-foreground ml-4 list-disc">{line.slice(2)}</li>;
+      }
+      if (line.trim() === "") return <br key={i} />;
+      return <p key={i} className="text-xs text-foreground/90 leading-relaxed">{line}</p>;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,31 +264,31 @@ const SportsBetting = () => {
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Trophy className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+            <Trophy className="h-7 w-7 text-primary" />
             Sports Betting Hub
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Football predictions, bet slip tracking & proven strategies
+          <p className="text-muted-foreground text-sm mt-1">
+            AI-powered predictions, bet slip analysis & daily picks
           </p>
         </div>
 
         {/* Stats Bar */}
         {user && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
             {[
-              { label: "Total Bets", value: stats.total, icon: BarChart3, color: "text-primary" },
+              { label: "Bets", value: stats.total, icon: BarChart3, color: "text-primary" },
               { label: "Wins", value: stats.wins, icon: CheckCircle, color: "text-green-500" },
               { label: "Losses", value: stats.losses, icon: XCircle, color: "text-red-500" },
               { label: "Pending", value: stats.pending, icon: Clock, color: "text-yellow-500" },
-              { label: "Win Rate", value: `${stats.winRate}%`, icon: Percent, color: "text-blue-500" },
-              { label: "P/L", value: `$${stats.profit.toFixed(2)}`, icon: TrendingUp, color: stats.profit >= 0 ? "text-green-500" : "text-red-500" },
+              { label: "Win %", value: `${stats.winRate}%`, icon: Percent, color: "text-blue-500" },
+              { label: "P/L", value: `$${stats.profit.toFixed(0)}`, icon: TrendingUp, color: stats.profit >= 0 ? "text-green-500" : "text-red-500" },
             ].map((s) => (
               <Card key={s.label} className="glass-card">
-                <CardContent className="p-4 text-center">
-                  <s.icon className={`h-5 w-5 mx-auto mb-1 ${s.color}`} />
-                  <p className="text-lg font-bold">{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
+                <CardContent className="p-3 text-center">
+                  <s.icon className={`h-4 w-4 mx-auto mb-0.5 ${s.color}`} />
+                  <p className="text-base font-bold">{s.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
                 </CardContent>
               </Card>
             ))}
@@ -215,21 +296,24 @@ const SportsBetting = () => {
         )}
 
         <Tabs defaultValue="fixtures" className="space-y-4">
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
-            <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
-            <TabsTrigger value="strategy">Strategy</TabsTrigger>
-            <TabsTrigger value="upload">Bet Slip</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+          <TabsList className="grid grid-cols-5 w-full">
+            <TabsTrigger value="fixtures" className="text-xs">Fixtures</TabsTrigger>
+            <TabsTrigger value="picks" className="text-xs">
+              <Sparkles className="h-3 w-3 mr-1" />Daily Picks
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="text-xs">Strategy</TabsTrigger>
+            <TabsTrigger value="upload" className="text-xs">Bet Slip</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs">History</TabsTrigger>
           </TabsList>
 
           {/* ===== FIXTURES TAB ===== */}
           <TabsContent value="fixtures" className="space-y-4">
             <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <Activity className="h-5 w-5" /> Upcoming Matches
                 </CardTitle>
-                <CardDescription>Next 7 days — tap a match to create a bet slip</CardDescription>
+                <CardDescription className="text-xs">Next 7 days — tap a match to create a bet slip</CardDescription>
               </CardHeader>
               <CardContent>
                 {fixturesLoading ? (
@@ -261,7 +345,7 @@ const SportsBetting = () => {
                             {m.competition?.name} • {new Date(m.utcDate).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge variant="outline" className="ml-2 shrink-0">
+                        <Badge variant="outline" className="ml-2 shrink-0 text-xs">
                           {m.status === "FINISHED"
                             ? `${m.score?.fullTime?.home ?? "?"}-${m.score?.fullTime?.away ?? "?"}`
                             : new Date(m.utcDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -270,9 +354,118 @@ const SportsBetting = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground py-8">
+                  <p className="text-center text-muted-foreground py-8 text-sm">
                     No upcoming fixtures found. Check back later.
                   </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ===== AI DAILY PICKS TAB ===== */}
+          <TabsContent value="picks" className="space-y-4">
+            <Card className="glass-card border-primary/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Brain className="h-5 w-5 text-primary" /> AI Daily Picks Generator
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Get AI-recommended slips — corners, goals, BTTS, match results
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Config row */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-xs">Slip Size</Label>
+                    <Select value={slipSize} onValueChange={setSlipSize}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {SLIP_SIZES.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Market</Label>
+                    <Select value={slipMarket} onValueChange={setSlipMarket}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mixed">Mixed (All)</SelectItem>
+                        <SelectItem value="corners">Corners Only</SelectItem>
+                        <SelectItem value="over_under">Goals Only</SelectItem>
+                        <SelectItem value="btts">BTTS Only</SelectItem>
+                        <SelectItem value="match_result">1X2 Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Slip Type</Label>
+                    <Select value={slipType} onValueChange={setSlipType}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="combined">Accumulator</SelectItem>
+                        <SelectItem value="single">Singles</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Quick presets */}
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined" },
+                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined" },
+                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined" },
+                    { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined" },
+                    { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined" },
+                  ].map((preset) => (
+                    <Button
+                      key={preset.label}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={() => {
+                        setSlipSize(preset.size);
+                        setSlipMarket(preset.market);
+                        setSlipType(preset.type);
+                      }}
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={generateDailyPicks}
+                  disabled={generatingPicks}
+                >
+                  {generatingPicks ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Generating {slipSize}-team picks...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Generate {slipSize}-Team {slipType === "combined" ? "Accumulator" : "Singles"}
+                    </>
+                  )}
+                </Button>
+
+                {/* AI Picks Result */}
+                {dailyPicks && (
+                  <div className="mt-4 p-4 rounded-xl bg-muted/40 border border-primary/20 space-y-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ListChecks className="h-4 w-4 text-primary" />
+                      <span className="font-semibold text-sm text-primary">AI Generated Picks</span>
+                    </div>
+                    <div className="prose prose-sm max-w-none">
+                      {renderAiText(dailyPicks)}
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -295,22 +488,22 @@ const SportsBetting = () => {
 
             <Card className="glass-card border-primary/30">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <Target className="h-5 w-5 text-primary" />
                   {strategy.name}
                 </CardTitle>
-                <CardDescription>{strategy.description}</CardDescription>
+                <CardDescription className="text-xs">{strategy.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                  <p className="text-sm font-medium text-primary mb-1">💡 Pro Tip</p>
-                  <p className="text-sm text-foreground">{strategy.tip}</p>
+                <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                  <p className="text-xs font-medium text-primary mb-1">💡 Pro Tip</p>
+                  <p className="text-xs text-foreground">{strategy.tip}</p>
                 </div>
 
                 {activeMarket === "over_under" && (
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Entry Checklist</h4>
-                    <ul className="space-y-2 text-sm">
+                    <h4 className="font-semibold text-sm">Entry Checklist</h4>
+                    <ul className="space-y-2 text-xs">
                       {[
                         "Both teams scored in 60%+ of last 10 matches",
                         "Combined goals average ≥ 2.8 per game",
@@ -319,7 +512,7 @@ const SportsBetting = () => {
                         "Odds ≥ 1.70 for Over 2.5",
                       ].map((item, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <Goal className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                          <Goal className="h-3.5 w-3.5 text-green-500 shrink-0 mt-0.5" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -329,17 +522,18 @@ const SportsBetting = () => {
 
                 {activeMarket === "corners" && (
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Entry Checklist</h4>
-                    <ul className="space-y-2 text-sm">
+                    <h4 className="font-semibold text-sm">Corners Strategy — 4+ / 7+ / 12+</h4>
+                    <ul className="space-y-2 text-xs">
                       {[
-                        "At least one team averages 5+ corners/game",
-                        "Match between attack-heavy teams (top-half table)",
-                        "Check weather — windy conditions = more crosses = more corners",
-                        "Use Over 9.5 corners as primary market",
-                        "Minimum odds 1.80",
+                        "Over 4.5 corners: Almost any match qualifies — use as safe single",
+                        "Over 7.5 corners: At least one team averages 5+ corners/game",
+                        "Over 9.5 corners: Both teams in top-half, attack-heavy styles",
+                        "Over 12.5 corners: Only when BOTH teams average 6+ corners AND playing aggressively",
+                        "Check weather — windy = more crosses = more corners",
+                        "Minimum odds 1.80 for 9.5+ corners",
                       ].map((item, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <Goal className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                          <Goal className="h-3.5 w-3.5 text-blue-500 shrink-0 mt-0.5" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -349,8 +543,8 @@ const SportsBetting = () => {
 
                 {activeMarket === "match_result" && (
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Entry Checklist</h4>
-                    <ul className="space-y-2 text-sm">
+                    <h4 className="font-semibold text-sm">Entry Checklist</h4>
+                    <ul className="space-y-2 text-xs">
                       {[
                         "Home team in top 5, away team in bottom 5",
                         "Home team won 70%+ of home matches this season",
@@ -359,7 +553,7 @@ const SportsBetting = () => {
                         "Minimum odds 1.50 for home win",
                       ].map((item, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <Goal className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />
+                          <Goal className="h-3.5 w-3.5 text-yellow-500 shrink-0 mt-0.5" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -369,8 +563,8 @@ const SportsBetting = () => {
 
                 {activeMarket === "btts" && (
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Entry Checklist</h4>
-                    <ul className="space-y-2 text-sm">
+                    <h4 className="font-semibold text-sm">Entry Checklist</h4>
+                    <ul className="space-y-2 text-xs">
                       {[
                         "Both teams conceded in 60%+ of their last 10 games",
                         "Both teams scored in 50%+ of H2H meetings",
@@ -379,7 +573,7 @@ const SportsBetting = () => {
                         "Minimum odds 1.65 for BTTS Yes",
                       ].map((item, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <Goal className="h-4 w-4 text-purple-500 shrink-0 mt-0.5" />
+                          <Goal className="h-3.5 w-3.5 text-purple-500 shrink-0 mt-0.5" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -395,114 +589,184 @@ const SportsBetting = () => {
             {!user ? (
               <Card className="glass-card">
                 <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">Please sign in to track your bet slips</p>
+                  <p className="text-muted-foreground text-sm">Please sign in to track your bet slips</p>
                 </CardContent>
               </Card>
             ) : (
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="h-5 w-5" /> Submit Bet Slip
-                  </CardTitle>
-                  <CardDescription>Track your predictions & build your win history</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Match *</Label>
+              <>
+                <Card className="glass-card">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Upload className="h-5 w-5" /> Submit Bet Slip
+                    </CardTitle>
+                    <CardDescription className="text-xs">Upload your slip for AI analysis — corners, goals, BTTS & match insights</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Screenshot upload — prominent */}
+                    <div className="p-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-center">
+                      <ImageIcon className="h-8 w-8 mx-auto text-primary/60 mb-2" />
+                      <Label className="text-xs font-medium text-primary cursor-pointer">
+                        Upload Bet Slip Screenshot for AI Analysis
+                      </Label>
                       <Input
-                        placeholder="e.g. Arsenal vs Chelsea"
-                        value={form.match_name}
-                        onChange={(e) => setForm((f) => ({ ...f, match_name: e.target.value }))}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleScreenshot}
+                        disabled={uploading}
+                        className="mt-2"
                       />
+                      {uploading && (
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                          <Loader2 className="h-3 w-3 animate-spin" /> Uploading...
+                        </p>
+                      )}
+                      {screenshotUrl && (
+                        <img src={screenshotUrl} alt="Bet slip" className="mt-3 rounded-lg max-h-48 mx-auto object-contain" />
+                      )}
                     </div>
-                    <div>
-                      <Label>League</Label>
-                      <Input
-                        placeholder="e.g. Premier League"
-                        value={form.league}
-                        onChange={(e) => setForm((f) => ({ ...f, league: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label>Market *</Label>
-                      <Select value={form.market_type} onValueChange={(v) => setForm((f) => ({ ...f, market_type: v }))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {MARKET_TYPES.map((mt) => (
-                            <SelectItem key={mt.value} value={mt.value}>{mt.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Prediction *</Label>
-                      <Input
-                        placeholder="e.g. Over 2.5, Home Win, BTTS Yes"
-                        value={form.prediction}
-                        onChange={(e) => setForm((f) => ({ ...f, prediction: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label>Odds</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g. 1.85"
-                        value={form.odds}
-                        onChange={(e) => setForm((f) => ({ ...f, odds: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label>Stake ($)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g. 10.00"
-                        value={form.stake}
-                        onChange={(e) => setForm((f) => ({ ...f, stake: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label>Match Date</Label>
-                      <Input
-                        type="date"
-                        value={form.match_date}
-                        onChange={(e) => setForm((f) => ({ ...f, match_date: e.target.value }))}
-                      />
-                    </div>
-                  </div>
 
-                  <div>
-                    <Label>Strategy Notes</Label>
-                    <Textarea
-                      placeholder="Why you picked this bet..."
-                      value={form.strategy_notes}
-                      onChange={(e) => setForm((f) => ({ ...f, strategy_notes: e.target.value }))}
-                    />
-                  </div>
+                    {/* AI Analysis Result */}
+                    {analyzing && (
+                      <div className="p-4 rounded-xl bg-muted/40 border border-primary/20 text-center">
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary mb-2" />
+                        <p className="text-xs text-muted-foreground">Analyzing your slip — corners, goals, BTTS, winners...</p>
+                      </div>
+                    )}
 
-                  <div>
-                    <Label>Screenshot (proof)</Label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleScreenshot(e)}
-                      disabled={uploading}
-                    />
-                    {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
-                  </div>
+                    {aiAnalysis && (
+                      <div className="p-4 rounded-xl bg-muted/40 border border-primary/20 space-y-1">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Brain className="h-4 w-4 text-primary" />
+                            <span className="font-semibold text-sm text-primary">AI Analysis</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs h-7"
+                            onClick={() => runAiAnalysis()}
+                            disabled={analyzing}
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" /> Re-analyze
+                          </Button>
+                        </div>
+                        <div className="max-h-[400px] overflow-y-auto pr-1">
+                          {renderAiText(aiAnalysis)}
+                        </div>
+                      </div>
+                    )}
 
-                  <Button
-                    className="w-full"
-                    disabled={!form.match_name || !form.prediction || submitMutation.isPending}
-                    onClick={() => submitMutation.mutate(undefined)}
-                  >
-                    {submitMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Save Bet Slip
-                  </Button>
-                </CardContent>
-              </Card>
+                    {/* Form fields */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs">Match *</Label>
+                        <Input
+                          placeholder="e.g. Arsenal vs Chelsea"
+                          value={form.match_name}
+                          onChange={(e) => setForm((f) => ({ ...f, match_name: e.target.value }))}
+                          className="h-9"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">League</Label>
+                        <Input
+                          placeholder="e.g. Premier League"
+                          value={form.league}
+                          onChange={(e) => setForm((f) => ({ ...f, league: e.target.value }))}
+                          className="h-9"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Market *</Label>
+                        <Select value={form.market_type} onValueChange={(v) => setForm((f) => ({ ...f, market_type: v }))}>
+                          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {MARKET_TYPES.map((mt) => (
+                              <SelectItem key={mt.value} value={mt.value}>{mt.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Prediction *</Label>
+                        <Input
+                          placeholder="e.g. Over 2.5, BTTS Yes, Home Win"
+                          value={form.prediction}
+                          onChange={(e) => setForm((f) => ({ ...f, prediction: e.target.value }))}
+                          className="h-9"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Odds</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="e.g. 1.85"
+                          value={form.odds}
+                          onChange={(e) => setForm((f) => ({ ...f, odds: e.target.value }))}
+                          className="h-9"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Stake ($)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="e.g. 10.00"
+                          value={form.stake}
+                          onChange={(e) => setForm((f) => ({ ...f, stake: e.target.value }))}
+                          className="h-9"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Match Date</Label>
+                        <Input
+                          type="date"
+                          value={form.match_date}
+                          onChange={(e) => setForm((f) => ({ ...f, match_date: e.target.value }))}
+                          className="h-9"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Manual AI analysis button when no screenshot */}
+                    {!screenshotUrl && form.match_name && (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => runAiAnalysis()}
+                        disabled={analyzing || !form.match_name}
+                      >
+                        {analyzing ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Brain className="h-4 w-4 mr-2" />
+                        )}
+                        Analyze This Match (AI)
+                      </Button>
+                    )}
+
+                    <div>
+                      <Label className="text-xs">Strategy Notes</Label>
+                      <Textarea
+                        placeholder="Why you picked this bet..."
+                        value={form.strategy_notes}
+                        onChange={(e) => setForm((f) => ({ ...f, strategy_notes: e.target.value }))}
+                        className="min-h-[60px]"
+                      />
+                    </div>
+
+                    <Button
+                      className="w-full"
+                      disabled={!form.match_name || !form.prediction || submitMutation.isPending}
+                      onClick={() => submitMutation.mutate()}
+                    >
+                      {submitMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                      Save Bet Slip
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
             )}
           </TabsContent>
 
@@ -511,7 +775,7 @@ const SportsBetting = () => {
             {!user ? (
               <Card className="glass-card">
                 <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">Please sign in to view your history</p>
+                  <p className="text-muted-foreground text-sm">Please sign in to view your history</p>
                 </CardContent>
               </Card>
             ) : betSlips && betSlips.length > 0 ? (
@@ -521,23 +785,23 @@ const SportsBetting = () => {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold truncate">{bet.match_name}</p>
+                          <p className="font-semibold text-sm truncate">{bet.match_name}</p>
                           <p className="text-xs text-muted-foreground">
                             {bet.league} • {MARKET_TYPES.find((m) => m.value === bet.market_type)?.label}
                           </p>
-                          <p className="text-sm mt-1">
+                          <p className="text-xs mt-1">
                             <span className="font-medium">{bet.prediction}</span>
                             {bet.odds && <span className="text-muted-foreground"> @ {bet.odds}</span>}
                             {bet.stake && <span className="text-muted-foreground"> • ${bet.stake}</span>}
                           </p>
                           {bet.strategy_notes && (
-                            <p className="text-xs text-muted-foreground mt-1 italic">"{bet.strategy_notes}"</p>
+                            <p className="text-[10px] text-muted-foreground mt-1 italic">"{bet.strategy_notes}"</p>
                           )}
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <Badge
                             variant={bet.result === "won" ? "default" : bet.result === "lost" ? "destructive" : "secondary"}
-                            className={bet.result === "won" ? "bg-green-600" : ""}
+                            className={bet.result === "won" ? "bg-green-600 text-xs" : "text-xs"}
                           >
                             {bet.result === "won" ? "✅ Won" : bet.result === "lost" ? "❌ Lost" : "⏳ Pending"}
                           </Badge>
@@ -546,7 +810,7 @@ const SportsBetting = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-7 text-xs text-green-600"
+                                className="h-6 text-[10px] text-green-600 px-2"
                                 onClick={() => {
                                   const pnl = bet.stake && bet.odds ? bet.stake * (bet.odds - 1) : 0;
                                   updateResult.mutate({ id: bet.id, result: "won", profit_loss: pnl });
@@ -557,7 +821,7 @@ const SportsBetting = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-7 text-xs text-red-600"
+                                className="h-6 text-[10px] text-red-600 px-2"
                                 onClick={() => {
                                   updateResult.mutate({ id: bet.id, result: "lost", profit_loss: -(bet.stake || 0) });
                                 }}
@@ -572,7 +836,7 @@ const SportsBetting = () => {
                         <img
                           src={bet.screenshot_url}
                           alt="Bet slip"
-                          className="mt-3 rounded-lg max-h-40 object-cover w-full"
+                          className="mt-3 rounded-lg max-h-32 object-cover w-full"
                         />
                       )}
                     </CardContent>
@@ -582,7 +846,7 @@ const SportsBetting = () => {
             ) : (
               <Card className="glass-card">
                 <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">No bet slips yet. Start tracking your predictions!</p>
+                  <p className="text-muted-foreground text-sm">No bet slips yet. Start tracking your predictions!</p>
                 </CardContent>
               </Card>
             )}
