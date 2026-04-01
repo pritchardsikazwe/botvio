@@ -405,11 +405,14 @@ const Landing = () => {
               <Link to="/blog" className="hover:text-foreground">Blog</Link>
               <Link to="/faq" className="hover:text-foreground">FAQ</Link>
               <Link to="/affiliate" className="hover:text-foreground">Affiliate</Link>
+              <Link to="/about" className="hover:text-foreground">About</Link>
+              <Link to="/contact" className="hover:text-foreground">Contact</Link>
               <Link to="/terms" className="hover:text-foreground">Terms</Link>
               <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link to="/disclaimer" className="hover:text-foreground">Disclaimer</Link>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2025 Botvio. All rights reserved.
+              © 2026 Botvio. All rights reserved.
             </p>
           </div>
           
