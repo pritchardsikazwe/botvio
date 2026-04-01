@@ -280,16 +280,20 @@ const StrategyDetail = () => {
                 <CardHeader>
                   <CardTitle>{t("strategies.about", "About This Strategy")}</CardTitle>
                 </CardHeader>
-                <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <CardContent className="prose prose-sm dark:prose-invert max-w-none
+                  prose-strong:text-foreground prose-li:text-muted-foreground
+                  prose-p:text-muted-foreground prose-p:leading-relaxed
+                  prose-ul:my-2 prose-li:my-0.5">
                   {strategy.description ? (
-                    <p>{strategy.description}</p>
+                    <div dangerouslySetInnerHTML={{ __html: formatDescription(strategy.description) }} />
                   ) : (
                     <p className="text-muted-foreground">{t("strategies.noDescription", "No description provided")}</p>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Strategy Configuration */}
+              {/* AdSense after description */}
+              <StrategyAdSlot slot="strategy-after-desc" />
               {strategy.config_json && typeof strategy.config_json === "object" && (
                 <Card>
                   <CardHeader>
