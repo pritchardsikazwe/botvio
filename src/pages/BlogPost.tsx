@@ -167,16 +167,30 @@ const BlogPost = () => {
       <SEOHead title={post.metaTitle || post.title} description={post.metaDescription || post.excerpt} jsonLd={jsonLd} />
       <Header />
 
-      {/* Affiliate top bar */}
-      <div className="bg-gradient-to-r from-emerald-500/10 via-primary/10 to-warning/10 border-b border-border/30">
-        <div className="container mx-auto px-4 py-2.5 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-warning" />
-            <span className="text-sm font-medium">Start trading with Deriv — Free demo account with $10,000 virtual funds</span>
+      {/* Contextual Affiliate top bar */}
+      {(() => {
+        const brokers = detectBrokers(post.title, post.content || "");
+        const primary = AFFILIATE_LINKS[brokers[0]];
+        return (
+          <div className={`bg-gradient-to-r ${primary.color} border-b border-border/30`}>
+            <div className="container mx-auto px-4 py-2.5 flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-warning" />
+                <span className="text-sm font-medium">Start trading with {primary.name} — Free demo account available</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {brokers.map(b => (
+                  <a key={b} href={AFFILIATE_LINKS[b].url} target="_blank" rel="noopener noreferrer">
+                    <Button size="sm" variant="default" className="gap-1 text-xs">
+                      {AFFILIATE_LINKS[b].cta} <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
-          <DerivAffiliateButton size="sm" label="Open Free Account →" />
-        </div>
-      </div>
+        );
+      })()}
 
       <div className="h-4" />
 
