@@ -602,12 +602,12 @@ const SportsBetting = () => {
                   {generatingPicks ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Generating {slipSize}-team picks...
+                      Generating {slipSize}-team {dayRange} picks...
                     </>
                   ) : (
                     <>
                       <Zap className="h-4 w-4 mr-2" />
-                      Generate {slipSize}-Team {slipType === "combined" ? "Accumulator" : "Singles"}
+                      Generate {slipSize}-Team {dayRange === "weekly" ? "Weekly" : dayRange === "weekend" ? "Weekend" : ""} {slipType === "combined" ? "Accumulator" : "Singles"}
                     </>
                   )}
                 </Button>
