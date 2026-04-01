@@ -966,44 +966,60 @@ const Admin = () => {
                 <Badge variant="destructive" className="ml-1">{stats.pendingProviders}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="subscription_requests" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Subscription Requests
-            </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
-              Subscriptions
-            </TabsTrigger>
-            <TabsTrigger value="affiliates" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Affiliates
-            </TabsTrigger>
-            <TabsTrigger value="payouts" className="flex items-center gap-2">
-              <Wallet className="w-4 h-4" />
-              Payouts
-              {stats.pendingPayouts > 0 && (
-                <Badge variant="destructive" className="ml-1">{stats.pendingPayouts}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="fraud" className="flex items-center gap-2">
-              <AlertOctagon className="w-4 h-4" />
-              Fraud Detection
-              {fraudFlags.length > 0 && (
-                <Badge variant="destructive" className="ml-1">{fraudFlags.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="billing" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
-              Billing Requests
-            </TabsTrigger>
-            <TabsTrigger value="deriv_connections" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Deriv Connections
-            </TabsTrigger>
-            <TabsTrigger value="pricing_plans" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Pricing Plans
-            </TabsTrigger>
+            {isSuperAdmin && (
+              <TabsTrigger value="subscription_requests" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Subscription Requests
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Subscriptions
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="affiliates" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Affiliates
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="payouts" className="flex items-center gap-2">
+                <Wallet className="w-4 h-4" />
+                Payouts
+                {stats.pendingPayouts > 0 && (
+                  <Badge variant="destructive" className="ml-1">{stats.pendingPayouts}</Badge>
+                )}
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="fraud" className="flex items-center gap-2">
+                <AlertOctagon className="w-4 h-4" />
+                Fraud Detection
+                {fraudFlags.length > 0 && (
+                  <Badge variant="destructive" className="ml-1">{fraudFlags.length}</Badge>
+                )}
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="billing" className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Billing Requests
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="deriv_connections" className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Deriv Connections
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="pricing_plans" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Pricing Plans
+              </TabsTrigger>
+            )}
             <TabsTrigger value="signal_approvals" className="flex items-center gap-2">
               <ClipboardCheck className="w-4 h-4" />
               Signal Approvals
@@ -1012,34 +1028,46 @@ const Admin = () => {
               <UserCheck className="w-4 h-4" />
               Signal Managers
             </TabsTrigger>
-            <TabsTrigger value="products" className="flex items-center gap-2">
-              <Package className="w-4 h-4" />
-              Products
-            </TabsTrigger>
-            <TabsTrigger value="seo" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              SEO & Webmasters
-            </TabsTrigger>
-            <TabsTrigger value="seo_pages" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              SEO Pages
-            </TabsTrigger>
+            {isSuperAdmin && (
+              <TabsTrigger value="products" className="flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Products
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="seo" className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                SEO & Webmasters
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="seo_pages" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                SEO Pages
+              </TabsTrigger>
+            )}
             <TabsTrigger value="news_events" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               News Events
             </TabsTrigger>
-            <TabsTrigger value="profiles" className="flex items-center gap-2">
-              <Contact className="w-4 h-4" />
-              Profiles
-            </TabsTrigger>
-            <TabsTrigger value="newsletter" className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              Newsletter
-            </TabsTrigger>
-            <TabsTrigger value="admin_roles" className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              Admin Roles
-            </TabsTrigger>
+            {isSuperAdmin && (
+              <TabsTrigger value="profiles" className="flex items-center gap-2">
+                <Contact className="w-4 h-4" />
+                Profiles
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="newsletter" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Newsletter
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
+              <TabsTrigger value="admin_roles" className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Admin Roles
+              </TabsTrigger>
+            )}
             <TabsTrigger value="signal_history" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Signal History
