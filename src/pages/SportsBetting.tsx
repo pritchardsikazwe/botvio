@@ -52,10 +52,43 @@ const STRATEGIES: Record<string, { name: string; description: string; tip: strin
 };
 
 const SLIP_SIZES = [
+  { value: "2", label: "2 Teams" },
   { value: "3", label: "3 Teams" },
+  { value: "5", label: "5 Teams" },
   { value: "6", label: "6 Teams" },
+  { value: "8", label: "8 Teams" },
   { value: "10", label: "10 Teams" },
+  { value: "15", label: "15 Teams" },
   { value: "20", label: "20 Teams" },
+  { value: "30", label: "30 Teams" },
+];
+
+const LEAGUES = [
+  { value: "all", label: "All Leagues" },
+  { value: "premier league|EPL|england", label: "🏴 Premier League" },
+  { value: "la liga|spain", label: "🇪🇸 La Liga" },
+  { value: "serie a|italy", label: "🇮🇹 Serie A" },
+  { value: "bundesliga|germany", label: "🇩🇪 Bundesliga" },
+  { value: "ligue 1|france", label: "🇫🇷 Ligue 1" },
+  { value: "eredivisie|netherlands", label: "🇳🇱 Eredivisie" },
+  { value: "primeira liga|portugal", label: "🇵🇹 Primeira Liga" },
+  { value: "champions league|UCL", label: "🏆 Champions League" },
+  { value: "europa league|UEL", label: "🏆 Europa League" },
+  { value: "saudi|arabia|SPL|pro league", label: "🇸🇦 Saudi Pro League" },
+  { value: "MLS|major league soccer|usa", label: "🇺🇸 MLS" },
+  { value: "championship|EFL", label: "🏴 Championship" },
+  { value: "turkish|super lig|turkey", label: "🇹🇷 Süper Lig" },
+  { value: "scottish|scotland", label: "🏴 Scottish Premiership" },
+  { value: "brazilian|brazil|serie a", label: "🇧🇷 Brasileirão" },
+  { value: "argentina|primera", label: "🇦🇷 Liga Profesional" },
+  { value: "africa|CAF|AFCON", label: "🌍 African Leagues" },
+];
+
+const DAY_OPTIONS = [
+  { value: "today", label: "Today" },
+  { value: "tomorrow", label: "Tomorrow" },
+  { value: "weekend", label: "Weekend" },
+  { value: "weekly", label: "Full Week" },
 ];
 
 const SportsBetting = () => {
@@ -83,7 +116,8 @@ const SportsBetting = () => {
   const [slipSize, setSlipSize] = useState("3");
   const [slipMarket, setSlipMarket] = useState("mixed");
   const [slipType, setSlipType] = useState("combined");
-  const [leagueFilter, setLeagueFilter] = useState("");
+  const [leagueFilter, setLeagueFilter] = useState("all");
+  const [dayRange, setDayRange] = useState("today");
   const [dailyPicks, setDailyPicks] = useState<string | null>(null);
   const [generatingPicks, setGeneratingPicks] = useState(false);
 
@@ -227,7 +261,7 @@ const SportsBetting = () => {
     setDailyPicks(null);
     try {
       const { data, error } = await supabase.functions.invoke("generate-daily-slips", {
-        body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter || undefined },
+        body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter === "all" ? undefined : leagueFilter, dayRange },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -240,7 +274,7 @@ const SportsBetting = () => {
           slip_size: parseInt(slipSize) || 3,
           market_type: slipMarket,
           slip_type: slipType,
-          league_filter: leagueFilter || null,
+          league_filter: leagueFilter === "all" ? null : leagueFilter,
           picks_content: data.picks,
           is_published: true,
         });
@@ -468,8 +502,8 @@ const SportsBetting = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Config row */}
-                <div className="grid grid-cols-3 gap-3">
+                {/* Config row 1 */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <Label className="text-xs">Slip Size</Label>
                     <Select value={slipSize} onValueChange={setSlipSize}>
@@ -495,6 +529,17 @@ const SportsBetting = () => {
                     </Select>
                   </div>
                   <div>
+                    <Label className="text-xs">Day Range</Label>
+                    <Select value={dayRange} onValueChange={setDayRange}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {DAY_OPTIONS.map((d) => (
+                          <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
                     <Label className="text-xs">Slip Type</Label>
                     <Select value={slipType} onValueChange={setSlipType}>
                       <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
@@ -506,15 +551,30 @@ const SportsBetting = () => {
                   </div>
                 </div>
 
+                {/* League filter */}
+                <div>
+                  <Label className="text-xs">League / Competition</Label>
+                  <Select value={leagueFilter} onValueChange={setLeagueFilter}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="All Leagues" /></SelectTrigger>
+                    <SelectContent>
+                      {LEAGUES.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Quick presets */}
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "" },
-                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "" },
-                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "" },
-                    { label: "🇸🇦 Saudi League", size: "3", market: "mixed", type: "combined", league: "saudi|arabia|SPL|pro league" },
-                    { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined", league: "" },
-                    { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined", league: "" },
+                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "all", day: "today" },
+                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "all", day: "today" },
+                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "all", day: "today" },
+                    { label: "📅 Weekend Multi", size: "10", market: "mixed", type: "combined", league: "all", day: "weekend" },
+                    { label: "📆 Weekly Mega", size: "20", market: "mixed", type: "combined", league: "all", day: "weekly" },
+                    { label: "🇬🇧 EPL Picks", size: "5", market: "mixed", type: "combined", league: "premier league|EPL|england", day: "weekend" },
+                    { label: "🇪🇸 La Liga", size: "5", market: "mixed", type: "combined", league: "la liga|spain", day: "weekend" },
+                    { label: "🏆 UCL Picks", size: "5", market: "mixed", type: "combined", league: "champions league|UCL", day: "weekly" },
                   ].map((preset) => (
                     <Button
                       key={preset.label}
@@ -526,6 +586,7 @@ const SportsBetting = () => {
                         setSlipMarket(preset.market);
                         setSlipType(preset.type);
                         setLeagueFilter(preset.league);
+                        setDayRange(preset.day);
                       }}
                     >
                       {preset.label}
@@ -541,12 +602,12 @@ const SportsBetting = () => {
                   {generatingPicks ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Generating {slipSize}-team picks...
+                      Generating {slipSize}-team {dayRange} picks...
                     </>
                   ) : (
                     <>
                       <Zap className="h-4 w-4 mr-2" />
-                      Generate {slipSize}-Team {slipType === "combined" ? "Accumulator" : "Singles"}
+                      Generate {slipSize}-Team {dayRange === "weekly" ? "Weekly" : dayRange === "weekend" ? "Weekend" : ""} {slipType === "combined" ? "Accumulator" : "Singles"}
                     </>
                   )}
                 </Button>
@@ -656,36 +717,62 @@ const SportsBetting = () => {
                 {checkSlipUrl && (
                     <>
                       <img src={checkSlipUrl} alt="Checking slip" className="mt-3 rounded-lg max-h-40 mx-auto object-contain" />
-                      <Button
-                        className="mt-3 w-full"
-                        size="sm"
-                        onClick={async () => {
-                          setChecking(true);
-                          setCheckResult(null);
-                          try {
-                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
-                              body: { imageUrl: checkSlipUrl },
-                            });
-                            if (fnErr) throw fnErr;
-                            if (data?.error) throw new Error(data.error);
-                            setCheckResult(data.result);
-                          } catch (err: any) {
-                            toast.error(err.message || "Check failed");
-                          } finally {
-                            setChecking(false);
-                          }
-                        }}
-                        disabled={checking}
-                      >
-                        {checking ? (
-                          <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Checking...</>
-                        ) : (
-                          <><Search className="h-4 w-4 mr-2" /> Get Results</>
-                        )}
-                      </Button>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <Button
+                          size="sm"
+                          onClick={async () => {
+                            setChecking(true);
+                            setCheckResult(null);
+                            try {
+                              const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
+                                body: { imageUrl: checkSlipUrl },
+                              });
+                              if (fnErr) throw fnErr;
+                              if (data?.error) throw new Error(data.error);
+                              setCheckResult(data.result);
+                            } catch (err: any) {
+                              toast.error(err.message || "Check failed");
+                            } finally {
+                              setChecking(false);
+                            }
+                          }}
+                          disabled={checking || analyzing}
+                        >
+                          {checking ? (
+                            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Checking...</>
+                          ) : (
+                            <><Search className="h-4 w-4 mr-2" /> Get Results</>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => runAiAnalysis(checkSlipUrl!)}
+                          disabled={analyzing || checking}
+                        >
+                          {analyzing ? (
+                            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Analyzing...</>
+                          ) : (
+                            <><Brain className="h-4 w-4 mr-2" /> Analyze Slip</>
+                          )}
+                        </Button>
+                      </div>
                     </>
                   )}
                 </div>
+
+                {/* AI Analysis result in Check tab */}
+                {aiAnalysis && checkSlipUrl && (
+                  <div className="p-4 rounded-xl bg-muted/40 border border-primary/20 space-y-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Brain className="h-4 w-4 text-primary" />
+                      <span className="font-semibold text-sm text-primary">AI Analysis</span>
+                    </div>
+                    <div className="max-h-[400px] overflow-y-auto pr-1">
+                      {renderAiText(aiAnalysis)}
+                    </div>
+                  </div>
+                )}
 
                 {/* Or check from history */}
                 {user && betSlips && betSlips.filter((b: any) => b.result === "pending").length > 0 && (

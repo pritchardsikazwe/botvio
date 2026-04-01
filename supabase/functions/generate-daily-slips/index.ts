@@ -14,18 +14,41 @@ serve(async (req) => {
   }
 
   try {
-    const { slipSize, marketType, slipType, leagueFilter } = await req.json();
+    const { slipSize, marketType, slipType, leagueFilter, dayRange } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Fetch today's and tomorrow's fixtures
-    const today = new Date().toISOString().split("T")[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    // Calculate date range based on dayRange
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+    let dateFrom = todayStr;
+    let dateTo = todayStr;
+    
+    if (dayRange === "tomorrow") {
+      const tmrw = new Date(Date.now() + 86400000);
+      dateFrom = tmrw.toISOString().split("T")[0];
+      dateTo = dateFrom;
+    } else if (dayRange === "weekend") {
+      // Find next Saturday and Sunday
+      const dayOfWeek = today.getDay();
+      const daysToSat = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
+      const sat = new Date(Date.now() + daysToSat * 86400000);
+      const sun = new Date(sat.getTime() + 86400000);
+      dateFrom = sat.toISOString().split("T")[0];
+      dateTo = sun.toISOString().split("T")[0];
+    } else if (dayRange === "weekly") {
+      dateTo = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+    } else {
+      // today — include tomorrow too for more options
+      dateTo = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    }
+    
+    const dayLabel = dayRange === "tomorrow" ? "tomorrow" : dayRange === "weekend" ? "this weekend" : dayRange === "weekly" ? "this week" : "today";
     
     let fixturesData: any = { matches: [] };
     if (FOOTBALL_API_KEY) {
       try {
-        const resp = await fetch(`${BASE}/matches?dateFrom=${today}&dateTo=${tomorrow}`, {
+        const resp = await fetch(`${BASE}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`, {
           headers: { "X-Auth-Token": FOOTBALL_API_KEY },
         });
         if (resp.ok) fixturesData = await resp.json();
@@ -64,12 +87,14 @@ RULES:
 - Include combined odds estimate for accumulators
 - Add bankroll management advice`;
 
-    const userPrompt = `Generate a ${type === "single" ? "set of single bets" : "combined accumulator slip"} with exactly ${size} picks.
+    const userPrompt = `Generate a ${type === "single" ? "set of single bets" : "combined accumulator slip"} with exactly ${size} picks for ${dayLabel}.
 
 Market focus: ${market === "mixed" ? "Mix of corners, over/under goals, BTTS, and match results" : market === "corners" ? "CORNERS ONLY (4+, 7+, 12+ corners)" : market === "over_under" ? "OVER/UNDER GOALS ONLY" : market === "btts" ? "BOTH TEAMS TO SCORE ONLY" : "MATCH RESULT (1X2) ONLY"}
 ${leagueFilter ? `\nIMPORTANT: Focus ONLY on ${leagueFilter} league matches. If no fixtures are available from the API, use your knowledge of current ${leagueFilter} fixtures.` : ''}
 
-Today's available fixtures:
+TIME PERIOD: ${dayLabel} (${dateFrom} to ${dateTo}). Only include matches scheduled within this date range.
+
+Available fixtures for this period:
 ${matchesSummary}
 
 For each pick provide:
