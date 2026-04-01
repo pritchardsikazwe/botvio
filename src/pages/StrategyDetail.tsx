@@ -426,6 +426,9 @@ const StrategyDetail = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Sidebar AdSense */}
+              <StrategyAdSlot slot="strategy-sidebar" />
             </div>
           </div>
         </div>
