@@ -959,13 +959,15 @@ const Admin = () => {
               <Signal className="w-4 h-4" />
               Signals
             </TabsTrigger>
-            <TabsTrigger value="providers" className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4" />
-              Providers
-              {stats.pendingProviders > 0 && (
-                <Badge variant="destructive" className="ml-1">{stats.pendingProviders}</Badge>
-              )}
-            </TabsTrigger>
+            {isSuperAdmin && (
+              <TabsTrigger value="providers" className="flex items-center gap-2">
+                <UserCheck className="w-4 h-4" />
+                Providers
+                {stats.pendingProviders > 0 && (
+                  <Badge variant="destructive" className="ml-1">{stats.pendingProviders}</Badge>
+                )}
+              </TabsTrigger>
+            )}
             {isSuperAdmin && (
               <TabsTrigger value="subscription_requests" className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
