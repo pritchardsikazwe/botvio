@@ -1,3 +1,4 @@
+import React, { useEffect, useRef } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,29 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
+
+const BlogAdSlot = ({ slot }: { slot: string }) => {
+  const adRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    try {
+      if (adRef.current) {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      }
+    } catch {}
+  }, []);
+  return (
+    <div className="my-6 text-center" ref={adRef}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client="ca-pub-8741937856196827"
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </div>
+  );
+};
 
 const blogPosts = [
   {
@@ -342,6 +366,9 @@ const Blog = () => {
                 ))}
               </CardContent>
             </Card>
+
+            {/* AdSense Sidebar Ad */}
+            <BlogAdSlot slot="sidebar-1" />
 
             {/* Risk Warning */}
             <Card className="border-destructive/20">

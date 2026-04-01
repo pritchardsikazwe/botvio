@@ -1,3 +1,4 @@
+import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SEOHead } from "@/components/seo/SEOHead";
@@ -18,17 +19,31 @@ const relatedPosts = [
   { slug: "botvio-vs-manual-trading", title: "Botvio vs Manual Trading" },
 ];
 
-/* ── Ad placeholder slot (for AdSense injection) ── */
-const AdSlot = ({ position }: { position: string }) => (
-  <div
-    className="my-8 flex items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-6 text-xs text-muted-foreground"
-    data-ad-slot={position}
-    aria-hidden
-  >
-    {/* Replace with AdSense code when approved */}
-    <span className="opacity-50">— Ad —</span>
-  </div>
-);
+/* ── AdSense ad slot ── */
+const AdSlot = ({ position }: { position: string }) => {
+  const adRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    try {
+      if (adRef.current && typeof window !== "undefined") {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      }
+    } catch {}
+  }, []);
+
+  return (
+    <div className="my-8 text-center" ref={adRef}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client="ca-pub-8741937856196827"
+        data-ad-slot={position}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </div>
+  );
+};
 
 /* ── YouTube embed ── */
 const YouTubeEmbed = ({ url }: { url: string }) => {
