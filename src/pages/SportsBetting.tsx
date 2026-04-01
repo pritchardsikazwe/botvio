@@ -261,7 +261,7 @@ const SportsBetting = () => {
     setDailyPicks(null);
     try {
       const { data, error } = await supabase.functions.invoke("generate-daily-slips", {
-        body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter || undefined, dayRange },
+        body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter === "all" ? undefined : leagueFilter, dayRange },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
