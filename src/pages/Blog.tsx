@@ -348,13 +348,19 @@ const Blog = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Deriv CTA */}
+            {/* Multi-Broker CTAs */}
             <Card className="bg-gradient-to-br from-primary/10 to-warning/10 border-primary/30">
-              <CardContent className="pt-6 space-y-3 text-center">
+              <CardContent className="pt-6 space-y-3">
                 <TrendingUp className="h-10 w-10 mx-auto text-primary" />
-                <h3 className="font-bold">Start Trading Now</h3>
-                <p className="text-sm text-muted-foreground">Create your free Deriv account and trade with Botvio AI.</p>
-                <DerivAffiliateButton size="default" className="w-full" label="Create Deriv Account" />
+                <h3 className="font-bold text-center">Start Trading Now</h3>
+                <p className="text-sm text-muted-foreground text-center">Open a free account with a trusted broker.</p>
+                <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" className="w-full gap-1 mb-2">Open Exness Account <ExternalLink className="h-3 w-3" /></Button>
+                </a>
+                <DerivAffiliateButton size="sm" className="w-full" label="Open Deriv Account" />
+                <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" variant="outline" className="w-full gap-1 mt-2">Open Weltrade Account <ExternalLink className="h-3 w-3" /></Button>
+                </a>
               </CardContent>
             </Card>
 
