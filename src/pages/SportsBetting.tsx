@@ -534,16 +534,61 @@ const SportsBetting = () => {
                   )}
                 </Button>
 
-                {/* AI Picks Result */}
+                {/* AI Picks Result (just generated) */}
                 {dailyPicks && (
                   <div className="mt-4 p-4 rounded-xl bg-muted/40 border border-primary/20 space-y-1">
                     <div className="flex items-center gap-2 mb-3">
                       <ListChecks className="h-4 w-4 text-primary" />
                       <span className="font-semibold text-sm text-primary">AI Generated Picks</span>
+                      {isAdmin && <Badge variant="outline" className="text-[10px]">Saved for all users</Badge>}
                     </div>
                     <div className="prose prose-sm max-w-none">
                       {renderAiText(dailyPicks)}
                     </div>
+                  </div>
+                )}
+
+                {/* Published picks from admin — visible to all users */}
+                {publishedPicks && publishedPicks.length > 0 && (
+                  <div className="space-y-4 mt-6">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      Today's Published Picks
+                    </h3>
+                    {publishedPicks.map((pick: any) => (
+                      <div key={pick.id} className="p-4 rounded-xl bg-muted/40 border border-primary/20 space-y-1">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <ListChecks className="h-4 w-4 text-primary" />
+                            <span className="font-semibold text-sm text-primary">
+                              {pick.slip_size}-Team {pick.slip_type === "combined" ? "Accumulator" : "Singles"}
+                            </span>
+                            <Badge variant="secondary" className="text-[10px]">{pick.market_type}</Badge>
+                            {pick.league_filter && <Badge variant="outline" className="text-[10px]">{pick.league_filter.split("|")[0]}</Badge>}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(pick.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                        <div className="prose prose-sm max-w-none">
+                          {renderAiText(pick.picks_content)}
+                        </div>
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-[10px] text-destructive mt-2"
+                            onClick={async () => {
+                              await supabase.from("daily_picks").delete().eq("id", pick.id);
+                              queryClient.invalidateQueries({ queryKey: ["published-picks"] });
+                              toast.success("Pick removed");
+                            }}
+                          >
+                            <XCircle className="h-3 w-3 mr-1" /> Remove
+                          </Button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
