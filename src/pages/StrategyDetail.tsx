@@ -7,12 +7,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, Star, Share2, Copy, ShoppingCart, CheckCircle, TrendingUp, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Download, Star, Share2, Copy, ShoppingCart, CheckCircle, TrendingUp, AlertTriangle, ExternalLink, BarChart3, Clock, Target, Layers } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
 
 const REFERRAL_STORAGE_KEY = "botvio_referral";
+
+const BROKER_LINKS: Record<string, { name: string; url: string }> = {
+  deriv: { name: "Deriv", url: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" },
+  exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k" },
+  mt5: { name: "Exness MT5", url: "https://one.exness-track.com/a/ts1kvs1k" },
+  binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
+};
 
 const StrategyDetail = () => {
   const { t } = useTranslation();
@@ -245,6 +252,57 @@ const StrategyDetail = () => {
                 </CardContent>
               </Card>
 
+              {/* Strategy Configuration */}
+              {strategy.config_json && typeof strategy.config_json === "object" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Layers className="h-5 w-5 text-primary" />
+                      Strategy Configuration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {Object.entries(strategy.config_json as Record<string, unknown>).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-start gap-4">
+                        <span className="text-sm text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
+                        <span className="text-sm font-medium text-right">
+                          {Array.isArray(value) ? (
+                            <div className="flex flex-wrap gap-1 justify-end">
+                              {(value as string[]).map((v, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{String(v)}</Badge>
+                              ))}
+                            </div>
+                          ) : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Broker CTA */}
+              {(() => {
+                const broker = BROKER_LINKS[strategy.market] || BROKER_LINKS.deriv;
+                return (
+                  <Card className="border-primary/30 bg-primary/5">
+                    <CardContent className="pt-6">
+                      <h3 className="font-semibold text-lg mb-2">Trade this strategy on {broker.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Open a free {broker.name} account and start using this strategy with a demo account first.
+                      </p>
+                      <a href={broker.url} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full gap-2">
+                          Open {broker.name} Account <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </a>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        ⚠️ Trading involves risk. Start with a demo account.
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+
               {/* Disclaimer */}
               <Card className="border-warning/50 bg-warning/5">
                 <CardHeader>
@@ -292,6 +350,36 @@ const StrategyDetail = () => {
                       {strategy.rating?.toFixed(1) || "N/A"}
                     </span>
                   </div>
+                  {strategy.contract_family && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Contract Type</span>
+                        <Badge variant="outline" className="text-xs">{strategy.contract_family}</Badge>
+                      </div>
+                    </>
+                  )}
+                  {strategy.market_type && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Market Type</span>
+                        <Badge variant="outline" className="text-xs">{strategy.market_type.replace(/_/g, " ")}</Badge>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardContent className="pt-6 space-y-3">
+                  <Button className="w-full gap-2" onClick={handleCopyStrategy}>
+                    <Copy className="h-4 w-4" /> Copy Strategy Config
+                  </Button>
+                  <Button variant="outline" className="w-full gap-2" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" /> Share Strategy
+                  </Button>
                 </CardContent>
               </Card>
             </div>
