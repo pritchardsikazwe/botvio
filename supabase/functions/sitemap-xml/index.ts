@@ -99,6 +99,13 @@ Deno.serve(async (req) => {
     .select("slug, updated_at")
     .eq("is_public", true);
 
+  // ═══ Dynamic: blog posts ═══
+  const { data: blogPosts } = await supabase
+    .from("posts")
+    .select("slug, published_at, updated_at")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false });
+
   // ═══ Dynamic: SEO pages from DB ═══
   const { data: seoPages } = await supabase
     .from("seo_pages")
