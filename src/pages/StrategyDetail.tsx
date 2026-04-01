@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStrategy, useHasPurchasedStrategy, useIncrementDownload } from "@/hooks/useStrategies";
@@ -19,6 +19,43 @@ const BROKER_LINKS: Record<string, { name: string; url: string }> = {
   exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k" },
   mt5: { name: "Exness MT5", url: "https://one.exness-track.com/a/ts1kvs1k" },
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
+};
+
+/* ── AdSense slot ── */
+const StrategyAdSlot = ({ slot }: { slot: string }) => {
+  const adRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    try {
+      if (adRef.current) {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      }
+    } catch {}
+  }, []);
+  return (
+    <div className="my-6 text-center" ref={adRef}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client="ca-pub-8741937856196827"
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </div>
+  );
+};
+
+/* ── Convert markdown-like text to HTML ── */
+const formatDescription = (text: string): string => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^• (.+)$/gm, '<li>$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+    .replace(/^✅ (.+)$/gm, '<li>✅ $1</li>')
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul class="list-disc pl-5 space-y-1">$1</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br/>')
+    .replace(/^/, '<p>').replace(/$/, '</p>');
 };
 
 const StrategyDetail = () => {
@@ -243,16 +280,20 @@ const StrategyDetail = () => {
                 <CardHeader>
                   <CardTitle>{t("strategies.about", "About This Strategy")}</CardTitle>
                 </CardHeader>
-                <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <CardContent className="prose prose-sm dark:prose-invert max-w-none
+                  prose-strong:text-foreground prose-li:text-muted-foreground
+                  prose-p:text-muted-foreground prose-p:leading-relaxed
+                  prose-ul:my-2 prose-li:my-0.5">
                   {strategy.description ? (
-                    <p>{strategy.description}</p>
+                    <div dangerouslySetInnerHTML={{ __html: formatDescription(strategy.description) }} />
                   ) : (
                     <p className="text-muted-foreground">{t("strategies.noDescription", "No description provided")}</p>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Strategy Configuration */}
+              {/* AdSense after description */}
+              <StrategyAdSlot slot="strategy-after-desc" />
               {strategy.config_json && typeof strategy.config_json === "object" && (
                 <Card>
                   <CardHeader>
@@ -302,6 +343,9 @@ const StrategyDetail = () => {
                   </Card>
                 );
               })()}
+
+              {/* AdSense mid-content */}
+              <StrategyAdSlot slot="strategy-mid" />
 
               {/* Disclaimer */}
               <Card className="border-warning/50 bg-warning/5">
@@ -382,6 +426,9 @@ const StrategyDetail = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Sidebar AdSense */}
+              <StrategyAdSlot slot="strategy-sidebar" />
             </div>
           </div>
         </div>

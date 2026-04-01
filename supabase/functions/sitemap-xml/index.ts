@@ -43,12 +43,36 @@ Deno.serve(async (req) => {
     { loc: "/terms", priority: "0.3", changefreq: "yearly" },
     { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
 
+    // Trust pages
+    { loc: "/about", priority: "0.5", changefreq: "monthly" },
+    { loc: "/contact", priority: "0.5", changefreq: "monthly" },
+    { loc: "/disclaimer", priority: "0.4", changefreq: "yearly" },
+    { loc: "/docs", priority: "0.5", changefreq: "monthly" },
+    { loc: "/whitepaper", priority: "0.5", changefreq: "monthly" },
+    { loc: "/press", priority: "0.5", changefreq: "monthly" },
+    { loc: "/case-studies", priority: "0.5", changefreq: "monthly" },
+
     // Category hub pages
     { loc: "/gold", priority: "0.9", changefreq: "daily" },
     { loc: "/weltrade", priority: "0.8", changefreq: "weekly" },
     { loc: "/trade-modes", priority: "0.8", changefreq: "weekly" },
     { loc: "/trading", priority: "0.8", changefreq: "daily" },
     { loc: "/authority-signals", priority: "0.7", changefreq: "daily" },
+    { loc: "/binary-options", priority: "0.7", changefreq: "weekly" },
+    { loc: "/deriv-options", priority: "0.7", changefreq: "weekly" },
+    { loc: "/news-calendar", priority: "0.7", changefreq: "daily" },
+    { loc: "/sports-betting", priority: "0.6", changefreq: "weekly" },
+    { loc: "/flipping-challenges", priority: "0.6", changefreq: "weekly" },
+    { loc: "/live", priority: "0.7", changefreq: "daily" },
+
+    // Market pages
+    { loc: "/markets", priority: "0.8", changefreq: "daily" },
+    { loc: "/markets/us", priority: "0.7", changefreq: "daily" },
+    { loc: "/markets/europe", priority: "0.7", changefreq: "daily" },
+    { loc: "/markets/africa", priority: "0.7", changefreq: "daily" },
+    { loc: "/markets/asia", priority: "0.7", changefreq: "daily" },
+    { loc: "/markets/middle-east", priority: "0.7", changefreq: "daily" },
+    { loc: "/markets/crypto", priority: "0.7", changefreq: "daily" },
 
     // Chart pages
     { loc: "/chart/XAUUSD", priority: "0.8", changefreq: "daily" },
@@ -74,6 +98,13 @@ Deno.serve(async (req) => {
     .from("strategies")
     .select("slug, updated_at")
     .eq("is_public", true);
+
+  // ═══ Dynamic: blog posts ═══
+  const { data: blogPosts } = await supabase
+    .from("posts")
+    .select("slug, published_at, updated_at")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false });
 
   // ═══ Dynamic: SEO pages from DB ═══
   const { data: seoPages } = await supabase
@@ -107,6 +138,15 @@ Deno.serve(async (req) => {
     <lastmod>${s.updated_at?.split("T")[0] || now}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+  </url>`);
+  });
+
+  blogPosts?.forEach((post) => {
+    urls.push(`  <url>
+    <loc>${siteUrl}/blog/${post.slug}</loc>
+    <lastmod>${(post.updated_at || post.published_at)?.split("T")[0] || now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>`);
   });
 
