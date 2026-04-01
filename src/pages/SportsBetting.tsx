@@ -707,43 +707,65 @@ const SportsBetting = () => {
                         <span className="font-semibold text-sm text-primary">Live Status Report</span>
                       </div>
                       <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7"
-                        onClick={async () => {
-                          setChecking(true);
-                          try {
-                            const body: any = {};
-                            if (checkSlipUrl) {
-                              body.imageUrl = checkSlipUrl;
-                            } else if (selectedBetForCheck && betSlips) {
-                              const bet = betSlips.find((b: any) => b.id === selectedBetForCheck);
-                              if (bet) {
-                                body.imageUrl = bet.screenshot_url || null;
-                                body.matches = [{
-                                  match_name: bet.match_name,
-                                  market_type: bet.market_type,
-                                  prediction: bet.prediction,
-                                  league: bet.league,
-                                }];
-                                body.marketType = bet.market_type;
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => {
+                            const shareText = `🏆 Bet Slip Results\n\n${checkResult}\n\nPowered by Botvio Sports Hub`;
+                            window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                          }}
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" /> WhatsApp
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => {
+                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/sports-betting')}&quote=${encodeURIComponent('🏆 Check my bet slip results on Botvio!')}`, '_blank');
+                          }}
+                        >
+                          <Facebook className="h-3 w-3 mr-1" /> Share
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={async () => {
+                            setChecking(true);
+                            try {
+                              const body: any = {};
+                              if (checkSlipUrl) {
+                                body.imageUrl = checkSlipUrl;
+                              } else if (selectedBetForCheck && betSlips) {
+                                const bet = betSlips.find((b: any) => b.id === selectedBetForCheck);
+                                if (bet) {
+                                  body.imageUrl = bet.screenshot_url || null;
+                                  body.matches = [{
+                                    match_name: bet.match_name,
+                                    market_type: bet.market_type,
+                                    prediction: bet.prediction,
+                                    league: bet.league,
+                                  }];
+                                  body.marketType = bet.market_type;
+                                }
                               }
+                              const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", { body });
+                              if (fnErr) throw fnErr;
+                              if (data?.error) throw new Error(data.error);
+                              setCheckResult(data.result);
+                            } catch (err: any) {
+                              toast.error(err.message || "Refresh failed");
+                            } finally {
+                              setChecking(false);
                             }
-                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", { body });
-                            if (fnErr) throw fnErr;
-                            if (data?.error) throw new Error(data.error);
-                            setCheckResult(data.result);
-                          } catch (err: any) {
-                            toast.error(err.message || "Refresh failed");
-                          } finally {
-                            setChecking(false);
-                          }
-                        }}
-                        disabled={checking}
-                      >
-                        <RefreshCw className={`h-3 w-3 mr-1 ${checking ? "animate-spin" : ""}`} /> Refresh
-                      </Button>
+                          }}
+                          disabled={checking}
+                        >
+                          <RefreshCw className={`h-3 w-3 mr-1 ${checking ? "animate-spin" : ""}`} /> Refresh
+                        </Button>
+                      </div>
                     </div>
                     <div className="max-h-[500px] overflow-y-auto pr-1">
                       {renderAiText(checkResult)}
