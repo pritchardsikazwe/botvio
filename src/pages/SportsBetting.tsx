@@ -106,7 +106,24 @@ const SportsBetting = () => {
     match_date: "",
   });
 
-  // Fetch fixtures
+  // Fetch published picks (from admin) — visible to all users
+  const todayStr = new Date().toISOString().split("T")[0];
+  const { data: publishedPicks } = useQuery({
+    queryKey: ["published-picks", todayStr],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("daily_picks")
+        .select("*")
+        .eq("is_published", true)
+        .gte("created_at", todayStr)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60 * 1000,
+  });
+
+
   const { data: fixtures, isLoading: fixturesLoading } = useQuery({
     queryKey: ["football-fixtures"],
     queryFn: async () => {
