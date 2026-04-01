@@ -242,6 +242,9 @@ const Blog = () => {
     ...blogPosts.filter(p => !dbSlugs.has(p.slug)),
   ];
 
+  // Auto-detect categories from all posts
+  const categories = ["All", ...Array.from(new Set(mergedPosts.map(p => p.category))).sort()];
+
   const filtered = mergedPosts.filter(p => {
     const matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.excerpt.toLowerCase().includes(search.toLowerCase());
     const matchCat = activeCategory === "All" || p.category === activeCategory;
