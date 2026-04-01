@@ -137,6 +137,9 @@ const App = () => (
               <Route path="/bots/binance/:id" element={<BinanceBotDetail />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/:slug" element={<Lesson />} />
               <Route path="/auth/deriv/callback" element={<DerivCallback />} />
