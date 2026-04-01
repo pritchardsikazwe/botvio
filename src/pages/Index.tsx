@@ -536,6 +536,9 @@ const Index = () => {
       {/* Latest Articles */}
       <LatestArticles />
 
+      {/* Latest Strategies */}
+      <LatestStrategies />
+
       <footer className="border-t border-border/50 mt-8 py-6 px-4">
         <div className="container mx-auto">
           {/* Internal navigation links */}
