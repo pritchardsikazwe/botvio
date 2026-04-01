@@ -215,6 +215,21 @@ const SportsBetting = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setDailyPicks(data.picks);
+
+      // Admin: save picks to database for all users to see
+      if (isAdmin && data.picks) {
+        await supabase.from("daily_picks").insert({
+          created_by: user!.id,
+          slip_size: parseInt(slipSize) || 3,
+          market_type: slipMarket,
+          slip_type: slipType,
+          league_filter: leagueFilter || null,
+          picks_content: data.picks,
+          is_published: true,
+        });
+        queryClient.invalidateQueries({ queryKey: ["published-picks"] });
+      }
+
       toast.success(`${slipSize}-team picks generated!`);
     } catch (err: any) {
       toast.error(err.message || "Generation failed");
