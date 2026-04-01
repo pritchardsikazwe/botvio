@@ -87,12 +87,14 @@ RULES:
 - Include combined odds estimate for accumulators
 - Add bankroll management advice`;
 
-    const userPrompt = `Generate a ${type === "single" ? "set of single bets" : "combined accumulator slip"} with exactly ${size} picks.
+    const userPrompt = `Generate a ${type === "single" ? "set of single bets" : "combined accumulator slip"} with exactly ${size} picks for ${dayLabel}.
 
 Market focus: ${market === "mixed" ? "Mix of corners, over/under goals, BTTS, and match results" : market === "corners" ? "CORNERS ONLY (4+, 7+, 12+ corners)" : market === "over_under" ? "OVER/UNDER GOALS ONLY" : market === "btts" ? "BOTH TEAMS TO SCORE ONLY" : "MATCH RESULT (1X2) ONLY"}
 ${leagueFilter ? `\nIMPORTANT: Focus ONLY on ${leagueFilter} league matches. If no fixtures are available from the API, use your knowledge of current ${leagueFilter} fixtures.` : ''}
 
-Today's available fixtures:
+TIME PERIOD: ${dayLabel} (${dateFrom} to ${dateTo}). Only include matches scheduled within this date range.
+
+Available fixtures for this period:
 ${matchesSummary}
 
 For each pick provide:
