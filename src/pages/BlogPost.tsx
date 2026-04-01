@@ -254,20 +254,31 @@ const BlogPost = () => {
         {/* Ad in middle */}
         <AdSlot position="mid-article" />
 
-        {/* Mid-article CTA */}
-        <div className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h3 className="m-0 text-xl font-semibold text-foreground">Ready to try Botvio?</h3>
-          <p className="mt-2 text-muted-foreground">
-            Explore AI strategies for synthetic indices, digits, and MT5 copy trading. Start with demo first.
-          </p>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <DerivAffiliateButton size="lg" label="Create Free Deriv Account" />
-            <Link to="/"><Button size="lg" variant="outline">Try Botvio Free</Button></Link>
-          </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            ⚠️ Risk disclaimer: Trading involves risk and losses can occur. Results are not guaranteed.
-          </p>
-        </div>
+        {/* Mid-article CTA — contextual broker links */}
+        {(() => {
+          const brokers = detectBrokers(post.title, post.content || "");
+          return (
+            <div className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="m-0 text-xl font-semibold text-foreground">Ready to start trading?</h3>
+              <p className="mt-2 text-muted-foreground">
+                Open a free account with a trusted broker and start practicing with a demo account.
+              </p>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row flex-wrap">
+                {brokers.map(b => (
+                  <a key={b} href={AFFILIATE_LINKS[b].url} target="_blank" rel="noopener noreferrer">
+                    <Button size="lg" className="gap-2 w-full sm:w-auto">
+                      {AFFILIATE_LINKS[b].cta} <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </a>
+                ))}
+                <Link to="/"><Button size="lg" variant="outline">Try Botvio Free</Button></Link>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">
+                ⚠️ Risk disclaimer: Trading involves risk and losses can occur. Results are not guaranteed.
+              </p>
+            </div>
+          );
+        })()}
 
         {/* Related */}
         <div className="mt-10 border-t border-border pt-8">
