@@ -415,6 +415,9 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Scrolling Advert Banner */}
+        <ScrollingAdvertBanner />
+
 
         {/* 6 — Quick Links */}
         <section>
