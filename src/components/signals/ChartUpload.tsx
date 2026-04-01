@@ -160,11 +160,18 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       const guestCount = getGuestUploadCount();
       if (guestCount >= GUEST_DAILY_LIMIT) {
         setShowAuthModal(true);
-        toast.error(`Daily limit of ${GUEST_DAILY_LIMIT} free analyses reached. Sign up for more!`);
+        toast.error(`Daily limit of ${GUEST_DAILY_LIMIT} free analysis reached. Sign up to continue!`);
         return false;
       }
       return true;
     }
+    // Enforce one email per device
+    if (user.email && isDeviceLockedToOtherEmail(user.email)) {
+      toast.error("This device is already linked to another account. One account per device allowed.");
+      return false;
+    }
+    // Lock device to this email on first use
+    if (user.email) lockDeviceToEmail(user.email);
     // Admins bypass
     if (isAdmin || isSuperAdmin || isSignalManager) return true;
     // Plan-based limits
