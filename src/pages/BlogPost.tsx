@@ -5,10 +5,38 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Zap, Play } from "lucide-react";
+import { ArrowLeft, Clock, Zap, Play, ExternalLink } from "lucide-react";
 import { blogContent } from "@/content/blogPosts";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
+
+/* ── Affiliate links ── */
+const AFFILIATE_LINKS = {
+  deriv: { name: "Deriv", url: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827", cta: "Open Deriv Account", color: "from-red-500/10 to-red-600/10" },
+  exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k", cta: "Open Exness Account", color: "from-yellow-500/10 to-amber-600/10" },
+  weltrade: { name: "Weltrade", url: "https://gowt.net/ib67505", cta: "Open Weltrade Account", color: "from-blue-500/10 to-blue-600/10" },
+  iqoption: { name: "IQ Option", url: "https://iqoption.net/lp/pwa-new/en/?aff=818055&aff_model=revenue", cta: "Open IQ Option Account", color: "from-green-500/10 to-green-600/10" },
+  pocketoption: { name: "Pocket Option", url: "https://pocket-friends.co/r/ylo6wciexb", cta: "Open Pocket Option Account", color: "from-purple-500/10 to-purple-600/10" },
+  binomo: { name: "Binomo", url: "https://binomo-r3.com/auth?a=249ff29b0265&t=0", cta: "Open Binomo Account", color: "from-amber-500/10 to-orange-600/10" },
+  binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU", cta: "Open Binance Account", color: "from-yellow-400/10 to-yellow-600/10" },
+};
+
+type BrokerKey = keyof typeof AFFILIATE_LINKS;
+
+const detectBrokers = (title: string, content: string): BrokerKey[] => {
+  const text = (title + " " + content).toLowerCase();
+  const found: BrokerKey[] = [];
+  if (text.includes("deriv") || text.includes("boom") || text.includes("crash") || text.includes("synthetic") || text.includes("digit")) found.push("deriv");
+  if (text.includes("exness")) found.push("exness");
+  if (text.includes("weltrade") || text.includes("syntx")) found.push("weltrade");
+  if (text.includes("iq option") || text.includes("iqoption")) found.push("iqoption");
+  if (text.includes("pocket option") || text.includes("pocketoption")) found.push("pocketoption");
+  if (text.includes("binomo")) found.push("binomo");
+  if (text.includes("binance") || text.includes("crypto")) found.push("binance");
+  // If none detected or generic forex/gold, show deriv + exness
+  if (found.length === 0) found.push("deriv", "exness");
+  return found;
+};
 
 const relatedPosts = [
   { slug: "how-to-start-forex-trading", title: "How to Start Forex Trading" },
@@ -139,16 +167,30 @@ const BlogPost = () => {
       <SEOHead title={post.metaTitle || post.title} description={post.metaDescription || post.excerpt} jsonLd={jsonLd} />
       <Header />
 
-      {/* Affiliate top bar */}
-      <div className="bg-gradient-to-r from-emerald-500/10 via-primary/10 to-warning/10 border-b border-border/30">
-        <div className="container mx-auto px-4 py-2.5 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-warning" />
-            <span className="text-sm font-medium">Start trading with Deriv — Free demo account with $10,000 virtual funds</span>
+      {/* Contextual Affiliate top bar */}
+      {(() => {
+        const brokers = detectBrokers(post.title, post.content || "");
+        const primary = AFFILIATE_LINKS[brokers[0]];
+        return (
+          <div className={`bg-gradient-to-r ${primary.color} border-b border-border/30`}>
+            <div className="container mx-auto px-4 py-2.5 flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-warning" />
+                <span className="text-sm font-medium">Start trading with {primary.name} — Free demo account available</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {brokers.map(b => (
+                  <a key={b} href={AFFILIATE_LINKS[b].url} target="_blank" rel="noopener noreferrer">
+                    <Button size="sm" variant="default" className="gap-1 text-xs">
+                      {AFFILIATE_LINKS[b].cta} <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
-          <DerivAffiliateButton size="sm" label="Open Free Account →" />
-        </div>
-      </div>
+        );
+      })()}
 
       <div className="h-4" />
 
@@ -212,20 +254,31 @@ const BlogPost = () => {
         {/* Ad in middle */}
         <AdSlot position="mid-article" />
 
-        {/* Mid-article CTA */}
-        <div className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h3 className="m-0 text-xl font-semibold text-foreground">Ready to try Botvio?</h3>
-          <p className="mt-2 text-muted-foreground">
-            Explore AI strategies for synthetic indices, digits, and MT5 copy trading. Start with demo first.
-          </p>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <DerivAffiliateButton size="lg" label="Create Free Deriv Account" />
-            <Link to="/"><Button size="lg" variant="outline">Try Botvio Free</Button></Link>
-          </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            ⚠️ Risk disclaimer: Trading involves risk and losses can occur. Results are not guaranteed.
-          </p>
-        </div>
+        {/* Mid-article CTA — contextual broker links */}
+        {(() => {
+          const brokers = detectBrokers(post.title, post.content || "");
+          return (
+            <div className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="m-0 text-xl font-semibold text-foreground">Ready to start trading?</h3>
+              <p className="mt-2 text-muted-foreground">
+                Open a free account with a trusted broker and start practicing with a demo account.
+              </p>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row flex-wrap">
+                {brokers.map(b => (
+                  <a key={b} href={AFFILIATE_LINKS[b].url} target="_blank" rel="noopener noreferrer">
+                    <Button size="lg" className="gap-2 w-full sm:w-auto">
+                      {AFFILIATE_LINKS[b].cta} <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </a>
+                ))}
+                <Link to="/"><Button size="lg" variant="outline">Try Botvio Free</Button></Link>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">
+                ⚠️ Risk disclaimer: Trading involves risk and losses can occur. Results are not guaranteed.
+              </p>
+            </div>
+          );
+        })()}
 
         {/* Related */}
         <div className="mt-10 border-t border-border pt-8">
