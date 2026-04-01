@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, Star, Share2, Copy, ShoppingCart, CheckCircle, TrendingUp, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Download, Star, Share2, Copy, ShoppingCart, CheckCircle, TrendingUp, AlertTriangle, ExternalLink, BarChart3, Clock, Target, Layers } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
