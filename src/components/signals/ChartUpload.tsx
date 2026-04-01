@@ -41,7 +41,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/auth/AuthModal";
-import { useChartUsageGate, getGuestUploadCount, incrementGuestUploadCount, GUEST_DAILY_LIMIT } from "@/hooks/useChartAnalysis";
+import { useChartUsageGate, getGuestUploadCount, incrementGuestUploadCount, GUEST_DAILY_LIMIT, isDeviceLockedToOtherEmail, lockDeviceToEmail } from "@/hooks/useChartAnalysis";
 
 const CHART_BROKERS = [
   { value: "exness", label: "Exness" },
