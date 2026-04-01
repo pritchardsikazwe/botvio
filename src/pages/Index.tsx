@@ -528,6 +528,9 @@ const Index = () => {
 
       <TradingGuide showOnboarding={showOnboarding} onCloseOnboarding={handleCloseOnboarding} />
 
+      {/* Latest Articles */}
+      <LatestArticles />
+
       <footer className="border-t border-border/50 mt-8 py-6 px-4">
         <div className="container mx-auto">
           {/* Internal navigation links */}
