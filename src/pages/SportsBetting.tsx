@@ -706,6 +706,7 @@ const SportsBetting = () => {
                         <Eye className="h-4 w-4 text-primary" />
                         <span className="font-semibold text-sm text-primary">Live Status Report</span>
                       </div>
+                      <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
