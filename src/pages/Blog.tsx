@@ -1,3 +1,4 @@
+import React, { useEffect, useRef } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
