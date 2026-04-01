@@ -81,13 +81,19 @@ const StrategyDetail = () => {
     }
   }, [searchParams]);
 
-  const handleShare = async () => {
-    if (!strategy) return;
-    
-    // Include user's affiliate code if they have one
+  // OG-friendly share URL that serves proper meta tags to crawlers
+  const getShareUrl = () => {
+    if (!strategy) return window.location.href;
     const referralData = localStorage.getItem("botvio_referral");
     const ref = referralData ? JSON.parse(referralData).code : null;
-    const shareUrl = `${window.location.origin}/s/${strategy.slug}${ref ? `?ref=${ref}` : ""}`;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const ogUrl = `${supabaseUrl}/functions/v1/strategy-og?slug=${encodeURIComponent(strategy.slug)}${ref ? `&ref=${ref}` : ""}`;
+    return ogUrl;
+  };
+
+  const handleShare = async () => {
+    if (!strategy) return;
+    const shareUrl = getShareUrl();
     
     if (navigator.share) {
       try {
