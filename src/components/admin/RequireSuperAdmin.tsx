@@ -11,7 +11,7 @@ interface RequireSuperAdminProps {
 }
 
 export const RequireSuperAdmin = ({ children }: RequireSuperAdminProps) => {
-  const { user, loading: authLoading, rolesLoading, isSuperAdmin, refreshRoles } = useAuth();
+  const { user, loading: authLoading, rolesLoading, isSuperAdmin, isAdmin, refreshRoles } = useAuth();
   const navigate = useNavigate();
   const [hasChecked, setHasChecked] = useState(false);
   const [checkTimeout, setCheckTimeout] = useState(false);
@@ -100,8 +100,8 @@ export const RequireSuperAdmin = ({ children }: RequireSuperAdminProps) => {
     );
   }
 
-  // Not super admin - show access denied
-  if (!isSuperAdmin) {
+  // Not admin at all - show access denied
+  if (!isSuperAdmin && !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md border-destructive/50">
@@ -111,7 +111,7 @@ export const RequireSuperAdmin = ({ children }: RequireSuperAdminProps) => {
             </div>
             <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
             <p className="text-muted-foreground text-center mb-4">
-              You do not have super admin privileges to access this area.
+              You do not have admin privileges to access this area.
             </p>
             <Alert className="mb-4">
               <AlertDescription>
@@ -136,6 +136,6 @@ export const RequireSuperAdmin = ({ children }: RequireSuperAdminProps) => {
     );
   }
 
-  // User is super admin - render children
+  // User is admin or super admin - render children
   return <>{children}</>;
 };
