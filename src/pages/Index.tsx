@@ -641,4 +641,61 @@ const LatestArticles = () => {
   );
 };
 
+const LatestStrategies = () => {
+  const { data: strategies } = useQuery({
+    queryKey: ["latest-strategies-home"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("strategies")
+        .select("slug, title, description, market, pricing_type, cover_image_url")
+        .eq("is_public", true)
+        .order("downloads", { ascending: false })
+        .limit(3);
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!strategies || strategies.length === 0) return null;
+
+  return (
+    <section className="px-4 mt-8">
+      <div className="container mx-auto max-w-4xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            Top Strategies
+          </h2>
+          <Link to="/strategies" className="text-sm text-primary hover:underline flex items-center gap-1">
+            View all <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {strategies.map((s) => (
+            <Link key={s.slug} to={`/strategies/${s.slug}`}>
+              <Card className="h-full border-border bg-card hover:border-primary/50 transition-colors overflow-hidden">
+                {s.cover_image_url && (
+                  <img src={s.cover_image_url} alt={s.title} className="w-full h-28 object-cover" loading="lazy" />
+                )}
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Badge variant="outline" className="text-[10px]">{s.market}</Badge>
+                    <Badge className={`text-[10px] ${s.pricing_type === "free" ? "bg-success/20 text-success border-success/30" : "bg-primary/20 text-primary border-primary/30"}`}>
+                      {s.pricing_type === "free" ? "Free" : "Paid"}
+                    </Badge>
+                  </div>
+                  <h3 className="text-sm font-medium text-foreground line-clamp-2 leading-snug">{s.title}</h3>
+                  {s.description && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{s.description}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export default Index;
