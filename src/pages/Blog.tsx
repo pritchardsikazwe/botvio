@@ -35,6 +35,7 @@ const BlogAdSlot = ({ slot }: { slot: string }) => {
   );
 };
 
+const blogPosts = [
   {
     slug: "what-is-botvio-ai-trading-bot",
     title: "What is Botvio AI Trading Bot?",
