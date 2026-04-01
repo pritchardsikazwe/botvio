@@ -567,11 +567,11 @@ const SportsBetting = () => {
                 {/* Quick presets */}
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "", day: "today" },
-                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "", day: "today" },
-                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "", day: "today" },
-                    { label: "📅 Weekend Multi", size: "10", market: "mixed", type: "combined", league: "", day: "weekend" },
-                    { label: "📆 Weekly Mega", size: "20", market: "mixed", type: "combined", league: "", day: "weekly" },
+                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "all", day: "today" },
+                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "all", day: "today" },
+                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "all", day: "today" },
+                    { label: "📅 Weekend Multi", size: "10", market: "mixed", type: "combined", league: "all", day: "weekend" },
+                    { label: "📆 Weekly Mega", size: "20", market: "mixed", type: "combined", league: "all", day: "weekly" },
                     { label: "🇬🇧 EPL Picks", size: "5", market: "mixed", type: "combined", league: "premier league|EPL|england", day: "weekend" },
                     { label: "🇪🇸 La Liga", size: "5", market: "mixed", type: "combined", league: "la liga|spain", day: "weekend" },
                     { label: "🏆 UCL Picks", size: "5", market: "mixed", type: "combined", league: "champions league|UCL", day: "weekly" },
