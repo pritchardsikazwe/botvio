@@ -11,7 +11,7 @@ interface RequireSuperAdminProps {
 }
 
 export const RequireSuperAdmin = ({ children }: RequireSuperAdminProps) => {
-  const { user, loading: authLoading, rolesLoading, isSuperAdmin, refreshRoles } = useAuth();
+  const { user, loading: authLoading, rolesLoading, isSuperAdmin, isAdmin, refreshRoles } = useAuth();
   const navigate = useNavigate();
   const [hasChecked, setHasChecked] = useState(false);
   const [checkTimeout, setCheckTimeout] = useState(false);
