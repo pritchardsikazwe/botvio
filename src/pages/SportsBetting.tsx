@@ -587,8 +587,37 @@ const SportsBetting = () => {
                       <Loader2 className="h-3 w-3 animate-spin" /> Uploading...
                     </p>
                   )}
-                  {checkSlipUrl && (
-                    <img src={checkSlipUrl} alt="Checking slip" className="mt-3 rounded-lg max-h-40 mx-auto object-contain" />
+                {checkSlipUrl && (
+                    <>
+                      <img src={checkSlipUrl} alt="Checking slip" className="mt-3 rounded-lg max-h-40 mx-auto object-contain" />
+                      <Button
+                        className="mt-3 w-full"
+                        size="sm"
+                        onClick={async () => {
+                          setChecking(true);
+                          setCheckResult(null);
+                          try {
+                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
+                              body: { imageUrl: checkSlipUrl },
+                            });
+                            if (fnErr) throw fnErr;
+                            if (data?.error) throw new Error(data.error);
+                            setCheckResult(data.result);
+                          } catch (err: any) {
+                            toast.error(err.message || "Check failed");
+                          } finally {
+                            setChecking(false);
+                          }
+                        }}
+                        disabled={checking}
+                      >
+                        {checking ? (
+                          <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Checking...</>
+                        ) : (
+                          <><Search className="h-4 w-4 mr-2" /> Get Results</>
+                        )}
+                      </Button>
+                    </>
                   )}
                 </div>
 
