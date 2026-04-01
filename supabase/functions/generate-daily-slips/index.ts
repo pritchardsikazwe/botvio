@@ -14,13 +14,36 @@ serve(async (req) => {
   }
 
   try {
-    const { slipSize, marketType, slipType, leagueFilter } = await req.json();
+    const { slipSize, marketType, slipType, leagueFilter, dayRange } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Fetch today's and tomorrow's fixtures
-    const today = new Date().toISOString().split("T")[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    // Calculate date range based on dayRange
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+    let dateFrom = todayStr;
+    let dateTo = todayStr;
+    
+    if (dayRange === "tomorrow") {
+      const tmrw = new Date(Date.now() + 86400000);
+      dateFrom = tmrw.toISOString().split("T")[0];
+      dateTo = dateFrom;
+    } else if (dayRange === "weekend") {
+      // Find next Saturday and Sunday
+      const dayOfWeek = today.getDay();
+      const daysToSat = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
+      const sat = new Date(Date.now() + daysToSat * 86400000);
+      const sun = new Date(sat.getTime() + 86400000);
+      dateFrom = sat.toISOString().split("T")[0];
+      dateTo = sun.toISOString().split("T")[0];
+    } else if (dayRange === "weekly") {
+      dateTo = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+    } else {
+      // today — include tomorrow too for more options
+      dateTo = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    }
+    
+    const dayLabel = dayRange === "tomorrow" ? "tomorrow" : dayRange === "weekend" ? "this weekend" : dayRange === "weekly" ? "this week" : "today";
     
     let fixturesData: any = { matches: [] };
     if (FOOTBALL_API_KEY) {
