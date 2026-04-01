@@ -207,7 +207,7 @@ const blogPosts = [
   },
 ];
 
-const categories = ["All", "Forex Basics", "Synthetic Indices", "AI Trading", "Strategies", "Money & Income", "Guide", "Tutorial", "Strategy", "Gold", "Signals", "Forex", "Earn Online", "Comparison", "Security"];
+// Categories auto-detected from posts below
 
 const Blog = () => {
   const [search, setSearch] = useState("");
