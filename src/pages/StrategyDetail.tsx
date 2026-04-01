@@ -252,6 +252,57 @@ const StrategyDetail = () => {
                 </CardContent>
               </Card>
 
+              {/* Strategy Configuration */}
+              {strategy.config_json && typeof strategy.config_json === "object" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Layers className="h-5 w-5 text-primary" />
+                      Strategy Configuration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {Object.entries(strategy.config_json as Record<string, unknown>).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-start gap-4">
+                        <span className="text-sm text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
+                        <span className="text-sm font-medium text-right">
+                          {Array.isArray(value) ? (
+                            <div className="flex flex-wrap gap-1 justify-end">
+                              {(value as string[]).map((v, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{String(v)}</Badge>
+                              ))}
+                            </div>
+                          ) : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Broker CTA */}
+              {(() => {
+                const broker = BROKER_LINKS[strategy.market] || BROKER_LINKS.deriv;
+                return (
+                  <Card className="border-primary/30 bg-primary/5">
+                    <CardContent className="pt-6">
+                      <h3 className="font-semibold text-lg mb-2">Trade this strategy on {broker.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Open a free {broker.name} account and start using this strategy with a demo account first.
+                      </p>
+                      <a href={broker.url} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full gap-2">
+                          Open {broker.name} Account <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </a>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        ⚠️ Trading involves risk. Start with a demo account.
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+
               {/* Disclaimer */}
               <Card className="border-warning/50 bg-warning/5">
                 <CardHeader>
