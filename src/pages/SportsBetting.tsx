@@ -83,6 +83,7 @@ const SportsBetting = () => {
   const [slipSize, setSlipSize] = useState("3");
   const [slipMarket, setSlipMarket] = useState("mixed");
   const [slipType, setSlipType] = useState("combined");
+  const [leagueFilter, setLeagueFilter] = useState("");
   const [dailyPicks, setDailyPicks] = useState<string | null>(null);
   const [generatingPicks, setGeneratingPicks] = useState(false);
 
