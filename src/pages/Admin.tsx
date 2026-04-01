@@ -60,6 +60,7 @@ import { AdminRolesTab } from "@/components/admin/AdminRolesTab";
 import { AdminSignalHistoryTab } from "@/components/admin/AdminSignalHistoryTab";
 import { AdminSportsBettingAccessTab } from "@/components/admin/AdminSportsBettingAccessTab";
 import { AdminLiveStreamsTab } from "@/components/admin/AdminLiveStreamsTab";
+import { AdminAdvertsTab } from "@/components/admin/AdminAdvertsTab";
 
 interface Provider {
   id: string;
@@ -1051,6 +1052,10 @@ const Admin = () => {
               <Signal className="w-4 h-4" />
               Live Streams
             </TabsTrigger>
+            <TabsTrigger value="adverts" className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Adverts
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1116,6 +1121,11 @@ const Admin = () => {
           {/* Live Streams Tab */}
           <TabsContent value="live_streams">
             <AdminLiveStreamsTab />
+          </TabsContent>
+
+          {/* Adverts Tab */}
+          <TabsContent value="adverts">
+            <AdminAdvertsTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

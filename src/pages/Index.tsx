@@ -16,6 +16,7 @@ import {
   Crown, Check, Star, Brain
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
+import { ScrollingAdvertBanner } from "@/components/adverts/ScrollingAdvertBanner";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { SignalsPerformanceTracker } from "@/components/signals/SignalsPerformanceTracker";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
@@ -241,6 +242,9 @@ const Index = () => {
           <ChartUpload />
         </section>
 
+        {/* Scrolling Advert Banner */}
+        <ScrollingAdvertBanner />
+
         {/* 3 — Subscription Plans */}
         <section>
           <div className="flex items-center justify-between mb-4">
@@ -413,6 +417,7 @@ const Index = () => {
             </Link>
           </div>
         </section>
+
 
 
         {/* 6 — Quick Links */}

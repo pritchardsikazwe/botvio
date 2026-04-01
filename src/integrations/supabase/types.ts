@@ -38,6 +38,51 @@ export type Database = {
         }
         Relationships: []
       }
+      advert_slots: {
+        Row: {
+          badge_color: string | null
+          badge_text: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon_emoji: string | null
+          id: string
+          is_active: boolean
+          link_url: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge_color?: string | null
+          badge_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon_emoji?: string | null
+          id?: string
+          is_active?: boolean
+          link_url?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge_color?: string | null
+          badge_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon_emoji?: string | null
+          id?: string
+          is_active?: boolean
+          link_url?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       affiliate_earnings: {
         Row: {
           amount_usd: number
