@@ -477,12 +477,12 @@ const SportsBetting = () => {
                 {/* Quick presets */}
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined" },
-                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined" },
-                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined" },
-                    { label: "🇸🇦 Saudi League", size: "3", market: "mixed", type: "combined" },
-                    { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined" },
-                    { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined" },
+                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "" },
+                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "" },
+                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "" },
+                    { label: "🇸🇦 Saudi League", size: "3", market: "mixed", type: "combined", league: "saudi|arabia|SPL|pro league" },
+                    { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined", league: "" },
+                    { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined", league: "" },
                   ].map((preset) => (
                     <Button
                       key={preset.label}
@@ -493,6 +493,7 @@ const SportsBetting = () => {
                         setSlipSize(preset.size);
                         setSlipMarket(preset.market);
                         setSlipType(preset.type);
+                        setLeagueFilter(preset.league);
                       }}
                     >
                       {preset.label}
