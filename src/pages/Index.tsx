@@ -242,6 +242,9 @@ const Index = () => {
           <ChartUpload />
         </section>
 
+        {/* Scrolling Advert Banner */}
+        <ScrollingAdvertBanner />
+
         {/* 3 — Subscription Plans */}
         <section>
           <div className="flex items-center justify-between mb-4">
