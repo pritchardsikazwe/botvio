@@ -64,7 +64,7 @@ const SLIP_SIZES = [
 ];
 
 const LEAGUES = [
-  { value: "", label: "All Leagues" },
+  { value: "all", label: "All Leagues" },
   { value: "premier league|EPL|england", label: "🏴 Premier League" },
   { value: "la liga|spain", label: "🇪🇸 La Liga" },
   { value: "serie a|italy", label: "🇮🇹 Serie A" },
