@@ -60,6 +60,7 @@ import { AdminRolesTab } from "@/components/admin/AdminRolesTab";
 import { AdminSignalHistoryTab } from "@/components/admin/AdminSignalHistoryTab";
 import { AdminSportsBettingAccessTab } from "@/components/admin/AdminSportsBettingAccessTab";
 import { AdminLiveStreamsTab } from "@/components/admin/AdminLiveStreamsTab";
+import { AdminAdvertsTab } from "@/components/admin/AdminAdvertsTab";
 
 interface Provider {
   id: string;
