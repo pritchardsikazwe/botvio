@@ -344,6 +344,9 @@ const StrategyDetail = () => {
                 );
               })()}
 
+              {/* AdSense mid-content */}
+              <StrategyAdSlot slot="strategy-mid" />
+
               {/* Disclaimer */}
               <Card className="border-warning/50 bg-warning/5">
                 <CardHeader>
