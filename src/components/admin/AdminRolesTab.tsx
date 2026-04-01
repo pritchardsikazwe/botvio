@@ -150,9 +150,8 @@ export const AdminRolesTab = () => {
 
   const removeAdmin = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      // Don't allow removing yourself
       if (userId === user?.id) throw new Error("Cannot remove your own admin role");
-      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role as any);
       await supabase.from("admin_permissions").delete().eq("user_id", userId);
     },
     onSuccess: () => {
