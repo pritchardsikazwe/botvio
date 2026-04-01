@@ -1097,6 +1097,42 @@ export type Database = {
           },
         ]
       }
+      daily_picks: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_published: boolean
+          league_filter: string | null
+          market_type: string
+          picks_content: string
+          slip_size: number
+          slip_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_published?: boolean
+          league_filter?: string | null
+          market_type?: string
+          picks_content: string
+          slip_size?: number
+          slip_type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_published?: boolean
+          league_filter?: string | null
+          market_type?: string
+          picks_content?: string
+          slip_size?: number
+          slip_type?: string
+        }
+        Relationships: []
+      }
       deriv_connection_logs: {
         Row: {
           created_at: string
