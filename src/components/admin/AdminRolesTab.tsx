@@ -136,10 +136,8 @@ export const AdminRolesTab = () => {
   });
 
   const changeRole = useMutation({
-    mutationFn: async ({ userId, currentRole, newRole }: { userId: string; currentRole: string; newRole: string }) => {
-      // Delete old role
-      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", currentRole);
-      // Insert new role
+    mutationFn: async ({ userId, currentRole, newRole }: { userId: string; currentRole: string; newRole: "admin" | "super_admin" }) => {
+      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", currentRole as any);
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
       if (error) throw error;
     },
