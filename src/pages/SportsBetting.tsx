@@ -1143,6 +1143,42 @@ const SportsBetting = () => {
                           className="mt-3 rounded-lg max-h-32 object-cover w-full"
                         />
                       )}
+                      {/* Share buttons */}
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[10px] flex-1"
+                          onClick={() => {
+                            const text = `🏆 My Bet Slip\n\n⚽ ${bet.match_name}\n📋 ${bet.league || 'N/A'}\n🎯 ${bet.prediction}${bet.odds ? ` @ ${bet.odds}` : ''}${bet.result !== 'pending' ? `\n${bet.result === 'won' ? '✅ WON' : '❌ LOST'}` : '\n⏳ Pending'}\n\nPowered by Botvio Sports Hub`;
+                            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                          }}
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" /> WhatsApp
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[10px] flex-1"
+                          onClick={() => {
+                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/sports-betting')}&quote=${encodeURIComponent(`🏆 ${bet.match_name} — ${bet.prediction}${bet.result !== 'pending' ? ` ${bet.result === 'won' ? '✅ WON' : '❌ LOST'}` : ''}`)}`, '_blank');
+                          }}
+                        >
+                          <Facebook className="h-3 w-3 mr-1" /> Facebook
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[10px]"
+                          onClick={() => {
+                            const text = `⚽ ${bet.match_name} | ${bet.prediction}${bet.odds ? ` @ ${bet.odds}` : ''}${bet.result !== 'pending' ? ` — ${bet.result === 'won' ? '✅ WON' : '❌ LOST'}` : ''}`;
+                            navigator.clipboard.writeText(text);
+                            toast.success("Copied to clipboard!");
+                          }}
+                        >
+                          <Share2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
