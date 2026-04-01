@@ -567,22 +567,8 @@ const SportsBetting = () => {
                       if (error) { toast.error("Upload failed"); return; }
                       const { data: urlData } = supabase.storage.from("bet-slips").getPublicUrl(path);
                       setCheckSlipUrl(urlData.publicUrl);
-                      toast.success("Slip uploaded! Checking...");
-                      // Auto-check
-                      setChecking(true);
                       setCheckResult(null);
-                      try {
-                        const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
-                          body: { imageUrl: urlData.publicUrl },
-                        });
-                        if (fnErr) throw fnErr;
-                        if (data?.error) throw new Error(data.error);
-                        setCheckResult(data.result);
-                      } catch (err: any) {
-                        toast.error(err.message || "Check failed");
-                      } finally {
-                        setChecking(false);
-                      }
+                      toast.success("Slip uploaded! Tap 'Get Results' to check.");
                     }}
                   />
                   {checkUploading && (
