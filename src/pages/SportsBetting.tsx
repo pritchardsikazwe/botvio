@@ -18,7 +18,7 @@ import {
   Trophy, Target, Upload, TrendingUp, Clock, Activity,
   CheckCircle, XCircle, Loader2, Goal, BarChart3, Percent,
   Sparkles, Brain, Zap, ListChecks, Image as ImageIcon,
-  Search, RefreshCw, Eye
+  Search, RefreshCw, Eye, Share2, MessageCircle, Facebook
 } from "lucide-react";
 
 const MARKET_TYPES = [
