@@ -21,6 +21,43 @@ const BROKER_LINKS: Record<string, { name: string; url: string }> = {
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
 };
 
+/* ── AdSense slot ── */
+const StrategyAdSlot = ({ slot }: { slot: string }) => {
+  const adRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    try {
+      if (adRef.current) {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      }
+    } catch {}
+  }, []);
+  return (
+    <div className="my-6 text-center" ref={adRef}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client="ca-pub-8741937856196827"
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </div>
+  );
+};
+
+/* ── Convert markdown-like text to HTML ── */
+const formatDescription = (text: string): string => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^• (.+)$/gm, '<li>$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+    .replace(/^✅ (.+)$/gm, '<li>✅ $1</li>')
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul class="list-disc pl-5 space-y-1">$1</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br/>')
+    .replace(/^/, '<p>').replace(/$/, '</p>');
+};
+
 const StrategyDetail = () => {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
