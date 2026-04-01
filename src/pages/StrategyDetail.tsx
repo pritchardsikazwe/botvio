@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStrategy, useHasPurchasedStrategy, useIncrementDownload } from "@/hooks/useStrategies";
