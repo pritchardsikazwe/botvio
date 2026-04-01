@@ -334,7 +334,7 @@ export const AdminProfilesTab = () => {
                           const usage = getUserAiUsage(p.user_id);
                           const plan = getUserPlan(p.user_id);
                           const planCode = plan?.code || "free";
-                          const limits: Record<string, string> = { free: "3/day", basic: "50/wk", standard: "100/mo", vip: "∞" };
+                          const limits: Record<string, string> = { free: "1/day", basic: "50/wk", standard: "100/mo", vip: "∞" };
                           return (
                             <div className="space-y-0.5">
                               <Badge variant="outline" className="text-xs gap-1">
