@@ -1052,6 +1052,10 @@ const Admin = () => {
               <Signal className="w-4 h-4" />
               Live Streams
             </TabsTrigger>
+            <TabsTrigger value="adverts" className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Adverts
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
