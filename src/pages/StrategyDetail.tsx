@@ -350,6 +350,36 @@ const StrategyDetail = () => {
                       {strategy.rating?.toFixed(1) || "N/A"}
                     </span>
                   </div>
+                  {strategy.contract_family && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Contract Type</span>
+                        <Badge variant="outline" className="text-xs">{strategy.contract_family}</Badge>
+                      </div>
+                    </>
+                  )}
+                  {strategy.market_type && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Market Type</span>
+                        <Badge variant="outline" className="text-xs">{strategy.market_type.replace(/_/g, " ")}</Badge>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardContent className="pt-6 space-y-3">
+                  <Button className="w-full gap-2" onClick={handleCopyStrategy}>
+                    <Copy className="h-4 w-4" /> Copy Strategy Config
+                  </Button>
+                  <Button variant="outline" className="w-full gap-2" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" /> Share Strategy
+                  </Button>
                 </CardContent>
               </Card>
             </div>
