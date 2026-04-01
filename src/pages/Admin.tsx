@@ -398,7 +398,7 @@ const BillingRequestsTab = () => {
 };
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const [dataLoading, setDataLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
