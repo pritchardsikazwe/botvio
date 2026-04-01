@@ -1047,6 +1047,10 @@ const Admin = () => {
               <Trophy className="w-4 h-4" />
               Sports Access
             </TabsTrigger>
+            <TabsTrigger value="live_streams" className="flex items-center gap-2">
+              <Signal className="w-4 h-4" />
+              Live Streams
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
