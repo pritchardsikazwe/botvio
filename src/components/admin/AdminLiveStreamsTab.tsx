@@ -19,7 +19,7 @@ export const AdminLiveStreamsTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("live_streams")
-        .select("id, title, status, creator_id, created_at, started_at, ended_at, viewers_peak, total_unique_viewers, livekit_room_name")
+        .select("id, title, status, creator_id, created_at, started_at, ended_at, viewers_peak, total_unique_viewers")
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
