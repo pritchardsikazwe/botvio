@@ -274,7 +274,7 @@ const SportsBetting = () => {
           slip_size: parseInt(slipSize) || 3,
           market_type: slipMarket,
           slip_type: slipType,
-          league_filter: leagueFilter || null,
+          league_filter: leagueFilter === "all" ? null : leagueFilter,
           picks_content: data.picks,
           is_published: true,
         });
