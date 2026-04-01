@@ -5,10 +5,38 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Zap, Play } from "lucide-react";
+import { ArrowLeft, Clock, Zap, Play, ExternalLink } from "lucide-react";
 import { blogContent } from "@/content/blogPosts";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
+
+/* ── Affiliate links ── */
+const AFFILIATE_LINKS = {
+  deriv: { name: "Deriv", url: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827", cta: "Open Deriv Account", color: "from-red-500/10 to-red-600/10" },
+  exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k", cta: "Open Exness Account", color: "from-yellow-500/10 to-amber-600/10" },
+  weltrade: { name: "Weltrade", url: "https://gowt.net/ib67505", cta: "Open Weltrade Account", color: "from-blue-500/10 to-blue-600/10" },
+  iqoption: { name: "IQ Option", url: "https://iqoption.net/lp/pwa-new/en/?aff=818055&aff_model=revenue", cta: "Open IQ Option Account", color: "from-green-500/10 to-green-600/10" },
+  pocketoption: { name: "Pocket Option", url: "https://pocket-friends.co/r/ylo6wciexb", cta: "Open Pocket Option Account", color: "from-purple-500/10 to-purple-600/10" },
+  binomo: { name: "Binomo", url: "https://binomo-r3.com/auth?a=249ff29b0265&t=0", cta: "Open Binomo Account", color: "from-amber-500/10 to-orange-600/10" },
+  binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU", cta: "Open Binance Account", color: "from-yellow-400/10 to-yellow-600/10" },
+};
+
+type BrokerKey = keyof typeof AFFILIATE_LINKS;
+
+const detectBrokers = (title: string, content: string): BrokerKey[] => {
+  const text = (title + " " + content).toLowerCase();
+  const found: BrokerKey[] = [];
+  if (text.includes("deriv") || text.includes("boom") || text.includes("crash") || text.includes("synthetic") || text.includes("digit")) found.push("deriv");
+  if (text.includes("exness")) found.push("exness");
+  if (text.includes("weltrade") || text.includes("syntx")) found.push("weltrade");
+  if (text.includes("iq option") || text.includes("iqoption")) found.push("iqoption");
+  if (text.includes("pocket option") || text.includes("pocketoption")) found.push("pocketoption");
+  if (text.includes("binomo")) found.push("binomo");
+  if (text.includes("binance") || text.includes("crypto")) found.push("binance");
+  // If none detected or generic forex/gold, show deriv + exness
+  if (found.length === 0) found.push("deriv", "exness");
+  return found;
+};
 
 const relatedPosts = [
   { slug: "how-to-start-forex-trading", title: "How to Start Forex Trading" },
