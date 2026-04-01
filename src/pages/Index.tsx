@@ -16,6 +16,7 @@ import {
   Crown, Check, Star, Brain
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
+import { ScrollingAdvertBanner } from "@/components/adverts/ScrollingAdvertBanner";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { SignalsPerformanceTracker } from "@/components/signals/SignalsPerformanceTracker";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
