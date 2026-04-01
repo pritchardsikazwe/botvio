@@ -379,9 +379,10 @@ const SportsBetting = () => {
                 ) : matchList.length > 0 ? (
                   <div className="space-y-2">
                     {matchList.map((m: any) => (
-                      <div
+                      <button
                         key={m.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                        type="button"
+                        className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-primary/10 active:bg-primary/20 cursor-pointer transition-colors border border-transparent hover:border-primary/30 text-left"
                         onClick={() => {
                           setForm((f) => ({
                             ...f,
@@ -391,6 +392,7 @@ const SportsBetting = () => {
                           }));
                           const el = document.querySelector('[data-value="upload"]');
                           if (el instanceof HTMLElement) el.click();
+                          toast.success("Match added to slip — fill in your prediction!");
                         }}
                       >
                         <div className="flex-1 min-w-0">
@@ -401,12 +403,15 @@ const SportsBetting = () => {
                             {m.competition?.name} • {new Date(m.utcDate).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge variant="outline" className="ml-2 shrink-0 text-xs">
-                          {m.status === "FINISHED"
-                            ? `${m.score?.fullTime?.home ?? "?"}-${m.score?.fullTime?.away ?? "?"}`
-                            : new Date(m.utcDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </Badge>
-                      </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <Badge variant="outline" className="text-xs">
+                            {m.status === "FINISHED"
+                              ? `${m.score?.fullTime?.home ?? "?"}-${m.score?.fullTime?.away ?? "?"}`
+                              : new Date(m.utcDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </Badge>
+                          <span className="text-[10px] text-primary font-medium">Tap →</span>
+                        </div>
+                      </button>
                     ))}
                   </div>
                 ) : (
