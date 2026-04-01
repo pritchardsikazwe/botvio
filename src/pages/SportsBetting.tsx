@@ -479,6 +479,7 @@ const SportsBetting = () => {
                     { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined" },
                     { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined" },
                     { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined" },
+                    { label: "🇸🇦 Saudi League", size: "3", market: "mixed", type: "combined" },
                     { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined" },
                     { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined" },
                   ].map((preset) => (
