@@ -141,6 +141,15 @@ Deno.serve(async (req) => {
   </url>`);
   });
 
+  blogPosts?.forEach((post) => {
+    urls.push(`  <url>
+    <loc>${siteUrl}/blog/${post.slug}</loc>
+    <lastmod>${(post.updated_at || post.published_at)?.split("T")[0] || now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`);
+  });
+
   seoPages?.forEach((p) => {
     // Avoid duplicates with static pages
     const isDuplicate = staticPages.some(sp => sp.loc === `/${p.slug}`);
