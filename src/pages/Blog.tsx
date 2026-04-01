@@ -344,6 +344,9 @@ const Blog = () => {
               </CardContent>
             </Card>
 
+            {/* AdSense Sidebar Ad */}
+            <BlogAdSlot slot="sidebar-1" />
+
             {/* Risk Warning */}
             <Card className="border-destructive/20">
               <CardContent className="pt-4">
