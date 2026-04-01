@@ -717,36 +717,62 @@ const SportsBetting = () => {
                 {checkSlipUrl && (
                     <>
                       <img src={checkSlipUrl} alt="Checking slip" className="mt-3 rounded-lg max-h-40 mx-auto object-contain" />
-                      <Button
-                        className="mt-3 w-full"
-                        size="sm"
-                        onClick={async () => {
-                          setChecking(true);
-                          setCheckResult(null);
-                          try {
-                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
-                              body: { imageUrl: checkSlipUrl },
-                            });
-                            if (fnErr) throw fnErr;
-                            if (data?.error) throw new Error(data.error);
-                            setCheckResult(data.result);
-                          } catch (err: any) {
-                            toast.error(err.message || "Check failed");
-                          } finally {
-                            setChecking(false);
-                          }
-                        }}
-                        disabled={checking}
-                      >
-                        {checking ? (
-                          <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Checking...</>
-                        ) : (
-                          <><Search className="h-4 w-4 mr-2" /> Get Results</>
-                        )}
-                      </Button>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <Button
+                          size="sm"
+                          onClick={async () => {
+                            setChecking(true);
+                            setCheckResult(null);
+                            try {
+                              const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
+                                body: { imageUrl: checkSlipUrl },
+                              });
+                              if (fnErr) throw fnErr;
+                              if (data?.error) throw new Error(data.error);
+                              setCheckResult(data.result);
+                            } catch (err: any) {
+                              toast.error(err.message || "Check failed");
+                            } finally {
+                              setChecking(false);
+                            }
+                          }}
+                          disabled={checking || analyzing}
+                        >
+                          {checking ? (
+                            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Checking...</>
+                          ) : (
+                            <><Search className="h-4 w-4 mr-2" /> Get Results</>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => runAiAnalysis(checkSlipUrl!)}
+                          disabled={analyzing || checking}
+                        >
+                          {analyzing ? (
+                            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Analyzing...</>
+                          ) : (
+                            <><Brain className="h-4 w-4 mr-2" /> Analyze Slip</>
+                          )}
+                        </Button>
+                      </div>
                     </>
                   )}
                 </div>
+
+                {/* AI Analysis result in Check tab */}
+                {aiAnalysis && checkSlipUrl && (
+                  <div className="p-4 rounded-xl bg-muted/40 border border-primary/20 space-y-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Brain className="h-4 w-4 text-primary" />
+                      <span className="font-semibold text-sm text-primary">AI Analysis</span>
+                    </div>
+                    <div className="max-h-[400px] overflow-y-auto pr-1">
+                      {renderAiText(aiAnalysis)}
+                    </div>
+                  </div>
+                )}
 
                 {/* Or check from history */}
                 {user && betSlips && betSlips.filter((b: any) => b.result === "pending").length > 0 && (
