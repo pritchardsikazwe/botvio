@@ -52,10 +52,43 @@ const STRATEGIES: Record<string, { name: string; description: string; tip: strin
 };
 
 const SLIP_SIZES = [
+  { value: "2", label: "2 Teams" },
   { value: "3", label: "3 Teams" },
+  { value: "5", label: "5 Teams" },
   { value: "6", label: "6 Teams" },
+  { value: "8", label: "8 Teams" },
   { value: "10", label: "10 Teams" },
+  { value: "15", label: "15 Teams" },
   { value: "20", label: "20 Teams" },
+  { value: "30", label: "30 Teams" },
+];
+
+const LEAGUES = [
+  { value: "", label: "All Leagues" },
+  { value: "premier league|EPL|england", label: "🏴 Premier League" },
+  { value: "la liga|spain", label: "🇪🇸 La Liga" },
+  { value: "serie a|italy", label: "🇮🇹 Serie A" },
+  { value: "bundesliga|germany", label: "🇩🇪 Bundesliga" },
+  { value: "ligue 1|france", label: "🇫🇷 Ligue 1" },
+  { value: "eredivisie|netherlands", label: "🇳🇱 Eredivisie" },
+  { value: "primeira liga|portugal", label: "🇵🇹 Primeira Liga" },
+  { value: "champions league|UCL", label: "🏆 Champions League" },
+  { value: "europa league|UEL", label: "🏆 Europa League" },
+  { value: "saudi|arabia|SPL|pro league", label: "🇸🇦 Saudi Pro League" },
+  { value: "MLS|major league soccer|usa", label: "🇺🇸 MLS" },
+  { value: "championship|EFL", label: "🏴 Championship" },
+  { value: "turkish|super lig|turkey", label: "🇹🇷 Süper Lig" },
+  { value: "scottish|scotland", label: "🏴 Scottish Premiership" },
+  { value: "brazilian|brazil|serie a", label: "🇧🇷 Brasileirão" },
+  { value: "argentina|primera", label: "🇦🇷 Liga Profesional" },
+  { value: "africa|CAF|AFCON", label: "🌍 African Leagues" },
+];
+
+const DAY_OPTIONS = [
+  { value: "today", label: "Today" },
+  { value: "tomorrow", label: "Tomorrow" },
+  { value: "weekend", label: "Weekend" },
+  { value: "weekly", label: "Full Week" },
 ];
 
 const SportsBetting = () => {
