@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { slipSize, marketType, slipType } = await req.json();
+    const { slipSize, marketType, slipType, leagueFilter } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -34,8 +34,17 @@ serve(async (req) => {
       }
     }
 
-    const matchesSummary = fixturesData.matches?.slice(0, 40).map((m: any) => 
-      `${m.homeTeam?.name} vs ${m.awayTeam?.name} (${m.competition?.name}, ${m.utcDate})`
+    let filteredMatches = fixturesData.matches || [];
+    if (leagueFilter) {
+      const regex = new RegExp(leagueFilter, 'i');
+      const leagueMatches = filteredMatches.filter((m: any) => 
+        regex.test(m.competition?.name || '') || regex.test(m.competition?.area?.name || '')
+      );
+      if (leagueMatches.length > 0) filteredMatches = leagueMatches;
+    }
+
+    const matchesSummary = filteredMatches.slice(0, 40).map((m: any) => 
+      `${m.homeTeam?.name} vs ${m.awayTeam?.name} (${m.competition?.name}, ${m.competition?.area?.name || ''}, ${m.utcDate})`
     ).join("\n") || "No live fixtures available — use your knowledge of today's scheduled matches.";
 
     const size = parseInt(slipSize) || 3;
@@ -58,6 +67,7 @@ RULES:
     const userPrompt = `Generate a ${type === "single" ? "set of single bets" : "combined accumulator slip"} with exactly ${size} picks.
 
 Market focus: ${market === "mixed" ? "Mix of corners, over/under goals, BTTS, and match results" : market === "corners" ? "CORNERS ONLY (4+, 7+, 12+ corners)" : market === "over_under" ? "OVER/UNDER GOALS ONLY" : market === "btts" ? "BOTH TEAMS TO SCORE ONLY" : "MATCH RESULT (1X2) ONLY"}
+${leagueFilter ? `\nIMPORTANT: Focus ONLY on ${leagueFilter} league matches. If no fixtures are available from the API, use your knowledge of current ${leagueFilter} fixtures.` : ''}
 
 Today's available fixtures:
 ${matchesSummary}

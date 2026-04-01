@@ -18,7 +18,7 @@ import {
   Trophy, Target, Upload, TrendingUp, Clock, Activity,
   CheckCircle, XCircle, Loader2, Goal, BarChart3, Percent,
   Sparkles, Brain, Zap, ListChecks, Image as ImageIcon,
-  Search, RefreshCw, Eye
+  Search, RefreshCw, Eye, Share2, MessageCircle, Facebook
 } from "lucide-react";
 
 const MARKET_TYPES = [
@@ -83,6 +83,7 @@ const SportsBetting = () => {
   const [slipSize, setSlipSize] = useState("3");
   const [slipMarket, setSlipMarket] = useState("mixed");
   const [slipType, setSlipType] = useState("combined");
+  const [leagueFilter, setLeagueFilter] = useState("");
   const [dailyPicks, setDailyPicks] = useState<string | null>(null);
   const [generatingPicks, setGeneratingPicks] = useState(false);
 
@@ -209,7 +210,7 @@ const SportsBetting = () => {
     setDailyPicks(null);
     try {
       const { data, error } = await supabase.functions.invoke("generate-daily-slips", {
-        body: { slipSize, marketType: slipMarket, slipType },
+        body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter || undefined },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -379,9 +380,10 @@ const SportsBetting = () => {
                 ) : matchList.length > 0 ? (
                   <div className="space-y-2">
                     {matchList.map((m: any) => (
-                      <div
+                      <button
                         key={m.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                        type="button"
+                        className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-primary/10 active:bg-primary/20 cursor-pointer transition-colors border border-transparent hover:border-primary/30 text-left"
                         onClick={() => {
                           setForm((f) => ({
                             ...f,
@@ -391,6 +393,7 @@ const SportsBetting = () => {
                           }));
                           const el = document.querySelector('[data-value="upload"]');
                           if (el instanceof HTMLElement) el.click();
+                          toast.success("Match added to slip — fill in your prediction!");
                         }}
                       >
                         <div className="flex-1 min-w-0">
@@ -401,12 +404,15 @@ const SportsBetting = () => {
                             {m.competition?.name} • {new Date(m.utcDate).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge variant="outline" className="ml-2 shrink-0 text-xs">
-                          {m.status === "FINISHED"
-                            ? `${m.score?.fullTime?.home ?? "?"}-${m.score?.fullTime?.away ?? "?"}`
-                            : new Date(m.utcDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </Badge>
-                      </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <Badge variant="outline" className="text-xs">
+                            {m.status === "FINISHED"
+                              ? `${m.score?.fullTime?.home ?? "?"}-${m.score?.fullTime?.away ?? "?"}`
+                              : new Date(m.utcDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </Badge>
+                          <span className="text-[10px] text-primary font-medium">Tap →</span>
+                        </div>
+                      </button>
                     ))}
                   </div>
                 ) : (
@@ -471,11 +477,12 @@ const SportsBetting = () => {
                 {/* Quick presets */}
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined" },
-                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined" },
-                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined" },
-                    { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined" },
-                    { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined" },
+                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "" },
+                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "" },
+                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "" },
+                    { label: "🇸🇦 Saudi League", size: "3", market: "mixed", type: "combined", league: "saudi|arabia|SPL|pro league" },
+                    { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined", league: "" },
+                    { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined", league: "" },
                   ].map((preset) => (
                     <Button
                       key={preset.label}
@@ -486,6 +493,7 @@ const SportsBetting = () => {
                         setSlipSize(preset.size);
                         setSlipMarket(preset.market);
                         setSlipType(preset.type);
+                        setLeagueFilter(preset.league);
                       }}
                     >
                       {preset.label}
@@ -559,22 +567,8 @@ const SportsBetting = () => {
                       if (error) { toast.error("Upload failed"); return; }
                       const { data: urlData } = supabase.storage.from("bet-slips").getPublicUrl(path);
                       setCheckSlipUrl(urlData.publicUrl);
-                      toast.success("Slip uploaded! Checking...");
-                      // Auto-check
-                      setChecking(true);
                       setCheckResult(null);
-                      try {
-                        const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
-                          body: { imageUrl: urlData.publicUrl },
-                        });
-                        if (fnErr) throw fnErr;
-                        if (data?.error) throw new Error(data.error);
-                        setCheckResult(data.result);
-                      } catch (err: any) {
-                        toast.error(err.message || "Check failed");
-                      } finally {
-                        setChecking(false);
-                      }
+                      toast.success("Slip uploaded! Tap 'Get Results' to check.");
                     }}
                   />
                   {checkUploading && (
@@ -582,8 +576,37 @@ const SportsBetting = () => {
                       <Loader2 className="h-3 w-3 animate-spin" /> Uploading...
                     </p>
                   )}
-                  {checkSlipUrl && (
-                    <img src={checkSlipUrl} alt="Checking slip" className="mt-3 rounded-lg max-h-40 mx-auto object-contain" />
+                {checkSlipUrl && (
+                    <>
+                      <img src={checkSlipUrl} alt="Checking slip" className="mt-3 rounded-lg max-h-40 mx-auto object-contain" />
+                      <Button
+                        className="mt-3 w-full"
+                        size="sm"
+                        onClick={async () => {
+                          setChecking(true);
+                          setCheckResult(null);
+                          try {
+                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", {
+                              body: { imageUrl: checkSlipUrl },
+                            });
+                            if (fnErr) throw fnErr;
+                            if (data?.error) throw new Error(data.error);
+                            setCheckResult(data.result);
+                          } catch (err: any) {
+                            toast.error(err.message || "Check failed");
+                          } finally {
+                            setChecking(false);
+                          }
+                        }}
+                        disabled={checking}
+                      >
+                        {checking ? (
+                          <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Checking...</>
+                        ) : (
+                          <><Search className="h-4 w-4 mr-2" /> Get Results</>
+                        )}
+                      </Button>
+                    </>
                   )}
                 </div>
 
@@ -672,43 +695,66 @@ const SportsBetting = () => {
                         <Eye className="h-4 w-4 text-primary" />
                         <span className="font-semibold text-sm text-primary">Live Status Report</span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7"
-                        onClick={async () => {
-                          setChecking(true);
-                          try {
-                            const body: any = {};
-                            if (checkSlipUrl) {
-                              body.imageUrl = checkSlipUrl;
-                            } else if (selectedBetForCheck && betSlips) {
-                              const bet = betSlips.find((b: any) => b.id === selectedBetForCheck);
-                              if (bet) {
-                                body.imageUrl = bet.screenshot_url || null;
-                                body.matches = [{
-                                  match_name: bet.match_name,
-                                  market_type: bet.market_type,
-                                  prediction: bet.prediction,
-                                  league: bet.league,
-                                }];
-                                body.marketType = bet.market_type;
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => {
+                            const shareText = `🏆 Bet Slip Results\n\n${checkResult}\n\nPowered by Botvio Sports Hub`;
+                            window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                          }}
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" /> WhatsApp
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => {
+                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/sports-betting')}&quote=${encodeURIComponent('🏆 Check my bet slip results on Botvio!')}`, '_blank');
+                          }}
+                        >
+                          <Facebook className="h-3 w-3 mr-1" /> Share
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={async () => {
+                            setChecking(true);
+                            try {
+                              const body: any = {};
+                              if (checkSlipUrl) {
+                                body.imageUrl = checkSlipUrl;
+                              } else if (selectedBetForCheck && betSlips) {
+                                const bet = betSlips.find((b: any) => b.id === selectedBetForCheck);
+                                if (bet) {
+                                  body.imageUrl = bet.screenshot_url || null;
+                                  body.matches = [{
+                                    match_name: bet.match_name,
+                                    market_type: bet.market_type,
+                                    prediction: bet.prediction,
+                                    league: bet.league,
+                                  }];
+                                  body.marketType = bet.market_type;
+                                }
                               }
+                              const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", { body });
+                              if (fnErr) throw fnErr;
+                              if (data?.error) throw new Error(data.error);
+                              setCheckResult(data.result);
+                            } catch (err: any) {
+                              toast.error(err.message || "Refresh failed");
+                            } finally {
+                              setChecking(false);
                             }
-                            const { data, error: fnErr } = await supabase.functions.invoke("check-bet-slip", { body });
-                            if (fnErr) throw fnErr;
-                            if (data?.error) throw new Error(data.error);
-                            setCheckResult(data.result);
-                          } catch (err: any) {
-                            toast.error(err.message || "Refresh failed");
-                          } finally {
-                            setChecking(false);
-                          }
-                        }}
-                        disabled={checking}
-                      >
-                        <RefreshCw className={`h-3 w-3 mr-1 ${checking ? "animate-spin" : ""}`} /> Refresh
-                      </Button>
+                          }}
+                          disabled={checking}
+                        >
+                          <RefreshCw className={`h-3 w-3 mr-1 ${checking ? "animate-spin" : ""}`} /> Refresh
+                        </Button>
+                      </div>
                     </div>
                     <div className="max-h-[500px] overflow-y-auto pr-1">
                       {renderAiText(checkResult)}
@@ -1086,6 +1132,42 @@ const SportsBetting = () => {
                           className="mt-3 rounded-lg max-h-32 object-cover w-full"
                         />
                       )}
+                      {/* Share buttons */}
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[10px] flex-1"
+                          onClick={() => {
+                            const text = `🏆 My Bet Slip\n\n⚽ ${bet.match_name}\n📋 ${bet.league || 'N/A'}\n🎯 ${bet.prediction}${bet.odds ? ` @ ${bet.odds}` : ''}${bet.result !== 'pending' ? `\n${bet.result === 'won' ? '✅ WON' : '❌ LOST'}` : '\n⏳ Pending'}\n\nPowered by Botvio Sports Hub`;
+                            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                          }}
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" /> WhatsApp
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[10px] flex-1"
+                          onClick={() => {
+                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/sports-betting')}&quote=${encodeURIComponent(`🏆 ${bet.match_name} — ${bet.prediction}${bet.result !== 'pending' ? ` ${bet.result === 'won' ? '✅ WON' : '❌ LOST'}` : ''}`)}`, '_blank');
+                          }}
+                        >
+                          <Facebook className="h-3 w-3 mr-1" /> Facebook
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[10px]"
+                          onClick={() => {
+                            const text = `⚽ ${bet.match_name} | ${bet.prediction}${bet.odds ? ` @ ${bet.odds}` : ''}${bet.result !== 'pending' ? ` — ${bet.result === 'won' ? '✅ WON' : '❌ LOST'}` : ''}`;
+                            navigator.clipboard.writeText(text);
+                            toast.success("Copied to clipboard!");
+                          }}
+                        >
+                          <Share2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
