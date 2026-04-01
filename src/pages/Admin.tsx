@@ -1113,6 +1113,11 @@ const Admin = () => {
             <AdminSportsBettingAccessTab />
           </TabsContent>
 
+          {/* Live Streams Tab */}
+          <TabsContent value="live_streams">
+            <AdminLiveStreamsTab />
+          </TabsContent>
+
           {/* Subscription Requests Tab */}
           <TabsContent value="subscription_requests">
             <SubscriptionRequestsTab />
