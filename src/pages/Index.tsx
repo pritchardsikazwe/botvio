@@ -219,6 +219,9 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Scrolling Advert Banner */}
+        <ScrollingAdvertBanner />
+
         {/* 0.5 — High-Impact News Events */}
         <NewsEventCards />
 
