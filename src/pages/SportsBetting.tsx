@@ -502,8 +502,8 @@ const SportsBetting = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Config row */}
-                <div className="grid grid-cols-3 gap-3">
+                {/* Config row 1 */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <Label className="text-xs">Slip Size</Label>
                     <Select value={slipSize} onValueChange={setSlipSize}>
@@ -529,6 +529,17 @@ const SportsBetting = () => {
                     </Select>
                   </div>
                   <div>
+                    <Label className="text-xs">Day Range</Label>
+                    <Select value={dayRange} onValueChange={setDayRange}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {DAY_OPTIONS.map((d) => (
+                          <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
                     <Label className="text-xs">Slip Type</Label>
                     <Select value={slipType} onValueChange={setSlipType}>
                       <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
@@ -540,15 +551,30 @@ const SportsBetting = () => {
                   </div>
                 </div>
 
+                {/* League filter */}
+                <div>
+                  <Label className="text-xs">League / Competition</Label>
+                  <Select value={leagueFilter} onValueChange={setLeagueFilter}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="All Leagues" /></SelectTrigger>
+                    <SelectContent>
+                      {LEAGUES.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Quick presets */}
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "" },
-                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "" },
-                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "" },
-                    { label: "🇸🇦 Saudi League", size: "3", market: "mixed", type: "combined", league: "saudi|arabia|SPL|pro league" },
-                    { label: "📊 10-Leg Multi", size: "10", market: "mixed", type: "combined", league: "" },
-                    { label: "🎯 20-Leg Mega", size: "20", market: "mixed", type: "combined", league: "" },
+                    { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "", day: "today" },
+                    { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "", day: "today" },
+                    { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "", day: "today" },
+                    { label: "📅 Weekend Multi", size: "10", market: "mixed", type: "combined", league: "", day: "weekend" },
+                    { label: "📆 Weekly Mega", size: "20", market: "mixed", type: "combined", league: "", day: "weekly" },
+                    { label: "🇬🇧 EPL Picks", size: "5", market: "mixed", type: "combined", league: "premier league|EPL|england", day: "weekend" },
+                    { label: "🇪🇸 La Liga", size: "5", market: "mixed", type: "combined", league: "la liga|spain", day: "weekend" },
+                    { label: "🏆 UCL Picks", size: "5", market: "mixed", type: "combined", league: "champions league|UCL", day: "weekly" },
                   ].map((preset) => (
                     <Button
                       key={preset.label}
@@ -560,6 +586,7 @@ const SportsBetting = () => {
                         setSlipMarket(preset.market);
                         setSlipType(preset.type);
                         setLeagueFilter(preset.league);
+                        setDayRange(preset.day);
                       }}
                     >
                       {preset.label}
