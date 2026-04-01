@@ -48,7 +48,7 @@ serve(async (req) => {
     let fixturesData: any = { matches: [] };
     if (FOOTBALL_API_KEY) {
       try {
-        const resp = await fetch(`${BASE}/matches?dateFrom=${today}&dateTo=${tomorrow}`, {
+        const resp = await fetch(`${BASE}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`, {
           headers: { "X-Auth-Token": FOOTBALL_API_KEY },
         });
         if (resp.ok) fixturesData = await resp.json();
