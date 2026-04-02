@@ -118,4 +118,17 @@ const button = {
   padding: '14px 28px',
   textDecoration: 'none',
 }
+const h2 = {
+  fontSize: '17px',
+  fontWeight: 'bold' as const,
+  color: '#0D1117',
+  margin: '24px 0 8px',
+}
+const footerNote = {
+  fontSize: '13px',
+  color: '#D4940A',
+  lineHeight: '1.5',
+  margin: '20px 0 0',
+  fontStyle: 'italic' as const,
+}
 const footer = { fontSize: '12px', color: '#808899', margin: '20px 0 0' }
