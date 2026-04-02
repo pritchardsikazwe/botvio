@@ -25,7 +25,7 @@ interface WelcomeEmailProps {
 const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Welcome to Botvio — your AI trading companion</Preview>
+    <Preview>Welcome to Botvio — AI signals, chart analysis, courses & more</Preview>
     <Body style={main}>
       <Container style={container}>
         <Img src={LOGO_URL} alt="Botvio" width="120" height="40" style={logo} />
@@ -33,21 +33,52 @@ const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
           {name ? `Welcome aboard, ${name}! 🚀` : 'Welcome aboard! 🚀'}
         </Heading>
         <Text style={text}>
-          You've joined thousands of traders using Botvio for AI-powered signals,
-          chart analysis, and Gold trading insights.
+          You've joined thousands of traders using Botvio for AI-powered trading
+          tools, education, and market insights. Here's everything waiting for you:
         </Text>
-        <Text style={text}>Here's what you can do next:</Text>
+
+        <Heading style={h2}>📊 Subscription Plans</Heading>
         <Text style={text}>
-          📊 Explore AI trading signals{'\n'}
-          🤖 Set up automated bots{'\n'}
-          💰 Access Gold & Forex analysis{'\n'}
-          📈 Upload charts for AI analysis
+          Choose a plan that fits your trading style — from Free Trial to VIP.
+          Unlock premium signals, unlimited AI analysis, copy trading, and more
+          as you level up.
         </Text>
+
+        <Heading style={h2}>📈 AI Chart Analysis</Heading>
+        <Text style={text}>
+          Upload any chart screenshot and get instant AI-powered analysis with
+          key levels, market structure, and trade ideas. Free users get 1 scan
+          per day — upgrade for more.
+        </Text>
+
+        <Heading style={h2}>🎓 Trading Courses</Heading>
+        <Text style={text}>
+          Learn from our library of courses: Smart Money Concepts (SMC),
+          Boom & Crash, Forex Masterclass, Binance Trading, and the Botvio
+          Sniper strategy. All available in the Marketplace.
+        </Text>
+
+        <Heading style={h2}>⚡ Quick Access Shortcuts</Heading>
+        <Text style={text}>
+          🎯 Binary Signals — live AI-generated trade signals{'\n'}
+          🔴 Botvio Live — watch traders stream in real-time{'\n'}
+          ⚽ Sports Betting — AI-analysed bet slips{'\n'}
+          🏆 Flipping Challenges — grow small accounts{'\n'}
+          📰 News Calendar — stay ahead of market events{'\n'}
+          💰 Gold Hub — dedicated XAU/USD analysis
+        </Text>
+
         <Button style={button} href="https://botvio.live">
-          Start Trading
+          Explore Botvio Now
         </Button>
+
+        <Text style={footerNote}>
+          💡 Tip: Tap the shortcut grid on the homepage to jump straight
+          into any feature.
+        </Text>
+
         <Text style={footer}>
-          Need help? Reply to this email or check our docs at botvio.live/docs.
+          Need help? Reply to this email or visit botvio.live/docs.
         </Text>
         <Text style={footer}>— The {SITE_NAME} Team</Text>
       </Container>
