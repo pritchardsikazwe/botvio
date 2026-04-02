@@ -43,6 +43,7 @@ import TradeModes from "./pages/TradeModes";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import CountryPage from "./pages/CountryPage";
+import SlugResolver from "./pages/SlugResolver";
 import Docs from "./pages/Docs";
 import FAQ from "./pages/FAQ";
 import Whitepaper from "./pages/Whitepaper";
