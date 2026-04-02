@@ -127,7 +127,9 @@ const App = () => (
               <Route path="/p2p" element={<P2P />} />
               <Route path="/affiliate" element={<Affiliate />} />
               <Route path="/strategies" element={<Strategies />} />
+              {/* Legacy /s/ redirect + category route */}
               <Route path="/s/:slug" element={<StrategyDetail />} />
+              <Route path="/strategies/:category/:slug" element={<StrategyDetail />} />
               <Route path="/r/:code" element={<ReferralRedirect />} />
               <Route path="/signals" element={<Signals />} />
               <Route path="/marketplace" element={<Marketplace />} />
