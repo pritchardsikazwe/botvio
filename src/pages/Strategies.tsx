@@ -78,7 +78,7 @@ const Strategies = () => {
     // Preserve referral code if exists
     const referralData = localStorage.getItem("botvio_referral");
     const ref = referralData ? JSON.parse(referralData).code : null;
-    navigate(`/s/${slug}${ref ? `?ref=${ref}` : ""}`);
+    navigate(`/${slug}${ref ? `?ref=${ref}` : ""}`);
   };
 
   const handleShare = async (strategy: { slug: string; title: string }) => {
