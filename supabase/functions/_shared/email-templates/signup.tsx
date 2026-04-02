@@ -119,3 +119,30 @@ const button = {
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#808899', margin: '30px 0 0' }
+const divider = { borderColor: '#1C2333', margin: '28px 0' }
+const h2 = {
+  fontSize: '17px',
+  fontWeight: 'bold' as const,
+  color: '#0D1117',
+  margin: '0 0 8px',
+}
+const textSmall = {
+  fontSize: '13px',
+  color: '#808899',
+  lineHeight: '1.5',
+  margin: '0 0 16px',
+}
+const brokerRow = { margin: '0 0 10px' }
+const brokerBtnBase = {
+  fontSize: '14px',
+  fontWeight: 'bold' as const,
+  borderRadius: '6px',
+  padding: '12px 24px',
+  textDecoration: 'none',
+  display: 'inline-block' as const,
+  width: '100%',
+  textAlign: 'center' as const,
+}
+const brokerBtnDeriv = { ...brokerBtnBase, backgroundColor: '#FF444F', color: '#ffffff' }
+const brokerBtnExness = { ...brokerBtnBase, backgroundColor: '#D4940A', color: '#0D1117' }
+const brokerBtnWeltrade = { ...brokerBtnBase, backgroundColor: '#0066FF', color: '#ffffff' }
