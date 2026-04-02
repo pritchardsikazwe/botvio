@@ -82,7 +82,7 @@ const Strategies = () => {
   };
 
   const handleShare = async (strategy: { slug: string; title: string }) => {
-    const shareUrl = `${window.location.origin}/s/${strategy.slug}`;
+    const shareUrl = `${window.location.origin}/${strategy.slug}`;
     
     if (navigator.share) {
       try {
