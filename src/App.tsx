@@ -43,6 +43,7 @@ import TradeModes from "./pages/TradeModes";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import CountryPage from "./pages/CountryPage";
+import SlugResolver from "./pages/SlugResolver";
 import Docs from "./pages/Docs";
 import FAQ from "./pages/FAQ";
 import Whitepaper from "./pages/Whitepaper";
@@ -126,7 +127,9 @@ const App = () => (
               <Route path="/p2p" element={<P2P />} />
               <Route path="/affiliate" element={<Affiliate />} />
               <Route path="/strategies" element={<Strategies />} />
+              {/* Legacy /s/ redirect + category route */}
               <Route path="/s/:slug" element={<StrategyDetail />} />
+              <Route path="/strategies/:category/:slug" element={<StrategyDetail />} />
               <Route path="/r/:code" element={<ReferralRedirect />} />
               <Route path="/signals" element={<Signals />} />
               <Route path="/marketplace" element={<Marketplace />} />
@@ -211,8 +214,8 @@ const App = () => (
                 <Route key={`gold-${c.slug}`} path={`/gold-trading-${c.slug}`} element={<CountryTrafficPage />} />,
               ])}
 
-              {/* Country landing pages */}
-              <Route path="/:country" element={<CountryPage />} />
+              {/* Slug resolver: strategy first, then country fallback */}
+              <Route path="/:slug" element={<SlugResolver />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

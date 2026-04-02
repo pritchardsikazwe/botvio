@@ -672,7 +672,7 @@ const LatestStrategies = () => {
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {strategies.map((s) => (
-            <Link key={s.slug} to={`/s/${s.slug}`}>
+            <Link key={s.slug} to={`/${s.slug}`}>
               <Card className="h-full border-border bg-card hover:border-primary/50 transition-colors overflow-hidden">
                 {s.cover_image_url && (
                   <img src={s.cover_image_url} alt={s.title} className="w-full h-28 object-cover" loading="lazy" />

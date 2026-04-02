@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     ? (strategy.description || "").replace(/[*#\n]/g, " ").slice(0, 160)
     : "Trading strategy on Botvio";
   const image = strategy?.cover_image_url || `${siteUrl}/botvio-logo.png`;
-  const pageUrl = `${siteUrl}/s/${slug}`;
+  const pageUrl = `${siteUrl}/${slug}`;
   const market = strategy?.market || "Forex";
 
   const html = `<!DOCTYPE html>

@@ -184,7 +184,7 @@ const StrategyDetail = () => {
         <meta property="og:title" content={strategy.title} />
         <meta property="og:description" content={ogDescription} />
         <meta property="og:image" content={ogImageUrl} />
-        <meta property="og:url" content={`${window.location.origin}/s/${strategy.slug}`} />
+        <meta property="og:url" content={`${window.location.origin}/${strategy.slug}`} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />

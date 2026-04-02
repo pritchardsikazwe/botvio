@@ -78,11 +78,11 @@ const Strategies = () => {
     // Preserve referral code if exists
     const referralData = localStorage.getItem("botvio_referral");
     const ref = referralData ? JSON.parse(referralData).code : null;
-    navigate(`/s/${slug}${ref ? `?ref=${ref}` : ""}`);
+    navigate(`/${slug}${ref ? `?ref=${ref}` : ""}`);
   };
 
   const handleShare = async (strategy: { slug: string; title: string }) => {
-    const shareUrl = `${window.location.origin}/s/${strategy.slug}`;
+    const shareUrl = `${window.location.origin}/${strategy.slug}`;
     
     if (navigator.share) {
       try {
@@ -422,7 +422,7 @@ const Strategies = () => {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => navigate(`/s/${strategy.slug}`)}
+                        onClick={() => navigate(`/${strategy.slug}`)}
                       >
                         {t("common.edit", "Edit")}
                       </Button>
