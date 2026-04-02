@@ -19,7 +19,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const LOGO_URL = 'https://tqqkzeblmjapgbnsbtgw.supabase.co/storage/v1/object/public/email-assets/botvio-logo.png'
-const SITE_NAME = 'Botvio'
+const SITE_NAME = 'Botvio – Forex Signals, AI Chart Analysis & Gold Trading Mentorship'
 
 interface SubscriptionUpgradedProps {
   name?: string

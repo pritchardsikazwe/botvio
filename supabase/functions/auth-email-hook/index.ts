@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "botvio"
+const SITE_NAME = "Botvio – Forex Signals, AI Chart Analysis & Gold Trading Mentorship"
 const SENDER_DOMAIN = "notify.botvio.live"
 const ROOT_DOMAIN = "botvio.live"
 const FROM_DOMAIN = "botvio.live" // Domain shown in From address (may be root or sender subdomain)
