@@ -214,8 +214,8 @@ const App = () => (
                 <Route key={`gold-${c.slug}`} path={`/gold-trading-${c.slug}`} element={<CountryTrafficPage />} />,
               ])}
 
-              {/* Country landing pages */}
-              <Route path="/:country" element={<CountryPage />} />
+              {/* Slug resolver: strategy first, then country fallback */}
+              <Route path="/:slug" element={<SlugResolver />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
