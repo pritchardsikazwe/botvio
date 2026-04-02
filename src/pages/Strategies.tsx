@@ -422,7 +422,7 @@ const Strategies = () => {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => navigate(`/s/${strategy.slug}`)}
+                        onClick={() => navigate(`/${strategy.slug}`)}
                       >
                         {t("common.edit", "Edit")}
                       </Button>

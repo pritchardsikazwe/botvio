@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
 
   strategies?.forEach((s) => {
     urls.push(`  <url>
-    <loc>${siteUrl}/s/${s.slug}</loc>
+    <loc>${siteUrl}/${s.slug}</loc>
     <lastmod>${s.updated_at?.split("T")[0] || now}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
