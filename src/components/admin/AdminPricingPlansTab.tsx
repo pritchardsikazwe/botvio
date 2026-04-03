@@ -434,6 +434,7 @@ export const AdminPricingPlansTab = () => {
                       setFormData({ ...formData, allow_all_courses: checked })
                     }
                   />
+                </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="is_active" className="font-normal">
                     Plan Active
