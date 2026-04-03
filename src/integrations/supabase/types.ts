@@ -3487,9 +3487,12 @@ export type Database = {
       }
       pricing_plans: {
         Row: {
+          allow_all_courses: boolean | null
           allow_copy_trading: boolean | null
           allow_premium_bots: boolean | null
+          allow_premium_signals: boolean | null
           allow_provider_listing: boolean | null
+          allow_sports_betting: boolean | null
           code: string
           created_at: string
           id: string
@@ -3501,9 +3504,12 @@ export type Database = {
           price_zmw: number | null
         }
         Insert: {
+          allow_all_courses?: boolean | null
           allow_copy_trading?: boolean | null
           allow_premium_bots?: boolean | null
+          allow_premium_signals?: boolean | null
           allow_provider_listing?: boolean | null
+          allow_sports_betting?: boolean | null
           code: string
           created_at?: string
           id?: string
@@ -3515,9 +3521,12 @@ export type Database = {
           price_zmw?: number | null
         }
         Update: {
+          allow_all_courses?: boolean | null
           allow_copy_trading?: boolean | null
           allow_premium_bots?: boolean | null
+          allow_premium_signals?: boolean | null
           allow_provider_listing?: boolean | null
+          allow_sports_betting?: boolean | null
           code?: string
           created_at?: string
           id?: string
