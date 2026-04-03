@@ -164,6 +164,7 @@ const BROKERS = [
   { value: "deriv", label: "Deriv" },
   { value: "weltrade", label: "Weltrade" },
   { value: "exness", label: "Exness" },
+  { value: "binance", label: "Binance" },
 ];
 
 interface AdminSignalFormProps {

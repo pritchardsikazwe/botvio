@@ -20,6 +20,7 @@ const BROKER_FILTERS = [
   { value: "exness", label: "Exness" },
   { value: "deriv", label: "Deriv" },
   { value: "weltrade", label: "Weltrade" },
+  { value: "binance", label: "Binance" },
   { value: "pocket-option", label: "Pocket Option" },
   { value: "iq-option", label: "IQ Option" },
   { value: "binomo", label: "Binomo" },
@@ -31,7 +32,7 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
     return { name: "Trade on Deriv", link: DERIV_LINK, color: "bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20" };
   }
   if (/BTC|ETH|SOL|BNB|XRP|DOGE|ADA|DOT|AVAX|MATIC|CRYPTO/i.test(s)) {
-    return { name: "Trade on Deriv", link: DERIV_LINK, color: "bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20" };
+    return { name: "Trade on Binance", link: "https://www.binance.com/en/trade", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/30 hover:bg-yellow-500/20" };
   }
   if (/XAU|XAG|GOLD|SILVER/i.test(s)) {
     return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
