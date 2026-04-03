@@ -295,6 +295,7 @@ const Index = () => {
               </CardHeader>
               <CardContent className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 100 chart analyses / month</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Premium monthly signals</div>
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Copy trading & premium bots</div>
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Provider listing</div>
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 5 trading accounts, 10 bots</div>
