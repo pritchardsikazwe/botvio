@@ -132,7 +132,7 @@ Generate the crypto trading signal now.`;
         const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
 
         // Only post actionable signals (buy/sell with decent confidence)
-        if ((parsed.signal === "buy" || parsed.signal === "sell") && parsed.confidence >= 55) {
+        if ((parsed.signal === "buy" || parsed.signal === "sell") && parsed.confidence >= 45) {
           const expiresAt = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(); // 4h expiry
 
           const { error: insertErr } = await supabase.from("trading_signals").insert({
