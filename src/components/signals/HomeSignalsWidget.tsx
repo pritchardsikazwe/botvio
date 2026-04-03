@@ -20,6 +20,7 @@ const BROKER_FILTERS = [
   { value: "exness", label: "Exness" },
   { value: "deriv", label: "Deriv" },
   { value: "weltrade", label: "Weltrade" },
+  { value: "binance", label: "Binance" },
   { value: "pocket-option", label: "Pocket Option" },
   { value: "iq-option", label: "IQ Option" },
   { value: "binomo", label: "Binomo" },
