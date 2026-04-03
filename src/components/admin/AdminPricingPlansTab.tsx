@@ -23,6 +23,9 @@ interface PricingPlan {
   allow_copy_trading: boolean | null;
   allow_premium_bots: boolean | null;
   allow_provider_listing: boolean | null;
+  allow_premium_signals: boolean | null;
+  allow_sports_betting: boolean | null;
+  allow_all_courses: boolean | null;
   is_active: boolean | null;
   created_at: string;
 }
