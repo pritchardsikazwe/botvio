@@ -151,6 +151,9 @@ export const AdminPricingPlansTab = () => {
       allow_copy_trading: plan.allow_copy_trading || false,
       allow_premium_bots: plan.allow_premium_bots || false,
       allow_provider_listing: plan.allow_provider_listing || false,
+      allow_premium_signals: plan.allow_premium_signals || false,
+      allow_sports_betting: plan.allow_sports_betting || false,
+      allow_all_courses: plan.allow_all_courses || false,
       is_active: plan.is_active !== false,
     });
     setEditDialog({ open: true, plan });
