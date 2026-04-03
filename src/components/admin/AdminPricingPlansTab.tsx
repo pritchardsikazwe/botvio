@@ -46,6 +46,9 @@ export const AdminPricingPlansTab = () => {
     allow_copy_trading: false,
     allow_premium_bots: false,
     allow_provider_listing: false,
+    allow_premium_signals: false,
+    allow_sports_betting: false,
+    allow_all_courses: false,
     is_active: true,
   });
 
