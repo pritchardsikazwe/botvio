@@ -18,7 +18,7 @@ import { ChartAnalysisPanel } from "@/components/chart/ChartAnalysisPanel";
 import { ChartBrokerLinks } from "@/components/chart/ChartBrokerLinks";
 import { BotvioStrategyCard } from "@/components/chart/HauzaStrategyCard";
 import { ChartTipsPanel } from "@/components/chart/ChartTipsPanel";
-import { SessionsPanel } from "@/components/chart/SessionsPanel";
+
 import { StrategyNotesPanel } from "@/components/chart/StrategyNotesPanel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +34,7 @@ const ChartPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
   const [timeframe, setTimeframe] = useState("1h");
-  const [showSessions, setShowSessions] = useState(true);
+  const [showSessions, setShowSessions] = useState(false);
   const [showLevels, setShowLevels] = useState(true);
   const [showNews, setShowNews] = useState(true);
 
@@ -57,7 +57,7 @@ const ChartPage = () => {
     enabled: !!displaySymbol,
   });
 
-  const LIVE_REFETCH_MS = 30_000;
+  const LIVE_REFETCH_MS = 10_000;
 
   const { data: quote } = useQuery({
     queryKey: ["chart-quote", asset?.id],
@@ -250,7 +250,7 @@ const ChartPage = () => {
                 <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
                 <TabsTrigger value="technical" className="text-xs">Technical Analysis</TabsTrigger>
                 <TabsTrigger value="signals" className="text-xs">Signals</TabsTrigger>
-                <TabsTrigger value="sessions" className="text-xs">Sessions</TabsTrigger>
+                
                 <TabsTrigger value="news" className="text-xs">News</TabsTrigger>
                 <TabsTrigger value="strategy" className="text-xs">Strategy Notes</TabsTrigger>
               </TabsList>
@@ -344,10 +344,6 @@ const ChartPage = () => {
                 </Card>
               </TabsContent>
 
-              {/* SESSIONS TAB */}
-              <TabsContent value="sessions">
-                <SessionsPanel />
-              </TabsContent>
 
               {/* NEWS TAB */}
               <TabsContent value="news">
