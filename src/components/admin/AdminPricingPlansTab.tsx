@@ -400,6 +400,41 @@ export const AdminPricingPlansTab = () => {
                   />
                 </div>
                 <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_premium_signals" className="font-normal">
+                    Allow Premium Signals
+                  </Label>
+                  <Switch
+                    id="allow_premium_signals"
+                    checked={formData.allow_premium_signals}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, allow_premium_signals: checked })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_sports_betting" className="font-normal">
+                    Allow Sports Betting
+                  </Label>
+                  <Switch
+                    id="allow_sports_betting"
+                    checked={formData.allow_sports_betting}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, allow_sports_betting: checked })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_all_courses" className="font-normal">
+                    Allow All Courses Access
+                  </Label>
+                  <Switch
+                    id="allow_all_courses"
+                    checked={formData.allow_all_courses}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, allow_all_courses: checked })
+                    }
+                  />
+                <div className="flex items-center justify-between">
                   <Label htmlFor="is_active" className="font-normal">
                     Plan Active
                   </Label>
