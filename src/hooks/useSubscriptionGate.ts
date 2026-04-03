@@ -12,6 +12,9 @@ export interface SubscriptionGate {
   canCopyTrade: boolean;
   canUsePremiumBots: boolean;
   canBeProvider: boolean;
+  canAccessPremiumSignals: boolean;
+  canAccessSportsBetting: boolean;
+  canAccessAllCourses: boolean;
   maxAccounts: number;
   maxBotInstances: number;
   isLoading: boolean;
