@@ -57,7 +57,7 @@ const ChartPage = () => {
     enabled: !!displaySymbol,
   });
 
-  const LIVE_REFETCH_MS = 30_000;
+  const LIVE_REFETCH_MS = 10_000;
 
   const { data: quote } = useQuery({
     queryKey: ["chart-quote", asset?.id],

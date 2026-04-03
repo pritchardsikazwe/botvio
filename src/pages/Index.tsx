@@ -313,8 +313,10 @@ const Index = () => {
               </CardHeader>
               <CardContent className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Unlimited chart analyses</div>
-                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> All strategies included</div>
-                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Provider listing</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Premium signals</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Sports betting access</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Global markets access</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> All strategies & courses</div>
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Unlimited accounts & bots</div>
                 <Button className="w-full mt-3 text-xs bg-destructive hover:bg-destructive/90 text-destructive-foreground" size="sm" asChild>
                   <Link to="/billing">Go VIP</Link>
