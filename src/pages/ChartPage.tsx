@@ -250,7 +250,7 @@ const ChartPage = () => {
                 <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
                 <TabsTrigger value="technical" className="text-xs">Technical Analysis</TabsTrigger>
                 <TabsTrigger value="signals" className="text-xs">Signals</TabsTrigger>
-                <TabsTrigger value="sessions" className="text-xs">Sessions</TabsTrigger>
+                
                 <TabsTrigger value="news" className="text-xs">News</TabsTrigger>
                 <TabsTrigger value="strategy" className="text-xs">Strategy Notes</TabsTrigger>
               </TabsList>
