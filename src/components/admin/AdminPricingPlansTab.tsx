@@ -234,10 +234,19 @@ export const AdminPricingPlansTab = () => {
                           <Badge variant="outline" className="text-xs">Copy</Badge>
                         )}
                         {plan.allow_premium_bots && (
-                          <Badge variant="outline" className="text-xs">Premium</Badge>
+                          <Badge variant="outline" className="text-xs">Premium Bots</Badge>
                         )}
                         {plan.allow_provider_listing && (
                           <Badge variant="outline" className="text-xs">Provider</Badge>
+                        )}
+                        {plan.allow_premium_signals && (
+                          <Badge variant="outline" className="text-xs bg-primary/10">Signals</Badge>
+                        )}
+                        {plan.allow_sports_betting && (
+                          <Badge variant="outline" className="text-xs bg-warning/10">Sports</Badge>
+                        )}
+                        {plan.allow_all_courses && (
+                          <Badge variant="outline" className="text-xs bg-success/10">Courses</Badge>
                         )}
                       </div>
                     </TableCell>
