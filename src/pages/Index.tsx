@@ -262,7 +262,7 @@ const Index = () => {
                 <p className="text-2xl font-extrabold text-foreground">$0<span className="text-sm font-normal text-muted-foreground">/forever</span></p>
               </CardHeader>
               <CardContent className="space-y-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 5 chart analyses / day</div>
+                <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 1 chart upload / day</div>
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Community signals</div>
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> Basic education</div>
                 <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" /> 1 trading account</div>
