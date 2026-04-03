@@ -344,10 +344,6 @@ const ChartPage = () => {
                 </Card>
               </TabsContent>
 
-              {/* SESSIONS TAB */}
-              <TabsContent value="sessions">
-                <SessionsPanel />
-              </TabsContent>
 
               {/* NEWS TAB */}
               <TabsContent value="news">
