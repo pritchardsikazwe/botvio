@@ -23,6 +23,9 @@ interface PricingPlan {
   allow_copy_trading: boolean | null;
   allow_premium_bots: boolean | null;
   allow_provider_listing: boolean | null;
+  allow_premium_signals: boolean | null;
+  allow_sports_betting: boolean | null;
+  allow_all_courses: boolean | null;
   is_active: boolean | null;
   created_at: string;
 }
@@ -43,6 +46,9 @@ export const AdminPricingPlansTab = () => {
     allow_copy_trading: false,
     allow_premium_bots: false,
     allow_provider_listing: false,
+    allow_premium_signals: false,
+    allow_sports_betting: false,
+    allow_all_courses: false,
     is_active: true,
   });
 
@@ -126,6 +132,9 @@ export const AdminPricingPlansTab = () => {
       allow_copy_trading: false,
       allow_premium_bots: false,
       allow_provider_listing: false,
+      allow_premium_signals: false,
+      allow_sports_betting: false,
+      allow_all_courses: false,
       is_active: true,
     });
     setEditDialog({ open: true, plan: null });
@@ -142,6 +151,9 @@ export const AdminPricingPlansTab = () => {
       allow_copy_trading: plan.allow_copy_trading || false,
       allow_premium_bots: plan.allow_premium_bots || false,
       allow_provider_listing: plan.allow_provider_listing || false,
+      allow_premium_signals: plan.allow_premium_signals || false,
+      allow_sports_betting: plan.allow_sports_betting || false,
+      allow_all_courses: plan.allow_all_courses || false,
       is_active: plan.is_active !== false,
     });
     setEditDialog({ open: true, plan });
@@ -222,10 +234,19 @@ export const AdminPricingPlansTab = () => {
                           <Badge variant="outline" className="text-xs">Copy</Badge>
                         )}
                         {plan.allow_premium_bots && (
-                          <Badge variant="outline" className="text-xs">Premium</Badge>
+                          <Badge variant="outline" className="text-xs">Premium Bots</Badge>
                         )}
                         {plan.allow_provider_listing && (
                           <Badge variant="outline" className="text-xs">Provider</Badge>
+                        )}
+                        {plan.allow_premium_signals && (
+                          <Badge variant="outline" className="text-xs bg-primary/10">Signals</Badge>
+                        )}
+                        {plan.allow_sports_betting && (
+                          <Badge variant="outline" className="text-xs bg-warning/10">Sports</Badge>
+                        )}
+                        {plan.allow_all_courses && (
+                          <Badge variant="outline" className="text-xs bg-success/10">Courses</Badge>
                         )}
                       </div>
                     </TableCell>
@@ -375,6 +396,42 @@ export const AdminPricingPlansTab = () => {
                     checked={formData.allow_provider_listing}
                     onCheckedChange={(checked) =>
                       setFormData({ ...formData, allow_provider_listing: checked })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_premium_signals" className="font-normal">
+                    Allow Premium Signals
+                  </Label>
+                  <Switch
+                    id="allow_premium_signals"
+                    checked={formData.allow_premium_signals}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, allow_premium_signals: checked })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_sports_betting" className="font-normal">
+                    Allow Sports Betting
+                  </Label>
+                  <Switch
+                    id="allow_sports_betting"
+                    checked={formData.allow_sports_betting}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, allow_sports_betting: checked })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allow_all_courses" className="font-normal">
+                    Allow All Courses Access
+                  </Label>
+                  <Switch
+                    id="allow_all_courses"
+                    checked={formData.allow_all_courses}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, allow_all_courses: checked })
                     }
                   />
                 </div>

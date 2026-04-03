@@ -12,6 +12,9 @@ export interface SubscriptionGate {
   canCopyTrade: boolean;
   canUsePremiumBots: boolean;
   canBeProvider: boolean;
+  canAccessPremiumSignals: boolean;
+  canAccessSportsBetting: boolean;
+  canAccessAllCourses: boolean;
   maxAccounts: number;
   maxBotInstances: number;
   isLoading: boolean;
@@ -57,6 +60,9 @@ export function useSubscriptionGate(): SubscriptionGate {
     canCopyTrade: plan?.allow_copy_trading ?? false,
     canUsePremiumBots: plan?.allow_premium_bots ?? false,
     canBeProvider: plan?.allow_provider_listing ?? false,
+    canAccessPremiumSignals: plan?.allow_premium_signals ?? false,
+    canAccessSportsBetting: plan?.allow_sports_betting ?? false,
+    canAccessAllCourses: plan?.allow_all_courses ?? false,
     maxAccounts: plan?.max_accounts ?? 1,
     maxBotInstances: plan?.max_bot_instances ?? 0,
     isLoading,
