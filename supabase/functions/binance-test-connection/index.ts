@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
   } catch (e: any) {
     console.error("binance-test-connection error:", e);
     return new Response(JSON.stringify({ ok: false, error: e?.message ?? "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
