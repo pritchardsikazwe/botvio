@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
 
     if (!accountId) {
       return new Response(JSON.stringify({ ok: false, error: "exchange_account_id required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
