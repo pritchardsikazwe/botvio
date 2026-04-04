@@ -32,6 +32,7 @@ import MyProducts from "./pages/MyProducts";
 import BinanceSettings from "./pages/BinanceSettings";
 import BinanceBots from "./pages/BinanceBots";
 import BinanceBotDetail from "./pages/BinanceBotDetail";
+import BinanceHub from "./pages/BinanceHub";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
