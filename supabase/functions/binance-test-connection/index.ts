@@ -92,19 +92,19 @@ Deno.serve(async (req) => {
 
     if (acctErr || !acct) {
       return new Response(JSON.stringify({ ok: false, error: "Account not found" }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (acct.user_id !== userId) {
       return new Response(JSON.stringify({ ok: false, error: "Forbidden" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (acct.status !== "active") {
       return new Response(JSON.stringify({ ok: false, error: "Account is disabled" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
