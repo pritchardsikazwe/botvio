@@ -168,7 +168,7 @@ const Index = () => {
                 ⚽ Sports Betting
               </Button>
             </Link>
-            <Link to="/binance-settings" className="block">
+            <Link to="/settings/binance" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-yellow-500/40 text-yellow-500 hover:bg-yellow-500/10">
                 <TrendingUp className="h-4 w-4" /> 💰 Binance Bots
               </Button>
