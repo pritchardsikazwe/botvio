@@ -32,6 +32,7 @@ import MyProducts from "./pages/MyProducts";
 import BinanceSettings from "./pages/BinanceSettings";
 import BinanceBots from "./pages/BinanceBots";
 import BinanceBotDetail from "./pages/BinanceBotDetail";
+import BinanceHub from "./pages/BinanceHub";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -136,6 +137,7 @@ const App = () => (
               <Route path="/my-products" element={<MyProducts />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/settings/binance" element={<BinanceSettings />} />
+              <Route path="/binance" element={<BinanceHub />} />
               <Route path="/bots/binance" element={<BinanceBots />} />
               <Route path="/bots/binance/:id" element={<BinanceBotDetail />} />
               <Route path="/terms" element={<Terms />} />

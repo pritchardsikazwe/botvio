@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const BINANCE_SYMBOLS = [
+const SPOT_SYMBOLS = [
   { symbol: "BTCUSDT", display: "BTCUSD", category: "crypto" },
   { symbol: "ETHUSDT", display: "ETHUSD", category: "crypto" },
   { symbol: "SOLUSDT", display: "SOLUSD", category: "crypto" },
@@ -17,7 +17,16 @@ const BINANCE_SYMBOLS = [
   { symbol: "DOTUSDT", display: "DOTUSD", category: "crypto" },
 ];
 
-const SYSTEM_PROMPT = `You are Botvio AI Crypto Analyst specializing in Binance spot trading.
+const FUTURES_SYMBOLS = [
+  { symbol: "BTCUSDT", display: "BTC/USDT", category: "futures" },
+  { symbol: "ETHUSDT", display: "ETH/USDT", category: "futures" },
+  { symbol: "SOLUSDT", display: "SOL/USDT", category: "futures" },
+  { symbol: "BNBUSDT", display: "BNB/USDT", category: "futures" },
+  { symbol: "XRPUSDT", display: "XRP/USDT", category: "futures" },
+  { symbol: "DOGEUSDT", display: "DOGE/USDT", category: "futures" },
+];
+
+const SPOT_PROMPT = `You are Botvio AI Crypto Analyst specializing in Binance spot trading.
 
 Your task: generate a structured crypto trading signal based on recent kline (candlestick) data.
 
@@ -39,6 +48,33 @@ Return ONLY valid JSON:
   "risk_reward": 0,
   "reason": "Short analysis summary",
   "strategy_name": "Binance AI Signal"
+}`;
+
+const FUTURES_PROMPT = `You are Botvio AI Futures Analyst specializing in Binance perpetual futures.
+
+Your task: generate a structured FUTURES trading signal with leverage recommendation.
+
+Rules:
+- You are not a financial advisor. Do not promise profits.
+- Use only the provided market data (klines with OHLCV).
+- Signal can be "long", "short", "hold", or "avoid".
+- Confidence must be 0 to 100.
+- Include leverage suggestion between x3 and x20 based on volatility.
+- Lower leverage for higher volatility. Higher leverage for strong clear trends.
+- Risk/reward should usually be at least 2.0 for futures.
+- Consider trend, volume, support/resistance, and volatility.
+
+Return ONLY valid JSON:
+{
+  "signal": "long|short|hold|avoid",
+  "confidence": 0,
+  "leverage": 10,
+  "entry_price": 0,
+  "stop_loss": 0,
+  "take_profit": 0,
+  "risk_reward": 0,
+  "reason": "Short analysis summary. Include: Leverage: x10",
+  "strategy_name": "Binance Futures AI Signal"
 }`;
 
 async function fetchBinanceKlines(symbol: string, interval = "1h", limit = 30): Promise<any[]> {
@@ -67,14 +103,13 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    let symbols = BINANCE_SYMBOLS;
-    
-    // Allow targeting specific symbols
+    let signalType = "spot"; // default
+    let targetSymbols: string[] | null = null;
+
     try {
       const body = await req.json();
-      if (body.symbols && Array.isArray(body.symbols)) {
-        symbols = BINANCE_SYMBOLS.filter(s => body.symbols.includes(s.symbol) || body.symbols.includes(s.display));
-      }
+      if (body.signal_type) signalType = body.signal_type;
+      if (body.symbols && Array.isArray(body.symbols)) targetSymbols = body.symbols;
     } catch { /* no body or invalid JSON — use defaults */ }
 
     if (!lovableApiKey) {
@@ -84,6 +119,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    const isFutures = signalType === "futures";
+    let symbols = isFutures ? FUTURES_SYMBOLS : SPOT_SYMBOLS;
+    const systemPrompt = isFutures ? FUTURES_PROMPT : SPOT_PROMPT;
+
+    if (targetSymbols) {
+      symbols = symbols.filter(s => targetSymbols!.includes(s.symbol) || targetSymbols!.includes(s.display));
+    }
+
     const results: any[] = [];
 
     for (const sym of symbols) {
@@ -91,13 +134,13 @@ Deno.serve(async (req) => {
         const klines = await fetchBinanceKlines(sym.symbol, "1h", 30);
         const currentPrice = klines[klines.length - 1]?.close ?? 0;
 
-        const userPrompt = `Instrument: ${sym.display} (Binance Spot)
+        const userPrompt = `Instrument: ${sym.display} (Binance ${isFutures ? "Futures" : "Spot"})
 Current price: ${currentPrice}
 
-Recent 1H candles (last 30):
+Recent 1H candles (last 15):
 ${JSON.stringify(klines.slice(-15), null, 2)}
 
-Generate the crypto trading signal now.`;
+Generate the ${isFutures ? "futures" : "crypto"} trading signal now.`;
 
         const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -108,7 +151,7 @@ Generate the crypto trading signal now.`;
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
             messages: [
-              { role: "system", content: SYSTEM_PROMPT },
+              { role: "system", content: systemPrompt },
               { role: "user", content: userPrompt },
             ],
             max_tokens: 1000,
@@ -130,14 +173,20 @@ Generate the crypto trading signal now.`;
         }
 
         const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+        const actionableSignals = isFutures
+          ? ["long", "short"]
+          : ["buy", "sell"];
 
-        // Only post actionable signals (buy/sell with decent confidence)
-        if ((parsed.signal === "buy" || parsed.signal === "sell") && parsed.confidence >= 45) {
-          const expiresAt = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(); // 4h expiry
+        if (actionableSignals.includes(parsed.signal) && parsed.confidence >= 45) {
+          const expiresAt = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString();
+
+          const direction = isFutures
+            ? parsed.signal.toUpperCase()
+            : parsed.signal.toUpperCase();
 
           const { error: insertErr } = await supabase.from("trading_signals").insert({
             symbol: sym.display,
-            direction: parsed.signal.toUpperCase(),
+            direction,
             entry_price: parsed.entry_price || currentPrice,
             stop_loss: parsed.stop_loss || null,
             take_profit: parsed.take_profit || null,
@@ -148,21 +197,25 @@ Generate the crypto trading signal now.`;
             reason: parsed.reason || `Binance AI: ${parsed.signal} signal for ${sym.display}`,
             is_manual: false,
             status: "ACTIVE",
-            strategy_name: parsed.strategy_name || "Binance AI Signal",
+            strategy_name: parsed.strategy_name || (isFutures ? "Binance Futures AI Signal" : "Binance AI Signal"),
             expires_at: expiresAt,
           });
 
           if (insertErr) {
             console.error(`Failed to save signal for ${sym.display}:`, insertErr.message);
           } else {
-            results.push({ symbol: sym.display, signal: parsed.signal, confidence: parsed.confidence });
+            results.push({
+              symbol: sym.display,
+              signal: parsed.signal,
+              confidence: parsed.confidence,
+              leverage: parsed.leverage || null,
+            });
             console.log(`Signal posted: ${sym.display} ${parsed.signal} (${parsed.confidence}%)`);
           }
         } else {
           console.log(`Skipped ${sym.display}: ${parsed.signal} (confidence: ${parsed.confidence})`);
         }
 
-        // Small delay between API calls
         await new Promise(r => setTimeout(r, 500));
       } catch (symErr: any) {
         console.error(`Error processing ${sym.display}:`, symErr.message);
