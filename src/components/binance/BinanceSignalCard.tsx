@@ -1,6 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Target, Shield, Zap, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, TrendingDown, Target, Shield, Zap, Clock, ExternalLink } from "lucide-react";
+
+const BINANCE_AFFILIATE = "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU";
 
 export const BinanceSignalCard = ({ signal }: { signal: any }) => {
   const isBuy = signal.direction === "BUY" || signal.direction === "LONG";
@@ -63,6 +66,13 @@ export const BinanceSignalCard = ({ signal }: { signal: any }) => {
         {signal.reason && (
           <p className="text-xs text-muted-foreground bg-secondary/30 rounded p-2">{signal.reason}</p>
         )}
+
+        {/* Trade Now affiliate CTA */}
+        <Button size="sm" className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-xs" asChild>
+          <a href={`${BINANCE_AFFILIATE}&symbol=${signal.symbol?.replace("/", "")}`} target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> Trade on Binance
+          </a>
+        </Button>
       </CardContent>
     </Card>
   );
