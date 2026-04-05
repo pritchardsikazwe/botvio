@@ -1,0 +1,2 @@
+ALTER TABLE public.trading_signals DROP CONSTRAINT trading_signals_direction_check;
+ALTER TABLE public.trading_signals ADD CONSTRAINT trading_signals_direction_check CHECK (direction = ANY (ARRAY['BUY'::text, 'SELL'::text, 'LONG'::text, 'SHORT'::text]));
