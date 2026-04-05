@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, TrendingDown, Lightbulb, ExternalLink } from "lucide-react";
+
+const BINANCE_AFFILIATE = "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU";
 
 interface CryptoInstrumentCardProps {
   symbol: string;
@@ -13,8 +16,20 @@ export function CryptoInstrumentCard({ symbol, displayName, tip }: CryptoInstrum
   const chartRef = useRef<HTMLDivElement>(null);
   const [price, setPrice] = useState<number | null>(null);
   const [prevPrice, setPrevPrice] = useState<number | null>(null);
+  const [change24h, setChange24h] = useState<number | null>(null);
 
-  // Live price via Binance WebSocket
+  // Fetch initial price + 24h change from REST API (no auth needed)
+  useEffect(() => {
+    fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
+      .then(r => r.json())
+      .then(d => {
+        setPrice(parseFloat(d.lastPrice));
+        setChange24h(parseFloat(d.priceChangePercent));
+      })
+      .catch(() => {});
+  }, [symbol]);
+
+  // Live price via Binance WebSocket (public, no API key needed)
   useEffect(() => {
     const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`);
     ws.onmessage = (e) => {
@@ -27,6 +42,7 @@ export function CryptoInstrumentCard({ symbol, displayName, tip }: CryptoInstrum
         });
       } catch {}
     };
+    ws.onerror = () => {};
     return () => ws.close();
   }, [symbol]);
 
@@ -54,7 +70,7 @@ export function CryptoInstrumentCard({ symbol, displayName, tip }: CryptoInstrum
   }, [symbol]);
 
   const isUp = price !== null && prevPrice !== null && price >= prevPrice;
-  const changeColor = isUp ? "text-emerald-500" : "text-red-500";
+  const changeColor = price !== null && prevPrice !== null ? (isUp ? "text-emerald-500" : "text-red-500") : "text-muted-foreground";
 
   return (
     <Card className="overflow-hidden border-border/50 hover:border-primary/30 transition-colors">
@@ -64,15 +80,20 @@ export function CryptoInstrumentCard({ symbol, displayName, tip }: CryptoInstrum
           <div className="flex items-center gap-2">
             <span className="font-bold text-sm">{displayName}</span>
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/30 text-primary">SPOT</Badge>
+            {change24h !== null && (
+              <span className={`text-[10px] font-mono font-semibold ${change24h >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                {change24h >= 0 ? "+" : ""}{change24h.toFixed(2)}%
+              </span>
+            )}
           </div>
           <div className={`flex items-center gap-1 font-mono text-sm font-semibold ${changeColor}`}>
             {price !== null ? (
               <>
-                {isUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                {prevPrice !== null && (isUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />)}
                 ${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: price < 1 ? 6 : 2 })}
               </>
             ) : (
-              <span className="text-muted-foreground text-xs">Loading…</span>
+              <span className="text-muted-foreground text-xs animate-pulse">Loading…</span>
             )}
           </div>
         </div>
@@ -81,11 +102,20 @@ export function CryptoInstrumentCard({ symbol, displayName, tip }: CryptoInstrum
         <div ref={chartRef} className="h-[160px] overflow-hidden" />
 
         {/* Tip */}
-        <div className="px-4 pb-3 pt-1">
+        <div className="px-4 pb-2 pt-1">
           <div className="flex items-start gap-2 bg-secondary/40 rounded-lg p-2.5">
             <Lightbulb className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
             <p className="text-[11px] text-muted-foreground leading-relaxed">{tip}</p>
           </div>
+        </div>
+
+        {/* Trade Now Button */}
+        <div className="px-4 pb-3">
+          <Button size="sm" className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-xs" asChild>
+            <a href={`${BINANCE_AFFILIATE}&symbol=${symbol}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> Trade {displayName} on Binance
+            </a>
+          </Button>
         </div>
       </CardContent>
     </Card>
