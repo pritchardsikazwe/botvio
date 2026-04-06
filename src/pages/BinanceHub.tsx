@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { CryptoInstrumentCard } from "@/components/binance/CryptoInstrumentCard";
 import { BinanceSignalCard } from "@/components/binance/BinanceSignalCard";
 import { ArbitrageScanner, StakingCard, LaunchpadCard, ScalpingCard } from "@/components/binance/BinanceFeatureCards";
+import { BinanceMarketOverview } from "@/components/binance/BinanceMarketOverview";
 
 const SPOT_INSTRUMENTS = [
   { symbol: "BTCUSDT", display: "BTC/USDT", tip: "Bitcoin is the most liquid crypto. Trade breakouts above key round numbers ($60k, $70k). Use the 4H chart for trend direction and 15m for entries." },
@@ -93,6 +94,9 @@ const BinanceHub = () => {
             Live charts, AI signals, arbitrage scanner & more — powered by Botvio AI.
           </p>
         </div>
+
+        {/* Market Overview */}
+        <BinanceMarketOverview />
 
         {/* Admin Controls */}
         {isAdmin.data && (
