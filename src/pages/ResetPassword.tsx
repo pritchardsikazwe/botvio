@@ -14,31 +14,51 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    // Check for recovery event in URL hash or query params
-    const hash = window.location.hash;
-    const params = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(hash.replace("#", "?"));
-    
-    if (
-      hash.includes("type=recovery") ||
-      params.get("type") === "recovery" ||
-      hashParams.get("type") === "recovery" ||
-      params.get("code") // PKCE flow
-    ) {
-      setIsRecovery(true);
-    }
+    const init = async () => {
+      const hash = window.location.hash;
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(hash.replace("#", "?"));
+      const code = params.get("code");
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // PKCE flow: exchange code for session first
+      if (code) {
+        try {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error) {
+            setIsRecovery(true);
+          } else {
+            console.error("Code exchange failed:", error.message);
+          }
+        } catch (e) {
+          console.error("Code exchange error:", e);
+        }
+        setInitializing(false);
+        return;
+      }
+
+      // Legacy hash-based flow
+      if (
+        hash.includes("type=recovery") ||
+        params.get("type") === "recovery" ||
+        hashParams.get("type") === "recovery"
+      ) {
+        setIsRecovery(true);
+      }
+
+      setInitializing(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setIsRecovery(true);
-      }
-      // Also handle when user lands with a valid session from the recovery link
-      if (event === "SIGNED_IN" && session) {
-        setIsRecovery(true);
+        setInitializing(false);
       }
     });
+
+    init();
 
     return () => subscription.unsubscribe();
   }, []);
@@ -79,6 +99,14 @@ export default function ResetPassword() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (initializing) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
