@@ -11,17 +11,28 @@ import {
 import { useEffect, useState } from "react";
 
 const CALENDAR_EVENTS = [
-  { date: "Mar 31 (Mon)", currency: "EUR", event: "Eurozone CPI Flash y/y", impact: "High", implication: "EUR pairs — inflation direction for ECB" },
-  { date: "Mar 31 (Mon)", currency: "USD", event: "Chicago PMI", impact: "Medium", implication: "Regional manufacturing gauge for USD" },
-  { date: "Apr 1 (Tue)", currency: "USD", event: "ISM Manufacturing PMI", impact: "High", implication: "Major USD mover — manufacturing health" },
-  { date: "Apr 1 (Tue)", currency: "USD", event: "JOLTS Job Openings", impact: "High", implication: "Labour market demand — Fed watch" },
-  { date: "Apr 2 (Wed)", currency: "USD", event: "ADP Non-Farm Employment", impact: "High", implication: "NFP preview — USD pairs + Gold" },
-  { date: "Apr 2 (Wed)", currency: "EUR", event: "Eurozone Unemployment Rate", impact: "Medium", implication: "EUR sentiment indicator" },
-  { date: "Apr 3 (Thu)", currency: "USD", event: "ISM Services PMI", impact: "High", implication: "Services sector — key for GDP outlook" },
-  { date: "Apr 3 (Thu)", currency: "USD", event: "Unemployment Claims", impact: "Medium", implication: "Weekly labour market pulse" },
-  { date: "Apr 4 (Fri)", currency: "USD", event: "Non-Farm Payrolls (NFP)", impact: "High", implication: "THE event — ALL USD pairs + Gold + Indices" },
-  { date: "Apr 4 (Fri)", currency: "USD", event: "Unemployment Rate", impact: "High", implication: "Fed rate path — risk sentiment" },
-  { date: "Apr 4 (Fri)", currency: "CAD", event: "Canada Employment Change", impact: "High", implication: "USD/CAD directional trigger" },
+  // Week 1: Apr 7–11
+  { date: "Apr 7 (Mon)", currency: "EUR", event: "Eurozone Sentix Investor Confidence", impact: "Medium", implication: "EUR pairs — early-week sentiment gauge" },
+  { date: "Apr 7 (Mon)", currency: "USD", event: "Consumer Credit", impact: "Medium", implication: "Household borrowing trends — consumer demand outlook" },
+  { date: "Apr 8 (Tue)", currency: "USD", event: "NFIB Small Business Index", impact: "Medium", implication: "Small business optimism — economic health" },
+  { date: "Apr 8 (Tue)", currency: "AUD", event: "RBA Rate Decision", impact: "High", implication: "AUD pairs — interest rate direction" },
+  { date: "Apr 9 (Wed)", currency: "USD", event: "FOMC Meeting Minutes", impact: "High", implication: "Key Fed insight — ALL USD pairs + Gold" },
+  { date: "Apr 9 (Wed)", currency: "NZD", event: "RBNZ Rate Decision", impact: "High", implication: "NZD pairs — monetary policy direction" },
+  { date: "Apr 10 (Thu)", currency: "USD", event: "CPI (Consumer Price Index)", impact: "High", implication: "THE inflation report — USD, Gold, Indices" },
+  { date: "Apr 10 (Thu)", currency: "USD", event: "Unemployment Claims", impact: "Medium", implication: "Weekly labour market pulse" },
+  { date: "Apr 11 (Fri)", currency: "USD", event: "PPI (Producer Price Index)", impact: "High", implication: "Wholesale inflation — upstream price pressure" },
+  { date: "Apr 11 (Fri)", currency: "GBP", event: "UK GDP m/m", impact: "High", implication: "GBP pairs — economic growth direction" },
+  { date: "Apr 11 (Fri)", currency: "CAD", event: "Canada Employment Change", impact: "High", implication: "USD/CAD directional trigger" },
+  // Week 2: Apr 14–18
+  { date: "Apr 14 (Mon)", currency: "CNY", event: "China Trade Balance", impact: "High", implication: "Risk sentiment — AUD, NZD, commodities" },
+  { date: "Apr 14 (Mon)", currency: "EUR", event: "Eurozone Industrial Production", impact: "Medium", implication: "EUR manufacturing health" },
+  { date: "Apr 15 (Tue)", currency: "USD", event: "Retail Sales m/m", impact: "High", implication: "Consumer spending — USD pairs + Indices" },
+  { date: "Apr 15 (Tue)", currency: "USD", event: "Empire State Manufacturing", impact: "Medium", implication: "Regional factory gauge for USD" },
+  { date: "Apr 16 (Wed)", currency: "GBP", event: "UK CPI y/y", impact: "High", implication: "GBP inflation — BOE rate path" },
+  { date: "Apr 16 (Wed)", currency: "EUR", event: "ECB Rate Decision", impact: "High", implication: "EUR pairs — major rate event" },
+  { date: "Apr 17 (Thu)", currency: "USD", event: "Housing Starts & Building Permits", impact: "Medium", implication: "Real estate sector — economic outlook" },
+  { date: "Apr 17 (Thu)", currency: "USD", event: "Philly Fed Manufacturing", impact: "Medium", implication: "Regional manufacturing index" },
+  { date: "Apr 18 (Fri)", currency: "USD", event: "Good Friday — Markets Closed", impact: "High", implication: "Low liquidity — close positions before weekend" },
 ];
 
 const IMPACT_COLORS: Record<string, string> = {
@@ -31,18 +42,23 @@ const IMPACT_COLORS: Record<string, string> = {
 };
 
 const WEEKLY_PLAN = [
-  { day: "Monday 31st", focus: "Eurozone CPI Flash + Chicago PMI — set EUR/USD bias for the week.", risk: "Medium", emoji: "📊" },
-  { day: "Tuesday 1st", focus: "ISM Manufacturing + JOLTS — USD pairs will move sharply. Key direction setter.", risk: "High", emoji: "🔥" },
-  { day: "Wednesday 2nd", focus: "ADP Employment — NFP preview. Position for Friday but don't overcommit.", risk: "High", emoji: "⚡" },
-  { day: "Thursday 3rd", focus: "ISM Services PMI — confirms economic health. Fine-tune Friday positioning.", risk: "Medium", emoji: "⏳" },
-  { day: "Friday 4th", focus: "NFP (BIG ONE) + Canada Employment — THE event of the month. Close all before weekend.", risk: "High", emoji: "🎯" },
+  { day: "Monday 7th", focus: "Sentix Confidence + Consumer Credit — set EUR/USD bias early.", risk: "Medium", emoji: "📊" },
+  { day: "Tuesday 8th", focus: "RBA Rate Decision — AUD pairs will move. NFIB sets USD tone.", risk: "High", emoji: "🔥" },
+  { day: "Wednesday 9th", focus: "FOMC Minutes + RBNZ — double central bank day. Key directional setup.", risk: "High", emoji: "⚡" },
+  { day: "Thursday 10th", focus: "US CPI (BIG ONE) — THE inflation event. All USD pairs + Gold will move.", risk: "High", emoji: "🎯" },
+  { day: "Friday 11th", focus: "PPI + UK GDP + Canada Jobs — triple impact day. Close before weekend.", risk: "High", emoji: "💥" },
+  { day: "Monday 14th", focus: "China Trade Balance — risk sentiment + commodity currencies.", risk: "Medium", emoji: "🇨🇳" },
+  { day: "Tuesday 15th", focus: "US Retail Sales — consumer spending = economy direction.", risk: "High", emoji: "🛒" },
+  { day: "Wednesday 16th", focus: "UK CPI + ECB Decision — double impact. EUR & GBP pairs.", risk: "High", emoji: "🏦" },
+  { day: "Thursday 17th", focus: "Housing data + Philly Fed — position for long weekend.", risk: "Medium", emoji: "🏠" },
+  { day: "Friday 18th", focus: "Good Friday — markets closed. No trading. Enjoy rest.", risk: "Low", emoji: "🕊️" },
 ];
 
 const THIS_WEEK_FOCUS = [
-  { title: "🎯 NFP Friday", desc: "Non-Farm Payrolls — THE biggest USD event of the month. Strong = USD rally, Gold dip. Weak = rate cut hopes, Gold rally.", pairs: "EUR/USD, XAU/USD, USD/JPY, US30" },
-  { title: "📈 ISM Manufacturing Tue", desc: "Factory health check. Below 50 = contraction worry. Above 50 = USD strength.", pairs: "EUR/USD, USD/CAD, NAS100" },
-  { title: "👷 ADP Wednesday", desc: "Private payroll preview for NFP. Sets expectations and early positioning.", pairs: "XAU/USD, EUR/USD, GBP/USD" },
-  { title: "🇪🇺 Eurozone CPI Monday", desc: "Flash inflation data. Hot = ECB stays hawkish → EUR strength. Cool = rate cut bets.", pairs: "EUR/USD, EUR/GBP, DAX" },
+  { title: "🎯 US CPI Thursday", desc: "Consumer Price Index — THE inflation event. Hot = USD rally, Gold dip. Cool = rate cut hopes, Gold rally.", pairs: "EUR/USD, XAU/USD, USD/JPY, US30" },
+  { title: "📜 FOMC Minutes Wed", desc: "Fed meeting minutes reveal rate path thinking. Hawkish = USD strength. Dovish = risk-on rally.", pairs: "EUR/USD, XAU/USD, NAS100" },
+  { title: "🏦 ECB Decision Apr 16", desc: "European Central Bank rate decision. Rate cut = EUR weakness. Hold = EUR strength.", pairs: "EUR/USD, EUR/GBP, DAX" },
+  { title: "🇦🇺 RBA Decision Tue", desc: "Reserve Bank of Australia rate call. Hold = AUD neutral. Cut = AUD weakness.", pairs: "AUD/USD, AUD/JPY, NZD/USD" },
 ];
 
 function LiveClock() {

@@ -426,8 +426,57 @@ const Index = () => {
           </div>
         </section>
 
-
-
+        {/* Binance Tools Shortcut Cards */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">🔶</span>
+            <h2 className="text-xl font-bold">Binance Tools</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Link to="/binance" className="block">
+              <Card className="glass-card border-yellow-500/30 hover:border-yellow-500/60 hover:scale-[1.02] transition-all cursor-pointer h-full">
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-muted/50 text-yellow-500">
+                      <Zap className="h-5 w-5" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px] border-yellow-500/30 text-yellow-500">AI</Badge>
+                  </div>
+                  <p className="font-bold text-sm">AI Scalping Signals</p>
+                  <p className="text-xs text-muted-foreground">Real-time crypto scalping signals for BTC, ETH, SOL & more.</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/binance" className="block">
+              <Card className="glass-card border-orange-500/30 hover:border-orange-500/60 hover:scale-[1.02] transition-all cursor-pointer h-full">
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-muted/50 text-orange-500">
+                      <BarChart3 className="h-5 w-5" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px] border-orange-500/30 text-orange-500">Scanner</Badge>
+                  </div>
+                  <p className="font-bold text-sm">Arbitrage Scanner</p>
+                  <p className="text-xs text-muted-foreground">Detect cross-exchange price gaps and arbitrage opportunities.</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/binance" className="block">
+              <Card className="glass-card border-success/30 hover:border-success/60 hover:scale-[1.02] transition-all cursor-pointer h-full">
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-muted/50 text-success">
+                      <TrendingUp className="h-5 w-5" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px] border-success/30 text-success">Yield</Badge>
+                  </div>
+                  <p className="font-bold text-sm">Staking & Earn</p>
+                  <p className="text-xs text-muted-foreground">Top staking APY rates and passive income opportunities.</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </section>
         {/* 6 — Quick Links */}
         <section>
           <div className="flex items-center justify-between mb-4">

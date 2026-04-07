@@ -415,7 +415,7 @@ const SportsBetting = () => {
           </div>
         )}
 
-        <Tabs defaultValue="fixtures" className="space-y-4">
+        <Tabs defaultValue="picks" className="space-y-4">
           <TabsList className="grid grid-cols-6 w-full">
             <TabsTrigger value="fixtures" className="text-[10px] px-1">Fixtures</TabsTrigger>
             <TabsTrigger value="picks" className="text-[10px] px-1">
