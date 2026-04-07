@@ -198,7 +198,7 @@ const ChartPage = () => {
                   showSessions={showSessions}
                   showLevels={showLevels}
                   showNews={showNews}
-                  onToggleSessions={() => setShowSessions(!showSessions)}
+                  onToggleSessions={() => {}}
                   onToggleLevels={() => setShowLevels(!showLevels)}
                   onToggleNews={() => setShowNews(!showNews)}
                   metrics={metrics}
