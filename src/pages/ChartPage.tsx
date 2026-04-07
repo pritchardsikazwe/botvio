@@ -34,7 +34,7 @@ const ChartPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
   const [timeframe, setTimeframe] = useState("1h");
-  const [showSessions, setShowSessions] = useState(false);
+  const [showSessions] = useState(false);
   const [showLevels, setShowLevels] = useState(true);
   const [showNews, setShowNews] = useState(true);
 
