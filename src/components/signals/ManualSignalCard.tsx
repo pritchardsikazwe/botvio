@@ -49,7 +49,10 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
   };
 
   const isBuy = signal.direction.toUpperCase() === 'BUY' || signal.direction.toUpperCase() === 'CALL';
-  const timeAgo = formatDistanceToNow(new Date(signal.created_at), { addSuffix: true });
+  const postedDate = new Date(signal.created_at);
+  const timeAgo = formatDistanceToNow(postedDate, { addSuffix: true });
+  const postedTime = postedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const postedDay = postedDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
   const { data: brokers } = useSignalBrokers();
 
   const getCategoryColor = (category: string) => {
@@ -115,7 +118,7 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
           <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {timeAgo}
+              {postedDay} {postedTime} · {timeAgo}
             </div>
             <Badge variant="secondary" className="text-xs">{signal.timeframe}</Badge>
           </div>
@@ -225,7 +228,7 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
               </div>
             )}
           </div>
-          <span className="text-xs text-muted-foreground">{timeAgo}</span>
+          <span className="text-xs text-muted-foreground">{postedDay} {postedTime} · {timeAgo}</span>
         </div>
 
         {/* Reason/Analysis */}
