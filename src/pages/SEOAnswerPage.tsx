@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Zap } from "lucide-react";
 import { seoPages, countrySEOPages } from "@/content/seoPages";
 import { seoTrafficPages } from "@/content/seoTrafficPages";
+import { binanceSEOPages } from "@/content/binanceSEOPages";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 
 const SEOAnswerPage = () => {
