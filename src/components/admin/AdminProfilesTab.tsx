@@ -82,21 +82,30 @@ export const AdminProfilesTab = () => {
     },
   });
 
-  // Fetch AI chart analysis usage counts per user
+  // Fetch AI chart analysis usage counts per user — paginate to beat 1000-row limit
   const { data: aiUsageCounts } = useQuery({
     queryKey: ["admin-ai-usage-counts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("chart_analyses")
-        .select("user_id, created_at");
-      if (error) throw error;
-      const today = new Date().toISOString().slice(0, 10);
       const counts: Record<string, { total: number; today: number }> = {};
-      data?.forEach(row => {
-        if (!counts[row.user_id]) counts[row.user_id] = { total: 0, today: 0 };
-        counts[row.user_id].total += 1;
-        if (row.created_at?.slice(0, 10) === today) counts[row.user_id].today += 1;
-      });
+      const today = new Date().toISOString().slice(0, 10);
+      const PAGE = 1000;
+      let from = 0;
+      let keepGoing = true;
+      while (keepGoing) {
+        const { data, error } = await supabase
+          .from("chart_analyses")
+          .select("user_id, created_at")
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        data.forEach(row => {
+          if (!counts[row.user_id]) counts[row.user_id] = { total: 0, today: 0 };
+          counts[row.user_id].total += 1;
+          if (row.created_at?.slice(0, 10) === today) counts[row.user_id].today += 1;
+        });
+        if (data.length < PAGE) keepGoing = false;
+        else from += PAGE;
+      }
       return counts;
     },
   });
