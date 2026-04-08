@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, Zap, Play, ExternalLink } from "lucide-react";
 import { blogContent } from "@/content/blogPosts";
+import { binanceBlogPosts } from "@/content/binanceBlogPosts";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -120,7 +121,7 @@ const BlogPost = () => {
     enabled: !!slug,
   });
 
-  const staticPost = blogContent[slug || ""];
+  const staticPost = blogContent[slug || ""] || binanceBlogPosts[slug || ""];
   const post = dbPost
     ? {
         title: dbPost.title,
