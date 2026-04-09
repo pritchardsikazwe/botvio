@@ -10,23 +10,23 @@ import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 
 const REGIONS = [
-  { emoji: "🇺🇸", name: "U.S. Market", path: "/markets/us", desc: "S&P 500, Nasdaq, Dow, Gold, Oil", indices: ["SPX +0.42%", "NAS +0.68%", "DJI -0.15%"], sentiment: 64, session: "NY Open", trend: "Bullish" },
-  { emoji: "🇪🇺", name: "Europe Market", path: "/markets/europe", desc: "DAX, FTSE 100, CAC 40, EUR/USD", indices: ["DAX +0.55%", "FTSE +0.18%", "CAC +0.36%"], sentiment: 58, session: "London", trend: "Mixed" },
-  { emoji: "🇸🇦", name: "Middle East", path: "/markets/middle-east", desc: "Tadawul, DFM, Aramco, Al Rajhi", indices: ["TASI +0.60%", "DFM +0.82%", "OIL +1.45%"], sentiment: 72, session: "Active", trend: "Bullish" },
-  { emoji: "🌏", name: "Asia Market", path: "/markets/asia", desc: "Nikkei, Hang Seng, ASX, USD/JPY", indices: ["NKY +0.38%", "HSI -0.32%", "ASX +0.24%"], sentiment: 53, session: "Closed", trend: "Cautious" },
-  { emoji: "₿", name: "Crypto Market", path: "/markets/crypto", desc: "Bitcoin, Ethereum, Solana, BNB", indices: ["BTC +2.14%", "ETH +1.85%", "SOL +5.20%"], sentiment: 70, session: "24/7", trend: "Bullish" },
-  { emoji: "🌍", name: "Africa Market", path: "/markets/africa", desc: "JSE, NGX, LuSE — SA, Nigeria, Zambia", indices: ["JSE +0.72%", "NGX +1.25%", "LuSE +0.38%"], sentiment: 65, session: "Active", trend: "Bullish" },
+  { emoji: "🇺🇸", name: "U.S. Market", path: "/markets/us", desc: "S&P 500, Nasdaq, Dow, Gold, Oil", indices: ["SPX +0.58%", "NAS +0.92%", "DJI +0.27%"], sentiment: 62, session: "NY Open", trend: "Bullish" },
+  { emoji: "🇪🇺", name: "Europe Market", path: "/markets/europe", desc: "DAX, FTSE 100, CAC 40, EUR/USD", indices: ["DAX +0.34%", "FTSE -0.12%", "CAC +0.48%"], sentiment: 55, session: "London", trend: "Mixed" },
+  { emoji: "🇸🇦", name: "Middle East", path: "/markets/middle-east", desc: "Tadawul, DFM, Aramco, Al Rajhi", indices: ["TASI +0.75%", "DFM +0.90%", "OIL -0.85%"], sentiment: 68, session: "Active", trend: "Bullish" },
+  { emoji: "🌏", name: "Asia Market", path: "/markets/asia", desc: "Nikkei, Hang Seng, ASX, USD/JPY", indices: ["NKY -0.45%", "HSI +0.22%", "ASX +0.35%"], sentiment: 50, session: "Closed", trend: "Cautious" },
+  { emoji: "₿", name: "Crypto Market", path: "/markets/crypto", desc: "Bitcoin, Ethereum, Solana, BNB", indices: ["BTC +3.20%", "ETH +2.45%", "SOL +6.10%"], sentiment: 74, session: "24/7", trend: "Bullish" },
+  { emoji: "🌍", name: "Africa Market", path: "/markets/africa", desc: "JSE, NGX, LuSE — SA, Nigeria, Zambia", indices: ["JSE +0.85%", "NGX +1.40%", "LuSE +0.55%"], sentiment: 67, session: "Active", trend: "Bullish" },
 ];
 
 const LIVE_MARKET_DATA = [
-  { symbol: "XAU/USD", price: "3,024.50", change: "+0.82%", dir: "up" },
-  { symbol: "EUR/USD", price: "1.0842", change: "-0.15%", dir: "down" },
-  { symbol: "BTC/USD", price: "87,420", change: "+2.14%", dir: "up" },
-  { symbol: "US30", price: "42,185", change: "+0.31%", dir: "up" },
-  { symbol: "GBP/USD", price: "1.2938", change: "+0.22%", dir: "up" },
-  { symbol: "OIL", price: "69.85", change: "+1.45%", dir: "up" },
-  { symbol: "NAS100", price: "18,520", change: "+0.68%", dir: "up" },
-  { symbol: "USD/JPY", price: "149.65", change: "-0.18%", dir: "down" },
+  { symbol: "XAU/USD", price: "3,085.20", change: "+1.15%", dir: "up" },
+  { symbol: "EUR/USD", price: "1.0918", change: "+0.28%", dir: "up" },
+  { symbol: "BTC/USD", price: "91,250", change: "+3.20%", dir: "up" },
+  { symbol: "US30", price: "42,540", change: "+0.27%", dir: "up" },
+  { symbol: "GBP/USD", price: "1.3012", change: "+0.35%", dir: "up" },
+  { symbol: "OIL", price: "67.45", change: "-0.85%", dir: "down" },
+  { symbol: "NAS100", price: "18,890", change: "+0.92%", dir: "up" },
+  { symbol: "USD/JPY", price: "148.20", change: "-0.42%", dir: "down" },
 ];
 
 const GlobalMarkets = () => {
@@ -34,14 +34,14 @@ const GlobalMarkets = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Global Market Intelligence — Week of Mar 31 – Apr 4 | Botvio" description="US, Europe, Middle East, Asia, Crypto & Africa market signals, analysis & trading intelligence. NFP week." />
+      <SEOHead title="Global Market Intelligence — Week of Apr 7 – Apr 11 | Botvio" description="US, Europe, Middle East, Asia, Crypto & Africa market signals, analysis & trading intelligence. CPI Week + FOMC Minutes." />
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="animate-fade-in">
           <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
             <Globe className="h-6 w-6 text-primary" /> Global Market Intelligence
           </h1>
-          <p className="text-sm text-muted-foreground">Week of Mar 31 – Apr 4, 2026 • NFP Friday • Q2 Start Flows</p>
+          <p className="text-sm text-muted-foreground">Week of Apr 7 – Apr 11, 2026 • CPI Wednesday • FOMC Minutes • Q2 Earnings Preview</p>
         </div>
 
         {/* Live Ticker Strip */}
@@ -84,10 +84,10 @@ const GlobalMarkets = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
-                { title: "NFP Friday", desc: "Non-Farm Payrolls — THE biggest event of the month. All USD pairs + Gold + Indices.", badge: "HIGH", color: "border-destructive/30" },
-                { title: "ISM Manufacturing Tue", desc: "Factory sector health. Key for USD direction early in the week.", badge: "HIGH", color: "border-warning/30" },
-                { title: "ADP Employment Wed", desc: "Private payrolls — NFP preview. Sets expectations for Friday.", badge: "HIGH", color: "border-primary/30" },
-                { title: "Q2 Start Flows", desc: "New quarter positioning = institutional moves. Watch for trend shifts.", badge: "CAUTION", color: "border-warning/30" },
+                { title: "US CPI Wednesday", desc: "Consumer inflation — THE key driver for Fed rate expectations. All USD pairs + Gold + Indices.", badge: "HIGH", color: "border-destructive/30" },
+                { title: "FOMC Minutes Wed", desc: "Detailed Fed discussion from March meeting. Watch for hawkish/dovish language shifts.", badge: "HIGH", color: "border-warning/30" },
+                { title: "PPI Thursday", desc: "Producer price data — leading indicator for CPI trends. Watch for upstream inflation.", badge: "HIGH", color: "border-primary/30" },
+                { title: "Q2 Earnings Season", desc: "Banks kick off earnings next week. Pre-positioning flows starting this week.", badge: "WATCH", color: "border-warning/30" },
               ].map((f, i) => (
                 <div key={i} className={`rounded-lg border ${f.color} p-3`}>
                   <div className="flex items-center justify-between mb-1">
@@ -277,11 +277,11 @@ const GlobalMarkets = () => {
                 <h2 className="text-sm font-extrabold text-foreground mb-3">🎯 Opportunity Radar — Top Trades This Week</h2>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   {[
-                    { name: "Gold", dir: "BUY", c: "87%", reason: "Safe-haven + NFP play" },
-                    { name: "Nasdaq", dir: "BUY", c: "82%", reason: "Tech momentum Q2 start" },
-                    { name: "GBP/USD", dir: "BUY", c: "78%", reason: "USD weakness if NFP miss" },
-                    { name: "EUR/USD", dir: "SELL", c: "71%", reason: "ECB dovish + USD flows" },
-                    { name: "Bitcoin", dir: "BUY", c: "85%", reason: "Risk-on Q2 positioning" },
+                    { name: "Gold", dir: "BUY", c: "89%", reason: "CPI play + safe-haven demand" },
+                    { name: "Nasdaq", dir: "BUY", c: "84%", reason: "Tech momentum pre-earnings" },
+                    { name: "GBP/USD", dir: "BUY", c: "76%", reason: "USD weakness if CPI soft" },
+                    { name: "EUR/USD", dir: "BUY", c: "73%", reason: "Dovish Fed pivot bets rising" },
+                    { name: "Bitcoin", dir: "BUY", c: "88%", reason: "Risk-on + ETF inflows strong" },
                   ].map((t) => (
                     <div key={t.name} className={`p-3 rounded-lg text-center ${t.dir === "BUY" ? "bg-success/10 border border-success/20" : "bg-destructive/10 border border-destructive/20"}`}>
                       <p className="font-bold text-foreground text-sm">{t.name}</p>
@@ -298,20 +298,20 @@ const GlobalMarkets = () => {
             <TradingTipsCard
               title="Global Market Do's & Don'ts — This Week"
               dos={[
-                "Focus on NFP Friday — it's THE event of the month",
-                "Use Mon-Wed ISM + ADP to set directional bias",
-                "Check cross-market correlations before every trade",
+                "Focus on CPI Wednesday — it's THE event of the week",
+                "Use FOMC Minutes for clues on June rate decision",
+                "Check Gold momentum — safe-haven flows rising with geopolitical tension",
                 "Trade during peak London/NY overlap for best liquidity",
-                "Close positions before weekend — Q2 start flows can be volatile",
+                "Position for Q2 earnings season starting next week",
               ]}
               donts={[
-                "Don't hold large positions through Friday NFP",
-                "Don't ignore ISM Tuesday — USD pairs will move sharply",
-                "Avoid trading illiquid markets during off-hours this week",
-                "Don't assume Q2 start flows are directional — they're often chaotic",
+                "Don't hold large USD positions through CPI release",
+                "Don't ignore PPI Thursday — upstream inflation matters",
+                "Avoid overleveraging ahead of FOMC Minutes release",
+                "Don't fight the trend if CPI surprises — it moves fast",
                 "Never risk more than 1-2% on a single news-driven trade",
               ]}
-              proTip="This week is all about Friday NFP. Everything before that is positioning. Keep risk tight Mon-Thu and save capital for the main event."
+              proTip="CPI Wednesday is the main event. If inflation comes in soft, expect Gold + Tech rally. If hot, USD rips higher and equities sell. Position Mon-Tue, react Wed-Thu."
             />
           </>
         )}
