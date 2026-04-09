@@ -96,7 +96,11 @@ export const AdminProfilesTab = () => {
           .from("chart_analyses")
           .select("user_id, created_at")
           .range(from, from + PAGE - 1);
-        if (error) throw error;
+        if (error) {
+          console.error("Failed to fetch chart_analyses for admin counts:", error.message);
+          // If RLS blocks, return empty — don't throw
+          return counts;
+        }
         if (!data || data.length === 0) break;
         data.forEach(row => {
           if (!counts[row.user_id]) counts[row.user_id] = { total: 0, today: 0 };
@@ -106,6 +110,7 @@ export const AdminProfilesTab = () => {
         if (data.length < PAGE) keepGoing = false;
         else from += PAGE;
       }
+      console.log(`Admin AI usage: loaded ${Object.keys(counts).length} users with uploads`);
       return counts;
     },
   });
