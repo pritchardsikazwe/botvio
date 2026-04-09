@@ -209,7 +209,7 @@ const SportsBetting = () => {
   // Upload screenshot + AI analysis
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const handleScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!hasAccess) { toast.error("VIP subscription required to upload bet slips"); return; }
+    if (!isAdmin) { toast.error("Only admins can upload bet slips for analysis"); return; }
     if (!e.target.files?.[0] || !user) return;
     setUploading(true);
     setAiAnalysis(null);
@@ -231,7 +231,7 @@ const SportsBetting = () => {
   };
 
   const runAiAnalysis = async (imageUrl?: string) => {
-    if (!hasAccess) { toast.error("VIP subscription required for AI analysis"); return; }
+    if (!isAdmin) { toast.error("Only admins can run AI analysis"); return; }
     setAnalyzing(true);
     setAiAnalysis(null);
     try {
@@ -254,9 +254,9 @@ const SportsBetting = () => {
     }
   };
 
-  // Generate daily picks
+  // Generate daily picks - admin only
   const generateDailyPicks = async () => {
-    if (!hasAccess) { toast.error("VIP subscription required to generate daily picks"); return; }
+    if (!isAdmin) { toast.error("Only admins can generate daily picks"); return; }
     setGeneratingPicks(true);
     setDailyPicks(null);
     try {
