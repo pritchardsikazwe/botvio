@@ -95,42 +95,60 @@ serve(async (req) => {
         .eq("id", jobId);
     }
 
-    // Check if user has an active premium entitlement (signal_pack product)
-    let isPremium = false;
+    // Determine user's subscription plan and limits
+    let planCode = "free";
+    let isAdmin = false;
     if (userId) {
-      const { data: entitlement } = await supabase
-        .from("entitlements")
-        .select("id")
+      // Check admin role — admins bypass limits
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .in("role", ["admin", "super_admin", "signal_manager"]);
+      if (roleData && roleData.length > 0) isAdmin = true;
+
+      // Get subscription plan
+      const { data: subData } = await supabase
+        .from("user_plan_subscriptions")
+        .select("pricing_plans(code)")
         .eq("user_id", userId)
         .eq("status", "active")
-        .limit(1)
         .maybeSingle();
-      isPremium = !!entitlement;
+      if (subData?.pricing_plans && typeof subData.pricing_plans === "object" && "code" in subData.pricing_plans) {
+        planCode = (subData.pricing_plans as any).code || "free";
+      }
     }
 
-    // Enforce 10 uploads/day limit for non-premium users
-    const MAX_FREE_DAILY = 10;
-    if (!isPremium) {
-      const today = new Date().toISOString().split("T")[0];
-      if (userId) {
-        const { count } = await supabase
-          .from("chart_analyses")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .gte("created_at", `${today}T00:00:00Z`);
-        if ((count || 0) >= MAX_FREE_DAILY) {
-          await logError(supabase, "analyze-chart", userId, ERROR_CODES.DAILY_LIMIT, "Daily free limit reached", null, 403);
-          if (jobId) {
-            await supabase.from("analysis_jobs").update({ status: "failed", error_code: ERROR_CODES.DAILY_LIMIT, error_message: "Daily limit reached", completed_at: new Date().toISOString() }).eq("id", jobId);
-          }
-          return new Response(
-            JSON.stringify({ error: "You've reached your daily limit of 10 free analyses. Subscribe to Premium Signals for unlimited access.", error_code: ERROR_CODES.DAILY_LIMIT, redirect: "/billing" }),
-            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+    // Plan-based limits: { maxUploads, periodDays }  (-1 = unlimited)
+    const PLAN_LIMITS: Record<string, { max: number; days: number; label: string }> = {
+      free:     { max: 1,   days: 1,  label: "1 per day" },
+      starter:  { max: 1,   days: 1,  label: "1 per day" },
+      basic:    { max: 50,  days: 7,  label: "50 per week" },
+      standard: { max: 100, days: 30, label: "100 per month" },
+      vip:      { max: -1,  days: 30, label: "unlimited" },
+    };
+    const limits = PLAN_LIMITS[planCode] || PLAN_LIMITS.free;
+
+    if (!isAdmin && limits.max !== -1 && userId) {
+      const periodStart = new Date();
+      periodStart.setDate(periodStart.getDate() - limits.days);
+      const { count } = await supabase
+        .from("chart_analyses")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("created_at", periodStart.toISOString());
+      if ((count || 0) >= limits.max) {
+        await logError(supabase, "analyze-chart", userId, ERROR_CODES.DAILY_LIMIT, `Plan limit reached (${planCode}: ${limits.label})`, null, 403);
+        if (jobId) {
+          await supabase.from("analysis_jobs").update({ status: "failed", error_code: ERROR_CODES.DAILY_LIMIT, error_message: "Plan limit reached", completed_at: new Date().toISOString() }).eq("id", jobId);
         }
-      } else {
-        // Guest — we can't enforce server-side, client handles it
+        return new Response(
+          JSON.stringify({ error: `You've reached your limit of ${limits.label}. Upgrade your plan for more analyses.`, error_code: ERROR_CODES.DAILY_LIMIT, redirect: "/billing" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
+    } else if (!userId) {
+      // Guest — client-side handles it
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
