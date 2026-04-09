@@ -542,9 +542,10 @@ Keep the response structured and actionable.`;
         success: true,
         analysis: analysisText,
         structured: analysisResult,
-        is_premium: isPremium,
+        is_premium: limits.max === -1,
         is_guest: isGuest,
-        remaining_today: remainingToday,
+        remaining: remainingInfo,
+        plan: planCode,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
