@@ -594,6 +594,7 @@ const SportsBetting = () => {
                   ))}
                 </div>
 
+                {isAdmin ? (
                 <Button
                   className="w-full"
                   onClick={generateDailyPicks}
@@ -611,6 +612,11 @@ const SportsBetting = () => {
                     </>
                   )}
                 </Button>
+                ) : (
+                  <div className="rounded-lg border border-muted p-3 text-center text-xs text-muted-foreground">
+                    Only admins can generate new picks. Check published picks below.
+                  </div>
+                )}
 
                 {/* AI Picks Result (just generated) */}
                 {dailyPicks && (
@@ -693,9 +699,9 @@ const SportsBetting = () => {
                     type="file"
                     accept="image/*"
                     className="mt-2"
-                    disabled={checkUploading || !hasAccess}
+                    disabled={checkUploading || !isAdmin}
                     onChange={async (e) => {
-                      if (!hasAccess) { toast.error("VIP subscription required"); return; }
+                      if (!isAdmin) { toast.error("Only admins can check slips"); return; }
                       if (!e.target.files?.[0]) return;
                       setCheckUploading(true);
                       const file = e.target.files[0];
