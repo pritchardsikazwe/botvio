@@ -507,7 +507,7 @@ Keep the response structured and actionable.`;
           timeframe: timeframe || null,
           analysis_result: analysisResult,
           ai_response: analysisText,
-          is_premium_analysis: isPremium,
+          is_premium_analysis: planCode === "vip" || planCode === "standard",
         });
 
       if (saveError) {
@@ -529,10 +529,12 @@ Keep the response structured and actionable.`;
         .eq("id", jobId);
     }
 
-    let remainingToday: string | number = "unlimited";
-    if (userId && !isPremium) {
-      const { count } = await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`);
-      remainingToday = Math.max(0, MAX_FREE_DAILY - (count || 0));
+    let remainingInfo: string | number = "unlimited";
+    if (userId && limits.max !== -1) {
+      const periodStart2 = new Date();
+      periodStart2.setDate(periodStart2.getDate() - limits.days);
+      const { count } = await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", periodStart2.toISOString());
+      remainingInfo = Math.max(0, limits.max - (count || 0));
     }
 
     return new Response(
