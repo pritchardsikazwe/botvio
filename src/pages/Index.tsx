@@ -236,10 +236,7 @@ const Index = () => {
           <HomeSignalsWidget />
         </section>
 
-        {/* 2 — Trading Results */}
-        <section>
-          <SignalsPerformanceTracker />
-        </section>
+        {/* 2.5 — Training Videos */}
 
         {/* 2.5 — Training Videos */}
         <section>
