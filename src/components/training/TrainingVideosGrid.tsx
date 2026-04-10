@@ -5,6 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Play, Video } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface TrainingVideo {
+  id: string;
+  title: string;
+  youtube_url: string;
+  thumbnail_url: string | null;
+  category: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
 function extractYouTubeId(url: string): string | null {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([^&?\s]+)/);
   return match ? match[1] : null;
@@ -15,13 +25,13 @@ export const TrainingVideosGrid = () => {
     queryKey: ["training-videos-public"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("training_videos")
+        .from("training_videos" as any)
         .select("*")
         .eq("is_active", true)
         .order("sort_order", { ascending: true })
         .limit(8);
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as TrainingVideo[];
     },
     refetchInterval: 120000,
   });

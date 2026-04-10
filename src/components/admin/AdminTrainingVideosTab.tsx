@@ -12,6 +12,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { Plus, Trash2, Video } from "lucide-react";
 
+interface TrainingVideo {
+  id: string;
+  title: string;
+  youtube_url: string;
+  thumbnail_url: string | null;
+  category: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+}
+
 interface VideoForm {
   title: string;
   youtube_url: string;
@@ -29,20 +40,23 @@ export const AdminTrainingVideosTab = () => {
     queryKey: ["admin-training-videos"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("training_videos")
+        .from("training_videos" as any)
         .select("*")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as TrainingVideo[];
     },
   });
 
   const addMutation = useMutation({
     mutationFn: async (v: VideoForm) => {
-      const { error } = await supabase.from("training_videos").insert({
-        ...v,
+      const { error } = await supabase.from("training_videos" as any).insert({
+        title: v.title,
+        youtube_url: v.youtube_url,
+        category: v.category,
+        sort_order: v.sort_order,
         created_by: user?.id,
-      });
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -57,7 +71,7 @@ export const AdminTrainingVideosTab = () => {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase.from("training_videos").update({ is_active }).eq("id", id);
+      const { error } = await supabase.from("training_videos" as any).update({ is_active } as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -68,7 +82,7 @@ export const AdminTrainingVideosTab = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("training_videos").delete().eq("id", id);
+      const { error } = await supabase.from("training_videos" as any).delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
