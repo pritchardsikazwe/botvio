@@ -149,13 +149,24 @@ export function ChartAnalysisPanel({ signal, metrics, indicator, symbol }: Chart
           </div>
         )}
 
-        {/* Small Account Warning */}
-        <div className="bg-warning/10 border border-warning/25 rounded-lg px-3 py-2.5">
-          <div className="flex items-start gap-2">
-            <Shield className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-            <p className="text-sm text-foreground leading-relaxed font-medium">
-              This signal may have a wide stop loss and take profit. Traders with small accounts should adjust position size carefully.
-            </p>
+        {/* BOTVIO AI Signal Guidelines */}
+        <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 space-y-2">
+          <p className="text-[10px] font-extrabold text-foreground">⚠️ BOTVIO AI – SIGNAL GUIDELINES</p>
+          <div className="flex items-start gap-1.5 text-[10px] text-muted-foreground">
+            <span>📌</span>
+            <p>Ensure the <span className="font-semibold text-foreground">instrument symbol</span> is visible on your chart.</p>
+          </div>
+          <div className="flex items-start gap-1.5 text-[10px] text-muted-foreground">
+            <span>📊</span>
+            <p>Use <span className="font-semibold text-foreground">H4</span> for trend → <span className="font-semibold text-foreground">M15/M5</span> for entries.</p>
+          </div>
+          <div className="flex items-start gap-1.5 text-[10px] text-muted-foreground">
+            <span>⚖️</span>
+            <p>Wide SL/TP possible — adjust lot size, risk <span className="font-semibold text-foreground">1–3%</span> per trade.</p>
+          </div>
+          <div className="flex items-start gap-1.5 text-[10px] text-primary italic">
+            <span>💡</span>
+            <p>"Higher timeframe = direction, lower timeframe = precision."</p>
           </div>
         </div>
 
