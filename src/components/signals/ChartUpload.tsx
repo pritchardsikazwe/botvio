@@ -33,6 +33,7 @@ import {
   Info,
   Lock,
   Zap,
+  Lightbulb,
   Star,
   Infinity
 } from "lucide-react";
