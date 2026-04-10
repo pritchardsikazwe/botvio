@@ -33,6 +33,7 @@ import {
   Info,
   Lock,
   Zap,
+  Lightbulb,
   Star,
   Infinity
 } from "lucide-react";
@@ -459,18 +460,47 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 )}
               </div>
 
-              {/* Tips */}
-              <div className="space-y-2">
-                <div className="flex items-start gap-2 rounded-lg bg-yellow-500/15 border border-yellow-500/40 p-3">
+              {/* BOTVIO AI Signal Guidelines */}
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                <h4 className="text-sm font-extrabold text-foreground flex items-center gap-2">
+                  ⚠️ BOTVIO AI – SIGNAL GUIDELINES
+                </h4>
+
+                <div className="flex items-start gap-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 p-2.5">
                   <Info className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
-                  <p className="text-sm text-yellow-400">
-                    <span className="font-semibold text-yellow-300">Tip:</span> Make sure the instrument symbol is visible on your chart before uploading.
+                  <p className="text-xs text-foreground leading-relaxed">
+                    <span className="font-bold text-yellow-400">📌 Chart Setup:</span> Make sure the instrument symbol is clearly visible on your chart before uploading or sharing any signal.
                   </p>
                 </div>
-                <div className="flex items-start gap-2 rounded-lg bg-warning/15 border border-warning/40 p-3">
+
+                <div className="flex items-start gap-2 rounded-lg bg-blue-500/10 border border-blue-500/30 p-2.5">
+                  <BarChart3 className="h-4 w-4 text-blue-400 mt-0.5 shrink-0" />
+                  <div className="text-xs text-foreground leading-relaxed">
+                    <span className="font-bold text-blue-400">📊 Timeframe Strategy:</span>
+                    <ul className="mt-1 ml-1 space-y-0.5 text-muted-foreground">
+                      <li>✅ Use <span className="font-semibold text-foreground">H4</span> to identify overall trend & key levels</li>
+                      <li>✅ Switch to <span className="font-semibold text-foreground">M15 / M5</span> to refine entries & exits</li>
+                    </ul>
+                    <p className="mt-1 text-[10px] text-primary italic">👉 Higher accuracy and better timing guaranteed.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 rounded-lg bg-warning/10 border border-warning/30 p-2.5">
                   <Shield className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-                  <p className="text-base text-foreground">
-                    <span className="font-semibold text-warning">Tip:</span> This signal may have a wide stop loss and take profit. Traders with small accounts should adjust position size carefully.
+                  <div className="text-xs text-foreground leading-relaxed">
+                    <span className="font-bold text-warning">⚖️ Risk Management:</span>
+                    <ul className="mt-1 ml-1 space-y-0.5 text-muted-foreground">
+                      <li>⚠️ Some signals may have wide SL & TP levels</li>
+                      <li>📉 Adjust lot size accordingly for small accounts</li>
+                      <li>🛡️ Maintain proper risk: <span className="font-semibold text-foreground">1–3% per trade</span></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 rounded-lg bg-primary/10 border border-primary/30 p-2.5">
+                  <Lightbulb className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <p className="text-xs text-foreground leading-relaxed italic">
+                    <span className="font-bold text-primary not-italic">💡 Pro Tip:</span> "Higher timeframe gives direction, lower timeframe gives precision."
                   </p>
                 </div>
               </div>
