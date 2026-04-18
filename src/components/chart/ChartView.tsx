@@ -335,8 +335,53 @@ export function ChartView({
         chartRef.current.remove();
         chartRef.current = null;
       }
+      candleSeriesRef.current = null;
     };
   }, [buildChart]);
+
+  // ── Live Deriv tick → update last candle in real time ───────────────
+  useEffect(() => {
+    if (!liveTick || !candleSeriesRef.current) return;
+    const series = candleSeriesRef.current;
+    const tfSeconds = timeframeToSeconds(timeframe);
+    const bucketTime = Math.floor(liveTick.epoch / tfSeconds) * tfSeconds;
+    const last = lastCandleRef.current;
+
+    if (!last || bucketTime > last.time) {
+      // New bar
+      const next = {
+        time: bucketTime,
+        open: liveTick.price,
+        high: liveTick.price,
+        low: liveTick.price,
+        close: liveTick.price,
+      };
+      lastCandleRef.current = next;
+      try {
+        series.update({
+          time: bucketTime as any,
+          open: next.open,
+          high: next.high,
+          low: next.low,
+          close: next.close,
+        });
+      } catch { /* ignore stale series */ }
+    } else if (bucketTime === last.time) {
+      // Update current bar
+      last.high = Math.max(last.high, liveTick.price);
+      last.low = Math.min(last.low, liveTick.price);
+      last.close = liveTick.price;
+      try {
+        series.update({
+          time: last.time as any,
+          open: last.open,
+          high: last.high,
+          low: last.low,
+          close: last.close,
+        });
+      } catch { /* ignore stale series */ }
+    }
+  }, [liveTick, timeframe]);
 
   return (
     <Card className="bg-card border-border/50 rounded-xl overflow-hidden">
