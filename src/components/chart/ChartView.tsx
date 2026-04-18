@@ -529,3 +529,15 @@ function calculateEMA(candles: { candle_time: string; close: number }[], period:
   }
   return result;
 }
+
+function timeframeToSeconds(tf: string): number {
+  const map: Record<string, number> = {
+    "1m": 60,
+    "5m": 300,
+    "15m": 900,
+    "1h": 3600,
+    "4h": 14400,
+  };
+  return map[tf] ?? 3600;
+}
+
