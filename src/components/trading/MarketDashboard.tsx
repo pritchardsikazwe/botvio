@@ -923,38 +923,43 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 {/* Botvio Signal Button — Hauza scalp or AI signal (suppressed when closed) */}
                 {!marketClosed && <BotvioSignalButton sig={effectiveSig} symbol={asset.symbol} navigate={navigate} />}
 
-                {sig && (sig.signal === "buy" || sig.signal === "sell") && (
+                {effectiveSig && !marketClosed && (effectiveSig.signal === "buy" || effectiveSig.signal === "sell") && (
                   <div className="border-t border-border/40 pt-2 space-y-1.5">
                     <div className="flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      <Crosshair className="h-3.5 w-3.5 text-primary" />
                       <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                        AI Signal
+                        {aiActive ? "AI Signal" : "Hauza Scalp"}
                       </span>
+                      {!aiActive && (
+                        <Badge variant="outline" className="text-[9px] py-0 px-1.5 border-primary/40 text-primary">
+                          M1 / M5
+                        </Badge>
+                      )}
                     </div>
                     <div className="grid grid-cols-3 gap-1.5 text-[11px]">
                       <div className="bg-primary/10 border border-primary/20 rounded-lg px-2 py-1.5 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">Entry</div>
-                        <div className="font-bold text-foreground">{sig.entry_price ? formatPrice(Number(sig.entry_price), asset.symbol) : "—"}</div>
+                        <div className="font-bold text-foreground">{effectiveSig.entry_price ? formatPrice(Number(effectiveSig.entry_price), asset.symbol) : "—"}</div>
                       </div>
                       <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-2 py-1.5 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">SL</div>
-                        <div className="font-bold text-destructive">{sig.stop_loss ? formatPrice(Number(sig.stop_loss), asset.symbol) : "—"}</div>
+                        <div className="font-bold text-destructive">{effectiveSig.stop_loss ? formatPrice(Number(effectiveSig.stop_loss), asset.symbol) : "—"}</div>
                       </div>
                       <div className="bg-success/10 border border-success/20 rounded-lg px-2 py-1.5 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">TP1</div>
-                        <div className="font-bold text-success">{sig.take_profit_1 ? formatPrice(Number(sig.take_profit_1), asset.symbol) : "—"}</div>
+                        <div className="font-bold text-success">{effectiveSig.take_profit_1 ? formatPrice(Number(effectiveSig.take_profit_1), asset.symbol) : "—"}</div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* Tip */}
-                {metrics && <TipBlock tip={metrics.market_tip} breakoutPrice={metrics.resistance_1 != null ? Number(metrics.resistance_1) : null} symbol={asset.symbol} />}
+                {metrics && !marketClosed && <TipBlock tip={metrics.market_tip} breakoutPrice={metrics.resistance_1 != null ? Number(metrics.resistance_1) : null} symbol={asset.symbol} />}
 
                 {/* AI Summary */}
-                {sig?.ai_summary && (
+                {effectiveSig?.ai_summary && !marketClosed && (
                   <p className="text-[11px] text-foreground/60 line-clamp-2 border-t border-border/30 pt-2 leading-relaxed">
-                    {sig.ai_summary}
+                    {effectiveSig.ai_summary}
                   </p>
                 )}
 
