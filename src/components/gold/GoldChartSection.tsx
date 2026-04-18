@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
-import { TwelveDataChart } from "@/components/chart/TwelveDataChart";
-import { TradingViewMiniWidget } from "@/components/chart/TradingViewMiniWidget";
+import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 
 
 const CHART_STRATEGIES = [
@@ -68,12 +67,8 @@ export function GoldChartSection() {
 
   return (
     <div className="space-y-4">
-      {/* Live TradingView Chart */}
-      <Card className="bg-card border-border/50 overflow-hidden">
-        <CardContent className="p-0">
-          <TradingViewMiniWidget symbol="XAUUSD" height={400} />
-        </CardContent>
-      </Card>
+      {/* Live Deriv XAU/USD Chart */}
+      <DerivLiveChart displaySymbol="XAU/USD" height={420} defaultGranularity={900} />
 
       {/* Botvio Signal + Live Detail Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -81,18 +76,7 @@ export function GoldChartSection() {
           <GoldBotvioSignalButton />
         </div>
         <div className="lg:col-span-3">
-          <Card className="bg-card border-border/50 overflow-hidden">
-            <CardContent className="p-0">
-              <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-xs font-bold text-foreground">XAU/USD · 15m Detail</span>
-                </div>
-                <Badge variant="outline" className="text-[10px] border-success/30 text-success">● Live</Badge>
-              </div>
-              <TradingViewMiniWidget symbol="XAUUSD" height={420} />
-            </CardContent>
-          </Card>
+          <DerivLiveChart displaySymbol="XAU/USD" height={380} defaultGranularity={300} />
         </div>
       </div>
 
