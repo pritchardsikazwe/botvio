@@ -782,12 +782,44 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const ind = indicatorMap.get(asset.id);
           const sig = signalMap.get(asset.id);
           const metrics = metricsMap.get(asset.id);
-          const glowClass = sig ? (SIGNAL_CARD_GLOW[sig.signal] || "") : "";
+          const marketClosed = isMarketClosedNow(asset.symbol);
+
+          // Hauza scalping fallback — instant client-side signal when AI is missing or 'wait'
+          const aiActive = sig && (sig.signal === "buy" || sig.signal === "sell");
+          const hauzaScalp = useMemo(
+            () => computeHauzaScalp(
+              quote?.price,
+              ind?.rsi_14 != null ? Number(ind.rsi_14) : null,
+              ind?.trend,
+              metrics?.day_high != null ? Number(metrics.day_high) : null,
+              metrics?.day_low != null ? Number(metrics.day_low) : null,
+              asset.symbol
+            ),
+            [quote?.price, ind?.rsi_14, ind?.trend, metrics?.day_high, metrics?.day_low, asset.symbol]
+          );
+
+          // If market is closed, force signal to wait. Otherwise prefer AI signal, else Hauza scalp.
+          const effectiveSig: AiSignal | undefined = marketClosed
+            ? undefined
+            : aiActive
+              ? sig
+              : hauzaScalp.signal !== "wait"
+                ? {
+                    asset_id: asset.id,
+                    signal: hauzaScalp.signal,
+                    confidence: hauzaScalp.confidence,
+                    ai_summary: hauzaScalp.reason,
+                    entry_price: hauzaScalp.entry,
+                    stop_loss: hauzaScalp.sl,
+                    take_profit_1: hauzaScalp.tp,
+                  }
+                : sig;
+          const glowClass = effectiveSig ? (SIGNAL_CARD_GLOW[effectiveSig.signal] || "") : "";
 
           return (
             <Card
               key={asset.id}
-              className={`bg-card hover:border-primary/50 transition-all overflow-hidden rounded-xl ${glowClass}`}
+              className={`bg-card hover:border-primary/50 transition-all overflow-hidden rounded-xl ${glowClass} ${marketClosed ? "opacity-90" : ""}`}
             >
               <CardHeader className="pb-2 px-4 pt-4">
                 <div className="flex items-center justify-between">
@@ -801,24 +833,45 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {ind?.trend && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold capitalize">
-                        {TREND_ICONS[ind.trend || "neutral"]}
-                        <span className={ind.trend === "bullish" ? "text-success" : ind.trend === "bearish" ? "text-destructive" : "text-muted-foreground"}>
-                          {ind.trend}
-                        </span>
-                      </span>
-                    )}
-                    {sig && (
-                      <Badge className={`text-[10px] uppercase font-extrabold px-2 ${SIGNAL_COLORS[sig.signal] || ""}`}>
-                        {sig.signal}
+                    {marketClosed ? (
+                      <Badge className="text-[10px] uppercase font-extrabold px-2 bg-muted text-muted-foreground border-border">
+                        <Pause className="h-3 w-3 mr-1" /> Closed
                       </Badge>
+                    ) : (
+                      <>
+                        {ind?.trend && (
+                          <span className="flex items-center gap-1 text-[11px] font-bold capitalize">
+                            {TREND_ICONS[ind.trend || "neutral"]}
+                            <span className={ind.trend === "bullish" ? "text-success" : ind.trend === "bearish" ? "text-destructive" : "text-muted-foreground"}>
+                              {ind.trend}
+                            </span>
+                          </span>
+                        )}
+                        {effectiveSig && (
+                          <Badge className={`text-[10px] uppercase font-extrabold px-2 ${SIGNAL_COLORS[effectiveSig.signal] || ""}`}>
+                            {effectiveSig.signal}
+                          </Badge>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-2.5 pt-0 px-4 pb-4">
+                {/* Market Closed Banner */}
+                {marketClosed && (
+                  <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2">
+                    <Pause className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-[11px] font-bold text-warning uppercase tracking-wider">Market Closed — Weekend</p>
+                      <p className="text-[10px] text-foreground/70 leading-relaxed mt-0.5">
+                        Forex & metals reopen Sunday 22:00 UTC. Signals resume when liquidity returns.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Price + Confidence */}
                 <div className="flex items-baseline justify-between">
                   <div>
@@ -834,9 +887,9 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                       </span>
                     )}
                   </div>
-                  {sig && (
+                  {effectiveSig && !marketClosed && (
                     <span className="text-xs text-foreground/60 font-semibold">
-                      {Math.round(sig.confidence)}% conf
+                      {Math.round(effectiveSig.confidence)}% conf
                     </span>
                   )}
                 </div>
@@ -867,8 +920,8 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 {/* Key Levels */}
                 {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
-                {/* Botvio Signal Button */}
-                <BotvioSignalButton sig={sig} symbol={asset.symbol} navigate={navigate} />
+                {/* Botvio Signal Button — Hauza scalp or AI signal (suppressed when closed) */}
+                {!marketClosed && <BotvioSignalButton sig={effectiveSig} symbol={asset.symbol} navigate={navigate} />}
 
                 {sig && (sig.signal === "buy" || sig.signal === "sell") && (
                   <div className="border-t border-border/40 pt-2 space-y-1.5">
