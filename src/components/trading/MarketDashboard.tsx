@@ -102,6 +102,110 @@ const TREND_ICONS: Record<string, React.ReactNode> = {
   neutral: <Minus className="h-4 w-4 text-muted-foreground" />,
 };
 
+// === Market open/close detection (forex/metals close on weekends) ===
+function isCryptoSymbol(symbol: string): boolean {
+  const s = symbol.toUpperCase();
+  return /BTC|ETH|SOL|BNB|XRP|DOGE|USDT|USDC|ADA|MATIC|LTC|DOT/.test(s);
+}
+
+function isForexOrMetalSymbol(symbol: string): boolean {
+  if (isCryptoSymbol(symbol)) return false;
+  const s = symbol.toUpperCase();
+  return /XAU|XAG|EUR|GBP|USD|JPY|AUD|CAD|CHF|NZD/.test(s);
+}
+
+function isMarketClosedNow(symbol: string): boolean {
+  if (!isForexOrMetalSymbol(symbol)) return false;
+  const now = new Date();
+  const day = now.getUTCDay(); // 0=Sun, 6=Sat
+  const hour = now.getUTCHours();
+  // Closed: Friday 22:00 UTC → Sunday 22:00 UTC
+  if (day === 6) return true; // Saturday
+  if (day === 0 && hour < 22) return true; // Sunday before 22:00 UTC
+  if (day === 5 && hour >= 22) return true; // Friday after 22:00 UTC
+  return false;
+}
+
+// === Hauza Scalping Signal (client-side, instant) ===
+// Uses RSI(14) + trend + recent price action for quick M1/M5 scalp setups.
+type HauzaScalp = {
+  signal: "buy" | "sell" | "wait";
+  confidence: number;
+  entry: number | null;
+  sl: number | null;
+  tp: number | null;
+  reason: string;
+};
+
+function computeHauzaScalp(
+  price: number | null | undefined,
+  rsi: number | null | undefined,
+  trend: string | null | undefined,
+  dayHigh: number | null | undefined,
+  dayLow: number | null | undefined,
+  symbol: string
+): HauzaScalp {
+  if (price == null || rsi == null) {
+    return { signal: "wait", confidence: 0, entry: null, sl: null, tp: null, reason: "Awaiting live tick data" };
+  }
+  // ATR proxy from day range (~10% of range as scalp risk)
+  const range = dayHigh != null && dayLow != null ? Math.abs(dayHigh - dayLow) : null;
+  const isJpy = symbol.includes("JPY");
+  const isMetal = symbol.includes("XAU") || symbol.includes("XAG");
+  const fallbackPip = isMetal ? 1.5 : isJpy ? 0.08 : 0.0008;
+  const risk = range != null ? Math.max(range * 0.12, fallbackPip) : fallbackPip;
+  const decimals = isJpy ? 3 : isMetal ? 2 : 5;
+  const round = (n: number) => +n.toFixed(decimals);
+
+  const t = (trend || "").toLowerCase();
+  const bullish = t === "bullish";
+  const bearish = t === "bearish";
+
+  // Hauza scalp logic — tight 1:1.8 R:R
+  if (bullish && rsi > 45 && rsi < 70) {
+    return {
+      signal: "buy",
+      confidence: Math.min(88, 62 + (rsi - 45) * 0.8),
+      entry: round(price),
+      sl: round(price - risk),
+      tp: round(price + risk * 1.8),
+      reason: "Hauza scalp: bullish trend + RSI momentum",
+    };
+  }
+  if (bearish && rsi < 55 && rsi > 30) {
+    return {
+      signal: "sell",
+      confidence: Math.min(88, 62 + (55 - rsi) * 0.8),
+      entry: round(price),
+      sl: round(price + risk),
+      tp: round(price - risk * 1.8),
+      reason: "Hauza scalp: bearish trend + RSI momentum",
+    };
+  }
+  if (rsi <= 30) {
+    return {
+      signal: "buy",
+      confidence: 70,
+      entry: round(price),
+      sl: round(price - risk * 0.8),
+      tp: round(price + risk * 1.5),
+      reason: "Hauza scalp: oversold bounce setup",
+    };
+  }
+  if (rsi >= 70) {
+    return {
+      signal: "sell",
+      confidence: 70,
+      entry: round(price),
+      sl: round(price + risk * 0.8),
+      tp: round(price - risk * 1.5),
+      reason: "Hauza scalp: overbought rejection setup",
+    };
+  }
+  return { signal: "wait", confidence: 40, entry: null, sl: null, tp: null, reason: "Hauza scalp: range-bound — wait for breakout" };
+}
+
+
 function formatPrice(price: number | null, symbol: string): string {
   if (price == null) return "—";
   if (symbol.includes("JPY")) return price.toFixed(3);
@@ -678,12 +782,41 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const ind = indicatorMap.get(asset.id);
           const sig = signalMap.get(asset.id);
           const metrics = metricsMap.get(asset.id);
-          const glowClass = sig ? (SIGNAL_CARD_GLOW[sig.signal] || "") : "";
+          const marketClosed = isMarketClosedNow(asset.symbol);
+
+          // Hauza scalping fallback — instant client-side signal when AI is missing or 'wait'
+          const aiActive = sig && (sig.signal === "buy" || sig.signal === "sell");
+          const hauzaScalp = computeHauzaScalp(
+            quote?.price,
+            ind?.rsi_14 != null ? Number(ind.rsi_14) : null,
+            ind?.trend,
+            metrics?.day_high != null ? Number(metrics.day_high) : null,
+            metrics?.day_low != null ? Number(metrics.day_low) : null,
+            asset.symbol
+          );
+
+          // If market is closed, force signal to wait. Otherwise prefer AI signal, else Hauza scalp.
+          const effectiveSig: AiSignal | undefined = marketClosed
+            ? undefined
+            : aiActive
+              ? sig
+              : hauzaScalp.signal !== "wait"
+                ? {
+                    asset_id: asset.id,
+                    signal: hauzaScalp.signal,
+                    confidence: hauzaScalp.confidence,
+                    ai_summary: hauzaScalp.reason,
+                    entry_price: hauzaScalp.entry,
+                    stop_loss: hauzaScalp.sl,
+                    take_profit_1: hauzaScalp.tp,
+                  }
+                : sig;
+          const glowClass = effectiveSig ? (SIGNAL_CARD_GLOW[effectiveSig.signal] || "") : "";
 
           return (
             <Card
               key={asset.id}
-              className={`bg-card hover:border-primary/50 transition-all overflow-hidden rounded-xl ${glowClass}`}
+              className={`bg-card hover:border-primary/50 transition-all overflow-hidden rounded-xl ${glowClass} ${marketClosed ? "opacity-90" : ""}`}
             >
               <CardHeader className="pb-2 px-4 pt-4">
                 <div className="flex items-center justify-between">
@@ -697,24 +830,45 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {ind?.trend && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold capitalize">
-                        {TREND_ICONS[ind.trend || "neutral"]}
-                        <span className={ind.trend === "bullish" ? "text-success" : ind.trend === "bearish" ? "text-destructive" : "text-muted-foreground"}>
-                          {ind.trend}
-                        </span>
-                      </span>
-                    )}
-                    {sig && (
-                      <Badge className={`text-[10px] uppercase font-extrabold px-2 ${SIGNAL_COLORS[sig.signal] || ""}`}>
-                        {sig.signal}
+                    {marketClosed ? (
+                      <Badge className="text-[10px] uppercase font-extrabold px-2 bg-muted text-muted-foreground border-border">
+                        <Pause className="h-3 w-3 mr-1" /> Closed
                       </Badge>
+                    ) : (
+                      <>
+                        {ind?.trend && (
+                          <span className="flex items-center gap-1 text-[11px] font-bold capitalize">
+                            {TREND_ICONS[ind.trend || "neutral"]}
+                            <span className={ind.trend === "bullish" ? "text-success" : ind.trend === "bearish" ? "text-destructive" : "text-muted-foreground"}>
+                              {ind.trend}
+                            </span>
+                          </span>
+                        )}
+                        {effectiveSig && (
+                          <Badge className={`text-[10px] uppercase font-extrabold px-2 ${SIGNAL_COLORS[effectiveSig.signal] || ""}`}>
+                            {effectiveSig.signal}
+                          </Badge>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-2.5 pt-0 px-4 pb-4">
+                {/* Market Closed Banner */}
+                {marketClosed && (
+                  <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2">
+                    <Pause className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-[11px] font-bold text-warning uppercase tracking-wider">Market Closed — Weekend</p>
+                      <p className="text-[10px] text-foreground/70 leading-relaxed mt-0.5">
+                        Forex & metals reopen Sunday 22:00 UTC. Signals resume when liquidity returns.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Price + Confidence */}
                 <div className="flex items-baseline justify-between">
                   <div>
@@ -730,9 +884,9 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                       </span>
                     )}
                   </div>
-                  {sig && (
+                  {effectiveSig && !marketClosed && (
                     <span className="text-xs text-foreground/60 font-semibold">
-                      {Math.round(sig.confidence)}% conf
+                      {Math.round(effectiveSig.confidence)}% conf
                     </span>
                   )}
                 </div>
@@ -763,41 +917,46 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 {/* Key Levels */}
                 {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
-                {/* Botvio Signal Button */}
-                <BotvioSignalButton sig={sig} symbol={asset.symbol} navigate={navigate} />
+                {/* Botvio Signal Button — Hauza scalp or AI signal (suppressed when closed) */}
+                {!marketClosed && <BotvioSignalButton sig={effectiveSig} symbol={asset.symbol} navigate={navigate} />}
 
-                {sig && (sig.signal === "buy" || sig.signal === "sell") && (
+                {effectiveSig && !marketClosed && (effectiveSig.signal === "buy" || effectiveSig.signal === "sell") && (
                   <div className="border-t border-border/40 pt-2 space-y-1.5">
                     <div className="flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      <Crosshair className="h-3.5 w-3.5 text-primary" />
                       <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                        AI Signal
+                        {aiActive ? "AI Signal" : "Hauza Scalp"}
                       </span>
+                      {!aiActive && (
+                        <Badge variant="outline" className="text-[9px] py-0 px-1.5 border-primary/40 text-primary">
+                          M1 / M5
+                        </Badge>
+                      )}
                     </div>
                     <div className="grid grid-cols-3 gap-1.5 text-[11px]">
                       <div className="bg-primary/10 border border-primary/20 rounded-lg px-2 py-1.5 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">Entry</div>
-                        <div className="font-bold text-foreground">{sig.entry_price ? formatPrice(Number(sig.entry_price), asset.symbol) : "—"}</div>
+                        <div className="font-bold text-foreground">{effectiveSig.entry_price ? formatPrice(Number(effectiveSig.entry_price), asset.symbol) : "—"}</div>
                       </div>
                       <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-2 py-1.5 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">SL</div>
-                        <div className="font-bold text-destructive">{sig.stop_loss ? formatPrice(Number(sig.stop_loss), asset.symbol) : "—"}</div>
+                        <div className="font-bold text-destructive">{effectiveSig.stop_loss ? formatPrice(Number(effectiveSig.stop_loss), asset.symbol) : "—"}</div>
                       </div>
                       <div className="bg-success/10 border border-success/20 rounded-lg px-2 py-1.5 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">TP1</div>
-                        <div className="font-bold text-success">{sig.take_profit_1 ? formatPrice(Number(sig.take_profit_1), asset.symbol) : "—"}</div>
+                        <div className="font-bold text-success">{effectiveSig.take_profit_1 ? formatPrice(Number(effectiveSig.take_profit_1), asset.symbol) : "—"}</div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* Tip */}
-                {metrics && <TipBlock tip={metrics.market_tip} breakoutPrice={metrics.resistance_1 != null ? Number(metrics.resistance_1) : null} symbol={asset.symbol} />}
+                {metrics && !marketClosed && <TipBlock tip={metrics.market_tip} breakoutPrice={metrics.resistance_1 != null ? Number(metrics.resistance_1) : null} symbol={asset.symbol} />}
 
                 {/* AI Summary */}
-                {sig?.ai_summary && (
+                {effectiveSig?.ai_summary && !marketClosed && (
                   <p className="text-[11px] text-foreground/60 line-clamp-2 border-t border-border/30 pt-2 leading-relaxed">
-                    {sig.ai_summary}
+                    {effectiveSig.ai_summary}
                   </p>
                 )}
 
