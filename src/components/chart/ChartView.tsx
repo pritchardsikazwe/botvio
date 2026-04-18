@@ -1,10 +1,17 @@
 import { useRef, useEffect, useCallback } from "react";
-import { createChart, ColorType, LineSeries, CandlestickSeries } from "lightweight-charts";
+import {
+  createChart,
+  ColorType,
+  LineSeries,
+  CandlestickSeries,
+  type ISeriesApi,
+} from "lightweight-charts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { BarChart3, Eye, Newspaper, Clock, TrendingUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { BarChart3, Eye, Newspaper, Clock, TrendingUp, Radio } from "lucide-react";
 import {
   detectSupportResistance,
   detectWickRejections,
@@ -12,6 +19,7 @@ import {
   detectTrendlines,
   candleTime,
 } from "@/lib/chartAnalysis";
+import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 
 interface Candle {
   candle_time: string;
