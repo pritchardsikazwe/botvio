@@ -20,6 +20,7 @@ import { ScrollingAdvertBanner } from "@/components/adverts/ScrollingAdvertBanne
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { SignalsPerformanceTracker } from "@/components/signals/SignalsPerformanceTracker";
 import { TrainingVideosGrid } from "@/components/training/TrainingVideosGrid";
+import { BrokerStarterCards } from "@/components/training/BrokerStarterCards";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { MarketDashboard } from "@/components/trading/MarketDashboard";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
@@ -241,6 +242,11 @@ const Index = () => {
         {/* 2.5 — Training Videos */}
         <section>
           <TrainingVideosGrid />
+        </section>
+
+        {/* 2.6 — Best Forex Brokers to Start With */}
+        <section>
+          <BrokerStarterCards />
         </section>
 
         {/* 2 — AI Chart Analysis */}
