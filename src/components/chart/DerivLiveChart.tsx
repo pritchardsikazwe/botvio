@@ -135,17 +135,7 @@ export function DerivLiveChart({
     };
   }, [derivSymbol, granularity]);
 
-  if (!derivSymbol) {
-    return (
-      <Card className="bg-card border-border/50">
-        <CardContent className="p-6 text-center text-xs text-muted-foreground">
-          {displaySymbol} is not available on Deriv live feed.
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Chart geometry
+  // Chart geometry (always compute hooks before any return)
   const W = 900;
   const H = height - 60;
   const padding = { top: 10, right: 60, bottom: 20, left: 10 };
@@ -175,6 +165,16 @@ export function DerivLiveChart({
     ? (change / visible[0].open) * 100
     : 0;
   const isUp = change >= 0;
+
+  if (!derivSymbol) {
+    return (
+      <Card className="bg-card border-border/50">
+        <CardContent className="p-6 text-center text-xs text-muted-foreground">
+          {displaySymbol} is not available on Deriv live feed.
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-card border-border/50 overflow-hidden">
