@@ -41,6 +41,11 @@ export function DerivLiveChart({
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
 
+  // Map display symbol → market session symbol (e.g. "XAU/USD" → "XAUUSD")
+  const sessionSymbol = useMemo(() => displaySymbol.replace("/", ""), [displaySymbol]);
+  const { isMarketOpen, marketType } = useMarketSession(sessionSymbol);
+  const isClosed = !isMarketOpen && (marketType === "forex" || marketType === "indices");
+
   useEffect(() => {
     if (!derivSymbol) return;
 
