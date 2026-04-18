@@ -403,6 +403,20 @@ export function ChartView({
               {tf.toUpperCase()}
             </Button>
           ))}
+          {derivSupported && (
+            <Badge
+              variant="outline"
+              className={`ml-2 h-6 gap-1 px-2 text-[10px] font-bold ${
+                liveConnected
+                  ? "border-success/40 text-success bg-success/10"
+                  : "border-muted-foreground/30 text-muted-foreground"
+              }`}
+              title="Live ticks streamed from Deriv"
+            >
+              <Radio className={`h-3 w-3 ${liveConnected ? "animate-pulse" : ""}`} />
+              {liveConnected ? "LIVE · Deriv" : "Connecting…"}
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
