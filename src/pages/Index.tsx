@@ -346,7 +346,7 @@ const Index = () => {
               <Link to="/learn">All Courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
-          <CourseEnrollmentCards compact />
+          <CourseEnrollmentCards compact homeMode />
         </section>
 
         {/* 5 — Live Market Intelligence */}

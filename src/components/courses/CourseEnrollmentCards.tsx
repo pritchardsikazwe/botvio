@@ -104,9 +104,17 @@ const COURSE_PROGRAMS: CourseProgram[] = [
 interface CourseEnrollmentCardsProps {
   onEnroll?: (category: string) => void;
   compact?: boolean;
+  homeMode?: boolean;
 }
 
-export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrollmentCardsProps) => {
+// On the home page, only show these specific programs
+const HOME_PROGRAM_IDS = [
+  "forex-beginner-mentorship",
+  "premium-signals-monthly",
+  "premium-signals-3months",
+];
+
+export const CourseEnrollmentCards = ({ onEnroll, compact = false, homeMode = false }: CourseEnrollmentCardsProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -198,8 +206,8 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false }: CourseEnrol
 
   return (
     <>
-      <div className={`grid grid-cols-1 ${compact ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-2 lg:grid-cols-4"} gap-5`}>
-        {COURSE_PROGRAMS.map((program) => (
+      <div className={`grid grid-cols-1 ${compact ? "md:grid-cols-2 lg:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-4"} gap-5`}>
+        {(homeMode ? COURSE_PROGRAMS.filter(p => HOME_PROGRAM_IDS.includes(p.id)) : COURSE_PROGRAMS).map((program) => (
           <CourseCard
             key={program.id}
             program={program}

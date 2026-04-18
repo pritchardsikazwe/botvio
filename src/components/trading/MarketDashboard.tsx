@@ -538,7 +538,7 @@ function BotvioSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefin
   );
 }
 
-const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD", "EUR/USD", "USD/JPY"];
+const HOME_PREFERRED_ORDER = ["XAU/USD", "XAG/USD", "BTC/USD", "GBP/USD"];
 
 export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCards?: number; maxBinanceCards?: number; homeMode?: boolean } = {}) {
   const navigate = useNavigate();
