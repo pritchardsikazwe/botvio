@@ -118,6 +118,25 @@
   .blog-prose ol > li::marker {
     font-weight: 700;
   }
+  /* Inline contextual affiliate links inside articles */
+  .blog-prose a.affiliate-inline-link {
+    background: linear-gradient(180deg, transparent 60%, hsl(var(--primary) / 0.25) 60%);
+    color: hsl(var(--primary));
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0 2px;
+    border-radius: 2px;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  .blog-prose a.affiliate-inline-link:hover {
+    background: hsl(var(--primary) / 0.35);
+    color: hsl(var(--primary));
+  }
+  .blog-prose a.affiliate-inline-link::after {
+    content: " ↗";
+    font-size: 0.75em;
+    opacity: 0.7;
+  }
 
   .gold-text {
     color: hsl(var(--primary));
