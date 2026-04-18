@@ -222,6 +222,7 @@ export function AlphaVantageChart({ symbol = "XAUUSD", displaySymbol, showHauzaS
       layout: {
         background: { color: "transparent" },
         textColor: "rgba(255, 255, 255, 0.6)",
+        attributionLogo: false,
       },
       grid: {
         vertLines: { color: "rgba(255, 255, 255, 0.04)" },
