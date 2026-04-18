@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, Wifi, WifiOff } from "lucide-react";
+import { Activity, Wifi, WifiOff, Lock } from "lucide-react";
 import { getDerivWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
+import { useMarketSession } from "@/hooks/useMarketSession";
 
 interface Candle {
   epoch: number;
