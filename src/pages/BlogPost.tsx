@@ -39,6 +39,43 @@ const detectBrokers = (title: string, content: string): BrokerKey[] => {
   return found;
 };
 
+/**
+ * Inject contextual affiliate links into the article HTML.
+ * Replaces the FIRST plain-text occurrence of each broker name with an anchor.
+ * Skips text already inside <a>…</a> or HTML attributes.
+ */
+const injectAffiliateLinks = (html: string): string => {
+  if (!html) return html;
+  const brokerPatterns: { key: BrokerKey; regex: RegExp }[] = [
+    { key: "pocketoption", regex: /\bPocket Option\b/i },
+    { key: "iqoption", regex: /\bIQ Option\b/i },
+    { key: "weltrade", regex: /\bWeltrade\b/i },
+    { key: "binance", regex: /\bBinance\b/i },
+    { key: "binomo", regex: /\bBinomo\b/i },
+    { key: "exness", regex: /\bExness\b/i },
+    { key: "deriv", regex: /\bDeriv\b/i },
+  ];
+
+  let output = html;
+  for (const { key, regex } of brokerPatterns) {
+    const parts = output.split(/(<a\b[^>]*>[\s\S]*?<\/a>|<[^>]+>)/gi);
+    let replaced = false;
+    for (let i = 0; i < parts.length; i++) {
+      if (i % 2 === 0 && !replaced && regex.test(parts[i])) {
+        const link = AFFILIATE_LINKS[key];
+        parts[i] = parts[i].replace(
+          regex,
+          (m) =>
+            `<a href="${link.url}" target="_blank" rel="noopener sponsored" class="affiliate-inline-link" title="Open ${link.name} account">${m}</a>`
+        );
+        replaced = true;
+      }
+    }
+    if (replaced) output = parts.join("");
+  }
+  return output;
+};
+
 const relatedPosts = [
   { slug: "how-to-start-forex-trading", title: "How to Start Forex Trading" },
   { slug: "how-to-earn-money-online-trading", title: "How to Earn Money Online" },
@@ -231,7 +268,7 @@ const BlogPost = () => {
             prose-code:bg-muted prose-code:text-primary prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.9em] prose-code:font-mono
             prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border prose-pre:rounded-xl prose-pre:p-5 prose-pre:my-8
           "
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: injectAffiliateLinks(post.content) }}
         />
 
         {/* Ad in middle */}
