@@ -786,16 +786,13 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
 
           // Hauza scalping fallback — instant client-side signal when AI is missing or 'wait'
           const aiActive = sig && (sig.signal === "buy" || sig.signal === "sell");
-          const hauzaScalp = useMemo(
-            () => computeHauzaScalp(
-              quote?.price,
-              ind?.rsi_14 != null ? Number(ind.rsi_14) : null,
-              ind?.trend,
-              metrics?.day_high != null ? Number(metrics.day_high) : null,
-              metrics?.day_low != null ? Number(metrics.day_low) : null,
-              asset.symbol
-            ),
-            [quote?.price, ind?.rsi_14, ind?.trend, metrics?.day_high, metrics?.day_low, asset.symbol]
+          const hauzaScalp = computeHauzaScalp(
+            quote?.price,
+            ind?.rsi_14 != null ? Number(ind.rsi_14) : null,
+            ind?.trend,
+            metrics?.day_high != null ? Number(metrics.day_high) : null,
+            metrics?.day_low != null ? Number(metrics.day_low) : null,
+            asset.symbol
           );
 
           // If market is closed, force signal to wait. Otherwise prefer AI signal, else Hauza scalp.
