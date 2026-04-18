@@ -12,28 +12,9 @@ import { useQuery } from "@tanstack/react-query";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
 
-const BlogAdSlot = ({ slot }: { slot: string }) => {
-  const adRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    try {
-      if (adRef.current) {
-        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-      }
-    } catch {}
-  }, []);
-  return (
-    <div className="my-6 text-center" ref={adRef}>
-      <ins
-        className="adsbygoogle"
-        style={{ display: "block" }}
-        data-ad-client="ca-pub-8741937856196827"
-        data-ad-slot={slot}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
-    </div>
-  );
-};
+// AdSense temporarily disabled while site content expands to meet AdSense Program Policies.
+// Re-enable by restoring the <ins class="adsbygoogle"> markup once approved.
+const BlogAdSlot = (_: { slot: string }) => null;
 
 const blogPosts = [
   {
