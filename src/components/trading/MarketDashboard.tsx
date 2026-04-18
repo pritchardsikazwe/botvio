@@ -102,6 +102,110 @@ const TREND_ICONS: Record<string, React.ReactNode> = {
   neutral: <Minus className="h-4 w-4 text-muted-foreground" />,
 };
 
+// === Market open/close detection (forex/metals close on weekends) ===
+function isCryptoSymbol(symbol: string): boolean {
+  const s = symbol.toUpperCase();
+  return /BTC|ETH|SOL|BNB|XRP|DOGE|USDT|USDC|ADA|MATIC|LTC|DOT/.test(s);
+}
+
+function isForexOrMetalSymbol(symbol: string): boolean {
+  if (isCryptoSymbol(symbol)) return false;
+  const s = symbol.toUpperCase();
+  return /XAU|XAG|EUR|GBP|USD|JPY|AUD|CAD|CHF|NZD/.test(s);
+}
+
+function isMarketClosedNow(symbol: string): boolean {
+  if (!isForexOrMetalSymbol(symbol)) return false;
+  const now = new Date();
+  const day = now.getUTCDay(); // 0=Sun, 6=Sat
+  const hour = now.getUTCHours();
+  // Closed: Friday 22:00 UTC → Sunday 22:00 UTC
+  if (day === 6) return true; // Saturday
+  if (day === 0 && hour < 22) return true; // Sunday before 22:00 UTC
+  if (day === 5 && hour >= 22) return true; // Friday after 22:00 UTC
+  return false;
+}
+
+// === Hauza Scalping Signal (client-side, instant) ===
+// Uses RSI(14) + trend + recent price action for quick M1/M5 scalp setups.
+type HauzaScalp = {
+  signal: "buy" | "sell" | "wait";
+  confidence: number;
+  entry: number | null;
+  sl: number | null;
+  tp: number | null;
+  reason: string;
+};
+
+function computeHauzaScalp(
+  price: number | null | undefined,
+  rsi: number | null | undefined,
+  trend: string | null | undefined,
+  dayHigh: number | null | undefined,
+  dayLow: number | null | undefined,
+  symbol: string
+): HauzaScalp {
+  if (price == null || rsi == null) {
+    return { signal: "wait", confidence: 0, entry: null, sl: null, tp: null, reason: "Awaiting live tick data" };
+  }
+  // ATR proxy from day range (~10% of range as scalp risk)
+  const range = dayHigh != null && dayLow != null ? Math.abs(dayHigh - dayLow) : null;
+  const isJpy = symbol.includes("JPY");
+  const isMetal = symbol.includes("XAU") || symbol.includes("XAG");
+  const fallbackPip = isMetal ? 1.5 : isJpy ? 0.08 : 0.0008;
+  const risk = range != null ? Math.max(range * 0.12, fallbackPip) : fallbackPip;
+  const decimals = isJpy ? 3 : isMetal ? 2 : 5;
+  const round = (n: number) => +n.toFixed(decimals);
+
+  const t = (trend || "").toLowerCase();
+  const bullish = t === "bullish";
+  const bearish = t === "bearish";
+
+  // Hauza scalp logic — tight 1:1.8 R:R
+  if (bullish && rsi > 45 && rsi < 70) {
+    return {
+      signal: "buy",
+      confidence: Math.min(88, 62 + (rsi - 45) * 0.8),
+      entry: round(price),
+      sl: round(price - risk),
+      tp: round(price + risk * 1.8),
+      reason: "Hauza scalp: bullish trend + RSI momentum",
+    };
+  }
+  if (bearish && rsi < 55 && rsi > 30) {
+    return {
+      signal: "sell",
+      confidence: Math.min(88, 62 + (55 - rsi) * 0.8),
+      entry: round(price),
+      sl: round(price + risk),
+      tp: round(price - risk * 1.8),
+      reason: "Hauza scalp: bearish trend + RSI momentum",
+    };
+  }
+  if (rsi <= 30) {
+    return {
+      signal: "buy",
+      confidence: 70,
+      entry: round(price),
+      sl: round(price - risk * 0.8),
+      tp: round(price + risk * 1.5),
+      reason: "Hauza scalp: oversold bounce setup",
+    };
+  }
+  if (rsi >= 70) {
+    return {
+      signal: "sell",
+      confidence: 70,
+      entry: round(price),
+      sl: round(price + risk * 0.8),
+      tp: round(price - risk * 1.5),
+      reason: "Hauza scalp: overbought rejection setup",
+    };
+  }
+  return { signal: "wait", confidence: 40, entry: null, sl: null, tp: null, reason: "Hauza scalp: range-bound — wait for breakout" };
+}
+
+
 function formatPrice(price: number | null, symbol: string): string {
   if (price == null) return "—";
   if (symbol.includes("JPY")) return price.toFixed(3);
