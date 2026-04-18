@@ -905,17 +905,11 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                   </div>
                 )}
 
-                {/* Session */}
-                {metrics && <SessionBlock metrics={metrics} />}
-
                 {/* 4H Block */}
                 {metrics && <H4Block metrics={metrics} symbol={asset.symbol} />}
 
                 {/* Day Range */}
                 {metrics && <DayRangeBlock metrics={metrics} symbol={asset.symbol} />}
-
-                {/* Key Levels */}
-                {metrics && <LevelsBlock metrics={metrics} symbol={asset.symbol} />}
 
                 {/* Botvio Signal Button — Hauza scalp or AI signal (suppressed when closed) */}
                 {!marketClosed && <BotvioSignalButton sig={effectiveSig} symbol={asset.symbol} navigate={navigate} />}
