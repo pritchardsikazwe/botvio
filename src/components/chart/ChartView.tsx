@@ -111,6 +111,7 @@ export function ChartView({
       wickUpColor: "hsl(145 70% 55%)",
       wickDownColor: "hsl(0 85% 65%)",
     });
+    candleSeriesRef.current = candleSeries;
 
     if (candles.length > 0) {
       const data = candles.map((c) => ({
@@ -121,6 +122,14 @@ export function ChartView({
         close: c.close,
       }));
       candleSeries.setData(data);
+      const lastBar = data[data.length - 1];
+      lastCandleRef.current = {
+        time: lastBar.time as number,
+        open: lastBar.open,
+        high: lastBar.high,
+        low: lastBar.low,
+        close: lastBar.close,
+      };
 
       const firstTime = candleTime(candles[0]) as any;
       const lastTime = candleTime(candles[candles.length - 1]) as any;
