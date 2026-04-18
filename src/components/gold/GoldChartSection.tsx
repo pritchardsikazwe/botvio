@@ -75,13 +75,24 @@ export function GoldChartSection() {
         </CardContent>
       </Card>
 
-      {/* Botvio Signal + Twelve Data Chart */}
+      {/* Botvio Signal + Live Detail Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-1">
           <GoldBotvioSignalButton />
         </div>
         <div className="lg:col-span-3">
-          <TwelveDataChart symbol="XAU/USD" displaySymbol="XAU/USD" showHauzaStrategy />
+          <Card className="bg-card border-border/50 overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-xs font-bold text-foreground">XAU/USD · 15m Detail</span>
+                </div>
+                <Badge variant="outline" className="text-[10px] border-success/30 text-success">● Live</Badge>
+              </div>
+              <TradingViewMiniWidget symbol="XAUUSD" height={420} />
+            </CardContent>
+          </Card>
         </div>
       </div>
 
