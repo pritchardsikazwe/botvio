@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { SignalComments } from "@/components/signals/SignalComments";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -357,10 +356,6 @@ export const HomeSignalsWidget = () => {
                   </a>
                 </div>
 
-                {/* Comments on running signals */}
-                {!isWin && !isLoss && (
-                  <SignalComments signalId={signal.id} />
-                )}
               </CardContent>
             </Card>
           );
