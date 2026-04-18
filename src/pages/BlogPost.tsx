@@ -172,14 +172,14 @@ const BlogPost = () => {
 
       <div className="h-4" />
 
-      <article className="mx-auto w-full max-w-3xl px-4 pb-16">
+      <article className="mx-auto w-full max-w-2xl px-4 pb-16 sm:px-6">
         {/* Hero */}
-        <header className="mb-8">
-          <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4 transition-colors">
+        <header className="mb-10">
+          <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to Blog
           </Link>
 
-          <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
             <Badge className="bg-primary text-primary-foreground">{post.category}</Badge>
             <span className="text-muted-foreground">•</span>
             <span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />{post.readTime}</span>
@@ -189,16 +189,16 @@ const BlogPost = () => {
             <span className="text-muted-foreground">By {post.author}</span>
           </div>
 
-          <h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+          <h1 className="text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground sm:text-5xl mb-5">
             {post.title}
           </h1>
 
-          <p className="mt-3 text-lg leading-relaxed text-muted-foreground">
+          <p className="text-xl leading-[1.65] text-muted-foreground font-light">
             {post.excerpt}
           </p>
 
           {post.coverImage && (
-            <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card shadow-md">
               <img src={post.coverImage} alt={post.title} className="h-auto w-full object-cover" loading="lazy" />
             </div>
           )}
@@ -213,18 +213,23 @@ const BlogPost = () => {
         {/* Content */}
         <section
           className="
-            prose prose-slate dark:prose-invert max-w-none
-            prose-headings:scroll-mt-24 prose-headings:text-foreground
-            prose-h2:mt-10 prose-h2:text-2xl
-            prose-h3:mt-8
-            prose-p:leading-relaxed prose-p:text-muted-foreground
-            prose-img:rounded-xl prose-img:shadow-sm prose-img:border prose-img:border-border
-            prose-hr:my-10
-            prose-a:text-primary prose-a:underline prose-a:decoration-primary/30 hover:prose-a:decoration-primary
-            prose-strong:text-foreground
-            prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-lg prose-blockquote:py-2 prose-blockquote:px-4
+            blog-prose
+            prose prose-lg prose-slate dark:prose-invert max-w-none
+            prose-headings:font-sans prose-headings:tracking-tight prose-headings:text-foreground prose-headings:scroll-mt-24
+            prose-h2:text-3xl prose-h2:font-bold prose-h2:mt-14 prose-h2:mb-5 prose-h2:leading-snug prose-h2:pb-2 prose-h2:border-b prose-h2:border-border/60
+            prose-h3:text-2xl prose-h3:font-semibold prose-h3:mt-10 prose-h3:mb-4 prose-h3:leading-snug
+            prose-h4:text-xl prose-h4:font-semibold prose-h4:mt-8 prose-h4:mb-3
+            prose-p:text-[1.0625rem] prose-p:leading-[1.85] prose-p:text-foreground/90 prose-p:my-6 prose-p:tracking-[0.005em]
+            prose-li:text-[1.0625rem] prose-li:leading-[1.8] prose-li:text-foreground/90 prose-li:my-2.5
+            prose-ul:my-6 prose-ul:pl-6 prose-ol:my-6 prose-ol:pl-6
+            prose-img:rounded-2xl prose-img:shadow-md prose-img:border prose-img:border-border prose-img:my-10
+            prose-hr:my-12 prose-hr:border-border/60
+            prose-a:text-primary prose-a:font-medium prose-a:underline prose-a:decoration-primary/40 prose-a:underline-offset-4 hover:prose-a:decoration-primary
+            prose-strong:text-foreground prose-strong:font-semibold
+            prose-blockquote:border-l-4 prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-xl prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:my-8 prose-blockquote:not-italic prose-blockquote:font-medium prose-blockquote:text-foreground
             prose-li:marker:text-primary
-            prose-code:bg-muted prose-code:text-primary prose-code:rounded prose-code:px-1.5 prose-code:py-0.5
+            prose-code:bg-muted prose-code:text-primary prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.9em] prose-code:font-mono
+            prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border prose-pre:rounded-xl prose-pre:p-5 prose-pre:my-8
           "
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
