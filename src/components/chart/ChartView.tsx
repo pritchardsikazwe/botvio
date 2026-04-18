@@ -419,26 +419,6 @@ export function ChartView({
           )}
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <Switch checked={showSessions} onCheckedChange={onToggleSessions} className="h-4 w-7" />
-            <Label className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <Clock className="h-3 w-3" /> Sessions
-            </Label>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Switch checked={showLevels} onCheckedChange={onToggleLevels} className="h-4 w-7" />
-            <Label className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <BarChart3 className="h-3 w-3" /> S/R
-            </Label>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Switch checked={showNews} onCheckedChange={onToggleNews} className="h-4 w-7" />
-            <Label className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <Newspaper className="h-3 w-3" /> News
-            </Label>
-          </div>
-        </div>
       </div>
 
       {/* Chart */}
