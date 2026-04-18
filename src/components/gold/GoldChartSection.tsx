@@ -5,6 +5,7 @@ import { ExternalLink, BarChart3, TrendingUp, Layers, Target, Zap, Crosshair, Sh
 import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
+import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
 
 
 const CHART_STRATEGIES = [
@@ -67,6 +68,9 @@ export function GoldChartSection() {
 
   return (
     <div className="space-y-4">
+      {/* Weekend / market-closed warning */}
+      <MarketClosedBanner symbol="XAUUSD" />
+
       {/* Live Deriv XAU/USD Chart */}
       <DerivLiveChart displaySymbol="XAU/USD" height={420} defaultGranularity={900} />
 
