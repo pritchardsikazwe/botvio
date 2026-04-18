@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, Wifi, WifiOff } from "lucide-react";
+import { Activity, Wifi, WifiOff, Lock } from "lucide-react";
 import { getDerivWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
+import { useMarketSession } from "@/hooks/useMarketSession";
 
 interface Candle {
   epoch: number;
@@ -39,6 +40,11 @@ export function DerivLiveChart({
   const [lastPrice, setLastPrice] = useState<number | null>(null);
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+
+  // Map display symbol → market session symbol (e.g. "XAU/USD" → "XAUUSD")
+  const sessionSymbol = useMemo(() => displaySymbol.replace("/", ""), [displaySymbol]);
+  const { isMarketOpen, marketType } = useMarketSession(sessionSymbol);
+  const isClosed = !isMarketOpen && (marketType === "forex" || marketType === "indices");
 
   useEffect(() => {
     if (!derivSymbol) return;
@@ -212,21 +218,37 @@ export function DerivLiveChart({
                 {g.label}
               </Button>
             ))}
-            <Badge
-              variant="outline"
-              className={`text-[10px] ml-1 ${connected ? "border-success/30 text-success" : "border-muted text-muted-foreground"}`}
-            >
-              {connected ? <Wifi className="h-2.5 w-2.5 mr-1" /> : <WifiOff className="h-2.5 w-2.5 mr-1" />}
-              {connected ? "Live" : "..."}
-            </Badge>
+            {isClosed ? (
+              <Badge variant="outline" className="text-[10px] ml-1 border-warning/40 text-warning">
+                <Lock className="h-2.5 w-2.5 mr-1" />
+                Market Closed
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className={`text-[10px] ml-1 ${connected ? "border-success/30 text-success" : "border-muted text-muted-foreground"}`}
+              >
+                {connected ? <Wifi className="h-2.5 w-2.5 mr-1" /> : <WifiOff className="h-2.5 w-2.5 mr-1" />}
+                {connected ? "Live" : "..."}
+              </Badge>
+            )}
           </div>
         </div>
 
         {/* SVG Chart */}
-        <div style={{ height }}>
+        <div style={{ height }} className="relative">
+          {isClosed && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+              <Lock className="h-8 w-8 text-warning mb-2" />
+              <p className="text-sm font-bold text-foreground">Market Closed (Weekend)</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-xs text-center px-4">
+                {displaySymbol} reopens Sunday 22:00 UTC. Trade Synthetic Indices (24/7) meanwhile.
+              </p>
+            </div>
+          )}
           {visible.length === 0 ? (
             <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
-              Connecting to Deriv live feed...
+              {isClosed ? "Last close shown when market reopens" : "Connecting to Deriv live feed..."}
             </div>
           ) : (
             <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full h-full">

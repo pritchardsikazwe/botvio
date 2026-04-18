@@ -5,6 +5,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { ChartView } from "@/components/chart/ChartView";
 import { SymbolHeaderCard } from "@/components/chart/SymbolHeaderCard";
+import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
 import { KeyLevelsCard } from "@/components/chart/KeyLevelsCard";
 import { TradeIdeaCard } from "@/components/chart/TradeIdeaCard";
 import { MarketStructureCard } from "@/components/chart/MarketStructureCard";
@@ -175,6 +176,9 @@ const ChartPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
+            {/* ── Weekend / Market Closed Banner ─────── */}
+            <MarketClosedBanner symbol={displaySymbol} />
+
             {/* ── Symbol Header ─────────────────────── */}
             <SymbolHeaderCard
               symbol={displaySymbol}
