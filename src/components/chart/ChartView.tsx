@@ -70,6 +70,7 @@ export function ChartView({
         textColor: "hsl(220 10% 55%)",
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: 11,
+        attributionLogo: false,
       },
       grid: {
         vertLines: { color: "hsl(220 15% 14%)" },
