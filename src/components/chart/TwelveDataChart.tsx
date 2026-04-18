@@ -208,7 +208,7 @@ export function TwelveDataChart({ symbol = "XAU/USD", displaySymbol, showHauzaSt
     if (chartRef.current) chartRef.current.remove();
 
     const chart = createChart(containerRef.current, {
-      layout: { background: { color: "transparent" }, textColor: "rgba(255, 255, 255, 0.6)" },
+      layout: { background: { color: "transparent" }, textColor: "rgba(255, 255, 255, 0.6)", attributionLogo: false },
       grid: { vertLines: { color: "rgba(255, 255, 255, 0.04)" }, horzLines: { color: "rgba(255, 255, 255, 0.04)" } },
       crosshair: { mode: 0 },
       rightPriceScale: { borderColor: "rgba(255, 255, 255, 0.1)" },
