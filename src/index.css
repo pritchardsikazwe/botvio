@@ -90,6 +90,35 @@
     @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;
   }
 
+  /* ── Editorial blog typography ── */
+  .blog-prose {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "liga", "calt";
+  }
+  .blog-prose > p:first-of-type::first-letter {
+    float: left;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 3.75rem;
+    line-height: 0.9;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    padding: 0.35rem 0.6rem 0 0;
+    margin-top: 0.15rem;
+  }
+  .blog-prose p {
+    text-wrap: pretty;
+  }
+  .blog-prose h2,
+  .blog-prose h3,
+  .blog-prose h4 {
+    text-wrap: balance;
+  }
+  .blog-prose ul > li::marker,
+  .blog-prose ol > li::marker {
+    font-weight: 700;
+  }
+
   .gold-text {
     color: hsl(var(--primary));
     text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
