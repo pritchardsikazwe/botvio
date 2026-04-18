@@ -48,31 +48,8 @@ const relatedPosts = [
   { slug: "botvio-vs-manual-trading", title: "Botvio vs Manual Trading" },
 ];
 
-/* ── AdSense ad slot ── */
-const AdSlot = ({ position }: { position: string }) => {
-  const adRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    try {
-      if (adRef.current && typeof window !== "undefined") {
-        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-      }
-    } catch {}
-  }, []);
-
-  return (
-    <div className="my-8 text-center" ref={adRef}>
-      <ins
-        className="adsbygoogle"
-        style={{ display: "block" }}
-        data-ad-client="ca-pub-8741937856196827"
-        data-ad-slot={position}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
-    </div>
-  );
-};
+/* ── AdSense ad slot (temporarily disabled for AdSense policy review) ── */
+const AdSlot = (_: { position: string }) => null;
 
 /* ── YouTube embed ── */
 const YouTubeEmbed = ({ url }: { url: string }) => {
