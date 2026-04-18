@@ -62,6 +62,11 @@ export function ChartView({
 }: ChartViewProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const lastCandleRef = useRef<{ time: number; open: number; high: number; low: number; close: number } | null>(null);
+
+  // Live Deriv tick feed for supported symbols (XAU/USD, XAG/USD, GBP/USD, BTC/USD, etc.)
+  const { tick: liveTick, connected: liveConnected, derivSupported } = useDerivLiveTicks(symbol);
 
   const buildChart = useCallback(() => {
     if (!chartContainerRef.current) return;
