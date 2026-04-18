@@ -177,7 +177,7 @@ export function AlphaVantageChart({ symbol = "XAUUSD", displaySymbol, showHauzaS
         function: fn,
         from_symbol: avSymbol.from,
         to_symbol: avSymbol.to,
-        apikey: "MFDKRYAY4WAZLR2T",
+        apikey: "GXDD1ZAPQUW7Y08T",
         outputsize: "compact",
       });
       if (isIntraday) params.set("interval", interval);
