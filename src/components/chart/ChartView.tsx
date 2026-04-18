@@ -1,10 +1,17 @@
 import { useRef, useEffect, useCallback } from "react";
-import { createChart, ColorType, LineSeries, CandlestickSeries } from "lightweight-charts";
+import {
+  createChart,
+  ColorType,
+  LineSeries,
+  CandlestickSeries,
+  type ISeriesApi,
+} from "lightweight-charts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { BarChart3, Eye, Newspaper, Clock, TrendingUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { BarChart3, Eye, Newspaper, Clock, TrendingUp, Radio } from "lucide-react";
 import {
   detectSupportResistance,
   detectWickRejections,
@@ -12,6 +19,7 @@ import {
   detectTrendlines,
   candleTime,
 } from "@/lib/chartAnalysis";
+import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 
 interface Candle {
   candle_time: string;
@@ -54,6 +62,11 @@ export function ChartView({
 }: ChartViewProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const lastCandleRef = useRef<{ time: number; open: number; high: number; low: number; close: number } | null>(null);
+
+  // Live Deriv tick feed for supported symbols (XAU/USD, XAG/USD, GBP/USD, BTC/USD, etc.)
+  const { tick: liveTick, connected: liveConnected, derivSupported } = useDerivLiveTicks(symbol);
 
   const buildChart = useCallback(() => {
     if (!chartContainerRef.current) return;
@@ -98,6 +111,7 @@ export function ChartView({
       wickUpColor: "hsl(145 70% 55%)",
       wickDownColor: "hsl(0 85% 65%)",
     });
+    candleSeriesRef.current = candleSeries;
 
     if (candles.length > 0) {
       const data = candles.map((c) => ({
@@ -108,6 +122,14 @@ export function ChartView({
         close: c.close,
       }));
       candleSeries.setData(data);
+      const lastBar = data[data.length - 1];
+      lastCandleRef.current = {
+        time: lastBar.time as number,
+        open: lastBar.open,
+        high: lastBar.high,
+        low: lastBar.low,
+        close: lastBar.close,
+      };
 
       const firstTime = candleTime(candles[0]) as any;
       const lastTime = candleTime(candles[candles.length - 1]) as any;
@@ -313,8 +335,53 @@ export function ChartView({
         chartRef.current.remove();
         chartRef.current = null;
       }
+      candleSeriesRef.current = null;
     };
   }, [buildChart]);
+
+  // ── Live Deriv tick → update last candle in real time ───────────────
+  useEffect(() => {
+    if (!liveTick || !candleSeriesRef.current) return;
+    const series = candleSeriesRef.current;
+    const tfSeconds = timeframeToSeconds(timeframe);
+    const bucketTime = Math.floor(liveTick.epoch / tfSeconds) * tfSeconds;
+    const last = lastCandleRef.current;
+
+    if (!last || bucketTime > last.time) {
+      // New bar
+      const next = {
+        time: bucketTime,
+        open: liveTick.price,
+        high: liveTick.price,
+        low: liveTick.price,
+        close: liveTick.price,
+      };
+      lastCandleRef.current = next;
+      try {
+        series.update({
+          time: bucketTime as any,
+          open: next.open,
+          high: next.high,
+          low: next.low,
+          close: next.close,
+        });
+      } catch { /* ignore stale series */ }
+    } else if (bucketTime === last.time) {
+      // Update current bar
+      last.high = Math.max(last.high, liveTick.price);
+      last.low = Math.min(last.low, liveTick.price);
+      last.close = liveTick.price;
+      try {
+        series.update({
+          time: last.time as any,
+          open: last.open,
+          high: last.high,
+          low: last.low,
+          close: last.close,
+        });
+      } catch { /* ignore stale series */ }
+    }
+  }, [liveTick, timeframe]);
 
   return (
     <Card className="bg-card border-border/50 rounded-xl overflow-hidden">
@@ -336,6 +403,20 @@ export function ChartView({
               {tf.toUpperCase()}
             </Button>
           ))}
+          {derivSupported && (
+            <Badge
+              variant="outline"
+              className={`ml-2 h-6 gap-1 px-2 text-[10px] font-bold ${
+                liveConnected
+                  ? "border-success/40 text-success bg-success/10"
+                  : "border-muted-foreground/30 text-muted-foreground"
+              }`}
+              title="Live ticks streamed from Deriv"
+            >
+              <Radio className={`h-3 w-3 ${liveConnected ? "animate-pulse" : ""}`} />
+              {liveConnected ? "LIVE · Deriv" : "Connecting…"}
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
@@ -448,3 +529,15 @@ function calculateEMA(candles: { candle_time: string; close: number }[], period:
   }
   return result;
 }
+
+function timeframeToSeconds(tf: string): number {
+  const map: Record<string, number> = {
+    "1m": 60,
+    "5m": 300,
+    "15m": 900,
+    "1h": 3600,
+    "4h": 14400,
+  };
+  return map[tf] ?? 3600;
+}
+
