@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, BarChart3, TrendingUp, Zap, ArrowUpDown, Activity } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
+import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
@@ -127,6 +128,22 @@ export function SyntxChartSection() {
         <p className="text-[10px] text-muted-foreground">
           💡 SyntX proprietary indices (PainX, GainX, etc.) are only available on Weltrade's platform. These charts show standard markets also tradeable on Weltrade.
         </p>
+      </section>
+
+      {/* ── Botvio Scalp Robot — Currencies (1m / 5m breakouts & S/R breaks) ── */}
+      <section className="space-y-2">
+        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+          <Zap className="h-4 w-4 text-primary" /> Botvio Scalp Robot — Currencies
+        </h3>
+        <MultiAssetScalpRobot
+          title="Currency Scalp Robot"
+          assets={[
+            { displaySymbol: "EUR/USD", label: "EUR/USD", emoji: "🇪🇺" },
+            { displaySymbol: "GBP/USD", label: "GBP/USD", emoji: "🇬🇧" },
+            { displaySymbol: "USD/JPY", label: "USD/JPY", emoji: "🇯🇵" },
+            { displaySymbol: "AUD/USD", label: "AUD/USD", emoji: "🇦🇺" },
+          ]}
+        />
       </section>
 
       {/* ── SyntX Catalog ── */}
