@@ -46,6 +46,8 @@ export const AdminProfilesTab = () => {
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"recent" | "ai_total_desc" | "ai_today_desc" | "ai_total_asc">("recent");
+  const [minUsage, setMinUsage] = useState("");
   const [planDialog, setPlanDialog] = useState<{ open: boolean; userId: string; userName: string; currentPlanId: string | null; subId: string | null }>({
     open: false, userId: "", userName: "", currentPlanId: null, subId: null,
   });
