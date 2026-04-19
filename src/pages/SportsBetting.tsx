@@ -254,9 +254,12 @@ const SportsBetting = () => {
     }
   };
 
-  // Generate daily picks - admin only
+  // Generate daily picks — allowed for admins, VIP, or manually granted users
   const generateDailyPicks = async () => {
-    if (!isAdmin) { toast.error("Only admins can generate daily picks"); return; }
+    if (!isAdmin && !hasAccess) {
+      toast.error("Subscribe to VIP or request access to generate picks");
+      return;
+    }
     setGeneratingPicks(true);
     setDailyPicks(null);
     try {
@@ -264,10 +267,16 @@ const SportsBetting = () => {
         body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter === "all" ? undefined : leagueFilter, dayRange },
       });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) {
+        if (data.limitReached) {
+          toast.error(`Daily limit reached (${data.used}/${data.daily_limit}). Try again tomorrow.`);
+          return;
+        }
+        throw new Error(data.error);
+      }
       setDailyPicks(data.picks);
 
-      // Admin: save picks to database for all users to see
+      // Admin: publish picks for all users
       if (isAdmin && data.picks) {
         await supabase.from("daily_picks").insert({
           created_by: user!.id,
@@ -281,7 +290,8 @@ const SportsBetting = () => {
         queryClient.invalidateQueries({ queryKey: ["published-picks"] });
       }
 
-      toast.success(`${slipSize}-team picks generated!`);
+      const used = data.used != null ? ` • Used ${data.used}/${data.daily_limit} today` : "";
+      toast.success(`${slipSize}-team picks generated!${used}`);
     } catch (err: any) {
       toast.error(err.message || "Generation failed");
     } finally {
