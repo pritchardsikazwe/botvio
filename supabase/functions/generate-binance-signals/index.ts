@@ -194,11 +194,60 @@ Deno.serve(async (req) => {
     }
 
     const isFutures = signalType === "futures";
-    let symbols = isFutures ? FUTURES_SYMBOLS : SPOT_SYMBOLS;
+    const isScalp = signalType === "scalp";
+    let symbols = isScalp ? SCALP_SYMBOLS : isFutures ? FUTURES_SYMBOLS : SPOT_SYMBOLS;
     const systemPrompt = isFutures ? FUTURES_PROMPT : SPOT_PROMPT;
 
     if (targetSymbols) {
       symbols = symbols.filter(s => targetSymbols!.includes(s.symbol) || targetSymbols!.includes(s.display));
+    }
+
+    // ── SCALP MODE: technical-only, fast loop, 30-min expiry ──
+    if (isScalp) {
+      const results: any[] = [];
+      for (const sym of symbols) {
+        try {
+          const [c1m, c5m] = await Promise.all([
+            fetchBinanceKlines(sym.symbol, "1m", 30),
+            fetchBinanceKlines(sym.symbol, "5m", 30),
+          ]);
+          const sig = detectScalp(c1m, c5m);
+          if (!sig) {
+            console.log(`Scalp skip ${sym.display}: no breakout`);
+            continue;
+          }
+
+          const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+          const { error: insertErr } = await supabase.from("trading_signals").insert({
+            symbol: sym.display,
+            direction: sig.side,
+            entry_price: sig.entry,
+            stop_loss: sig.sl,
+            take_profit: sig.tp,
+            timeframe: "M1",
+            category: "scalp",
+            broker: ["binance"],
+            confidence: sig.confidence,
+            reason: sig.reason,
+            is_manual: false,
+            status: "ACTIVE",
+            strategy_name: "Binance Scalp Robot",
+            expires_at: expiresAt,
+          });
+          if (insertErr) {
+            console.error(`Scalp insert failed ${sym.display}:`, insertErr.message);
+          } else {
+            results.push({ symbol: sym.display, signal: sig.side, confidence: sig.confidence });
+            console.log(`Scalp signal: ${sym.display} ${sig.side} (${sig.confidence}%)`);
+          }
+        } catch (e: any) {
+          console.error(`Scalp error ${sym.display}:`, e.message);
+        }
+      }
+      return new Response(
+        JSON.stringify({ success: true, signals_posted: results.length, results, mode: "scalp" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const results: any[] = [];
