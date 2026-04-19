@@ -115,6 +115,9 @@ const BinanceHub = () => {
                 <Button size="sm" variant="outline" className="border-yellow-500/30 text-yellow-500" onClick={() => handleGenerate("futures")} disabled={generate.isPending}>
                   <Zap className="h-4 w-4 mr-1" /> Futures Signals
                 </Button>
+                <Button size="sm" variant="outline" className="border-orange-500/40 text-orange-500" onClick={() => handleGenerate("scalp")} disabled={generate.isPending}>
+                  <Flame className="h-4 w-4 mr-1" /> Scalp Signals (1m/5m)
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -158,10 +161,11 @@ const BinanceHub = () => {
         <div>
           <h2 className="text-xl font-bold mb-3">⚡ AI Trading Signals</h2>
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="all">🔥 All</TabsTrigger>
               <TabsTrigger value="crypto">📊 Spot</TabsTrigger>
               <TabsTrigger value="futures">⚡ Futures</TabsTrigger>
+              <TabsTrigger value="scalp">🎯 Scalp</TabsTrigger>
             </TabsList>
             <TabsContent value={tab} className="mt-4">
               {isLoading ? (
