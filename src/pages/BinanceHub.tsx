@@ -15,6 +15,7 @@ import { BinanceSignalCard } from "@/components/binance/BinanceSignalCard";
 import { ArbitrageScanner, StakingCard, LaunchpadCard, ScalpingCard } from "@/components/binance/BinanceFeatureCards";
 import { BinanceMarketOverview } from "@/components/binance/BinanceMarketOverview";
 import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
+import { AutoTradePanel } from "@/components/trading/AutoTradePanel";
 
 const SPOT_INSTRUMENTS = [
   { symbol: "BTCUSDT", display: "BTC/USDT", tip: "Bitcoin is the most liquid crypto. Trade breakouts above key round numbers ($60k, $70k). Use the 4H chart for trend direction and 15m for entries." },
