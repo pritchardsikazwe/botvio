@@ -8,6 +8,7 @@ import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
 import { GoldScalpingRobot } from "./GoldScalpingRobot";
 import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
+import { AutoTradePanel } from "@/components/trading/AutoTradePanel";
 
 
 const CHART_STRATEGIES = [
