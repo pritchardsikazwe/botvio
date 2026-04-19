@@ -14,6 +14,7 @@ import { CryptoInstrumentCard } from "@/components/binance/CryptoInstrumentCard"
 import { BinanceSignalCard } from "@/components/binance/BinanceSignalCard";
 import { ArbitrageScanner, StakingCard, LaunchpadCard, ScalpingCard } from "@/components/binance/BinanceFeatureCards";
 import { BinanceMarketOverview } from "@/components/binance/BinanceMarketOverview";
+import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
 
 const SPOT_INSTRUMENTS = [
   { symbol: "BTCUSDT", display: "BTC/USDT", tip: "Bitcoin is the most liquid crypto. Trade breakouts above key round numbers ($60k, $70k). Use the 4H chart for trend direction and 15m for entries." },
@@ -117,6 +118,20 @@ const BinanceHub = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Botvio Scalp Robot — Crypto (BTC / ETH, 1m / 5m breakouts & S/R breaks) */}
+        <div>
+          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+            <Zap className="h-5 w-5 text-yellow-500" /> Botvio Scalp Robot — Crypto
+          </h2>
+          <MultiAssetScalpRobot
+            title="Crypto Scalp Robot"
+            assets={[
+              { displaySymbol: "BTC/USD", label: "Bitcoin", emoji: "₿", cryptoAlwaysOpen: true },
+              { displaySymbol: "ETH/USD", label: "Ethereum", emoji: "⟠", cryptoAlwaysOpen: true },
+            ]}
+          />
+        </div>
 
         {/* Live Spot Instruments */}
         <div>
