@@ -185,8 +185,25 @@ export const AdminProfilesTab = () => {
       const plan = getUserPlan(p.user_id);
       if (!plan || plan.code !== planFilter) return false;
     }
+    const minN = parseInt(minUsage);
+    if (!isNaN(minN) && minN > 0) {
+      const usage = getUserAiUsage(p.user_id);
+      if (usage.total < minN) return false;
+    }
     return true;
   });
+
+  // Sort
+  if (filtered && sortBy !== "recent") {
+    filtered.sort((a, b) => {
+      const ua = getUserAiUsage(a.user_id);
+      const ub = getUserAiUsage(b.user_id);
+      if (sortBy === "ai_total_desc") return ub.total - ua.total;
+      if (sortBy === "ai_today_desc") return ub.today - ua.today;
+      if (sortBy === "ai_total_asc") return ua.total - ub.total;
+      return 0;
+    });
+  }
 
   const openPlanDialog = (profile: ProfileRow) => {
     const sub = getUserSub(profile.user_id);
