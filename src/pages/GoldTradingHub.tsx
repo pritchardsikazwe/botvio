@@ -9,6 +9,7 @@ import { GoldCommunitySection } from "@/components/gold/GoldCommunitySection";
 import { GoldSentimentGauge } from "@/components/gold/GoldSentimentGauge";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
 import { GoldBotvioStrategy } from "@/components/gold/GoldHauzaStrategy";
+import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, Signal, Lightbulb, Users, Crosshair, Target, TrendingUp, Clock, ShieldCheck } from "lucide-react";
@@ -74,6 +75,9 @@ const GoldTradingHub = () => {
 
         {/* Sentiment Gauge Row */}
         <GoldSentimentGauge />
+
+        {/* Sponsored */}
+        <AdsterraNativeBanner />
 
         {/* Active Gold Signals */}
         <div>

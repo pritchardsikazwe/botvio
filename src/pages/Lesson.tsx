@@ -5,6 +5,7 @@ import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
+import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 
 interface Lesson {
   id: string;
@@ -165,6 +166,11 @@ const Lesson = () => {
           <article className="prose prose-invert max-w-none">
             {renderContent(lesson.content)}
           </article>
+        </div>
+
+        {/* Sponsored */}
+        <div className="mb-8">
+          <AdsterraNativeBanner />
         </div>
 
         {/* Navigation */}
