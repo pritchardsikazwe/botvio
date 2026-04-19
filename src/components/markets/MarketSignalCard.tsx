@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, Minus, Lock, BarChart3, ExternalLink } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Lock, BarChart3, ExternalLink, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -24,16 +24,21 @@ interface MarketSignalCardProps {
   chartSymbol?: string;
   metrics?: { label: string; value: string }[];
   bias?: "Bullish" | "Bearish" | "Neutral";
+  /** ISO timestamp when the signal was generated/posted */
+  postedAt?: string;
 }
 
 export const MarketSignalCard = ({
   instrument, symbol, price, change, changePercent,
   signal, entry, stopLoss, takeProfit, strategy,
   session, confidence, isPremium, brokerName, brokerUrl,
-  chartSymbol, metrics, bias,
+  chartSymbol, metrics, bias, postedAt,
 }: MarketSignalCardProps) => {
   const { user } = useAuth();
   const locked = isPremium && !user;
+  const postedLabel = (postedAt ? new Date(postedAt) : new Date()).toLocaleString([], {
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+  });
 
   const signalColor = signal === "BUY" ? "text-success" : signal === "SELL" ? "text-destructive" : "text-muted-foreground";
   const signalBg = signal === "BUY" ? "bg-success/10 border-success/30" : signal === "SELL" ? "bg-destructive/10 border-destructive/30" : "bg-muted/30 border-border";
@@ -105,6 +110,12 @@ export const MarketSignalCard = ({
             <span className="font-semibold text-foreground truncate max-w-[120px]">{strategy}</span>
           </div>
           <Badge variant="outline" className="text-[10px] font-mono">{session}</Badge>
+        </div>
+
+        {/* Posted time */}
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          <Clock className="h-2.5 w-2.5" />
+          <span>Posted {postedLabel}</span>
         </div>
 
         {/* Confidence */}
