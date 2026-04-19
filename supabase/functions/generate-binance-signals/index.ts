@@ -186,12 +186,7 @@ Deno.serve(async (req) => {
       if (body.symbols && Array.isArray(body.symbols)) targetSymbols = body.symbols;
     } catch { /* no body or invalid JSON — use defaults */ }
 
-    if (!lovableApiKey) {
-      return new Response(
-        JSON.stringify({ error: "AI service not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // (lovableApiKey check happens later — scalp mode doesn't need AI)
 
     const isFutures = signalType === "futures";
     const isScalp = signalType === "scalp";
