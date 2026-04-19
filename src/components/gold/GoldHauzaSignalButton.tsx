@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity } from "lucide-react";
+import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } from "lucide-react";
+import { useMarketSession } from "@/hooks/useMarketSession";
 
 type SignalType = "BUY" | "SELL" | "WAIT" | "HOLD";
 
@@ -109,10 +110,25 @@ const SIGNAL_CONFIG: Record<SignalType, {
 };
 
 export function GoldBotvioSignalButton() {
+  const { isMarketOpen, isLoading: sessionLoading } = useMarketSession("XAUUSD");
   const [signalState, setSignalState] = useState<SignalState>(generateSignal);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Force WAIT state when market is closed
+  const effectiveState: SignalState = useMemo(() => {
+    if (!sessionLoading && !isMarketOpen) {
+      return {
+        signal: "WAIT",
+        confidence: 0,
+        reason: "Gold market is currently CLOSED. XAU/USD trades Mon 22:00 UTC – Fri 22:00 UTC. No signals generated outside trading hours.",
+        strategy: "Market Closed",
+      };
+    }
+    return signalState;
+  }, [isMarketOpen, sessionLoading, signalState]);
+
   useEffect(() => {
+    if (!isMarketOpen) return; // don't refresh signals when market closed
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
@@ -121,10 +137,10 @@ export function GoldBotvioSignalButton() {
       }, 400);
     }, 30000); // refresh every 30s
     return () => clearInterval(interval);
-  }, []);
+  }, [isMarketOpen]);
 
-  const config = SIGNAL_CONFIG[signalState.signal];
-  const Icon = config.icon;
+  const config = SIGNAL_CONFIG[effectiveState.signal];
+  const Icon = isMarketOpen ? config.icon : Clock;
 
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-500 ${isTransitioning ? "opacity-50 scale-95" : "opacity-100 scale-100"}`}>
@@ -139,7 +155,7 @@ export function GoldBotvioSignalButton() {
           <div className="flex items-center gap-1.5">
             <Activity className={`h-3 w-3 ${config.text} ${config.pulse}`} />
             <Badge variant="outline" className={`text-[10px] ${config.border} ${config.text} font-mono`}>
-              LIVE
+              {isMarketOpen ? "LIVE" : "CLOSED"}
             </Badge>
           </div>
         </div>
@@ -150,29 +166,29 @@ export function GoldBotvioSignalButton() {
             <Icon className={`h-10 w-10 ${config.text}`} />
           </div>
           <span className={`text-2xl font-black tracking-tight ${config.text}`}>
-            {config.label}
+            {isMarketOpen ? config.label : "MARKET CLOSED"}
           </span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Confidence:</span>
             <div className="w-24 h-2 rounded-full bg-muted overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-700 ${
-                  signalState.confidence >= 70 ? "bg-emerald-500" :
-                  signalState.confidence >= 50 ? "bg-amber-500" : "bg-red-500"
+                  effectiveState.confidence >= 70 ? "bg-emerald-500" :
+                  effectiveState.confidence >= 50 ? "bg-amber-500" : "bg-red-500"
                 }`}
-                style={{ width: `${signalState.confidence}%` }}
+                style={{ width: `${effectiveState.confidence}%` }}
               />
             </div>
-            <span className={`text-xs font-bold ${config.text}`}>{signalState.confidence}%</span>
+            <span className={`text-xs font-bold ${config.text}`}>{effectiveState.confidence}%</span>
           </div>
         </div>
 
         {/* Reason */}
         <div className="space-y-2 bg-background/30 rounded-lg p-3">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">{signalState.strategy}</Badge>
+            <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">{effectiveState.strategy}</Badge>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">{signalState.reason}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">{effectiveState.reason}</p>
         </div>
 
         {/* Disclaimer */}
