@@ -83,6 +83,15 @@ export function GoldChartSection() {
       {/* Scalp Robot — Silver (XAG/USD) */}
       <BotvioScalpRobot displaySymbol="XAG/USD" assetLabel="Silver" />
 
+      {/* Auto-Trade Engine — Gold + Silver */}
+      <AutoTradePanel
+        scope="Gold & Silver"
+        availableAssets={[
+          { displaySymbol: "XAU/USD", label: "Gold", emoji: "🥇" },
+          { displaySymbol: "XAG/USD", label: "Silver", emoji: "🥈" },
+        ]}
+      />
+
       {/* Botvio Signal + Live Detail Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-1">
