@@ -8,6 +8,7 @@ import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
 import { GoldScalpingRobot } from "./GoldScalpingRobot";
 import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
+import { AutoTradePanel } from "@/components/trading/AutoTradePanel";
 
 
 const CHART_STRATEGIES = [
@@ -81,6 +82,15 @@ export function GoldChartSection() {
 
       {/* Scalp Robot — Silver (XAG/USD) */}
       <BotvioScalpRobot displaySymbol="XAG/USD" assetLabel="Silver" />
+
+      {/* Auto-Trade Engine — Gold + Silver */}
+      <AutoTradePanel
+        scope="Gold & Silver"
+        availableAssets={[
+          { displaySymbol: "XAU/USD", label: "Gold", emoji: "🥇" },
+          { displaySymbol: "XAG/USD", label: "Silver", emoji: "🥈" },
+        ]}
+      />
 
       {/* Botvio Signal + Live Detail Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">

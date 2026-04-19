@@ -506,6 +506,126 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_trade_executions: {
+        Row: {
+          account_type: string
+          closed_at: string | null
+          confidence: number
+          contract_id: number | null
+          created_at: string
+          deriv_symbol: string
+          display_symbol: string
+          entry_price: number | null
+          error_message: string | null
+          id: string
+          multiplier: number
+          outcome: string | null
+          pnl_usd: number | null
+          raw_response: Json | null
+          side: string
+          signal_tf: string
+          signal_type: string
+          stake_usd: number
+          status: string
+          stop_loss: number | null
+          take_profit: number | null
+          user_id: string
+        }
+        Insert: {
+          account_type: string
+          closed_at?: string | null
+          confidence: number
+          contract_id?: number | null
+          created_at?: string
+          deriv_symbol: string
+          display_symbol: string
+          entry_price?: number | null
+          error_message?: string | null
+          id?: string
+          multiplier: number
+          outcome?: string | null
+          pnl_usd?: number | null
+          raw_response?: Json | null
+          side: string
+          signal_tf: string
+          signal_type: string
+          stake_usd: number
+          status?: string
+          stop_loss?: number | null
+          take_profit?: number | null
+          user_id: string
+        }
+        Update: {
+          account_type?: string
+          closed_at?: string | null
+          confidence?: number
+          contract_id?: number | null
+          created_at?: string
+          deriv_symbol?: string
+          display_symbol?: string
+          entry_price?: number | null
+          error_message?: string | null
+          id?: string
+          multiplier?: number
+          outcome?: string | null
+          pnl_usd?: number | null
+          raw_response?: Json | null
+          side?: string
+          signal_tf?: string
+          signal_type?: string
+          stake_usd?: number
+          status?: string
+          stop_loss?: number | null
+          take_profit?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      auto_trade_settings: {
+        Row: {
+          account_type: string
+          created_at: string
+          daily_loss_limit_pct: number
+          enabled: boolean
+          enabled_assets: string[]
+          id: string
+          max_open_per_asset: number
+          min_confidence: number
+          multiplier: number
+          stake_usd: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_type?: string
+          created_at?: string
+          daily_loss_limit_pct?: number
+          enabled?: boolean
+          enabled_assets?: string[]
+          id?: string
+          max_open_per_asset?: number
+          min_confidence?: number
+          multiplier?: number
+          stake_usd?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_type?: string
+          created_at?: string
+          daily_loss_limit_pct?: number
+          enabled?: boolean
+          enabled_assets?: string[]
+          id?: string
+          max_open_per_asset?: number
+          min_confidence?: number
+          multiplier?: number
+          stake_usd?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bet_slips: {
         Row: {
           created_at: string
@@ -5838,6 +5958,15 @@ export type Database = {
         Returns: number
       }
       finalize_stream: { Args: { p_stream_id: string }; Returns: undefined }
+      get_auto_trade_today_pnl: {
+        Args: { _user_id: string }
+        Returns: {
+          loss_count: number
+          realized_pnl_usd: number
+          trade_count: number
+          win_count: number
+        }[]
+      }
       get_p2p_trader_stats: {
         Args: { trader_id: string }
         Returns: {
@@ -5847,6 +5976,10 @@ export type Database = {
           total_trades: number
           total_volume: number
         }[]
+      }
+      has_open_auto_trade: {
+        Args: { _display_symbol: string; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
