@@ -230,6 +230,9 @@ const Index = () => {
         {/* Scrolling Advert Banner */}
         <ScrollingAdvertBanner />
 
+        {/* Adsterra Native Banner */}
+        <AdsterraNativeBanner />
+
         {/* 1 — Latest Trading Signals */}
         <section>
           <HomeSignalsWidget />
