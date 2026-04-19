@@ -10,6 +10,7 @@ import { blogContent } from "@/content/blogPosts";
 import { binanceBlogPosts } from "@/content/binanceBlogPosts";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
+import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 
 /* ── Affiliate links ── */
 const AFFILIATE_LINKS = {
@@ -85,8 +86,8 @@ const relatedPosts = [
   { slug: "botvio-vs-manual-trading", title: "Botvio vs Manual Trading" },
 ];
 
-/* ── AdSense ad slot (temporarily disabled for AdSense policy review) ── */
-const AdSlot = (_: { position: string }) => null;
+/* ── Adsterra native ad slot (renders only once per page due to invoke.js container ID) ── */
+const AdSlot = (_: { position: string }) => <AdsterraNativeBanner />;
 
 /* ── YouTube embed ── */
 const YouTubeEmbed = ({ url }: { url: string }) => {

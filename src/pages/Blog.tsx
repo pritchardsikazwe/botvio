@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
+import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 
 // AdSense temporarily disabled while site content expands to meet AdSense Program Policies.
 // Re-enable by restoring the <ins class="adsbygoogle"> markup once approved.
@@ -347,6 +348,8 @@ const Blog = () => {
                 ))}
               </div>
             )}
+
+            <AdsterraNativeBanner />
 
             <div className="space-y-4">
               {rest.map(post => (
