@@ -50,8 +50,10 @@ const TIMEFRAMES: { label: "1m" | "5m"; seconds: number }[] = [
   { label: "5m", seconds: 300 },
 ];
 
-interface GoldScalpingRobotProps {
-  displaySymbol?: string; // default XAU/USD
+interface BotvioScalpRobotProps {
+  displaySymbol: string;        // e.g. "XAU/USD", "EUR/USD", "BTC/USD", "XAG/USD"
+  assetLabel?: string;          // friendly label, e.g. "Gold", "Silver", "Bitcoin"
+  cryptoAlwaysOpen?: boolean;   // if true, ignore market-session gating (crypto trades 24/7)
 }
 
 /**
@@ -60,7 +62,7 @@ interface GoldScalpingRobotProps {
  *   - Support / Resistance breaks (using pivot S/R clustering)
  * Generates ready-to-execute scalp setups with SL/TP based on ATR-style range.
  */
-export function GoldScalpingRobot({ displaySymbol = "XAU/USD" }: GoldScalpingRobotProps) {
+export function BotvioScalpRobot({ displaySymbol, assetLabel, cryptoAlwaysOpen = false }: BotvioScalpRobotProps) {
   const derivSymbol = useMemo(() => mapToDerivSymbol(displaySymbol), [displaySymbol]);
   const sessionSymbol = useMemo(() => displaySymbol.replace("/", ""), [displaySymbol]);
   const { isMarketOpen, marketType } = useMarketSession(sessionSymbol);
