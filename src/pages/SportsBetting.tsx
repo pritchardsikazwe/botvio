@@ -427,10 +427,10 @@ const SportsBetting = () => {
 
         <Tabs defaultValue="picks" className="space-y-4">
           <TabsList className="grid grid-cols-6 w-full">
-            <TabsTrigger value="fixtures" className="text-[10px] px-1">Fixtures</TabsTrigger>
             <TabsTrigger value="picks" className="text-[10px] px-1">
               <Sparkles className="h-3 w-3 mr-0.5" />Picks
             </TabsTrigger>
+            <TabsTrigger value="fixtures" className="text-[10px] px-1">Fixtures</TabsTrigger>
             <TabsTrigger value="check" className="text-[10px] px-1">
               <Eye className="h-3 w-3 mr-0.5" />Check
             </TabsTrigger>
