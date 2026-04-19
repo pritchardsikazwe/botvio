@@ -132,6 +132,16 @@ const BinanceHub = () => {
               { displaySymbol: "ETH/USD", label: "Ethereum", emoji: "⟠", cryptoAlwaysOpen: true },
             ]}
           />
+
+          {/* Auto-Trade Engine — Bitcoin via Deriv (note: Deriv has BTC/USD only) */}
+          <div className="mt-4">
+            <AutoTradePanel
+              scope="Bitcoin (Deriv)"
+              availableAssets={[
+                { displaySymbol: "BTC/USD", label: "Bitcoin", emoji: "₿" },
+              ]}
+            />
+          </div>
         </div>
 
         {/* Live Spot Instruments */}
