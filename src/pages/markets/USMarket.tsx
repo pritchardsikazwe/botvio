@@ -20,7 +20,7 @@ const US_SIGNALS = [
 ];
 
 const USMarket = () => (
-  <MarketPageLayout title="U.S. Market Dashboard" description="Real-time US market signals, S&P 500, Nasdaq, Dow Jones, Gold & Oil trading intelligence." emoji="🇺🇸">
+  <MarketPageLayout seoKey="marketsUs" title="U.S. Market Dashboard" description="Real-time US market signals, S&P 500, Nasdaq, Dow Jones, Gold & Oil trading intelligence." emoji="🇺🇸">
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">Market Overview</CardTitle></CardHeader>
       <CardContent>

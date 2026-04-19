@@ -19,7 +19,7 @@ const EU_SIGNALS = [
 ];
 
 const EuropeMarket = () => (
-  <MarketPageLayout title="Europe Market Dashboard" description="DAX, FTSE 100, CAC 40, EUR/USD trading signals and European market intelligence." emoji="🇪🇺">
+  <MarketPageLayout seoKey="marketsEurope" title="Europe Market Dashboard" description="DAX, FTSE 100, CAC 40, EUR/USD trading signals and European market intelligence." emoji="🇪🇺">
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">European Indices</CardTitle></CardHeader>
       <CardContent>

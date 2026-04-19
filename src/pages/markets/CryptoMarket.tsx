@@ -18,7 +18,7 @@ const CRYPTO_SIGNALS = [
 ];
 
 const CryptoMarket = () => (
-  <MarketPageLayout title="Crypto Market Dashboard" description="Bitcoin, Ethereum, Solana, BNB trading signals and crypto market intelligence." emoji="₿">
+  <MarketPageLayout seoKey="marketsCrypto" title="Crypto Market Dashboard" description="Bitcoin, Ethereum, Solana, BNB trading signals and crypto market intelligence." emoji="₿">
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">Crypto Overview</CardTitle></CardHeader>
       <CardContent>

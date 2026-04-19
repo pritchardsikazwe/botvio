@@ -19,7 +19,7 @@ const AFRICA_SIGNALS = [
 ];
 
 const AfricaMarket = () => (
-  <MarketPageLayout title="Africa Market Dashboard" description="JSE, NGX, LuSE market signals. South Africa, Nigeria, Zambia stock trading intelligence." emoji="🌍">
+  <MarketPageLayout seoKey="marketsAfrica" title="Africa Market Dashboard" description="JSE, NGX, LuSE market signals. South Africa, Nigeria, Zambia stock trading intelligence." emoji="🌍">
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">African Exchanges</CardTitle></CardHeader>
       <CardContent>
