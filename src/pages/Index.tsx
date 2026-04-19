@@ -229,9 +229,6 @@ const Index = () => {
         {/* Scrolling Advert Banner */}
         <ScrollingAdvertBanner />
 
-        {/* 0.5 — High-Impact News Events */}
-        <NewsEventCards />
-
         {/* 1 — Latest Trading Signals */}
         <section>
           <HomeSignalsWidget />
