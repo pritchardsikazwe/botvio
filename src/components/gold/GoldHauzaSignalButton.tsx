@@ -155,7 +155,7 @@ export function GoldBotvioSignalButton() {
           <div className="flex items-center gap-1.5">
             <Activity className={`h-3 w-3 ${config.text} ${config.pulse}`} />
             <Badge variant="outline" className={`text-[10px] ${config.border} ${config.text} font-mono`}>
-              LIVE
+              {isMarketOpen ? "LIVE" : "CLOSED"}
             </Badge>
           </div>
         </div>
@@ -166,29 +166,29 @@ export function GoldBotvioSignalButton() {
             <Icon className={`h-10 w-10 ${config.text}`} />
           </div>
           <span className={`text-2xl font-black tracking-tight ${config.text}`}>
-            {config.label}
+            {isMarketOpen ? config.label : "MARKET CLOSED"}
           </span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Confidence:</span>
             <div className="w-24 h-2 rounded-full bg-muted overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-700 ${
-                  signalState.confidence >= 70 ? "bg-emerald-500" :
-                  signalState.confidence >= 50 ? "bg-amber-500" : "bg-red-500"
+                  effectiveState.confidence >= 70 ? "bg-emerald-500" :
+                  effectiveState.confidence >= 50 ? "bg-amber-500" : "bg-red-500"
                 }`}
-                style={{ width: `${signalState.confidence}%` }}
+                style={{ width: `${effectiveState.confidence}%` }}
               />
             </div>
-            <span className={`text-xs font-bold ${config.text}`}>{signalState.confidence}%</span>
+            <span className={`text-xs font-bold ${config.text}`}>{effectiveState.confidence}%</span>
           </div>
         </div>
 
         {/* Reason */}
         <div className="space-y-2 bg-background/30 rounded-lg p-3">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">{signalState.strategy}</Badge>
+            <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">{effectiveState.strategy}</Badge>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">{signalState.reason}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">{effectiveState.reason}</p>
         </div>
 
         {/* Disclaimer */}
