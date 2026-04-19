@@ -15,7 +15,7 @@ const pressReleases = [
 
 const Press = () => (
   <div className="min-h-screen bg-background">
-    <SEOHead title="Press & Media" description="Botvio press releases, media coverage, and company announcements. Stay updated on Botvio's AI trading platform developments." />
+    <SEOHead seoKey="press" title="Press & Media" description="Botvio press releases, media coverage, and company announcements. Stay updated on Botvio's AI trading platform developments." />
     <Header />
     <main className="container mx-auto px-4 py-10 space-y-8">
       <div className="text-center space-y-3">

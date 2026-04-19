@@ -89,7 +89,7 @@ const GlobalMarkets = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="markets"
         title="Global Market Intelligence — Live Forex, Stocks, Crypto & Commodities Signals"
         description="Real-time market intelligence across US, Europe, Middle East, Asia, Crypto & Africa. Live signals, sentiment, economic events and AI trading insights — free for everyone."
         jsonLd={seoJsonLd}

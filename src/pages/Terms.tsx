@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 const Terms = () => {
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Terms of Service" description="Read Botvio's terms of service covering account usage, trading bot disclaimers, signal accuracy, copy trading rules, intellectual property rights, and user responsibilities for our AI-powered trading platform." />
+      <SEOHead seoKey="terms" title="Terms of Service" description="Read Botvio's terms of service covering account usage, trading bot disclaimers, signal accuracy, copy trading rules, intellectual property rights, and user responsibilities for our AI-powered trading platform." />
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-4xl">

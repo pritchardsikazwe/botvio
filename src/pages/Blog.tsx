@@ -297,7 +297,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="blog"
         title="Blog – Gold Signals, Forex Mentorship & AI Chart Analysis"
         description="Expert guides on gold trading signals, XAUUSD analysis, forex mentorship, Deriv signals, Exness signals, Weltrade signals & AI-powered chart analysis tools."
         jsonLd={jsonLd}

@@ -24,7 +24,7 @@ const Docs = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Documentation" description="Botvio internal documentation." noIndex />
+      <SEOHead seoKey="docs" title="Documentation" description="Botvio internal documentation." noIndex />
       <Header />
       <main className="container mx-auto px-4 py-10 max-w-4xl space-y-8">
         <div className="space-y-3">

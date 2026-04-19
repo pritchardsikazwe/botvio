@@ -33,7 +33,7 @@ const values = [
 
 const About = () => (
   <div className="min-h-screen bg-background">
-    <SEOHead
+    <SEOHead seoKey="about"
       title="About Botvio – AI Trading Signals & Forex Education"
       description="Botvio is an AI-powered trading platform providing free forex signals, chart analysis, gold trading tools, and education for traders worldwide."
       jsonLd={jsonLd}

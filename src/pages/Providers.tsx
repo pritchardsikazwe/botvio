@@ -107,7 +107,7 @@ const Providers = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="providers"
         title="Copy Trading – Follow Top Traders on Deriv & Exness"
         description="Subscribe to verified signal providers and automatically copy their trades on Deriv and Exness. Choose from top-performing gold, forex, and synthetic indices traders with real track records."
       />

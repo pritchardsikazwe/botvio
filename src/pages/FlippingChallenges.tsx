@@ -120,7 +120,7 @@ export default function FlippingChallenges() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="flippingChallenges"
         title="Botvio Flipping Challenges — Disciplined Account Growth"
         description="Join 7-day, 14-day, and 30-day growth challenges with rules, AI coaching, progress tracking, and leaderboards."
       />
