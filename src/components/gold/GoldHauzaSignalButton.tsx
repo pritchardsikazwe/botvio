@@ -110,10 +110,25 @@ const SIGNAL_CONFIG: Record<SignalType, {
 };
 
 export function GoldBotvioSignalButton() {
+  const { isMarketOpen, isLoading: sessionLoading } = useMarketSession("XAUUSD");
   const [signalState, setSignalState] = useState<SignalState>(generateSignal);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Force WAIT state when market is closed
+  const effectiveState: SignalState = useMemo(() => {
+    if (!sessionLoading && !isMarketOpen) {
+      return {
+        signal: "WAIT",
+        confidence: 0,
+        reason: "Gold market is currently CLOSED. XAU/USD trades Mon 22:00 UTC – Fri 22:00 UTC. No signals generated outside trading hours.",
+        strategy: "Market Closed",
+      };
+    }
+    return signalState;
+  }, [isMarketOpen, sessionLoading, signalState]);
+
   useEffect(() => {
+    if (!isMarketOpen) return; // don't refresh signals when market closed
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
@@ -122,10 +137,10 @@ export function GoldBotvioSignalButton() {
       }, 400);
     }, 30000); // refresh every 30s
     return () => clearInterval(interval);
-  }, []);
+  }, [isMarketOpen]);
 
-  const config = SIGNAL_CONFIG[signalState.signal];
-  const Icon = config.icon;
+  const config = SIGNAL_CONFIG[effectiveState.signal];
+  const Icon = isMarketOpen ? config.icon : Clock;
 
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-500 ${isTransitioning ? "opacity-50 scale-95" : "opacity-100 scale-100"}`}>
