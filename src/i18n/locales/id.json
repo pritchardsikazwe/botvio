@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "Memuat...", "save": "Simpan", "cancel": "Batal", "delete": "Hapus", "edit": "Edit", "create": "Buat", "submit": "Kirim", "search": "Cari", "filter": "Filter", "all": "Semua", "active": "Aktif", "inactive": "Tidak aktif", "pending": "Tertunda", "approved": "Disetujui", "rejected": "Ditolak", "copy": "Salin", "copied": "Disalin!", "share": "Bagikan", "download": "Unduh", "upload": "Unggah", "close": "Tutup", "back": "Kembali", "next": "Berikutnya", "previous": "Sebelumnya", "viewAll": "Lihat semua", "learnMore": "Pelajari lebih lanjut", "getStarted": "Mulai" },
+  "nav": { "home": "Beranda", "dashboard": "Dasbor", "bots": "Bot", "copyTrade": "Copy Trading", "p2p": "P2P", "learn": "Belajar", "strategies": "Strategi", "affiliate": "Afiliasi", "settings": "Pengaturan", "signIn": "Masuk", "signOut": "Keluar" },
+  "auth": { "signIn": "Masuk", "signUp": "Daftar", "email": "Email", "password": "Kata sandi", "confirmPassword": "Konfirmasi kata sandi", "forgotPassword": "Lupa kata sandi?", "noAccount": "Belum punya akun?", "haveAccount": "Sudah punya akun?", "createAccount": "Buat akun" },
+  "footer": { "copyright": "© 2024 Botvio. Semua hak dilindungi.", "terms": "Syarat layanan", "privacy": "Kebijakan privasi", "contact": "Kontak" }
+}

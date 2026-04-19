@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "লোড হচ্ছে...", "save": "সংরক্ষণ", "cancel": "বাতিল", "delete": "মুছুন", "edit": "সম্পাদনা", "create": "তৈরি করুন", "submit": "জমা দিন", "search": "খুঁজুন", "filter": "ফিল্টার", "all": "সব", "active": "সক্রিয়", "inactive": "নিষ্ক্রিয়", "pending": "অপেক্ষমান", "approved": "অনুমোদিত", "rejected": "প্রত্যাখ্যাত", "copy": "অনুলিপি", "copied": "অনুলিপি হয়েছে!", "share": "শেয়ার", "download": "ডাউনলোড", "upload": "আপলোড", "close": "বন্ধ", "back": "পিছনে", "next": "পরবর্তী", "previous": "পূর্ববর্তী", "viewAll": "সব দেখুন", "learnMore": "আরও জানুন", "getStarted": "শুরু করুন" },
+  "nav": { "home": "হোম", "dashboard": "ড্যাশবোর্ড", "bots": "বট", "copyTrade": "কপি ট্রেডিং", "p2p": "P2P", "learn": "শিখুন", "strategies": "কৌশল", "affiliate": "অ্যাফিলিয়েট", "settings": "সেটিংস", "signIn": "সাইন ইন", "signOut": "সাইন আউট" },
+  "auth": { "signIn": "সাইন ইন", "signUp": "সাইন আপ", "email": "ইমেইল", "password": "পাসওয়ার্ড", "confirmPassword": "পাসওয়ার্ড নিশ্চিত করুন", "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?", "noAccount": "অ্যাকাউন্ট নেই?", "haveAccount": "ইতিমধ্যে অ্যাকাউন্ট আছে?", "createAccount": "অ্যাকাউন্ট তৈরি করুন" },
+  "footer": { "copyright": "© 2024 Botvio। সর্বস্বত্ব সংরক্ষিত।", "terms": "শর্তাবলী", "privacy": "গোপনীয়তা", "contact": "যোগাযোগ" }
+}

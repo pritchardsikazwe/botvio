@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "Yükleniyor...", "save": "Kaydet", "cancel": "İptal", "delete": "Sil", "edit": "Düzenle", "create": "Oluştur", "submit": "Gönder", "search": "Ara", "filter": "Filtre", "all": "Tümü", "active": "Aktif", "inactive": "Pasif", "pending": "Bekliyor", "approved": "Onaylandı", "rejected": "Reddedildi", "copy": "Kopyala", "copied": "Kopyalandı!", "share": "Paylaş", "download": "İndir", "upload": "Yükle", "close": "Kapat", "back": "Geri", "next": "İleri", "previous": "Önceki", "viewAll": "Tümünü gör", "learnMore": "Daha fazla", "getStarted": "Başla" },
+  "nav": { "home": "Ana sayfa", "dashboard": "Panel", "bots": "Botlar", "copyTrade": "Kopya İşlem", "p2p": "P2P", "learn": "Öğren", "strategies": "Stratejiler", "affiliate": "Ortaklık", "settings": "Ayarlar", "signIn": "Giriş yap", "signOut": "Çıkış" },
+  "auth": { "signIn": "Giriş yap", "signUp": "Kayıt ol", "email": "E-posta", "password": "Şifre", "confirmPassword": "Şifreyi onayla", "forgotPassword": "Şifremi unuttum?", "noAccount": "Hesabın yok mu?", "haveAccount": "Hesabın var mı?", "createAccount": "Hesap oluştur" },
+  "footer": { "copyright": "© 2024 Botvio. Tüm hakları saklıdır.", "terms": "Kullanım şartları", "privacy": "Gizlilik", "contact": "İletişim" }
+}

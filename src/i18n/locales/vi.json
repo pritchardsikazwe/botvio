@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "Đang tải...", "save": "Lưu", "cancel": "Hủy", "delete": "Xóa", "edit": "Sửa", "create": "Tạo", "submit": "Gửi", "search": "Tìm kiếm", "filter": "Bộ lọc", "all": "Tất cả", "active": "Hoạt động", "inactive": "Không hoạt động", "pending": "Đang chờ", "approved": "Đã duyệt", "rejected": "Bị từ chối", "copy": "Sao chép", "copied": "Đã sao chép!", "share": "Chia sẻ", "download": "Tải xuống", "upload": "Tải lên", "close": "Đóng", "back": "Quay lại", "next": "Tiếp theo", "previous": "Trước", "viewAll": "Xem tất cả", "learnMore": "Tìm hiểu thêm", "getStarted": "Bắt đầu" },
+  "nav": { "home": "Trang chủ", "dashboard": "Bảng điều khiển", "bots": "Bot", "copyTrade": "Copy Trading", "p2p": "P2P", "learn": "Học", "strategies": "Chiến lược", "affiliate": "Đại lý", "settings": "Cài đặt", "signIn": "Đăng nhập", "signOut": "Đăng xuất" },
+  "auth": { "signIn": "Đăng nhập", "signUp": "Đăng ký", "email": "Email", "password": "Mật khẩu", "confirmPassword": "Xác nhận mật khẩu", "forgotPassword": "Quên mật khẩu?", "noAccount": "Chưa có tài khoản?", "haveAccount": "Đã có tài khoản?", "createAccount": "Tạo tài khoản" },
+  "footer": { "copyright": "© 2024 Botvio. Bảo lưu mọi quyền.", "terms": "Điều khoản", "privacy": "Bảo mật", "contact": "Liên hệ" }
+}

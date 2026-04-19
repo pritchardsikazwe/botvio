@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "Naglo-load...", "save": "I-save", "cancel": "Kanselahin", "delete": "Tanggalin", "edit": "I-edit", "create": "Lumikha", "submit": "Isumite", "search": "Maghanap", "filter": "Salain", "all": "Lahat", "active": "Aktibo", "inactive": "Hindi aktibo", "pending": "Nakabinbin", "approved": "Naaprubahan", "rejected": "Tinanggihan", "copy": "Kopyahin", "copied": "Nakopya!", "share": "Ibahagi", "download": "I-download", "upload": "I-upload", "close": "Isara", "back": "Bumalik", "next": "Susunod", "previous": "Nakaraan", "viewAll": "Tingnan lahat", "learnMore": "Matuto pa", "getStarted": "Magsimula" },
+  "nav": { "home": "Tahanan", "dashboard": "Dashboard", "bots": "Bot", "copyTrade": "Copy Trading", "p2p": "P2P", "learn": "Matuto", "strategies": "Estratehiya", "affiliate": "Affiliate", "settings": "Mga setting", "signIn": "Mag-sign in", "signOut": "Mag-sign out" },
+  "auth": { "signIn": "Mag-sign in", "signUp": "Mag-sign up", "email": "Email", "password": "Password", "confirmPassword": "Kumpirmahin ang password", "forgotPassword": "Nakalimutan ang password?", "noAccount": "Walang account?", "haveAccount": "Mayroon nang account?", "createAccount": "Gumawa ng account" },
+  "footer": { "copyright": "© 2024 Botvio. Nakalaan ang lahat ng karapatan.", "terms": "Mga tuntunin", "privacy": "Pagkapribado", "contact": "Makipag-ugnayan" }
+}

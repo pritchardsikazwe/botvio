@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "Wird geladen...", "save": "Speichern", "cancel": "Abbrechen", "delete": "Löschen", "edit": "Bearbeiten", "create": "Erstellen", "submit": "Absenden", "search": "Suchen", "filter": "Filter", "all": "Alle", "active": "Aktiv", "inactive": "Inaktiv", "pending": "Ausstehend", "approved": "Genehmigt", "rejected": "Abgelehnt", "copy": "Kopieren", "copied": "Kopiert!", "share": "Teilen", "download": "Herunterladen", "upload": "Hochladen", "close": "Schließen", "back": "Zurück", "next": "Weiter", "previous": "Vorherige", "viewAll": "Alle anzeigen", "learnMore": "Mehr erfahren", "getStarted": "Loslegen" },
+  "nav": { "home": "Startseite", "dashboard": "Dashboard", "bots": "Bots", "copyTrade": "Copy Trading", "p2p": "P2P", "learn": "Lernen", "strategies": "Strategien", "affiliate": "Partnerprogramm", "settings": "Einstellungen", "signIn": "Anmelden", "signOut": "Abmelden" },
+  "auth": { "signIn": "Anmelden", "signUp": "Registrieren", "email": "E-Mail", "password": "Passwort", "confirmPassword": "Passwort bestätigen", "forgotPassword": "Passwort vergessen?", "noAccount": "Noch kein Konto?", "haveAccount": "Bereits ein Konto?", "createAccount": "Konto erstellen" },
+  "footer": { "copyright": "© 2024 Botvio. Alle Rechte vorbehalten.", "terms": "Nutzungsbedingungen", "privacy": "Datenschutz", "contact": "Kontakt" }
+}

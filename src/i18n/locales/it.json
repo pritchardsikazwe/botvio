@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "Caricamento...", "save": "Salva", "cancel": "Annulla", "delete": "Elimina", "edit": "Modifica", "create": "Crea", "submit": "Invia", "search": "Cerca", "filter": "Filtro", "all": "Tutti", "active": "Attivo", "inactive": "Inattivo", "pending": "In attesa", "approved": "Approvato", "rejected": "Rifiutato", "copy": "Copia", "copied": "Copiato!", "share": "Condividi", "download": "Scarica", "upload": "Carica", "close": "Chiudi", "back": "Indietro", "next": "Avanti", "previous": "Precedente", "viewAll": "Vedi tutto", "learnMore": "Scopri di più", "getStarted": "Inizia" },
+  "nav": { "home": "Home", "dashboard": "Dashboard", "bots": "Bot", "copyTrade": "Copy Trading", "p2p": "P2P", "learn": "Impara", "strategies": "Strategie", "affiliate": "Affiliazione", "settings": "Impostazioni", "signIn": "Accedi", "signOut": "Esci" },
+  "auth": { "signIn": "Accedi", "signUp": "Registrati", "email": "Email", "password": "Password", "confirmPassword": "Conferma password", "forgotPassword": "Password dimenticata?", "noAccount": "Non hai un account?", "haveAccount": "Hai già un account?", "createAccount": "Crea account" },
+  "footer": { "copyright": "© 2024 Botvio. Tutti i diritti riservati.", "terms": "Termini di servizio", "privacy": "Privacy", "contact": "Contatto" }
+}

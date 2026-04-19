@@ -1,0 +1,6 @@
+{
+  "common": { "loading": "로드 중...", "save": "저장", "cancel": "취소", "delete": "삭제", "edit": "편집", "create": "만들기", "submit": "제출", "search": "검색", "filter": "필터", "all": "모두", "active": "활성", "inactive": "비활성", "pending": "대기 중", "approved": "승인됨", "rejected": "거부됨", "copy": "복사", "copied": "복사됨!", "share": "공유", "download": "다운로드", "upload": "업로드", "close": "닫기", "back": "뒤로", "next": "다음", "previous": "이전", "viewAll": "전체 보기", "learnMore": "자세히 알아보기", "getStarted": "시작하기" },
+  "nav": { "home": "홈", "dashboard": "대시보드", "bots": "봇", "copyTrade": "카피 트레이딩", "p2p": "P2P", "learn": "학습", "strategies": "전략", "affiliate": "제휴", "settings": "설정", "signIn": "로그인", "signOut": "로그아웃" },
+  "auth": { "signIn": "로그인", "signUp": "회원가입", "email": "이메일", "password": "비밀번호", "confirmPassword": "비밀번호 확인", "forgotPassword": "비밀번호를 잊으셨나요?", "noAccount": "계정이 없으신가요?", "haveAccount": "이미 계정이 있으신가요?", "createAccount": "계정 만들기" },
+  "footer": { "copyright": "© 2024 Botvio. 모든 권리 보유.", "terms": "이용약관", "privacy": "개인정보", "contact": "연락처" }
+}
