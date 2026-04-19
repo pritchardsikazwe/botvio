@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – Yapay Zeka Forex Sinyalleri, Altın Ticareti ve Botlar",
+    "description": "Deriv, Exness, Weltrade ve Binance için ücretsiz yapay zeka destekli forex sinyalleri, altın (XAUUSD) analizi, grafik yapay zekası ve otomatik ticaret botları. Dünya çapında yatırımcıların tercihi.",
+    "keywords": "forex sinyalleri, altın ticareti, XAUUSD sinyalleri, yapay zeka ticaret botu, Deriv bot, Boom 1000, ücretsiz forex sinyalleri, grafik analizi"
+  },
+  "signals": {
+    "title": "Canlı Forex & Altın Alım Satım Sinyalleri",
+    "description": "Forex, altın, sentetik endeksler ve kripto için giriş, zararı durdur ve kar al seviyeleriyle gerçek zamanlı yapay zeka tarafından üretilen alım satım sinyalleri.",
+    "keywords": "canlı forex sinyalleri, altın sinyalleri, XAUUSD sinyalleri, ücretsiz alım satım sinyalleri, Deriv sinyalleri, Boom Crash sinyalleri"
+  },
+  "gold": {
+    "title": "Altın Ticaret Merkezi – XAUUSD Canlı Sinyaller & Analiz",
+    "description": "Canlı XAUUSD fiyatları, yapay zeka altın alım satım sinyalleri, scalping robotu ve tutarlı altın alım satımı için Botvio AI Stratejisi.",
+    "keywords": "altın ticareti, XAUUSD, altın sinyalleri, altın scalping, altın analizi, altın robotu"
+  },
+  "binary": {
+    "title": "İkili Opsiyon Sinyalleri & Yapay Zeka Tahminleri",
+    "description": "Pocket Option, Deriv, IQ Option ve Binomo için yapay zeka destekli ikili opsiyon sinyalleri, vade sonu tahminleri ve güven puanlaması.",
+    "keywords": "ikili opsiyon sinyalleri, Pocket Option sinyalleri, IQ Option, ikili yapay zeka botu, OTC sinyalleri"
+  },
+  "blog": {
+    "title": "Botvio Akademi – Ticaret Makaleleri, Rehberler & Stratejiler",
+    "description": "Forex, altın, kripto ve ikili opsiyon ticareti üzerine ücretsiz kapsamlı makaleler. Gerçek yatırımcılardan stratejiler, eğitimler ve aracı kurum incelemeleri.",
+    "keywords": "ticaret blogu, forex rehberleri, altın stratejisi, ikili opsiyon eğitimi, Deriv rehberi"
+  },
+  "strategies": {
+    "title": "Ticaret Stratejileri Pazarı – Uzman Stratejilerini Kopyala",
+    "description": "Forex, altın, sentetik endeksler ve kripto için kanıtlanmış alım satım stratejilerini keşfedin, kopyalayın ve paylaşın.",
+    "keywords": "alım satım stratejileri, kopya ticaret, forex stratejisi, altın stratejisi, Boom stratejisi"
+  },
+  "markets": {
+    "title": "Küresel Piyasa Bilgileri – Canlı Oturumlar & Sinyaller",
+    "description": "ABD, Avrupa, Asya, Orta Doğu, Afrika ve Kripto piyasalarında gerçek zamanlı piyasa durumu, duyarlılık, sinyaller ve ekonomik olaylar.",
+    "keywords": "küresel piyasalar, canlı piyasa oturumları, ABD piyasa açılışı, Tadawul sinyalleri, Asya piyasa sinyalleri, piyasa duyarlılığı"
+  },
+  "marketsUs": {
+    "title": "ABD Piyasa Bilgileri – S&P 500, Nasdaq, NYSE Sinyalleri",
+    "description": "NYSE ve Nasdaq oturumları için canlı ABD borsası sinyalleri, duyarlılık, sektör ısı haritası ve ekonomik olaylar.",
+    "keywords": "ABD piyasa sinyalleri, S&P 500, Nasdaq sinyalleri, NYSE açılışı, ABD oturumu forex"
+  },
+  "marketsEurope": {
+    "title": "Avrupa Piyasa Bilgileri – DAX, FTSE & EUR Sinyalleri",
+    "description": "DAX, FTSE 100, EURUSD ve Londra oturumu forex için canlı Avrupa piyasa sinyalleri.",
+    "keywords": "DAX sinyalleri, FTSE 100, Londra oturumu, EURUSD sinyalleri, Avrupa piyasa açılışı"
+  },
+  "marketsAsia": {
+    "title": "Asya Piyasa Bilgileri – Nikkei, Hang Seng & JPY Sinyalleri",
+    "description": "Nikkei 225, Hang Seng, USDJPY ve Tokyo oturumu forex için canlı Asya piyasa sinyalleri.",
+    "keywords": "Nikkei sinyalleri, Hang Seng, USDJPY, Tokyo oturumu, Asya piyasa açılışı"
+  },
+  "marketsMiddleEast": {
+    "title": "Orta Doğu Piyasa Bilgileri – Tadawul & Altın Sinyalleri",
+    "description": "Bölgesel alım satım oturumları sırasında Tadawul, Dubai, altın (XAUUSD) ve petrol için canlı Orta Doğu piyasa sinyalleri.",
+    "keywords": "Tadawul sinyalleri, Dubai piyasası, Orta Doğu forex, altın Orta Doğu oturumu"
+  },
+  "marketsAfrica": {
+    "title": "Afrika Piyasa Bilgileri – JSE & Afrika Forex Sinyalleri",
+    "description": "JSE Top 40, Güney Afrika, Nijerya, Kenya ve Mısır oturumları için canlı Afrika piyasa sinyalleri.",
+    "keywords": "JSE Top 40, Afrika forex sinyalleri, ZAR sinyalleri, NGN, Afrika piyasa açılışı"
+  },
+  "marketsCrypto": {
+    "title": "Kripto Piyasa Bilgileri – BTC, ETH & Altcoin Sinyalleri",
+    "description": "Bitcoin, Ethereum ve önde gelen altcoinler için 7/24 kripto piyasa sinyalleri, duyarlılık ve canlı fiyatlar.",
+    "keywords": "kripto sinyalleri, Bitcoin sinyalleri, Ethereum sinyalleri, altcoin sinyalleri, kripto duyarlılığı"
+  },
+  "bots": {
+    "title": "Yapay Zeka Ticaret Botları – Otomatik Forex, Altın & Kripto",
+    "description": "Forex, altın, sentetik endeksler, Boom & Crash ve kriptoyu kapsayan Deriv, Binance ve MT5 için otomatik alım satım botları.",
+    "keywords": "ticaret botu, Deriv bot, Binance bot, Boom 1000 bot, otomatik forex, MT5 bot"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Merkezi – Kripto Botları, Sinyaller & Stratejiler",
+    "description": "Yapay zeka tarafından oluşturulan kripto sinyalleri, otomatik botlar ve canlı piyasa bilgileri için Binance hesabınızı bağlayın.",
+    "keywords": "Binance bot, Binance sinyalleri, kripto ticaret botu, BTC bot, ETH sinyalleri"
+  },
+  "weltrade": {
+    "title": "Weltrade Merkezi – Sentetik Endeksler, Spike Hunter & Painx",
+    "description": "Weltrade'in özel sentetik endekslerini (Spike Hunter, Painx, GainX) Botvio AI Stratejisi ve canlı sinyallerle takas edin.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, sentetik endeksler Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvio Pazaryeri – Botlar, Sinyaller & Eğitim",
+    "description": "Önde gelen yatırımcılardan doğrulanmış alım satım botları, sinyal sağlayıcıları ve eğitim kurslarını satın alın veya abone olun.",
+    "keywords": "ticaret pazaryeri, ticaret botu satın al, sinyal aboneliği, ticaret kursları"
+  },
+  "about": {
+    "title": "Botvio Hakkında – Yapay Zeka Ticaret Sinyalleri & Forex Eğitimi",
+    "description": "Botvio, dünya çapındaki yatırımcılar için ücretsiz forex sinyalleri, grafik analizi, altın alım satım araçları ve eğitim sağlayan yapay zeka destekli bir alım satım platformudur.",
+    "keywords": "Botvio hakkında, yapay zeka ticaret platformu, forex eğitimi, ticaret sinyalleri şirketi"
+  },
+  "contact": {
+    "title": "Botvio İletişim – Destek & Ortaklıklar",
+    "description": "Botvio destek, ortaklıklar ve medya sorularına e-posta veya WhatsApp aracılığıyla ulaşın.",
+    "keywords": "Botvio iletişim, ticaret desteği, sinyal sağlayıcı iletişim"
+  },
+  "faq": {
+    "title": "Botvio SSS – Sinyaller & Botlar Hakkında Sıkça Sorulan Sorular",
+    "description": "Botvio alım satım sinyalleri, botlar, aracılar, ödemeler, abonelikler ve hesap kurulumu hakkındaki soruların yanıtları.",
+    "keywords": "Botvio SSS, ticaret sinyalleri soruları, Botvio nasıl kullanılır"
+  },
+  "affiliate": {
+    "title": "Botvio Ortaklık Programı – %20 Ömür Boyu Komisyon Kazanın",
+    "description": "Yatırımcıları Botvio'ya yönlendirin ve her kayıt için 2$ artı her satın alma işleminden %20 ömür boyu gelir payı kazanın.",
+    "keywords": "Botvio ortaklık, ticaret ortaklığı, forex yönlendirme programı, sinyal ortaklığı"
+  },
+  "p2p": {
+    "title": "P2P Kripto Ticareti – USDT'yi Yerel Olarak Al & Sat",
+    "description": "Mobil para, banka transferi ve yerel yöntemlerle USDT, BTC ve kripto almak ve satmak için Botvio P2P pazaryeri.",
+    "keywords": "P2P kripto, USDT satın al, Bitcoin sat, mobil para kripto"
+  },
+  "sportsBetting": {
+    "title": "Botvio Spor Bahisleri – Futbol Tahminleri & Kuponlar",
+    "description": "Önde gelen Avrupa ligleri için yapay zeka destekli futbol tahminleri, günlük kuponlar ve bahis takipçisi.",
+    "keywords": "futbol tahminleri, günlük bahis kuponları, spor yapay zekası, futbol tahminleri"
+  },
+  "flippingChallenges": {
+    "title": "Hesap Katlama Yarışmaları – Küçük Hesapları Hızla Büyütün",
+    "description": "Altın scalping, haftalık forex sprintleri ve Boom & Crash hesap büyümesi için rehberli hesap katlama yarışmaları.",
+    "keywords": "katlama yarışması, hesap büyümesi, prop firm yarışması, scalping yarışması"
+  },
+  "live": {
+    "title": "Botvio Canlı – Gerçek Zamanlı Ticaret Yayınları & Mentorluk",
+    "description": "Canlı alım satım yayınlarını izleyin, gerçek zamanlı sorular sorun ve önde gelen sinyal sağlayıcılarını takip edin.",
+    "keywords": "canlı ticaret, ticaret mentorluğu, canlı forex yayını, canlı kopya ticaret"
+  },
+  "newsCalendar": {
+    "title": "Forex Haber Takvimi – Yüksek Etkili Ekonomik Olaylar",
+    "description": "NFP, CPI, FOMC ve forex ile altını hareket ettiren yüksek etkili olayları kapsayan canlı ekonomik haber takvimi.",
+    "keywords": "forex haber takvimi, NFP, CPI, FOMC, yüksek etkili haberler"
+  },
+  "tradeModes": {
+    "title": "Botvio Ticaret Modları – Scalping, Swing, Sniper & Hedge",
+    "description": "Her piyasa koşulu için Scalper, Swing, Sniper, Hedge ve Trend modları dahil 8 uzman alım satım modundan birini seçin.",
+    "keywords": "scalping modu, swing ticaret, sniper ticaret, hedge ticaret, trend modu"
+  },
+  "derivOptions": {
+    "title": "Deriv Opsiyon İşlemleri – Rakamlar, Çarpanlar & Boom/Crash",
+    "description": "Deriv Çarpanları, Rakamlar, Yüksek/Düşük ve Boom & Crash'i yapay zeka sinyalleri ve Botvio botları ile takas edin.",
+    "keywords": "Deriv opsiyonları, Deriv çarpanları, Deriv rakamları, Boom Crash, Yüksek Düşük"
+  },
+  "trading": {
+    "title": "Botvio Ticaret Çalışma Alanı – Sinyaller, Grafikler & Otomatik İşlem",
+    "description": "Yapay zeka sinyalleri, canlı grafikler, piyasa verileri ve otomatik yürütme ile hepsi bir arada alım satım çalışma alanı.",
+    "keywords": "ticaret çalışma alanı, yapay zeka sinyalleri panosu, otomatik işlem, canlı grafikler"
+  },
+  "trade": {
+    "title": "Botvio Ticaret – Canlı Sinyaller & Otomatik Yürütme",
+    "description": "Deriv, MT5 ve Binance için sinyaller, grafikler ve tek tıklamalı yürütme ile canlı ticaret panosu.",
+    "keywords": "canlı ticaret panosu, otomatik işlem, sinyal yürütme"
+  },
+  "authoritySignals": {
+    "title": "Otorite Sinyalleri – Doğrulanmış En İyi Sağlayıcı Sinyalleri",
+    "description": "Geçmiş başarıları, kazanma oranları ve risk profilleriyle doğrulanmış en iyi sağlayıcılardan derlenmiş sinyaller.",
+    "keywords": "doğrulanmış sinyaller, en iyi sinyal sağlayıcıları, otorite sinyalleri, sinyal kopyalama"
+  },
+  "learn": {
+    "title": "Botvio Akademi – Ücretsiz Forex & Ticaret Mentorluğu",
+    "description": "Forex, altın, kripto ve ikili opsiyonları kapsayan ücretsiz forex başlangıç mentorluğu, video dersler ve ticaret kursları.",
+    "keywords": "ücretsiz forex kursu, forex mentorluğu, ticaret akademisi, ticaret öğrenmek"
+  },
+  "providers": {
+    "title": "En İyi Sinyal Sağlayıcıları – Doğrulanmış Yatırımcıları Kopyala",
+    "description": "Performansa göre sıralanmış en iyi sinyal sağlayıcılarına göz atın, işlemleri otomatik olarak kopyalayın ve hesabınızı büyütün.",
+    "keywords": "sinyal sağlayıcıları, kopya ticaret, en iyi yatırımcılar, doğrulanmış yatırımcılar"
+  },
+  "billing": {
+    "title": "Botvio Fiyatlandırma – Sinyaller, Botlar & VIP İçin Planlar",
+    "description": "Yapay zeka sinyalleri, botlar ve premium araçlar için Botvio Ücretsiz Deneme, Temel, Standart ve VIP planlarını karşılaştırın.",
+    "keywords": "Botvio fiyatlandırma, ticaret aboneliği, VIP sinyalleri, sinyal planları"
+  },
+  "press": {
+    "title": "Botvio Basın & Medya",
+    "description": "Botvio için basın kaynakları, marka varlıkları ve medya soruları.",
+    "keywords": "Botvio basın, medya kiti, ticaret platformu basın"
+  },
+  "testimonials": {
+    "title": "Botvio Referansları – Gerçek Trader Hikayeleri",
+    "description": "Botvio kullanıcılarından gerçek trader referanslarını ve doğrulanmış sonuçları okuyun.",
+    "keywords": "Botvio yorumları, trader referansları, sinyal sonuçları"
+  },
+  "caseStudies": {
+    "title": "Botvio Vaka Çalışmaları – Gerçek Ticaret Sonuçları",
+    "description": "Botvio sinyalleri, botları ve stratejilerini kullanarak hesap büyüten yatırımcıların detaylı vaka çalışmaları.",
+    "keywords": "ticaret vaka çalışmaları, Botvio sonuçları, büyüme hikayeleri"
+  },
+  "docs": {
+    "title": "Botvio Dokümantasyon – API, Botlar & Entegrasyonlar",
+    "description": "Botvio botları, API, aracı bağlantıları ve entegrasyonları için teknik dokümantasyon.",
+    "keywords": "Botvio dokümanları, ticaret API, bot dokümantasyonu"
+  },
+  "whitepaper": {
+    "title": "Botvio Whitepaper – Yapay Zeka Ticaret Mimarisi",
+    "description": "Yapay zeka sinyal mimarisini, risk modelini ve platform felsefesini kapsayan Botvio teknik incelemesini okuyun.",
+    "keywords": "Botvio teknik inceleme, yapay zeka ticaret mimarisi, sinyal modeli"
+  },
+  "terms": {
+    "title": "Botvio Hizmet Şartları",
+    "description": "Botvio'nun alım satım sinyallerinin, botlarının ve platform özelliklerinin kullanımını düzenleyen hizmet şartları.",
+    "keywords": "Botvio şartları, hizmet şartları"
+  },
+  "privacy": {
+    "title": "Botvio Gizlilik Politikası",
+    "description": "Kişisel veriler, aracı belirteçleri ve analitik işleme konularını kapsayan Botvio gizlilik politikası.",
+    "keywords": "Botvio gizlilik, veri politikası"
+  },
+  "disclaimer": {
+    "title": "Botvio Risk Uyarısı",
+    "description": "Botvio tarafından sağlanan alım satım sinyalleri, botları ve eğitim içeriği için önemli risk uyarısı.",
+    "keywords": "ticaret uyarısı, risk uyarısı, sinyal uyarısı"
+  },
+  "install": {
+    "title": "Botvio'yu Yükle – Yatırımcılar İçin Mobil Uygulama",
+    "description": "Sinyallere, grafiklere ve canlı uyarılara hızlı erişim için Botvio'yu Android ve iOS'a PWA olarak yükleyin.",
+    "keywords": "Botvio uygulamasını yükle, PWA ticaret uygulaması, mobil ticaret"
+  }
+}

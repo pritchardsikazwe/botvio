@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – Sinyal Forex AI, Trading Emas & Bot Trading",
+    "description": "Sinyal forex bertenaga AI gratis, analisis emas (XAU/USD), AI grafik, dan bot trading otomatis untuk Deriv, Exness, Weltrade, dan Binance. Dipercaya trader global.",
+    "keywords": "sinyal forex, trading emas, sinyal XAUUSD, bot trading AI, bot Deriv, Boom 1000, sinyal forex gratis, analisis grafik"
+  },
+  "signals": {
+    "title": "Sinyal Trading Forex & Emas Langsung",
+    "description": "Sinyal trading real-time yang dihasilkan AI untuk forex, emas, indeks sintetis, dan kripto dengan level entri, stop loss, dan take profit.",
+    "keywords": "sinyal forex langsung, sinyal emas, sinyal XAUUSD, sinyal trading gratis, sinyal Deriv, sinyal Boom Crash"
+  },
+  "gold": {
+    "title": "Pusat Trading Emas – Sinyal & Analisis XAU/USD Langsung",
+    "description": "Harga XAU/USD langsung, sinyal trading emas AI, robot scalping, dan Strategi AI Botvio untuk trading emas yang konsisten.",
+    "keywords": "trading emas, XAUUSD, sinyal emas, scalping emas, analisis emas, robot emas"
+  },
+  "binary": {
+    "title": "Sinyal Opsi Biner & Prediksi AI",
+    "description": "Sinyal opsi biner bertenaga AI untuk Pocket Option, Deriv, IQ Option, dan Binomo dengan prediksi kedaluwarsa dan penilaian keyakinan.",
+    "keywords": "sinyal opsi biner, sinyal Pocket Option, IQ Option, bot AI biner, sinyal OTC"
+  },
+  "blog": {
+    "title": "Botvio Academy – Artikel, Panduan & Strategi Trading",
+    "description": "Artikel mendalam gratis tentang trading forex, emas, kripto, dan opsi biner. Strategi, tutorial, dan ulasan broker dari trader sungguhan.",
+    "keywords": "blog trading, panduan forex, strategi emas, tutorial opsi biner, panduan Deriv"
+  },
+  "strategies": {
+    "title": "Marketplace Strategi Trading – Salin Strategi Ahli",
+    "description": "Temukan, salin, dan bagikan strategi trading yang terbukti untuk forex, emas, indeks sintetis, dan kripto.",
+    "keywords": "strategi trading, copy trading, strategi forex, strategi emas, strategi Boom"
+  },
+  "markets": {
+    "title": "Intelijen Pasar Global – Sesi & Sinyal Langsung",
+    "description": "Status pasar real-time, sentimen, sinyal, dan peristiwa ekonomi di pasar AS, Eropa, Asia, Timur Tengah, Afrika, dan Kripto.",
+    "keywords": "pasar global, sesi pasar langsung, pembukaan pasar AS, sinyal Tadawul, sinyal pasar Asia, sentimen pasar"
+  },
+  "marketsUs": {
+    "title": "Intelijen Pasar AS – Sinyal S&P 500, Nasdaq, NYSE",
+    "description": "Sinyal pasar saham AS langsung, sentimen, peta panas sektor, dan peristiwa ekonomi untuk sesi NYSE dan Nasdaq.",
+    "keywords": "sinyal pasar AS, S&P 500, sinyal Nasdaq, pembukaan NYSE, forex sesi AS"
+  },
+  "marketsEurope": {
+    "title": "Intelijen Pasar Eropa – DAX, FTSE & Sinyal EUR",
+    "description": "Sinyal pasar Eropa langsung untuk DAX, FTSE 100, EUR/USD, dan forex sesi London.",
+    "keywords": "sinyal DAX, FTSE 100, sesi London, sinyal EURUSD, pembukaan pasar Eropa"
+  },
+  "marketsAsia": {
+    "title": "Intelijen Pasar Asia – Nikkei, Hang Seng & Sinyal JPY",
+    "description": "Sinyal pasar Asia langsung untuk Nikkei 225, Hang Seng, USD/JPY, dan forex sesi Tokyo.",
+    "keywords": "sinyal Nikkei, Hang Seng, USDJPY, sesi Tokyo, pembukaan pasar Asia"
+  },
+  "marketsMiddleEast": {
+    "title": "Intelijen Pasar Timur Tengah – Sinyal Tadawul & Emas",
+    "description": "Sinyal pasar Timur Tengah langsung untuk Tadawul, Dubai, emas (XAU/USD), dan minyak selama sesi trading regional.",
+    "keywords": "sinyal Tadawul, pasar Dubai, forex Timur Tengah, emas sesi Timur Tengah"
+  },
+  "marketsAfrica": {
+    "title": "Intelijen Pasar Afrika – JSE & Sinyal Forex Afrika",
+    "description": "Sinyal pasar Afrika langsung untuk JSE Top 40, Afrika Selatan, Nigeria, Kenya, dan sesi Mesir.",
+    "keywords": "JSE Top 40, sinyal forex Afrika, sinyal ZAR, NGN, pembukaan pasar Afrika"
+  },
+  "marketsCrypto": {
+    "title": "Intelijen Pasar Kripto – Sinyal BTC, ETH & Altcoin",
+    "description": "Sinyal pasar kripto 24/7, sentimen, dan harga langsung untuk Bitcoin, Ethereum, dan altcoin teratas.",
+    "keywords": "sinyal kripto, sinyal Bitcoin, sinyal Ethereum, sinyal altcoin, sentimen kripto"
+  },
+  "bots": {
+    "title": "Bot Trading AI – Forex Otomatis, Emas & Kripto",
+    "description": "Bot trading otomatis untuk Deriv, Binance, dan MT5 mencakup forex, emas, indeks sintetis, Boom & Crash, dan kripto.",
+    "keywords": "bot trading, bot Deriv, bot Binance, bot Boom 1000, forex otomatis, bot MT5"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – Bot, Sinyal & Strategi Kripto",
+    "description": "Hubungkan akun Binance Anda untuk sinyal kripto yang dihasilkan AI, bot otomatis, dan intelijen pasar langsung.",
+    "keywords": "bot Binance, sinyal Binance, bot trading kripto, bot BTC, sinyal ETH"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – Indeks Sintetis, Spike Hunter & Painx",
+    "description": "Trading indeks sintetis eksklusif Weltrade (Spike Hunter, Painx, GainX) dengan Strategi AI Botvio dan sinyal langsung.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, indeks sintetis Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvio Marketplace – Bot, Sinyal & Edukasi",
+    "description": "Beli atau berlangganan bot trading terverifikasi, penyedia sinyal, dan kursus edukasi dari trader top.",
+    "keywords": "marketplace trading, beli bot trading, langganan sinyal, kursus trading"
+  },
+  "about": {
+    "title": "Tentang Botvio – Sinyal Trading AI & Edukasi Forex",
+    "description": "Botvio adalah platform trading bertenaga AI yang menyediakan sinyal forex gratis, analisis grafik, alat trading emas, dan edukasi bagi trader global.",
+    "keywords": "tentang Botvio, platform trading AI, edukasi forex, perusahaan sinyal trading"
+  },
+  "contact": {
+    "title": "Hubungi Botvio – Dukungan & Kemitraan",
+    "description": "Hubungi dukungan Botvio, kemitraan, dan pertanyaan media melalui email atau WhatsApp.",
+    "keywords": "kontak Botvio, dukungan trading, kontak penyedia sinyal"
+  },
+  "faq": {
+    "title": "FAQ Botvio – Pertanyaan Umum Tentang Sinyal & Bot",
+    "description": "Jawaban tentang sinyal trading Botvio, bot, broker, pembayaran, langganan, dan pengaturan akun.",
+    "keywords": "FAQ Botvio, pertanyaan sinyal trading, cara menggunakan Botvio"
+  },
+  "affiliate": {
+    "title": "Program Afiliasi Botvio – Dapatkan Komisi Seumur Hidup 20%",
+    "description": "Referensikan trader ke Botvio dan dapatkan $2 per pendaftaran plus 20% bagi hasil pendapatan seumur hidup dari setiap pembelian.",
+    "keywords": "afiliasi Botvio, afiliasi trading, program rujukan forex, afiliasi sinyal"
+  },
+  "p2p": {
+    "title": "Trading Kripto P2P – Beli & Jual USDT Secara Lokal",
+    "description": "Marketplace P2P Botvio untuk membeli dan menjual USDT, BTC, dan kripto dengan uang seluler, transfer bank, dan metode lokal.",
+    "keywords": "kripto P2P, beli USDT, jual Bitcoin, kripto uang seluler"
+  },
+  "sportsBetting": {
+    "title": "Taruhan Olahraga Botvio – Prediksi & Kupon Sepak Bola",
+    "description": "Prediksi sepak bola dibantu AI, kupon harian, dan pelacak taruhan untuk liga-liga Eropa teratas.",
+    "keywords": "prediksi sepak bola, kupon taruhan harian, AI olahraga, prediksi sepak bola"
+  },
+  "flippingChallenges": {
+    "title": "Tantangan Flipping Akun – Kembangkan Akun Kecil dengan Cepat",
+    "description": "Tantangan flipping terpandu untuk scalping emas, sprint forex mingguan, dan pertumbuhan akun Boom & Crash.",
+    "keywords": "tantangan flipping, pertumbuhan akun, tantangan prop firm, tantangan scalping"
+  },
+  "live": {
+    "title": "Botvio Live – Streaming Trading Real-Time & Mentorship",
+    "description": "Tonton streaming trading langsung, ajukan pertanyaan secara real time, dan ikuti penyedia sinyal top.",
+    "keywords": "trading langsung, mentorship trading, streaming forex langsung, copy trading langsung"
+  },
+  "newsCalendar": {
+    "title": "Kalender Berita Forex – Peristiwa Ekonomi Berdampak Tinggi",
+    "description": "Kalender berita ekonomi langsung mencakup NFP, CPI, FOMC, dan peristiwa berdampak tinggi yang menggerakkan forex dan emas.",
+    "keywords": "kalender berita forex, NFP, CPI, FOMC, berita berdampak tinggi"
+  },
+  "tradeModes": {
+    "title": "Mode Trade Botvio – Scalping, Swing, Sniper & Hedge",
+    "description": "Pilih dari 8 mode trading ahli termasuk Scalper, Swing, Sniper, Hedge, dan Trend untuk kondisi pasar apa pun.",
+    "keywords": "mode scalping, swing trading, sniper trading, hedge trading, mode trend"
+  },
+  "derivOptions": {
+    "title": "Trading Opsi Deriv – Digits, Multipliers & Boom/Crash",
+    "description": "Trading Deriv Multipliers, Digits, Higher/Lower, dan Boom & Crash dengan sinyal AI dan bot Botvio.",
+    "keywords": "opsi Deriv, Deriv multipliers, Deriv digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Workspace Trading Botvio – Sinyal, Grafik & Auto-Trade",
+    "description": "Workspace trading all-in-one dengan sinyal AI, grafik langsung, data pasar, dan eksekusi otomatis.",
+    "keywords": "workspace trading, dasbor sinyal AI, auto trade, grafik langsung"
+  },
+  "trade": {
+    "title": "Botvio Trade – Sinyal Langsung & Eksekusi Otomatis",
+    "description": "Dasbor trading langsung dengan sinyal, grafik, dan eksekusi satu-klik untuk Deriv, MT5, dan Binance.",
+    "keywords": "dasbor trade langsung, auto trade, eksekusi sinyal"
+  },
+  "authoritySignals": {
+    "title": "Authority Signals – Sinyal Penyedia Top Terverifikasi",
+    "description": "Sinyal pilihan dari penyedia top terverifikasi dengan rekam jejak, tingkat kemenangan, dan profil risiko.",
+    "keywords": "sinyal terverifikasi, penyedia sinyal top, sinyal otoritas, salin sinyal"
+  },
+  "learn": {
+    "title": "Botvio Academy – Mentorship Forex & Trading Gratis",
+    "description": "Mentorship pemula forex gratis, pelajaran video, dan kursus trading mencakup forex, emas, kripto, dan opsi biner.",
+    "keywords": "kursus forex gratis, mentorship forex, akademi trading, belajar trading"
+  },
+  "providers": {
+    "title": "Penyedia Sinyal Top – Salin Trader Terverifikasi",
+    "description": "Jelajahi penyedia sinyal top yang diberi peringkat berdasarkan kinerja, salin perdagangan secara otomatis, dan kembangkan akun Anda.",
+    "keywords": "penyedia sinyal, copy trading, trader top, trader terverifikasi"
+  },
+  "billing": {
+    "title": "Harga Botvio – Paket untuk Sinyal, Bot & VIP",
+    "description": "Bandingkan Botvio Free Trial, paket Basic, Standard, dan VIP untuk sinyal AI, bot, dan alat premium.",
+    "keywords": "harga Botvio, langganan trading, sinyal VIP, paket sinyal"
+  },
+  "press": {
+    "title": "Botvio Press & Media",
+    "description": "Sumber daya pers, aset merek, dan pertanyaan media untuk Botvio.",
+    "keywords": "Botvio press, kit media, press platform trading"
+  },
+  "testimonials": {
+    "title": "Testimonial Botvio – Kisah Trader Nyata",
+    "description": "Baca testimonial trader nyata dan hasil terverifikasi dari pengguna Botvio di seluruh dunia.",
+    "keywords": "ulasan Botvio, testimonial trader, hasil sinyal"
+  },
+  "caseStudies": {
+    "title": "Studi Kasus Botvio – Hasil Trading Nyata",
+    "description": "Studi kasus terperinci tentang trader yang mengembangkan akun menggunakan sinyal, bot, dan strategi Botvio.",
+    "keywords": "studi kasus trading, hasil Botvio, kisah pertumbuhan"
+  },
+  "docs": {
+    "title": "Dokumentasi Botvio – API, Bot & Integrasi",
+    "description": "Dokumentasi teknis untuk bot Botvio, API, koneksi broker, dan integrasi.",
+    "keywords": "dokumen Botvio, API trading, dokumentasi bot"
+  },
+  "whitepaper": {
+    "title": "Whitepaper Botvio – Arsitektur Trading AI",
+    "description": "Baca whitepaper Botvio yang mencakup arsitektur sinyal AI, model risiko, dan filosofi platform.",
+    "keywords": "whitepaper Botvio, arsitektur trading AI, model sinyal"
+  },
+  "terms": {
+    "title": "Ketentuan Layanan Botvio",
+    "description": "Ketentuan layanan Botvio yang mengatur penggunaan sinyal trading, bot, dan fitur platform.",
+    "keywords": "ketentuan Botvio, ketentuan layanan"
+  },
+  "privacy": {
+    "title": "Kebijakan Privasi Botvio",
+    "description": "Kebijakan privasi Botvio mencakup penanganan data pribadi, token broker, dan analitik.",
+    "keywords": "privasi Botvio, kebijakan data"
+  },
+  "disclaimer": {
+    "title": "Penafian Risiko Botvio",
+    "description": "Penafian risiko penting untuk sinyal trading, bot, dan konten edukasi yang disediakan oleh Botvio.",
+    "keywords": "penafian trading, peringatan risiko, penafian sinyal"
+  },
+  "install": {
+    "title": "Instal Botvio – Aplikasi Seluler untuk Trader",
+    "description": "Instal Botvio sebagai PWA di Android dan iOS untuk akses cepat ke sinyal, grafik, dan peringatan langsung.",
+    "keywords": "instal aplikasi Botvio, aplikasi trading PWA, trading seluler"
+  }
+}

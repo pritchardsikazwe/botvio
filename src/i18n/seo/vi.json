@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – Tín hiệu Forex AI, Giao dịch Vàng & Bot",
+    "description": "Tín hiệu forex miễn phí dùng AI, phân tích vàng (XAU/USD), AI biểu đồ và bot giao dịch tự động cho Deriv, Exness, Weltrade và Binance. Được tin cậy bởi các nhà giao dịch trên toàn thế giới.",
+    "keywords": "tín hiệu forex, giao dịch vàng, tín hiệu XAUUSD, bot giao dịch AI, bot Deriv, Boom 1000, tín hiệu forex miễn phí, phân tích biểu đồ"
+  },
+  "signals": {
+    "title": "Tín hiệu Giao dịch Forex & Vàng Trực tiếp",
+    "description": "Tín hiệu giao dịch được tạo bằng AI theo thời gian thực cho forex, vàng, chỉ số tổng hợp và crypto với các mức vào lệnh, dừng lỗ và chốt lời.",
+    "keywords": "tín hiệu forex trực tiếp, tín hiệu vàng, tín hiệu XAUUSD, tín hiệu giao dịch miễn phí, tín hiệu Deriv, tín hiệu Boom Crash"
+  },
+  "gold": {
+    "title": "Trung tâm Giao dịch Vàng – Tín hiệu & Phân tích XAU/USD Trực tiếp",
+    "description": "Giá XAU/USD trực tiếp, tín hiệu giao dịch vàng AI, robot scalping và Chiến lược AI Botvio cho giao dịch vàng ổn định.",
+    "keywords": "giao dịch vàng, XAUUSD, tín hiệu vàng, scalping vàng, phân tích vàng, robot vàng"
+  },
+  "binary": {
+    "title": "Tín hiệu Quyền chọn Nhị phân & Dự đoán AI",
+    "description": "Tín hiệu quyền chọn nhị phân dùng AI cho Pocket Option, Deriv, IQ Option và Binomo với dự đoán thời gian hết hạn và điểm tin cậy.",
+    "keywords": "tín hiệu quyền chọn nhị phân, tín hiệu Pocket Option, IQ Option, bot nhị phân AI, tín hiệu OTC"
+  },
+  "blog": {
+    "title": "Học viện Botvio – Bài viết, Hướng dẫn & Chiến lược Giao dịch",
+    "description": "Các bài viết chuyên sâu miễn phí về giao dịch forex, vàng, crypto và quyền chọn nhị phân. Chiến lược, hướng dẫn và đánh giá sàn từ các nhà giao dịch thực tế.",
+    "keywords": "blog giao dịch, hướng dẫn forex, chiến lược vàng, hướng dẫn quyền chọn nhị phân, hướng dẫn Deriv"
+  },
+  "strategies": {
+    "title": "Sàn Giao dịch Chiến lược – Sao chép Chiến lược Chuyên gia",
+    "description": "Khám phá, sao chép và chia sẻ các chiến lược giao dịch đã được chứng minh cho forex, vàng, chỉ số tổng hợp và crypto.",
+    "keywords": "chiến lược giao dịch, copy trading, chiến lược forex, chiến lược vàng, chiến lược Boom"
+  },
+  "markets": {
+    "title": "Thông tin Thị trường Toàn cầu – Các phiên Trực tiếp & Tín hiệu",
+    "description": "Trạng thái thị trường, tâm lý, tín hiệu và các sự kiện kinh tế theo thời gian thực trên các thị trường Mỹ, Châu Âu, Châu Á, Trung Đông, Châu Phi và Crypto.",
+    "keywords": "thị trường toàn cầu, các phiên thị trường trực tiếp, mở cửa thị trường Mỹ, tín hiệu Tadawul, tín hiệu thị trường Châu Á, tâm lý thị trường"
+  },
+  "marketsUs": {
+    "title": "Thông tin Thị trường Mỹ – Tín hiệu S&P 500, Nasdaq, NYSE",
+    "description": "Tín hiệu thị trường chứng khoán Mỹ trực tiếp, tâm lý, bản đồ nhiệt ngành và các sự kiện kinh tế cho phiên NYSE và Nasdaq.",
+    "keywords": "tín hiệu thị trường Mỹ, S&P 500, tín hiệu Nasdaq, mở cửa NYSE, forex phiên Mỹ"
+  },
+  "marketsEurope": {
+    "title": "Thông tin Thị trường Châu Âu – Tín hiệu DAX, FTSE & EUR",
+    "description": "Tín hiệu thị trường Châu Âu trực tiếp cho DAX, FTSE 100, EUR/USD và forex phiên London.",
+    "keywords": "tín hiệu DAX, FTSE 100, phiên London, tín hiệu EURUSD, mở cửa thị trường Châu Âu"
+  },
+  "marketsAsia": {
+    "title": "Thông tin Thị trường Châu Á – Tín hiệu Nikkei, Hang Seng & JPY",
+    "description": "Tín hiệu thị trường Châu Á trực tiếp cho Nikkei 225, Hang Seng, USD/JPY và forex phiên Tokyo.",
+    "keywords": "tín hiệu Nikkei, Hang Seng, USDJPY, phiên Tokyo, mở cửa thị trường Châu Á"
+  },
+  "marketsMiddleEast": {
+    "title": "Thông tin Thị trường Trung Đông – Tín hiệu Tadawul & Vàng",
+    "description": "Tín hiệu thị trường Trung Đông trực tiếp cho Tadawul, Dubai, vàng (XAU/USD) và dầu trong các phiên giao dịch khu vực.",
+    "keywords": "tín hiệu Tadawul, thị trường Dubai, forex Trung Đông, phiên vàng Trung Đông"
+  },
+  "marketsAfrica": {
+    "title": "Thông tin Thị trường Châu Phi – Tín hiệu JSE & Forex Châu Phi",
+    "description": "Tín hiệu thị trường Châu Phi trực tiếp cho JSE Top 40, Nam Phi, Nigeria, Kenya và các phiên Ai Cập.",
+    "keywords": "JSE Top 40, tín hiệu forex Châu Phi, tín hiệu ZAR, NGN, mở cửa thị trường Châu Phi"
+  },
+  "marketsCrypto": {
+    "title": "Thông tin Thị trường Crypto – Tín hiệu BTC, ETH & Altcoin",
+    "description": "Tín hiệu thị trường crypto 24/7, tâm lý và giá trực tiếp cho Bitcoin, Ethereum và các altcoin hàng đầu.",
+    "keywords": "tín hiệu crypto, tín hiệu Bitcoin, tín hiệu Ethereum, tín hiệu altcoin, tâm lý crypto"
+  },
+  "bots": {
+    "title": "Bot Giao dịch AI – Forex, Vàng & Crypto Tự động",
+    "description": "Các bot giao dịch tự động cho Deriv, Binance và MT5 bao gồm forex, vàng, chỉ số tổng hợp, Boom & Crash và crypto.",
+    "keywords": "bot giao dịch, bot Deriv, bot Binance, bot Boom 1000, forex tự động, bot MT5"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – Bot Crypto, Tín hiệu & Chiến lược",
+    "description": "Kết nối tài khoản Binance của bạn để nhận tín hiệu crypto được tạo bằng AI, bot tự động và thông tin thị trường trực tiếp.",
+    "keywords": "bot Binance, tín hiệu Binance, bot giao dịch crypto, bot BTC, tín hiệu ETH"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – Chỉ số Tổng hợp, Spike Hunter & Painx",
+    "description": "Giao dịch các chỉ số tổng hợp độc quyền của Weltrade (Spike Hunter, Painx, GainX) với Chiến lược AI Botvio và tín hiệu trực tiếp.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, chỉ số tổng hợp Weltrade"
+  },
+  "marketplace": {
+    "title": "Sàn Giao dịch Botvio – Bot, Tín hiệu & Giáo dục",
+    "description": "Mua hoặc đăng ký các bot giao dịch đã được xác minh, nhà cung cấp tín hiệu và khóa học giáo dục từ các nhà giao dịch hàng đầu.",
+    "keywords": "sàn giao dịch, mua bot giao dịch, đăng ký tín hiệu, khóa học giao dịch"
+  },
+  "about": {
+    "title": "Về Botvio – Tín hiệu Giao dịch AI & Giáo dục Forex",
+    "description": "Botvio là nền tảng giao dịch dùng AI cung cấp tín hiệu forex miễn phí, phân tích biểu đồ, công cụ giao dịch vàng và giáo dục cho các nhà giao dịch trên toàn thế giới.",
+    "keywords": "về Botvio, nền tảng giao dịch AI, giáo dục forex, công ty tín hiệu giao dịch"
+  },
+  "contact": {
+    "title": "Liên hệ Botvio – Hỗ trợ & Đối tác",
+    "description": "Liên hệ bộ phận hỗ trợ Botvio, đối tác và các yêu cầu truyền thông qua email hoặc WhatsApp.",
+    "keywords": "liên hệ Botvio, hỗ trợ giao dịch, liên hệ nhà cung cấp tín hiệu"
+  },
+  "faq": {
+    "title": "FAQ Botvio – Câu hỏi Thường gặp về Tín hiệu & Bot",
+    "description": "Câu trả lời về tín hiệu giao dịch, bot, nhà môi giới, thanh toán, đăng ký và thiết lập tài khoản của Botvio.",
+    "keywords": "FAQ Botvio, câu hỏi về tín hiệu giao dịch, cách sử dụng Botvio"
+  },
+  "affiliate": {
+    "title": "Chương trình Đối tác Botvio – Kiếm 20% Hoa hồng Trọn đời",
+    "description": "Giới thiệu các nhà giao dịch đến Botvio và kiếm 2 đô la cho mỗi lượt đăng ký cộng với 20% doanh thu trọn đời trên mỗi giao dịch mua.",
+    "keywords": "đối tác Botvio, đối tác giao dịch, chương trình giới thiệu forex, đối tác tín hiệu"
+  },
+  "p2p": {
+    "title": "Giao dịch Crypto P2P – Mua & Bán USDT Nội địa",
+    "description": "Sàn giao dịch P2P của Botvio để mua và bán USDT, BTC và crypto bằng tiền điện tử, chuyển khoản ngân hàng và các phương thức địa phương.",
+    "keywords": "crypto P2P, mua USDT, bán Bitcoin, crypto tiền di động"
+  },
+  "sportsBetting": {
+    "title": "Botvio Cá cược Thể thao – Dự đoán Bóng đá & Phiếu cược",
+    "description": "Dự đoán bóng đá có AI hỗ trợ, phiếu cược hàng ngày và công cụ theo dõi cược cho các giải đấu Châu Âu hàng đầu.",
+    "keywords": "dự đoán bóng đá, phiếu cược hàng ngày, AI thể thao, dự đoán bóng đá"
+  },
+  "flippingChallenges": {
+    "title": "Thử thách Lật tài khoản – Tăng trưởng nhanh Tài khoản Nhỏ",
+    "description": "Thử thách lật tài khoản có hướng dẫn cho scalping vàng, các vòng đua forex hàng tuần và tăng trưởng tài khoản Boom & Crash.",
+    "keywords": "thử thách lật tài khoản, tăng trưởng tài khoản, thử thách của công ty quỹ, thử thách scalping"
+  },
+  "live": {
+    "title": "Botvio Trực tiếp – Các buổi Phát trực tiếp Giao dịch & Cố vấn",
+    "description": "Xem các buổi phát trực tiếp giao dịch, đặt câu hỏi theo thời gian thực và theo dõi các nhà cung cấp tín hiệu hàng đầu.",
+    "keywords": "giao dịch trực tiếp, cố vấn giao dịch, phát trực tiếp forex, sao chép giao dịch trực tiếp"
+  },
+  "newsCalendar": {
+    "title": "Lịch Tin tức Forex – Các Sự kiện Kinh tế Tác động Lớn",
+    "description": "Lịch tin tức kinh tế trực tiếp bao gồm NFP, CPI, FOMC và các sự kiện tác động lớn làm biến động forex và vàng.",
+    "keywords": "lịch tin tức forex, NFP, CPI, FOMC, tin tức tác động lớn"
+  },
+  "tradeModes": {
+    "title": "Chế độ Giao dịch Botvio – Scalping, Swing, Sniper & Hedge",
+    "description": "Chọn từ 8 chế độ giao dịch chuyên nghiệp bao gồm Scalper, Swing, Sniper, Hedge và Trend cho mọi điều kiện thị trường.",
+    "keywords": "chế độ scalping, giao dịch swing, giao dịch sniper, giao dịch hedge, chế độ trend"
+  },
+  "derivOptions": {
+    "title": "Giao dịch Quyền chọn Deriv – Digits, Multipliers & Boom/Crash",
+    "description": "Giao dịch Deriv Multipliers, Digits, Higher/Lower và Boom & Crash với tín hiệu AI và bot Botvio.",
+    "keywords": "quyền chọn Deriv, Deriv multipliers, Deriv digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Không gian làm việc Giao dịch Botvio – Tín hiệu, Biểu đồ & Tự động Giao dịch",
+    "description": "Không gian làm việc giao dịch tất cả trong một với tín hiệu AI, biểu đồ trực tiếp, dữ liệu thị trường và thực hiện tự động.",
+    "keywords": "không gian làm việc giao dịch, bảng điều khiển tín hiệu AI, tự động giao dịch, biểu đồ trực tiếp"
+  },
+  "trade": {
+    "title": "Giao dịch Botvio – Tín hiệu Trực tiếp & Thực hiện Tự động",
+    "description": "Bảng điều khiển giao dịch trực tiếp với tín hiệu, biểu đồ và thực hiện bằng một cú nhấp chuột cho Deriv, MT5 và Binance.",
+    "keywords": "bảng điều khiển giao dịch trực tiếp, tự động giao dịch, thực hiện tín hiệu"
+  },
+  "authoritySignals": {
+    "title": "Tín hiệu Uy tín – Tín hiệu Nhà cung cấp Hàng đầu Đã xác minh",
+    "description": "Các tín hiệu được tuyển chọn từ các nhà cung cấp hàng đầu đã được xác minh với lịch sử giao dịch, tỷ lệ thắng và hồ sơ rủi ro.",
+    "keywords": "tín hiệu đã xác minh, nhà cung cấp tín hiệu hàng đầu, tín hiệu ủy quyền, sao chép tín hiệu"
+  },
+  "learn": {
+    "title": "Học viện Botvio – Cố vấn Forex & Giao dịch Miễn phí",
+    "description": "Cố vấn forex cho người mới bắt đầu miễn phí, bài học video và khóa học giao dịch bao gồm forex, vàng, crypto và quyền chọn nhị phân.",
+    "keywords": "khóa học forex miễn phí, cố vấn forex, học viện giao dịch, học giao dịch"
+  },
+  "providers": {
+    "title": "Các Nhà cung cấp Tín hiệu Hàng đầu – Sao chép Nhà giao dịch Đã xác minh",
+    "description": "Duyệt qua các nhà cung cấp tín hiệu hàng đầu được xếp hạng theo hiệu suất, tự động sao chép giao dịch và tăng trưởng tài khoản của bạn.",
+    "keywords": "nhà cung cấp tín hiệu, copy trading, nhà giao dịch hàng đầu, nhà giao dịch đã xác minh"
+  },
+  "billing": {
+    "title": "Giá Botvio – Gói cho Tín hiệu, Bot & VIP",
+    "description": "So sánh các gói Dùng thử miễn phí, Cơ bản, Tiêu chuẩn và VIP của Botvio cho tín hiệu AI, bot và công cụ cao cấp.",
+    "keywords": "giá Botvio, đăng ký giao dịch, tín hiệu VIP, gói tín hiệu"
+  },
+  "press": {
+    "title": "Botvio Báo chí & Truyền thông",
+    "description": "Tài nguyên báo chí, nội dung thương hiệu và yêu cầu truyền thông cho Botvio.",
+    "keywords": "Báo chí Botvio, bộ truyền thông, báo chí nền tảng giao dịch"
+  },
+  "testimonials": {
+    "title": "Lời chứng thực Botvio – Câu chuyện Nhà giao dịch Thực",
+    "description": "Đọc các lời chứng thực thực tế từ nhà giao dịch và kết quả đã được xác minh từ người dùng Botvio trên toàn thế giới.",
+    "keywords": "đánh giá Botvio, lời chứng thực của nhà giao dịch, kết quả tín hiệu"
+  },
+  "caseStudies": {
+    "title": "Các Nghiên cứu trường hợp Botvio – Kết quả Giao dịch Thực",
+    "description": "Các nghiên cứu trường hợp chi tiết về các nhà giao dịch tăng trưởng tài khoản bằng tín hiệu, bot và chiến lược của Botvio.",
+    "keywords": "nghiên cứu trường hợp giao dịch, kết quả Botvio, câu chuyện tăng trưởng"
+  },
+  "docs": {
+    "title": "Tài liệu Botvio – API, Bot & Tích hợp",
+    "description": "Tài liệu kỹ thuật cho bot Botvio, API, kết nối nhà môi giới và tích hợp.",
+    "keywords": "tài liệu Botvio, API giao dịch, tài liệu bot"
+  },
+  "whitepaper": {
+    "title": "Sách trắng Botvio – Kiến trúc Giao dịch AI",
+    "description": "Đọc sách trắng Botvio bao gồm kiến trúc tín hiệu AI, mô hình rủi ro và triết lý nền tảng.",
+    "keywords": "Sách trắng Botvio, kiến trúc giao dịch AI, mô hình tín hiệu"
+  },
+  "terms": {
+    "title": "Điều khoản Dịch vụ Botvio",
+    "description": "Điều khoản dịch vụ của Botvio quy định việc sử dụng tín hiệu giao dịch, bot và các tính năng nền tảng.",
+    "keywords": "điều khoản Botvio, điều khoản dịch vụ"
+  },
+  "privacy": {
+    "title": "Chính sách Quyền riêng tư Botvio",
+    "description": "Chính sách quyền riêng tư của Botvio bao gồm dữ liệu cá nhân, token nhà môi giới và xử lý phân tích.",
+    "keywords": "quyền riêng tư Botvio, chính sách dữ liệu"
+  },
+  "disclaimer": {
+    "title": "Tuyên bố Miễn trừ Trách nhiệm Rủi ro Botvio",
+    "description": "Tuyên bố miễn trừ trách nhiệm rủi ro quan trọng đối với tín hiệu giao dịch, bot và nội dung giáo dục được cung cấp bởi Botvio.",
+    "keywords": "tuyên bố miễn trừ trách nhiệm giao dịch, cảnh báo rủi ro, tuyên bố miễn trừ trách nhiệm tín hiệu"
+  },
+  "install": {
+    "title": "Cài đặt Botvio – Ứng dụng Di động cho Nhà giao dịch",
+    "description": "Cài đặt Botvio dưới dạng PWA trên Android và iOS để truy cập nhanh vào tín hiệu, biểu đồ và cảnh báo trực tiếp.",
+    "keywords": "cài đặt ứng dụng Botvio, ứng dụng giao dịch PWA, giao dịch di động"
+  }
+}

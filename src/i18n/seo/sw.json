@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – Ishara za Forex za AI, Biashara ya Dhahabu & Bots",
+    "description": "Ishara za bure za forex zinazoendeshwa na AI, uchambuzi wa dhahabu (XAU/USD), chati za AI, na bots za biashara ya kiotomatiki kwa Deriv, Exness, Weltrade na Binance. Inaaminiwa na wafanyabiashara duniani kote.",
+    "keywords": "ishara za forex, biashara ya dhahabu, ishara za XAUUSD, bot ya biashara ya AI, bot ya Deriv, Boom 1000, ishara za bure za forex, uchambuzi wa chati"
+  },
+  "signals": {
+    "title": "Ishara za Moja kwa Moja za Forex & Dhahabu",
+    "description": "Ishara za biashara zinazozalishwa na AI kwa wakati halisi kwa forex, dhahabu, faharisi synthetic na crypto na viwango vya kuingia, kusitisha hasara na kuchukua faida.",
+    "keywords": "ishara za forex moja kwa moja, ishara za dhahabu, ishara za XAUUSD, ishara za biashara za bure, ishara za Deriv, ishara za Boom Crash"
+  },
+  "gold": {
+    "title": "Kituo cha Biashara ya Dhahabu – Ishara & Uchambuzi wa XAU/USD",
+    "description": "Bei za XAU/USD za moja kwa moja, ishara za biashara ya dhahabu za AI, roboti ya scalping, na Mkakati wa AI wa Botvio kwa biashara thabiti ya dhahabu.",
+    "keywords": "biashara ya dhahabu, XAUUSD, ishara za dhahabu, scalping ya dhahabu, uchambuzi wa dhahabu, roboti ya dhahabu"
+  },
+  "binary": {
+    "title": "Ishara za Binary Options & Utabiri wa AI",
+    "description": "Ishara za binary options zinazoendeshwa na AI kwa Pocket Option, Deriv, IQ Option na Binomo zenye utabiri wa muda wake na alama za uaminifu.",
+    "keywords": "ishara za binary options, ishara za Pocket Option, IQ Option, bot ya binary AI, ishara za OTC"
+  },
+  "blog": {
+    "title": "Botvio Academy – Makala ya Biashara, Miongozo & Mikakati",
+    "description": "Makala ya kina ya bure kuhusu forex, dhahabu, crypto na biashara ya binary options. Mikakati, mafunzo na hakiki za mawakala kutoka kwa wafanyabiashara halisi.",
+    "keywords": "blogu ya biashara, miongozo ya forex, mkakati wa dhahabu, mafunzo ya binary options, mwongozo wa Deriv"
+  },
+  "strategies": {
+    "title": "Soko la Mikakati ya Biashara – Nakili Mikakati ya Wataalamu",
+    "description": "Gundua, nakili na ushiriki mikakati ya biashara iliyothibitishwa kwa forex, dhahabu, faharisi synthetic na crypto.",
+    "keywords": "mikakati ya biashara, biashara ya nakala, mkakati wa forex, mkakati wa dhahabu, mkakati wa Boom"
+  },
+  "markets": {
+    "title": "Uakili wa Soko la Kimataifa – Vikao & Ishara za Moja kwa Moja",
+    "description": "Hali ya soko ya wakati halisi, hisia, ishara na matukio ya kiuchumi kwenye masoko ya Marekani, Ulaya, Asia, Mashariki ya Kati, Afrika na Crypto.",
+    "keywords": "masoko ya kimataifa, vikao vya soko vya moja kwa moja, soko la Marekani limefunguliwa, ishara za Tadawul, ishara za soko la Asia, hisia za soko"
+  },
+  "marketsUs": {
+    "title": "Uakili wa Soko la Marekani – S&P 500, Nasdaq, Ishara za NYSE",
+    "description": "Ishara za moja kwa moja za soko la hisa la Marekani, hisia, ramani ya joto ya sekta na matukio ya kiuchumi kwa vikao vya NYSE na Nasdaq.",
+    "keywords": "ishara za soko la Marekani, S&P 500, ishara za Nasdaq, NYSE imefunguliwa, forex ya kikao cha Marekani"
+  },
+  "marketsEurope": {
+    "title": "Uakili wa Soko la Ulaya – DAX, FTSE & Ishara za EUR",
+    "description": "Ishara za moja kwa moja za soko la Ulaya kwa DAX, FTSE 100, EUR/USD, na forex ya kikao cha London.",
+    "keywords": "ishara za DAX, FTSE 100, kikao cha London, ishara za EURUSD, soko la Ulaya limefunguliwa"
+  },
+  "marketsAsia": {
+    "title": "Uakili wa Soko la Asia – Nikkei, Hang Seng & Ishara za JPY",
+    "description": "Ishara za moja kwa moja za soko la Asia kwa Nikkei 225, Hang Seng, USD/JPY, na forex ya kikao cha Tokyo.",
+    "keywords": "ishara za Nikkei, Hang Seng, USDJPY, kikao cha Tokyo, soko la Asia limefunguliwa"
+  },
+  "marketsMiddleEast": {
+    "title": "Uakili wa Soko la Mashariki ya Kati – Ishara za Tadawul & Dhahabu",
+    "description": "Ishara za moja kwa moja za soko la Mashariki ya Kati kwa Tadawul, Dubai, dhahabu (XAU/USD) na mafuta wakati wa vikao vya biashara vya kikanda.",
+    "keywords": "ishara za Tadawul, soko la Dubai, forex ya Mashariki ya Kati, kikao cha dhahabu cha Mashariki ya Kati"
+  },
+  "marketsAfrica": {
+    "title": "Uakili wa Soko la Afrika – JSE & Ishara za Forex za Afrika",
+    "description": "Ishara za moja kwa moja za soko la Afrika kwa JSE Top 40, Afrika Kusini, Nigeria, Kenya na vikao vya Misri.",
+    "keywords": "JSE Top 40, ishara za forex za Afrika, ishara za ZAR, NGN, soko la Afrika limefunguliwa"
+  },
+  "marketsCrypto": {
+    "title": "Uakili wa Soko la Crypto – BTC, ETH & Ishara za Altcoin",
+    "description": "Ishara za soko la crypto 24/7, hisia na bei za moja kwa moja za Bitcoin, Ethereum na altcoins za juu.",
+    "keywords": "ishara za crypto, ishara za Bitcoin, ishara za Ethereum, ishara za altcoin, hisia za crypto"
+  },
+  "bots": {
+    "title": "Bots za Biashara za AI – Forex, Dhahabu & Crypto Kiotomatiki",
+    "description": "Bots za biashara za kiotomatiki kwa Deriv, Binance na MT5 zinazoshughulikia forex, dhahabu, faharisi synthetic, Boom & Crash na crypto.",
+    "keywords": "bot ya biashara, bot ya Deriv, bot ya Binance, bot ya Boom 1000, forex otomatiki, bot ya MT5"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – Bots za Crypto, Ishara & Mikakati",
+    "description": "Unganisha akaunti yako ya Binance kwa ishara za crypto zinazozalishwa na AI, bots za kiotomatiki na uakili wa soko la moja kwa moja.",
+    "keywords": "bot ya Binance, ishara za Binance, bot ya biashara ya crypto, bot ya BTC, ishara za ETH"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – Faharisi Synthetic, Spike Hunter & Painx",
+    "description": "Fanya biashara za Weltrade za faharisi synthetic (Spike Hunter, Painx, GainX) ukitumia Mkakati wa AI wa Botvio na ishara za moja kwa moja.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, faharisi synthetic Weltrade"
+  },
+  "marketplace": {
+    "title": "Soko la Botvio – Bots, Ishara & Elimu",
+    "description": "Nunua au jiandikishe kwa bots za biashara zilizothibitishwa, watoa ishara na kozi za elimu kutoka kwa wafanyabiashara wakuu.",
+    "keywords": "soko la biashara, nunua bot ya biashara, usajili wa ishara, kozi za biashara"
+  },
+  "about": {
+    "title": "Kuhusu Botvio – Ishara za Biashara za AI & Elimu ya Forex",
+    "description": "Botvio ni jukwaa la biashara linaloendeshwa na AI linalotoa ishara za bure za forex, uchambuzi wa chati, zana za biashara ya dhahabu, na elimu kwa wafanyabiara duniani kote.",
+    "keywords": "kuhusu Botvio, jukwaa la biashara la AI, elimu ya forex, kampuni ya ishara za biashara"
+  },
+  "contact": {
+    "title": "Wasiliana na Botvio – Msaada & Ushirikiano",
+    "description": "Wasiliana na usaidizi wa Botvio, ushirikiano na maswali ya media kupitia barua pepe au WhatsApp.",
+    "keywords": "mawasiliano ya Botvio, msaada wa biashara, wasiliana na mtoa ishara"
+  },
+  "faq": {
+    "title": "Maswali Yanayoulizwa Mara kwa Mara ya Botvio – Kuhusu Ishara & Bots",
+    "description": "Majibu kuhusu ishara za biashara za Botvio, bots, mawakala, malipo, usajili na kuanzisha akaunti.",
+    "keywords": "Maswali Yanayoulizwa Mara kwa Mara ya Botvio, maswali ya ishara za biashara, jinsi ya kutumia Botvio"
+  },
+  "affiliate": {
+    "title": "Mpango wa Ushirika wa Botvio – Pata 20% ya Kamishna kwa Maisha",
+    "description": "Rejelea wafanyabiashara kwa Botvio na upate $2 kwa kila usajili pamoja na asilimia 20 ya mapato ya maisha kwa kila ununuzi.",
+    "keywords": "ushirika wa Botvio, ushirika wa biashara, mpango wa rufaa wa forex, ushirika wa ishara"
+  },
+  "p2p": {
+    "title": "Biashara ya Crypto ya P2P – Nunua & Uuze USDT Ndani",
+    "description": "Soko la Botvio P2P kununua na kuuza USDT, BTC na crypto kwa pesa za rununu, uhamisho wa benki na mbinu za ndani.",
+    "keywords": "crypto P2P, nunua USDT, uza Bitcoin, crypto ya pesa za rununu"
+  },
+  "sportsBetting": {
+    "title": "Michezo ya Kubashiri ya Botvio – Utabiri wa Mpira & Slipu",
+    "description": "Utabiri wa mpira unaosaidiwa na AI, slipu za kila siku na kifuatiliaji cha dau kwa ligi kuu za Ulaya.",
+    "keywords": "utabiri wa mpira, slipu za kubashiri za kila siku, AI ya michezo, utabiri wa soka"
+  },
+  "flippingChallenges": {
+    "title": "Changamoto za Kugeuza Akaunti – Kuza Akaunti Ndogo Haraka",
+    "description": "Changamoto za kugeuza zilizoongozwa kwa scalping ya dhahabu, sprints za forex za wiki na ukuaji wa akaunti za Boom & Crash.",
+    "keywords": "changamoto ya kugeuza, ukuaji wa akaunti, changamoto ya kampuni ya prop, changamoto ya scalping"
+  },
+  "live": {
+    "title": "Botvio Live – Mitiririko ya Biashara ya Wakati Halisi & Ushauri",
+    "description": "Tazama mitiririko ya biashara ya moja kwa moja, uliza maswali kwa wakati halisi, na fuatilia watoa ishara wakuu.",
+    "keywords": "biashara ya moja kwa moja, ushauri wa biashara, mtiririko wa forex wa moja kwa moja, biashara ya nakala ya moja kwa moja"
+  },
+  "newsCalendar": {
+    "title": "Kalenda ya Habari za Forex – Matukio ya Kiuchumi Yenye Athari Kuu",
+    "description": "Kalenda ya habari za kiuchumi ya moja kwa moja inayoshughulikia NFP, CPI, FOMC na matukio yenye athari kuu yanayosogeza forex na dhahabu.",
+    "keywords": "kalenda ya habari za forex, NFP, CPI, FOMC, habari zenye athari kuu"
+  },
+  "tradeModes": {
+    "title": "Hali za Biashara za Botvio – Scalping, Swing, Sniper & Hedge",
+    "description": "Chagua kutoka kwa hali 8 za biashara za wataalamu ikiwemo Scalper, Swing, Sniper, Hedge na Trend kwa hali yoyote ya soko.",
+    "keywords": "hali ya scalping, biashara ya swing, biashara ya sniper, biashara ya hedge, hali ya trend"
+  },
+  "derivOptions": {
+    "title": "Biashara ya Deriv Options – Digits, Multipliers & Boom/Crash",
+    "description": "Fanya biashara za Deriv Multipliers, Digits, Higher/Lower na Boom & Crash kwa ishara za AI na bots za Botvio.",
+    "keywords": "Deriv options, Deriv multipliers, Deriv digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Sehemu ya Kazi ya Biashara ya Botvio – Ishara, Chati & Biashara Kiotomatiki",
+    "description": "Sehemu ya kazi ya biashara ya yote-kwa-moja yenye ishara za AI, chati za moja kwa moja, data ya soko na utekelezaji wa kiotomatiki.",
+    "keywords": "sehemu ya kazi ya biashara, dashibodi ya ishara za AI, biashara otomatiki, chati za moja kwa moja"
+  },
+  "trade": {
+    "title": "Biashara ya Botvio – Ishara za Moja kwa Moja & Utekelezaji Kiotomatiki",
+    "description": "Dashibodi ya biashara ya moja kwa moja yenye ishara, chati, na utekelezaji wa mara moja kwa Deriv, MT5 na Binance.",
+    "keywords": "dashibodi ya biashara ya moja kwa moja, biashara otomatiki, utekelezaji wa ishara"
+  },
+  "authoritySignals": {
+    "title": "Ishara za Mamlaka – Ishara Zilizothibitishwa za Watoa Huduma Wakuu",
+    "description": "Ishara zilizoratibiwa kutoka kwa watoa huduma wakuu waliothibitishwa wenye rekodi, viwango vya kushinda na profaili za hatari.",
+    "keywords": "ishara zilizothibitishwa, watoa ishara wakuu, ishara za mamlaka, nakala ya ishara"
+  },
+  "learn": {
+    "title": "Botvio Academy – Ushauri wa Bure wa Forex & Biashara",
+    "description": "Ushauri wa bure wa forex kwa Kompyuta, masomo ya video, na kozi za biashara zinazoshughulikia forex, dhahabu, crypto na binary options.",
+    "keywords": "kozi ya bure ya forex, ushauri wa forex, chuo cha biashara, jifunze biashara"
+  },
+  "providers": {
+    "title": "Watoa Ishara Wakuu – Nakili Wafanyabiashara Waliothibitishwa",
+    "description": "Vinjari watoa ishara wakuu waliopangwa kwa utendaji, nakili biashara kiotomatiki na ukuze akaunti yako.",
+    "keywords": "watoa ishara, biashara ya nakala, wafanyabiashara wakuu, wafanyabiashara waliothibitishwa"
+  },
+  "billing": {
+    "title": "Bei za Botvio – Mipango ya Ishara, Bots & VIP",
+    "description": "Linganisha majaribio ya bure ya Botvio, mipango ya Basic, Standard na VIP kwa ishara za AI, bots na zana za malipo.",
+    "keywords": "bei za Botvio, usajili wa biashara, ishara za VIP, mipango ya ishara"
+  },
+  "press": {
+    "title": "Botvio Press & Media",
+    "description": "Rasilimali za vyombo vya habari, mali za chapa, na maswali ya vyombo vya habari kwa Botvio.",
+    "keywords": "Botvio press, kit cha media, press ya jukwaa la biashara"
+  },
+  "testimonials": {
+    "title": "Shuhuda za Botvio – Hadithi Halisi za Wafanyabiashara",
+    "description": "Soma shuhuda halisi za wafanyabiashara na matokeo yaliyothibitishwa kutoka kwa watumiaji wa Botvio ulimwenguni kote.",
+    "keywords": "hakiki za Botvio, shuhuda za wafanyabiashara, matokeo ya ishara"
+  },
+  "caseStudies": {
+    "title": "Utafiti wa Kesi za Botvio – Matokeo Halisi ya Biashara",
+    "description": "Utafiti wa kina wa kesi za wafanyabiashara wanaokuza akaunti kwa kutumia ishara za Botvio, bots na mikakati.",
+    "keywords": "utafiti wa kesi za biashara, matokeo ya Botvio, hadithi za ukuaji"
+  },
+  "docs": {
+    "title": "Nyaraka za Botvio – API, Bots & Ushirika",
+    "description": "Nyaraka za kiufundi kwa bots za Botvio, API, miunganisho ya mawakala na ushirika.",
+    "keywords": "nyaraka za Botvio, API za biashara, nyaraka za bot"
+  },
+  "whitepaper": {
+    "title": "Nyaraka Nyeupe ya Botvio – Usanifu wa Biashara wa AI",
+    "description": "Soma nyaraka nyeupe ya Botvio inayoshughulikia usanifu wa ishara za AI, mfano wa hatari na falsafa ya jukwaa.",
+    "keywords": "nyaraka nyeupe ya Botvio, usanifu wa biashara wa AI, mfano wa ishara"
+  },
+  "terms": {
+    "title": "Masharti ya Huduma ya Botvio",
+    "description": "Masharti ya huduma ya Botvio yanayosimamia matumizi ya ishara za biashara, bots na vipengele vya jukwaa.",
+    "keywords": "masharti ya Botvio, masharti ya huduma"
+  },
+  "privacy": {
+    "title": "Sera ya Faragha ya Botvio",
+    "description": "Sera ya faragha ya Botvio inayoshughulikia data binafsi, tokeni za mawakala na usindikaji wa uchambuzi.",
+    "keywords": "faragha ya Botvio, sera ya data"
+  },
+  "disclaimer": {
+    "title": "Onyo la Hatari la Botvio",
+    "description": "Onyo muhimu la hatari kwa ishara za biashara, bots na maudhui ya elimu yanayotolewa na Botvio.",
+    "keywords": "onyo la biashara, onyo la hatari, onyo la ishara"
+  },
+  "install": {
+    "title": "Sakinisha Botvio – Programu ya Simu kwa Wafanyabiashara",
+    "description": "Sakinisha Botvio kama PWA kwenye Android na iOS kwa ufikiaji wa haraka wa ishara, chati na arifa za moja kwa moja.",
+    "keywords": "sakinisha programu ya Botvio, programu ya biashara ya PWA, biashara ya simu"
+  }
+}

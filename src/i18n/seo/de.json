@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – KI Forex Signale, Gold-Trading & Trading Bots",
+    "description": "Kostenlose KI-gestützte Forex Signale, Gold (XAU/USD) Analyse, Chart KI und automatisierte Trading Bots für Deriv, Exness, Weltrade und Binance. Vertraut von Tradern weltweit.",
+    "keywords": "Forex Signale, Gold Trading, XAUUSD Signale, KI Trading Bot, Deriv Bot, Boom 1000, kostenlose Forex Signale, Chartanalyse"
+  },
+  "signals": {
+    "title": "Live Forex & Gold Trading Signale",
+    "description": "KI-generierte Echtzeit-Tradingsignale für Forex, Gold, synthetische Indizes und Krypto mit Einstieg, Stop-Loss und Take-Profit-Levels.",
+    "keywords": "Live Forex Signale, Gold Signale, XAUUSD Signale, kostenlose Trading Signale, Deriv Signale, Boom Crash Signale"
+  },
+  "gold": {
+    "title": "Gold Trading Hub – XAU/USD Live Signale & Analyse",
+    "description": "Live XAU/USD Kurse, KI Gold Trading Signale, Scalping Roboter und Botvio KI Strategie für erfolgreiches Gold-Trading.",
+    "keywords": "Gold Trading, XAUUSD, Gold Signale, Gold Scalping, Gold Analyse, Gold Roboter"
+  },
+  "binary": {
+    "title": "Binäre Optionen Signale & KI Vorhersagen",
+    "description": "KI-gestützte binäre Optionen Signale für Pocket Option, Deriv, IQ Option und Binomo mit Ablaufvorhersagen und Vertrauensbewertung.",
+    "keywords": "Binäre Optionen Signale, Pocket Option Signale, IQ Option, binärer KI Bot, OTC Signale"
+  },
+  "blog": {
+    "title": "Botvio Akademie – Trading Artikel, Anleitungen & Strategien",
+    "description": "Kostenlose, detaillierte Artikel zu Forex, Gold, Krypto und binären Optionen. Strategien, Tutorials und Broker-Bewertungen von echten Tradern.",
+    "keywords": "Trading Blog, Forex Anleitungen, Gold Strategie, Binäre Optionen Tutorial, Deriv Anleitung"
+  },
+  "strategies": {
+    "title": "Trading Strategie Marktplatz – Expertenstrategien kopieren",
+    "description": "Entdecken, kopieren und teilen Sie bewährte Handelsstrategien für Forex, Gold, synthetische Indizes und Krypto.",
+    "keywords": "Trading Strategien, Copy Trading, Forex Strategie, Gold Strategie, Boom Strategie"
+  },
+  "markets": {
+    "title": "Globale Marktinformationen – Live-Sitzungen & Signale",
+    "description": "Echtzeit-Marktstatus, Stimmung, Signale und Wirtschaftsereignisse für die Märkte in den USA, Europa, Asien, dem Nahen Osten, Afrika und Krypto.",
+    "keywords": "Globale Märkte, Live Marktsitzungen, US Marktöffnung, Tadawul Signale, Asien Markt Signale, Marktstimmung"
+  },
+  "marketsUs": {
+    "title": "US Marktinformationen – S&P 500, Nasdaq, NYSE Signale",
+    "description": "Live US-Aktienmarktsignale, Stimmung, Sektor-Heatmap und Wirtschaftsereignisse für NYSE und Nasdaq Sitzungen.",
+    "keywords": "US Markt Signale, S&P 500, Nasdaq Signale, NYSE Eröffnung, US Session Forex"
+  },
+  "marketsEurope": {
+    "title": "Europa Marktinformationen – DAX, FTSE & EUR Signale",
+    "description": "Live-Signale für den europäischen Markt für DAX, FTSE 100, EUR/USD und die London Session im Forex.",
+    "keywords": "DAX Signale, FTSE 100, London Session, EURUSD Signale, Europa Markteröffnung"
+  },
+  "marketsAsia": {
+    "title": "Asien Marktinformationen – Nikkei, Hang Seng & JPY Signale",
+    "description": "Live-Signale für den asiatischen Markt für Nikkei 225, Hang Seng, USD/JPY und die Tokio Session im Forex.",
+    "keywords": "Nikkei Signale, Hang Seng, USDJPY, Tokio Session, Asien Markteröffnung"
+  },
+  "marketsMiddleEast": {
+    "title": "Naher Osten Marktinformationen – Tadawul & Gold Signale",
+    "description": "Live-Signale für den Nahen Osten Markt für Tadawul, Dubai, Gold (XAU/USD) und Öl während regionaler Handelssitzungen.",
+    "keywords": "Tadawul Signale, Dubai Markt, Naher Osten Forex, Gold Naher Osten Session"
+  },
+  "marketsAfrica": {
+    "title": "Afrika Marktinformationen – JSE & Afrikanische Forex Signale",
+    "description": "Live-Signale für den afrikanischen Markt für JSE Top 40, Südafrika, Nigeria, Kenia und Ägypten Sessions.",
+    "keywords": "JSE Top 40, Afrika Forex Signale, ZAR Signale, NGN, Afrika Markteröffnung"
+  },
+  "marketsCrypto": {
+    "title": "Krypto Marktinformationen – BTC, ETH & Altcoin Signale",
+    "description": "24/7 Krypto-Marktsignale, Stimmung und Live-Kurse für Bitcoin, Ethereum und Top-Altcoins.",
+    "keywords": "Krypto Signale, Bitcoin Signale, Ethereum Signale, Altcoin Signale, Krypto Gefühl"
+  },
+  "bots": {
+    "title": "KI Trading Bots – Automatisiertes Forex, Gold & Krypto",
+    "description": "Automatisierte Trading Bots für Deriv, Binance und MT5 für Forex, Gold, synthetische Indizes, Boom & Crash und Krypto.",
+    "keywords": "Trading Bot, Deriv Bot, Binance Bot, Boom 1000 Bot, automatisierter Forex, MT5 Bot"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – Krypto Bots, Signale & Strategien",
+    "description": "Verbinden Sie Ihr Binance-Konto für KI-generierte Krypto-Signale, automatisierte Bots und Live-Marktinformationen.",
+    "keywords": "Binance Bot, Binance Signale, Krypto Trading Bot, BTC Bot, ETH Signale"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – Synthetische Indizes, Spike Hunter & Painx",
+    "description": "Handeln Sie die exklusiven synthetischen Indizes von Weltrade (Spike Hunter, Painx, GainX) mit der Botvio KI-Strategie und Live-Signalen.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, synthetische Indizes Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvio Marktplatz – Bots, Signale & Bildung",
+    "description": "Kaufen oder abonnieren Sie verifizierte Trading Bots, Signalanbieter und Weiterbildungskurse von Top-Tradern.",
+    "keywords": "Trading Marktplatz, Trading Bot kaufen, Signal Abonnement, Trading Kurse"
+  },
+  "about": {
+    "title": "Über Botvio – KI Trading Signale & Forex Bildung",
+    "description": "Botvio ist eine KI-gestützte Handelsplattform, die kostenlose Forex-Signale, Chartanalyse, Gold-Trading-Tools und Bildung für Trader weltweit anbietet.",
+    "keywords": "Über Botvio, KI Trading Plattform, Forex Bildung, Trading Signale Unternehmen"
+  },
+  "contact": {
+    "title": "Kontakt Botvio – Support & Partnerschaften",
+    "description": "Kontaktieren Sie den Botvio Support, Partnerschaften und Medienanfragen per E-Mail oder WhatsApp.",
+    "keywords": "Botvio Kontakt, Trading Support, Signalanbieter Kontakt"
+  },
+  "faq": {
+    "title": "Botvio FAQ – Häufige Fragen zu Signalen & Bots",
+    "description": "Antworten zu Botvio Trading Signalen, Bots, Brokern, Zahlungen, Abonnements und Kontoeinrichtung.",
+    "keywords": "Botvio FAQ, Trading Signale Fragen, wie man Botvio benutzt"
+  },
+  "affiliate": {
+    "title": "Botvio Partnerprogramm – Verdienen Sie 20% lebenslang",
+    "description": "Empfehlen Sie Trader an Botvio und verdienen Sie 2 $ pro Anmeldung plus 20 % lebenslange Umsatzbeteiligung an jedem Kauf.",
+    "keywords": "Botvio Partner, Trading Affiliate, Forex Empfehlungsprogramm, Signal Affiliate"
+  },
+  "p2p": {
+    "title": "P2P Krypto Trading – USDT lokal kaufen & verkaufen",
+    "description": "Botvio P2P Marktplatz zum Kaufen und Verkaufen von USDT, BTC und Krypto mit mobilem Geld, Banküberweisung und lokalen Methoden.",
+    "keywords": "P2P Krypto, USDT kaufen, Bitcoin verkaufen, mobiles Geld Krypto"
+  },
+  "sportsBetting": {
+    "title": "Botvio Sportwetten – Fußball Vorhersagen & Wettscheine",
+    "description": "KI-gestützte Fußballvorhersagen, tägliche Wettscheine und Wettverfolger für europäische Top-Ligen.",
+    "keywords": "Fußball Vorhersagen, tägliche Wettscheine, Sport KI, Fußball Vorhersagen"
+  },
+  "flippingChallenges": {
+    "title": "Account Flipping Challenges – Kleine Konten schnell wachsen lassen",
+    "description": "Geführte Flipping Challenges für Gold-Scalping, wöchentliche Forex-Sprints und Boom & Crash Konto-Wachstum.",
+    "keywords": "Flipping Challenge, Kontowachstum, Prop Firm Challenge, Scalping Challenge"
+  },
+  "live": {
+    "title": "Botvio Live – Echtzeit Trading Streams & Mentoring",
+    "description": "Schauen Sie Live-Trading-Streams, stellen Sie Fragen in Echtzeit und folgen Sie Top-Signalanbietern.",
+    "keywords": "Live Trading, Trading Mentoring, Live Forex Stream, Copy Trading Live"
+  },
+  "newsCalendar": {
+    "title": "Forex Nachrichten Kalender – Hochwirksame Wirtschaftsereignisse",
+    "description": "Live-Wirtschaftsnachrichtenkalender für NFP, CPI, FOMC und hochwirksame Ereignisse, die Forex und Gold bewegen.",
+    "keywords": "Forex Nachrichten Kalender, NFP, CPI, FOMC, wichtige Nachrichten"
+  },
+  "tradeModes": {
+    "title": "Botvio Handelsmodi – Scalping, Swing, Sniper & Hedge",
+    "description": "Wählen Sie aus 8 erfahrenen Handelsmodi, darunter Scalper, Swing, Sniper, Hedge und Trend-Modi für jede Marktsituation.",
+    "keywords": "Scalp Modus, Swing Trading, Sniper Trading, Hedge Trading, Trend Modus"
+  },
+  "derivOptions": {
+    "title": "Deriv Optionen Trading – Digits, Multiplikatoren & Boom/Crash",
+    "description": "Handeln Sie Deriv Multiplikatoren, Digits, Higher/Lower und Boom & Crash mit KI-Signalen und Botvio Bots.",
+    "keywords": "Deriv Optionen, Deriv Multiplikatoren, Deriv Digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Botvio Trading Workspace – Signale, Charts & Auto-Trade",
+    "description": "All-in-One Trading Workspace mit KI-Signalen, Live-Charts, Marktdaten und automatisierter Ausführung.",
+    "keywords": "Trading Workspace, KI Signale Dashboard, Auto Trade, Live Charts"
+  },
+  "trade": {
+    "title": "Botvio Trade – Live Signale & Automatische Ausführung",
+    "description": "Live-Trading-Dashboard mit Signalen, Charts und Ein-Klick-Ausführung für Deriv, MT5 und Binance.",
+    "keywords": "Live Trade Dashboard, Auto Trade, Signal Ausführung"
+  },
+  "authoritySignals": {
+    "title": "Authority Signals – Verifizierte Top-Anbieter Signale",
+    "description": "Ausgewählte Signale von verifizierten Top-Anbietern mit Erfolgsbilanzen, Gewinnraten und Risikoprofilen.",
+    "keywords": "Verifizierte Signale, Top Signalanbieter, Authority Signale, Signal Kopie"
+  },
+  "learn": {
+    "title": "Botvio Akademie – Kostenloses Forex & Trading Mentoring",
+    "description": "Kostenloses Forex-Mentoring für Anfänger, Video-Lektionen und Trading-Kurse zu Forex, Gold, Krypto und binären Optionen.",
+    "keywords": "kostenloser Forex Kurs, Forex Mentoring, Trading Akademie, Trading lernen"
+  },
+  "providers": {
+    "title": "Top Signalanbieter – Verifizierte Trader kopieren",
+    "description": "Durchsuchen Sie Top-Signalanbieter nach Leistung, kopieren Sie Trades automatisch und lassen Sie Ihr Konto wachsen.",
+    "keywords": "Signalanbieter, Copy Trading, Top Trader, verifizierte Trader"
+  },
+  "billing": {
+    "title": "Botvio Preise – Pläne für Signale, Bots & VIP",
+    "description": "Vergleichen Sie Botvio Kostenlose Testversion, Basic, Standard und VIP-Pläne für KI-Signale, Bots und Premium-Tools.",
+    "keywords": "Botvio Preise, Trading Abonnement, VIP Signale, Signalpläne"
+  },
+  "press": {
+    "title": "Botvio Presse & Medien",
+    "description": "Presse-Ressourcen, Marken-Assets und Medienanfragen für Botvio.",
+    "keywords": "Botvio Presse, Media Kit, Trading Plattform Presse"
+  },
+  "testimonials": {
+    "title": "Botvio Testimonials – Echte Trader Geschichten",
+    "description": "Lesen Sie echte Trader-Testimonials und verifizierte Ergebnisse von Botvio-Nutzern weltweit.",
+    "keywords": "Botvio Bewertungen, Trader Testimonials, Signal Ergebnisse"
+  },
+  "caseStudies": {
+    "title": "Botvio Fallstudien – Echte Trading Ergebnisse",
+    "description": "Detaillierte Fallstudien von Tradern, die Konten mit Botvio-Signalen, Bots und Strategien wachsen lassen.",
+    "keywords": "Trading Fallstudien, Botvio Ergebnisse, Wachstumsgeschichten"
+  },
+  "docs": {
+    "title": "Botvio Dokumentation – API, Bots & Integrationen",
+    "description": "Technische Dokumentation für Botvio Bots, API, Broker-Verbindungen und Integrationen.",
+    "keywords": "Botvio Docs, Trading API, Bot Dokumentation"
+  },
+  "whitepaper": {
+    "title": "Botvio Whitepaper – KI Trading Architektur",
+    "description": "Lesen Sie das Botvio Whitepaper über die KI-Signalarchitektur, das Risikomodell und die Plattformphilosophie.",
+    "keywords": "Botvio Whitepaper, KI Trading Architektur, Signalmodell"
+  },
+  "terms": {
+    "title": "Botvio Nutzungsbedingungen",
+    "description": "Botvio Nutzungsbedingungen für die Verwendung von Trading Signalen, Bots und Plattformfunktionen.",
+    "keywords": "Botvio Bedingungen, Nutzungsbedingungen"
+  },
+  "privacy": {
+    "title": "Botvio Datenschutzerklärung",
+    "description": "Botvio Datenschutzerklärung bezüglich personenbezogener Daten, Broker-Tokens und Analysehandling.",
+    "keywords": "Botvio Datenschutz, Datenrichtlinie"
+  },
+  "disclaimer": {
+    "title": "Botvio Risikohinweis",
+    "description": "Wichtiger Risikohinweis für Trading Signale, Bots und Bildungs Inhalte, die von Botvio bereitgestellt werden.",
+    "keywords": "Trading Disclaimer, Risikohinweis, Signal Disclaimer"
+  },
+  "install": {
+    "title": "Botvio installieren – Mobile App für Trader",
+    "description": "Installieren Sie Botvio als PWA auf Android und iOS für schnellen Zugriff auf Signale, Charts und Live-Benachrichtigungen.",
+    "keywords": "Botvio App installieren, PWA Trading App, mobiles Trading"
+  }
+}

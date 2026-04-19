@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – Sinais AI Forex, Trading Ouro e Bots de Trading",
+    "description": "Sinais forex gratuitos com IA, análise de ouro (XAU/USD), IA de gráficos e bots de trading automatizados para Deriv, Exness, Weltrade e Binance. Confiado por traders globalmente.",
+    "keywords": "sinais forex, trading ouro, sinais XAUUSD, bot de trading AI, bot Deriv, Boom 1000, sinais forex grátis, análise gráfica"
+  },
+  "signals": {
+    "title": "Sinais ao Vivo de Forex e Gold Trading",
+    "description": "Sinais de trading gerados por IA em tempo real para forex, ouro, índices sintéticos e cripto com níveis de entrada, stop loss e take profit.",
+    "keywords": "sinais forex ao vivo, sinais de ouro, sinais XAUUSD, sinais de trading grátis, sinais Deriv, sinais Boom Crash"
+  },
+  "gold": {
+    "title": "Hub de Gold Trading – Sinais e Análise XAU/USD ao Vivo",
+    "description": "Preços XAU/USD ao vivo, sinais de trading de ouro com IA, robô de scalping e Estratégia Botvio AI para um trading de ouro consistente.",
+    "keywords": "trading ouro, XAUUSD, sinais de ouro, scalping ouro, análise de ouro, robô de ouro"
+  },
+  "binary": {
+    "title": "Sinais de Opções Binárias e Previsões com IA",
+    "description": "Sinais de opções binárias com IA para Pocket Option, Deriv, IQ Option e Binomo com previsões de expiração e pontuação de confiança.",
+    "keywords": "sinais de opções binárias, sinais Pocket Option, IQ Option, bot binário AI, sinais OTC"
+  },
+  "blog": {
+    "title": "Botvio Academy – Artigos, Guias e Estratégias de Trading",
+    "description": "Artigos aprofundados gratuitos sobre trading de forex, ouro, cripto e opções binárias. Estratégias, tutoriais e análises de corretoras por traders reais.",
+    "keywords": "blog de trading, guias forex, estratégia de ouro, tutorial de opções binárias, guia Deriv"
+  },
+  "strategies": {
+    "title": "Mercado de Estratégias de Trading – Copie Estratégias Expert",
+    "description": "Descubra, copie e compartilhe estratégias de trading comprovadas para forex, ouro, índices sintéticos e cripto.",
+    "keywords": "estratégias de trading, copy trading, estratégia forex, estratégia de ouro, estratégia Boom"
+  },
+  "markets": {
+    "title": "Inteligência de Mercado Global – Sessões e Sinais ao Vivo",
+    "description": "Status de mercado em tempo real, sentimento, sinais e eventos econômicos nos mercados dos EUA, Europa, Ásia, Oriente Médio, África e Cripto.",
+    "keywords": "mercados globais, sessões de mercado ao vivo, abertura do mercado dos EUA, sinais Tadawul, sinais do mercado asiático, sentimento de mercado"
+  },
+  "marketsUs": {
+    "title": "Inteligência de Mercado dos EUA – S&P 500, Nasdaq, Sinais NYSE",
+    "description": "Sinais do mercado de ações dos EUA ao vivo, sentimento, mapa de calor setorial e eventos econômicos para as sessões da NYSE e Nasdaq.",
+    "keywords": "sinais de mercado dos EUA, S&P 500, sinais Nasdaq, abertura NYSE, forex sessão dos EUA"
+  },
+  "marketsEurope": {
+    "title": "Inteligência de Mercado Europeu – DAX, FTSE e Sinais EUR",
+    "description": "Sinais do mercado europeu ao vivo para DAX, FTSE 100, EUR/USD e forex da sessão de Londres.",
+    "keywords": "sinais DAX, FTSE 100, sessão de Londres, sinais EURUSD, abertura do mercado europeu"
+  },
+  "marketsAsia": {
+    "title": "Inteligência de Mercado Asiático – Nikkei, Hang Seng e Sinais JPY",
+    "description": "Sinais do mercado asiático ao vivo para Nikkei 225, Hang Seng, USD/JPY e forex da sessão de Tóquio.",
+    "keywords": "sinais Nikkei, Hang Seng, USDJPY, sessão de Tóquio, abertura do mercado asiático"
+  },
+  "marketsMiddleEast": {
+    "title": "Inteligência de Mercado do Oriente Médio – Tadawul e Sinais de Gold",
+    "description": "Sinais do mercado do Oriente Médio ao vivo para Tadawul, Dubai, ouro (XAU/USD) e petróleo durante as sessões de trading regionais.",
+    "keywords": "sinais Tadawul, mercado de Dubai, forex do Oriente Médio, sessão de ouro no Oriente Médio"
+  },
+  "marketsAfrica": {
+    "title": "Inteligência de Mercado Africano – JSE e Sinais Forex Africanos",
+    "description": "Sinais do mercado africano ao vivo para JSE Top 40, sessões da África do Sul, Nigéria, Quênia e Egito.",
+    "keywords": "JSE Top 40, sinais forex África, sinais ZAR, NGN, abertura do mercado africano"
+  },
+  "marketsCrypto": {
+    "title": "Inteligência de Mercado Cripto – BTC, ETH e Sinais Altcoin",
+    "description": "Sinais de mercado cripto 24/7, sentimento e preços ao vivo para Bitcoin, Ethereum e as principais altcoins.",
+    "keywords": "sinais cripto, sinais Bitcoin, sinais Ethereum, sinais altcoin, sentimento cripto"
+  },
+  "bots": {
+    "title": "Bots de Trading AI – Forex, Gold e Cripto Automatizados",
+    "description": "Bots de trading automatizados para Deriv, Binance e MT5 cobrindo forex, ouro, índices sintéticos, Boom & Crash e cripto.",
+    "keywords": "bot de trading, bot Deriv, bot Binance, bot Boom 1000, forex automatizado, bot MT5"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – Bots Cripto, Sinais e Estratégias",
+    "description": "Conecte sua conta Binance para sinais cripto gerados por IA, bots automatizados e inteligência de mercado ao vivo.",
+    "keywords": "bot Binance, sinais Binance, bot de negociação de cripto, bot BTC, sinais ETH"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – Índices Sintéticos, Spike Hunter e Painx",
+    "description": "Opere os índices sintéticos exclusivos da Weltrade (Spike Hunter, Painx, GainX) com a Estratégia Botvio AI e sinais ao vivo.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, índices sintéticos Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvio Marketplace – Bots, Sinais e Educação",
+    "description": "Compre ou assine bots de trading verificados, provedores de sinal e cursos educacionais dos melhores traders.",
+    "keywords": "mercado de trading, comprar bot de trading, assinatura de sinal, cursos de trading"
+  },
+  "about": {
+    "title": "Sobre a Botvio – Sinais de Trading AI e Educação Forex",
+    "description": "Botvio é uma plataforma de trading com IA que oferece sinais forex gratuitos, análise de gráficos, ferramentas de trading de ouro e educação para traders em todo o mundo.",
+    "keywords": "sobre Botvio, plataforma de trading AI, educação forex, empresa de sinais de trading"
+  },
+  "contact": {
+    "title": "Contato Botvio – Suporte e Parcerias",
+    "description": "Entre em contato com o suporte da Botvio, parcerias e consultas de mídia via e-mail ou WhatsApp.",
+    "keywords": "contato Botvio, suporte de trading, contato provedor de sinal"
+  },
+  "faq": {
+    "title": "FAQ Botvio – Perguntas Comuns sobre Sinais e Bots",
+    "description": "Respostas sobre os sinais de trading, bots, brokers, pagamentos, assinaturas e configuração de conta da Botvio.",
+    "keywords": "FAQ Botvio, perguntas sobre sinais de trading, como usar Botvio"
+  },
+  "affiliate": {
+    "title": "Programa de Afiliados Botvio – Ganhe 20% de Comissões Vitalícias",
+    "description": "Indique traders para a Botvio e ganhe $2 por inscrição mais 20% de participação na receita vitalícia em cada compra.",
+    "keywords": "afiliado Botvio, afiliado de trading, programa de indicação forex, afiliado de sinal"
+  },
+  "p2p": {
+    "title": "P2P Cripto Trading – Compre e Venda USDT Localmente",
+    "description": "Mercado P2P da Botvio para comprar e vender USDT, BTC e cripto com dinheiro móvel, transferência bancária e métodos locais.",
+    "keywords": "cripto P2P, comprar USDT, vender Bitcoin, cripto dinheiro móvel"
+  },
+  "sportsBetting": {
+    "title": "Botvio Apostas Esportivas – Previsões e Palpites de Futebol",
+    "description": "Previsões de futebol assistidas por IA, palpites diários e rastreador de apostas para as principais ligas europeias.",
+    "keywords": "previsões de futebol, palpites diários, IA esportiva, previsões de futebol"
+  },
+  "flippingChallenges": {
+    "title": "Desafios de Alavancagem de Contas – Cresça Contas Pequenas Rápido",
+    "description": "Desafios de alavancagem guiados para scalping de ouro, sprints forex semanais e crescimento de contas Boom & Crash.",
+    "keywords": "desafio de alavancagem, crescimento de conta, desafio de prop firm, desafio de scalping"
+  },
+  "live": {
+    "title": "Botvio Live – Transmissões de Trading ao Vivo e Mentoria",
+    "description": "Assista a transmissões de trading ao vivo, faça perguntas em tempo real e siga os principais provedores de sinal.",
+    "keywords": "trading ao vivo, mentoria de trading, transmissão forex ao vivo, copy trading ao vivo"
+  },
+  "newsCalendar": {
+    "title": "Calendário de Notícias Forex – Eventos Econômicos de Alto Impacto",
+    "description": "Calendário de notícias econômicas ao vivo cobrindo NFP, CPI, FOMC e eventos de alto impacto que movem forex e ouro.",
+    "keywords": "calendário de notícias forex, NFP, CPI, FOMC, notícias de alto impacto"
+  },
+  "tradeModes": {
+    "title": "Modos de Trading Botvio – Scalping, Swing, Sniper e Hedge",
+    "description": "Escolha entre 8 modos de trading especializados, incluindo Scalper, Swing, Sniper, Hedge e Trend para qualquer condição de mercado.",
+    "keywords": "modo scalping, trading swing, trading sniper, trading hedge, modo tendência"
+  },
+  "derivOptions": {
+    "title": "Deriv Options Trading – Digits, Multiplicadores e Boom/Crash",
+    "description": "Opere Deriv Multipliers, Digits, Higher/Lower e Boom & Crash com sinais AI e bots Botvio.",
+    "keywords": "opções Deriv, multiplicadores Deriv, dígitos Deriv, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Espaço de Trabalho de Trading Botvio – Sinais, Gráficos e Auto-Trade",
+    "description": "Espaço de trabalho de trading tudo-em-um com sinais AI, gráficos ao vivo, dados de mercado e execução automatizada.",
+    "keywords": "espaço de trabalho de trading, painel de sinais AI, auto trade, gráficos ao vivo"
+  },
+  "trade": {
+    "title": "Botvio Trade – Sinais ao Vivo e Execução Automática",
+    "description": "Painel de trading ao vivo com sinais, gráficos e execução com um clique para Deriv, MT5 e Binance.",
+    "keywords": "painel de trading ao vivo, auto trade, execução de sinal"
+  },
+  "authoritySignals": {
+    "title": "Sinais de Autoridade – Sinais Verificados de Principais Provedores",
+    "description": "Sinais curados de provedores de topo verificados com históricos, taxas de vitória e perfis de risco.",
+    "keywords": "sinais verificados, principais provedores de sinal, sinais de autoridade, cópia de sinal"
+  },
+  "learn": {
+    "title": "Botvio Academy – Mentoria Gratuita de Forex e Trading",
+    "description": "Mentoria gratuita de forex para iniciantes, videoaulas e cursos de trading cobrindo forex, ouro, cripto e opções binárias.",
+    "keywords": "curso forex grátis, mentoria forex, academia de trading, aprender trading"
+  },
+  "providers": {
+    "title": "Principais Provedores de Sinal – Copie Traders Verificados",
+    "description": "Navegue pelos principais provedores de sinal classificados por desempenho, copie trades automaticamente e aumente sua conta.",
+    "keywords": "provedores de sinal, copy trading, melhores traders, traders verificados"
+  },
+  "billing": {
+    "title": "Preços Botvio – Planos para Sinais, Bots e VIP",
+    "description": "Compare os planos Botvio Free Trial, Basic, Standard e VIP para sinais AI, bots e ferramentas premium.",
+    "keywords": "preços Botvio, assinatura de trading, sinais VIP, planos de sinal"
+  },
+  "press": {
+    "title": "Botvio Imprensa e Mídia",
+    "description": "Recursos de imprensa, ativos de marca e consultas de mídia para Botvio.",
+    "keywords": "Botvio imprensa, kit de mídia, imprensa plataforma de trading"
+  },
+  "testimonials": {
+    "title": "Depoimentos Botvio – Histórias Reais de Traders",
+    "description": "Leia depoimentos reais de traders e resultados verificados de usuários Botvio em todo o mundo.",
+    "keywords": "avaliações Botvio, depoimentos de traders, resultados de sinal"
+  },
+  "caseStudies": {
+    "title": "Estudos de Caso Botvio – Resultados Reais de Trading",
+    "description": "Estudos de caso detalhados de traders que crescem contas usando os sinais, bots e estratégias da Botvio.",
+    "keywords": "estudos de caso de trading, resultados Botvio, histórias de crescimento"
+  },
+  "docs": {
+    "title": "Documentação Botvio – API, Bots e Integrações",
+    "description": "Documentação técnica para bots Botvio, API, conexões de corretoras e integrações.",
+    "keywords": "documentos Botvio, API de trading, documentação de bot"
+  },
+  "whitepaper": {
+    "title": "Whitepaper Botvio – Arquitetura de Trading AI",
+    "description": "Leia o whitepaper da Botvio cobrindo a arquitetura de sinais AI, modelo de risco e filosofia da plataforma.",
+    "keywords": "whitepaper Botvio, arquitetura de trading AI, modelo de sinal"
+  },
+  "terms": {
+    "title": "Termos de Serviço da Botvio",
+    "description": "Termos de serviço da Botvio que regem o uso de sinais de trading, bots e recursos da plataforma.",
+    "keywords": "termos Botvio, termos de serviço"
+  },
+  "privacy": {
+    "title": "Política de Privacidade da Botvio",
+    "description": "Política de privacidade da Botvio cobrindo dados pessoais, tokens de corretoras e tratamento de análises.",
+    "keywords": "privacidade Botvio, política de dados"
+  },
+  "disclaimer": {
+    "title": "Aviso de Risco da Botvio",
+    "description": "Importante aviso de risco para sinais de trading, bots e conteúdo educacional fornecidos pela Botvio.",
+    "keywords": "aviso de trading, aviso de risco, aviso de sinal"
+  },
+  "install": {
+    "title": "Instalar Botvio – Aplicativo Móvel para Traders",
+    "description": "Instale o Botvio como PWA no Android e iOS para acesso rápido a sinais, gráficos e alertas ao vivo.",
+    "keywords": "instalar aplicativo Botvio, aplicativo de trading PWA, trading móvel"
+  }
+}
