@@ -26,6 +26,15 @@ const FUTURES_SYMBOLS = [
   { symbol: "DOGEUSDT", display: "DOGE/USDT", category: "futures" },
 ];
 
+const SCALP_SYMBOLS = [
+  { symbol: "BTCUSDT", display: "BTC/USDT", category: "scalp" },
+  { symbol: "ETHUSDT", display: "ETH/USDT", category: "scalp" },
+  { symbol: "SOLUSDT", display: "SOL/USDT", category: "scalp" },
+  { symbol: "BNBUSDT", display: "BNB/USDT", category: "scalp" },
+  { symbol: "XRPUSDT", display: "XRP/USDT", category: "scalp" },
+  { symbol: "DOGEUSDT", display: "DOGE/USDT", category: "scalp" },
+];
+
 const SPOT_PROMPT = `You are Botvio AI Crypto Analyst specializing in Binance spot trading.
 
 Your task: generate a structured crypto trading signal based on recent kline (candlestick) data.
@@ -76,6 +85,71 @@ Return ONLY valid JSON:
   "reason": "Short analysis summary. Include: Leverage: x10",
   "strategy_name": "Binance Futures AI Signal"
 }`;
+
+// ── Scalping detector: pure technical (1m + 5m). No AI for speed. ─────
+type Candle = { time: string; open: number; high: number; low: number; close: number; volume: number };
+
+function ema(values: number[], period: number): number[] {
+  if (values.length === 0) return [];
+  const k = 2 / (period + 1);
+  const out: number[] = [values[0]];
+  for (let i = 1; i < values.length; i++) out.push(values[i] * k + out[i - 1] * (1 - k));
+  return out;
+}
+
+function detectScalp(c1m: Candle[], c5m: Candle[]): {
+  side: "BUY" | "SELL";
+  confidence: number;
+  entry: number;
+  sl: number;
+  tp: number;
+  reason: string;
+} | null {
+  if (c1m.length < 25 || c5m.length < 25) return null;
+
+  const closes5 = c5m.map((c) => c.close);
+  const ema9_5 = ema(closes5, 9);
+  const ema21_5 = ema(closes5, 21);
+  const trend5 =
+    ema9_5.at(-1)! > ema21_5.at(-1)! ? "up" : ema9_5.at(-1)! < ema21_5.at(-1)! ? "down" : "flat";
+
+  const lookback = c1m.slice(-16, -1);
+  const last = c1m.at(-2)!;
+  if (!last || lookback.length < 10) return null;
+  const recentHigh = Math.max(...lookback.map((c) => c.high));
+  const recentLow = Math.min(...lookback.map((c) => c.low));
+
+  const ranges = c1m.slice(-14).map((c) => c.high - c.low);
+  const atr = ranges.reduce((s, r) => s + r, 0) / Math.max(ranges.length, 1);
+  const slDist = Math.max(atr * 0.9, last.close * 0.0008);
+
+  const avgVol = lookback.reduce((s, c) => s + c.volume, 0) / lookback.length;
+  const volBoost = last.volume > avgVol * 1.2;
+
+  if (last.close > recentHigh && trend5 !== "down") {
+    const conf = Math.min(70 + (volBoost ? 10 : 0) + (trend5 === "up" ? 8 : 0), 92);
+    return {
+      side: "BUY",
+      confidence: conf,
+      entry: last.close,
+      sl: +(last.close - slDist).toFixed(8),
+      tp: +(last.close + slDist * 1.8).toFixed(8),
+      reason: `1m breakout above 15-bar high (${recentHigh.toFixed(4)})${volBoost ? ", volume surge" : ""}, 5m trend ${trend5}.`,
+    };
+  }
+  if (last.close < recentLow && trend5 !== "up") {
+    const conf = Math.min(70 + (volBoost ? 10 : 0) + (trend5 === "down" ? 8 : 0), 92);
+    return {
+      side: "SELL",
+      confidence: conf,
+      entry: last.close,
+      sl: +(last.close + slDist).toFixed(8),
+      tp: +(last.close - slDist * 1.8).toFixed(8),
+      reason: `1m breakdown below 15-bar low (${recentLow.toFixed(4)})${volBoost ? ", volume surge" : ""}, 5m trend ${trend5}.`,
+    };
+  }
+  return null;
+}
 
 async function fetchBinanceKlines(symbol: string, interval = "1h", limit = 30): Promise<any[]> {
   const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
