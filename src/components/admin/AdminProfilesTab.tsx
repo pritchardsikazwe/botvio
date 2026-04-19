@@ -301,6 +301,26 @@ export const AdminProfilesTab = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <SelectTrigger className="w-[180px]">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="ai_total_desc">AI Usage: High → Low</SelectItem>
+              <SelectItem value="ai_today_desc">AI Today: High → Low</SelectItem>
+              <SelectItem value="ai_total_asc">AI Usage: Low → High</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            type="number"
+            min={0}
+            placeholder="Min AI uploads"
+            value={minUsage}
+            onChange={(e) => setMinUsage(e.target.value)}
+            className="w-[140px]"
+          />
         </div>
       </CardHeader>
       <CardContent>
