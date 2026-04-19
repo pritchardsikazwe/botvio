@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – Isyarat AI Forex, Dagangan Emas & Bot Dagangan",
+    "description": "Isyarat forex percuma berkuasa AI, analisis emas (XAU/USD), AI carta, dan bot dagangan automatik untuk Deriv, Exness, Weltrade dan Binance. Dipercayai pedagang seluruh dunia.",
+    "keywords": "isyarat forex, dagangan emas, isyarat XAUUSD, bot dagangan AI, bot Deriv, Boom 1000, isyarat forex percuma, analisis carta"
+  },
+  "signals": {
+    "title": "Isyarat Dagangan Forex & Emas Langsung",
+    "description": "Isyarat dagangan masa nyata dijana AI untuk forex, emas, indeks sintetik dan kripto dengan tahap kemasukan, henti rugi dan ambil untung.",
+    "keywords": "isyarat forex langsung, isyarat emas, isyarat XAUUSD, isyarat dagangan percuma, isyarat Deriv, isyarat Boom Crash"
+  },
+  "gold": {
+    "title": "Hab Dagangan Emas – Isyarat & Analisis XAU/USD Langsung",
+    "description": "Harga XAU/USD langsung, isyarat dagangan emas AI, robot scalping, dan Strategi AI Botvio untuk dagangan emas yang konsisten.",
+    "keywords": "dagangan emas, XAUUSD, isyarat emas, scalping emas, analisis emas, robot emas"
+  },
+  "binary": {
+    "title": "Isyarat Opsyen Binari & Ramalan AI",
+    "description": "Isyarat opsyen binari berkuasa AI untuk Pocket Option, Deriv, IQ Option dan Binomo dengan ramalan tamat tempoh dan skor keyakinan.",
+    "keywords": "isyarat opsyen binari, isyarat Pocket Option, IQ Option, bot AI binari, isyarat OTC"
+  },
+  "blog": {
+    "title": "Botvio Academy – Artikel Dagangan, Panduan & Strategi",
+    "description": "Artikel mendalam percuma tentang dagangan forex, emas, kripto dan opsyen binari. Strategi, tutorial dan ulasan broker daripada pedagang sebenar.",
+    "keywords": "blog dagangan, panduan forex, strategi emas, tutorial opsyen binari, panduan Deriv"
+  },
+  "strategies": {
+    "title": "Pasaran Strategi Dagangan – Salin Strategi Pakar",
+    "description": "Temui, salin dan kongsi strategi dagangan yang terbukti untuk forex, emas, indeks sintetik dan kripto.",
+    "keywords": "strategi dagangan, salin dagangan, strategi forex, strategi emas, strategi Boom"
+  },
+  "markets": {
+    "title": "Intelijen Pasaran Global – Sesi Langsung & Isyarat",
+    "description": "Status pasaran masa nyata, sentimen, isyarat dan peristiwa ekonomi di pasaran AS, Eropah, Asia, Timur Tengah, Afrika dan Kripto.",
+    "keywords": "pasaran global, sesi pasaran langsung, pembukaan pasaran AS, isyarat Tadawul, isyarat pasaran Asia, sentimen pasaran"
+  },
+  "marketsUs": {
+    "title": "Intelijen Pasaran AS – S&P 500, Nasdaq, Isyarat NYSE",
+    "description": "Isyarat pasaran saham AS langsung, sentimen, peta haba sektor dan peristiwa ekonomi untuk sesi NYSE dan Nasdaq.",
+    "keywords": "isyarat pasaran AS, S&P 500, isyarat Nasdaq, pembukaan NYSE, forex sesi AS"
+  },
+  "marketsEurope": {
+    "title": "Intelijen Pasaran Eropah – DAX, FTSE & Isyarat EUR",
+    "description": "Isyarat pasaran Eropah langsung untuk DAX, FTSE 100, EUR/USD, dan forex sesi London.",
+    "keywords": "isyarat DAX, FTSE 100, sesi London, isyarat EURUSD, pembukaan pasaran Eropah"
+  },
+  "marketsAsia": {
+    "title": "Intelijen Pasaran Asia – Nikkei, Hang Seng & Isyarat JPY",
+    "description": "Isyarat pasaran Asia langsung untuk Nikkei 225, Hang Seng, USD/JPY, dan forex sesi Tokyo.",
+    "keywords": "isyarat Nikkei, Hang Seng, USDJPY, sesi Tokyo, pembukaan pasaran Asia"
+  },
+  "marketsMiddleEast": {
+    "title": "Intelijen Pasaran Timur Tengah – Isyarat Tadawul & Emas",
+    "description": "Isyarat pasaran Timur Tengah langsung untuk Tadawul, Dubai, emas (XAU/USD) dan minyak semasa sesi dagangan serantau.",
+    "keywords": "isyarat Tadawul, pasaran Dubai, forex Timur Tengah, sesi emas Timur Tengah"
+  },
+  "marketsAfrica": {
+    "title": "Intelijen Pasaran Afrika – JSE & Isyarat Forex Afrika",
+    "description": "Isyarat pasaran Afrika langsung untuk JSE Top 40, sesi Afrika Selatan, Nigeria, Kenya dan Mesir.",
+    "keywords": "JSE Top 40, isyarat forex Afrika, isyarat ZAR, NGN, pembukaan pasaran Afrika"
+  },
+  "marketsCrypto": {
+    "title": "Intelijen Pasaran Kripto – Isyarat BTC, ETH & Altcoin",
+    "description": "Isyarat pasaran kripto 24/7, sentimen dan harga langsung untuk Bitcoin, Ethereum dan altcoin teratas.",
+    "keywords": "isyarat kripto, isyarat Bitcoin, isyarat Ethereum, isyarat altcoin, sentimen kripto"
+  },
+  "bots": {
+    "title": "Bot Dagangan AI – Forex, Emas & Kripto Automatik",
+    "description": "Bot dagangan automatik untuk Deriv, Binance dan MT5 meliputi forex, emas, indeks sintetik, Boom & Crash dan kripto.",
+    "keywords": "bot dagangan, bot Deriv, bot Binance, bot Boom 1000, forex automatik, bot MT5"
+  },
+  "binanceHub": {
+    "title": "Hab Binance Botvio – Bot Kripto, Isyarat & Strategi",
+    "description": "Sambungkan akaun Binance anda untuk isyarat kripto yang dijana AI, bot automatik dan intelijen pasaran langsung.",
+    "keywords": "bot Binance, isyarat Binance, bot dagangan kripto, bot BTC, isyarat ETH"
+  },
+  "weltrade": {
+    "title": "Hab Weltrade – Indeks Sintetik, Spike Hunter & Painx",
+    "description": "Dapatkan dagangan indeks sintetik eksklusif Weltrade (Spike Hunter, Painx, GainX) dengan Strategi AI Botvio dan isyarat langsung.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, indeks sintetik Weltrade"
+  },
+  "marketplace": {
+    "title": "Pasaran Botvio – Bot, Isyarat & Pendidikan",
+    "description": "Beli atau langgan bot dagangan yang disahkan, penyedia isyarat dan kursus pendidikan daripada pedagang teratas.",
+    "keywords": "pasaran dagangan, beli bot dagangan, langganan isyarat, kursus dagangan"
+  },
+  "about": {
+    "title": "Mengenai Botvio – Isyarat Dagangan AI & Pendidikan Forex",
+    "description": "Botvio ialah platform dagangan berkuasa AI yang menyediakan isyarat forex percuma, analisis carta, alat dagangan emas, dan pendidikan untuk pedagang di seluruh dunia.",
+    "keywords": "mengenai Botvio, platform dagangan AI, pendidikan forex, syarikat isyarat dagangan"
+  },
+  "contact": {
+    "title": "Hubungi Botvio – Sokongan & Kerjasama",
+    "description": "Hubungi sokongan, kerjasama dan pertanyaan media Botvio melalui e-mel atau WhatsApp.",
+    "keywords": "hubungi Botvio, sokongan dagangan, hubungi penyedia isyarat"
+  },
+  "faq": {
+    "title": "Soalan Lazim Botvio – Soalan Umum Isyarat & Bot",
+    "description": "Jawapan tentang isyarat dagangan Botvio, bot, broker, pembayaran, langganan dan persediaan akaun.",
+    "keywords": "Soalan Lazim Botvio, soalan isyarat dagangan, cara menggunakan Botvio"
+  },
+  "affiliate": {
+    "title": "Program Afiliasi Botvio – Jana 20% Komisen Sepanjang Hayat",
+    "description": "Rujuk pedagang kepada Botvio dan perolehi $2 setiap pendaftaran serta 20% perkongsian pendapatan sepanjang hayat pada setiap pembelian.",
+    "keywords": "afiliasi Botvio, afiliasi dagangan, program rujukan forex, afiliasi isyarat"
+  },
+  "p2p": {
+    "title": "Dagangan Kripto P2P – Beli & Jual USDT Secara Tempatan",
+    "description": "Pasaran P2P Botvio untuk membeli dan menjual USDT, BTC dan kripto dengan wang mudah alih, pindahan bank dan kaedah tempatan.",
+    "keywords": "kripto P2P, beli USDT, jual Bitcoin, kripto wang mudah alih"
+  },
+  "sportsBetting": {
+    "title": "Pertaruhan Sukan Botvio – Ramalan & Slip Bola Sepak",
+    "description": "Ramalan bola sepak dibantu AI, slip harian dan penjejak pertaruhan untuk liga Eropah teratas.",
+    "keywords": "ramalan bola sepak, slip pertaruhan harian, AI sukan, ramalan bola"
+  },
+  "flippingChallenges": {
+    "title": "Cabaran Membina Akaun – Kembangkan Akaun Kecil Dengan Pantas",
+    "description": "Cabaran membina akaun berpandu untuk scalping emas, larian pantas forex mingguan dan pertumbuhan akaun Boom & Crash.",
+    "keywords": "cabaran membina akaun, pertumbuhan akaun, cabaran firma prop, cabaran scalping"
+  },
+  "live": {
+    "title": "Botvio Live – Strim Dagangan Langsung & Mentorship",
+    "description": "Tonton strim dagangan langsung, ajukan soalan dalam masa nyata, dan ikuti penyedia isyarat teratas.",
+    "keywords": "dagangan langsung, mentorship dagangan, strim forex langsung, salin dagangan langsung"
+  },
+  "newsCalendar": {
+    "title": "Kalendar Berita Forex – Acara Ekonomi Berimpak Tinggi",
+    "description": "Kalendar berita ekonomi langsung meliputi NFP, CPI, FOMC dan peristiwa berimpak tinggi yang menggerakkan forex dan emas.",
+    "keywords": "kalendar berita forex, NFP, CPI, FOMC, berita berimpak tinggi"
+  },
+  "tradeModes": {
+    "title": "Mod Dagangan Botvio – Scalping, Swing, Sniper & Hedge",
+    "description": "Pilih daripada 8 mod dagangan pakar termasuk mod Scalper, Swing, Sniper, Hedge dan Trend untuk sebarang keadaan pasaran.",
+    "keywords": "mod scalping, dagangan swing, dagangan sniper, dagangan hedge, mod trend"
+  },
+  "derivOptions": {
+    "title": "Dagangan Opsyen Deriv – Digit, Pengganda & Boom/Crash",
+    "description": "Dapatkan dagangan Pengganda Deriv, Digit, Higher/Lower dan Boom & Crash dengan isyarat AI dan bot Botvio.",
+    "keywords": "opsyen Deriv, pengganda Deriv, digit Deriv, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Ruang Kerja Dagangan Botvio – Isyarat, Carta & Auto-Dagangan",
+    "description": "Ruang kerja dagangan semua-dalam-satu dengan isyarat AI, carta langsung, data pasaran dan pelaksanaan automatik.",
+    "keywords": "ruang kerja dagangan, papan pemuka isyarat AI, auto dagangan, carta langsung"
+  },
+  "trade": {
+    "title": "Dagangan Botvio – Isyarat Langsung & Pelaksanaan Auto",
+    "description": "Papan pemuka dagangan langsung dengan isyarat, carta, dan pelaksanaan satu klik untuk Deriv, MT5 dan Binance.",
+    "keywords": "papan pemuka dagangan langsung, auto dagangan, pelaksanaan isyarat"
+  },
+  "authoritySignals": {
+    "title": "Isyarat Pihak Berkuasa – Isyarat Penyedia Teratas Disahkan",
+    "description": "Isyarat terpilih daripada penyedia teratas yang disahkan dengan rekod jejak, kadar kemenangan dan profil risiko.",
+    "keywords": "isyarat disahkan, penyedia isyarat teratas, isyarat pihak berkuasa, salin isyarat"
+  },
+  "learn": {
+    "title": "Botvio Academy – Mentorship Forex & Dagangan Percuma",
+    "description": "Mentorship pemula forex percuma, pelajaran video, dan kursus dagangan meliputi forex, emas, kripto dan opsyen binari.",
+    "keywords": "kursus forex percuma, mentorship forex, akademi dagangan, belajar dagangan"
+  },
+  "providers": {
+    "title": "Penyedia Isyarat Teratas – Salin Pedagang Disahkan",
+    "description": "Semak imbas penyedia isyarat teratas yang disusun mengikut prestasi, salin dagangan secara automatik dan kembangkan akaun anda.",
+    "keywords": "penyedia isyarat, salin dagangan, pedagang teratas, pedagang disahkan"
+  },
+  "billing": {
+    "title": "Harga Botvio – Pelan untuk Isyarat, Bot & VIP",
+    "description": "Bandingkan Pelan Percubaan Percuma, Asas, Standard dan VIP Botvio untuk isyarat AI, bot dan alat premium.",
+    "keywords": "harga Botvio, langganan dagangan, isyarat VIP, pelan isyarat"
+  },
+  "press": {
+    "title": "Botvio Press & Media",
+    "description": "Sumber akhbar, aset jenama, dan pertanyaan media untuk Botvio.",
+    "keywords": "akhbar Botvio, kit media, akhbar platform dagangan"
+  },
+  "testimonials": {
+    "title": "Testimoni Botvio – Kisah Pedagang Sebenar",
+    "description": "Baca testimoni pedagang sebenar dan hasil yang disahkan daripada pengguna Botvio di seluruh dunia.",
+    "keywords": "ulasan Botvio, testimoni pedagang, hasil isyarat"
+  },
+  "caseStudies": {
+    "title": "Kajian Kes Botvio – Hasil Dagangan Sebenar",
+    "description": "Kajian kes terperinci pedagang yang mengembangkan akaun menggunakan isyarat, bot dan strategi Botvio.",
+    "keywords": "kajian kes dagangan, hasil Botvio, kisah pertumbuhan"
+  },
+  "docs": {
+    "title": "Dokumentasi Botvio – API, Bot & Integrasi",
+    "description": "Dokumentasi teknikal untuk bot Botvio, API, sambungan broker dan integrasi.",
+    "keywords": "dokumen Botvio, API dagangan, dokumentasi bot"
+  },
+  "whitepaper": {
+    "title": "Kertas Putih Botvio – Seni Bina Dagangan AI",
+    "description": "Baca kertas putih Botvio meliputi seni bina isyarat AI, model risiko dan falsafah platform.",
+    "keywords": "kertas putih Botvio, seni bina dagangan AI, model isyarat"
+  },
+  "terms": {
+    "title": "Terma Perkhidmatan Botvio",
+    "description": "Terma perkhidmatan Botvio mengawal penggunaan isyarat dagangan, bot dan ciri platform.",
+    "keywords": "terma Botvio, terma perkhidmatan"
+  },
+  "privacy": {
+    "title": "Dasar Privasi Botvio",
+    "description": "Dasar privasi Botvio meliputi data peribadi, token broker dan pengendalian analitik.",
+    "keywords": "privasi Botvio, dasar data"
+  },
+  "disclaimer": {
+    "title": "Penafian Risiko Botvio",
+    "description": "Penafian risiko penting untuk isyarat dagangan, bot dan kandungan pendidikan yang disediakan oleh Botvio.",
+    "keywords": "penafian dagangan, amaran risiko, penafian isyarat"
+  },
+  "install": {
+    "title": "Pasang Botvio – Aplikasi Mudah Alih untuk Pedagang",
+    "description": "Pasang Botvio sebagai PWA pada Android dan iOS untuk akses pantas kepada isyarat, carta dan makluman langsung.",
+    "keywords": "pasang aplikasi Botvio, aplikasi dagangan PWA, dagangan mudah alih"
+  }
+}

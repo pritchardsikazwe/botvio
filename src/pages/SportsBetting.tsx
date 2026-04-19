@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Header } from "@/components/trading/Header";
@@ -363,9 +364,7 @@ const SportsBetting = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      <SEOHead seoKey="sportsBetting" noIndex />
       <Header />
 
       {!user ? (

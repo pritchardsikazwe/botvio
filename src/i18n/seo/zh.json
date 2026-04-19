@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – AI外汇信号、黄金交易与交易机器人",
+    "description": "免费AI驱动的外汇信号、黄金(XAU/USD)分析、图表AI，以及适用Deriv、Exness、Weltrade和Binance的自动化交易机器人。受全球交易者信赖。",
+    "keywords": "外汇信号, 黄金交易, XAUUSD信号, AI交易机器人, Deriv机器人, Boom 1000, 免费外汇信号, 图表分析"
+  },
+  "signals": {
+    "title": "实时外汇与黄金交易信号",
+    "description": "AI生成的实时外汇、黄金、合成指数和加密货币交易信号，包含入场、止损和止盈水平。",
+    "keywords": "实时外汇信号, 黄金信号, XAUUSD信号, 免费交易信号, Deriv信号, Boom Crash信号"
+  },
+  "gold": {
+    "title": "黄金交易中心 – XAU/USD实时信号与分析",
+    "description": "实时XAU/USD价格、AI黄金交易信号、剥头皮机器人以及Botvio AI策略，助您持续黄金交易。",
+    "keywords": "黄金交易, XAUUSD, 黄金信号, 黄金剥头皮, 黄金分析, 黄金机器人"
+  },
+  "binary": {
+    "title": "二元期权信号与AI预测",
+    "description": "Botvio提供Pocket Option、Deriv、IQ Option和Binomo的AI驱动二元期权信号，附带到期预测和置信度评分。",
+    "keywords": "二元期权信号, Pocket Option信号, IQ Option, 二元AI机器人, OTC信号"
+  },
+  "blog": {
+    "title": "Botvio学院 – 交易文章、指南与策略",
+    "description": "免费提供深度外汇、黄金、加密货币和二元期权交易文章。来自真实交易者的策略、教程和经纪商评论。",
+    "keywords": "交易博客, 外汇指南, 黄金策略, 二元期权教程, Deriv指南"
+  },
+  "strategies": {
+    "title": "交易策略市场 – 复制专家策略",
+    "description": "发现、复制和分享经过验证的外汇、黄金、合成指数及加密货币交易策略。",
+    "keywords": "交易策略, 复制交易, 外汇策略, 黄金策略, Boom策略"
+  },
+  "markets": {
+    "title": "全球市场情报 – 实时会话与信号",
+    "description": "横跨美国、欧洲、亚洲、中东、非洲和加密货币市场的实时市场状态、情绪、信号和经济事件。",
+    "keywords": "全球市场, 实时市场会话, 美国市场开盘, Tadawul信号, 亚洲市场信号, 市场情绪"
+  },
+  "marketsUs": {
+    "title": "美国市场情报 – S&P 500, Nasdaq, NYSE信号",
+    "description": "针对NYSE和Nasdaq交易时段的实时美国股票市场信号、情绪、板块热图和经济事件。",
+    "keywords": "美国市场信号, S&P 500, Nasdaq信号, NYSE开盘, 美国时段外汇"
+  },
+  "marketsEurope": {
+    "title": "欧洲市场情报 – DAX, FTSE & 欧元信号",
+    "description": "DAX、FTSE 100、EUR/USD以及伦敦交易时段外汇的实时欧洲市场信号。",
+    "keywords": "DAX信号, FTSE 100, 伦敦时段, EURUSD信号, 欧洲市场开盘"
+  },
+  "marketsAsia": {
+    "title": "亚洲市场情报 – Nikkei, Hang Seng & 日元信号",
+    "description": "Nikkei 225、Hang Seng、USD/JPY以及东京交易时段外汇的实时亚洲市场信号。",
+    "keywords": "Nikkei信号, Hang Seng, USDJPY, 东京时段, 亚洲市场开盘"
+  },
+  "marketsMiddleEast": {
+    "title": "中东市场情报 – Tadawul与黄金信号",
+    "description": "区域交易时段内的Tadawul、迪拜、黄金(XAU/USD)和石油的实时中东市场信号。",
+    "keywords": "Tadawul信号, 迪拜市场, 中东外汇, 黄金中东时段"
+  },
+  "marketsAfrica": {
+    "title": "非洲市场情报 – JSE与非洲外汇信号",
+    "description": "JSE Top 40、南非、尼日利亚、肯尼亚和埃及交易时段的实时非洲市场信号。",
+    "keywords": "JSE Top 40, 非洲外汇信号, ZAR信号, NGN, 非洲市场开盘"
+  },
+  "marketsCrypto": {
+    "title": "加密货币市场情报 - BTC, ETH & 山寨币信号",
+    "description": "24/7加密货币市场信号、情绪和比特币、以太坊及顶级山寨币的实时价格。",
+    "keywords": "加密信号, 比特币信号, 以太坊信号, 山寨币信号, 加密情绪"
+  },
+  "bots": {
+    "title": "AI交易机器人 – 自动化外汇、黄金与加密交易",
+    "description": "适用于Deriv、Binance和MT5的自动化交易机器人，涵盖外汇、黄金、合成指数、Boom & Crash和加密货币。",
+    "keywords": "交易机器人, Deriv机器人, Binance机器人, Boom 1000机器人, 自动化外汇, MT5机器人"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – 加密机器人、信号与策略",
+    "description": "连接您的Binance账户，获取AI生成的加密信号、自动化机器人和实时市场情报。",
+    "keywords": "Binance机器人, Binance信号, 加密交易机器人, BTC机器人, ETH信号"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – 合成指数、Spike Hunter & Painx",
+    "description": "通过Botvio AI策略和实时信号，交易Weltrade独有的合成指数（Spike Hunter, Painx, GainX）。",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, Weltrade合成指数"
+  },
+  "marketplace": {
+    "title": "Botvio 市场 – 机器人、信号与教育",
+    "description": "购买或订阅由顶级交易者提供的经过验证的交易机器人、信号服务和教育课程。",
+    "keywords": "交易市场, 购买交易机器人, 信号订阅, 交易课程"
+  },
+  "about": {
+    "title": "关于Botvio – AI交易信号与外汇教育",
+    "description": "Botvio是一个AI驱动的交易平台，为全球交易者提供免费外汇信号、图表分析、黄金交易工具和教育。",
+    "keywords": "Botvio简介, AI交易平台, 外汇教育, 交易信号公司"
+  },
+  "contact": {
+    "title": "联系Botvio – 支持与合作",
+    "description": "通过电子邮件或WhatsApp联系Botvio支持、合作和媒体咨询。",
+    "keywords": "Botvio联系方式, 交易支持, 信号提供商联系"
+  },
+  "faq": {
+    "title": "Botvio 常见问题 – 信号与机器人常见问题",
+    "description": "关于Botvio交易信号、机器人、经纪商、支付、订阅和账户设置的解答。",
+    "keywords": "Botvio常见问题, 交易信号问题, 如何使用Botvio"
+  },
+  "affiliate": {
+    "title": "Botvio 联盟计划 – 赚取20%终身佣金",
+    "description": "推荐交易者使用Botvio，每注册一人赚取2美元，并获得每次购买20%的终身营收分成。",
+    "keywords": "Botvio联盟, 交易联盟, 外汇推荐计划, 信号联盟"
+  },
+  "p2p": {
+    "title": "P2P加密货币交易 – 本地买卖USDT",
+    "description": "Botvio P2P市场，通过移动支付、银行转账和本地方式买卖USDT、BTC和其他加密货币。",
+    "keywords": "P2P加密货币, 购买USDT, 出售比特币, 移动支付加密货币"
+  },
+  "sportsBetting": {
+    "title": "Botvio 体育投注 – 足球预测与投注单",
+    "description": "AI辅助的足球预测、每日投注单以及欧洲顶级联赛的投注跟踪器。",
+    "keywords": "足球预测, 每日投注单, 体育AI, 足球预测"
+  },
+  "flippingChallenges": {
+    "title": "翻仓挑战 – 快速增长小额账户",
+    "description": "为黄金剥头皮、每周外汇短线交易和Boom & Crash账户增长提供的指导性翻仓挑战。",
+    "keywords": "翻仓挑战, 账户增长, 机构挑战, 剥头皮挑战"
+  },
+  "live": {
+    "title": "Botvio Live – 实时交易直播与指导",
+    "description": "观看实时交易直播，实时提问，并跟随顶级信号提供商。",
+    "keywords": "实时交易, 交易指导, 实时外汇直播, 复制交易直播"
+  },
+  "newsCalendar": {
+    "title": "外汇新闻日历 – 高影响力经济事件",
+    "description": "涵盖NFP、CPI、FOMC以及影响外汇和黄金的高影响力事件的实时经济新闻日历。",
+    "keywords": "外汇新闻日历, NFP, CPI, FOMC, 高影响力新闻"
+  },
+  "tradeModes": {
+    "title": "Botvio 交易模式 – 剥头皮、波段、狙击与对冲",
+    "description": "在任何市场条件下，从8种专业交易模式中选择，包括剥头皮、波段、狙击、对冲和趋势模式。",
+    "keywords": "剥头皮模式, 波段交易, 狙击交易, 对冲交易, 趋势模式"
+  },
+  "derivOptions": {
+    "title": "Deriv 期权交易 – 数字、乘数与Boom/Crash",
+    "description": "通过AI信号和Botvio机器人交易Deriv乘数、数字、Higher/Lower和Boom & Crash。",
+    "keywords": "Deriv期权, Deriv乘数, Deriv数字, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Botvio 交易工作区 – 信号、图表与自动交易",
+    "description": "一体化交易工作区，提供AI信号、实时图表、市场数据和自动化执行。",
+    "keywords": "交易工作区, AI信号仪表盘, 自动交易, 实时图表"
+  },
+  "trade": {
+    "title": "Botvio Trade – 实时信号与自动执行",
+    "description": "实时交易仪表盘，提供信号、图表以及Deriv、MT5和Binance的一键执行功能。",
+    "keywords": "实时交易仪表盘, 自动交易, 信号执行"
+  },
+  "authoritySignals": {
+    "title": "权威信号 – 经过验证的顶级提供商信号",
+    "description": "精选来自经过验证的顶级提供商的信号，附带交易记录、胜率和风险概况。",
+    "keywords": "验证信号, 顶级信号提供商, 权威信号, 信号复制"
+  },
+  "learn": {
+    "title": "Botvio 学院 – 免费外汇与交易指导",
+    "description": "免费提供外汇初学者指导、视频课程和涵盖外汇、黄金、加密货币和二元期权的交易课程。",
+    "keywords": "免费外汇课程, 外汇指导, 交易学院, 学习交易"
+  },
+  "providers": {
+    "title": "顶级信号提供商 – 复制验证交易者",
+    "description": "浏览按业绩排名的顶级信号提供商，自动复制交易并增长您的账户。",
+    "keywords": "信号提供商, 复制交易, 顶级交易者, 验证交易者"
+  },
+  "billing": {
+    "title": "Botvio 定价 – 信号、机器人与VIP计划",
+    "description": "比较Botvio免费试用、基础、标准和VIP计划，获取AI信号、机器人和高级工具。",
+    "keywords": "Botvio定价, 交易订阅, VIP信号, 信号计划"
+  },
+  "press": {
+    "title": "Botvio 新闻与媒体",
+    "description": "Botvio的新闻资源、品牌资产和媒体咨询。",
+    "keywords": "Botvio新闻, 媒体资料包, 交易平台新闻"
+  },
+  "testimonials": {
+    "title": "Botvio 客户评价 – 真实交易者故事",
+    "description": "阅读来自全球Botvio用户的真实交易者评价和验证结果。",
+    "keywords": "Botvio评论, 交易者评价, 信号结果"
+  },
+  "caseStudies": {
+    "title": "Botvio 案例研究 – 真实交易结果",
+    "description": "详细的案例研究，展示交易者如何使用Botvio信号、机器人和策略增长账户。",
+    "keywords": "交易案例研究, Botvio结果, 增长故事"
+  },
+  "docs": {
+    "title": "Botvio 文档 – API、机器人与集成",
+    "description": "Botvio机器人、API、经纪商连接和集成的技术文档。",
+    "keywords": "Botvio文档, 交易API, 机器人文档"
+  },
+  "whitepaper": {
+    "title": "Botvio 白皮书 – AI交易架构",
+    "description": "阅读Botvio白皮书，涵盖AI信号架构、风险模型和平台理念。",
+    "keywords": "Botvio白皮书, AI交易架构, 信号模型"
+  },
+  "terms": {
+    "title": "Botvio 服务条款",
+    "description": "Botvio服务条款，规范交易信号、机器人和平台功能的使用。",
+    "keywords": "Botvio条款, 服务条款"
+  },
+  "privacy": {
+    "title": "Botvio 隐私政策",
+    "description": "Botvio隐私政策，涵盖个人数据、经纪商令牌和分析处理。",
+    "keywords": "Botvio隐私, 数据政策"
+  },
+  "disclaimer": {
+    "title": "Botvio 风险免责声明",
+    "description": "Botvio提供的交易信号、机器人和教育内容的重要风险免责声明。",
+    "keywords": "交易免责声明, 风险警告, 信号免责声明"
+  },
+  "install": {
+    "title": "安装Botvio – 交易者移动应用",
+    "description": "在Android和iOS上将Botvio安装为PWA，以便快速访问信号、图表和实时提醒。",
+    "keywords": "安装Botvio应用, PWA交易应用, 移动交易"
+  }
+}

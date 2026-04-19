@@ -78,7 +78,7 @@ function LiveClock() {
 const NewsCalendar = () => {
   return (
     <div className="min-h-screen bg-background">
-        <SEOHead
+        <SEOHead seoKey="newsCalendar"
           title="Forex News Calendar — Week of Mar 31 – Apr 4, 2026 | Botvio"
           description="This week's high-impact forex events: NFP, ISM Manufacturing, ADP, Eurozone CPI. Trading strategies, entry levels, and risk management."
         />

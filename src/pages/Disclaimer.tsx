@@ -6,7 +6,7 @@ import { AlertTriangle } from "lucide-react";
 
 const Disclaimer = () => (
   <div className="min-h-screen bg-background">
-    <SEOHead
+    <SEOHead seoKey="disclaimer"
       title="Disclaimer – Botvio Trading Risk Notice"
       description="Important risk disclaimer for Botvio users. Trading forex, gold, synthetic indices, and crypto involves substantial risk. Read before trading."
     />

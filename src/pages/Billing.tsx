@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Header } from "@/components/trading/Header";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { useNavigate, Link } from "react-router-dom";
 import { Check, Crown, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle, Sparkles, Shield, Zap, BarChart3 } from "lucide-react";
@@ -114,6 +115,7 @@ const Billing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead seoKey="billing" />
       <Header />
       
       <main className="container mx-auto px-4 py-6">

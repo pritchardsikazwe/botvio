@@ -23,7 +23,7 @@ const AuthoritySignals = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Authority Signals" description="Real-time AI-generated and expert trading signals for Deriv. High-confidence signals with performance tracking and analysis." jsonLd={jsonLd} />
+      <SEOHead seoKey="authoritySignals" title="Authority Signals" description="Real-time AI-generated and expert trading signals for Deriv. High-confidence signals with performance tracking and analysis." jsonLd={jsonLd} />
       <Header />
       <main className="container mx-auto px-4 py-10 space-y-8">
         <div className="text-center space-y-3">

@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – สัญญาณ AI Forex, เทรดทอง & บอทเทรด",
+    "description": "สัญญาณ Forex ขับเคลื่อนด้วย AI ฟรี, การวิเคราะห์ทองคำ (XAU/USD), Chart AI และบอทเทรดอัตโนมัติสำหรับ Deriv, Exness, Weltrade และ Binance ได้รับความไว้วางใจจากนักเทรดทั่วโลก",
+    "keywords": "สัญญาณ forex, เทรดทอง, สัญญาณ XAUUSD, บอทเทรด AI, บอท Deriv, Boom 1000, สัญญาณ forex ฟรี, วิเคราะห์กราฟ"
+  },
+  "signals": {
+    "title": "สัญญาณเทรด Forex & ทองคำสด",
+    "description": "สัญญาณเทรดแบบเรียลไทม์ที่สร้างโดย AI สำหรับ Forex, ทองคำ, ตลาดสังเคราะห์และคริปโต พร้อมจุดเข้า, Stop Loss และ Take Profit",
+    "keywords": "สัญญาณ forex สด, สัญญาณทอง, สัญญาณ XAUUSD, สัญญาณเทรดฟรี, สัญญาณ Deriv, สัญญาณ Boom Crash"
+  },
+  "gold": {
+    "title": "ศูนย์เทรดทอง – สัญญาณ XAU/USD สด & วิเคราะห์",
+    "description": "ราคา XAU/USD สด, สัญญาณเทรดทอง AI, โรบอท Scalping และกลยุทธ์ Botvio AI เพื่อการเทรดทองที่สม่ำเสมอ",
+    "keywords": "เทรดทอง, XAUUSD, สัญญาณทอง, scalping ทอง, วิเคราะห์ทอง, โรบอททอง"
+  },
+  "binary": {
+    "title": "สัญญาณ Binary Options & การคาดการณ์ AI",
+    "description": "สัญญาณ Binary Options ที่ขับเคลื่อนด้วย AI สำหรับ Pocket Option, Deriv, IQ Option และ Binomo พร้อมการคาดการณ์วันหมดอายุและคะแนนความเชื่อมั่น",
+    "keywords": "สัญญาณ binary options, สัญญาณ Pocket Option, IQ Option, บอท binary AI, สัญญาณ OTC"
+  },
+  "blog": {
+    "title": "Botvio Academy – บทความเทรด, คู่มือ & กลยุทธ์",
+    "description": "บทความเชิงลึกฟรีเกี่ยวกับการเทรด Forex, ทองคำ, คริปโตและ Binary Options กลยุทธ์, บทเรียนและรีวิวโบรกเกอร์จากนักเทรดจริง",
+    "keywords": "บล็อกเทรด, คู่มือ forex, กลยุทธ์ทอง, บทเรียน binary options, คู่มือ Deriv"
+  },
+  "strategies": {
+    "title": "ตลาดกลยุทธ์การเทรด – คัดลอกกลยุทธ์ผู้เชี่ยวชาญ",
+    "description": "ค้นพบ คัดลอก และแบ่งปันกลยุทธ์การเทรดที่ได้รับการพิสูจน์แล้วสำหรับ Forex, ทองคำ, ตลาดสังเคราะห์และคริปโต",
+    "keywords": "กลยุทธ์การเทรด, copy trading, กลยุทธ์ forex, กลยุทธ์ทอง, กลยุทธ์ Boom"
+  },
+  "markets": {
+    "title": "ข้อมูลตลาดทั่วโลก – เซสซันสด & สัญญาณ",
+    "description": "สถานะตลาด, Sentiment, สัญญาณและเหตุการณ์ทางเศรษฐกิจแบบเรียลไทม์ครอบคลุมตลาดสหรัฐฯ, ยุโรป, เอเชีย, ตะวันออกกลาง, แอฟริกาและ Crypto",
+    "keywords": "ตลาดทั่วโลก, เซสซันตลาดสด, ตลาดสหรัฐฯเปิด, สัญญาณ Tadawul, สัญญาณตลาดเอเชีย, market sentiment"
+  },
+  "marketsUs": {
+    "title": "ข้อมูลตลาดสหรัฐฯ – สัญญาณ S&P 500, Nasdaq, NYSE",
+    "description": "สัญญาณตลาดหุ้นสหรัฐฯสด, Sentiment, แผนที่ความร้อนรายภาคส่วนและเหตุการณ์ทางเศรษฐกิจสำหรับช่วง NYSE และ Nasdaq",
+    "keywords": "สัญญาณตลาดสหรัฐฯ, S&P 500, สัญญาณ Nasdaq, NYSE เปิด, forex ช่วงสหรัฐฯ"
+  },
+  "marketsEurope": {
+    "title": "ข้อมูลตลาดยุโรป – สัญญาณ DAX, FTSE & EUR",
+    "description": "สัญญาณตลาดยุโรปสดสำหรับ DAX, FTSE 100, EUR/USD และ Forex ช่วงลอนดอน",
+    "keywords": "สัญญาณ DAX, FTSE 100, ช่วงลอนดอน, สัญญาณ EURUSD, ตลาดยุโรปเปิด"
+  },
+  "marketsAsia": {
+    "title": "ข้อมูลตลาดเอเชีย – สัญญาณ Nikkei, Hang Seng & JPY",
+    "description": "สัญญาณตลาดเอเชียสดสำหรับ Nikkei 225, Hang Seng, USD/JPY และ Forex ช่วงโตเกียว",
+    "keywords": "สัญญาณ Nikkei, Hang Seng, USDJPY, ช่วงโตเกียว, ตลาดเอเชียเปิด"
+  },
+  "marketsMiddleEast": {
+    "title": "ข้อมูลตลาดตะวันออกกลาง – สัญญาณ Tadawul & ทอง",
+    "description": "สัญญาณตลาดตะวันออกกลางสดสำหรับ Tadawul, ดูไบ, ทองคำ (XAU/USD) และน้ำมันระหว่างช่วงการซื้อขายในภูมิภาค",
+    "keywords": "สัญญาณ Tadawul, ตลาดดูไบ, Forex ตะวันออกกลาง, ทองคำช่วงตะวันออกกลาง"
+  },
+  "marketsAfrica": {
+    "title": "ข้อมูลตลาดแอฟริกา – สัญญาณ JSE & แอฟริกา Forex",
+    "description": "สัญญาณตลาดแอฟริกาที่ส่งตรงจาก JSE Top 40, แอฟริกาใต้, ไนจีเรีย, เคนยา และช่วงอียิปต์",
+    "keywords": "JSE Top 40, สัญญาณ Forex แอฟริกา, สัญญาณ ZAR, NGN, ตลาดแอฟริกาเปิด"
+  },
+  "marketsCrypto": {
+    "title": "ข้อมูลตลาด Crypto – สัญญาณ BTC, ETH & Altcoin",
+    "description": "สัญญาณตลาด Crypto, Sentiment และราคา Bitcoin, Ethereum และ Altcoin ยอดนิยมตลอด 24 ชั่วโมง",
+    "keywords": "สัญญาณ crypto, สัญญาณ Bitcoin, สัญญาณ Ethereum, สัญญาณ altcoin, crypto sentiment"
+  },
+  "bots": {
+    "title": "บอทเทรด AI – ระบบอัตโนมัติ Forex, ทองคำ & Crypto",
+    "description": "บอทเทรดอัตโนมัติสำหรับ Deriv, Binance และ MT5 ครอบคลุม Forex, ทองคำ, ตลาดสังเคราะห์, Boom & Crash และ Crypto",
+    "keywords": "บอทเทรด, บอท Deriv, บอท Binance, บอท Boom 1000, forex อัตโนมัติ, บอท MT5"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – บอท Crypto, สัญญาณ & กลยุทธ์",
+    "description": "เชื่อมต่อบัญชี Binance ของคุณเพื่อรับสัญญาณ Crypto ที่สร้างโดย AI, บอทอัตโนมัติและข้อมูลตลาดสด",
+    "keywords": "บอท Binance, สัญญาณ Binance, บอทเทรด crypto, บอท BTC, สัญญาณ ETH"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – ตลาดสังเคราะห์, Spike Hunter & Painx",
+    "description": "เทรดตลาดสังเคราะห์พิเศษของ Weltrade (Spike Hunter, Painx, GainX) ด้วยกลยุทธ์ Botvio AI และสัญญาณสด",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, ดัชนีสังเคราะห์ Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvio Marketplace – บอท, สัญญาณ & การศึกษา",
+    "description": "ซื้อหรือสมัครบอทเทรดที่ได้รับการยืนยัน, ผู้ให้บริการสัญญาณและคอร์สเรียนจากนักเทรดชั้นนำ",
+    "keywords": "ตลาดเทรด, ซื้อบอทเทรด, สมัครสัญญาณ, คอร์สเรียนเทรด"
+  },
+  "about": {
+    "title": "เกี่ยวกับ Botvio – สัญญาณเทรด AI & การศึกษา Forex",
+    "description": "Botvio คือแพลตฟอร์มเทรดที่ขับเคลื่อนด้วย AI ที่ให้บริการสัญญาณ Forex ฟรี, การวิเคราะห์กราฟ, เครื่องมือเทรดทองคำและการศึกษาสำหรับนักเทรดทั่วโลก",
+    "keywords": "เกี่ยวกับ Botvio, แพลตฟอร์มเทรด AI, การศึกษา forex, บริษัทสัญญาณเทรด"
+  },
+  "contact": {
+    "title": "ติดต่อ Botvio – สนับสนุน & พันธมิตร",
+    "description": "ติดต่อฝ่ายสนับสนุนของ Botvio, พันธมิตรและสอบถามข้อมูลสื่อผ่านอีเมลหรือ WhatsApp",
+    "keywords": "ติดต่อ Botvio, สนับสนุนการเทรด, ติดต่อผู้ให้บริการสัญญาณ"
+  },
+  "faq": {
+    "title": "คำถามที่พบบ่อยของ Botvio – เกี่ยวกับสัญญาณ & บอท",
+    "description": "คำตอบเกี่ยวกับสัญญาณเทรด Botvio, บอท, โบรกเกอร์, การชำระเงิน, การสมัครสมาชิกและการตั้งค่าบัญชี",
+    "keywords": "คำถามที่พบบ่อย Botvio, คำถามสัญญาณเทรด, วิธีใช้ Botvio"
+  },
+  "affiliate": {
+    "title": "โปรแกรม Botvio Affiliate – รับค่าคอมมิชชัน 20% ตลอดชีพ",
+    "description": "แนะนำนักเทรดมาที่ Botvio และรับ $2 ต่อการสมัครบวก 20% ของส่วนแบ่งรายได้ตลอดชีพจากการซื้อทุกครั้ง",
+    "keywords": "Botvio affiliate, affiliate เทรด, โปรแกรมแนะนำ forex, affiliate สัญญาณ"
+  },
+  "p2p": {
+    "title": "P2P Crypto Trading – ซื้อ & ขาย USDT ในพื้นที่",
+    "description": "ตลาด Botvio P2P สำหรับซื้อและขาย USDT, BTC และ Crypto ด้วย Mobile Money, การโอนเงินผ่านธนาคารและวิธีการในพื้นที่",
+    "keywords": "P2P crypto, ซื้อ USDT, ขาย Bitcoin, mobile money crypto"
+  },
+  "sportsBetting": {
+    "title": "Botvio Sports Betting – การทำนายฟุตบอล & สลิป",
+    "description": "การทำนายฟุตบอลที่ช่วยด้วย AI, สลิปรายวันและตัวติดตามการเดิมพันสำหรับลีกยุโรปชั้นนำ",
+    "keywords": "การทำนายฟุตบอล, สลิปเดิมพันรายวัน, กีฬา AI, การทำนายฟุตบอล"
+  },
+  "flippingChallenges": {
+    "title": "การท้าทาย Account Flipping – สร้างบัญชีเล็กให้โตเร็ว",
+    "description": "การท้าทาย Account Flipping แบบมีไกด์สำหรับการ Scalping ทองคำ, การวิ่ง Forex รายสัปดาห์และการเพิ่มพูนบัญชี Boom & Crash",
+    "keywords": "การท้าทาย flipping, การเพิ่มพูนบัญชี, การท้าทายบริษัท prop, การท้าทาย scalping"
+  },
+  "live": {
+    "title": "Botvio Live – สตรีมการเทรดสด & การให้คำปรึกษา",
+    "description": "รับชมสตรีมการเทรดสด, ถามคำถามได้ทันที และติดตามผู้ให้บริการสัญญาณชั้นนำ",
+    "keywords": "เทรดสด, การให้คำปรึกษาการเทรด, สตรีม forex สด, copy trading สด"
+  },
+  "newsCalendar": {
+    "title": "ปฏิทินข่าว Forex – เหตุการณ์เศรษฐกิจที่มีผลกระทบสูง",
+    "description": "ปฏิทินข่าวเศรษฐกิจสดครอบคลุม NFP, CPI, FOMC และเหตุการณ์ที่มีผลกระทบสูงที่ทำให้ Forex และทองคำเคลื่อนไหว",
+    "keywords": "ปฏิทินข่าว forex, NFP, CPI, FOMC, ข่าวสำคัญ"
+  },
+  "tradeModes": {
+    "title": "โหมดการเทรด Botvio – Scalping, Swing, Sniper & Hedge",
+    "description": "เลือกจาก 8 โหมดการเทรดผู้เชี่ยวชาญ รวมถึงโหมด Scalper, Swing, Sniper, Hedge และ Trend สำหรับทุกสภาวะตลาด",
+    "keywords": "โหมด scalping, swing trading, sniper trading, hedge trading, โหมด trend"
+  },
+  "derivOptions": {
+    "title": "การเทรด Deriv Options – Digits, Multipliers & Boom/Crash",
+    "description": "เทรด Deriv Multipliers, Digits, Higher/Lower และ Boom & Crash ด้วยสัญญาณ AI และบอท Botvio",
+    "keywords": "Deriv options, Deriv multipliers, Deriv digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "พื้นที่ทำงาน Botvio Trading – สัญญาณ, กราฟ & Auto-Trade",
+    "description": "พื้นที่ทำงานการเทรดแบบ All-in-one พร้อมสัญญาณ AI, กราฟสด, ข้อมูลตลาดและการดำเนินการอัตโนมัติ",
+    "keywords": "พื้นที่ทำงานเทรด, แดชบอร์ดสัญญาณ AI, Auto Trade, กราฟสด"
+  },
+  "trade": {
+    "title": "Botvio Trade – สัญญาณสด & การดำเนินการอัตโนมัติ",
+    "description": "แดชบอร์ดเทรดสดพร้อมสัญญาณ, กราฟและการดำเนินการในคลิกเดียวสำหรับ Deriv, MT5 และ Binance",
+    "keywords": "แดชบอร์ดเทรดสด, Auto Trade, การดำเนินการสัญญาณ"
+  },
+  "authoritySignals": {
+    "title": "Authority Signals – สัญญาณผู้ให้บริการชั้นนำที่ได้รับการยืนยัน",
+    "description": "สัญญาณที่คัดสรรจากผู้ให้บริการชั้นนำที่ได้รับการยืนยันพร้อมประวัติผลงาน, อัตราการชนะและโปรไฟล์ความเสี่ยง",
+    "keywords": "สัญญาณที่ได้รับการยืนยัน, ผู้ให้บริการสัญญาณชั้นนำ, สัญญาณ Authority, คัดลอกสัญญาณ"
+  },
+  "learn": {
+    "title": "Botvio Academy – การให้คำปรึกษา Forex ฟรี & การเทรด",
+    "description": "การให้คำปรึกษา Forex สำหรับผู้เริ่มต้นฟรี, บทเรียนวิดีโอและคอร์สเรียนเทรดครอบคลุม Forex, ทองคำ, Crypto และ Binary Options",
+    "keywords": "คอร์สเรียน forex ฟรี, การให้คำปรึกษา forex, สถาบันเทรด, เรียนเทรด"
+  },
+  "providers": {
+    "title": "ผู้ให้บริการสัญญาณชั้นนำ – คัดลอกนักเทรดที่ได้รับการยืนยัน",
+    "description": "เรียกดูผู้ให้บริการสัญญาณชั้นนำที่จัดอันดับตามประสิทธิภาพ, คัดลอกการเทรดโดยอัตโนมัติและเพิ่มขนาดบัญชีของคุณ",
+    "keywords": "ผู้ให้บริการสัญญาณ, copy trading, นักเทรดชั้นนำ, นักเทรดที่ได้รับการยืนยัน"
+  },
+  "billing": {
+    "title": "ราคา Botvio – แผนสำหรับสัญญาณ, บอท & VIP",
+    "description": "เปรียบเทียบ Botvio Free Trial, Basic, Standard และ VIP สำหรับสัญญาณ AI, บอทและเครื่องมือพรีเมียม",
+    "keywords": "ราคา Botvio, สมัครเทรด, สัญญาณ VIP, แผนสัญญาณ"
+  },
+  "press": {
+    "title": "ข่าวประชาสัมพันธ์ & สื่อ Botvio",
+    "description": "แหล่งข้อมูลสื่อ, สินทรัพย์แบรนด์และการสอบถามข้อมูลสื่อสำหรับ Botvio",
+    "keywords": "ข่าว Botvio, ชุดสื่อ, ข่าวแพลตฟอร์มเทรด"
+  },
+  "testimonials": {
+    "title": "คำ testimonial จาก Botvio – เรื่องราวจากนักเทรดจริง",
+    "description": "อ่านคำ testimonial จากนักเทรดจริงและผลลัพธ์ที่ได้รับการยืนยันจากผู้ใช้ Botvio ทั่วโลก",
+    "keywords": "รีวิว Botvio, คำtestimonial จากนักเทรด, ผลลัพธ์สัญญาณ"
+  },
+  "caseStudies": {
+    "title": "กรณีศึกษา Botvio – ผลลัพธ์การเทรดจริง",
+    "description": "กรณีศึกษาโดยละเอียดของนักเทรดที่เพิ่มขนาดบัญชีโดยใช้สัญญาณ Botvio, บอทและกลยุทธ์",
+    "keywords": "กรณีศึกษาการเทรด, ผลลัพธ์ Botvio, เรื่องราวการเติบโต"
+  },
+  "docs": {
+    "title": "เอกสาร Botvio – API, บอท & การผสานรวม",
+    "description": "เอกสารทางเทคนิคสำหรับบอท Botvio, API, การเชื่อมต่อโบรกเกอร์และการผสานรวม",
+    "keywords": "เอกสาร Botvio, API การเทรด, เอกสารบอท"
+  },
+  "whitepaper": {
+    "title": "เอกสาร Whitepaper ของ Botvio – สถาปัตยกรรม AI Trading",
+    "description": "อ่านเอกสาร Whitepaper ของ Botvio ที่ครอบคลุมสถาปัตยกรรมสัญญาณ AI, โมเดลความเสี่ยงและปรัชญาแพลตฟอร์ม",
+    "keywords": "Whitepaper Botvio, สถาปัตยกรรม AI Trading, โมเดลสัญญาณ"
+  },
+  "terms": {
+    "title": "ข้อกำหนดบริการของ Botvio",
+    "description": "ข้อกำหนดบริการของ Botvio ที่ควบคุมการใช้สัญญาณเทรด, บอทและคุณสมบัติแพลตฟอร์ม",
+    "keywords": "ข้อกำหนด Botvio, ข้อกำหนดบริการ"
+  },
+  "privacy": {
+    "title": "นโยบายความเป็นส่วนตัวของ Botvio",
+    "description": "นโยบายความเป็นส่วนตัวของ Botvio ครอบคลุมข้อมูลส่วนบุคคล, โทเค็นโบรกเกอร์และการจัดการการวิเคราะห์",
+    "keywords": "ความเป็นส่วนตัว Botvio, นโยบายข้อมูล"
+  },
+  "disclaimer": {
+    "title": "คำสงวนสิทธิ์ความเสี่ยงของ Botvio",
+    "description": "คำสงวนสิทธิ์ความเสี่ยงที่สำคัญสำหรับสัญญาณเทรด, บอทและเนื้อหาการศึกษาที่จัดทำโดย Botvio",
+    "keywords": "คำสงวนสิทธิ์การเทรด, คำเตือนความเสี่ยง, คำสงวนสิทธิ์สัญญาณ"
+  },
+  "install": {
+    "title": "ติดตั้ง Botvio – แอพมือถือสำหรับนักเทรด",
+    "description": "ติดตั้ง Botvio เป็น PWA บน Android และ iOS เพื่อการเข้าถึงสัญญาณ, กราฟและการแจ้งเตือนสดที่รวดเร็ว",
+    "keywords": "ติดตั้งแอพ Botvio, แอพ PWA เทรด, เทรดบนมือถือ"
+  }
+}

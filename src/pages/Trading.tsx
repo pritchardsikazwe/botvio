@@ -67,7 +67,7 @@ const Trading = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Trading Workspace" description="Full trading workspace with pair selection, strategies, signals & AI analysis" noIndex />
+      <SEOHead seoKey="trading" title="Trading Workspace" description="Full trading workspace with pair selection, strategies, signals & AI analysis" noIndex />
       <Header />
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

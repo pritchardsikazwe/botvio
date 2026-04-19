@@ -37,7 +37,7 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="faq"
         title="FAQ – Botvio AI Trading Bot Questions Answered"
         description="Get answers to common questions about Botvio AI trading bot. Learn about safety, pricing, supported trading modes, Deriv integration, Botvio AI strategies, and how to automate your trades."
         jsonLd={jsonLd}

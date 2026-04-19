@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – AI外国為替シグナル、ゴールド取引、取引ボット",
+    "description": "Deriv、Binance、Weltrade向けの無料AI搭載外国為替シグナル、ゴールド (XAU/USD) 分析、チャートAI、自動取引ボットです。世界中のトレーダーから信頼されています。",
+    "keywords": "外国為替シグナル, ゴールド取引, XAUUSDシグナル, AI取引ボット, Derivボット, Boom 1000, 無料外国為替シグナル, チャート分析"
+  },
+  "signals": {
+    "title": "ライブ外国為替＆ゴールド取引シグナル",
+    "description": "外国為替、ゴールド、合成指数、仮想通貨向けのリアルタイムAI生成取引シグナル。エントリー、ストップロス、テイクプロフィット水準を提供します。",
+    "keywords": "ライブ外国為替シグナル, ゴールドシグナル, XAUUSDシグナル, 無料取引シグナル, Derivシグナル, Boom Crashシグナル"
+  },
+  "gold": {
+    "title": "ゴールド取引ハブ – XAU/USDライブシグナル＆分析",
+    "description": "ライブXAU/USD価格、AIゴールド取引シグナル、スキャルピングロボット、Botvio AI戦略で一貫したゴールド取引を。",
+    "keywords": "ゴールド取引, XAUUSD, ゴールドシグナル, ゴールドスキャルピング, ゴールド分析, ゴールドロボット"
+  },
+  "binary": {
+    "title": "バイナリーオプションシグナル＆AI予測",
+    "description": "Pocket Option、Deriv、IQ Option、Binomo向けのAI搭載バイナリーオプションシグナル。満期予測と信頼度スコア付き。",
+    "keywords": "バイナリーオプションシグナル, Pocket Optionシグナル, IQ Option, バイナリーAIボット, OTCシグナル"
+  },
+  "blog": {
+    "title": "Botvioアカデミー – 取引記事、ガイド、戦略",
+    "description": "外国為替、ゴールド、仮想通貨、バイナリーオプション取引に関する詳細な無料記事。実際のトレーダーによる戦略、チュートリアル、ブローカーレビュー。",
+    "keywords": "取引ブログ, 外国為替ガイド, ゴールド戦略, バイナリーオプションチュートリアル, Derivガイド"
+  },
+  "strategies": {
+    "title": "取引戦略マーケットプレイス – エキスパート戦略をコピー",
+    "description": "外国為替、ゴールド、合成指数、仮想通貨向けの実績ある取引戦略を発見し、コピーして共有。",
+    "keywords": "取引戦略, コピートレード, 外国為替戦略, ゴールド戦略, Boom戦略"
+  },
+  "markets": {
+    "title": "グローバル市場情報 — ライブセッション＆シグナル",
+    "description": "米国、欧州、アジア、中東、アフリカ、仮想通貨市場を横断するリアルタイムの市場状況、センチメント、シグナル、経済イベント。",
+    "keywords": "グローバル市場, ライブ市場セッション, 米国市場オープン, Tadawulシグナル, アジア市場シグナル, 市場センチメント"
+  },
+  "marketsUs": {
+    "title": "米国市場情報 – S&P 500、Nasdaq、NYSEシグナル",
+    "description": "NYSEとNasdaqセッション向けのライブ米国株式市場シグナル、センチメント、セクターヒートマップ、経済イベント。",
+    "keywords": "米国市場シグナル, S&P 500, Nasdaqシグナル, NYSEオープン, 米国セッション外国為替"
+  },
+  "marketsEurope": {
+    "title": "欧州市場情報 – DAX、FTSE、EURシグナル",
+    "description": "DAX、FTSE 100、EUR/USD、ロンドンセッション外国為替向けのライブ欧州市場シグナル。",
+    "keywords": "DAXシグナル, FTSE 100, ロンドンセッション, EURUSDシグナル, 欧州市場オープン"
+  },
+  "marketsAsia": {
+    "title": "アジア市場情報 – 日経、ハンセン、JPYシグナル",
+    "description": "日経225、ハンセン、USD/JPY、東京セッション外国為替向けのライブアジア市場シグナル。",
+    "keywords": "日経シグナル, ハンセン, USDJPY, 東京セッション, アジア市場オープン"
+  },
+  "marketsMiddleEast": {
+    "title": "中東市場情報 – Tadawul＆ゴールドシグナル",
+    "description": "地域取引セッション中の中東市場、Tadawul、ドバイ、ゴールド (XAU/USD)、原油のライブシグナル。",
+    "keywords": "Tadawulシグナル, ドバイ市場, 中東外国為替, ゴールド中東セッション"
+  },
+  "marketsAfrica": {
+    "title": "アフリカ市場情報 – JSE＆アフリカ外国為替シグナル",
+    "description": "JSE Top 40、南アフリカ、ナイジェリア、ケニア、エジプトセッション向けのライブアフリカ市場シグナル。",
+    "keywords": "JSE Top 40, アフリカ外国為替シグナル, ZARシグナル, NGN, アフリカ市場オープン"
+  },
+  "marketsCrypto": {
+    "title": "仮想通貨市場情報 – BTC、ETH、アルトコインシグナル",
+    "description": "Bitcoin、Ethereum、主要アルトコイン向けの24時間年中無休の仮想通貨市場シグナル、センチメント、ライブ価格。",
+    "keywords": "仮想通貨シグナル, Bitcoinシグナル, Ethereumシグナル, アルトコインシグナル, 仮想通貨センチメント"
+  },
+  "bots": {
+    "title": "AI取引ボット – 自動外国為替、ゴールド、仮想通貨",
+    "description": "Deriv、Binance、MT5向けの自動取引ボットで、外国為替、ゴールド、合成指数、Boom & Crash、仮想通貨をカバー。",
+    "keywords": "取引ボット, Derivボット, Binanceボット, Boom 1000ボット, 自動外国為替, MT5ボット"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – 仮想通貨ボット、シグナル、戦略",
+    "description": "Binanceアカウントを接続して、AI生成の仮想通貨シグナル、自動ボット、ライブ市場情報を入手。",
+    "keywords": "Binanceボット, Binanceシグナル, 仮想通貨取引ボット, BTCボット, ETHシグナル"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – 合成指数、Spike Hunter、Painx",
+    "description": "Weltrade独自の合成指数 (Spike Hunter、Painx、GainX) をBotvio AI戦略とライブシグナルで取引。",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, 合成指数Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvioマーケットプレイス – ボット、シグナル、教育",
+    "description": "トップトレーダーからの検証済み取引ボット、シグナルプロバイダー、教育コースを購入または購読。",
+    "keywords": "取引マーケットプレイス, 取引ボット購入, シグナル購読, 取引コース"
+  },
+  "about": {
+    "title": "Botvioについて – AI取引シグナル＆外国為替教育",
+    "description": "Botvioは、無料の外国為替シグナル、チャート分析、ゴールド取引ツール、世界中のトレーダー向けの教育を提供するAI搭載取引プラットフォームです。",
+    "keywords": "Botvioについて, AI取引プラットフォーム, 外国為替教育, 取引シグナル会社"
+  },
+  "contact": {
+    "title": "Botvioへのお問い合わせ – サポート＆パートナーシップ",
+    "description": "Botvioのサポート、パートナーシップ、メディアに関するお問い合わせは、メールまたはWhatsAppでご連絡ください。",
+    "keywords": "Botvioお問い合わせ, 取引サポート, シグナルプロバイダー連絡先"
+  },
+  "faq": {
+    "title": "Botvio FAQ – シグナルとボットに関するよくある質問",
+    "description": "Botvioの取引シグナル、ボット、ブローカー、支払い、サブスクリプション、アカウント設定に関する回答。",
+    "keywords": "Botvio FAQ, 取引シグナル質問, Botvioの使い方"
+  },
+  "affiliate": {
+    "title": "Botvioアフィリエイトプログラム – 20%の生涯コミッションを獲得",
+    "description": "トレーダーをBotvioに紹介し、サインアップごとに$2と、すべての購入に対して20%の生涯収益シェアを獲得してください。",
+    "keywords": "Botvioアフィリエイト, 取引アフィリエイト, 外国為替紹介プログラム, シグナルアフィリエイト"
+  },
+  "p2p": {
+    "title": "P2P仮想通貨取引 – USDTを現地で売買",
+    "description": "Botvio P2Pマーケットプレイスで、携帯決済、銀行送金、その他の現地方法でUSDT、BTC、仮想通貨を売買。",
+    "keywords": "P2P仮想通貨, USDT購入, Bitcoin売却, 携帯決済仮想通貨"
+  },
+  "sportsBetting": {
+    "title": "Botvioスポーツベッティング – サッカー予測＆スリップ",
+    "description": "主要欧州リーグ向けのAI支援サッカー予測、日次スリップ、ベットトラッカー。",
+    "keywords": "サッカー予測, 日次ベッティングスリップ, スポーツAI, サッカー予測"
+  },
+  "flippingChallenges": {
+    "title": "アカウント反転チャレンジ – 小額のアカウントを急速に成長",
+    "description": "ゴールドスキャルピング、週次外国為替スプリント、Boom & Crashアカウント成長のためのガイド付き反転チャレンジ。",
+    "keywords": "反転チャレンジ, アカウント成長, プロップファームチャレンジ, スキャルピングチャレンジ"
+  },
+  "live": {
+    "title": "Botvioライブ – リアルタイム取引ストリーム＆メンターシップ",
+    "description": "ライブ取引ストリームを視聴し、リアルタイムで質問し、トップシグナルプロバイダーをフォロー。",
+    "keywords": "ライブ取引, 取引メンターシップ, ライブ外国為替ストリーム, コピートレードライブ"
+  },
+  "newsCalendar": {
+    "title": "外国為替ニュースカレンダー – 影響の大きい経済イベント",
+    "description": "NFP、CPI、FOMC、および外国為替とゴールドに影響を与える高影響経済イベントをカバーするライブ経済ニュースカレンダー。",
+    "keywords": "外国為替ニュースカレンダー, NFP, CPI, FOMC, 高影響ニュース"
+  },
+  "tradeModes": {
+    "title": "Botvio取引モード – スキャルピング、スイング、スナイパー、ヘッジ",
+    "description": "スキャルパー、スイング、スナイパー、ヘッジ、トレンドモードを含む8つのエキスパート取引モードから、あらゆる市場状況に合わせて選択。",
+    "keywords": "スキャルピングモード, スイングトレード, スナイパートレード, ヘッジトレード, トレンドモード"
+  },
+  "derivOptions": {
+    "title": "Derivオプション取引 – Digits、Multipliers、Boom/Crash",
+    "description": "Deriv Multipliers、Digits、Higher/Lower、およびBoom & CrashをAIシグナルとBotvioボットで取引。",
+    "keywords": "Derivオプション, Deriv Multipliers, Deriv Digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Botvioトレーディングワークスペース – シグナル、チャート、自動取引",
+    "description": "AIシグナル、ライブチャート、市場データ、自動実行機能を備えたオールインワントレーディングワークスペース。",
+    "keywords": "トレーディングワークスペース, AIシグナルダッシュボード, 自動取引, ライブチャート"
+  },
+  "trade": {
+    "title": "Botvio Trade – ライブシグナル＆自動実行",
+    "description": "Deriv、MT5、Binance向けのシグナル、チャート、ワンクリック実行を備えたライブ取引ダッシュボード。",
+    "keywords": "ライブ取引ダッシュボード, 自動取引, シグナル実行"
+  },
+  "authoritySignals": {
+    "title": "オーソリティシグナル – 検証済みのトッププロバイダーシグナル",
+    "description": "実績、勝率、リスクプロファイルを持つ検証済みのトッププロバイダーからの厳選されたシグナル。",
+    "keywords": "検証済みシグナル, トップシグナルプロバイダー, オーソリティシグナル, シグナルコピー"
+  },
+  "learn": {
+    "title": "Botvioアカデミー – 無料の外国為替＆取引メンターシップ",
+    "description": "外国為替、ゴールド、仮想通貨、バイナリーオプションをカバーする無料の外国為替初心者向けメンターシップ、ビデオレッスン、取引コース。",
+    "keywords": "無料外国為替コース, 外国為替メンターシップ, トレーディングアカデミー, トレーディングを学ぶ"
+  },
+  "providers": {
+    "title": "トップシグナルプロバイダー – 検証済みトレーダーをコピー",
+    "description": "パフォーマンス別にランク付けされたトップシグナルプロバイダーを閲覧し、自動的に取引をコピーしてアカウントを成長させましょう。",
+    "keywords": "シグナルプロバイダー, コピートレード, トップトレーダー, 検証済みトレーダー"
+  },
+  "billing": {
+    "title": "Botvio料金 – シグナル、ボット、VIPプラン",
+    "description": "Botvioの無料トライアル、ベーシック、スタンダード、VIPプランを比較して、AIシグナル、ボット、プレミアムツールを活用しましょう。",
+    "keywords": "Botvio料金, 取引サブスクリプション, VIPシグナル, シグナルプラン"
+  },
+  "press": {
+    "title": "Botvioプレス＆メディア",
+    "description": "Botvioのプレスリソース、ブランド資産、メディアに関するお問い合わせ。",
+    "keywords": "Botvioプレス, メディアキット, 取引プラットフォームプレス"
+  },
+  "testimonials": {
+    "title": "Botvio体験談 – 実際のトレーダーのストーリー",
+    "description": "世界中のBotvioユーザーからの実際のトレーダーの体験談と検証済み結果をお読みください。",
+    "keywords": "Botvioレビュー, トレーダー体験談, シグナル結果"
+  },
+  "caseStudies": {
+    "title": "Botvioケーススタディ – 実際の取引結果",
+    "description": "Botvioのシグナル、ボット、戦略を使用してアカウントを成長させたトレーダーの詳細なケーススタディ。",
+    "keywords": "取引ケーススタディ, Botvio結果, 成長ストーリー"
+  },
+  "docs": {
+    "title": "Botvioドキュメント – API、ボット、統合",
+    "description": "Botvioボット、API、ブローカー接続、統合の技術文書。",
+    "keywords": "Botvioドキュメント, 取引API, ボットドキュメント"
+  },
+  "whitepaper": {
+    "title": "Botvioホワイトペーパー – AI取引アーキテクチャ",
+    "description": "AIシグナルアーキテクチャ、リスクモデル、プラットフォーム哲学をカバーするBotvioホワイトペーパーをお読みください。",
+    "keywords": "Botvioホワイトペーパー, AI取引アーキテクチャ, シグナルモデル"
+  },
+  "terms": {
+    "title": "Botvio利用規約",
+    "description": "取引シグナル、ボット、プラットフォーム機能の使用を規定するBotvioの利用規約。",
+    "keywords": "Botvio利用規約, 利用規約"
+  },
+  "privacy": {
+    "title": "Botvioプライバシーポリシー",
+    "description": "個人データ、ブローカートークン、分析処理をカバーするBotvioのプライバシーポリシー。",
+    "keywords": "Botvioプライバシー, データポリシー"
+  },
+  "disclaimer": {
+    "title": "Botvioリスク免責事項",
+    "description": "Botvioが提供する取引シグナル、ボット、教育コンテンツに関する重要なリスク免責事項。",
+    "keywords": "取引免責事項, リスク警告, シグナル免責事項"
+  },
+  "install": {
+    "title": "Botvioをインストール – トレーダー向けモバイルアプリ",
+    "description": "AndroidおよびiOSにBotvioをPWAとしてインストールし、シグナル、チャート、ライブアラートに素早くアクセス。",
+    "keywords": "Botvioアプリをインストール, PWA取引アプリ, モバイル取引"
+  }
+}

@@ -19,7 +19,7 @@ const ASIA_SIGNALS = [
 ];
 
 const AsiaMarket = () => (
-  <MarketPageLayout title="Asia Market Dashboard" description="Nikkei 225, Hang Seng, ASX 200, USD/JPY signals and Asian market intelligence." emoji="🌏">
+  <MarketPageLayout seoKey="marketsAsia" title="Asia Market Dashboard" description="Nikkei 225, Hang Seng, ASX 200, USD/JPY signals and Asian market intelligence." emoji="🌏">
     <Card>
       <CardHeader className="pb-2"><CardTitle className="text-sm">Asian Indices</CardTitle></CardHeader>
       <CardContent>

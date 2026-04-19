@@ -17,7 +17,7 @@ const CaseStudies = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Case Studies" description="Botvio internal case studies." noIndex />
+      <SEOHead seoKey="caseStudies" title="Case Studies" description="Botvio internal case studies." noIndex />
       <Header />
       <main className="container mx-auto px-4 py-10 max-w-3xl">
         <Badge variant="outline" className="mb-4">Admin Only</Badge>

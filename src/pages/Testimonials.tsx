@@ -17,7 +17,7 @@ const testimonials = [
 
 const Testimonials = () => (
   <div className="min-h-screen bg-background">
-    <SEOHead title="Testimonials" description="Read what traders around the world say about Botvio AI trading bot. Real reviews from users in Kenya, Nigeria, Zambia, India, and more." />
+    <SEOHead seoKey="testimonials" title="Testimonials" description="Read what traders around the world say about Botvio AI trading bot. Real reviews from users in Kenya, Nigeria, Zambia, India, and more." />
     <Header />
     <main className="container mx-auto px-4 py-10 space-y-8">
       <div className="text-center space-y-3">

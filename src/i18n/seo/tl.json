@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – AI Forex Signals, Gold Trading & Trading Bots",
+    "description": "Mga libreng AI-powered forex signal, gold (XAU/USD) analysis, chart AI, at automated trading bots para sa Deriv, Exness, Weltrade at Binance. Pinagkakatiwalaan ng mga trader sa buong mundo.",
+    "keywords": "forex signals, gold trading, XAUUSD signals, AI trading bot, Deriv bot, Boom 1000, libreng forex signals, chart analysis"
+  },
+  "signals": {
+    "title": "Live Forex & Gold Trading Signals",
+    "description": "Real-time AI-generated trading signals para sa forex, gold, synthetic indices at crypto na may entry, stop loss, at take profit levels.",
+    "keywords": "live forex signals, gold signals, XAUUSD signals, libreng trading signals, Deriv signals, Boom Crash signals"
+  },
+  "gold": {
+    "title": "Gold Trading Hub – XAU/USD Live Signals & Analysis",
+    "description": "Live XAU/USD prices, AI gold trading signals, scalping robot, at Botvio AI Strategy para sa pare-parehong gold trading.",
+    "keywords": "gold trading, XAUUSD, gold signals, gold scalping, gold analysis, gold robot"
+  },
+  "binary": {
+    "title": "Binary Options Signals & AI Predictions",
+    "description": "Mga signal ng binary options na gamit ang AI para sa Pocket Option, Deriv, IQ Option at Binomo na may expiry predictions at confidence scoring.",
+    "keywords": "binary options signals, Pocket Option signals, IQ Option, binary AI bot, OTC signals"
+  },
+  "blog": {
+    "title": "Botvio Academy – Mga Artikulo, Gabay at Estratehiya sa Trading",
+    "description": "Libreng detalyadong artikulo sa forex, gold, crypto at binary options trading. Mga estratehiya, tutorial at review ng broker mula sa mga totoong trader.",
+    "keywords": "trading blog, gabay sa forex, gold strategy, binary options tutorial, gabay sa Deriv"
+  },
+  "strategies": {
+    "title": "Trading Strategy Marketplace – Kopyahin ang mga Expert Strategy",
+    "description": "Tuklasin, kopyahin at ibahagi ang mga napatunayang trading strategy para sa forex, gold, synthetic indices at crypto.",
+    "keywords": "trading strategies, copy trading, forex strategy, gold strategy, Boom strategy"
+  },
+  "markets": {
+    "title": "Global Market Intelligence – Live Sessions & Signals",
+    "description": "Real-time na status ng merkado, sentiment, signals at economic events sa US, Europe, Asia, Middle East, Africa at Crypto markets.",
+    "keywords": "global markets, live market sessions, US market open, Tadawul signals, Asia market signals, market sentiment"
+  },
+  "marketsUs": {
+    "title": "US Market Intelligence – S&P 500, Nasdaq, NYSE Signals",
+    "description": "Live US stock market signals, sentiment, sector heatmap at economic events para sa NYSE at Nasdaq sessions.",
+    "keywords": "US market signals, S&P 500, Nasdaq signals, NYSE open, US session forex"
+  },
+  "marketsEurope": {
+    "title": "Europe Market Intelligence – DAX, FTSE & EUR Signals",
+    "description": "Live European market signals para sa DAX, FTSE 100, EUR/USD, at London session forex.",
+    "keywords": "DAX signals, FTSE 100, London session, EURUSD signals, Europe market open"
+  },
+  "marketsAsia": {
+    "title": "Asia Market Intelligence – Nikkei, Hang Seng & JPY Signals",
+    "description": "Live Asian market signals para sa Nikkei 225, Hang Seng, USD/JPY, at Tokyo session forex.",
+    "keywords": "Nikkei signals, Hang Seng, USDJPY, Tokyo session, Asia market open"
+  },
+  "marketsMiddleEast": {
+    "title": "Middle East Market Intelligence – Tadawul & Gold Signals",
+    "description": "Live Middle East market signals para sa Tadawul, Dubai, gold (XAU/USD) at oil sa panahon ng regional trading sessions.",
+    "keywords": "Tadawul signals, Dubai market, Middle East forex, gold Middle East session"
+  },
+  "marketsAfrica": {
+    "title": "Africa Market Intelligence – JSE & African Forex Signals",
+    "description": "Live African market signals para sa JSE Top 40, South Africa, Nigeria, Kenya at Egypt sessions.",
+    "keywords": "JSE Top 40, Africa forex signals, ZAR signals, NGN, Africa market open"
+  },
+  "marketsCrypto": {
+    "title": "Crypto Market Intelligence – BTC, ETH & Altcoin Signals",
+    "description": "24/7 crypto market signals, sentiment at live prices para sa Bitcoin, Ethereum at mga nangungunang altcoins.",
+    "keywords": "crypto signals, Bitcoin signals, Ethereum signals, altcoin signals, crypto sentiment"
+  },
+  "bots": {
+    "title": "AI Trading Bots – Automated Forex, Gold & Crypto",
+    "description": "Automated trading bots para sa Deriv, Binance at MT5 na sumasaklaw sa forex, gold, synthetic indices, Boom & Crash at crypto.",
+    "keywords": "trading bot, Deriv bot, Binance bot, Boom 1000 bot, automated forex, MT5 bot"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – Crypto Bots, Signals & Strategies",
+    "description": "Ikonekta ang iyong Binance account para sa mga AI-generated crypto signals, automated bots at live market intelligence.",
+    "keywords": "Binance bot, Binance signals, crypto trading bot, BTC bot, ETH signals"
+  },
+  "weltrade": {
+    "title": "Weltrade Hub – Synthetic Indices, Spike Hunter & Painx",
+    "description": "I-trade ang mga eksklusibong synthetic indices ng Weltrade (Spike Hunter, Painx, GainX) gamit ang Botvio AI Strategy at live signals.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, synthetic indices Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvio Marketplace – Bots, Signals & Education",
+    "description": "Bumili o mag-subscribe sa mga verified trading bots, signal provider at educational courses mula sa mga top trader.",
+    "keywords": "trading marketplace, bumili ng trading bot, signal subscription, trading courses"
+  },
+  "about": {
+    "title": "Tungkol sa Botvio – AI Trading Signals & Forex Education",
+    "description": "Ang Botvio ay isang AI-powered trading platform na nagbibigay ng libreng forex signals, chart analysis, gold trading tools, at edukasyon para sa mga trader sa buong mundo.",
+    "keywords": "tungkol sa Botvio, AI trading platform, edukasyon sa forex, kumpanya ng trading signals"
+  },
+  "contact": {
+    "title": "Makipag-ugnayan sa Botvio – Suporta & Partnership",
+    "description": "Abutin ang suporta, partnerships at media inquiries ng Botvio sa pamamagitan ng email o WhatsApp.",
+    "keywords": "contact Botvio, suporta sa trading, contact ng signal provider"
+  },
+  "faq": {
+    "title": "Botvio FAQ – Karaniwang Tanong sa Signals & Bots",
+    "description": "Mga sagot tungkol sa mga trading signals, bots, brokers, payments, subscriptions at pag-set up ng account ng Botvio.",
+    "keywords": "Botvio FAQ, tanong tungkol sa trading signals, paano gamitin ang Botvio"
+  },
+  "affiliate": {
+    "title": "Botvio Affiliate Program – Kumita ng 20% Lifetime Commissions",
+    "description": "I-refer ang mga trader sa Botvio at kumita ng $2 sa bawat signup plus 20% lifetime revenue share sa bawat pagbili.",
+    "keywords": "Botvio affiliate, trading affiliate, forex referral program, signal affiliate"
+  },
+  "p2p": {
+    "title": "P2P Crypto Trading – Bumili at Magbenta ng USDT Locally",
+    "description": "Botvio P2P marketplace para bumili at magbenta ng USDT, BTC at crypto gamit ang mobile money, bank transfer at lokal na paraan.",
+    "keywords": "P2P crypto, bumili ng USDT, magbenta ng Bitcoin, mobile money crypto"
+  },
+  "sportsBetting": {
+    "title": "Botvio Sports Betting – Mga Prediksyon at Slips sa Football",
+    "description": "Mga prediksyon sa football na may tulong ng AI, pang-araw-araw na slips at bet tracker para sa mga nangungunang European league.",
+    "keywords": "football predictions, daily betting slips, sports AI, soccer predictions"
+  },
+  "flippingChallenges": {
+    "title": "Account Flipping Challenges – Mabilis na Palakihin ang Maliit na Accounts",
+    "description": "Ginabayang flipping challenges para sa gold scalping, lingguhang forex sprints at pagpapalaki ng Boom & Crash account.",
+    "keywords": "flipping challenge, pagpapalaki ng account, prop firm challenge, scalping challenge"
+  },
+  "live": {
+    "title": "Botvio Live – Real-Time Trading Streams & Mentorship",
+    "description": "Manood ng live trading streams, magtanong nang real time, at sundin ang mga nangungunang signal providers.",
+    "keywords": "live trading, trading mentorship, live forex stream, copy trading live"
+  },
+  "newsCalendar": {
+    "title": "Kalendaryo ng Balita sa Forex – Mataas na Epekto ng Economic Events",
+    "description": "Live economic news calendar na sumasaklaw sa NFP, CPI, FOMC at mga high-impact na kaganapan na nagpapagalaw sa forex at gold.",
+    "keywords": "forex news calendar, NFP, CPI, FOMC, high impact news"
+  },
+  "tradeModes": {
+    "title": "Botvio Trade Modes – Scalping, Swing, Sniper & Hedge",
+    "description": "Pumili mula sa 8 expert trading modes kabilang ang Scalper, Swing, Sniper, Hedge at Trend modes para sa anumang market condition.",
+    "keywords": "scalping mode, swing trading, sniper trading, hedge trading, trend mode"
+  },
+  "derivOptions": {
+    "title": "Deriv Options Trading – Digits, Multipliers & Boom/Crash",
+    "description": "I-trade ang Deriv Multipliers, Digits, Higher/Lower at Boom & Crash gamit ang AI signals at Botvio bots.",
+    "keywords": "Deriv options, Deriv multipliers, Deriv digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Botvio Trading Workspace – Signals, Charts & Auto-Trade",
+    "description": "All-in-one trading workspace na may AI signals, live charts, market data at automated execution.",
+    "keywords": "trading workspace, AI signals dashboard, auto trade, live charts"
+  },
+  "trade": {
+    "title": "Botvio Trade – Live Signals & Auto Execution",
+    "description": "Live trading dashboard na may signals, charts, at one-click execution para sa Deriv, MT5 at Binance.",
+    "keywords": "live trade dashboard, auto trade, signal execution"
+  },
+  "authoritySignals": {
+    "title": "Authority Signals – Verified Top Provider Signals",
+    "description": "Mga piniling signal mula sa mga verified top provider na may track record, win rates at risk profiles.",
+    "keywords": "verified signals, top signal providers, authority signals, signal copy"
+  },
+  "learn": {
+    "title": "Botvio Academy – Libreng Forex & Trading Mentorship",
+    "description": "Libreng forex beginner mentorship, video lesson, at trading courses na sumasaklaw sa forex, gold, crypto at binary options.",
+    "keywords": "libreng forex course, forex mentorship, trading academy, matuto ng trading"
+  },
+  "providers": {
+    "title": "Nangungunang Signal Providers – Kopyahin ang Verified Traders",
+    "description": "I-browse ang mga nangungunang signal providers na niraranggo ayon sa performance, awtomatikong kopyahin ang mga trade at palakihin ang iyong account.",
+    "keywords": "signal providers, copy trading, top traders, verified traders"
+  },
+  "billing": {
+    "title": "Botvio Pricing – Mga Plano para sa Signals, Bots & VIP",
+    "description": "Ihambing ang Botvio Free Trial, Basic, Standard at VIP plans para sa AI signals, bots at premium tools.",
+    "keywords": "Botvio pricing, trading subscription, VIP signals, signal plans"
+  },
+  "press": {
+    "title": "Botvio Press & Media",
+    "description": "Press resources, brand assets, at media inquiries para sa Botvio.",
+    "keywords": "Botvio press, media kit, trading platform press"
+  },
+  "testimonials": {
+    "title": "Botvio Testimonials – Mga Kwento ng Totoong Trader",
+    "description": "Basahin ang mga totoong testimonial ng trader at verified results mula sa mga user ng Botvio sa buong mundo.",
+    "keywords": "Botvio review, trader testimonials, resulta ng signal"
+  },
+  "caseStudies": {
+    "title": "Botvio Case Studies – Mga Totoong Resulta ng Trading",
+    "description": "Detalyadong case studies ng mga trader na nagpapalaki ng account gamit ang mga signals, bots at strategies ng Botvio.",
+    "keywords": "trading case studies, resulta ng Botvio, growth stories"
+  },
+  "docs": {
+    "title": "Botvio Documentation – API, Bots & Integrations",
+    "description": "Teknikal na dokumentasyon para sa mga Botvio bot, API, broker connections at integrations.",
+    "keywords": "Botvio docs, trading API, bot documentation"
+  },
+  "whitepaper": {
+    "title": "Botvio Whitepaper – AI Trading Architecture",
+    "description": "Basahin ang Botvio whitepaper na sumasaklaw sa AI signal architecture, risk model at platform philosophy.",
+    "keywords": "Botvio whitepaper, AI trading architecture, signal model"
+  },
+  "terms": {
+    "title": "Botvio Terms of Service",
+    "description": "Botvio terms of service na namamahala sa paggamit ng trading signals, bots at features ng platform.",
+    "keywords": "Botvio terms, terms of service"
+  },
+  "privacy": {
+    "title": "Botvio Privacy Policy",
+    "description": "Botvio privacy policy na sumasaklaw sa personal data, broker tokens at paghawak ng analytics.",
+    "keywords": "Botvio privacy, data policy"
+  },
+  "disclaimer": {
+    "title": "Botvio Risk Disclaimer",
+    "description": "Mahalagang risk disclaimer para sa trading signals, bots at nilalamang pang-edukasyon na ibinibigay ng Botvio.",
+    "keywords": "trading disclaimer, babala sa panganib, signal disclaimer"
+  },
+  "install": {
+    "title": "I-install ang Botvio – Mobile App para sa Traders",
+    "description": "I-install ang Botvio bilang isang PWA sa Android at iOS para sa mabilis na access sa signals, charts at live alerts.",
+    "keywords": "i-install ang Botvio app, PWA trading app, mobile trading"
+  }
+}

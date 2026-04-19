@@ -161,7 +161,7 @@ const Bots = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="bots"
         title="AI Trading Bots – Automate Deriv & Binance Strategies"
         description="Deploy AI-powered trading bots on Deriv and Binance. Automate Boom/Crash, Volatility indices, Digits, and crypto strategies with risk management and 24/7 execution."
       />

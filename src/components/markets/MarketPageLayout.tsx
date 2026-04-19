@@ -5,9 +5,18 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export const MarketPageLayout = ({ title, description, emoji, children }: { title: string; description: string; emoji: string; children: ReactNode }) => (
+interface MarketPageLayoutProps {
+  title: string;
+  description: string;
+  emoji: string;
+  children: ReactNode;
+  /** Optional SEO registry key for translated meta (falls back to literal title/description). */
+  seoKey?: string;
+}
+
+export const MarketPageLayout = ({ title, description, emoji, children, seoKey }: MarketPageLayoutProps) => (
   <div className="min-h-screen bg-background">
-    <SEOHead title={title} description={description} />
+    <SEOHead title={title} description={description} seoKey={seoKey} />
     <Header />
     <main className="container mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center gap-3">

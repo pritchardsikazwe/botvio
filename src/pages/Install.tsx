@@ -73,7 +73,7 @@ const Install = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Install Botvio App" description="Install Botvio as a progressive web app on your phone or desktop. Get instant access to free forex signals, AI chart analysis, gold trading tools, and real-time market alerts — even offline." />
+      <SEOHead seoKey="install" title="Install Botvio App" description="Install Botvio as a progressive web app on your phone or desktop. Get instant access to free forex signals, AI chart analysis, gold trading tools, and real-time market alerts — even offline." />
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">

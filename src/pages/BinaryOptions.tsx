@@ -175,7 +175,7 @@ const BinaryOptions = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="binary"
         title="Binary Options Brokers — Live Signals & Compare"
         description="Compare the best binary options brokers with live trading signals. Find the right platform for synthetic indices, OTC markets, forex, and crypto binary trading."
       />

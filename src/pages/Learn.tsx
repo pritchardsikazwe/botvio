@@ -221,7 +221,7 @@ const Learn = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Learn Trading — Free Forex & Gold Trading Courses" description="Free trading education for beginners and advanced traders. Learn forex fundamentals, gold trading strategies, technical analysis, risk management, and how to use AI tools for smarter trading decisions." />
+      <SEOHead seoKey="learn" title="Learn Trading — Free Forex & Gold Trading Courses" description="Free trading education for beginners and advanced traders. Learn forex fundamentals, gold trading strategies, technical analysis, risk management, and how to use AI tools for smarter trading decisions." />
       <Header />
 
       <main className="container mx-auto px-4 py-8">

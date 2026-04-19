@@ -20,7 +20,7 @@ const ME_SIGNALS = [
 ];
 
 const MiddleEastMarket = () => (
-  <MarketPageLayout title="Middle East Market Dashboard" description="Saudi Tadawul, Dubai DFM, Aramco, Al Rajhi trading signals. Foreign investors now welcome." emoji="🇸🇦">
+  <MarketPageLayout seoKey="marketsMiddleEast" title="Middle East Market Dashboard" description="Saudi Tadawul, Dubai DFM, Aramco, Al Rajhi trading signals. Foreign investors now welcome." emoji="🇸🇦">
     <Card className="border-primary/30 bg-primary/5">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">

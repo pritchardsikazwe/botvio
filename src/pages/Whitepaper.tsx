@@ -17,7 +17,7 @@ const Whitepaper = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Whitepaper" description="Botvio internal whitepaper." noIndex />
+      <SEOHead seoKey="whitepaper" title="Whitepaper" description="Botvio internal whitepaper." noIndex />
       <Header />
       <main className="container mx-auto px-4 py-10 max-w-3xl prose dark:prose-invert">
         <Badge variant="outline" className="mb-4">Admin Only</Badge>

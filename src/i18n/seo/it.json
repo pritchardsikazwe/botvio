@@ -1,1 +1,217 @@
-{}
+{
+  "home": {
+    "title": "Botvio – Segnali Forex AI, Trading Oro & Bot di Trading",
+    "description": "Segnali forex gratuiti basati su AI, analisi dell'oro (XAU/USD), AI per grafici e bot di trading automatizzati per Deriv, Exness, Weltrade e Binance. Scelto dai trader di tutto il mondo.",
+    "keywords": "segnali forex, trading oro, segnali XAUUSD, bot trading AI, bot Deriv, Boom 1000, segnali forex gratis, analisi grafici"
+  },
+  "signals": {
+    "title": "Segnali Live Forex e Trading Oro",
+    "description": "Segnali di trading generati da AI in tempo reale per forex, oro, indici sintetici e crypto con livelli di entrata, stop loss e take profit.",
+    "keywords": "segnali forex live, segnali oro, segnali XAUUSD, segnali trading gratuiti, segnali Deriv, segnali Boom Crash"
+  },
+  "gold": {
+    "title": "Hub Trading Oro – Segnali Live XAU/USD e Analisi",
+    "description": "Prezzi live XAU/USD, segnali trading oro AI, robot di scalping e strategia Botvio AI per un trading oro consistente.",
+    "keywords": "trading oro, XAUUSD, segnali oro, scalping oro, analisi oro, robot oro"
+  },
+  "binary": {
+    "title": "Segnali Opzioni Binarie e Previsioni AI",
+    "description": "Segnali di opzioni binarie potenziati dall'AI per Pocket Option, Deriv, IQ Option e Binomo con previsioni di scadenza e punteggio di confidenza.",
+    "keywords": "segnali opzioni binarie, segnali Pocket Option, IQ Option, bot AI binario, segnali OTC"
+  },
+  "blog": {
+    "title": "Botvio Academy – Articoli, Guide e Strategie di Trading",
+    "description": "Articoli approfonditi gratuiti su forex, oro, crypto e opzioni binarie. Strategie, tutorial e recensioni di broker da trader reali.",
+    "keywords": "blog trading, guide forex, strategia oro, tutorial opzioni binarie, guida Deriv"
+  },
+  "strategies": {
+    "title": "Marketplace Strategie di Trading – Copia Strategie Expert",
+    "description": "Scopri, copia e condividi strategie di trading comprovate per forex, oro, indici sintetici e crypto.",
+    "keywords": "strategie trading, copy trading, strategia forex, strategia oro, strategia Boom"
+  },
+  "markets": {
+    "title": "Market Intelligence Globale – Sessioni Live e Segnali",
+    "description": "Stato del mercato in tempo reale, sentiment, segnali ed eventi economici nei mercati USA, Europa, Asia, Medio Oriente, Africa e Crypto.",
+    "keywords": "mercati globali, sessioni mercato live, apertura mercato USA, segnali Tadawul, segnali mercato Asia, sentiment mercato"
+  },
+  "marketsUs": {
+    "title": "Market Intelligence USA – Segnali S&P 500, Nasdaq, NYSE",
+    "description": "Segnali live del mercato azionario USA, sentiment, heatmap settoriale ed eventi economici per le sessioni NYSE e Nasdaq.",
+    "keywords": "segnali mercato USA, S&P 500, segnali Nasdaq, apertura NYSE, forex sessione USA"
+  },
+  "marketsEurope": {
+    "title": "Market Intelligence Europa – Segnali DAX, FTSE e EUR",
+    "description": "Segnali live del mercato europeo per DAX, FTSE 100, EUR/USD e forex della sessione di Londra.",
+    "keywords": "segnali DAX, FTSE 100, sessione Londra, segnali EURUSD, apertura mercato Europa"
+  },
+  "marketsAsia": {
+    "title": "Market Intelligence Asia – Segnali Nikkei, Hang Seng & JPY",
+    "description": "Segnali live del mercato asiatico per Nikkei 225, Hang Seng, USD/JPY e forex della sessione di Tokyo.",
+    "keywords": "segnali Nikkei, Hang Seng, USDJPY, sessione Tokyo, apertura mercato Asia"
+  },
+  "marketsMiddleEast": {
+    "title": "Market Intelligence Medio Oriente – Segnali Tadawul & Oro",
+    "description": "Segnali live del mercato mediorientale per Tadawul, Dubai, oro (XAU/USD) e petrolio durante le sessioni di trading regionali.",
+    "keywords": "segnali Tadawul, mercato Dubai, forex Medio Oriente, oro sessione Medio Oriente"
+  },
+  "marketsAfrica": {
+    "title": "Market Intelligence Africa – Segnali JSE & Forex Africano",
+    "description": "Segnali live del mercato africano per JSE Top 40, Sud Africa, Nigeria, Kenya e sessioni Egitto.",
+    "keywords": "JSE Top 40, segnali forex Africa, segnali ZAR, NGN, apertura mercato Africa"
+  },
+  "marketsCrypto": {
+    "title": "Market Intelligence Crypto – Segnali BTC, ETH & Altcoin",
+    "description": "Segnali del mercato crypto 24/7, sentiment e prezzi live per Bitcoin, Ethereum e le principali altcoin.",
+    "keywords": "segnali crypto, segnali Bitcoin, segnali Ethereum, segnali altcoin, sentiment crypto"
+  },
+  "bots": {
+    "title": "Bot di Trading AI – Forex, Oro & Crypto Automatizzati",
+    "description": "Bot di trading automatizzati per Deriv, Binance e MT5 che coprono forex, oro, indici sintetici, Boom & Crash e crypto.",
+    "keywords": "bot trading, bot Deriv, bot Binance, bot Boom 1000, forex automatizzato, bot MT5"
+  },
+  "binanceHub": {
+    "title": "Botvio Binance Hub – Bot Crypto, Segnali e Strategie",
+    "description": "Connetti il tuo account Binance per segnali crypto generati da AI, bot automatizzati e market intelligence live.",
+    "keywords": "bot Binance, segnali Binance, bot trading crypto, bot BTC, segnali ETH"
+  },
+  "weltrade": {
+    "title": "Hub Weltrade – Indici Sintetici, Spike Hunter & Painx",
+    "description": "Fai trading sugli indici sintetici esclusivi di Weltrade (Spike Hunter, Painx, GainX) con la strategia Botvio AI e segnali live.",
+    "keywords": "Weltrade, Spike Hunter, Painx, GainX, indici sintetici Weltrade"
+  },
+  "marketplace": {
+    "title": "Botvio Marketplace – Bot, Segnali e Formazione",
+    "description": "Acquista o abbonati a bot di trading verificati, fornitori di segnali e corsi di formazione dai migliori trader.",
+    "keywords": "marketplace trading, compra bot trading, abbonamento segnali, corsi trading"
+  },
+  "about": {
+    "title": "Chi Siamo – Botvio: Segnali Trading AI & Formazione Forex",
+    "description": "Botvio è una piattaforma di trading basata sull'AI che fornisce segnali forex gratuiti, analisi grafici, strumenti per il trading sull'oro e formazione per trader di tutto il mondo.",
+    "keywords": "su Botvio, piattaforma trading AI, formazione forex, azienda segnali trading"
+  },
+  "contact": {
+    "title": "Contatta Botvio – Supporto e Partnership",
+    "description": "Contatta il supporto Botvio per partnership e richieste media via email o WhatsApp.",
+    "keywords": "contatto Botvio, supporto trading, contatto fornitore segnali"
+  },
+  "faq": {
+    "title": "FAQ Botvio – Domande Comuni su Segnali e Bot",
+    "description": "Risposte su segnali di trading Botvio, bot, broker, pagamenti, abbonamenti e configurazione account.",
+    "keywords": "FAQ Botvio, domande segnali trading, come usare Botvio"
+  },
+  "affiliate": {
+    "title": "Programma Affiliazione Botvio – Guadagna 20% a Vita",
+    "description": "Referenzia trader a Botvio e guadagna $2 per iscrizione più il 20% di condivisione delle entrate a vita su ogni acquisto.",
+    "keywords": "affiliato Botvio, affiliato trading, programma referral forex, affiliato segnali"
+  },
+  "p2p": {
+    "title": "Trading Crypto P2P – Compra e Vendi USDT Localmente",
+    "description": "Marketplace P2P di Botvio per comprare e vendere USDT, BTC e crypto con mobile money, bonifico bancario e metodi locali.",
+    "keywords": "crypto P2P, compra USDT, vendi Bitcoin, crypto mobile money"
+  },
+  "sportsBetting": {
+    "title": "Scommesse Sportive Botvio – Pronostici Calcio e Schedine",
+    "description": "Pronostici calcistici assistiti dall'AI, schedine giornaliere e tracker scommesse per i campionati europei più importanti.",
+    "keywords": "pronostici calcio, schedine scommesse giornaliere, AI sportiva, pronostici calcio"
+  },
+  "flippingChallenges": {
+    "title": "Sfide di Flipping Account – Fai Crescere Conti Velocemente",
+    "description": "Sfide di flipping guidate per scalping sull'oro, sprint forex settimanali e crescita di account Boom & Crash.",
+    "keywords": "sfida flipping, crescita account, sfida prop firm, sfida scalping"
+  },
+  "live": {
+    "title": "Botvio Live – Streaming Trading in Tempo Reale & Mentoring",
+    "description": "Guarda streaming di trading live, fai domande in tempo reale e segui i migliori fornitori di segnali.",
+    "keywords": "trading live, mentoring trading, streaming forex live, copy trading live"
+  },
+  "newsCalendar": {
+    "title": "Calendario Notizie Forex – Eventi Economici ad Alto Impatto",
+    "description": "Calendario notizie economiche live che copre NFP, CPI, FOMC ed eventi ad alto impatto che muovono forex e oro.",
+    "keywords": "calendario notizie forex, NFP, CPI, FOMC, notizie alto impatto"
+  },
+  "tradeModes": {
+    "title": "Modalità di Trading Botvio – Scalping, Swing, Sniper & Hedge",
+    "description": "Scegli tra 8 modalità di trading esperte tra cui Scalper, Swing, Sniper, Hedge e Trend per qualsiasi condizione di mercato.",
+    "keywords": "modalità scalping, swing trading, sniper trading, hedge trading, modalità trend"
+  },
+  "derivOptions": {
+    "title": "Trading Opzioni Deriv – Digits, Multipliers & Boom/Crash",
+    "description": "Fai trading con Deriv Multipliers, Digits, Higher/Lower e Boom & Crash con segnali AI e bot Botvio.",
+    "keywords": "opzioni Deriv, Deriv Multipliers, Deriv Digits, Boom Crash, Higher Lower"
+  },
+  "trading": {
+    "title": "Spazio di Lavoro Trading Botvio – Segnali, Grafici & Auto-Trade",
+    "description": "Spazio di lavoro trading all-in-one con segnali AI, grafici live, dati di mercato ed esecuzione automatizzata.",
+    "keywords": "spazio lavoro trading, dashboard segnali AI, auto trade, grafici live"
+  },
+  "trade": {
+    "title": "Botvio Trade – Segnali Live & Auto Esecuzione",
+    "description": "Dashboard di trading live con segnali, grafici ed esecuzione con un clic per Deriv, MT5 e Binance.",
+    "keywords": "dashboard trading live, auto trade, esecuzione segnali"
+  },
+  "authoritySignals": {
+    "title": "Segnali di Autorità – Segnali Verificati dei Migliori Provider",
+    "description": "Segnali curati dai migliori provider verificati con track record, tassi di vittoria e profili di rischio.",
+    "keywords": "segnali verificati, migliori fornitori segnali, segnali autorità, copia segnali"
+  },
+  "learn": {
+    "title": "Botvio Academy – Mentoring Forex & Trading Gratuito",
+    "description": "Mentoring forex gratuito per principianti, lezioni video e corsi di trading che coprono forex, oro, crypto e opzioni binarie.",
+    "keywords": "corso forex gratuito, mentoring forex, accademia trading, impara trading"
+  },
+  "providers": {
+    "title": "Migliori Fornitori di Segnali – Copia Trader Verificati",
+    "description": "Sfoglia i migliori fornitori di segnali classificati per performance, copia automaticamente i trade e fai crescere il tuo account.",
+    "keywords": "fornitori segnali, copy trading, migliori trader, trader verificati"
+  },
+  "billing": {
+    "title": "Prezzi Botvio – Piani per Segnali, Bot & VIP",
+    "description": "Confronta i piani Botvio Free Trial, Basic, Standard e VIP per segnali AI, bot e strumenti premium.",
+    "keywords": "prezzi Botvio, abbonamento trading, segnali VIP, piani segnali"
+  },
+  "press": {
+    "title": "Botvio Stampa & Media",
+    "description": "Risorse stampa, asset del brand e richieste media per Botvio.",
+    "keywords": "stampa Botvio, media kit, stampa piattaforma trading"
+  },
+  "testimonials": {
+    "title": "Testimonianze Botvio – Storie Vere di Trader",
+    "description": "Leggi testimonianze reali di trader e risultati verificati dagli utenti Botvio in tutto il mondo.",
+    "keywords": "recensioni Botvio, testimonianze trader, risultati segnali"
+  },
+  "caseStudies": {
+    "title": "Botvio Case Studies – Risultati di Trading Reali",
+    "description": "Case study dettagliati di trader che fanno crescere i loro account usando segnali, bot e strategie Botvio.",
+    "keywords": "case study trading, risultati Botvio, storie di crescita"
+  },
+  "docs": {
+    "title": "Documentazione Botvio – API, Bot & Integrazioni",
+    "description": "Documentazione tecnica per bot Botvio, API, connessioni broker e integrazioni.",
+    "keywords": "documenti Botvio, API trading, documentazione bot"
+  },
+  "whitepaper": {
+    "title": "Whitepaper Botvio – Architettura Trading AI",
+    "description": "Leggi il whitepaper Botvio che copre l'architettura dei segnali AI, il modello di rischio e la filosofia della piattaforma.",
+    "keywords": "whitepaper Botvio, architettura trading AI, modello segnali"
+  },
+  "terms": {
+    "title": "Termini di Servizio Botvio",
+    "description": "Termini di servizio Botvio che regolano l'uso di segnali di trading, bot e funzionalità della piattaforma.",
+    "keywords": "termini Botvio, termini di servizio"
+  },
+  "privacy": {
+    "title": "Informativa sulla Privacy Botvio",
+    "description": "Informativa sulla privacy Botvio che copre dati personali, token broker e gestione delle analisi.",
+    "keywords": "privacy Botvio, politica dati"
+  },
+  "disclaimer": {
+    "title": "Disclaimer Rischio Botvio",
+    "description": "Importante disclaimer sui rischi per i segnali di trading, i bot e i contenuti educativi forniti da Botvio.",
+    "keywords": "disclaimer trading, avviso rischio, disclaimer segnale"
+  },
+  "install": {
+    "title": "Installa Botvio – App Mobile per Trader",
+    "description": "Installa Botvio come PWA su Android e iOS per accedere rapidamente a segnali, grafici e avvisi live.",
+    "keywords": "installa app Botvio, app trading PWA, trading mobile"
+  }
+}

@@ -79,7 +79,7 @@ const PRO_TIPS = [
 const DerivOptions = () => {
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
+      <SEOHead seoKey="derivOptions"
         title="Deriv Options & API Trading | Botvio"
         description="Trade Deriv options with Botvio — Digits, Multipliers, Rise/Fall, Boom/Crash, Accumulators & more. Connect via API and execute trades instantly."
       />

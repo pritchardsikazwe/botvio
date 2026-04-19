@@ -312,7 +312,7 @@ function LiveFeedPage() {
 
   return (
     <>
-      <SEOHead
+      <SEOHead seoKey="live"
         title="Botvio Live – Watch Traders Stream in Real-Time"
         description="Watch live trading sessions, interact with traders, and learn strategies in real-time on Botvio Live."
       />

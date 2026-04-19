@@ -84,7 +84,7 @@ const BinanceHub = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Binance Crypto Trading Hub — Botvio" description="Live Binance crypto signals: spot, futures, arbitrage scanner, staking & launchpad alerts powered by Botvio AI." />
+      <SEOHead seoKey="binanceHub" title="Binance Crypto Trading Hub — Botvio" description="Live Binance crypto signals: spot, futures, arbitrage scanner, staking & launchpad alerts powered by Botvio AI." />
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Hero */}

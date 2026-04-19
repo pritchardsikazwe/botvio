@@ -104,7 +104,7 @@ const Strategies = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Strategy Marketplace — Forex & Gold Trading Strategies" description="Discover, share, and download profitable trading strategies for forex, gold, crypto, and synthetic indices. Community-built strategies with performance stats, risk profiles, and easy one-click deployment." />
+      <SEOHead seoKey="strategies" title="Strategy Marketplace — Forex & Gold Trading Strategies" description="Discover, share, and download profitable trading strategies for forex, gold, crypto, and synthetic indices. Community-built strategies with performance stats, risk profiles, and easy one-click deployment." />
       <Header />
       {/* Sub-Header */}
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">

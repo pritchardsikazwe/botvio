@@ -29,7 +29,7 @@ const channels = [
 
 const Contact = () => (
   <div className="min-h-screen bg-background">
-    <SEOHead
+    <SEOHead seoKey="contact"
       title="Contact Botvio – Get in Touch"
       description="Contact the Botvio team via Telegram, WhatsApp, or email. We're here to help with trading signals, account issues, partnerships, and more."
     />
