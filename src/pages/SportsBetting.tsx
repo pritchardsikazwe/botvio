@@ -607,7 +607,7 @@ const SportsBetting = () => {
                   ))}
                 </div>
 
-                {isAdmin ? (
+                {(isAdmin || hasAccess) ? (
                 <Button
                   className="w-full"
                   onClick={generateDailyPicks}
@@ -627,7 +627,7 @@ const SportsBetting = () => {
                 </Button>
                 ) : (
                   <div className="rounded-lg border border-muted p-3 text-center text-xs text-muted-foreground">
-                    Only admins can generate new picks. Check published picks below.
+                    Subscribe to VIP or request access to generate picks. Default 5 slips per day for granted users.
                   </div>
                 )}
 
