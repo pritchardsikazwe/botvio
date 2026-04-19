@@ -3,20 +3,54 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, ArrowRight, Globe, Activity, Shield, Flame, BarChart3, Zap, Clock, Eye, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowRight, Globe, Activity, Zap, Clock, Sparkles, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
-import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
-import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 
-const REGIONS = [
-  { emoji: "🇺🇸", name: "U.S. Market", path: "/markets/us", desc: "S&P 500, Nasdaq, Dow, Gold, Oil", indices: ["SPX +0.58%", "NAS +0.92%", "DJI +0.27%"], sentiment: 62, session: "NY Open", trend: "Bullish" },
-  { emoji: "🇪🇺", name: "Europe Market", path: "/markets/europe", desc: "DAX, FTSE 100, CAC 40, EUR/USD", indices: ["DAX +0.34%", "FTSE -0.12%", "CAC +0.48%"], sentiment: 55, session: "London", trend: "Mixed" },
-  { emoji: "🇸🇦", name: "Middle East", path: "/markets/middle-east", desc: "Tadawul, DFM, Aramco, Al Rajhi", indices: ["TASI +0.75%", "DFM +0.90%", "OIL -0.85%"], sentiment: 68, session: "Active", trend: "Bullish" },
-  { emoji: "🌏", name: "Asia Market", path: "/markets/asia", desc: "Nikkei, Hang Seng, ASX, USD/JPY", indices: ["NKY -0.45%", "HSI +0.22%", "ASX +0.35%"], sentiment: 50, session: "Closed", trend: "Cautious" },
-  { emoji: "₿", name: "Crypto Market", path: "/markets/crypto", desc: "Bitcoin, Ethereum, Solana, BNB", indices: ["BTC +3.20%", "ETH +2.45%", "SOL +6.10%"], sentiment: 74, session: "24/7", trend: "Bullish" },
-  { emoji: "🌍", name: "Africa Market", path: "/markets/africa", desc: "JSE, NGX, LuSE — SA, Nigeria, Zambia", indices: ["JSE +0.85%", "NGX +1.40%", "LuSE +0.55%"], sentiment: 67, session: "Active", trend: "Bullish" },
+// Determine if a market is currently open based on UTC day/hour
+type RegionKey = "us" | "europe" | "middleEast" | "asia" | "crypto" | "africa";
+
+function getMarketStatus(key: RegionKey): { isOpen: boolean; session: string } {
+  const now = new Date();
+  const day = now.getUTCDay(); // 0 Sun – 6 Sat
+  const hour = now.getUTCHours() + now.getUTCMinutes() / 60;
+  const isWeekday = day >= 1 && day <= 5;
+
+  switch (key) {
+    case "us":
+      // NYSE 13:30–20:00 UTC
+      return { isOpen: isWeekday && hour >= 13.5 && hour < 20, session: isWeekday && hour >= 13.5 && hour < 20 ? "NY Open" : "NY Closed" };
+    case "europe":
+      // LSE / Euronext 07:00–15:30 UTC
+      return { isOpen: isWeekday && hour >= 7 && hour < 15.5, session: isWeekday && hour >= 7 && hour < 15.5 ? "London Open" : "London Closed" };
+    case "middleEast":
+      // Tadawul Sun–Thu 07:00–12:00 UTC
+      const meDay = day >= 0 && day <= 4;
+      return { isOpen: meDay && hour >= 7 && hour < 12, session: meDay && hour >= 7 && hour < 12 ? "Riyadh Open" : "Riyadh Closed" };
+    case "asia":
+      // Tokyo 00:00–06:00 UTC
+      return { isOpen: isWeekday && hour >= 0 && hour < 6, session: isWeekday && hour >= 0 && hour < 6 ? "Tokyo Open" : "Tokyo Closed" };
+    case "crypto":
+      return { isOpen: true, session: "24/7" };
+    case "africa":
+      // JSE 07:00–15:00 UTC
+      return { isOpen: isWeekday && hour >= 7 && hour < 15, session: isWeekday && hour >= 7 && hour < 15 ? "JSE Open" : "JSE Closed" };
+  }
+}
+
+const BASE_REGIONS: Array<{ key: RegionKey; emoji: string; name: string; path: string; desc: string; indices: string[]; sentiment: number; trend: string }> = [
+  { key: "us", emoji: "🇺🇸", name: "U.S. Market", path: "/markets/us", desc: "S&P 500, Nasdaq, Dow, Gold, Oil", indices: ["SPX +0.58%", "NAS +0.92%", "DJI +0.27%"], sentiment: 62, trend: "Bullish" },
+  { key: "europe", emoji: "🇪🇺", name: "Europe Market", path: "/markets/europe", desc: "DAX, FTSE 100, CAC 40, EUR/USD", indices: ["DAX +0.34%", "FTSE -0.12%", "CAC +0.48%"], sentiment: 55, trend: "Mixed" },
+  { key: "middleEast", emoji: "🇸🇦", name: "Middle East", path: "/markets/middle-east", desc: "Tadawul, DFM, Aramco, Al Rajhi", indices: ["TASI +0.75%", "DFM +0.90%", "OIL -0.85%"], sentiment: 68, trend: "Bullish" },
+  { key: "asia", emoji: "🌏", name: "Asia Market", path: "/markets/asia", desc: "Nikkei, Hang Seng, ASX, USD/JPY", indices: ["NKY -0.45%", "HSI +0.22%", "ASX +0.35%"], sentiment: 50, trend: "Cautious" },
+  { key: "crypto", emoji: "₿", name: "Crypto Market", path: "/markets/crypto", desc: "Bitcoin, Ethereum, Solana, BNB", indices: ["BTC +3.20%", "ETH +2.45%", "SOL +6.10%"], sentiment: 74, trend: "Bullish" },
+  { key: "africa", emoji: "🌍", name: "Africa Market", path: "/markets/africa", desc: "JSE, NGX, LuSE — SA, Nigeria, Zambia", indices: ["JSE +0.85%", "NGX +1.40%", "LuSE +0.55%"], sentiment: 67, trend: "Bullish" },
 ];
+
+const REGIONS = BASE_REGIONS.map((r) => {
+  const status = getMarketStatus(r.key);
+  return { ...r, isOpen: status.isOpen, session: status.session };
+});
 
 const LIVE_MARKET_DATA = [
   { symbol: "XAU/USD", price: "3,085.20", change: "+1.15%", dir: "up" },
@@ -30,11 +64,36 @@ const LIVE_MARKET_DATA = [
 ];
 
 const GlobalMarkets = () => {
-  const { isBasicOrAbove, isLoading } = useSubscriptionGate();
+  const seoJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Global Market Intelligence — Live Forex, Stocks, Crypto & Commodities Signals",
+    description:
+      "Real-time global market dashboard covering US, Europe, Middle East, Asia, Crypto and Africa. Live indices, sentiment, economic events, AI trading signals and cross-market correlations.",
+    keywords: [
+      "global market intelligence",
+      "live forex signals",
+      "US stock market signals",
+      "European market analysis",
+      "Middle East Tadawul signals",
+      "Asia market dashboard",
+      "crypto signals BTC ETH",
+      "Africa JSE NGX trading",
+      "real-time trading signals",
+      "AI market intelligence",
+      "cross-market correlations",
+      "CPI FOMC trading",
+      "Botvio signals",
+    ].join(", "),
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Global Market Intelligence — Week of Apr 7 – Apr 11 | Botvio" description="US, Europe, Middle East, Asia, Crypto & Africa market signals, analysis & trading intelligence. CPI Week + FOMC Minutes." />
+      <SEOHead
+        title="Global Market Intelligence — Live Forex, Stocks, Crypto & Commodities Signals"
+        description="Real-time market intelligence across US, Europe, Middle East, Asia, Crypto & Africa. Live signals, sentiment, economic events and AI trading insights — free for everyone."
+        jsonLd={seoJsonLd}
+      />
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="animate-fade-in">
@@ -66,10 +125,12 @@ const GlobalMarkets = () => {
             <h2 className="text-sm font-extrabold text-foreground mb-3">🌐 Global Risk Pulse</h2>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
               {REGIONS.map((r) => (
-                <div key={r.path} className={`p-2 rounded text-center text-xs font-bold ${r.sentiment > 65 ? "bg-success/10 text-success" : r.sentiment > 55 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                <div key={r.path} className={`relative p-2 rounded text-center text-xs font-bold ${!r.isOpen ? "bg-muted/60 text-muted-foreground opacity-70" : r.sentiment > 65 ? "bg-success/10 text-success" : r.sentiment > 55 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   <span className="text-lg">{r.emoji}</span>
-                  <p className="mt-1">{r.trend}</p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">{r.session}</p>
+                  <p className="mt-1">{r.isOpen ? r.trend : "Closed"}</p>
+                  <p className="text-[9px] text-muted-foreground mt-0.5 flex items-center justify-center gap-0.5">
+                    {!r.isOpen && <Lock className="h-2.5 w-2.5" />} {r.session}
+                  </p>
                 </div>
               ))}
             </div>
@@ -87,7 +148,6 @@ const GlobalMarkets = () => {
                 { title: "US CPI Wednesday", desc: "Consumer inflation — THE key driver for Fed rate expectations. All USD pairs + Gold + Indices.", badge: "HIGH", color: "border-destructive/30" },
                 { title: "FOMC Minutes Wed", desc: "Detailed Fed discussion from March meeting. Watch for hawkish/dovish language shifts.", badge: "HIGH", color: "border-warning/30" },
                 { title: "PPI Thursday", desc: "Producer price data — leading indicator for CPI trends. Watch for upstream inflation.", badge: "HIGH", color: "border-primary/30" },
-                { title: "Q2 Earnings Season", desc: "Banks kick off earnings next week. Pre-positioning flows starting this week.", badge: "WATCH", color: "border-warning/30" },
               ].map((f, i) => (
                 <div key={i} className={`rounded-lg border ${f.color} p-3`}>
                   <div className="flex items-center justify-between mb-1">
@@ -101,9 +161,7 @@ const GlobalMarkets = () => {
           </CardContent>
         </Card>
 
-        {!isBasicOrAbove && !isLoading ? (
-          <UpgradePrompt feature="Global Market Intelligence" requiredPlan="Basic" />
-        ) : (
+        {(
           <>
             {/* Cross-Market Correlations */}
             <Card className="animate-fade-in">
