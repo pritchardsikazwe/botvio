@@ -31,9 +31,25 @@ export function AdminSportsBettingAccessTab() {
     },
   });
 
+  // Today's slip generation usage per user
+  const { data: usageMap } = useQuery({
+    queryKey: ["admin-sports-usage-today"],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from("slip_generations")
+        .select("user_id, count")
+        .eq("generated_on", today);
+      if (error) throw error;
+      const map: Record<string, number> = {};
+      (data || []).forEach((r: any) => { map[r.user_id] = r.count; });
+      return map;
+    },
+    refetchInterval: 60_000,
+  });
+
   const grantMutation = useMutation({
     mutationFn: async () => {
-      // Find user by email
       const { data: profile, error: profileErr } = await supabase
         .from("profiles")
         .select("user_id, email, display_name")
@@ -42,10 +58,12 @@ export function AdminSportsBettingAccessTab() {
       if (profileErr) throw profileErr;
       if (!profile) throw new Error("User not found with that email");
 
+      const limitNum = Math.max(1, parseInt(dailyLimit) || 5);
       const { error } = await supabase.from("sports_betting_access").insert({
         user_id: profile.user_id,
         granted_by: user!.id,
         reason: reason || null,
+        daily_slip_limit: limitNum,
       });
       if (error) {
         if (error.code === "23505") throw new Error("User already has access");
@@ -56,9 +74,26 @@ export function AdminSportsBettingAccessTab() {
       toast.success("Access granted");
       setEmail("");
       setReason("");
+      setDailyLimit("5");
       queryClient.invalidateQueries({ queryKey: ["admin-sports-access"] });
     },
     onError: (err: Error) => toast.error(err.message),
+  });
+
+  const updateLimitMutation = useMutation({
+    mutationFn: async ({ id, limit }: { id: string; limit: number }) => {
+      const { error } = await supabase
+        .from("sports_betting_access")
+        .update({ daily_slip_limit: limit })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      toast.success("Daily limit updated");
+      setEditingLimits((p) => { const c = { ...p }; delete c[vars.id]; return c; });
+      queryClient.invalidateQueries({ queryKey: ["admin-sports-access"] });
+    },
+    onError: () => toast.error("Failed to update limit"),
   });
 
   const revokeMutation = useMutation({
