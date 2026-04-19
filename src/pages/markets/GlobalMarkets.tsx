@@ -215,9 +215,15 @@ const GlobalMarkets = () => {
                       </div>
                       <div className="flex items-center justify-between text-[10px]">
                         <span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {r.session}</span>
-                        <Badge variant="outline" className={`text-[9px] ${r.trend === "Bullish" ? "text-success border-success/30" : r.trend === "Mixed" ? "text-warning border-warning/30" : "text-muted-foreground"}`}>
-                          {r.trend}
-                        </Badge>
+                        {r.isOpen ? (
+                          <Badge variant="outline" className={`text-[9px] ${r.trend === "Bullish" ? "text-success border-success/30" : r.trend === "Mixed" ? "text-warning border-warning/30" : "text-muted-foreground"}`}>
+                            {r.trend}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[9px] text-muted-foreground border-muted-foreground/30 gap-1">
+                            <Lock className="h-2.5 w-2.5" /> Market Closed
+                          </Badge>
+                        )}
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-[10px]">
