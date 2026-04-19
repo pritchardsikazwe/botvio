@@ -332,6 +332,17 @@ export const HomeSignalsWidget = () => {
                   )}
                 </div>
 
+                {/* Posted time */}
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Clock className="h-2.5 w-2.5" />
+                  <span>
+                    Posted {new Date(signal.created_at).toLocaleString([], {
+                      month: "short", day: "numeric",
+                      hour: "2-digit", minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+
                 {/* Broker CTAs */}
                 <div className="flex flex-col gap-1.5 mt-1">
                   <div className="flex gap-1.5">
