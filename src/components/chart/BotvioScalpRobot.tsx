@@ -66,7 +66,7 @@ export function BotvioScalpRobot({ displaySymbol, assetLabel, cryptoAlwaysOpen =
   const derivSymbol = useMemo(() => mapToDerivSymbol(displaySymbol), [displaySymbol]);
   const sessionSymbol = useMemo(() => displaySymbol.replace("/", ""), [displaySymbol]);
   const { isMarketOpen, marketType } = useMarketSession(sessionSymbol);
-  const isClosed = !isMarketOpen && (marketType === "forex" || marketType === "indices");
+  const isClosed = !cryptoAlwaysOpen && !isMarketOpen && (marketType === "forex" || marketType === "indices");
 
   const [activeTf, setActiveTf] = useState<"1m" | "5m">("1m");
   const [candlesByTf, setCandlesByTf] = useState<Record<string, Candle[]>>({ "1m": [], "5m": [] });
