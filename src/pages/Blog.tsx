@@ -348,6 +348,8 @@ const Blog = () => {
               </div>
             )}
 
+            <AdsterraNativeBanner />
+
             <div className="space-y-4">
               {rest.map(post => (
                 <Link key={post.slug} to={`/blog/${post.slug}`}>

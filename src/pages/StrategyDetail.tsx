@@ -21,8 +21,10 @@ const BROKER_LINKS: Record<string, { name: string; url: string }> = {
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
 };
 
-/* ── AdSense slot (temporarily disabled for AdSense policy review) ── */
-const StrategyAdSlot = (_: { slot: string }) => null;
+import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
+
+/* ── Adsterra native slot ── */
+const StrategyAdSlot = (_: { slot: string }) => <AdsterraNativeBanner />;
 
 /* ── Convert markdown-like text to HTML ── */
 const formatDescription = (text: string): string => {
