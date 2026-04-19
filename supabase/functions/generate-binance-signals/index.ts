@@ -245,6 +245,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (!lovableApiKey) {
+      return new Response(
+        JSON.stringify({ error: "AI service not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const results: any[] = [];
 
     for (const sym of symbols) {
