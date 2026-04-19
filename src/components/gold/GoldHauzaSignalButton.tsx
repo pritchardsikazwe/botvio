@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity } from "lucide-react";
+import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } from "lucide-react";
+import { useMarketSession } from "@/hooks/useMarketSession";
 
 type SignalType = "BUY" | "SELL" | "WAIT" | "HOLD";
 
