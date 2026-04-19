@@ -167,7 +167,7 @@ For each pick provide:
 1. Match name
 2. League
 3. **Kickoff time** (UTC) — REQUIRED, e.g. "Sat 19:30 UTC"
-4. Market & prediction (e.g., "Over 9.5 Corners", "Under 1.5 Goals", "Over 4.5 Goals", "BTTS Yes", "Home Win")
+4. Market & prediction (e.g., "Over 9.5 Corners", "Over 1.5 Goals", "Under 4.5 Goals", "BTTS Yes", "Home Win")
 5. Estimated odds
 6. Confidence (1-5 stars)
 7. Brief reasoning (1-2 sentences)
