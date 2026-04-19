@@ -522,7 +522,7 @@ const SportsBetting = () => {
                       <SelectContent>
                         <SelectItem value="mixed">Mixed (All)</SelectItem>
                         <SelectItem value="corners">Corners Only</SelectItem>
-                        <SelectItem value="over_under">Goals Only</SelectItem>
+                        <SelectItem value="over_under">Goals (incl. Under 1.5 / Over &amp; Under 4.5)</SelectItem>
                         <SelectItem value="btts">BTTS Only</SelectItem>
                         <SelectItem value="match_result">1X2 Only</SelectItem>
                       </SelectContent>
@@ -570,6 +570,9 @@ const SportsBetting = () => {
                     { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "all", day: "today" },
                     { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "all", day: "today" },
                     { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "all", day: "today" },
+                    { label: "🛡️ Under 1.5 Goals", size: "3", market: "over_under", type: "combined", league: "all", day: "today" },
+                    { label: "🎯 Under 4.5 Goals", size: "5", market: "over_under", type: "combined", league: "all", day: "today" },
+                    { label: "🔥 Over 4.5 Goals", size: "3", market: "over_under", type: "combined", league: "all", day: "today" },
                     { label: "📅 Weekend Multi", size: "10", market: "mixed", type: "combined", league: "all", day: "weekend" },
                     { label: "📆 Weekly Mega", size: "20", market: "mixed", type: "combined", league: "all", day: "weekly" },
                     { label: "🇬🇧 EPL Picks", size: "5", market: "mixed", type: "combined", league: "premier league|EPL|england", day: "weekend" },
