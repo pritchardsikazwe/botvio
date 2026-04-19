@@ -146,7 +146,7 @@ RULES:
 - Only suggest matches that have NOT yet kicked off (kickoff is in the future)
 - Always include the exact kickoff time (UTC) for each pick
 - For corners: specify exact lines (Over 4.5, 7.5, 9.5, 12.5)
-- For goals: choose from Under 1.5, Over 1.5, Over 2.5, Under 2.5, Over 3.5, Over 4.5, Under 4.5
+- For goals: ONLY use "Over 1.5 Goals" or "Under 4.5 Goals" — never any other goal line
 - For BTTS: specify Yes or No with confidence
 - For match result: specify 1, X, or 2
 - Rate each pick: ⭐ (risky) to ⭐⭐⭐⭐⭐ (very confident)
