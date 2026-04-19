@@ -3,6 +3,7 @@ import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { NewsEventCards } from "@/components/news/NewsEventCard";
 import {
   Newspaper, AlertTriangle, TrendingUp, TrendingDown, Shield,
   Clock, Target, Zap, BarChart3, Flame, Globe, ArrowRight,
@@ -104,6 +105,11 @@ const NewsCalendar = () => {
               <Flame className="h-3 w-3 mr-1" /> NFP Week — 5 High-Impact Events
             </Badge>
           </div>
+        </section>
+
+        {/* High-Impact Events with Botvio Signals (live from admin) */}
+        <section className="animate-fade-in" style={{ animationDelay: "0.05s" }}>
+          <NewsEventCards />
         </section>
 
         {/* This Week's Focus */}
