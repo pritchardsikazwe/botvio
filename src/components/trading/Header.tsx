@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { NotificationBell } from "@/components/trading/NotificationBell";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -325,6 +326,7 @@ export const Header = () => {
             )}
             
             <TradesDrawer />
+            <LanguageSwitcher />
             <NotificationBell />
             
             {user ? (

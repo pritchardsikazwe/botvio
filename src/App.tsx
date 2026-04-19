@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DerivProvider } from "@/contexts/DerivContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LanguageProvider } from "@/i18n/LanguageProvider";
 import Landing from "./pages/Landing";
 import Install from "./pages/Install";
 import Index from "./pages/Index";
@@ -86,11 +87,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <DerivProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <LanguageProvider>
+        <AuthProvider>
+          <DerivProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/landing" element={<Landing />} />
@@ -224,6 +226,7 @@ const App = () => (
           </BrowserRouter>
         </DerivProvider>
       </AuthProvider>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
