@@ -8,14 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Trophy, Plus, Trash2, Search, Loader2 } from "lucide-react";
+import { Trophy, Plus, Trash2, Search, Loader2, Save } from "lucide-react";
 
 export function AdminSportsBettingAccessTab() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [reason, setReason] = useState("");
+  const [dailyLimit, setDailyLimit] = useState("5");
   const [search, setSearch] = useState("");
+  const [editingLimits, setEditingLimits] = useState<Record<string, string>>({});
 
   const { data: accessList, isLoading } = useQuery({
     queryKey: ["admin-sports-access"],
