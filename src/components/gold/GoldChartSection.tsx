@@ -7,6 +7,7 @@ import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
 import { GoldScalpingRobot } from "./GoldScalpingRobot";
+import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
 
 
 const CHART_STRATEGIES = [
@@ -75,8 +76,11 @@ export function GoldChartSection() {
       {/* Live Deriv XAU/USD Chart */}
       <DerivLiveChart displaySymbol="XAU/USD" height={420} defaultGranularity={900} />
 
-      {/* Scalp Robot — 1m / 5m breakout & S/R break detector */}
+      {/* Scalp Robot — 1m / 5m breakout & S/R break detector (Gold) */}
       <GoldScalpingRobot displaySymbol="XAU/USD" />
+
+      {/* Scalp Robot — Silver (XAG/USD) */}
+      <BotvioScalpRobot displaySymbol="XAG/USD" assetLabel="Silver" />
 
       {/* Botvio Signal + Live Detail Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
