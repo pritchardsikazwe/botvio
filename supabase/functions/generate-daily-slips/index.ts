@@ -131,11 +131,11 @@ serve(async (req) => {
     const type = slipType || "combined";
 
     const marketDescriptor = market === "mixed"
-      ? "Mix of corners, goal lines (Over/Under 0.5, 1.5, 2.5, 3.5, 4.5), BTTS, and match results"
+      ? "Mix of corners, goals OVER 1.5 and UNDER 4.5 lines, BTTS, and match results"
       : market === "corners"
       ? "CORNERS ONLY (Over 4.5, 7.5, 9.5, 12.5)"
       : market === "over_under"
-      ? "OVER/UNDER GOALS — include lines: Under 1.5, Over 1.5, Over 2.5, Under 2.5, Over 3.5, Over 4.5, Under 4.5"
+      ? "GOALS ONLY — use ONLY these two lines: 'Over 1.5 Goals' and 'Under 4.5 Goals'. Do NOT suggest any other goal lines (no 0.5, 2.5, 3.5, etc.)."
       : market === "btts"
       ? "BOTH TEAMS TO SCORE ONLY (Yes/No)"
       : "MATCH RESULT (1X2) ONLY";
@@ -146,7 +146,7 @@ RULES:
 - Only suggest matches that have NOT yet kicked off (kickoff is in the future)
 - Always include the exact kickoff time (UTC) for each pick
 - For corners: specify exact lines (Over 4.5, 7.5, 9.5, 12.5)
-- For goals: choose from Under 1.5, Over 1.5, Over 2.5, Under 2.5, Over 3.5, Over 4.5, Under 4.5
+- For goals: ONLY use "Over 1.5 Goals" or "Under 4.5 Goals" — never any other goal line
 - For BTTS: specify Yes or No with confidence
 - For match result: specify 1, X, or 2
 - Rate each pick: ⭐ (risky) to ⭐⭐⭐⭐⭐ (very confident)
@@ -167,7 +167,7 @@ For each pick provide:
 1. Match name
 2. League
 3. **Kickoff time** (UTC) — REQUIRED, e.g. "Sat 19:30 UTC"
-4. Market & prediction (e.g., "Over 9.5 Corners", "Under 1.5 Goals", "Over 4.5 Goals", "BTTS Yes", "Home Win")
+4. Market & prediction (e.g., "Over 9.5 Corners", "Over 1.5 Goals", "Under 4.5 Goals", "BTTS Yes", "Home Win")
 5. Estimated odds
 6. Confidence (1-5 stars)
 7. Brief reasoning (1-2 sentences)

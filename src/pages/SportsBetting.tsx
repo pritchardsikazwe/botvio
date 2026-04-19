@@ -532,7 +532,7 @@ const SportsBetting = () => {
                       <SelectContent>
                         <SelectItem value="mixed">Mixed (All)</SelectItem>
                         <SelectItem value="corners">Corners Only</SelectItem>
-                        <SelectItem value="over_under">Goals (incl. Under 1.5 / Over &amp; Under 4.5)</SelectItem>
+                        <SelectItem value="over_under">Goals (Over 1.5 &amp; Under 4.5)</SelectItem>
                         <SelectItem value="btts">BTTS Only</SelectItem>
                         <SelectItem value="match_result">1X2 Only</SelectItem>
                       </SelectContent>
