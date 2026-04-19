@@ -574,6 +574,82 @@ const SportsBetting = () => {
                   </Select>
                 </div>
 
+                {/* Recommended Leagues helper */}
+                <div className="rounded-xl border border-primary/20 bg-muted/30 p-3 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="text-xs font-semibold">Recommended Leagues by Goal Profile</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] text-muted-foreground">
+                      🔥 <span className="font-medium text-foreground">High-Scoring</span> — best for Over 1.5 / Over 2.5 / BTTS
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { label: "🇳🇱 Eredivisie ~3.3", filter: "eredivisie|netherlands", market: "over_under" },
+                        { label: "🇦🇹 Austria ~3.2", filter: "bundesliga|austria", market: "over_under" },
+                        { label: "🇩🇪 Bundesliga ~3.1", filter: "bundesliga|germany", market: "over_under" },
+                        { label: "🇨🇭 Swiss SL ~3.1", filter: "super league|switzerland", market: "over_under" },
+                        { label: "🇳🇴 Eliteserien ~3.0", filter: "eliteserien|norway", market: "over_under" },
+                        { label: "🇸🇪 Allsvenskan ~2.9", filter: "allsvenskan|sweden", market: "btts" },
+                        { label: "🇧🇪 Belgian Pro ~2.9", filter: "pro league|belgium", market: "btts" },
+                        { label: "🇹🇷 Süper Lig ~2.8", filter: "süper lig|super lig|turkey", market: "btts" },
+                      ].map((l) => (
+                        <Button
+                          key={l.label}
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[11px] border-success/40 hover:bg-success/10"
+                          onClick={() => {
+                            setLeagueFilter(l.filter);
+                            setSlipMarket(l.market);
+                            toast.success(`Filter set: ${l.label}`);
+                          }}
+                        >
+                          {l.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] text-muted-foreground">
+                      🛡️ <span className="font-medium text-foreground">Defensive / Low-Scoring</span> — best for Under 2.5 / Under 4.5 / 1X2
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { label: "🇫🇷 Ligue 1 ~2.5", filter: "ligue 1|france", market: "over_under" },
+                        { label: "🇮🇹 Serie A ~2.6", filter: "serie a|italy", market: "over_under" },
+                        { label: "🇬🇷 Greece SL ~2.3", filter: "super league|greece", market: "over_under" },
+                        { label: "🇷🇸 Serbia ~2.4", filter: "superliga|serbia", market: "over_under" },
+                        { label: "🇺🇦 Ukraine ~2.4", filter: "premier league|ukraine", market: "over_under" },
+                        { label: "🇰🇷 K League ~2.3", filter: "k league|korea", market: "over_under" },
+                        { label: "🇯🇵 J1 League ~2.5", filter: "j1 league|japan", market: "over_under" },
+                        { label: "🇦🇷 Argentina ~2.2", filter: "primera|argentina", market: "match_result" },
+                      ].map((l) => (
+                        <Button
+                          key={l.label}
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[11px] border-warning/40 hover:bg-warning/10"
+                          onClick={() => {
+                            setLeagueFilter(l.filter);
+                            setSlipMarket(l.market);
+                            toast.success(`Filter set: ${l.label}`);
+                          }}
+                        >
+                          {l.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Tip: Avoid mixing high-scoring &amp; defensive leagues in the same Over 2.5 accumulator.
+                  </p>
+                </div>
+
                 {/* Quick presets */}
                 <div className="flex flex-wrap gap-2">
                   {[
