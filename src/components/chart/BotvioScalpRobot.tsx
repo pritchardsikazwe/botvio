@@ -330,11 +330,11 @@ export function BotvioScalpRobot({ displaySymbol, assetLabel, cryptoAlwaysOpen =
             </div>
             <div>
               <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
-                Botvio Scalp Robot
+                Botvio Scalp Robot{assetLabel ? ` · ${assetLabel}` : ""}
                 <Badge variant="outline" className="text-[9px] border-primary/40 text-primary px-1.5 py-0">AI</Badge>
               </h3>
               <p className="text-[10px] text-muted-foreground">
-                Breakout & S/R break detector · 1m / 5m
+                {displaySymbol} · Breakout & S/R break · 1m / 5m
               </p>
             </div>
           </div>
