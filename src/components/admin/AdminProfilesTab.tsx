@@ -46,6 +46,8 @@ export const AdminProfilesTab = () => {
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"recent" | "ai_total_desc" | "ai_today_desc" | "ai_total_asc">("recent");
+  const [minUsage, setMinUsage] = useState("");
   const [planDialog, setPlanDialog] = useState<{ open: boolean; userId: string; userName: string; currentPlanId: string | null; subId: string | null }>({
     open: false, userId: "", userName: "", currentPlanId: null, subId: null,
   });
@@ -183,8 +185,25 @@ export const AdminProfilesTab = () => {
       const plan = getUserPlan(p.user_id);
       if (!plan || plan.code !== planFilter) return false;
     }
+    const minN = parseInt(minUsage);
+    if (!isNaN(minN) && minN > 0) {
+      const usage = getUserAiUsage(p.user_id);
+      if (usage.total < minN) return false;
+    }
     return true;
   });
+
+  // Sort
+  if (filtered && sortBy !== "recent") {
+    filtered.sort((a, b) => {
+      const ua = getUserAiUsage(a.user_id);
+      const ub = getUserAiUsage(b.user_id);
+      if (sortBy === "ai_total_desc") return ub.total - ua.total;
+      if (sortBy === "ai_today_desc") return ub.today - ua.today;
+      if (sortBy === "ai_total_asc") return ua.total - ub.total;
+      return 0;
+    });
+  }
 
   const openPlanDialog = (profile: ProfileRow) => {
     const sub = getUserSub(profile.user_id);
@@ -282,6 +301,26 @@ export const AdminProfilesTab = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <SelectTrigger className="w-[180px]">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="ai_total_desc">AI Usage: High → Low</SelectItem>
+              <SelectItem value="ai_today_desc">AI Today: High → Low</SelectItem>
+              <SelectItem value="ai_total_asc">AI Usage: Low → High</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            type="number"
+            min={0}
+            placeholder="Min AI uploads"
+            value={minUsage}
+            onChange={(e) => setMinUsage(e.target.value)}
+            className="w-[140px]"
+          />
         </div>
       </CardHeader>
       <CardContent>

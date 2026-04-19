@@ -4519,9 +4519,34 @@ export type Database = {
         }
         Relationships: []
       }
+      slip_generations: {
+        Row: {
+          count: number
+          generated_on: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          generated_on?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          generated_on?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sports_betting_access: {
         Row: {
           created_at: string
+          daily_slip_limit: number
           granted_by: string
           id: string
           is_active: boolean
@@ -4530,6 +4555,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          daily_slip_limit?: number
           granted_by: string
           id?: string
           is_active?: boolean
@@ -4538,6 +4564,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          daily_slip_limit?: number
           granted_by?: string
           id?: string
           is_active?: boolean
@@ -5831,6 +5858,14 @@ export type Database = {
       has_sports_betting_access: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      increment_slip_generation: {
+        Args: { _user_id: string }
+        Returns: {
+          allowed: boolean
+          daily_limit: number
+          used: number
+        }[]
       }
       is_admin: { Args: never; Returns: boolean }
       is_affiliate: { Args: never; Returns: boolean }

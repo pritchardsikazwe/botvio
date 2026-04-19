@@ -254,9 +254,12 @@ const SportsBetting = () => {
     }
   };
 
-  // Generate daily picks - admin only
+  // Generate daily picks — allowed for admins, VIP, or manually granted users
   const generateDailyPicks = async () => {
-    if (!isAdmin) { toast.error("Only admins can generate daily picks"); return; }
+    if (!isAdmin && !hasAccess) {
+      toast.error("Subscribe to VIP or request access to generate picks");
+      return;
+    }
     setGeneratingPicks(true);
     setDailyPicks(null);
     try {
@@ -264,10 +267,16 @@ const SportsBetting = () => {
         body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter === "all" ? undefined : leagueFilter, dayRange },
       });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) {
+        if (data.limitReached) {
+          toast.error(`Daily limit reached (${data.used}/${data.daily_limit}). Try again tomorrow.`);
+          return;
+        }
+        throw new Error(data.error);
+      }
       setDailyPicks(data.picks);
 
-      // Admin: save picks to database for all users to see
+      // Admin: publish picks for all users
       if (isAdmin && data.picks) {
         await supabase.from("daily_picks").insert({
           created_by: user!.id,
@@ -281,7 +290,8 @@ const SportsBetting = () => {
         queryClient.invalidateQueries({ queryKey: ["published-picks"] });
       }
 
-      toast.success(`${slipSize}-team picks generated!`);
+      const used = data.used != null ? ` • Used ${data.used}/${data.daily_limit} today` : "";
+      toast.success(`${slipSize}-team picks generated!${used}`);
     } catch (err: any) {
       toast.error(err.message || "Generation failed");
     } finally {
@@ -522,7 +532,7 @@ const SportsBetting = () => {
                       <SelectContent>
                         <SelectItem value="mixed">Mixed (All)</SelectItem>
                         <SelectItem value="corners">Corners Only</SelectItem>
-                        <SelectItem value="over_under">Goals Only</SelectItem>
+                        <SelectItem value="over_under">Goals (incl. Under 1.5 / Over &amp; Under 4.5)</SelectItem>
                         <SelectItem value="btts">BTTS Only</SelectItem>
                         <SelectItem value="match_result">1X2 Only</SelectItem>
                       </SelectContent>
@@ -570,6 +580,9 @@ const SportsBetting = () => {
                     { label: "🥅 Corners Slip", size: "3", market: "corners", type: "combined", league: "all", day: "today" },
                     { label: "⚽ BTTS Slip", size: "6", market: "btts", type: "combined", league: "all", day: "today" },
                     { label: "🏆 Winners Slip", size: "3", market: "match_result", type: "combined", league: "all", day: "today" },
+                    { label: "🛡️ Under 1.5 Goals", size: "3", market: "over_under", type: "combined", league: "all", day: "today" },
+                    { label: "🎯 Under 4.5 Goals", size: "5", market: "over_under", type: "combined", league: "all", day: "today" },
+                    { label: "🔥 Over 4.5 Goals", size: "3", market: "over_under", type: "combined", league: "all", day: "today" },
                     { label: "📅 Weekend Multi", size: "10", market: "mixed", type: "combined", league: "all", day: "weekend" },
                     { label: "📆 Weekly Mega", size: "20", market: "mixed", type: "combined", league: "all", day: "weekly" },
                     { label: "🇬🇧 EPL Picks", size: "5", market: "mixed", type: "combined", league: "premier league|EPL|england", day: "weekend" },
@@ -594,7 +607,7 @@ const SportsBetting = () => {
                   ))}
                 </div>
 
-                {isAdmin ? (
+                {(isAdmin || hasAccess) ? (
                 <Button
                   className="w-full"
                   onClick={generateDailyPicks}
@@ -614,7 +627,7 @@ const SportsBetting = () => {
                 </Button>
                 ) : (
                   <div className="rounded-lg border border-muted p-3 text-center text-xs text-muted-foreground">
-                    Only admins can generate new picks. Check published picks below.
+                    Subscribe to VIP or request access to generate picks. Default 5 slips per day for granted users.
                   </div>
                 )}
 
