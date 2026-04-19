@@ -4,7 +4,6 @@ import { ExternalLink, BarChart3, TrendingUp, Zap, ArrowUpDown, Activity } from 
 import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
-import { AutoTradePanel } from "@/components/trading/AutoTradePanel";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
@@ -139,17 +138,6 @@ export function SyntxChartSection() {
         <MultiAssetScalpRobot
           title="Currency Scalp Robot"
           assets={[
-            { displaySymbol: "EUR/USD", label: "EUR/USD", emoji: "🇪🇺" },
-            { displaySymbol: "GBP/USD", label: "GBP/USD", emoji: "🇬🇧" },
-            { displaySymbol: "USD/JPY", label: "USD/JPY", emoji: "🇯🇵" },
-            { displaySymbol: "AUD/USD", label: "AUD/USD", emoji: "🇦🇺" },
-          ]}
-        />
-
-        {/* Auto-Trade Engine — Currencies */}
-        <AutoTradePanel
-          scope="Currencies"
-          availableAssets={[
             { displaySymbol: "EUR/USD", label: "EUR/USD", emoji: "🇪🇺" },
             { displaySymbol: "GBP/USD", label: "GBP/USD", emoji: "🇬🇧" },
             { displaySymbol: "USD/JPY", label: "USD/JPY", emoji: "🇯🇵" },
