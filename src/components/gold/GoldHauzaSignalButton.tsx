@@ -63,8 +63,8 @@ const SIGNAL_CONFIG: Record<SignalType, {
 
 export function GoldBotvioSignalButton() {
   const { isMarketOpen, isLoading: sessionLoading } = useMarketSession("XAUUSD");
-  const [signalState, setSignalState] = useState<SignalState>(generateSignal);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  // Real-time signal driven by live Deriv 5-min candles + EMA/RSI/wick analysis
+  const live = useDerivLiveSignal("XAU/USD", 300);
 
   // Force WAIT state when market is closed
   const effectiveState: SignalState = useMemo(() => {
@@ -76,20 +76,13 @@ export function GoldBotvioSignalButton() {
         strategy: "Market Closed",
       };
     }
-    return signalState;
-  }, [isMarketOpen, sessionLoading, signalState]);
-
-  useEffect(() => {
-    if (!isMarketOpen) return; // don't refresh signals when market closed
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setSignalState(generateSignal());
-        setIsTransitioning(false);
-      }, 400);
-    }, 30000); // refresh every 30s
-    return () => clearInterval(interval);
-  }, [isMarketOpen]);
+    return {
+      signal: live.signal,
+      confidence: live.confidence,
+      reason: live.reason,
+      strategy: live.strategy,
+    };
+  }, [isMarketOpen, sessionLoading, live]);
 
   const config = SIGNAL_CONFIG[effectiveState.signal];
   const Icon = isMarketOpen ? config.icon : Clock;
