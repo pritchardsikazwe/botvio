@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, Minus, Lock, BarChart3, ExternalLink, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Lock, BarChart3, ExternalLink, Clock, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
+import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 
 interface MarketSignalCardProps {
   instrument: string;
@@ -26,23 +28,53 @@ interface MarketSignalCardProps {
   bias?: "Bullish" | "Bearish" | "Neutral";
   /** ISO timestamp when the signal was generated/posted */
   postedAt?: string;
+  /** When false, disables live Deriv-driven override (default: auto-on for Deriv-supported symbols) */
+  live?: boolean;
+}
+
+// Format a number using the static price string as a precision hint
+function formatLikePrice(value: number, hint: string): string {
+  const cleaned = (hint || "").replace(/,/g, "");
+  const decimals = cleaned.includes(".") ? cleaned.split(".")[1].length : 2;
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 }
 
 export const MarketSignalCard = ({
   instrument, symbol, price, change, changePercent,
   signal, entry, stopLoss, takeProfit, strategy,
   session, confidence, isPremium, brokerName, brokerUrl,
-  chartSymbol, metrics, bias, postedAt,
+  chartSymbol, metrics, bias, postedAt, live,
 }: MarketSignalCardProps) => {
   const { user } = useAuth();
   const locked = isPremium && !user;
-  const postedLabel = (postedAt ? new Date(postedAt) : new Date()).toLocaleString([], {
+
+  // Auto-enable live mode when symbol is Deriv-supported, unless caller forces it off
+  const derivSupported = !!mapToDerivSymbol(symbol);
+  const liveEnabled = live !== false && derivSupported;
+  const liveSig = useDerivLiveSignal(liveEnabled ? symbol : null, 300);
+
+  // Effective values — live overrides static when available
+  const useLive = liveEnabled && liveSig.lastPrice != null;
+  const effSignal = useLive ? liveSig.signal : signal;
+  const effConfidence = useLive ? liveSig.confidence : confidence;
+  const effStrategy = useLive ? liveSig.strategy : strategy;
+  const effPrice = useLive && liveSig.lastPrice != null
+    ? formatLikePrice(liveSig.lastPrice, price)
+    : price;
+  const effBias: "Bullish" | "Bearish" | "Neutral" = useLive
+    ? (effSignal === "BUY" ? "Bullish" : effSignal === "SELL" ? "Bearish" : "Neutral")
+    : (bias ?? "Neutral");
+
+  const postedLabel = (useLive ? new Date() : (postedAt ? new Date(postedAt) : new Date())).toLocaleString([], {
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
-  const signalColor = signal === "BUY" ? "text-success" : signal === "SELL" ? "text-destructive" : "text-muted-foreground";
-  const signalBg = signal === "BUY" ? "bg-success/10 border-success/30" : signal === "SELL" ? "bg-destructive/10 border-destructive/30" : "bg-muted/30 border-border";
-  const biasColor = bias === "Bullish" ? "text-success" : bias === "Bearish" ? "text-destructive" : "text-muted-foreground";
+  const signalColor = effSignal === "BUY" ? "text-success" : effSignal === "SELL" ? "text-destructive" : "text-muted-foreground";
+  const signalBg = effSignal === "BUY" ? "bg-success/10 border-success/30" : effSignal === "SELL" ? "bg-destructive/10 border-destructive/30" : "bg-muted/30 border-border";
+  const biasColor = effBias === "Bullish" ? "text-success" : effBias === "Bearish" ? "text-destructive" : "text-muted-foreground";
   const isPositive = !changePercent.startsWith("-");
 
   return (
