@@ -1,14 +1,23 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { TradingViewAdvancedChart } from "@/components/chart/TradingViewAdvancedChart";
+import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 import { DailyOutlookCard, type DailyOutlookCardProps } from "./DailyOutlookCard";
 import { Clock, Activity } from "lucide-react";
 
 export interface SessionInstrument {
-  /** TradingView symbol, e.g. "NASDAQ:NDX" */
+  /** TradingView symbol, e.g. "NASDAQ:NDX" — used as fallback when Deriv doesn't list this asset */
   tvSymbol: string;
   label: string;        // e.g. "NASDAQ 100"
   symbolBadge?: string; // e.g. "NAS100"
+  /**
+   * Optional explicit Deriv display symbol (e.g. "XAU/USD", "NAS100", "GER40").
+   * When provided OR when the badge/label maps to a Deriv-supported symbol,
+   * the chart uses the same live Deriv engine as the Gold Trading Hub
+   * (real candles + Hauza overlay) instead of the TradingView widget.
+   */
+  derivDisplaySymbol?: string;
   outlook: DailyOutlookCardProps;
 }
 
@@ -21,10 +30,24 @@ export interface SessionMarketsBlockProps {
   instruments: SessionInstrument[];
 }
 
+/** Try every available hint to find a Deriv-supported symbol. */
+function resolveDerivSymbol(inst: SessionInstrument): string | null {
+  const candidates = [inst.derivDisplaySymbol, inst.symbolBadge, inst.label]
+    .filter(Boolean) as string[];
+  for (const c of candidates) {
+    if (mapToDerivSymbol(c)) return c;
+  }
+  return null;
+}
+
 /**
- * A reusable section that renders a session header + a grid of
- * TradingView Advanced charts (with Hauza indicators preloaded)
- * paired with daily outlook cards (technical + fundamental + Hauza + new-trader tips).
+ * Reusable section: session header + grid of live charts paired with
+ * daily-outlook cards (technical + fundamental + Hauza + new-trader tips).
+ *
+ * Charts mirror the Gold Trading Hub experience:
+ *   • Deriv live candles + Hauza overlay (clear, instant) when supported
+ *   • TradingView Advanced Chart fallback for non-Deriv assets
+ *     (Aramco / TASI / DFM etc.)
  */
 export function SessionMarketsBlock({
   sessionEmoji,
@@ -60,22 +83,35 @@ export function SessionMarketsBlock({
         </CardContent>
       </Card>
 
-      {instruments.map((inst) => (
-        <div key={inst.tvSymbol} className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-3">
-            <TradingViewAdvancedChart
-              symbol={inst.tvSymbol}
-              label={`${inst.label}${inst.symbolBadge ? ` · ${inst.symbolBadge}` : ""}`}
-              height={420}
-              interval="60"
-              withHauza
-            />
+      {instruments.map((inst) => {
+        const derivSym = resolveDerivSymbol(inst);
+        const chartLabel = `${inst.label}${inst.symbolBadge ? ` · ${inst.symbolBadge}` : ""}`;
+        return (
+          <div key={inst.tvSymbol} className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-3">
+              {derivSym ? (
+                <DerivLiveChart
+                  displaySymbol={derivSym}
+                  height={420}
+                  defaultGranularity={300}
+                  showHauza
+                />
+              ) : (
+                <TradingViewAdvancedChart
+                  symbol={inst.tvSymbol}
+                  label={chartLabel}
+                  height={420}
+                  interval="60"
+                  withHauza
+                />
+              )}
+            </div>
+            <div className="lg:col-span-2">
+              <DailyOutlookCard {...inst.outlook} />
+            </div>
           </div>
-          <div className="lg:col-span-2">
-            <DailyOutlookCard {...inst.outlook} />
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 }
