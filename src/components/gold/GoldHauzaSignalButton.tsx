@@ -1,65 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } from "lucide-react";
 import { useMarketSession } from "@/hooks/useMarketSession";
+import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
 
-type SignalType = "BUY" | "SELL" | "WAIT" | "HOLD";
+type SignalType = DerivSignalType;
 
 interface SignalState {
   signal: SignalType;
   confidence: number;
   reason: string;
   strategy: string;
-}
-
-function generateSignal(): SignalState {
-  const hour = new Date().getUTCHours();
-  const minute = new Date().getMinutes();
-  const seed = Math.sin(hour * 100 + minute) * 10000;
-  const rand = Math.abs(seed - Math.floor(seed));
-
-  // London/NY overlap = stronger signals
-  const isActiveSession = (hour >= 8 && hour <= 16) || (hour >= 13 && hour <= 21);
-
-  if (!isActiveSession) {
-    return {
-      signal: "WAIT",
-      confidence: 30 + Math.floor(rand * 20),
-      reason: "Market session inactive — no high-probability setups",
-      strategy: "Session Filter",
-    };
-  }
-
-  if (rand < 0.25) {
-    return {
-      signal: "BUY",
-      confidence: 65 + Math.floor(rand * 100) % 25,
-      reason: "S/R bounce + EMA 20 bullish alignment + wick rejection at support",
-      strategy: "S/R Bounce Entry",
-    };
-  } else if (rand < 0.5) {
-    return {
-      signal: "SELL",
-      confidence: 65 + Math.floor(rand * 100) % 25,
-      reason: "Breakout below key support + RSI < 40 + momentum confirmation",
-      strategy: "Breakout Momentum",
-    };
-  } else if (rand < 0.75) {
-    return {
-      signal: "HOLD",
-      confidence: 55 + Math.floor(rand * 100) % 20,
-      reason: "Active position — trailing with EMA 20, no exit signal yet",
-      strategy: "MTF Trend Ride",
-    };
-  } else {
-    return {
-      signal: "WAIT",
-      confidence: 40 + Math.floor(rand * 100) % 20,
-      reason: "Price in consolidation zone — waiting for breakout or sweep",
-      strategy: "Liquidity Sweep",
-    };
-  }
 }
 
 const SIGNAL_CONFIG: Record<SignalType, {
@@ -111,8 +63,8 @@ const SIGNAL_CONFIG: Record<SignalType, {
 
 export function GoldBotvioSignalButton() {
   const { isMarketOpen, isLoading: sessionLoading } = useMarketSession("XAUUSD");
-  const [signalState, setSignalState] = useState<SignalState>(generateSignal);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  // Real-time signal driven by live Deriv 5-min candles + EMA/RSI/wick analysis
+  const live = useDerivLiveSignal("XAU/USD", 300);
 
   // Force WAIT state when market is closed
   const effectiveState: SignalState = useMemo(() => {
@@ -124,26 +76,19 @@ export function GoldBotvioSignalButton() {
         strategy: "Market Closed",
       };
     }
-    return signalState;
-  }, [isMarketOpen, sessionLoading, signalState]);
-
-  useEffect(() => {
-    if (!isMarketOpen) return; // don't refresh signals when market closed
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setSignalState(generateSignal());
-        setIsTransitioning(false);
-      }, 400);
-    }, 30000); // refresh every 30s
-    return () => clearInterval(interval);
-  }, [isMarketOpen]);
+    return {
+      signal: live.signal,
+      confidence: live.confidence,
+      reason: live.reason,
+      strategy: live.strategy,
+    };
+  }, [isMarketOpen, sessionLoading, live]);
 
   const config = SIGNAL_CONFIG[effectiveState.signal];
   const Icon = isMarketOpen ? config.icon : Clock;
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-500 ${isTransitioning ? "opacity-50 scale-95" : "opacity-100 scale-100"}`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-500`}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.05),transparent_70%)]" />
       <div className="relative p-5 space-y-4">
         {/* Header */}

@@ -73,24 +73,26 @@ export function GoldChartSection() {
       {/* Weekend / market-closed warning */}
       <MarketClosedBanner symbol="XAUUSD" />
 
-      {/* Live Deriv XAU/USD Chart */}
-      <DerivLiveChart displaySymbol="XAU/USD" height={420} defaultGranularity={900} />
+      {/* Botvio Signal (driven by real candles) + Live XAU/USD Chart with Hauza overlay */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-1">
+          <GoldBotvioSignalButton />
+        </div>
+        <div className="lg:col-span-3">
+          <DerivLiveChart
+            displaySymbol="XAU/USD"
+            height={420}
+            defaultGranularity={300}
+            showHauza
+          />
+        </div>
+      </div>
 
       {/* Scalp Robot — 1m / 5m breakout & S/R break detector (Gold) */}
       <GoldScalpingRobot displaySymbol="XAU/USD" />
 
       {/* Scalp Robot — Silver (XAG/USD) */}
       <BotvioScalpRobot displaySymbol="XAG/USD" assetLabel="Silver" />
-
-      {/* Botvio Signal + Live Detail Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-1">
-          <GoldBotvioSignalButton />
-        </div>
-        <div className="lg:col-span-3">
-          <DerivLiveChart displaySymbol="XAU/USD" height={380} defaultGranularity={300} />
-        </div>
-      </div>
 
        {/* ── Botvio Strategy Quick-Reference ─────── */}
        <div>
