@@ -27,18 +27,21 @@ interface DerivLiveChartProps {
   displaySymbol: string; // e.g. "XAU/USD"
   height?: number;
   defaultGranularity?: number;
+  showHauza?: boolean; // Hauza strategy overlay (S/R, breakouts, trend)
 }
 
 export function DerivLiveChart({
   displaySymbol,
   height = 420,
   defaultGranularity = 900,
+  showHauza = true,
 }: DerivLiveChartProps) {
   const derivSymbol = useMemo(() => mapToDerivSymbol(displaySymbol), [displaySymbol]);
   const [granularity, setGranularity] = useState(defaultGranularity);
   const [candles, setCandles] = useState<Candle[]>([]);
   const [lastPrice, setLastPrice] = useState<number | null>(null);
   const [connected, setConnected] = useState(false);
+  const [hauzaOn, setHauzaOn] = useState(showHauza);
   const wsRef = useRef<WebSocket | null>(null);
 
   // Map display symbol → market session symbol (e.g. "XAU/USD" → "XAUUSD")
