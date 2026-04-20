@@ -88,7 +88,7 @@ export function GoldBotvioSignalButton() {
   const Icon = isMarketOpen ? config.icon : Clock;
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-500 ${isTransitioning ? "opacity-50 scale-95" : "opacity-100 scale-100"}`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-500`}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.05),transparent_70%)]" />
       <div className="relative p-5 space-y-4">
         {/* Header */}
