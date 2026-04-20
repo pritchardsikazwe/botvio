@@ -27,13 +27,14 @@ function pricingProfile(symbol: string, tf: "M1" | "M5"): {
 } {
   const s = symbol.toUpperCase();
   const scale = tf === "M1" ? 0.4 : 1.0; // M1 ≈ 40% of M5 distances
-  let base = { tpPct: 0.005, slPct: 0.003, decimals: 4, category: "other" };
+  // Tightened for scalping: TP ~1.5R, SL trimmed across the board
+  let base = { tpPct: 0.0020, slPct: 0.0015, decimals: 4, category: "other" };
 
-  if (s.includes("BTC")) base = { tpPct: 0.012, slPct: 0.008, decimals: 1, category: "crypto" };
-  else if (s.includes("ETH")) base = { tpPct: 0.012, slPct: 0.008, decimals: 2, category: "crypto" };
-  else if (s.includes("XAU") || s.includes("GOLD")) base = { tpPct: 0.005, slPct: 0.003, decimals: 2, category: "gold" };
-  else if (s.includes("XAG") || s.includes("SILVER")) base = { tpPct: 0.008, slPct: 0.005, decimals: 3, category: "commodities" };
-  else if (/^[A-Z]{6}$/.test(s)) base = { tpPct: 0.0035, slPct: 0.0025, decimals: 5, category: "forex" };
+  if (s.includes("BTC")) base = { tpPct: 0.0040, slPct: 0.0028, decimals: 1, category: "crypto" };
+  else if (s.includes("ETH")) base = { tpPct: 0.0045, slPct: 0.0030, decimals: 2, category: "crypto" };
+  else if (s.includes("XAU") || s.includes("GOLD")) base = { tpPct: 0.0018, slPct: 0.0012, decimals: 2, category: "gold" };
+  else if (s.includes("XAG") || s.includes("SILVER")) base = { tpPct: 0.0030, slPct: 0.0020, decimals: 3, category: "commodities" };
+  else if (/^[A-Z]{6}$/.test(s)) base = { tpPct: 0.0015, slPct: 0.0010, decimals: 5, category: "forex" };
 
   return { ...base, tpPct: base.tpPct * scale, slPct: base.slPct * scale };
 }
