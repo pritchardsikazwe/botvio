@@ -75,3 +75,5 @@ project_id = "tqqkzeblmjapgbnsbtgw"
     verify_jwt = false
   [functions.persist-live-gold-signal]
     verify_jwt = false
+  [functions.evaluate-live-signals]
+    verify_jwt = false

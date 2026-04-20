@@ -8,20 +8,20 @@ import type { DerivLiveSignal } from "./useDerivLiveSignal";
  *  - Symbol-specific hubs (Gold, etc.)
  *  - Home Latest Trading Signals widget
  *  - /signals page
+ *  - signals_history (for the public profitability tracker)
  *
  * Calls the `persist-live-gold-signal` edge function, which uses the service
- * role to bypass RLS and enforces a 30-minute throttle per symbol+direction.
- * Auto-expires after 1 hour via `expires_at`.
- *
- * Generic — works for any symbol (XAUUSD, XAGUSD, BTCUSD, GBPUSD, …).
+ * role to bypass RLS, enforces a per-timeframe throttle (M1=1min, M5=5min)
+ * and sets `expires_at` to match — so users never enter late.
  */
 export function usePersistLiveSignal(
   live: DerivLiveSignal,
   enabled: boolean,
   symbol: string,
   category?: string,
+  timeframe: "M1" | "M5" = "M5",
 ) {
-  const lastSentRef = useRef<{ direction: string; at: number } | null>(null);
+  const lastSentRef = useRef<{ direction: string; tf: string; at: number } | null>(null);
   const inFlightRef = useRef(false);
 
   useEffect(() => {
@@ -31,9 +31,15 @@ export function usePersistLiveSignal(
     if (!live.lastPrice) return;
     if (live.confidence < 65) return;
 
+    const throttleMs = (timeframe === "M1" ? 60 : 300) * 1000;
     const now = Date.now();
     const last = lastSentRef.current;
-    if (last && last.direction === live.signal && now - last.at < 25 * 60 * 1000) {
+    if (
+      last &&
+      last.direction === live.signal &&
+      last.tf === timeframe &&
+      now - last.at < throttleMs * 0.9
+    ) {
       return;
     }
 
@@ -50,16 +56,17 @@ export function usePersistLiveSignal(
             reason: live.reason,
             strategy: live.strategy,
             category,
+            timeframe,
           },
         });
-        lastSentRef.current = { direction: live.signal as string, at: now };
+        lastSentRef.current = { direction: live.signal as string, tf: timeframe, at: now };
       } catch {
         /* swallow */
       } finally {
         inFlightRef.current = false;
       }
     })();
-  }, [live.signal, live.confidence, live.lastPrice, enabled, symbol, category]);
+  }, [live.signal, live.confidence, live.lastPrice, enabled, symbol, category, timeframe]);
 }
 
 // Backward-compat alias for the gold-specific call sites.
@@ -67,6 +74,7 @@ export function usePersistGoldLiveSignal(
   live: DerivLiveSignal,
   enabled: boolean,
   symbol: string = "XAUUSD",
+  timeframe: "M1" | "M5" = "M5",
 ) {
-  return usePersistLiveSignal(live, enabled, symbol, "gold");
+  return usePersistLiveSignal(live, enabled, symbol, "gold", timeframe);
 }
