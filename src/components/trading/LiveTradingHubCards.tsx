@@ -3,7 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
-import { ArrowRight, Activity, TrendingUp, Bitcoin, Gem, Coins, PoundSterling } from "lucide-react";
+import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
+import { ArrowRight, Activity, TrendingUp, Bitcoin, Gem, Coins, PoundSterling, ArrowUp, ArrowDown, Pause } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
