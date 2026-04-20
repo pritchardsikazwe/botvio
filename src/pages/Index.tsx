@@ -112,22 +112,22 @@ const Index = () => {
               </Button>
             </a>
             <Link to="/gold" className="block">
-              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-yellow-500/40 text-yellow-500 hover:bg-yellow-500/10">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
                 🥇 Gold Hub
               </Button>
             </Link>
             <Link to="/bitcoin" className="block">
-              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-orange-500/40 text-orange-500 hover:bg-orange-500/10">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
                 ₿ Bitcoin Hub
               </Button>
             </Link>
             <Link to="/silver" className="block">
-              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-slate-400/40 text-slate-300 hover:bg-slate-400/10">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-muted-foreground/40 text-muted-foreground hover:bg-muted/40">
                 🥈 Silver Hub
               </Button>
             </Link>
             <Link to="/gbpusd" className="block">
-              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-blue-500/40 text-blue-400 hover:bg-blue-500/10">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
                 £ GBP/USD Hub
               </Button>
             </Link>
