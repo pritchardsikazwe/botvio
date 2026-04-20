@@ -279,6 +279,16 @@ export function DerivLiveChart({
                 {g.label}
               </Button>
             ))}
+            <Button
+              size="sm"
+              variant={hauzaOn ? "default" : "ghost"}
+              className={`h-6 text-[10px] px-2 ml-1 ${hauzaOn ? "bg-primary/90 hover:bg-primary text-primary-foreground" : ""}`}
+              onClick={() => setHauzaOn((v) => !v)}
+              title="Toggle Hauza Strategy overlay (S/R, Trend, Breakouts)"
+            >
+              <Crosshair className="h-2.5 w-2.5 mr-1" />
+              Hauza
+            </Button>
             {isClosed ? (
               <Badge variant="outline" className="text-[10px] ml-1 border-warning/40 text-warning">
                 <Lock className="h-2.5 w-2.5 mr-1" />
