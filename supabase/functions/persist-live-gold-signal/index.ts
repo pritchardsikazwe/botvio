@@ -282,6 +282,24 @@ Deno.serve(async (req) => {
       strategy_name: strategyTag,
     });
 
+    // ── Fan out: auto-execute on opted-in users' Deriv accounts ───────
+    // Opt-in is OFF by default (auto_trade_settings.enabled = false).
+    // Respects user's account_type (demo/real), stake, multiplier, min_confidence,
+    // daily kill-switch and per-asset whitelist. Live-engine signals only.
+    const autoExecResults = await autoExecuteForOptedInUsers(supabase, {
+      symbol,
+      direction: body.direction,
+      confidence: conf,
+      entry: round(price),
+      sl,
+      tp,
+      timeframe,
+      signalId: data?.id,
+    }).catch((e) => {
+      console.error("[persist-live-gold-signal] fan-out error:", e);
+      return { attempted: 0, filled: 0, error: String(e) };
+    });
+
     return new Response(JSON.stringify({
       ok: true,
       id: data?.id,
@@ -289,6 +307,7 @@ Deno.serve(async (req) => {
       expires_at: expiresAt,
       tp_source: tpSource,
       candle_distance: candleDistance,
+      auto_exec: autoExecResults,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
