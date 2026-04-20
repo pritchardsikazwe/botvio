@@ -91,6 +91,16 @@ export const MarketSignalCard = ({
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
+  // Map known instruments to their dedicated trading hubs
+  const HUB_ROUTES: Record<string, string> = {
+    XAUUSD: "/gold",
+    XAGUSD: "/silver",
+    BTCUSD: "/bitcoin",
+    GBPUSD: "/gbpusd",
+  };
+  const hubRoute = HUB_ROUTES[normSym];
+  const chartHref = hubRoute ?? `/chart/${chartSymbol || symbol}`;
+
   const signalColor = effSignal === "BUY" ? "text-success" : effSignal === "SELL" ? "text-destructive" : "text-muted-foreground";
   const signalBg = effSignal === "BUY" ? "bg-success/10 border-success/30" : effSignal === "SELL" ? "bg-destructive/10 border-destructive/30" : "bg-muted/30 border-border";
   const biasColor = effBias === "Bullish" ? "text-success" : effBias === "Bearish" ? "text-destructive" : "text-muted-foreground";
