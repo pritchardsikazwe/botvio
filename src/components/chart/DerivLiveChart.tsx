@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, Wifi, WifiOff, Lock } from "lucide-react";
+import { Activity, Wifi, WifiOff, Lock, Crosshair } from "lucide-react";
 import { getDerivWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 import { useMarketSession } from "@/hooks/useMarketSession";
@@ -27,18 +27,21 @@ interface DerivLiveChartProps {
   displaySymbol: string; // e.g. "XAU/USD"
   height?: number;
   defaultGranularity?: number;
+  showHauza?: boolean; // Hauza strategy overlay (S/R, breakouts, trend)
 }
 
 export function DerivLiveChart({
   displaySymbol,
   height = 420,
   defaultGranularity = 900,
+  showHauza = true,
 }: DerivLiveChartProps) {
   const derivSymbol = useMemo(() => mapToDerivSymbol(displaySymbol), [displaySymbol]);
   const [granularity, setGranularity] = useState(defaultGranularity);
   const [candles, setCandles] = useState<Candle[]>([]);
   const [lastPrice, setLastPrice] = useState<number | null>(null);
   const [connected, setConnected] = useState(false);
+  const [hauzaOn, setHauzaOn] = useState(showHauza);
   const wsRef = useRef<WebSocket | null>(null);
 
   // Map display symbol → market session symbol (e.g. "XAU/USD" → "XAUUSD")
@@ -172,6 +175,64 @@ export function DerivLiveChart({
     : 0;
   const isUp = change >= 0;
 
+  // ─── Hauza Strategy Overlay ───────────────────────────────────────────
+  // Pivot-based S/R + linear regression trend line + breakout markers
+  const hauza = useMemo(() => {
+    if (!hauzaOn || visible.length < 20) return null;
+
+    const left = 3;
+    const right = 3;
+    const supports: { price: number; idx: number }[] = [];
+    const resistances: { price: number; idx: number }[] = [];
+
+    for (let i = left; i < visible.length - right; i++) {
+      const c = visible[i];
+      let isPivotHigh = true;
+      let isPivotLow = true;
+      for (let k = 1; k <= left; k++) {
+        if (visible[i - k].high >= c.high) isPivotHigh = false;
+        if (visible[i - k].low <= c.low) isPivotLow = false;
+      }
+      for (let k = 1; k <= right; k++) {
+        if (visible[i + k].high >= c.high) isPivotHigh = false;
+        if (visible[i + k].low <= c.low) isPivotLow = false;
+      }
+      if (isPivotHigh) resistances.push({ price: c.high, idx: i });
+      if (isPivotLow) supports.push({ price: c.low, idx: i });
+    }
+
+    // Keep top 2 most recent of each
+    const topSup = supports.slice(-2);
+    const topRes = resistances.slice(-2);
+
+    // Linear regression trend on closes
+    const n = visible.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    visible.forEach((c, i) => {
+      sumX += i; sumY += c.close; sumXY += i * c.close; sumXX += i * i;
+    });
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    const trendStart = intercept;
+    const trendEnd = intercept + slope * (n - 1);
+    const trendDir: "up" | "down" | "flat" =
+      Math.abs(slope) < (range / n) * 0.05 ? "flat" : slope > 0 ? "up" : "down";
+
+    // Breakout detection: last candle closes beyond most recent S/R
+    const last = visible[n - 1];
+    const lastRes = topRes[topRes.length - 1];
+    const lastSup = topSup[topSup.length - 1];
+    const breakouts: { type: "up" | "down"; idx: number; price: number }[] = [];
+    if (lastRes && last.close > lastRes.price && visible[n - 2]?.close <= lastRes.price) {
+      breakouts.push({ type: "up", idx: n - 1, price: last.close });
+    }
+    if (lastSup && last.close < lastSup.price && visible[n - 2]?.close >= lastSup.price) {
+      breakouts.push({ type: "down", idx: n - 1, price: last.close });
+    }
+
+    return { supports: topSup, resistances: topRes, trendStart, trendEnd, trendDir, breakouts };
+  }, [hauzaOn, visible, range]);
+
   if (!derivSymbol) {
     return (
       <Card className="bg-card border-border/50">
@@ -218,6 +279,16 @@ export function DerivLiveChart({
                 {g.label}
               </Button>
             ))}
+            <Button
+              size="sm"
+              variant={hauzaOn ? "default" : "ghost"}
+              className={`h-6 text-[10px] px-2 ml-1 ${hauzaOn ? "bg-primary/90 hover:bg-primary text-primary-foreground" : ""}`}
+              onClick={() => setHauzaOn((v) => !v)}
+              title="Toggle Hauza Strategy overlay (S/R, Trend, Breakouts)"
+            >
+              <Crosshair className="h-2.5 w-2.5 mr-1" />
+              Hauza
+            </Button>
             {isClosed ? (
               <Badge variant="outline" className="text-[10px] ml-1 border-warning/40 text-warning">
                 <Lock className="h-2.5 w-2.5 mr-1" />
@@ -290,6 +361,109 @@ export function DerivLiveChart({
                   </g>
                 );
               })}
+
+              {/* ── Hauza Strategy Overlay ───────── */}
+              {hauza && (
+                <g>
+                  {/* Resistance levels (red dashed) */}
+                  {hauza.resistances.map((r, i) => (
+                    <g key={`res-${i}`}>
+                      <line
+                        x1={padding.left}
+                        x2={padding.left + chartW}
+                        y1={yFor(r.price)}
+                        y2={yFor(r.price)}
+                        stroke="hsl(var(--destructive))"
+                        strokeWidth={1.2}
+                        strokeDasharray="6,4"
+                        strokeOpacity={0.85}
+                      />
+                      <rect
+                        x={padding.left + 2}
+                        y={yFor(r.price) - 7}
+                        width={28}
+                        height={12}
+                        fill="hsl(var(--destructive))"
+                        rx={2}
+                      />
+                      <text
+                        x={padding.left + 16}
+                        y={yFor(r.price) + 2}
+                        fontSize="9"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        fill="hsl(var(--destructive-foreground))"
+                      >
+                        R{i + 1}
+                      </text>
+                    </g>
+                  ))}
+                  {/* Support levels (green dashed) */}
+                  {hauza.supports.map((s, i) => (
+                    <g key={`sup-${i}`}>
+                      <line
+                        x1={padding.left}
+                        x2={padding.left + chartW}
+                        y1={yFor(s.price)}
+                        y2={yFor(s.price)}
+                        stroke="hsl(var(--success))"
+                        strokeWidth={1.2}
+                        strokeDasharray="6,4"
+                        strokeOpacity={0.85}
+                      />
+                      <rect
+                        x={padding.left + 2}
+                        y={yFor(s.price) - 7}
+                        width={28}
+                        height={12}
+                        fill="hsl(var(--success))"
+                        rx={2}
+                      />
+                      <text
+                        x={padding.left + 16}
+                        y={yFor(s.price) + 2}
+                        fontSize="9"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        fill="hsl(var(--background))"
+                      >
+                        S{i + 1}
+                      </text>
+                    </g>
+                  ))}
+                  {/* Trend line (linear regression) */}
+                  <line
+                    x1={padding.left}
+                    x2={padding.left + chartW}
+                    y1={yFor(hauza.trendStart)}
+                    y2={yFor(hauza.trendEnd)}
+                    stroke={
+                      hauza.trendDir === "up"
+                        ? "hsl(var(--success))"
+                        : hauza.trendDir === "down"
+                        ? "hsl(var(--destructive))"
+                        : "hsl(var(--muted-foreground))"
+                    }
+                    strokeWidth={1.6}
+                    strokeOpacity={0.7}
+                  />
+                  {/* Breakout markers */}
+                  {hauza.breakouts.map((b, i) => {
+                    const x = padding.left + b.idx * step + step / 2;
+                    const y = yFor(b.price);
+                    const arrow = b.type === "up" ? "▲" : "▼";
+                    const color = b.type === "up" ? "hsl(var(--success))" : "hsl(var(--destructive))";
+                    return (
+                      <g key={`bo-${i}`}>
+                        <circle cx={x} cy={y} r={6} fill={color} fillOpacity={0.25} stroke={color} strokeWidth={1.5} />
+                        <text x={x} y={b.type === "up" ? y - 10 : y + 16} fontSize="11" fontWeight="bold" textAnchor="middle" fill={color}>
+                          {arrow} BO
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
 
               {/* Last price line */}
               {lastPrice !== null && (
