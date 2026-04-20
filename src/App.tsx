@@ -8,6 +8,7 @@ import { DerivProvider } from "@/contexts/DerivContext";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { LocalePrefixRouter } from "@/i18n/LocalePrefixRouter";
 import { AppRoutes } from "./AppRoutes";
+import { MonetagLoader } from "@/components/adverts/MonetagLoader";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
                 matches. Unknown prefixes pass through unchanged.
               */}
               <LocalePrefixRouter>
+                <MonetagLoader />
                 <AppRoutes />
               </LocalePrefixRouter>
             </BrowserRouter>
