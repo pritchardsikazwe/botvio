@@ -70,7 +70,7 @@ const HUBS: Hub[] = [
 function HubCard({ hub }: { hub: Hub }) {
   const navigate = useNavigate();
   const { tick, connected } = useDerivLiveTicks(hub.symbol);
-  const live = useDerivLiveSignal(hub.symbol, "1m");
+  const live = useDerivLiveSignal(hub.symbol, 60);
   const Icon = hub.icon;
 
   // Track tick direction for subtle flash
