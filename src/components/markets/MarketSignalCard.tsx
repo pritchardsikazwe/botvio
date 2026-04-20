@@ -166,8 +166,8 @@ export const MarketSignalCard = ({
           </div>
           <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${confidence >= 70 ? "bg-success" : confidence >= 50 ? "bg-warning" : "bg-destructive"}`}
-              style={{ width: `${confidence}%` }}
+              className={`h-full rounded-full transition-all ${effConfidence >= 70 ? "bg-success" : effConfidence >= 50 ? "bg-warning" : "bg-destructive"}`}
+              style={{ width: `${effConfidence}%` }}
             />
           </div>
         </div>
