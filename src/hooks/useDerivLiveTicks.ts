@@ -6,18 +6,40 @@ import { getDerivWebSocketUrl } from "@/config/derivEnv";
  * Returns null when the symbol is not supported by Deriv.
  */
 export function mapToDerivSymbol(displaySymbol: string): string | null {
+  const s = (displaySymbol || "").trim();
+  if (!s) return null;
+  // Pass-through if already a Deriv code
+  if (s.startsWith("frx") || s.startsWith("cry") || s.includes("_")) return s;
+
   const map: Record<string, string> = {
-    "XAU/USD": "frxXAUUSD",
-    "XAG/USD": "frxXAGUSD",
-    "GBP/USD": "frxGBPUSD",
-    "EUR/USD": "frxEURUSD",
-    "USD/JPY": "frxUSDJPY",
-    "AUD/USD": "frxAUDUSD",
-    "BTC/USD": "cryBTCUSD",
-    "ETH/USD": "cryETHUSD",
+    // Forex pairs (slash + plain)
+    "XAU/USD": "frxXAUUSD", "XAUUSD": "frxXAUUSD",
+    "XAG/USD": "frxXAGUSD", "XAGUSD": "frxXAGUSD",
+    "GBP/USD": "frxGBPUSD", "GBPUSD": "frxGBPUSD",
+    "EUR/USD": "frxEURUSD", "EURUSD": "frxEURUSD",
+    "USD/JPY": "frxUSDJPY", "USDJPY": "frxUSDJPY",
+    "AUD/USD": "frxAUDUSD", "AUDUSD": "frxAUDUSD",
+    "USD/CHF": "frxUSDCHF", "USDCHF": "frxUSDCHF",
+    "USD/CAD": "frxUSDCAD", "USDCAD": "frxUSDCAD",
+    "NZD/USD": "frxNZDUSD", "NZDUSD": "frxNZDUSD",
+    "EUR/JPY": "frxEURJPY", "EURJPY": "frxEURJPY",
+    "GBP/JPY": "frxGBPJPY", "GBPJPY": "frxGBPJPY",
+    // Crypto
+    "BTC/USD": "cryBTCUSD", "BTCUSD": "cryBTCUSD", "BTC": "cryBTCUSD",
+    "ETH/USD": "cryETHUSD", "ETHUSD": "cryETHUSD", "ETH": "cryETHUSD",
+    // Indices (Deriv cash CFDs)
+    "US30": "OTC_DJI", "DOW": "OTC_DJI", "DJI": "OTC_DJI",
+    "SPX500": "OTC_SPC", "SPX": "OTC_SPC", "SP500": "OTC_SPC",
+    "NAS100": "OTC_NDX", "NDX": "OTC_NDX", "NASDAQ": "OTC_NDX",
+    "GER40": "OTC_GDAXI", "DAX": "OTC_GDAXI",
+    "UK100": "OTC_FTSE", "FTSE": "OTC_FTSE",
+    "JP225": "OTC_N225", "NIKKEI": "OTC_N225",
+    "HK50": "OTC_HSI", "HSI": "OTC_HSI",
+    "AUS200": "OTC_AS51",
   };
-  return map[displaySymbol] ?? null;
+  return map[s] ?? null;
 }
+
 
 export interface DerivLiveTick {
   symbol: string;
