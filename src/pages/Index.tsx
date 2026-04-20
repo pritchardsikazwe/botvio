@@ -23,7 +23,7 @@ import { SignalsPerformanceTracker } from "@/components/signals/SignalsPerforman
 import { TrainingVideosGrid } from "@/components/training/TrainingVideosGrid";
 import { BrokerStarterCards } from "@/components/training/BrokerStarterCards";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
-import { MarketDashboard } from "@/components/trading/MarketDashboard";
+import { LiveTradingHubCards } from "@/components/trading/LiveTradingHubCards";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
 import { NewsEventCards } from "@/components/news/NewsEventCard";
 import { useNavigate, Link } from "react-router-dom";
@@ -371,9 +371,9 @@ const Index = () => {
           <CourseEnrollmentCards compact homeMode />
         </section>
 
-        {/* 5 — Live Market Intelligence */}
+        {/* 5 — Live Trading Hubs (Gold / Silver / Bitcoin / GBP/USD) */}
         <section>
-          <MarketDashboard homeMode />
+          <LiveTradingHubCards />
         </section>
 
         {/* 6 — Deriv Options Shortcut */}
