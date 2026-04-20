@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, ArrowRight, Globe, Activity, Zap, Clock, Sparkles, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { SessionMarketsBlock, type SessionInstrument } from "@/components/markets/SessionMarketsBlock";
 
 // Determine if a market is currently open based on UTC day/hour
 type RegionKey = "us" | "europe" | "middleEast" | "asia" | "crypto" | "africa";
