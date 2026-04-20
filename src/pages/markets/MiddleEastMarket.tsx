@@ -167,6 +167,21 @@ const MiddleEastMarket = () => (
 
     <MarketSentimentGauge bullish={71} label="Middle East Sentiment" />
 
+    {/* ── LIVE TRADINGVIEW CHARTS + DAILY OUTLOOKS ── */}
+    <SessionMarketsBlock
+      sessionEmoji="🕌"
+      sessionName="Middle East Live Markets"
+      sessionHours="Riyadh 07:00–12:00 UTC · Dubai 06:00–10:00 UTC"
+      isOpen={(() => {
+        const d = new Date();
+        const day = d.getUTCDay();
+        const hr = d.getUTCHours() + d.getUTCMinutes() / 60;
+        return day >= 0 && day <= 4 && hr >= 6 && hr < 12;
+      })()}
+      description="Live TradingView charts for Aramco, TASI, DFM and Brent Crude with full technical + fundamental + Hauza strategy outlooks."
+      instruments={ME_INSTRUMENTS}
+    />
+
     <div>
       <h2 className="text-lg font-extrabold text-foreground mb-3">📊 Trading Opportunities</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
