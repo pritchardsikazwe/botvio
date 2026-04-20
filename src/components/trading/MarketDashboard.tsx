@@ -481,10 +481,14 @@ function BotvioSignalButton({ sig, symbol, navigate }: { sig: AiSignal | undefin
   const Icon = config.icon;
   const isActive = signalKey === "buy" || signalKey === "sell";
   const chartSlug = symbol.replace("/", "");
+  const HUB_ROUTES: Record<string, string> = {
+    XAUUSD: "/gold", XAGUSD: "/silver", BTCUSD: "/bitcoin", GBPUSD: "/gbpusd",
+  };
+  const targetRoute = HUB_ROUTES[chartSlug.toUpperCase()] ?? `/chart/${chartSlug}`;
 
   return (
     <button
-      onClick={() => navigate(`/chart/${chartSlug}`)}
+      onClick={() => navigate(targetRoute)}
       className={`w-full relative overflow-hidden rounded-xl bg-gradient-to-r ${config.bg} ${config.border} border-2 ${config.glow} transition-all duration-300 hover:scale-[1.02] cursor-pointer group`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.04),transparent_70%)]" />
