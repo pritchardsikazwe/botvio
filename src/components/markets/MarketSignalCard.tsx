@@ -6,6 +6,20 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
+import { usePersistLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
+
+// Symbols that auto-post live BUY/SELL signals to the DB (Home + /signals).
+// Each entry maps a normalized symbol → category for display & filtering.
+const AUTO_POST_SYMBOLS: Record<string, string> = {
+  XAUUSD: "gold",
+  XAGUSD: "commodities",
+  BTCUSD: "crypto",
+  GBPUSD: "forex",
+};
+
+function normalizeSymbol(sym: string): string {
+  return (sym || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
 
 interface MarketSignalCardProps {
   instrument: string;
@@ -55,6 +69,11 @@ export const MarketSignalCard = ({
   const derivSupported = !!mapToDerivSymbol(symbol);
   const liveEnabled = live !== false && derivSupported;
   const liveSig = useDerivLiveSignal(liveEnabled ? symbol : null, 300);
+
+  // Auto-post high-confidence live signals to DB for whitelisted symbols
+  const normSym = normalizeSymbol(symbol);
+  const autoPostCategory = AUTO_POST_SYMBOLS[normSym];
+  usePersistLiveSignal(liveSig, !!autoPostCategory && liveEnabled, normSym, autoPostCategory);
 
   // Effective values — live overrides static when available
   const useLive = liveEnabled && liveSig.lastPrice != null;
