@@ -54,6 +54,9 @@ import SignalPairPage from "./pages/SignalPairPage";
 import BotDetailPage from "./pages/BotDetailPage";
 import CountryTrafficPage from "./pages/CountryTrafficPage";
 import GoldTradingHub from "./pages/GoldTradingHub";
+import BitcoinTradingHub from "./pages/BitcoinTradingHub";
+import SilverTradingHub from "./pages/SilverTradingHub";
+import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
 import WeltradeHub from "./pages/WeltradeHub";
 import DerivOptions from "./pages/DerivOptions";
 import NewsCalendar from "./pages/NewsCalendar";
@@ -132,6 +135,12 @@ export const AppRoutes = () => (
     <Route path="trading" element={<Trading />} />
     <Route path="chart/:symbol" element={<ChartPage />} />
     <Route path="gold" element={<GoldTradingHub />} />
+    <Route path="bitcoin" element={<BitcoinTradingHub />} />
+    <Route path="btc" element={<BitcoinTradingHub />} />
+    <Route path="silver" element={<SilverTradingHub />} />
+    <Route path="xag" element={<SilverTradingHub />} />
+    <Route path="gbpusd" element={<GbpUsdTradingHub />} />
+    <Route path="gbp-usd" element={<GbpUsdTradingHub />} />
     <Route path="weltrade" element={<WeltradeHub />} />
     <Route path="news-calendar" element={<NewsCalendar />} />
     <Route path="markets" element={<GlobalMarkets />} />
