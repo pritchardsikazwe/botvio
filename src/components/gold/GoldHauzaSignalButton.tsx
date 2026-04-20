@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } from "lucide-react";
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
+import { usePersistGoldLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
 
 type SignalType = DerivSignalType;
 
