@@ -372,7 +372,26 @@ const GlobalMarkets = () => {
               ))}
             </div>
 
-            {/* Binary Options OTC Markets */}
+            {/* ── NEW YORK SESSION — Live TradingView charts + daily outlook ── */}
+            <SessionMarketsBlock
+              sessionEmoji="🗽"
+              sessionName="New York Trading Session"
+              sessionHours="13:30 – 20:00 UTC"
+              isOpen={REGIONS.find((r) => r.key === "us")?.isOpen ?? false}
+              description="Live charts for NASDAQ 100, S&P 500 and Gold with technical + fundamental + Hauza strategy outlooks. Highest liquidity for US equities & metals."
+              instruments={NY_INSTRUMENTS}
+            />
+
+            {/* ── LONDON SESSION — Live TradingView charts + daily outlook ── */}
+            <SessionMarketsBlock
+              sessionEmoji="🇬🇧"
+              sessionName="London Trading Session"
+              sessionHours="07:00 – 15:30 UTC"
+              isOpen={REGIONS.find((r) => r.key === "europe")?.isOpen ?? false}
+              description="Live charts for DAX 40, FTSE 100 and EUR/USD with technical + fundamental + Hauza strategy outlooks. Best liquidity for European indices & FX majors."
+              instruments={LONDON_INSTRUMENTS}
+            />
+
             <Card className="border-warning/30 animate-fade-in">
               <CardContent className="p-4">
                 <h2 className="text-sm font-extrabold text-foreground mb-3 flex items-center gap-2">
