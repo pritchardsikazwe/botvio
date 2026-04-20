@@ -10,14 +10,18 @@ export function GoldSignalsSection() {
   const { data: signals, isLoading } = useQuery({
     queryKey: ["gold-hub-signals"],
     queryFn: async () => {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from("trading_signals")
         .select("*")
-        .ilike("pair", "%XAU%")
+        .or("symbol.ilike.%XAU%,symbol.ilike.%GOLD%")
         .eq("status", "ACTIVE")
+        .gte("created_at", oneDayAgo)
         .order("created_at", { ascending: false })
         .limit(6);
-      return data ?? [];
+      // Filter out expired by expires_at
+      const now = Date.now();
+      return (data ?? []).filter((s: any) => !s.expires_at || new Date(s.expires_at).getTime() > now);
     },
     refetchInterval: 30000,
   });
@@ -115,7 +119,7 @@ export function GoldSignalsSection() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {isBuy ? <ArrowUpRight className="h-5 w-5 text-success" /> : <ArrowDownRight className="h-5 w-5 text-destructive" />}
-                        <span className="font-bold text-sm text-foreground">{sig.pair}</span>
+                        <span className="font-bold text-sm text-foreground">{sig.symbol}</span>
                       </div>
                       <Badge className={isBuy ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"}>
                         {sig.direction?.toUpperCase()}

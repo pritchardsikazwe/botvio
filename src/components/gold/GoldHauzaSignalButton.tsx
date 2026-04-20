@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } from "lucide-react";
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
+import { usePersistGoldLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
 
 type SignalType = DerivSignalType;
 
@@ -65,6 +66,9 @@ export function GoldBotvioSignalButton() {
   const { isMarketOpen, isLoading: sessionLoading } = useMarketSession("XAUUSD");
   // Real-time signal driven by live Deriv 5-min candles + EMA/RSI/wick analysis
   const live = useDerivLiveSignal("XAU/USD", 300);
+
+  // Persist real BUY/SELL signals to DB so they appear on Gold Hub + Home + /signals
+  usePersistGoldLiveSignal(live, !sessionLoading && isMarketOpen, "XAUUSD");
 
   // Force WAIT state when market is closed
   const effectiveState: SignalState = useMemo(() => {
