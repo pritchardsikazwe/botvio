@@ -3,20 +3,23 @@ import { supabase } from "@/integrations/supabase/client";
 import type { DerivLiveSignal } from "./useDerivLiveSignal";
 
 /**
- * Persists fresh BUY/SELL gold signals from the live Deriv engine into
+ * Persists fresh BUY/SELL signals from the live Deriv engine into
  * `trading_signals` so they appear in:
- *  - Gold Trading Hub (Active Gold Signals)
+ *  - Symbol-specific hubs (Gold, etc.)
  *  - Home Latest Trading Signals widget
  *  - /signals page
  *
  * Calls the `persist-live-gold-signal` edge function, which uses the service
- * role to bypass RLS and enforces a 30-minute throttle per direction.
+ * role to bypass RLS and enforces a 30-minute throttle per symbol+direction.
  * Auto-expires after 1 hour via `expires_at`.
+ *
+ * Generic — works for any symbol (XAUUSD, XAGUSD, BTCUSD, GBPUSD, …).
  */
-export function usePersistGoldLiveSignal(
+export function usePersistLiveSignal(
   live: DerivLiveSignal,
   enabled: boolean,
-  symbol: string = "XAUUSD",
+  symbol: string,
+  category?: string,
 ) {
   const lastSentRef = useRef<{ direction: string; at: number } | null>(null);
   const inFlightRef = useRef(false);
@@ -30,7 +33,6 @@ export function usePersistGoldLiveSignal(
 
     const now = Date.now();
     const last = lastSentRef.current;
-    // Client-side throttle: skip same-direction within 25 min
     if (last && last.direction === live.signal && now - last.at < 25 * 60 * 1000) {
       return;
     }
@@ -47,6 +49,7 @@ export function usePersistGoldLiveSignal(
             confidence: live.confidence,
             reason: live.reason,
             strategy: live.strategy,
+            category,
           },
         });
         lastSentRef.current = { direction: live.signal as string, at: now };
@@ -56,5 +59,14 @@ export function usePersistGoldLiveSignal(
         inFlightRef.current = false;
       }
     })();
-  }, [live.signal, live.confidence, live.lastPrice, enabled, symbol]);
+  }, [live.signal, live.confidence, live.lastPrice, enabled, symbol, category]);
+}
+
+// Backward-compat alias for the gold-specific call sites.
+export function usePersistGoldLiveSignal(
+  live: DerivLiveSignal,
+  enabled: boolean,
+  symbol: string = "XAUUSD",
+) {
+  return usePersistLiveSignal(live, enabled, symbol, "gold");
 }
