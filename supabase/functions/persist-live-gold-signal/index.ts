@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
         stop_loss: sl,
         take_profit: tp,
         timeframe: "M5",
-        category: "commodity",
+        category: "gold",
         broker: ["exness", "deriv", "weltrade"],
         confidence: conf,
         reason: body.reason || `Live engine signal (${body.strategy || "Botvio"})`,
