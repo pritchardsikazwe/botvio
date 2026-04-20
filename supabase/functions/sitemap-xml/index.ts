@@ -23,6 +23,8 @@ const STATIC_PAGES = [
   { loc: "/",                     priority: "1.0", changefreq: "daily" },
   { loc: "/landing",              priority: "0.9", changefreq: "weekly" },
   { loc: "/signals",              priority: "0.9", changefreq: "daily" },
+  { loc: "/signals/history",      priority: "0.9", changefreq: "daily" },
+  { loc: "/track-record",         priority: "0.8", changefreq: "daily" },
   { loc: "/bots",                 priority: "0.8", changefreq: "weekly" },
   { loc: "/marketplace",          priority: "0.8", changefreq: "daily" },
   { loc: "/providers",            priority: "0.7", changefreq: "weekly" },
