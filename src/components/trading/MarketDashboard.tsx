@@ -986,13 +986,25 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                     ? `${binanceLink}`
                     : `https://www.binance.com/en/trade/${binancePair}`;
 
+                  // Map known assets to dedicated trading hubs
+                  const normSym = asset.symbol.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+                  const HUB_ROUTES: Record<string, string> = {
+                    XAUUSD: "/gold",
+                    XAGUSD: "/silver",
+                    BTCUSD: "/bitcoin",
+                    GBPUSD: "/gbpusd",
+                  };
+                  const hubRoute = HUB_ROUTES[normSym];
+                  const chartRoute = hubRoute ?? `/chart/${asset.symbol.replace("/", "")}`;
+                  const chartLabel = hubRoute ? "🚀 Trading Hub" : "📈 Chart";
+
                   return (
                     <div className={`grid gap-1.5 pt-1 border-t border-border/30 ${hasBinance ? "grid-cols-4" : "grid-cols-3"}`}>
                       <button
-                        onClick={() => navigate(`/chart/${asset.symbol.replace("/", "")}`)}
+                        onClick={() => navigate(chartRoute)}
                         className="text-[10px] font-bold py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
                       >
-                        📈 Chart
+                        {chartLabel}
                       </button>
                       <button
                         className="text-[10px] font-bold py-1.5 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
