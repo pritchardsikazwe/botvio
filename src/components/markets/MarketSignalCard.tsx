@@ -215,8 +215,8 @@ export const MarketSignalCard = ({
         {/* Buttons */}
         <div className="flex gap-2 pt-1">
           <Button size="sm" variant="outline" className="flex-1 text-xs" asChild>
-            <Link to={`/chart/${chartSymbol || symbol}`}>
-              <BarChart3 className="h-3 w-3 mr-1" /> Chart
+            <Link to={chartHref}>
+              <BarChart3 className="h-3 w-3 mr-1" /> {hubRoute ? "Trading Hub" : "Chart"}
             </Link>
           </Button>
           {brokerUrl ? (
