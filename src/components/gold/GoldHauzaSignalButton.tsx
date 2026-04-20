@@ -67,6 +67,9 @@ export function GoldBotvioSignalButton() {
   // Real-time signal driven by live Deriv 5-min candles + EMA/RSI/wick analysis
   const live = useDerivLiveSignal("XAU/USD", 300);
 
+  // Persist real BUY/SELL signals to DB so they appear on Gold Hub + Home + /signals
+  usePersistGoldLiveSignal(live, !sessionLoading && isMarketOpen, "XAUUSD");
+
   // Force WAIT state when market is closed
   const effectiveState: SignalState = useMemo(() => {
     if (!sessionLoading && !isMarketOpen) {
