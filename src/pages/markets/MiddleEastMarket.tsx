@@ -5,8 +5,93 @@ import { EconomicEventsCard } from "@/components/markets/EconomicEventsCard";
 import { SectorHeatmap } from "@/components/markets/SectorHeatmap";
 import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
 import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
+import { SessionMarketsBlock, type SessionInstrument } from "@/components/markets/SessionMarketsBlock";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+const ME_INSTRUMENTS: SessionInstrument[] = [
+  {
+    tvSymbol: "TADAWUL:2222",
+    label: "Saudi Aramco",
+    symbolBadge: "2222.SR",
+    outlook: {
+      market: "Saudi Aramco (2222)",
+      emoji: "🛢️",
+      bias: "Bullish",
+      bestSession: "Riyadh 07:00–12:00 UTC",
+      technical: "Holding above 32.50 SAR support with rising 20-EMA. RSI 61, room before overbought. Higher highs structure intact above 32.10.",
+      fundamental: "Brent crude > $84 + Saudi production discipline + record dividend yield (5.5%). Vision 2030 capex bullish for downstream chemicals.",
+      hauza: "Oil Momentum Breakout: long on close > 33.00 SAR. Stop 31.90. TP1 33.80 / TP2 34.20. Skip if Brent breaks below $80 intraday.",
+      levels: [
+        { label: "Support", value: "32.10" },
+        { label: "Pivot", value: "32.80" },
+        { label: "Resistance", value: "34.20" },
+      ],
+      newTraderTip: "Aramco moves with Brent oil — check WTI/Brent before every trade. When Brent > $85, Aramco rallies 2–3% within a week (80% historical correlation).",
+    },
+  },
+  {
+    tvSymbol: "TVC:TASI",
+    label: "Tadawul All-Share Index",
+    symbolBadge: "TASI",
+    outlook: {
+      market: "Tadawul (TASI)",
+      emoji: "🇸🇦",
+      bias: "Bullish",
+      bestSession: "Riyadh 07:00–12:00 UTC",
+      technical: "Breakout above 12,400 with strong volume. EMA20 > EMA50 alignment. RSI 64 — momentum confirmed, watch for pullback to 12,350 retest.",
+      fundamental: "Foreign investor inflow surge after QFI restrictions abolished (Feb 2026). PIF deploying $50B+ across local champions. Vision 2030 sectors leading.",
+      hauza: "Trend Continuation: long pullbacks to 12,350 with EMA20 confluence. Stop 12,300. TP1 12,500 / TP2 12,600. Skip near OPEC meeting volatility.",
+      levels: [
+        { label: "Support", value: "12,300" },
+        { label: "Pivot", value: "12,420" },
+        { label: "Resistance", value: "12,600" },
+      ],
+      newTraderTip: "Saudi market trades Sun–Thu (NOT Mon–Fri). Plan your week around the Riyadh calendar. Best entries are typically Sun & Tue when global cues align.",
+    },
+  },
+  {
+    tvSymbol: "DFM:DFMGI",
+    label: "Dubai Financial Market Index",
+    symbolBadge: "DFM",
+    outlook: {
+      market: "DFM Index",
+      emoji: "🏙️",
+      bias: "Bullish",
+      bestSession: "Dubai 06:00–10:00 UTC",
+      technical: "Breaking above 4,250 resistance with strong real-estate sector leadership. RSI 67 — strong but watch for divergence on the next high.",
+      fundamental: "Tourism boom + Expo legacy infrastructure + record property sales (Emaar, DAMAC). UAE non-oil GDP growing 4%+ this year.",
+      hauza: "Opening Range Breakout: long on break above first 60-min high after 06:00 UTC. Stop below opening low. TP at 1:2 R:R.",
+      levels: [
+        { label: "Support", value: "4,200" },
+        { label: "Pivot", value: "4,260" },
+        { label: "Resistance", value: "4,320" },
+      ],
+      newTraderTip: "DFM is heavily real-estate weighted. When you see news about Dubai property prices or Expo projects, expect immediate index reaction — react fast.",
+    },
+  },
+  {
+    tvSymbol: "TVC:UKOIL",
+    label: "Brent Crude Oil",
+    symbolBadge: "BRENT",
+    outlook: {
+      market: "Brent Crude Oil",
+      emoji: "🛢️",
+      bias: "Bullish",
+      bestSession: "London/NY 12:00–18:00 UTC",
+      technical: "Breakout above $84 resistance, now retesting as support. EMA20 sloping up. RSI 60 — clean trend continuation setup.",
+      fundamental: "OPEC+ production cuts extended. Middle East geopolitical premium. China demand recovery underway. Watch weekly EIA inventory Wednesdays.",
+      hauza: "Breakout Momentum: long on retest of $84.00 with bullish wick. Stop $82.50. TP1 $86.00 / TP2 $87.50. Tighten stops over OPEC headlines.",
+      levels: [
+        { label: "Support", value: "$82.50" },
+        { label: "Pivot", value: "$84.20" },
+        { label: "Resistance", value: "$86.00" },
+      ],
+      newTraderTip: "Oil drives the entire Gulf region. Always check Brent before trading any Saudi/UAE/Kuwait stock — your win rate will improve dramatically.",
+    },
+  },
+];
+
 
 const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
 
@@ -81,6 +166,21 @@ const MiddleEastMarket = () => (
     </Card>
 
     <MarketSentimentGauge bullish={71} label="Middle East Sentiment" />
+
+    {/* ── LIVE TRADINGVIEW CHARTS + DAILY OUTLOOKS ── */}
+    <SessionMarketsBlock
+      sessionEmoji="🕌"
+      sessionName="Middle East Live Markets"
+      sessionHours="Riyadh 07:00–12:00 UTC · Dubai 06:00–10:00 UTC"
+      isOpen={(() => {
+        const d = new Date();
+        const day = d.getUTCDay();
+        const hr = d.getUTCHours() + d.getUTCMinutes() / 60;
+        return day >= 0 && day <= 4 && hr >= 6 && hr < 12;
+      })()}
+      description="Live TradingView charts for Aramco, TASI, DFM and Brent Crude with full technical + fundamental + Hauza strategy outlooks."
+      instruments={ME_INSTRUMENTS}
+    />
 
     <div>
       <h2 className="text-lg font-extrabold text-foreground mb-3">📊 Trading Opportunities</h2>

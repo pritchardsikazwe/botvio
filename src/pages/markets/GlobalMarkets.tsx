@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, ArrowRight, Globe, Activity, Zap, Clock, Sparkles, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
+import { SessionMarketsBlock, type SessionInstrument } from "@/components/markets/SessionMarketsBlock";
 
 // Determine if a market is currently open based on UTC day/hour
 type RegionKey = "us" | "europe" | "middleEast" | "asia" | "crypto" | "africa";
@@ -61,6 +62,134 @@ const LIVE_MARKET_DATA = [
   { symbol: "OIL", price: "67.45", change: "-0.85%", dir: "down" },
   { symbol: "NAS100", price: "18,890", change: "+0.92%", dir: "up" },
   { symbol: "USD/JPY", price: "148.20", change: "-0.42%", dir: "down" },
+];
+
+// ── New York session instruments (NYSE / NASDAQ-listed mega-caps + Gold) ──
+const NY_INSTRUMENTS: SessionInstrument[] = [
+  {
+    tvSymbol: "NASDAQ:NDX",
+    label: "NASDAQ 100",
+    symbolBadge: "NAS100",
+    outlook: {
+      market: "NASDAQ 100",
+      emoji: "💻",
+      bias: "Bullish",
+      bestSession: "NY 13:30–20:00 UTC",
+      technical: "Price above EMA20 & EMA50 on 1H, RSI 58 (room to run). Higher highs / higher lows structure intact above 22,500 swing-low. MACD histogram expanding bullish.",
+      fundamental: "Strong Q2 tech earnings momentum (NVDA, AAPL, MSFT). Falling 10Y yields support growth multiples. Watch CPI Wednesday — soft print = breakout fuel.",
+      hauza: "Breakout Momentum: long on close > 22,800 with retest entry. Stop below 22,640. TP1 22,920 / TP2 23,150 (1:2 R:R). Skip if VIX > 22.",
+      levels: [
+        { label: "Support", value: "22,640" },
+        { label: "Pivot", value: "22,733" },
+        { label: "Resistance", value: "22,920" },
+      ],
+      newTraderTip: "Don't chase the open. Wait for the first 30-min candle (13:30–14:00 UTC) to close, then trade in its direction with a 1:2 risk-reward.",
+    },
+  },
+  {
+    tvSymbol: "SP:SPX",
+    label: "S&P 500",
+    symbolBadge: "SPX500",
+    outlook: {
+      market: "S&P 500",
+      emoji: "🇺🇸",
+      bias: "Bullish",
+      bestSession: "NY 13:30–20:00 UTC",
+      technical: "5,830 holding as dynamic support (rising 20-EMA). RSI 56, no divergence. Bullish flag breakout above 5,855 opens 5,890.",
+      fundamental: "Banks beat estimates, financials leading rally. Fed rate-cut bets at 70% for June. Lower DXY supports multi-nationals' earnings translation.",
+      hauza: "Trend Continuation: long pullbacks to 5,830 with 20-EMA confluence. Stop 5,805. TP 5,890. Avoid holding through 14:30 CPI release.",
+      levels: [
+        { label: "Support", value: "5,830" },
+        { label: "Pivot", value: "5,842" },
+        { label: "Resistance", value: "5,890" },
+      ],
+      newTraderTip: "S&P leads global sentiment — when SPX is bullish, EM equities (JSE, NGX) usually follow within 24h. Use SPX as your overall risk gauge.",
+    },
+  },
+  {
+    tvSymbol: "OANDA:XAUUSD",
+    label: "Gold",
+    symbolBadge: "XAU/USD",
+    outlook: {
+      market: "Gold (XAU/USD)",
+      emoji: "🥇",
+      bias: "Bullish",
+      bestSession: "London/NY Overlap 13:30–17:00 UTC",
+      technical: "Higher lows from 2,335 with EMA20 > EMA50 alignment. RSI 62 — strong but not overbought. Bullish flag targeting 2,375.",
+      fundamental: "Geopolitical tensions + Fed dovishness + central bank gold buying = triple tailwind. Soft CPI = explosive upside. Hot CPI = drop to 2,330.",
+      hauza: "S/R Bounce: long on rejection at 2,345 zone with bullish wick. Stop 2,330. TP1 2,365 / TP2 2,375. Tighten stops over US data releases.",
+      levels: [
+        { label: "Support", value: "2,330" },
+        { label: "Pivot", value: "2,348" },
+        { label: "Resistance", value: "2,375" },
+      ],
+      newTraderTip: "Gold respects round numbers ($2,300, $2,350, $2,400) more than any other asset. Use them as your primary entry/exit framework.",
+    },
+  },
+];
+
+// ── London session instruments (FTSE / DAX / EUR & GBP majors) ──
+const LONDON_INSTRUMENTS: SessionInstrument[] = [
+  {
+    tvSymbol: "XETR:DAX",
+    label: "DAX 40",
+    symbolBadge: "GER40",
+    outlook: {
+      market: "DAX 40",
+      emoji: "🇩🇪",
+      bias: "Bullish",
+      bestSession: "London 07:00–15:30 UTC",
+      technical: "Breaking above 18,400 resistance with strong volume. EMA20 sloping up. RSI 64 — momentum confirmed but watch overbought levels.",
+      fundamental: "ECB rate cut expectations. German manufacturing PMI improving. Auto sector recovery driving index. Watch ZEW sentiment data.",
+      hauza: "Breakout Momentum: enter on retest of 18,400. Stop 18,280. TP1 18,580 / TP2 18,750. Avoid Friday holds — gap risk over weekend.",
+      levels: [
+        { label: "Support", value: "18,280" },
+        { label: "Pivot", value: "18,400" },
+        { label: "Resistance", value: "18,580" },
+      ],
+      newTraderTip: "DAX moves fastest in the first 90 min after London open (07:00–08:30 UTC). Use a 5m chart and trade only the dominant direction.",
+    },
+  },
+  {
+    tvSymbol: "OANDA:UK100GBP",
+    label: "FTSE 100",
+    symbolBadge: "UK100",
+    outlook: {
+      market: "FTSE 100",
+      emoji: "🇬🇧",
+      bias: "Neutral",
+      bestSession: "London 07:00–15:30 UTC",
+      technical: "Range-bound 8,200–8,360. EMA20 flat. RSI 50 — no edge. Wait for clean break + retest before committing capital.",
+      fundamental: "BoE on hold, sticky UK inflation. Energy & mining majors tracking oil. Brexit-era trade flows still pressuring growth.",
+      hauza: "Range Trading: long 8,200 support / short 8,360 resistance. Stop 30 pts beyond zone. Skip mid-range entries — chop kills capital.",
+      levels: [
+        { label: "Support", value: "8,200" },
+        { label: "Pivot", value: "8,280" },
+        { label: "Resistance", value: "8,360" },
+      ],
+      newTraderTip: "FTSE has the lowest volatility of major Western indices. It's perfect for learning range-bound strategies before tackling NAS100.",
+    },
+  },
+  {
+    tvSymbol: "FX:EURUSD",
+    label: "EUR/USD",
+    symbolBadge: "EURUSD",
+    outlook: {
+      market: "EUR/USD",
+      emoji: "💶",
+      bias: "Bullish",
+      bestSession: "London/NY Overlap 13:30–17:00 UTC",
+      technical: "Bullish reversal off 1.0850 support with bullish engulfing on 4H. EMA20 crossing above EMA50. RSI 56, momentum building.",
+      fundamental: "Dovish Fed pivot bets weighing on USD. ECB hawkish hold supportive. Soft US CPI Wednesday could push toward 1.0980.",
+      hauza: "MTF Trend Ride: long pullbacks to 1.0900. Stop 1.0870. TP1 1.0960 / TP2 1.0998. Skip during 14:30 US data releases.",
+      levels: [
+        { label: "Support", value: "1.0870" },
+        { label: "Pivot", value: "1.0918" },
+        { label: "Resistance", value: "1.0960" },
+      ],
+      newTraderTip: "EUR/USD is the most-traded pair globally — tight spreads make it ideal for beginners. Always check DXY before entering: DXY ↑ = EUR/USD ↓.",
+    },
+  },
 ];
 
 const GlobalMarkets = () => {
@@ -243,7 +372,26 @@ const GlobalMarkets = () => {
               ))}
             </div>
 
-            {/* Binary Options OTC Markets */}
+            {/* ── NEW YORK SESSION — Live TradingView charts + daily outlook ── */}
+            <SessionMarketsBlock
+              sessionEmoji="🗽"
+              sessionName="New York Trading Session"
+              sessionHours="13:30 – 20:00 UTC"
+              isOpen={REGIONS.find((r) => r.key === "us")?.isOpen ?? false}
+              description="Live charts for NASDAQ 100, S&P 500 and Gold with technical + fundamental + Hauza strategy outlooks. Highest liquidity for US equities & metals."
+              instruments={NY_INSTRUMENTS}
+            />
+
+            {/* ── LONDON SESSION — Live TradingView charts + daily outlook ── */}
+            <SessionMarketsBlock
+              sessionEmoji="🇬🇧"
+              sessionName="London Trading Session"
+              sessionHours="07:00 – 15:30 UTC"
+              isOpen={REGIONS.find((r) => r.key === "europe")?.isOpen ?? false}
+              description="Live charts for DAX 40, FTSE 100 and EUR/USD with technical + fundamental + Hauza strategy outlooks. Best liquidity for European indices & FX majors."
+              instruments={LONDON_INSTRUMENTS}
+            />
+
             <Card className="border-warning/30 animate-fade-in">
               <CardContent className="p-4">
                 <h2 className="text-sm font-extrabold text-foreground mb-3 flex items-center gap-2">
