@@ -163,7 +163,7 @@ export function AutoTradePanel({ availableAssets, scope }: AutoTradePanelProps) 
                 </Badge>
               </h3>
               <p className="text-[10px] text-muted-foreground">
-                Server-side robot · executes scalp signals on your Deriv account every minute.
+                Executes live-engine M1/M5 scalp signals on your Deriv account the instant they post.
               </p>
             </div>
           </div>

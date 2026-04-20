@@ -124,6 +124,180 @@ function findSR(candles: Candle[], price: number): { support: number | null; res
   return { support, resistance, avgRange };
 }
 
+// ── Display symbol normalization for auto_trade_settings.enabled_assets ──
+// AutoTradePanel stores entries like "XAU/USD", "GBP/USD", "BTC/USD".
+// Live engine sends compact "XAUUSD". Map between the two.
+function symbolToDisplay(s: string): string {
+  const u = s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (u === "XAUUSD") return "XAU/USD";
+  if (u === "XAGUSD") return "XAG/USD";
+  if (u === "BTCUSD") return "BTC/USD";
+  if (u === "ETHUSD") return "ETH/USD";
+  if (/^[A-Z]{6}$/.test(u)) return `${u.slice(0, 3)}/${u.slice(3)}`;
+  return u;
+}
+
+function symbolToDeriv(s: string): string | null {
+  const u = s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (u.includes("XAU")) return "frxXAUUSD";
+  if (u.includes("XAG")) return "frxXAGUSD";
+  if (u.includes("BTC")) return "cryBTCUSD";
+  if (u.includes("ETH")) return "cryETHUSD";
+  if (/^[A-Z]{6}$/.test(u)) return `frx${u}`;
+  return null;
+}
+
+interface AutoExecInput {
+  symbol: string;
+  direction: "BUY" | "SELL";
+  confidence: number;
+  entry: number;
+  sl: number;
+  tp: number;
+  timeframe: "M1" | "M5";
+  signalId?: string;
+}
+
+// deno-lint-ignore no-explicit-any
+async function autoExecuteForOptedInUsers(supabase: any, sig: AutoExecInput) {
+  const displaySymbol = symbolToDisplay(sig.symbol);
+  const derivSymbol = symbolToDeriv(sig.symbol);
+  if (!derivSymbol) return { attempted: 0, filled: 0, reason: "unsupported_symbol" };
+
+  // Pull all enabled auto-trade settings whose whitelist contains this asset.
+  const { data: settingsList, error: settingsErr } = await supabase
+    .from("auto_trade_settings")
+    .select("user_id, account_type, enabled_assets, min_confidence, multiplier, stake_usd, daily_loss_limit_pct")
+    .eq("enabled", true)
+    .contains("enabled_assets", [displaySymbol]);
+
+  if (settingsErr || !settingsList || settingsList.length === 0) {
+    return { attempted: 0, filled: 0, reason: settingsErr?.message || "no_opted_in_users" };
+  }
+
+  const SUPABASE_URL_INNER = Deno.env.get("SUPABASE_URL")!;
+  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const slDistance = Math.abs(sig.entry - sig.sl);
+  const tpDistance = Math.abs(sig.tp - sig.entry);
+
+  let attempted = 0, filled = 0, rejected = 0, skipped = 0;
+  // deno-lint-ignore no-explicit-any
+  const detail: any[] = [];
+
+  for (const s of settingsList) {
+    try {
+      if (sig.confidence < (s.min_confidence ?? 70)) {
+        skipped++; detail.push({ user: s.user_id.slice(0, 8), skipped: "below_min_confidence" });
+        continue;
+      }
+
+      const { data: pnlRow } = await supabase.rpc("get_auto_trade_today_pnl", { _user_id: s.user_id });
+      const todayPnl = Number(pnlRow?.[0]?.realized_pnl_usd ?? 0);
+      const lossLimitUsd = -((s.stake_usd ?? 1) * (s.daily_loss_limit_pct ?? 5));
+      if (todayPnl <= lossLimitUsd && todayPnl < 0) {
+        skipped++; detail.push({ user: s.user_id.slice(0, 8), skipped: "kill_switch" });
+        continue;
+      }
+
+      const { data: hasOpen } = await supabase.rpc("has_open_auto_trade", {
+        _user_id: s.user_id, _display_symbol: displaySymbol,
+      });
+      if (hasOpen === true) {
+        skipped++; detail.push({ user: s.user_id.slice(0, 8), skipped: "already_open" });
+        continue;
+      }
+
+      const { data: conns } = await supabase
+        .from("deriv_connections")
+        .select("id, login_id, env, account_type, is_connected")
+        .eq("user_id", s.user_id)
+        .eq("is_connected", true);
+
+      // deno-lint-ignore no-explicit-any
+      const conn = (conns || []).find((c: any) => {
+        const isVirtual = c.env === "demo" || (c.login_id && c.login_id.startsWith("VRT"));
+        return s.account_type === "demo" ? isVirtual : !isVirtual;
+      });
+      if (!conn) {
+        skipped++; detail.push({ user: s.user_id.slice(0, 8), skipped: `no_${s.account_type}_connection` });
+        continue;
+      }
+
+      const { data: execRow, error: execErr } = await supabase
+        .from("auto_trade_executions")
+        .insert({
+          user_id: s.user_id,
+          display_symbol: displaySymbol,
+          deriv_symbol: derivSymbol,
+          side: sig.direction,
+          signal_type: `live_${sig.timeframe.toLowerCase()}`,
+          signal_tf: sig.timeframe.toLowerCase(),
+          confidence: sig.confidence,
+          entry_price: sig.entry,
+          stop_loss: sig.sl,
+          take_profit: sig.tp,
+          stake_usd: s.stake_usd ?? 1,
+          multiplier: s.multiplier ?? 100,
+          account_type: s.account_type,
+          status: "pending",
+        })
+        .select("id")
+        .single();
+      if (execErr || !execRow) {
+        rejected++; detail.push({ user: s.user_id.slice(0, 8), rejected: execErr?.message }); continue;
+      }
+
+      attempted++;
+
+      const resp = await fetch(`${SUPABASE_URL_INNER}/functions/v1/deriv-trade-execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SERVICE_KEY}`,
+          "apikey": SERVICE_KEY,
+          "x-internal-user-id": s.user_id,
+        },
+        body: JSON.stringify({
+          connection_id: conn.id,
+          contract_family: "MULTIPLIERS",
+          payload: {
+            symbol: derivSymbol,
+            contract_type: sig.direction === "BUY" ? "MULTUP" : "MULTDOWN",
+            stake: s.stake_usd ?? 1,
+            currency: "USD",
+            multiplier: s.multiplier ?? 100,
+            limit_order: {
+              stop_loss: Number(slDistance.toFixed(6)),
+              take_profit: Number(tpDistance.toFixed(6)),
+            },
+          },
+          idempotency_key: `live-${sig.signalId || execRow.id}`,
+        }),
+      });
+      const respBody = await resp.json().catch(() => ({}));
+
+      if (!resp.ok || !respBody?.success) {
+        await supabase.from("auto_trade_executions").update({
+          status: "rejected", error_message: respBody?.error || `HTTP ${resp.status}`, raw_response: respBody,
+        }).eq("id", execRow.id);
+        rejected++;
+        detail.push({ user: s.user_id.slice(0, 8), rejected: respBody?.error || `HTTP ${resp.status}` });
+      } else {
+        await supabase.from("auto_trade_executions").update({
+          status: "filled", contract_id: respBody.contract_id || null, raw_response: respBody,
+        }).eq("id", execRow.id);
+        filled++;
+        detail.push({ user: s.user_id.slice(0, 8), filled: true, contract_id: respBody.contract_id });
+      }
+    } catch (e) {
+      rejected++;
+      detail.push({ user: s.user_id.slice(0, 8), error: String(e) });
+    }
+  }
+
+  return { attempted, filled, rejected, skipped, total_opted_in: settingsList.length, detail };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -282,6 +456,24 @@ Deno.serve(async (req) => {
       strategy_name: strategyTag,
     });
 
+    // ── Fan out: auto-execute on opted-in users' Deriv accounts ───────
+    // Opt-in is OFF by default (auto_trade_settings.enabled = false).
+    // Respects user's account_type (demo/real), stake, multiplier, min_confidence,
+    // daily kill-switch and per-asset whitelist. Live-engine signals only.
+    const autoExecResults = await autoExecuteForOptedInUsers(supabase, {
+      symbol,
+      direction: body.direction,
+      confidence: conf,
+      entry: round(price),
+      sl,
+      tp,
+      timeframe,
+      signalId: data?.id,
+    }).catch((e) => {
+      console.error("[persist-live-gold-signal] fan-out error:", e);
+      return { attempted: 0, filled: 0, error: String(e) };
+    });
+
     return new Response(JSON.stringify({
       ok: true,
       id: data?.id,
@@ -289,6 +481,7 @@ Deno.serve(async (req) => {
       expires_at: expiresAt,
       tp_source: tpSource,
       candle_distance: candleDistance,
+      auto_exec: autoExecResults,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
