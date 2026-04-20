@@ -9,6 +9,11 @@
     "description": "Real-time AI-generated trading signals for forex, gold, synthetic indices and crypto with entry, stop loss, and take profit levels.",
     "keywords": "live forex signals, gold signals, XAUUSD signals, free trading signals, Deriv signals, Boom Crash signals"
   },
+  "signalsHistory": {
+    "title": "Signals History & Verified Track Record",
+    "description": "Verified Botvio trading signals track record. Browse past forex, gold and synthetic indices signals with WIN/LOSS results, pip outcomes, entry, SL/TP and chart screenshots.",
+    "keywords": "Botvio track record, signals history, forex signals results, gold signals win rate, verified trading signals, signal performance"
+  },
   "gold": {
     "title": "Gold Trading Hub – XAU/USD Live Signals & Analysis",
     "description": "Live XAU/USD prices, AI gold trading signals, scalping robot, and Botvio AI Strategy for consistent gold trading.",

@@ -23,6 +23,7 @@ import Strategies from "./pages/Strategies";
 import StrategyDetail from "./pages/StrategyDetail";
 import ReferralRedirect from "./pages/ReferralRedirect";
 import Signals from "./pages/Signals";
+import SignalsHistory from "./pages/SignalsHistory";
 import Settings from "./pages/Settings";
 import Marketplace from "./pages/Marketplace";
 import MyProducts from "./pages/MyProducts";
@@ -110,6 +111,9 @@ export const AppRoutes = () => (
     <Route path="strategies/:category/:slug" element={<StrategyDetail />} />
     <Route path="r/:code" element={<ReferralRedirect />} />
     <Route path="signals" element={<Signals />} />
+    <Route path="signals/history" element={<SignalsHistory />} />
+    <Route path="signals-history" element={<SignalsHistory />} />
+    <Route path="track-record" element={<SignalsHistory />} />
     <Route path="marketplace" element={<Marketplace />} />
     <Route path="my-products" element={<MyProducts />} />
     <Route path="settings" element={<Settings />} />
