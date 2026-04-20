@@ -9,17 +9,16 @@ import type { DerivLiveSignal } from "./useDerivLiveSignal";
  *  - Home Latest Trading Signals widget
  *  - /signals page
  *
- * Rules:
- *  - Only persist BUY or SELL with confidence >= 65
- *  - Throttle to one insert per direction per 30 minutes (prevents spam)
- *  - expires_at = now + 1 hour (auto-expiry handled by existing widget logic)
+ * Calls the `persist-live-gold-signal` edge function, which uses the service
+ * role to bypass RLS and enforces a 30-minute throttle per direction.
+ * Auto-expires after 1 hour via `expires_at`.
  */
 export function usePersistGoldLiveSignal(
   live: DerivLiveSignal,
   enabled: boolean,
   symbol: string = "XAUUSD",
 ) {
-  const lastInsertRef = useRef<{ direction: string; at: number } | null>(null);
+  const lastSentRef = useRef<{ direction: string; at: number } | null>(null);
   const inFlightRef = useRef(false);
 
   useEffect(() => {
@@ -30,9 +29,9 @@ export function usePersistGoldLiveSignal(
     if (live.confidence < 65) return;
 
     const now = Date.now();
-    const last = lastInsertRef.current;
-    // Throttle: same direction within 30 min → skip
-    if (last && last.direction === live.signal && now - last.at < 30 * 60 * 1000) {
+    const last = lastSentRef.current;
+    // Client-side throttle: skip same-direction within 25 min
+    if (last && last.direction === live.signal && now - last.at < 25 * 60 * 1000) {
       return;
     }
 
@@ -40,49 +39,17 @@ export function usePersistGoldLiveSignal(
 
     (async () => {
       try {
-        // Check DB for any recent signal (any user) to avoid duplicates across tabs
-        const thirtyMinAgo = new Date(now - 30 * 60 * 1000).toISOString();
-        const { data: existing } = await supabase
-          .from("trading_signals")
-          .select("id, direction, created_at")
-          .eq("symbol", symbol)
-          .eq("status", "ACTIVE")
-          .eq("direction", live.signal)
-          .gte("created_at", thirtyMinAgo)
-          .limit(1);
-
-        if (existing && existing.length > 0) {
-          lastInsertRef.current = { direction: live.signal, at: now };
-          return;
-        }
-
-        const price = live.lastPrice!;
-        const isBuy = live.signal === "BUY";
-        // Gold typical move: ~0.5% TP, 0.3% SL
-        const tp = isBuy ? price * 1.005 : price * 0.995;
-        const sl = isBuy ? price * 0.997 : price * 1.003;
-        const expiresAt = new Date(now + 60 * 60 * 1000).toISOString(); // 1 hour
-
-        const { error } = await supabase.from("trading_signals").insert({
-          symbol,
-          direction: live.signal,
-          entry_price: Number(price.toFixed(2)),
-          stop_loss: Number(sl.toFixed(2)),
-          take_profit: Number(tp.toFixed(2)),
-          timeframe: "M5",
-          category: "commodity",
-          broker: ["exness", "deriv", "weltrade"],
-          confidence: Math.round(live.confidence),
-          reason: `Live engine: ${live.strategy}. ${live.reason}`,
-          strategy_name: `Botvio Live · ${live.strategy}`,
-          status: "ACTIVE",
-          is_manual: false,
-          expires_at: expiresAt,
+        await supabase.functions.invoke("persist-live-gold-signal", {
+          body: {
+            symbol,
+            direction: live.signal,
+            entry_price: live.lastPrice,
+            confidence: live.confidence,
+            reason: live.reason,
+            strategy: live.strategy,
+          },
         });
-
-        if (!error) {
-          lastInsertRef.current = { direction: live.signal, at: now };
-        }
+        lastSentRef.current = { direction: live.signal as string, at: now };
       } catch {
         /* swallow */
       } finally {
