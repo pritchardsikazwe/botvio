@@ -112,8 +112,23 @@ const Index = () => {
               </Button>
             </a>
             <Link to="/gold" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
+                🥇 Gold Hub
+              </Button>
+            </Link>
+            <Link to="/bitcoin" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
-                <Sparkles className="h-4 w-4" /> Gold Hub
+                ₿ Bitcoin Hub
+              </Button>
+            </Link>
+            <Link to="/silver" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-muted-foreground/40 text-muted-foreground hover:bg-muted/40">
+                🥈 Silver Hub
+              </Button>
+            </Link>
+            <Link to="/gbpusd" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
+                £ GBP/USD Hub
               </Button>
             </Link>
             <Link to="/weltrade" className="block">
