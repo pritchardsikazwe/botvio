@@ -2,6 +2,15 @@
 // Uses service role to bypass RLS (live engine has no user role).
 // Throttle window matches the chosen timeframe (M1 = 1 min, M5 = 5 min).
 // Auto-expires after 1 min (M1) or 5 min (M5) so users don't enter late.
+//
+// SCALPING TP/SL LOGIC:
+//  - Pulls recent candles from Deriv WS to compute support/resistance.
+//  - BUY  → TP = nearest resistance above price, SL = nearest support below.
+//  - SELL → TP = nearest support below price,    SL = nearest resistance above.
+//  - Capped by candle-count distance:
+//      M1 → TP within ~3-5 candles of avg range
+//      M5 → TP within ~1-3 candles of avg range
+//  - Falls back to tight % distances if WS lookup fails.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -21,13 +30,23 @@ interface Body {
   timeframe?: "M1" | "M5";
 }
 
-// TP/SL profile per instrument, scaled by timeframe (M1 is tighter than M5).
+// Symbol → Deriv WS symbol for S/R lookup.
+function toDerivSymbol(s: string): string | null {
+  const u = s.toUpperCase();
+  if (u.includes("XAU") || u === "GOLD") return "frxXAUUSD";
+  if (u.includes("XAG") || u === "SILVER") return "frxXAGUSD";
+  if (u.includes("BTC")) return "cryBTCUSD";
+  if (u.includes("ETH")) return "cryETHUSD";
+  if (/^[A-Z]{6}$/.test(u)) return `frx${u}`;
+  return null;
+}
+
+// Pricing fallback profile (used when S/R lookup fails).
 function pricingProfile(symbol: string, tf: "M1" | "M5"): {
   tpPct: number; slPct: number; decimals: number; category: string;
 } {
   const s = symbol.toUpperCase();
-  const scale = tf === "M1" ? 0.4 : 1.0; // M1 ≈ 40% of M5 distances
-  // Tightened for scalping: TP ~1.5R, SL trimmed across the board
+  const scale = tf === "M1" ? 0.4 : 1.0;
   let base = { tpPct: 0.0020, slPct: 0.0015, decimals: 4, category: "other" };
 
   if (s.includes("BTC")) base = { tpPct: 0.0040, slPct: 0.0028, decimals: 1, category: "crypto" };
@@ -37,6 +56,72 @@ function pricingProfile(symbol: string, tf: "M1" | "M5"): {
   else if (/^[A-Z]{6}$/.test(s)) base = { tpPct: 0.0015, slPct: 0.0010, decimals: 5, category: "forex" };
 
   return { ...base, tpPct: base.tpPct * scale, slPct: base.slPct * scale };
+}
+
+interface Candle { open: number; high: number; low: number; close: number; epoch: number; }
+
+// Fetch last N candles from Deriv WS (one-shot, no subscription).
+async function fetchCandles(derivSymbol: string, granularity: number, count = 60): Promise<Candle[]> {
+  const appId = Deno.env.get("DERIV_APP_ID") || "1089";
+  const url = `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (out: Candle[]) => { if (!done) { done = true; try { ws.close(); } catch { /* noop */ } resolve(out); } };
+    const timer = setTimeout(() => finish([]), 4000);
+    let ws: WebSocket;
+    try { ws = new WebSocket(url); } catch { clearTimeout(timer); resolve([]); return; }
+    ws.onopen = () => {
+      ws.send(JSON.stringify({
+        ticks_history: derivSymbol,
+        adjust_start_time: 1,
+        count,
+        end: "latest",
+        granularity,
+        style: "candles",
+      }));
+    };
+    ws.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.error) { clearTimeout(timer); finish([]); return; }
+        if (Array.isArray(data.candles)) {
+          const arr: Candle[] = data.candles.map((c: any) => ({
+            open: Number(c.open), high: Number(c.high), low: Number(c.low),
+            close: Number(c.close), epoch: Number(c.epoch),
+          }));
+          clearTimeout(timer);
+          finish(arr);
+        }
+      } catch { /* ignore */ }
+    };
+    ws.onerror = () => { clearTimeout(timer); finish([]); };
+  });
+}
+
+// Find nearest support (below price) and nearest resistance (above price)
+// using swing pivots from recent candles.
+function findSR(candles: Candle[], price: number): { support: number | null; resistance: number | null; avgRange: number } {
+  if (candles.length < 10) return { support: null, resistance: null, avgRange: 0 };
+  const pivotsHigh: number[] = [];
+  const pivotsLow: number[] = [];
+  // 3-bar pivot detection
+  for (let i = 2; i < candles.length - 2; i++) {
+    const h = candles[i].high, l = candles[i].low;
+    if (h > candles[i - 1].high && h > candles[i - 2].high && h > candles[i + 1].high && h > candles[i + 2].high) pivotsHigh.push(h);
+    if (l < candles[i - 1].low && l < candles[i - 2].low && l < candles[i + 1].low && l < candles[i + 2].low) pivotsLow.push(l);
+  }
+  // Add overall recent extremes as a backstop
+  const recent = candles.slice(-30);
+  pivotsHigh.push(Math.max(...recent.map((c) => c.high)));
+  pivotsLow.push(Math.min(...recent.map((c) => c.low)));
+
+  const resistance = pivotsHigh.filter((h) => h > price).sort((a, b) => a - b)[0] ?? null;
+  const support = pivotsLow.filter((l) => l < price).sort((a, b) => b - a)[0] ?? null;
+
+  const ranges = candles.slice(-20).map((c) => c.high - c.low);
+  const avgRange = ranges.reduce((a, b) => a + b, 0) / Math.max(ranges.length, 1);
+
+  return { support, resistance, avgRange };
 }
 
 Deno.serve(async (req) => {
@@ -97,9 +182,62 @@ Deno.serve(async (req) => {
     const price = body.entry_price;
     const isBuy = body.direction === "BUY";
     const round = (n: number) => +n.toFixed(profile.decimals);
-    const tp = round(isBuy ? price * (1 + profile.tpPct) : price * (1 - profile.tpPct));
-    const sl = round(isBuy ? price * (1 - profile.slPct) : price * (1 + profile.slPct));
+
+    // ── Compute S/R-based TP/SL with candle-count caps ─────────────
+    // M1 → TP within 3-5 candles of avg range; M5 → 1-3 candles.
+    const maxCandles = timeframe === "M1" ? 5 : 3;
+    const minCandles = timeframe === "M1" ? 3 : 1;
+
+    const derivSym = toDerivSymbol(symbol);
+    const granularity = timeframe === "M1" ? 60 : 300;
+    let candles: Candle[] = [];
+    if (derivSym) {
+      try { candles = await fetchCandles(derivSym, granularity, 80); } catch { /* fallback */ }
+    }
+
+    let tp: number;
+    let sl: number;
+    let tpSource = "fallback%";
+    let candleDistance: number | null = null;
+
+    if (candles.length >= 15) {
+      const { support, resistance, avgRange } = findSR(candles, price);
+      const minDist = avgRange * minCandles;
+      const maxDist = avgRange * maxCandles;
+
+      if (isBuy) {
+        // TP → nearest resistance (capped), SL → nearest support (capped tighter)
+        let tpRaw = resistance != null ? resistance - price : maxDist;
+        tpRaw = Math.max(minDist, Math.min(maxDist, tpRaw));
+        let slRaw = support != null ? price - support : avgRange * 1.5;
+        slRaw = Math.max(avgRange * 0.8, Math.min(avgRange * 2.5, slRaw));
+        tp = round(price + tpRaw);
+        sl = round(price - slRaw);
+        candleDistance = +(tpRaw / Math.max(avgRange, 1e-9)).toFixed(1);
+        tpSource = resistance != null ? "resistance" : "candle-cap";
+      } else {
+        // SELL: TP → nearest support, SL → nearest resistance
+        let tpRaw = support != null ? price - support : maxDist;
+        tpRaw = Math.max(minDist, Math.min(maxDist, tpRaw));
+        let slRaw = resistance != null ? resistance - price : avgRange * 1.5;
+        slRaw = Math.max(avgRange * 0.8, Math.min(avgRange * 2.5, slRaw));
+        tp = round(price - tpRaw);
+        sl = round(price + slRaw);
+        candleDistance = +(tpRaw / Math.max(avgRange, 1e-9)).toFixed(1);
+        tpSource = support != null ? "support" : "candle-cap";
+      }
+    } else {
+      // Fallback: tight % scalping distances
+      tp = round(isBuy ? price * (1 + profile.tpPct) : price * (1 - profile.tpPct));
+      sl = round(isBuy ? price * (1 - profile.slPct) : price * (1 + profile.slPct));
+    }
+
     const expiresAt = new Date(Date.now() + expirySec * 1000).toISOString();
+    const candleNote = candleDistance != null ? ` · ${candleDistance} candle TP` : "";
+    const strategyTag = `Botvio Live ${timeframe} · ${body.strategy || "Auto"}${candleNote} · TP@${tpSource}`;
+    const reasonText = body.reason
+      ? `${body.reason} | ${timeframe} scalp, TP=${tpSource}${candleDistance != null ? ` (~${candleDistance} candles)` : ""}`
+      : `Live engine ${timeframe} scalp (${body.strategy || "Botvio"}) — TP at ${tpSource}${candleDistance != null ? ` ~${candleDistance} candles ahead` : ""}`;
 
     const { data, error } = await supabase
       .from("trading_signals")
@@ -113,8 +251,8 @@ Deno.serve(async (req) => {
         category,
         broker: ["exness", "deriv", "weltrade"],
         confidence: conf,
-        reason: body.reason || `Live engine ${timeframe} scalp (${body.strategy || "Botvio"})`,
-        strategy_name: `Botvio Live ${timeframe} · ${body.strategy || "Auto"}`,
+        reason: reasonText,
+        strategy_name: strategyTag,
         status: "ACTIVE",
         is_manual: false,
         expires_at: expiresAt,
@@ -141,10 +279,17 @@ Deno.serve(async (req) => {
       stop_loss: sl,
       result: "RUNNING",
       source: "BOT",
-      strategy_name: `Botvio Live ${timeframe}`,
+      strategy_name: strategyTag,
     });
 
-    return new Response(JSON.stringify({ ok: true, id: data?.id, timeframe, expires_at: expiresAt }), {
+    return new Response(JSON.stringify({
+      ok: true,
+      id: data?.id,
+      timeframe,
+      expires_at: expiresAt,
+      tp_source: tpSource,
+      candle_distance: candleDistance,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
