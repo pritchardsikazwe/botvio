@@ -175,6 +175,64 @@ export function DerivLiveChart({
     : 0;
   const isUp = change >= 0;
 
+  // ─── Hauza Strategy Overlay ───────────────────────────────────────────
+  // Pivot-based S/R + linear regression trend line + breakout markers
+  const hauza = useMemo(() => {
+    if (!hauzaOn || visible.length < 20) return null;
+
+    const left = 3;
+    const right = 3;
+    const supports: { price: number; idx: number }[] = [];
+    const resistances: { price: number; idx: number }[] = [];
+
+    for (let i = left; i < visible.length - right; i++) {
+      const c = visible[i];
+      let isPivotHigh = true;
+      let isPivotLow = true;
+      for (let k = 1; k <= left; k++) {
+        if (visible[i - k].high >= c.high) isPivotHigh = false;
+        if (visible[i - k].low <= c.low) isPivotLow = false;
+      }
+      for (let k = 1; k <= right; k++) {
+        if (visible[i + k].high >= c.high) isPivotHigh = false;
+        if (visible[i + k].low <= c.low) isPivotLow = false;
+      }
+      if (isPivotHigh) resistances.push({ price: c.high, idx: i });
+      if (isPivotLow) supports.push({ price: c.low, idx: i });
+    }
+
+    // Keep top 2 most recent of each
+    const topSup = supports.slice(-2);
+    const topRes = resistances.slice(-2);
+
+    // Linear regression trend on closes
+    const n = visible.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    visible.forEach((c, i) => {
+      sumX += i; sumY += c.close; sumXY += i * c.close; sumXX += i * i;
+    });
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    const trendStart = intercept;
+    const trendEnd = intercept + slope * (n - 1);
+    const trendDir: "up" | "down" | "flat" =
+      Math.abs(slope) < (range / n) * 0.05 ? "flat" : slope > 0 ? "up" : "down";
+
+    // Breakout detection: last candle closes beyond most recent S/R
+    const last = visible[n - 1];
+    const lastRes = topRes[topRes.length - 1];
+    const lastSup = topSup[topSup.length - 1];
+    const breakouts: { type: "up" | "down"; idx: number; price: number }[] = [];
+    if (lastRes && last.close > lastRes.price && visible[n - 2]?.close <= lastRes.price) {
+      breakouts.push({ type: "up", idx: n - 1, price: last.close });
+    }
+    if (lastSup && last.close < lastSup.price && visible[n - 2]?.close >= lastSup.price) {
+      breakouts.push({ type: "down", idx: n - 1, price: last.close });
+    }
+
+    return { supports: topSup, resistances: topRes, trendStart, trendEnd, trendDir, breakouts };
+  }, [hauzaOn, visible, range]);
+
   if (!derivSymbol) {
     return (
       <Card className="bg-card border-border/50">
