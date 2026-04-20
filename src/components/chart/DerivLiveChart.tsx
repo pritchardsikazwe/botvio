@@ -362,6 +362,109 @@ export function DerivLiveChart({
                 );
               })}
 
+              {/* ── Hauza Strategy Overlay ───────── */}
+              {hauza && (
+                <g>
+                  {/* Resistance levels (red dashed) */}
+                  {hauza.resistances.map((r, i) => (
+                    <g key={`res-${i}`}>
+                      <line
+                        x1={padding.left}
+                        x2={padding.left + chartW}
+                        y1={yFor(r.price)}
+                        y2={yFor(r.price)}
+                        stroke="hsl(var(--destructive))"
+                        strokeWidth={1.2}
+                        strokeDasharray="6,4"
+                        strokeOpacity={0.85}
+                      />
+                      <rect
+                        x={padding.left + 2}
+                        y={yFor(r.price) - 7}
+                        width={28}
+                        height={12}
+                        fill="hsl(var(--destructive))"
+                        rx={2}
+                      />
+                      <text
+                        x={padding.left + 16}
+                        y={yFor(r.price) + 2}
+                        fontSize="9"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        fill="hsl(var(--destructive-foreground))"
+                      >
+                        R{i + 1}
+                      </text>
+                    </g>
+                  ))}
+                  {/* Support levels (green dashed) */}
+                  {hauza.supports.map((s, i) => (
+                    <g key={`sup-${i}`}>
+                      <line
+                        x1={padding.left}
+                        x2={padding.left + chartW}
+                        y1={yFor(s.price)}
+                        y2={yFor(s.price)}
+                        stroke="hsl(var(--success))"
+                        strokeWidth={1.2}
+                        strokeDasharray="6,4"
+                        strokeOpacity={0.85}
+                      />
+                      <rect
+                        x={padding.left + 2}
+                        y={yFor(s.price) - 7}
+                        width={28}
+                        height={12}
+                        fill="hsl(var(--success))"
+                        rx={2}
+                      />
+                      <text
+                        x={padding.left + 16}
+                        y={yFor(s.price) + 2}
+                        fontSize="9"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        fill="hsl(var(--background))"
+                      >
+                        S{i + 1}
+                      </text>
+                    </g>
+                  ))}
+                  {/* Trend line (linear regression) */}
+                  <line
+                    x1={padding.left}
+                    x2={padding.left + chartW}
+                    y1={yFor(hauza.trendStart)}
+                    y2={yFor(hauza.trendEnd)}
+                    stroke={
+                      hauza.trendDir === "up"
+                        ? "hsl(var(--success))"
+                        : hauza.trendDir === "down"
+                        ? "hsl(var(--destructive))"
+                        : "hsl(var(--muted-foreground))"
+                    }
+                    strokeWidth={1.6}
+                    strokeOpacity={0.7}
+                  />
+                  {/* Breakout markers */}
+                  {hauza.breakouts.map((b, i) => {
+                    const x = padding.left + b.idx * step + step / 2;
+                    const y = yFor(b.price);
+                    const arrow = b.type === "up" ? "▲" : "▼";
+                    const color = b.type === "up" ? "hsl(var(--success))" : "hsl(var(--destructive))";
+                    return (
+                      <g key={`bo-${i}`}>
+                        <circle cx={x} cy={y} r={6} fill={color} fillOpacity={0.25} stroke={color} strokeWidth={1.5} />
+                        <text x={x} y={b.type === "up" ? y - 10 : y + 16} fontSize="11" fontWeight="bold" textAnchor="middle" fill={color}>
+                          {arrow} BO
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
+
               {/* Last price line */}
               {lastPrice !== null && (
                 <g>
