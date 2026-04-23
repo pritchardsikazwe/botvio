@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "./useSubscriptionGate";
+import { useChartLimitSettings, DEFAULT_CHART_LIMITS } from "./useChartLimitSettings";
 
 export interface ChartAnalysis {
   id: string;
@@ -37,77 +38,128 @@ export const useChartAnalyses = () => {
   });
 };
 
-/** Plan-based chart analysis limits */
-interface ChartLimitConfig {
-  maxUploads: number; // -1 = unlimited
-  periodLabel: string;
-  periodDays: number;
-}
-
-const CHART_LIMITS: Record<string, ChartLimitConfig> = {
-  free:     { maxUploads: 1,   periodLabel: "per day (3-day trial)", periodDays: 1 },
-  basic:    { maxUploads: 50,  periodLabel: "per 7 days", periodDays: 7 },
-  standard: { maxUploads: 100, periodLabel: "per month",  periodDays: 30 },
-  vip:      { maxUploads: 10,  periodLabel: "per day",    periodDays: 1 },
+/**
+ * Returns the UTC calendar date (YYYY-MM-DD) for a given timestamp.
+ * Free trials are measured in calendar days using the user's signup date in UTC.
+ */
+const utcDateOnly = (iso: string | Date): Date => {
+  const d = typeof iso === "string" ? new Date(iso) : iso;
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 };
 
-/** Free trial window — free users get 1/day for the first N days after signup */
-const FREE_TRIAL_DAYS = 3;
+const addDaysUTC = (d: Date, days: number): Date => {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + days));
+};
+
+const periodLabelFor = (planCode: string, settings: typeof DEFAULT_CHART_LIMITS): string => {
+  switch (planCode) {
+    case "free":
+    case "starter":
+      return `per day (${settings.free_trial_days}-day trial)`;
+    case "basic":
+      return `per ${settings.basic_period_days} days`;
+    case "standard":
+      return settings.standard_period_days === 30 ? "per month" : `per ${settings.standard_period_days} days`;
+    case "vip":
+      return "per day";
+    default:
+      return "";
+  }
+};
 
 export const useChartUsageGate = () => {
   const { user } = useAuth();
   const gate = useSubscriptionGate();
+  const { data: settingsRow } = useChartLimitSettings();
+  const settings = {
+    free_trial_days: settingsRow?.free_trial_days ?? DEFAULT_CHART_LIMITS.free_trial_days,
+    free_daily_uploads: settingsRow?.free_daily_uploads ?? DEFAULT_CHART_LIMITS.free_daily_uploads,
+    basic_uploads: settingsRow?.basic_uploads ?? DEFAULT_CHART_LIMITS.basic_uploads,
+    basic_period_days: settingsRow?.basic_period_days ?? DEFAULT_CHART_LIMITS.basic_period_days,
+    standard_uploads: settingsRow?.standard_uploads ?? DEFAULT_CHART_LIMITS.standard_uploads,
+    standard_period_days: settingsRow?.standard_period_days ?? DEFAULT_CHART_LIMITS.standard_period_days,
+    vip_daily_uploads: settingsRow?.vip_daily_uploads ?? DEFAULT_CHART_LIMITS.vip_daily_uploads,
+  };
+
   const planCode = gate.planCode || "free";
-  const config = CHART_LIMITS[planCode] || CHART_LIMITS.free;
 
-  const periodStart = new Date();
-  periodStart.setDate(periodStart.getDate() - config.periodDays);
-  const periodStartISO = periodStart.toISOString();
+  // Resolve max + period from admin settings
+  let maxUploads = settings.free_daily_uploads;
+  let periodDays = 1;
+  switch (planCode) {
+    case "basic":
+      maxUploads = settings.basic_uploads;
+      periodDays = settings.basic_period_days;
+      break;
+    case "standard":
+      maxUploads = settings.standard_uploads;
+      periodDays = settings.standard_period_days;
+      break;
+    case "vip":
+      maxUploads = settings.vip_daily_uploads;
+      periodDays = 1;
+      break;
+    default:
+      maxUploads = settings.free_daily_uploads;
+      periodDays = 1;
+  }
 
-  // Free-only: check if user is past the 3-day trial window since signup
-  const trialExpired = (() => {
-    if (planCode !== "free" || !user?.created_at) return false;
-    const signupMs = new Date(user.created_at).getTime();
-    const ageDays = (Date.now() - signupMs) / 86400000;
-    return ageDays >= FREE_TRIAL_DAYS;
+  // Timezone-safe trial expiry: signup date (UTC) + N calendar days
+  // Trial is "active" while today < signup + N (i.e. it ends at the start of day N)
+  const { trialExpired, trialEndDate } = (() => {
+    if (planCode !== "free" && planCode !== "starter") {
+      return { trialExpired: false, trialEndDate: null as Date | null };
+    }
+    if (!user?.created_at) {
+      return { trialExpired: false, trialEndDate: null as Date | null };
+    }
+    const signupDay = utcDateOnly(user.created_at);
+    const endDay = addDaysUTC(signupDay, settings.free_trial_days);
+    const todayDay = utcDateOnly(new Date());
+    return { trialExpired: todayDay.getTime() >= endDay.getTime(), trialEndDate: endDay };
   })();
 
+  // Today's usage (UTC day) for free + VIP, or rolling period for paid plans
   const { data: usageCount = 0, isLoading } = useQuery({
-    queryKey: ["chart-usage-gate", user?.id, planCode],
+    queryKey: ["chart-usage-gate", user?.id, planCode, periodDays],
     queryFn: async () => {
-      if (!user || config.maxUploads === -1) return 0;
-
+      if (!user) return 0;
+      const periodStart = new Date();
+      if (planCode === "free" || planCode === "starter" || planCode === "vip") {
+        // Today = start of UTC day
+        const today = utcDateOnly(new Date());
+        periodStart.setTime(today.getTime());
+      } else {
+        periodStart.setDate(periodStart.getDate() - periodDays);
+      }
       const { count, error } = await supabase
         .from("chart_analyses")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .gte("created_at", periodStartISO);
-
+        .gte("created_at", periodStart.toISOString());
       if (error) throw error;
       return count || 0;
     },
-    enabled: !!user && config.maxUploads !== -1,
+    enabled: !!user,
     refetchInterval: 30000,
   });
 
-  const isUnlimited = config.maxUploads === -1;
-  const remaining = trialExpired
-    ? 0
-    : isUnlimited
-      ? Infinity
-      : Math.max(0, config.maxUploads - usageCount);
-  const limitReached = trialExpired || (!isUnlimited && usageCount >= config.maxUploads);
+  const remaining = trialExpired ? 0 : Math.max(0, maxUploads - usageCount);
+  const limitReached = trialExpired || usageCount >= maxUploads;
+  const periodLabel = periodLabelFor(planCode, settings);
 
   return {
     planCode,
     planName: gate.planName || "Free",
-    maxUploads: config.maxUploads,
-    periodLabel: config.periodLabel,
+    maxUploads,
+    periodLabel,
     usageCount,
     remaining,
     limitReached,
-    isUnlimited,
+    isUnlimited: false,
     trialExpired,
+    trialEndDate,
+    trialDays: settings.free_trial_days,
     isLoading: isLoading || gate.isLoading,
   };
 };
