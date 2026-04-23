@@ -212,8 +212,9 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       if (analysisError) throw analysisError;
 
       if (analysisData.error) {
-        if (analysisData.error_code === "daily_limit" || analysisData.redirect) {
+        if (analysisData.error_code === "daily_limit" || analysisData.redirect || analysisData.trial_expired) {
           setShowUpgradeModal(true);
+          if (analysisData.error) toast.error(analysisData.error);
           return;
         }
         toast.error(analysisData.error);
