@@ -45,11 +45,14 @@ interface ChartLimitConfig {
 }
 
 const CHART_LIMITS: Record<string, ChartLimitConfig> = {
-  free:     { maxUploads: 1,   periodLabel: "per day",    periodDays: 1 },
+  free:     { maxUploads: 1,   periodLabel: "per day (3-day trial)", periodDays: 1 },
   basic:    { maxUploads: 50,  periodLabel: "per 7 days", periodDays: 7 },
   standard: { maxUploads: 100, periodLabel: "per month",  periodDays: 30 },
-  vip:      { maxUploads: -1,  periodLabel: "unlimited",  periodDays: 30 },
+  vip:      { maxUploads: 10,  periodLabel: "per day",    periodDays: 1 },
 };
+
+/** Free trial window — free users get 1/day for the first N days after signup */
+const FREE_TRIAL_DAYS = 3;
 
 export const useChartUsageGate = () => {
   const { user } = useAuth();
@@ -60,6 +63,14 @@ export const useChartUsageGate = () => {
   const periodStart = new Date();
   periodStart.setDate(periodStart.getDate() - config.periodDays);
   const periodStartISO = periodStart.toISOString();
+
+  // Free-only: check if user is past the 3-day trial window since signup
+  const trialExpired = (() => {
+    if (planCode !== "free" || !user?.created_at) return false;
+    const signupMs = new Date(user.created_at).getTime();
+    const ageDays = (Date.now() - signupMs) / 86400000;
+    return ageDays >= FREE_TRIAL_DAYS;
+  })();
 
   const { data: usageCount = 0, isLoading } = useQuery({
     queryKey: ["chart-usage-gate", user?.id, planCode],
@@ -80,8 +91,12 @@ export const useChartUsageGate = () => {
   });
 
   const isUnlimited = config.maxUploads === -1;
-  const remaining = isUnlimited ? Infinity : Math.max(0, config.maxUploads - usageCount);
-  const limitReached = !isUnlimited && usageCount >= config.maxUploads;
+  const remaining = trialExpired
+    ? 0
+    : isUnlimited
+      ? Infinity
+      : Math.max(0, config.maxUploads - usageCount);
+  const limitReached = trialExpired || (!isUnlimited && usageCount >= config.maxUploads);
 
   return {
     planCode,
@@ -92,6 +107,7 @@ export const useChartUsageGate = () => {
     remaining,
     limitReached,
     isUnlimited,
+    trialExpired,
     isLoading: isLoading || gate.isLoading,
   };
 };
