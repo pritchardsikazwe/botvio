@@ -985,6 +985,45 @@ export type Database = {
         }
         Relationships: []
       }
+      chart_limit_settings: {
+        Row: {
+          basic_period_days: number
+          basic_uploads: number
+          free_daily_uploads: number
+          free_trial_days: number
+          id: string
+          standard_period_days: number
+          standard_uploads: number
+          updated_at: string
+          updated_by: string | null
+          vip_daily_uploads: number
+        }
+        Insert: {
+          basic_period_days?: number
+          basic_uploads?: number
+          free_daily_uploads?: number
+          free_trial_days?: number
+          id?: string
+          standard_period_days?: number
+          standard_uploads?: number
+          updated_at?: string
+          updated_by?: string | null
+          vip_daily_uploads?: number
+        }
+        Update: {
+          basic_period_days?: number
+          basic_uploads?: number
+          free_daily_uploads?: number
+          free_trial_days?: number
+          id?: string
+          standard_period_days?: number
+          standard_uploads?: number
+          updated_at?: string
+          updated_by?: string | null
+          vip_daily_uploads?: number
+        }
+        Relationships: []
+      }
       commission_rules: {
         Row: {
           buyer_bonus_type: string | null
@@ -5949,6 +5988,18 @@ export type Database = {
     }
     Functions: {
       auto_expire_signals: { Args: never; Returns: undefined }
+      claim_chart_upload_slot: {
+        Args: { _user_id: string }
+        Returns: {
+          allowed: boolean
+          daily_max: number
+          plan_code: string
+          reason: string
+          remaining: number
+          trial_days: number
+          trial_expired: boolean
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -6016,6 +6067,19 @@ export type Database = {
         Returns: number
       }
       owns_mt5_account: { Args: { acct_id: string }; Returns: boolean }
+      preview_chart_upload_slot: {
+        Args: { _user_id: string }
+        Returns: {
+          allowed: boolean
+          daily_max: number
+          plan_code: string
+          reason: string
+          remaining: number
+          trial_days: number
+          trial_end_date: string
+          trial_expired: boolean
+        }[]
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
