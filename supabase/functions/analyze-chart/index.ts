@@ -95,60 +95,54 @@ serve(async (req) => {
         .eq("id", jobId);
     }
 
-    // Determine user's subscription plan and limits
+    // Determine user's plan + atomically claim a chart upload slot.
+    // Server-side enforcement uses an advisory transaction lock keyed on the
+    // user, so two parallel uploads cannot both bypass the cap.
     let planCode = "free";
-    let isAdmin = false;
+    let claimRemaining = 0;
+    let claimMax = 0;
+    let claimTrialExpired = false;
     if (userId) {
-      // Check admin role — admins bypass limits
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .in("role", ["admin", "super_admin", "signal_manager"]);
-      if (roleData && roleData.length > 0) isAdmin = true;
-
-      // Get subscription plan
-      const { data: subData } = await supabase
-        .from("user_plan_subscriptions")
-        .select("pricing_plans(code)")
-        .eq("user_id", userId)
-        .eq("status", "active")
-        .maybeSingle();
-      if (subData?.pricing_plans && typeof subData.pricing_plans === "object" && "code" in subData.pricing_plans) {
-        planCode = (subData.pricing_plans as any).code || "free";
-      }
-    }
-
-    // Plan-based limits: { maxUploads, periodDays }  (-1 = unlimited)
-    const PLAN_LIMITS: Record<string, { max: number; days: number; label: string }> = {
-      free:     { max: 1,   days: 1,  label: "1 per day" },
-      starter:  { max: 1,   days: 1,  label: "1 per day" },
-      basic:    { max: 50,  days: 7,  label: "50 per week" },
-      standard: { max: 100, days: 30, label: "100 per month" },
-      vip:      { max: -1,  days: 30, label: "unlimited" },
-    };
-    const limits = PLAN_LIMITS[planCode] || PLAN_LIMITS.free;
-
-    if (!isAdmin && limits.max !== -1 && userId) {
-      const periodStart = new Date();
-      periodStart.setDate(periodStart.getDate() - limits.days);
-      const { count } = await supabase
-        .from("chart_analyses")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .gte("created_at", periodStart.toISOString());
-      if ((count || 0) >= limits.max) {
-        await logError(supabase, "analyze-chart", userId, ERROR_CODES.DAILY_LIMIT, `Plan limit reached (${planCode}: ${limits.label})`, null, 403);
+      const { data: claim, error: claimErr } = await supabase.rpc("claim_chart_upload_slot", {
+        _user_id: userId,
+      });
+      if (claimErr) {
+        await logError(supabase, "analyze-chart", userId, "db_error", claimErr.message, null, 500);
         if (jobId) {
-          await supabase.from("analysis_jobs").update({ status: "failed", error_code: ERROR_CODES.DAILY_LIMIT, error_message: "Plan limit reached", completed_at: new Date().toISOString() }).eq("id", jobId);
+          await supabase.from("analysis_jobs").update({ status: "failed", error_code: "db_error", error_message: claimErr.message, completed_at: new Date().toISOString() }).eq("id", jobId);
         }
         return new Response(
-          JSON.stringify({ error: `You've reached your limit of ${limits.label}. Upgrade your plan for more analyses.`, error_code: ERROR_CODES.DAILY_LIMIT, redirect: "/billing" }),
+          JSON.stringify({ error: "Could not verify upload limits", error_code: "db_error" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const row = Array.isArray(claim) ? claim[0] : claim;
+      planCode = row?.plan_code || "free";
+      claimRemaining = row?.remaining ?? 0;
+      claimMax = row?.daily_max ?? 0;
+      claimTrialExpired = !!row?.trial_expired;
+
+      if (!row?.allowed) {
+        const reason = row?.reason || "daily_limit";
+        const isTrial = reason === "trial_expired" || claimTrialExpired;
+        const message = isTrial
+          ? "Your free trial of AI chart analysis has ended. Subscribe to a plan to keep uploading charts."
+          : `You've reached your chart upload limit (${claimMax} / period). Upgrade your plan for more analyses.`;
+        await logError(supabase, "analyze-chart", userId, ERROR_CODES.DAILY_LIMIT, `${planCode}:${reason}`, null, 403);
+        if (jobId) {
+          await supabase.from("analysis_jobs").update({ status: "failed", error_code: ERROR_CODES.DAILY_LIMIT, error_message: message, completed_at: new Date().toISOString() }).eq("id", jobId);
+        }
+        return new Response(
+          JSON.stringify({
+            error: message,
+            error_code: ERROR_CODES.DAILY_LIMIT,
+            reason,
+            trial_expired: isTrial,
+            redirect: "/billing",
+          }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-    } else if (!userId) {
-      // Guest — client-side handles it
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -529,22 +523,15 @@ Keep the response structured and actionable.`;
         .eq("id", jobId);
     }
 
-    let remainingInfo: string | number = "unlimited";
-    if (userId && limits.max !== -1) {
-      const periodStart2 = new Date();
-      periodStart2.setDate(periodStart2.getDate() - limits.days);
-      const { count } = await supabase.from("chart_analyses").select("*", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", periodStart2.toISOString());
-      remainingInfo = Math.max(0, limits.max - (count || 0));
-    }
-
     return new Response(
       JSON.stringify({
         success: true,
         analysis: analysisText,
         structured: analysisResult,
-        is_premium: limits.max === -1,
+        is_premium: planCode === "vip" || planCode === "standard",
         is_guest: isGuest,
-        remaining: remainingInfo,
+        remaining: claimRemaining,
+        daily_max: claimMax,
         plan: planCode,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

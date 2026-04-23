@@ -62,6 +62,7 @@ import { AdminSportsBettingAccessTab } from "@/components/admin/AdminSportsBetti
 import { AdminLiveStreamsTab } from "@/components/admin/AdminLiveStreamsTab";
 import { AdminAdvertsTab } from "@/components/admin/AdminAdvertsTab";
 import { AdminTrainingVideosTab } from "@/components/admin/AdminTrainingVideosTab";
+import { AdminChartLimitsTab } from "@/components/admin/AdminChartLimitsTab";
 
 interface Provider {
   id: string;
@@ -1091,6 +1092,12 @@ const Admin = () => {
               <Signal className="w-4 h-4" />
               Training Videos
             </TabsTrigger>
+            {isSuperAdmin && (
+              <TabsTrigger value="chart_limits" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Chart Limits
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Signals Tab */}
@@ -1166,6 +1173,11 @@ const Admin = () => {
           {/* Training Videos Tab */}
           <TabsContent value="training_videos">
             <AdminTrainingVideosTab />
+          </TabsContent>
+
+          {/* Chart Upload Limits Tab */}
+          <TabsContent value="chart_limits">
+            <AdminChartLimitsTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

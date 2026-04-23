@@ -212,8 +212,9 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       if (analysisError) throw analysisError;
 
       if (analysisData.error) {
-        if (analysisData.error_code === "daily_limit" || analysisData.redirect) {
+        if (analysisData.error_code === "daily_limit" || analysisData.redirect || analysisData.trial_expired) {
           setShowUpgradeModal(true);
+          if (analysisData.error) toast.error(analysisData.error);
           return;
         }
         toast.error(analysisData.error);
@@ -360,6 +361,50 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
             </TabsList>
 
             <TabsContent value="upload" className="space-y-4 mt-4">
+              {/* Remaining-uploads pill (visible BEFORE selecting a file) */}
+              {!isAdmin && !isSuperAdmin && !isSignalManager && user && (
+                <div
+                  className={`flex items-center justify-between gap-3 rounded-xl border p-3 ${
+                    usageGate.trialExpired
+                      ? "border-destructive/40 bg-destructive/10"
+                      : usageGate.limitReached
+                      ? "border-amber-500/40 bg-amber-500/10"
+                      : "border-primary/30 bg-primary/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    {usageGate.trialExpired ? (
+                      <>
+                        <Lock className="h-4 w-4 text-destructive" />
+                        <span className="font-semibold text-destructive">Trial ended</span>
+                        <span className="text-muted-foreground hidden sm:inline">
+                          — subscribe to keep uploading charts
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <span className="font-semibold">
+                          {usageGate.remaining} of {usageGate.maxUploads} uploads left
+                        </span>
+                        <span className="text-xs text-muted-foreground hidden sm:inline">
+                          {usageGate.periodLabel}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {(usageGate.trialExpired || usageGate.limitReached) && (
+                    <Button
+                      size="sm"
+                      variant={usageGate.trialExpired ? "destructive" : "default"}
+                      onClick={() => navigate("/billing")}
+                    >
+                      Upgrade
+                    </Button>
+                  )}
+                </div>
+              )}
+
               {/* Analysis Type Selection */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {ANALYSIS_TYPES.map((type) => (
