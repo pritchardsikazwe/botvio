@@ -57,6 +57,30 @@ import GoldTradingHub from "./pages/GoldTradingHub";
 import BitcoinTradingHub from "./pages/BitcoinTradingHub";
 import SilverTradingHub from "./pages/SilverTradingHub";
 import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
+
+// Additional FX hubs
+import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
+import UsdJpyHub from "./pages/forex-hubs/UsdJpyHub";
+import AudUsdHub from "./pages/forex-hubs/AudUsdHub";
+import UsdCadHub from "./pages/forex-hubs/UsdCadHub";
+import UsdChfHub from "./pages/forex-hubs/UsdChfHub";
+import EurGbpHub from "./pages/forex-hubs/EurGbpHub";
+import EurJpyHub from "./pages/forex-hubs/EurJpyHub";
+import NzdUsdHub from "./pages/forex-hubs/NzdUsdHub";
+import UsdCnyHub from "./pages/forex-hubs/UsdCnyHub";
+
+// Stock hubs
+import NvidiaHub from "./pages/stock-hubs/NvidiaHub";
+import TeslaHub from "./pages/stock-hubs/TeslaHub";
+import AmdHub from "./pages/stock-hubs/AmdHub";
+import MicronHub from "./pages/stock-hubs/MicronHub";
+import AppleHub from "./pages/stock-hubs/AppleHub";
+import MicrosoftHub from "./pages/stock-hubs/MicrosoftHub";
+import BroadcomHub from "./pages/stock-hubs/BroadcomHub";
+import AmazonHub from "./pages/stock-hubs/AmazonHub";
+import MetaHub from "./pages/stock-hubs/MetaHub";
+import AlphabetHub from "./pages/stock-hubs/AlphabetHub";
+
 import WeltradeHub from "./pages/WeltradeHub";
 import DerivOptions from "./pages/DerivOptions";
 import NewsCalendar from "./pages/NewsCalendar";
@@ -141,6 +165,39 @@ export const AppRoutes = () => (
     <Route path="xag" element={<SilverTradingHub />} />
     <Route path="gbpusd" element={<GbpUsdTradingHub />} />
     <Route path="gbp-usd" element={<GbpUsdTradingHub />} />
+
+    {/* Additional forex pair hubs */}
+    <Route path="eurusd" element={<EurUsdHub />} />
+    <Route path="eur-usd" element={<EurUsdHub />} />
+    <Route path="usdjpy" element={<UsdJpyHub />} />
+    <Route path="usd-jpy" element={<UsdJpyHub />} />
+    <Route path="audusd" element={<AudUsdHub />} />
+    <Route path="aud-usd" element={<AudUsdHub />} />
+    <Route path="usdcad" element={<UsdCadHub />} />
+    <Route path="usd-cad" element={<UsdCadHub />} />
+    <Route path="usdchf" element={<UsdChfHub />} />
+    <Route path="usd-chf" element={<UsdChfHub />} />
+    <Route path="eurgbp" element={<EurGbpHub />} />
+    <Route path="eur-gbp" element={<EurGbpHub />} />
+    <Route path="eurjpy" element={<EurJpyHub />} />
+    <Route path="eur-jpy" element={<EurJpyHub />} />
+    <Route path="nzdusd" element={<NzdUsdHub />} />
+    <Route path="nzd-usd" element={<NzdUsdHub />} />
+    <Route path="usdcny" element={<UsdCnyHub />} />
+    <Route path="usd-cny" element={<UsdCnyHub />} />
+
+    {/* Stock hubs */}
+    <Route path="stocks/nvda" element={<NvidiaHub />} />
+    <Route path="stocks/tsla" element={<TeslaHub />} />
+    <Route path="stocks/amd" element={<AmdHub />} />
+    <Route path="stocks/mu" element={<MicronHub />} />
+    <Route path="stocks/aapl" element={<AppleHub />} />
+    <Route path="stocks/msft" element={<MicrosoftHub />} />
+    <Route path="stocks/avgo" element={<BroadcomHub />} />
+    <Route path="stocks/amzn" element={<AmazonHub />} />
+    <Route path="stocks/meta" element={<MetaHub />} />
+    <Route path="stocks/googl" element={<AlphabetHub />} />
+
     <Route path="weltrade" element={<WeltradeHub />} />
     <Route path="news-calendar" element={<NewsCalendar />} />
     <Route path="markets" element={<GlobalMarkets />} />
