@@ -642,11 +642,12 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Lock className="h-5 w-5 text-destructive" />
-              Chart Analysis Limit Reached
+              {usageGate.trialExpired ? "Free Trial Ended" : "Chart Analysis Limit Reached"}
             </DialogTitle>
             <DialogDescription>
-              You've used all {usageGate.maxUploads} chart uploads for this period ({usageGate.periodLabel}). 
-              Upgrade your plan to unlock more AI analyses.
+              {usageGate.trialExpired
+                ? "Your 3-day free trial of AI chart analysis has ended. Subscribe to a plan to keep uploading charts."
+                : `You've used all ${usageGate.maxUploads} chart uploads for this period (${usageGate.periodLabel}). Upgrade your plan to unlock more AI analyses.`}
             </DialogDescription>
           </DialogHeader>
 
