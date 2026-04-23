@@ -374,6 +374,7 @@ const Index = () => {
         {/* 5 — Live Trading Hubs (Gold / Silver / Bitcoin / GBP/USD) */}
         <section>
           <LiveTradingHubCards />
+          <MoreTradingHubsList />
         </section>
 
         {/* 6 — Deriv Options Shortcut */}
