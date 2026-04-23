@@ -81,6 +81,13 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedBrokers, setSelectedBrokers] = useState<string[]>(["exness", "deriv", "weltrade"]);
+  // Server-reported block info from the most recent rejected upload
+  const [serverBlock, setServerBlock] = useState<{
+    reason: string;
+    message: string;
+    remaining?: number;
+    daily_max?: number;
+  } | null>(null);
 
   const usageGate = useChartUsageGate();
 
@@ -213,6 +220,12 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
 
       if (analysisData.error) {
         if (analysisData.error_code === "daily_limit" || analysisData.redirect || analysisData.trial_expired) {
+          setServerBlock({
+            reason: analysisData.trial_expired ? "trial_expired" : (analysisData.reason || "daily_limit"),
+            message: analysisData.error || "Upload blocked by plan limits.",
+            remaining: analysisData.remaining,
+            daily_max: analysisData.daily_max,
+          });
           setShowUpgradeModal(true);
           if (analysisData.error) toast.error(analysisData.error);
           return;
