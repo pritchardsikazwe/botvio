@@ -24,6 +24,7 @@ import { TrainingVideosGrid } from "@/components/training/TrainingVideosGrid";
 import { BrokerStarterCards } from "@/components/training/BrokerStarterCards";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { LiveTradingHubCards } from "@/components/trading/LiveTradingHubCards";
+import { MoreTradingHubsList } from "@/components/trading/MoreTradingHubsList";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
 import { NewsEventCards } from "@/components/news/NewsEventCard";
 import { useNavigate, Link } from "react-router-dom";
@@ -374,6 +375,7 @@ const Index = () => {
         {/* 5 — Live Trading Hubs (Gold / Silver / Bitcoin / GBP/USD) */}
         <section>
           <LiveTradingHubCards />
+          <MoreTradingHubsList />
         </section>
 
         {/* 6 — Deriv Options Shortcut */}

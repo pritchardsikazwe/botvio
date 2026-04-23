@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, Signal, Lightbulb, Crosshair, Target, TrendingUp, Clock, ShieldCheck, ExternalLink, Zap, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
+import { TradingViewAdvancedChart } from "@/components/chart/TradingViewAdvancedChart";
 import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
 import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
 import { AssetSignalButton } from "./AssetSignalButton";
@@ -37,6 +38,14 @@ export interface AssetTradingHubConfig {
     note: string;
   }[];
   siblingScalp?: { displaySymbol: string; assetLabel: string };
+  /**
+   * Chart provider:
+   *  - "deriv" (default): live Deriv WebSocket candles + Hauza overlay + Botvio Scalp Robot.
+   *  - "tradingview": TradingView Advanced Chart iframe (used for stocks and any symbols Deriv doesn't list).
+   */
+  chartProvider?: "deriv" | "tradingview";
+  /** TradingView symbol (required when chartProvider === "tradingview"), e.g. "NASDAQ:NVDA". */
+  tvSymbol?: string;
 }
 
 const DEFAULT_QUICK_STATS = [
@@ -141,16 +150,28 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
                 />
               </div>
               <div className="lg:col-span-3">
-                <DerivLiveChart
-                  displaySymbol={config.displaySymbol}
-                  height={420}
-                  defaultGranularity={300}
-                  showHauza
-                />
+                {config.chartProvider === "tradingview" && config.tvSymbol ? (
+                  <TradingViewAdvancedChart
+                    symbol={config.tvSymbol}
+                    label={`${config.assetLabel} · TradingView`}
+                    height={420}
+                    interval="60"
+                    withHauza
+                  />
+                ) : (
+                  <DerivLiveChart
+                    displaySymbol={config.displaySymbol}
+                    height={420}
+                    defaultGranularity={300}
+                    showHauza
+                  />
+                )}
               </div>
             </div>
 
-            <BotvioScalpRobot displaySymbol={config.displaySymbol} assetLabel={config.assetLabel} />
+            {config.chartProvider !== "tradingview" && (
+              <BotvioScalpRobot displaySymbol={config.displaySymbol} assetLabel={config.assetLabel} />
+            )}
 
             {config.siblingScalp && (
               <BotvioScalpRobot
