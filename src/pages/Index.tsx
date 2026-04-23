@@ -25,6 +25,7 @@ import { BrokerStarterCards } from "@/components/training/BrokerStarterCards";
 import { CourseEnrollmentCards } from "@/components/courses/CourseEnrollmentCards";
 import { LiveTradingHubCards } from "@/components/trading/LiveTradingHubCards";
 import { MoreTradingHubsList } from "@/components/trading/MoreTradingHubsList";
+import { TradingHubsSidebar } from "@/components/trading/TradingHubsSidebar";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
 import { NewsEventCards } from "@/components/news/NewsEventCard";
 import { useNavigate, Link } from "react-router-dom";
@@ -374,8 +375,19 @@ const Index = () => {
 
         {/* 5 — Live Trading Hubs (Gold / Silver / Bitcoin / GBP/USD) */}
         <section>
-          <LiveTradingHubCards />
-          <MoreTradingHubsList />
+          <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-4">
+            <aside className="hidden lg:block">
+              <TradingHubsSidebar />
+            </aside>
+            <div className="space-y-4 min-w-0">
+              <LiveTradingHubCards />
+              <MoreTradingHubsList />
+              {/* Mobile: show the sidebar nav inline at the bottom of the section */}
+              <div className="lg:hidden">
+                <TradingHubsSidebar />
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* 6 — Deriv Options Shortcut */}
