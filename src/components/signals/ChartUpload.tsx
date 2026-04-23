@@ -279,7 +279,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const UPGRADE_PLANS = [
     { code: "basic", name: "Basic", icon: Zap, uploads: "50 charts / 7 days", color: "text-blue-400", price: "$10/mo" },
     { code: "standard", name: "Standard", icon: Star, uploads: "100 charts / month", color: "text-purple-400", price: "$49/3mo" },
-    { code: "vip", name: "VIP", icon: Crown, uploads: "Unlimited charts", color: "text-amber-400", price: "$99/lifetime" },
+    { code: "vip", name: "VIP", icon: Crown, uploads: "10 charts / day", color: "text-amber-400", price: "$99/lifetime" },
   ];
 
   return (
