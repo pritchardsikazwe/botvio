@@ -565,16 +565,27 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                       )}
                     </div>
                     <div>
-                      <p className="font-medium">
-                        {(user ? usageGate.limitReached : guestCount >= GUEST_DAILY_LIMIT) && !isAdmin && !isSuperAdmin
-                          ? "Upload limit reached"
-                          : "Drop your chart image here"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {(user ? usageGate.limitReached : guestCount >= GUEST_DAILY_LIMIT) && !isAdmin && !isSuperAdmin
-                          ? user ? "Upgrade to continue analyzing charts" : "Sign up for more free analyses"
-                          : "or click to browse (max 5MB)"}
-                      </p>
+                      {(user ? usageGate.limitReached : guestCount >= GUEST_DAILY_LIMIT) && !isAdmin && !isSuperAdmin ? (
+                        <>
+                          <p className="font-medium">
+                            {user
+                              ? usageGate.blockInfo?.title || "Upload limit reached"
+                              : "Daily free upload used"}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {user
+                              ? usageGate.blockInfo?.detail || "Upgrade your plan to continue."
+                              : "Sign up to unlock more free analyses."}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-medium">Drop your chart image here</p>
+                          <p className="text-sm text-muted-foreground">
+                            or click to browse (max 5MB) — {user ? `${usageGate.remaining} of ${usageGate.maxUploads} uploads left` : `${GUEST_DAILY_LIMIT - guestCount}/${GUEST_DAILY_LIMIT} free`}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
@@ -757,17 +768,34 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       </Card>
 
       {/* Upgrade Modal */}
-      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+      <Dialog open={showUpgradeModal} onOpenChange={(o) => { setShowUpgradeModal(o); if (!o) setServerBlock(null); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Lock className="h-5 w-5 text-destructive" />
-              {usageGate.trialExpired ? "Free Trial Ended" : "Chart Analysis Limit Reached"}
+              {(serverBlock?.reason === "trial_expired") || usageGate.trialExpired
+                ? "Free Trial Ended"
+                : (serverBlock?.reason === "period_limit")
+                ? `${usageGate.planName} Plan Limit Reached`
+                : "Daily Upload Limit Reached"}
             </DialogTitle>
-            <DialogDescription>
-              {usageGate.trialExpired
-                ? "Your 3-day free trial of AI chart analysis has ended. Subscribe to a plan to keep uploading charts."
-                : `You've used all ${usageGate.maxUploads} chart uploads for this period (${usageGate.periodLabel}). Upgrade your plan to unlock more AI analyses.`}
+            <DialogDescription asChild>
+              <div className="space-y-2">
+                <p>
+                  {serverBlock?.message ||
+                    usageGate.blockInfo?.detail ||
+                    `You've used all ${usageGate.maxUploads} chart uploads for this period (${usageGate.periodLabel}).`}
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <Badge variant="outline" className="text-[11px]">Plan: {usageGate.planName}</Badge>
+                  <Badge variant="outline" className="text-[11px]">
+                    Used: {usageGate.usageCount}/{usageGate.maxUploads}
+                  </Badge>
+                  <Badge variant="outline" className="text-[11px]">
+                    Remaining: {Math.max(0, usageGate.remaining)}
+                  </Badge>
+                </div>
+              </div>
             </DialogDescription>
           </DialogHeader>
 
