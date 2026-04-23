@@ -148,6 +148,42 @@ export const useChartUsageGate = () => {
   const limitReached = trialExpired || usageCount >= maxUploads;
   const periodLabel = periodLabelFor(planCode, settings);
 
+  // Structured block reason for the UI to render specific copy + CTA
+  const blockInfo = (() => {
+    if (!user) {
+      return { reason: "guest" as const, title: "Sign in required", detail: "Create a free account to start analyzing charts." };
+    }
+    if (trialExpired) {
+      return {
+        reason: "trial_expired" as const,
+        title: "Free trial ended",
+        detail: `Your ${settings.free_trial_days}-day free trial has ended. Subscribe to keep uploading charts.`,
+      };
+    }
+    if (limitReached) {
+      if (planCode === "free" || planCode === "starter") {
+        return {
+          reason: "daily_cap" as const,
+          title: `Daily limit reached (${usageCount}/${maxUploads})`,
+          detail: `Free trial allows ${maxUploads} upload${maxUploads === 1 ? "" : "s"} per day. Resets at 00:00 UTC, or upgrade for more.`,
+        };
+      }
+      if (planCode === "vip") {
+        return {
+          reason: "daily_cap" as const,
+          title: `Daily VIP limit reached (${usageCount}/${maxUploads})`,
+          detail: `You've used all ${maxUploads} VIP uploads for today. Resets at 00:00 UTC.`,
+        };
+      }
+      return {
+        reason: "period_cap" as const,
+        title: `${planCode === "basic" ? "Weekly" : "Monthly"} limit reached (${usageCount}/${maxUploads})`,
+        detail: `You've used all ${maxUploads} uploads in your current ${periodLabel.replace(/^per\s/, "")} window. Upgrade for higher caps.`,
+      };
+    }
+    return null;
+  })();
+
   return {
     planCode,
     planName: gate.planName || "Free",
@@ -160,6 +196,7 @@ export const useChartUsageGate = () => {
     trialExpired,
     trialEndDate,
     trialDays: settings.free_trial_days,
+    blockInfo,
     isLoading: isLoading || gate.isLoading,
   };
 };
