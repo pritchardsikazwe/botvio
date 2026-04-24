@@ -233,6 +233,108 @@ export function DerivLiveChart({
     return { supports: topSup, resistances: topRes, trendStart, trendEnd, trendDir, breakouts };
   }, [hauzaOn, visible, range]);
 
+  // ─── HH / HL Channel Overlay ──────────────────────────────────────────
+  // Detect last 2+ swing highs and lows, then draw the ascending/descending
+  // channel that connects Higher Highs (resistance) and Higher Lows (support).
+  // Provides an entry/target/stop suggestion based on the most recent HL.
+  const hhhl = useMemo(() => {
+    if (!hauzaOn || visible.length < 20) return null;
+
+    const left = 3;
+    const right = 3;
+    const swingHighs: { idx: number; price: number }[] = [];
+    const swingLows: { idx: number; price: number }[] = [];
+
+    for (let i = left; i < visible.length - right; i++) {
+      const c = visible[i];
+      let isHigh = true;
+      let isLow = true;
+      for (let k = 1; k <= left; k++) {
+        if (visible[i - k].high >= c.high) isHigh = false;
+        if (visible[i - k].low <= c.low) isLow = false;
+      }
+      for (let k = 1; k <= right; k++) {
+        if (visible[i + k].high >= c.high) isHigh = false;
+        if (visible[i + k].low <= c.low) isLow = false;
+      }
+      if (isHigh) swingHighs.push({ idx: i, price: c.high });
+      if (isLow) swingLows.push({ idx: i, price: c.low });
+    }
+
+    // Walk the last few pivots to find the longest ascending/descending sequence.
+    const findSequence = (
+      pivots: { idx: number; price: number }[],
+      direction: "higher" | "lower"
+    ) => {
+      if (pivots.length < 2) return [] as { idx: number; price: number }[];
+      const recent = pivots.slice(-5);
+      const seq: { idx: number; price: number }[] = [recent[0]];
+      for (let i = 1; i < recent.length; i++) {
+        const last = seq[seq.length - 1];
+        if (direction === "higher" ? recent[i].price > last.price : recent[i].price < last.price) {
+          seq.push(recent[i]);
+        } else {
+          // restart sequence from this pivot
+          seq.length = 0;
+          seq.push(recent[i]);
+        }
+      }
+      return seq.length >= 2 ? seq : [];
+    };
+
+    const higherHighs = findSequence(swingHighs, "higher");
+    const higherLows = findSequence(swingLows, "higher");
+    const lowerHighs = findSequence(swingHighs, "lower");
+    const lowerLows = findSequence(swingLows, "lower");
+
+    let trend: "uptrend" | "downtrend" | "none" = "none";
+    let highs: { idx: number; price: number }[] = [];
+    let lows: { idx: number; price: number }[] = [];
+
+    if (higherHighs.length >= 2 && higherLows.length >= 2) {
+      trend = "uptrend";
+      highs = higherHighs;
+      lows = higherLows;
+    } else if (lowerHighs.length >= 2 && lowerLows.length >= 2) {
+      trend = "downtrend";
+      highs = lowerHighs;
+      lows = lowerLows;
+    } else {
+      return null;
+    }
+
+    // Project each line across the visible range.
+    const project = (pts: { idx: number; price: number }[]) => {
+      const a = pts[0];
+      const b = pts[pts.length - 1];
+      const slope = (b.price - a.price) / Math.max(1, b.idx - a.idx);
+      const startIdx = 0;
+      const endIdx = visible.length - 1;
+      return {
+        startIdx,
+        endIdx,
+        startPrice: a.price + slope * (startIdx - a.idx),
+        endPrice: a.price + slope * (endIdx - a.idx),
+        slope,
+      };
+    };
+
+    const highLine = project(highs);
+    const lowLine = project(lows);
+
+    // Trade plan based on the most recent Higher Low / Lower High.
+    const lastLow = lows[lows.length - 1];
+    const lastHigh = highs[highs.length - 1];
+    const entry = trend === "uptrend" ? lastLow.price : lastHigh.price;
+    const target = trend === "uptrend" ? lastHigh.price : lastLow.price;
+    const stop =
+      trend === "uptrend"
+        ? lastLow.price - (lastHigh.price - lastLow.price) * 0.25
+        : lastHigh.price + (lastHigh.price - lastLow.price) * 0.25;
+
+    return { trend, highs, lows, highLine, lowLine, entry, target, stop };
+  }, [hauzaOn, visible]);
+
   if (!derivSymbol) {
     return (
       <Card className="bg-card border-border/50">
@@ -465,6 +567,90 @@ export function DerivLiveChart({
                 </g>
               )}
 
+              {/* ── HH / HL Trend Channel ───────── */}
+              {hhhl && (
+                <g>
+                  {(() => {
+                    const color =
+                      hhhl.trend === "uptrend"
+                        ? "hsl(var(--success))"
+                        : "hsl(var(--destructive))";
+                    const x1 = padding.left + hhhl.highLine.startIdx * step + step / 2;
+                    const x2 = padding.left + hhhl.highLine.endIdx * step + step / 2;
+                    return (
+                      <>
+                        {/* Channel fill */}
+                        <polygon
+                          points={`${x1},${yFor(hhhl.highLine.startPrice)} ${x2},${yFor(hhhl.highLine.endPrice)} ${x2},${yFor(hhhl.lowLine.endPrice)} ${x1},${yFor(hhhl.lowLine.startPrice)}`}
+                          fill={color}
+                          fillOpacity={0.06}
+                        />
+                        {/* HH line (resistance) */}
+                        <line
+                          x1={x1}
+                          x2={x2}
+                          y1={yFor(hhhl.highLine.startPrice)}
+                          y2={yFor(hhhl.highLine.endPrice)}
+                          stroke={color}
+                          strokeWidth={1.4}
+                          strokeOpacity={0.9}
+                        />
+                        {/* HL line (support) */}
+                        <line
+                          x1={x1}
+                          x2={x2}
+                          y1={yFor(hhhl.lowLine.startPrice)}
+                          y2={yFor(hhhl.lowLine.endPrice)}
+                          stroke={color}
+                          strokeWidth={1.4}
+                          strokeOpacity={0.9}
+                        />
+                      </>
+                    );
+                  })()}
+                  {/* HH labels */}
+                  {hhhl.highs.map((h, i) => {
+                    const x = padding.left + h.idx * step + step / 2;
+                    const y = yFor(h.price);
+                    return (
+                      <g key={`hh-${i}`}>
+                        <circle cx={x} cy={y} r={3} fill="hsl(var(--destructive))" />
+                        <text
+                          x={x}
+                          y={y - 6}
+                          fontSize="9"
+                          fontWeight="bold"
+                          textAnchor="middle"
+                          fill="hsl(var(--destructive))"
+                        >
+                          {hhhl.trend === "uptrend" ? "HH" : "LH"}
+                        </text>
+                      </g>
+                    );
+                  })}
+                  {/* HL labels */}
+                  {hhhl.lows.map((l, i) => {
+                    const x = padding.left + l.idx * step + step / 2;
+                    const y = yFor(l.price);
+                    return (
+                      <g key={`hl-${i}`}>
+                        <circle cx={x} cy={y} r={3} fill="hsl(var(--success))" />
+                        <text
+                          x={x}
+                          y={y + 12}
+                          fontSize="9"
+                          fontWeight="bold"
+                          textAnchor="middle"
+                          fill="hsl(var(--success))"
+                        >
+                          {hhhl.trend === "uptrend" ? "HL" : "LL"}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
+
               {/* Last price line */}
               {lastPrice !== null && (
                 <g>
@@ -499,6 +685,32 @@ export function DerivLiveChart({
             </svg>
           )}
         </div>
+        {/* HH / HL trade plan summary */}
+        {hhhl && (
+          <div className="border-t border-border/50 px-3 py-2 flex flex-wrap items-center gap-2 text-[10px]">
+            <Badge
+              variant="outline"
+              className={
+                hhhl.trend === "uptrend"
+                  ? "border-success/40 text-success"
+                  : "border-destructive/40 text-destructive"
+              }
+            >
+              {hhhl.trend === "uptrend" ? "▲ HH/HL Channel" : "▼ LH/LL Channel"}
+            </Badge>
+            <span className="text-muted-foreground">
+              {hhhl.trend === "uptrend" ? "Buy near HL" : "Sell near LH"}:
+            </span>
+            <span className="font-mono font-bold text-foreground">{hhhl.entry.toFixed(2)}</span>
+            <span className="text-muted-foreground">Target:</span>
+            <span className="font-mono font-bold text-success">{hhhl.target.toFixed(2)}</span>
+            <span className="text-muted-foreground">Stop:</span>
+            <span className="font-mono font-bold text-destructive">{hhhl.stop.toFixed(2)}</span>
+            <span className="ml-auto text-muted-foreground italic">
+              Exit if price breaks the {hhhl.trend === "uptrend" ? "HL" : "LH"} line
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
