@@ -195,6 +195,91 @@ export function LiveTradingHubCards() {
           <HubCard key={h.label} hub={h} />
         ))}
       </div>
+
+      {/* Quick-access chip rails: shown directly below the 4 main hub buttons */}
+      <ShortcutRail
+        title="Forex Pairs"
+        subtitle="Top 10 most-traded"
+        icon={Globe2}
+        accentClass="text-primary"
+        chipClass="border-primary/30 hover:bg-primary/10 hover:border-primary/60 hover:text-primary"
+        items={[
+          { label: "EUR/USD", route: "/eurusd" },
+          { label: "USD/JPY", route: "/usdjpy" },
+          { label: "AUD/USD", route: "/audusd" },
+          { label: "USD/CAD", route: "/usdcad" },
+          { label: "USD/CHF", route: "/usdchf" },
+          { label: "EUR/GBP", route: "/eurgbp" },
+          { label: "EUR/JPY", route: "/eurjpy" },
+          { label: "NZD/USD", route: "/nzdusd" },
+          { label: "USD/CNY", route: "/usdcny" },
+        ]}
+      />
+
+      <ShortcutRail
+        title="US Stocks"
+        subtitle="Most-traded large caps"
+        icon={BarChart4}
+        accentClass="text-warning"
+        chipClass="border-warning/30 hover:bg-warning/10 hover:border-warning/60 hover:text-warning"
+        items={[
+          { label: "NVDA", route: "/stocks/nvda" },
+          { label: "TSLA", route: "/stocks/tsla" },
+          { label: "AMD", route: "/stocks/amd" },
+          { label: "MU", route: "/stocks/mu" },
+          { label: "AAPL", route: "/stocks/aapl" },
+          { label: "MSFT", route: "/stocks/msft" },
+          { label: "AVGO", route: "/stocks/avgo" },
+          { label: "AMZN", route: "/stocks/amzn" },
+          { label: "META", route: "/stocks/meta" },
+          { label: "GOOGL", route: "/stocks/googl" },
+        ]}
+      />
+    </div>
+  );
+}
+
+type ShortcutItem = { label: string; route: string };
+
+function ShortcutRail({
+  title,
+  subtitle,
+  icon: Icon,
+  accentClass,
+  chipClass,
+  items,
+}: {
+  title: string;
+  subtitle: string;
+  icon: LucideIcon;
+  accentClass: string;
+  chipClass: string;
+  items: ShortcutItem[];
+}) {
+  return (
+    <div className="rounded-lg border border-border/50 bg-card/40 p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Icon className={`h-4 w-4 ${accentClass}`} />
+          <span className="text-xs font-extrabold text-foreground">{title}</span>
+          <span className="text-[10px] text-muted-foreground">· {subtitle}</span>
+        </div>
+        <Badge variant="outline" className="text-[9px] border-border text-muted-foreground">
+          {items.length} hubs
+        </Badge>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((it) => (
+          <Link
+            key={it.route}
+            to={it.route}
+            className={`inline-flex items-center gap-1 rounded-full border bg-background/40 px-2.5 py-1 text-[11px] font-bold text-foreground transition-colors ${chipClass}`}
+          >
+            {it.label}
+            <ArrowRight className="h-3 w-3 opacity-60" />
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
