@@ -685,6 +685,32 @@ export function DerivLiveChart({
             </svg>
           )}
         </div>
+        {/* HH / HL trade plan summary */}
+        {hhhl && (
+          <div className="border-t border-border/50 px-3 py-2 flex flex-wrap items-center gap-2 text-[10px]">
+            <Badge
+              variant="outline"
+              className={
+                hhhl.trend === "uptrend"
+                  ? "border-success/40 text-success"
+                  : "border-destructive/40 text-destructive"
+              }
+            >
+              {hhhl.trend === "uptrend" ? "▲ HH/HL Channel" : "▼ LH/LL Channel"}
+            </Badge>
+            <span className="text-muted-foreground">
+              {hhhl.trend === "uptrend" ? "Buy near HL" : "Sell near LH"}:
+            </span>
+            <span className="font-mono font-bold text-foreground">{hhhl.entry.toFixed(2)}</span>
+            <span className="text-muted-foreground">Target:</span>
+            <span className="font-mono font-bold text-success">{hhhl.target.toFixed(2)}</span>
+            <span className="text-muted-foreground">Stop:</span>
+            <span className="font-mono font-bold text-destructive">{hhhl.stop.toFixed(2)}</span>
+            <span className="ml-auto text-muted-foreground italic">
+              Exit if price breaks the {hhhl.trend === "uptrend" ? "HL" : "LH"} line
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
