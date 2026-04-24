@@ -375,15 +375,15 @@ const Index = () => {
 
         {/* 5 — Live Trading Hubs (Gold / Silver / Bitcoin / GBP/USD) */}
         <section>
-          <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-4">
-            <aside className="hidden lg:block">
+          <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-4">
+            <aside className="hidden md:block">
               <TradingHubsSidebar />
             </aside>
             <div className="space-y-4 min-w-0">
               <LiveTradingHubCards />
               <MoreTradingHubsList />
               {/* Mobile: show the sidebar nav inline at the bottom of the section */}
-              <div className="lg:hidden">
+              <div className="md:hidden">
                 <TradingHubsSidebar />
               </div>
             </div>
