@@ -567,6 +567,90 @@ export function DerivLiveChart({
                 </g>
               )}
 
+              {/* ── HH / HL Trend Channel ───────── */}
+              {hhhl && (
+                <g>
+                  {(() => {
+                    const color =
+                      hhhl.trend === "uptrend"
+                        ? "hsl(var(--success))"
+                        : "hsl(var(--destructive))";
+                    const x1 = padding.left + hhhl.highLine.startIdx * step + step / 2;
+                    const x2 = padding.left + hhhl.highLine.endIdx * step + step / 2;
+                    return (
+                      <>
+                        {/* Channel fill */}
+                        <polygon
+                          points={`${x1},${yFor(hhhl.highLine.startPrice)} ${x2},${yFor(hhhl.highLine.endPrice)} ${x2},${yFor(hhhl.lowLine.endPrice)} ${x1},${yFor(hhhl.lowLine.startPrice)}`}
+                          fill={color}
+                          fillOpacity={0.06}
+                        />
+                        {/* HH line (resistance) */}
+                        <line
+                          x1={x1}
+                          x2={x2}
+                          y1={yFor(hhhl.highLine.startPrice)}
+                          y2={yFor(hhhl.highLine.endPrice)}
+                          stroke={color}
+                          strokeWidth={1.4}
+                          strokeOpacity={0.9}
+                        />
+                        {/* HL line (support) */}
+                        <line
+                          x1={x1}
+                          x2={x2}
+                          y1={yFor(hhhl.lowLine.startPrice)}
+                          y2={yFor(hhhl.lowLine.endPrice)}
+                          stroke={color}
+                          strokeWidth={1.4}
+                          strokeOpacity={0.9}
+                        />
+                      </>
+                    );
+                  })()}
+                  {/* HH labels */}
+                  {hhhl.highs.map((h, i) => {
+                    const x = padding.left + h.idx * step + step / 2;
+                    const y = yFor(h.price);
+                    return (
+                      <g key={`hh-${i}`}>
+                        <circle cx={x} cy={y} r={3} fill="hsl(var(--destructive))" />
+                        <text
+                          x={x}
+                          y={y - 6}
+                          fontSize="9"
+                          fontWeight="bold"
+                          textAnchor="middle"
+                          fill="hsl(var(--destructive))"
+                        >
+                          {hhhl.trend === "uptrend" ? "HH" : "LH"}
+                        </text>
+                      </g>
+                    );
+                  })}
+                  {/* HL labels */}
+                  {hhhl.lows.map((l, i) => {
+                    const x = padding.left + l.idx * step + step / 2;
+                    const y = yFor(l.price);
+                    return (
+                      <g key={`hl-${i}`}>
+                        <circle cx={x} cy={y} r={3} fill="hsl(var(--success))" />
+                        <text
+                          x={x}
+                          y={y + 12}
+                          fontSize="9"
+                          fontWeight="bold"
+                          textAnchor="middle"
+                          fill="hsl(var(--success))"
+                        >
+                          {hhhl.trend === "uptrend" ? "HL" : "LL"}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
+
               {/* Last price line */}
               {lastPrice !== null && (
                 <g>
