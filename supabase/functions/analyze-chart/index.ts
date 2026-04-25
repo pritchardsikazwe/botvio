@@ -343,7 +343,21 @@ Keep the response structured and actionable.`;
     }
 
     const aiData = await aiResponse.json();
-    const analysisText = aiData.choices?.[0]?.message?.content || "Analysis not available";
+    let analysisText = aiData.choices?.[0]?.message?.content || "Analysis not available";
+
+    // Normalize common OCR/AI misreads of Weltrade SyntX index names.
+    // The AI sometimes transcribes "GainX" as "Gairx", "Gaixn", "Garnx", "Gainex", etc.
+    // Always force the canonical brand spellings: PainX, GainX, TrendX.
+    analysisText = analysisText
+      .replace(/\bGa[ix]r[nx]?x?\b/gi, "GainX")   // Gairx, Gaixn, Garnx, Gairnx
+      .replace(/\bGain[ex]+x?\b/gi, "GainX")       // Gainex, Gainx variants with extra letters
+      .replace(/\bGa[il]nx\b/gi, "GainX")          // Galnx, Gainx (lowercase l for i)
+      .replace(/\bPa[ix]r[nx]?x?\b/gi, "PainX")   // Pairx, Paixn
+      .replace(/\bPain[ex]+x?\b/gi, "PainX")
+      .replace(/\bTr[ae]ndx\b/gi, "TrendX")
+      .replace(/\bgainx\b/g, "GainX")
+      .replace(/\bpainx\b/g, "PainX")
+      .replace(/\btrendx\b/g, "TrendX");
 
     // Extract price targets first (needed for instrument price-range fallback)
     const entryMatch = analysisText.match(/\*\*Entry\s*(?:Price)?\*\*[:\s]*\$?([\d,]+\.?\d*)/i) 
