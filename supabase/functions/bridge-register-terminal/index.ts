@@ -36,21 +36,22 @@ serve(async (req) => {
     try {
       body = JSON.parse(rawBody);
     } catch (parseErr) {
+      const errMsg = parseErr instanceof Error ? parseErr.message : String(parseErr);
       // Try to fix truncated JSON by appending closing brace
       if (!rawBody.endsWith('}')) {
         try {
           body = JSON.parse(rawBody + '}');
           console.log('Fixed truncated JSON by appending }');
-        } catch (parseErr2) {
-          console.error('JSON parse error:', parseErr.message, 'Body:', rawBody.substring(0, 500));
-          return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: parseErr.message }), {
+        } catch (_parseErr2) {
+          console.error('JSON parse error:', errMsg, 'Body:', rawBody.substring(0, 500));
+          return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: errMsg }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400
           });
         }
       } else {
-        console.error('JSON parse error:', parseErr.message, 'Body:', rawBody.substring(0, 500));
-        return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: parseErr.message }), {
+        console.error('JSON parse error:', errMsg, 'Body:', rawBody.substring(0, 500));
+        return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: errMsg }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400
         });
