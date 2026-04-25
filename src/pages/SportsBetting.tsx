@@ -267,7 +267,14 @@ const SportsBetting = () => {
       const { data, error } = await supabase.functions.invoke("generate-daily-slips", {
         body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter === "all" ? undefined : leagueFilter, dayRange },
       });
-      if (error) throw error;
+      if (error) {
+        const response = (error as any).context;
+        if (response && typeof response.json === "function") {
+          const payload = await response.json().catch(() => null);
+          if (payload?.error) throw new Error(payload.error);
+        }
+        throw error;
+      }
       if (data?.error) {
         if (data.limitReached) {
           toast.error(`Daily limit reached (${data.used}/${data.daily_limit}). Try again tomorrow.`);
