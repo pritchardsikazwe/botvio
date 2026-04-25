@@ -3,6 +3,14 @@ project_id = "tqqkzeblmjapgbnsbtgw"
 [functions]
   [functions.admin-signup-notification]
     verify_jwt = false
+  [functions.analyze-bet-slip]
+    verify_jwt = false
+  [functions.check-bet-slip]
+    verify_jwt = false
+  [functions.football-fixtures]
+    verify_jwt = false
+  [functions.generate-daily-slips]
+    verify_jwt = false
   [functions.analyze-chart]
     verify_jwt = false
   [functions.auth-email-hook]
