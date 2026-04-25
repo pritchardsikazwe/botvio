@@ -16,8 +16,6 @@ import {
   Crown, Check, Star, Brain
 } from "lucide-react";
 import { ChartUpload } from "@/components/signals/ChartUpload";
-import { ScrollingAdvertBanner } from "@/components/adverts/ScrollingAdvertBanner";
-import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { SignalsPerformanceTracker } from "@/components/signals/SignalsPerformanceTracker";
 import { TrainingVideosGrid } from "@/components/training/TrainingVideosGrid";
@@ -243,12 +241,6 @@ const Index = () => {
             </Link>
           </div>
         </section>
-
-        {/* Scrolling Advert Banner */}
-        <ScrollingAdvertBanner />
-
-        {/* Adsterra Native Banner */}
-        <AdsterraNativeBanner />
 
         {/* 1 — Latest Trading Signals */}
         <section>
