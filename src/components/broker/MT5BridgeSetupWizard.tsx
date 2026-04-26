@@ -32,6 +32,7 @@ const MT5BridgeSetupWizard = () => {
   const [autoDetecting, setAutoDetecting] = useState(false);
 
   const terminalUid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
+  const supabaseUrl = "https://tqqkzeblmjapgbnsbtgw.supabase.co";
 
   const steps: WizardStep[] = [
     { id: 0, title: "Download EA", description: "Get the BOTVIO Bridge EA file", status: currentStep > 0 ? "completed" : currentStep === 0 ? "active" : "pending" },
@@ -76,6 +77,11 @@ const MT5BridgeSetupWizard = () => {
   const copyTerminalUid = () => {
     navigator.clipboard.writeText(terminalUid);
     toast.success("Terminal UID copied to clipboard!");
+  };
+
+  const copySupabaseUrl = () => {
+    navigator.clipboard.writeText(supabaseUrl);
+    toast.success("Backend URL copied — paste it into MT5 allowed URLs");
   };
 
   const handleDownload = () => {
@@ -254,11 +260,23 @@ const MT5BridgeSetupWizard = () => {
                 <span>Go to <strong>Tools → Options → Expert Advisors</strong> and enable:</span>
               </li>
             </ol>
-            <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-xs">
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-xs">
+              <p className="font-medium">In the Expert Advisors tab, tick:</p>
               <p>✅ Allow algorithmic trading</p>
               <p>✅ Allow WebRequest for listed URL</p>
-              <p className="pl-4 text-muted-foreground">
-                Add: <code>https://tqqkzeblmjapgbnsbtgw.supabase.co</code>
+              <p className="pt-1 font-medium">Then click <strong>Add</strong> and paste this exact URL:</p>
+              <div className="flex gap-2 items-center">
+                <code className="flex-1 bg-background border rounded px-2 py-1.5 font-mono text-[11px] truncate">
+                  {supabaseUrl}
+                </code>
+                <Button variant="outline" size="sm" onClick={copySupabaseUrl} className="h-8 shrink-0">
+                  <Copy className="h-3 w-3 mr-1" /> Copy
+                </Button>
+              </div>
+              <p className="text-muted-foreground pt-1">
+                <strong>Why?</strong> MT5 blocks all internet requests by default. This whitelist
+                lets the EA securely send your trades and receive signals from Botvio's backend.
+                Without it, the EA cannot connect.
               </p>
             </div>
             <div className="flex gap-2">
