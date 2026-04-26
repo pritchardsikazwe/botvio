@@ -10,7 +10,6 @@ import { blogContent } from "@/content/blogPosts";
 import { binanceBlogPosts } from "@/content/binanceBlogPosts";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
-import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 
 /* ── Affiliate links ── */
 const AFFILIATE_LINKS = {
@@ -86,8 +85,6 @@ const relatedPosts = [
   { slug: "botvio-vs-manual-trading", title: "Botvio vs Manual Trading" },
 ];
 
-/* ── Adsterra native ad slot (renders only once per page due to invoke.js container ID) ── */
-const AdSlot = (_: { position: string }) => <AdsterraNativeBanner />;
 
 /* ── YouTube embed ── */
 const YouTubeEmbed = ({ url }: { url: string }) => {
@@ -242,8 +239,6 @@ const BlogPost = () => {
           )}
         </header>
 
-        {/* Ad after intro */}
-        <AdSlot position="after-intro" />
 
         {/* YouTube Video */}
         {post.youtubeUrl && <YouTubeEmbed url={post.youtubeUrl} />}
@@ -272,8 +267,6 @@ const BlogPost = () => {
           dangerouslySetInnerHTML={{ __html: injectAffiliateLinks(post.content) }}
         />
 
-        {/* Ad in middle */}
-        <AdSlot position="mid-article" />
 
         {/* Mid-article CTA — contextual broker links */}
         {(() => {
@@ -313,8 +306,6 @@ const BlogPost = () => {
           </div>
         </div>
 
-        {/* Ad at end */}
-        <AdSlot position="end-article" />
 
         {/* Bottom nav */}
         <div className="mt-8 flex flex-wrap gap-3">
