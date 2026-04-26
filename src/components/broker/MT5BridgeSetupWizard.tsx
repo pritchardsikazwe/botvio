@@ -32,6 +32,7 @@ const MT5BridgeSetupWizard = () => {
   const [autoDetecting, setAutoDetecting] = useState(false);
 
   const terminalUid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
+  const supabaseUrl = "https://tqqkzeblmjapgbnsbtgw.supabase.co";
 
   const steps: WizardStep[] = [
     { id: 0, title: "Download EA", description: "Get the BOTVIO Bridge EA file", status: currentStep > 0 ? "completed" : currentStep === 0 ? "active" : "pending" },
@@ -76,6 +77,11 @@ const MT5BridgeSetupWizard = () => {
   const copyTerminalUid = () => {
     navigator.clipboard.writeText(terminalUid);
     toast.success("Terminal UID copied to clipboard!");
+  };
+
+  const copySupabaseUrl = () => {
+    navigator.clipboard.writeText(supabaseUrl);
+    toast.success("Backend URL copied — paste it into MT5 allowed URLs");
   };
 
   const handleDownload = () => {
