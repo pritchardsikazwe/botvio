@@ -45,24 +45,32 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Auth user
+    // Auth user — validate the caller token explicitly so slip generation works
+    // reliably with the platform's signing-keys deployment mode.
     const authHeader = req.headers.get("Authorization") || "";
+    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
+    const adminClient = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false },
     });
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Authentication required" }), {
+
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Authentication failed. Please sign in again." }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: authData, error: authError } = await adminClient.auth.getUser(token);
+    const user = authData?.user;
+    if (authError || !user) {
+      console.error("Slip auth failed:", authError?.message || "No user for token");
+      return new Response(JSON.stringify({ error: "Authentication failed. Please sign in again." }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Enforce daily limit (admins/VIP get unlimited via RPC logic)
-    const adminClient = createClient(supabaseUrl, serviceKey);
     const { data: limitCheck, error: limitErr } = await adminClient.rpc("increment_slip_generation", {
       _user_id: user.id,
     });
