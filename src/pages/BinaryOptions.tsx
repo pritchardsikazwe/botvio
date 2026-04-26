@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, TrendingUp, TrendingDown, Shield, Zap, Star, ArrowRight, Activity, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 
 const BROKER_DETAILS: Record<string, { emoji: string; color: string; features: string[]; minDeposit: string; payout: string }> = {
   "deriv": { emoji: "🔴", color: "border-destructive/40", features: ["Synthetic Indices", "Boom & Crash", "Volatility Index", "24/7 Trading"], minDeposit: "$5", payout: "Up to 95%" },
@@ -230,11 +229,6 @@ const BinaryOptions = () => {
             ))}
           </div>
         )}
-
-        {/* Sponsored */}
-        <div className="mt-8">
-          <AdsterraNativeBanner />
-        </div>
 
         {/* Top 5 Assets Today */}
         <div className="mt-8">

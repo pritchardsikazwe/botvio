@@ -21,10 +21,6 @@ const BROKER_LINKS: Record<string, { name: string; url: string }> = {
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
 };
 
-import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
-
-/* ── Adsterra native slot ── */
-const StrategyAdSlot = (_: { slot: string }) => <AdsterraNativeBanner />;
 
 /* ── Convert markdown-like text to HTML ── */
 const formatDescription = (text: string): string => {
@@ -279,8 +275,6 @@ const StrategyDetail = () => {
                 </CardContent>
               </Card>
 
-              {/* AdSense after description */}
-              <StrategyAdSlot slot="strategy-after-desc" />
               {strategy.config_json && typeof strategy.config_json === "object" && (
                 <Card>
                   <CardHeader>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, Signal, Lightbulb, Crosshair, Target, TrendingUp, Clock, ShieldCheck, ExternalLink, Zap, Layers } from "lucide-react";
@@ -108,8 +107,6 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
             );
           })}
         </div>
-
-        <AdsterraNativeBanner />
 
         <div>
           <h2 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
