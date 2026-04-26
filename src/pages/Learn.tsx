@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CourseEnrollmentCards, COURSE_PROGRAMS } from "@/components/courses/CourseEnrollmentCards";
-import { AdsterraNativeBanner } from "@/components/adverts/AdsterraNativeBanner";
 import { 
   GraduationCap, 
   BookOpen, 
@@ -277,9 +276,6 @@ const Learn = () => {
           </h2>
           <CourseEnrollmentCards onEnroll={(cat) => handleCategoryChange(cat)} />
         </div>
-
-        {/* Sponsored */}
-        <AdsterraNativeBanner />
 
         {/* Strategy Categories */}
         <div className="mb-8">
