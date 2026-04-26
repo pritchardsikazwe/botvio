@@ -93,7 +93,7 @@ const DAY_OPTIONS = [
 ];
 
 const SportsBetting = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, session, isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [activeMarket, setActiveMarket] = useState("over_under");
   const [uploading, setUploading] = useState(false);
@@ -264,23 +264,35 @@ const SportsBetting = () => {
     setGeneratingPicks(true);
     setDailyPicks(null);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-daily-slips", {
-        body: { slipSize, marketType: slipMarket, slipType, leagueFilter: leagueFilter === "all" ? undefined : leagueFilter, dayRange },
-      });
-      if (error) {
-        const response = (error as any).context;
-        if (response && typeof response.json === "function") {
-          const payload = await response.json().catch(() => null);
-          if (payload?.error) throw new Error(payload.error);
-        }
-        throw error;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token || session?.access_token;
+      if (!accessToken) {
+        throw new Error("Authentication failed. Please sign out, sign in again, then generate slips.");
       }
-      if (data?.error) {
-        if (data.limitReached) {
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-daily-slips`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          slipSize,
+          marketType: slipMarket,
+          slipType,
+          leagueFilter: leagueFilter === "all" ? undefined : leagueFilter,
+          dayRange,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+      if (!response.ok || data?.error) {
+        if (data?.limitReached) {
           toast.error(`Daily limit reached (${data.used}/${data.daily_limit}). Try again tomorrow.`);
           return;
         }
-        throw new Error(data.error);
+        throw new Error(data?.error || `Slip generation failed (${response.status})`);
       }
       setDailyPicks(data.picks);
 
