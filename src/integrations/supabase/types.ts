@@ -5764,6 +5764,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_mt5_terminals: {
+        Row: {
+          auto_execute: boolean
+          created_at: string
+          default_lot: number
+          id: string
+          last_seen_at: string | null
+          nickname: string | null
+          terminal_uid: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_execute?: boolean
+          created_at?: string
+          default_lot?: number
+          id?: string
+          last_seen_at?: string | null
+          nickname?: string | null
+          terminal_uid: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_execute?: boolean
+          created_at?: string
+          default_lot?: number
+          id?: string
+          last_seen_at?: string | null
+          nickname?: string | null
+          terminal_uid?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_plan_subscriptions: {
         Row: {
           created_at: string

@@ -5,6 +5,7 @@ import { Header } from "@/components/trading/Header";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
 import MT5BridgeSetupWizard from "@/components/broker/MT5BridgeSetupWizard";
+import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -152,6 +153,7 @@ const Connections = () => {
 
           <TabsContent value="mt5" className="space-y-6">
             <MT5BridgeSetupWizard />
+            <Mt5AutoExecuteCard />
           </TabsContent>
         </Tabs>
       </main>
