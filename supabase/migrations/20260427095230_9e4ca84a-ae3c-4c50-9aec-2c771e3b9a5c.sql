@@ -1,0 +1,2 @@
+ALTER TABLE public.trading_accounts DROP CONSTRAINT IF EXISTS trading_accounts_broker_check;
+ALTER TABLE public.trading_accounts ADD CONSTRAINT trading_accounts_broker_check CHECK (broker = ANY (ARRAY['deriv'::text, 'binance'::text, 'mt5'::text]));
