@@ -95,8 +95,10 @@ const MT5BridgeSetupWizard = () => {
     setTestResult("idle");
 
     try {
-      // Check if any MT5 account with this terminal UID exists and is connected
-      const { data, error } = await supabase
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+      // Primary check: trading_accounts row created on registration
+      const { data: accounts } = await supabase
         .from("trading_accounts")
         .select("id, connection_status, label, updated_at")
         .eq("user_id", user?.id)
@@ -104,21 +106,47 @@ const MT5BridgeSetupWizard = () => {
         .order("updated_at", { ascending: false })
         .limit(1);
 
-      if (error) throw error;
+      const hasFreshAccount =
+        accounts &&
+        accounts.length > 0 &&
+        accounts[0].connection_status === "connected" &&
+        new Date(accounts[0].updated_at) > fiveMinAgo;
 
-      if (data && data.length > 0 && data[0].connection_status === "connected") {
-        // Check if heartbeat is recent (within last 5 minutes)
-        const lastUpdate = new Date(data[0].updated_at);
-        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
-        
-        if (lastUpdate > fiveMinAgo) {
-          setTestResult("success");
-          setCurrentStep(4);
-          toast.success("Connection verified! EA is online.");
-        } else {
-          setTestResult("fail");
-          toast.error("EA was connected but appears offline. Restart the EA.");
-        }
+      if (hasFreshAccount) {
+        setTestResult("success");
+        setCurrentStep(4);
+        toast.success("Connection verified! EA is online.");
+        return;
+      }
+
+      // Fallback: look up mt5_states by the user's registered terminal UID
+      const { data: terminals } = await supabase
+        .from("user_mt5_terminals")
+        .select("terminal_uid")
+        .eq("user_id", user?.id);
+
+      const uids = (terminals ?? []).map((t: any) => t.terminal_uid).filter(Boolean);
+      if (uids.length === 0) {
+        setTestResult("fail");
+        toast.error("No Terminal UID linked yet. Save your Terminal UID first.");
+        return;
+      }
+
+      const { data: states } = await supabase
+        .from("mt5_states")
+        .select("terminal_uid, updated_at")
+        .in("terminal_uid", uids)
+        .order("updated_at", { ascending: false })
+        .limit(1);
+
+      if (
+        states &&
+        states.length > 0 &&
+        new Date(states[0].updated_at) > fiveMinAgo
+      ) {
+        setTestResult("success");
+        setCurrentStep(4);
+        toast.success("EA is online (heartbeat detected).");
       } else {
         setTestResult("fail");
         toast.error("No active MT5 connection found. Make sure the EA is running.");
