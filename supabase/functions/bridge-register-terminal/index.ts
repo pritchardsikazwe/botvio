@@ -86,9 +86,21 @@ serve(async (req) => {
         .select('user_id')
         .eq('login_id', terminal_uid)
         .eq('broker', 'mt5')
-        .single();
+        .maybeSingle();
       if (existing) {
         realUserId = existing.user_id;
+      }
+
+      // Fallback: look up user_mt5_terminals (set when user registers the terminal UID in the dashboard)
+      if (!realUserId) {
+        const { data: termRow } = await supabase
+          .from('user_mt5_terminals')
+          .select('user_id')
+          .eq('terminal_uid', terminal_uid)
+          .maybeSingle();
+        if (termRow) {
+          realUserId = termRow.user_id;
+        }
       }
     }
 
