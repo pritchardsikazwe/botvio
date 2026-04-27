@@ -5,6 +5,7 @@ import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } f
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
 import { usePersistGoldLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
+import { useMt5HubExecution } from "@/hooks/useMt5HubExecution";
 
 type SignalType = DerivSignalType;
 
@@ -69,6 +70,14 @@ export function GoldBotvioSignalButton() {
 
   // Persist real BUY/SELL signals to DB so they appear on Gold Hub + Home + /signals
   usePersistGoldLiveSignal(live, !sessionLoading && isMarketOpen, "XAUUSD");
+
+  // Auto-execute on MT5 Bridge EA when user has enabled auto-execute
+  useMt5HubExecution({
+    symbol: "XAUUSD",
+    live,
+    enabled: !sessionLoading && isMarketOpen,
+    source: "gold-hub",
+  });
 
   // Force WAIT state when market is closed
   const effectiveState: SignalState = useMemo(() => {

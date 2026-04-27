@@ -5,6 +5,7 @@ import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } f
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
 import { usePersistLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
+import { useMt5HubExecution } from "@/hooks/useMt5HubExecution";
 
 const SIGNAL_CONFIG: Record<DerivSignalType, {
   bg: string;
@@ -78,6 +79,14 @@ export function AssetSignalButton({
 
   // Persist real BUY/SELL signals to DB so they appear on Hub + Home + /signals
   usePersistLiveSignal(live, !sessionLoading && effOpen, persistSymbol, category);
+
+  // Auto-execute on MT5 Bridge EA (Gold, Bitcoin, Forex, Stocks, etc.)
+  useMt5HubExecution({
+    symbol: persistSymbol,
+    live,
+    enabled: !sessionLoading && effOpen,
+    source: `hub-${category}`,
+  });
 
   const state = useMemo(() => {
     if (!sessionLoading && !effOpen) {
