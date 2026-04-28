@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import type { SyntheticInstrument } from "@/config/synthetics";
-import { useDeriv } from "@/contexts/DerivContext";
 
 interface Props {
   instrument: SyntheticInstrument;
@@ -28,7 +27,6 @@ export function SyntheticSignalCard({
   onSignalChange,
 }: Props) {
   const { user } = useAuth();
-  const { connections } = useDeriv();
   const [busyDeriv, setBusyDeriv] = useState(false);
   const [busyMt5, setBusyMt5] = useState(false);
 
@@ -79,17 +77,24 @@ export function SyntheticSignalCard({
       });
       return;
     }
-    const conn = connections?.find((c) => c.is_active) ?? connections?.[0];
+    // Look up the user's active Deriv connection
+    const { data: conns } = await supabase
+      .from("deriv_connections")
+      .select("id, is_active, login_id")
+      .eq("user_id", user.id)
+      .order("is_active", { ascending: false })
+      .limit(5);
+    const conn = conns?.find((c) => c.is_active) ?? conns?.[0];
     if (!conn) {
       toast({
         title: "Connect Deriv first",
         description: "Link your Deriv account in Connections to enable direct execution.",
         variant: "destructive",
       });
+      setBusyDeriv(false);
       return;
     }
 
-    setBusyDeriv(true);
     try {
       const { data, error } = await supabase.functions.invoke("deriv-trade-execute", {
         body: {
