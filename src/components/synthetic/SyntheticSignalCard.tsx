@@ -80,11 +80,12 @@ export function SyntheticSignalCard({
     // Look up the user's active Deriv connection
     const { data: conns } = await supabase
       .from("deriv_connections")
-      .select("id, is_active, login_id")
+      .select("id, is_connected, login_id")
       .eq("user_id", user.id)
-      .order("is_active", { ascending: false })
+      .order("is_connected", { ascending: false })
+      .order("updated_at", { ascending: false })
       .limit(5);
-    const conn = conns?.find((c) => c.is_active) ?? conns?.[0];
+    const conn = conns?.find((c) => c.is_connected) ?? conns?.[0];
     if (!conn) {
       toast({
         title: "Connect Deriv first",
