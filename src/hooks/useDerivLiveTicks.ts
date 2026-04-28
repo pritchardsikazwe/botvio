@@ -36,6 +36,12 @@ export function mapToDerivSymbol(displaySymbol: string): string | null {
     "JP225": "OTC_N225", "NIKKEI": "OTC_N225",
     "HK50": "OTC_HSI", "HSI": "OTC_HSI",
     "AUS200": "OTC_AS51",
+    // Deriv Synthetic Indices — pass-through codes (already valid Deriv symbols)
+    "BOOM500": "BOOM500", "BOOM1000": "BOOM1000",
+    "CRASH500": "CRASH500", "CRASH1000": "CRASH1000",
+    "R_10": "R_10", "R_25": "R_25", "R_50": "R_50", "R_75": "R_75", "R_100": "R_100",
+    "1HZ10V": "1HZ10V", "1HZ25V": "1HZ25V", "1HZ50V": "1HZ50V", "1HZ75V": "1HZ75V", "1HZ100V": "1HZ100V",
+    "stpRNG": "stpRNG", "STPRNG": "stpRNG", "STEP": "stpRNG",
   };
   return map[s] ?? null;
 }

@@ -28,6 +28,11 @@ interface DerivLiveChartProps {
   height?: number;
   defaultGranularity?: number;
   showHauza?: boolean; // Hauza strategy overlay (S/R, breakouts, trend)
+  /**
+   * Optional live BUY/SELL marker to plot at the latest candle.
+   * Used by the Synthetic Hub to show the active signal directly on the chart.
+   */
+  signalMarker?: { direction: "BUY" | "SELL"; confidence: number } | null;
 }
 
 export function DerivLiveChart({
@@ -35,6 +40,7 @@ export function DerivLiveChart({
   height = 420,
   defaultGranularity = 900,
   showHauza = true,
+  signalMarker = null,
 }: DerivLiveChartProps) {
   const derivSymbol = useMemo(() => mapToDerivSymbol(displaySymbol), [displaySymbol]);
   const [granularity, setGranularity] = useState(defaultGranularity);
@@ -650,6 +656,46 @@ export function DerivLiveChart({
                   })}
                 </g>
               )}
+
+              {/* ── Live BUY/SELL signal marker ── */}
+              {signalMarker && lastPrice !== null && visible.length > 0 && (() => {
+                const lastIdx = visible.length - 1;
+                const x = padding.left + lastIdx * step + step / 2;
+                const y = yFor(lastPrice);
+                const isBuy = signalMarker.direction === "BUY";
+                const color = isBuy ? "hsl(var(--success))" : "hsl(var(--destructive))";
+                const arrowY = isBuy ? y + 24 : y - 24;
+                const triPath = isBuy
+                  ? `M${x},${y + 8} L${x - 7},${y + 20} L${x + 7},${y + 20} Z`
+                  : `M${x},${y - 8} L${x - 7},${y - 20} L${x + 7},${y - 20} Z`;
+                return (
+                  <g>
+                    <path d={triPath} fill={color} stroke={color} strokeWidth={1.5} />
+                    <circle cx={x} cy={y} r={9} fill="none" stroke={color} strokeWidth={2}>
+                      <animate attributeName="r" from="9" to="18" dur="1.4s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" from="1" to="0" dur="1.4s" repeatCount="indefinite" />
+                    </circle>
+                    <rect
+                      x={x - 28}
+                      y={isBuy ? arrowY : arrowY - 14}
+                      width={56}
+                      height={14}
+                      rx={3}
+                      fill={color}
+                    />
+                    <text
+                      x={x}
+                      y={(isBuy ? arrowY : arrowY - 14) + 10}
+                      fontSize="9"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      fill="hsl(var(--background))"
+                    >
+                      {signalMarker.direction} · {signalMarker.confidence}%
+                    </text>
+                  </g>
+                );
+              })()}
 
               {/* Last price line */}
               {lastPrice !== null && (
