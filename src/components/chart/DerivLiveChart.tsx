@@ -28,6 +28,11 @@ interface DerivLiveChartProps {
   height?: number;
   defaultGranularity?: number;
   showHauza?: boolean; // Hauza strategy overlay (S/R, breakouts, trend)
+  /**
+   * Optional live BUY/SELL marker to plot at the latest candle.
+   * Used by the Synthetic Hub to show the active signal directly on the chart.
+   */
+  signalMarker?: { direction: "BUY" | "SELL"; confidence: number } | null;
 }
 
 export function DerivLiveChart({
@@ -35,6 +40,7 @@ export function DerivLiveChart({
   height = 420,
   defaultGranularity = 900,
   showHauza = true,
+  signalMarker = null,
 }: DerivLiveChartProps) {
   const derivSymbol = useMemo(() => mapToDerivSymbol(displaySymbol), [displaySymbol]);
   const [granularity, setGranularity] = useState(defaultGranularity);
