@@ -82,6 +82,7 @@ import MetaHub from "./pages/stock-hubs/MetaHub";
 import AlphabetHub from "./pages/stock-hubs/AlphabetHub";
 
 import WeltradeHub from "./pages/WeltradeHub";
+import SyntheticHub from "./pages/SyntheticHub";
 import DerivOptions from "./pages/DerivOptions";
 import NewsCalendar from "./pages/NewsCalendar";
 import GlobalMarkets from "./pages/markets/GlobalMarkets";
@@ -199,6 +200,9 @@ export const AppRoutes = () => (
     <Route path="stocks/googl" element={<AlphabetHub />} />
 
     <Route path="weltrade" element={<WeltradeHub />} />
+    <Route path="synthetic-hub" element={<SyntheticHub />} />
+    <Route path="synthetic" element={<SyntheticHub />} />
+    <Route path="synthetics" element={<SyntheticHub />} />
     <Route path="news-calendar" element={<NewsCalendar />} />
     <Route path="markets" element={<GlobalMarkets />} />
     <Route path="markets/us" element={<USMarket />} />
