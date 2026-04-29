@@ -21,6 +21,7 @@ import { getDerivWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { detectSupportResistance, detectBreakouts, type PriceLevel } from "@/lib/chartAnalysis";
+import { useSendScalpSignal } from "@/hooks/useSendScalpSignal";
 
 interface Candle {
   candle_time: string;
@@ -67,6 +68,7 @@ export function BotvioScalpRobot({ displaySymbol, assetLabel, cryptoAlwaysOpen =
   const sessionSymbol = useMemo(() => displaySymbol.replace("/", ""), [displaySymbol]);
   const { isMarketOpen, marketType } = useMarketSession(sessionSymbol);
   const isClosed = !cryptoAlwaysOpen && !isMarketOpen && (marketType === "forex" || marketType === "indices");
+  const { sendToMt5, sendToDeriv, busyMt5, busyDeriv } = useSendScalpSignal();
 
   const [activeTf, setActiveTf] = useState<"1m" | "5m">("1m");
   const [candlesByTf, setCandlesByTf] = useState<Record<string, Candle[]>>({ "1m": [], "5m": [] });
@@ -466,6 +468,50 @@ export function BotvioScalpRobot({ displaySymbol, assetLabel, cryptoAlwaysOpen =
                       <span className="text-[10px] text-muted-foreground">
                         RR ≈ 1:1.5 / 1:2.5
                       </span>
+                    </div>
+
+                    {/* Execute buttons */}
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/40">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        disabled={busyMt5}
+                        className="h-7 text-[10px] flex-1 font-bold"
+                        onClick={() =>
+                          sendToMt5({
+                            displaySymbol,
+                            derivSymbol,
+                            direction: meta.side,
+                            entry: sig.entry,
+                            sl: sig.sl,
+                            tp: sig.tp1,
+                            source: `scalp-${displaySymbol.replace("/", "")}-${sig.tf}`,
+                          })
+                        }
+                      >
+                        <Zap className="h-3 w-3 mr-1" /> Send to MT5
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={busyDeriv || !derivSymbol}
+                        className="h-7 text-[10px] flex-1 font-bold border-primary/40 text-primary hover:bg-primary/10"
+                        onClick={() =>
+                          sendToDeriv({
+                            displaySymbol,
+                            derivSymbol,
+                            direction: meta.side,
+                            entry: sig.entry,
+                            sl: sig.sl,
+                            tp: sig.tp1,
+                            defaultStake: 1,
+                            defaultMultiplier: 100,
+                            source: `scalp-${displaySymbol.replace("/", "")}-${sig.tf}`,
+                          })
+                        }
+                      >
+                        <Target className="h-3 w-3 mr-1" /> Trade on Deriv
+                      </Button>
                     </div>
                   </div>
                 );
