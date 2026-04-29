@@ -268,50 +268,82 @@ export default function AutoTrade() {
         {/* VPS guide */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Server className="h-5 w-5 text-primary" /> Optional: VPS for MT5 Bridge 24/7</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Server className="h-5 w-5 text-primary" /> Contabo Windows VPS → Link Botvio + MT5 (24/7)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              The Botvio Cloud Worker above already runs 24/7 — you do NOT need a VPS for Deriv API auto-trading.
-              A VPS is only useful if you want your <strong>MT5 terminal + Bridge EA</strong> online 24/7 so MT5-routed trades
-              fill instantly even when your laptop is off.
+              You bought a <strong>Contabo Windows VPS</strong> — perfect. Follow the steps below to install MT5,
+              attach the <strong>Botvio Bridge EA</strong>, and let auto-trading run 24/7 even when your laptop is off.
+              The Botvio Cloud Worker handles Deriv API trades automatically — the VPS is what keeps your MT5 terminal alive.
             </p>
-            <div className="grid md:grid-cols-2 gap-3">
-              <div className="rounded-lg border border-border p-3">
-                <div className="flex items-center gap-2 mb-2"><Cloud className="h-4 w-4 text-primary" /><strong>Recommended providers</strong></div>
-                <ul className="space-y-1 text-muted-foreground text-xs">
-                  <li>• ForexVPS.net — MT5-optimised, low latency to Deriv ($35/mo)</li>
-                  <li>• Contabo Windows VPS — cheapest reliable option ($8/mo)</li>
-                  <li>• AccuWeb Forex VPS — fast EU/US locations ($15/mo)</li>
-                  <li>• Vultr / DigitalOcean Windows — flexible ($16+/mo)</li>
-                </ul>
-              </div>
-              <div className="rounded-lg border border-border p-3">
-                <div className="flex items-center gap-2 mb-2"><ShieldCheck className="h-4 w-4 text-primary" /><strong>Setup steps</strong></div>
-                <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
-                  <li>Order a Windows Server VPS (≥ 2 GB RAM)</li>
-                  <li>RDP in, install your broker's MT5 terminal</li>
-                  <li>Log into the same MT5 account you use locally</li>
-                  <li>Copy <code>BOTVIO_BridgeEA.mq5</code> from /connections, compile in MetaEditor</li>
-                  <li>Drag the EA onto any chart, paste your terminal UID + secret</li>
-                  <li>Enable Algo Trading. Leave the VPS running 24/7.</li>
-                </ol>
-              </div>
+
+            <div className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center gap-2"><Cloud className="h-4 w-4 text-primary" /><strong>Step 1 — Connect to your Contabo VPS</strong></div>
+              <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
+                <li>Log in at <a className="underline" href="https://my.contabo.com" target="_blank" rel="noopener noreferrer">my.contabo.com</a> → <strong>Your Services</strong> → open your VPS.</li>
+                <li>Copy the <strong>IP address</strong>, <strong>Username</strong> (usually <code>Administrator</code>), and the <strong>Initial Password</strong> from the email Contabo sent you.</li>
+                <li>On Windows: press <kbd>Win+R</kbd> → type <code>mstsc</code> → enter the IP → connect → paste the password. (On Mac, install <em>Microsoft Remote Desktop</em> from the App Store.)</li>
+                <li>Once you see the Windows desktop, you're inside your VPS — it stays online 24/7.</li>
+              </ol>
             </div>
+
+            <div className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center gap-2"><Server className="h-4 w-4 text-primary" /><strong>Step 2 — Install MT5 on the VPS</strong></div>
+              <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
+                <li>Open Edge browser inside the VPS, go to your broker's website (e.g. Deriv, Exness, FBS, Weltrade).</li>
+                <li>Download their <strong>MT5 desktop installer</strong> and install it.</li>
+                <li>Open MT5 → <strong>File → Login to Trade Account</strong> → enter your account number, password, and pick your broker's server.</li>
+                <li>Confirm the green "Connected" status at the bottom-right of MT5.</li>
+              </ol>
+            </div>
+
+            <div className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /><strong>Step 3 — Register a new Terminal UID in Botvio</strong></div>
+              <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
+                <li>On your normal computer, open Botvio → <a className="underline" href="/connections">Connections</a> → MT5 Bridge.</li>
+                <li>Click <strong>"Add new terminal"</strong>, give it a nickname like <em>"Contabo VPS — Deriv MT5"</em>.</li>
+                <li>Botvio will generate a unique <code>BOTVIO_xxxx-N</code> Terminal UID and a <strong>Bridge Secret</strong>. Copy both.</li>
+                <li>Toggle <strong>Auto-execute = ON</strong> for that terminal so signals route to the VPS.</li>
+              </ol>
+            </div>
+
+            <div className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /><strong>Step 4 — Install the Botvio Bridge EA on the VPS</strong></div>
+              <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
+                <li>Inside the VPS browser, open <a className="underline" href="https://botvio.live/BOTVIO_BridgeEA.mq5" target="_blank" rel="noopener noreferrer">botvio.live/BOTVIO_BridgeEA.mq5</a> and save the file.</li>
+                <li>In MT5: <strong>File → Open Data Folder → MQL5 → Experts</strong>. Drop <code>BOTVIO_BridgeEA.mq5</code> there.</li>
+                <li>In MT5: <strong>Tools → Options → Expert Advisors</strong> → tick "Allow Algo Trading", "Allow WebRequest", and add <code>https://tqqkzeblmjapgbnsbtgw.supabase.co</code> to the allowed URLs.</li>
+                <li>Open MetaEditor (F4) → right-click <code>BOTVIO_BridgeEA.mq5</code> → <strong>Compile</strong>. It should show 0 errors.</li>
+                <li>Back in MT5, drag the EA onto any open chart. In the input dialog paste your <strong>Terminal UID</strong> and <strong>Bridge Secret</strong> from Step 3, then click OK.</li>
+                <li>Click the <strong>Algo Trading</strong> button in the MT5 toolbar — it must turn green. A 😊 face on the chart means the EA is live.</li>
+              </ol>
+            </div>
+
+            <div className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center gap-2"><Activity className="h-4 w-4 text-primary" /><strong>Step 5 — Keep it alive 24/7</strong></div>
+              <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
+                <li>When you're done, <strong>do NOT shut down</strong> the VPS — just close the RDP window (top-right ✕). Windows + MT5 keep running.</li>
+                <li>In Windows: Settings → System → Power → set "Sleep" and "Screen off" to <strong>Never</strong>.</li>
+                <li>Back in Botvio → <a className="underline" href="/connections">/connections</a>, your terminal should show a green <strong>"Heartbeat ✓ active"</strong> badge within ~10 seconds.</li>
+                <li>Now toggle the instruments above to <strong>Enabled = ON</strong> and route = <strong>MT5</strong>. Botvio will push every qualifying signal straight to your VPS — 24/7.</li>
+              </ol>
+            </div>
+
             <div className="flex flex-wrap gap-2">
               <Button asChild variant="outline" size="sm">
-                <a href="https://forexvps.net" target="_blank" rel="noopener noreferrer">ForexVPS <ExternalLink className="h-3 w-3 ml-1" /></a>
+                <a href="https://my.contabo.com" target="_blank" rel="noopener noreferrer">Contabo Dashboard <ExternalLink className="h-3 w-3 ml-1" /></a>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <a href="https://contabo.com/en/vps/" target="_blank" rel="noopener noreferrer">Contabo <ExternalLink className="h-3 w-3 ml-1" /></a>
+                <a href="/BOTVIO_BridgeEA.mq5" target="_blank" rel="noopener noreferrer">Download Bridge EA <ExternalLink className="h-3 w-3 ml-1" /></a>
               </Button>
-              <Button asChild variant="outline" size="sm">
-                <a href="/connections">Open Bridge setup</a>
+              <Button asChild size="sm">
+                <a href="/connections">Open MT5 Bridge setup →</a>
               </Button>
             </div>
             <Separator />
             <p className="text-xs text-muted-foreground">
-              Botvio is not affiliated with the providers above. Choose a server geographically close to your broker for lowest latency.
+              Tip: pick a Contabo region close to your broker's server (EU for Deriv/Weltrade, US for Exness US) for the lowest latency.
+              Need help? Contact support@botvio.live or +260 966 284 085.
             </p>
           </CardContent>
         </Card>
