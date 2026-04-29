@@ -629,6 +629,36 @@ const MT5BridgeSetupWizard = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* VPS guide */}
+      <Card className="glass-card border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Monitor className="h-4 w-4 text-primary" />
+            Run MT5 24/7 on a Windows VPS
+          </CardTitle>
+          <CardDescription>
+            For uninterrupted bridge execution even when your PC is off
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <ol className="space-y-2 list-decimal list-inside text-muted-foreground">
+            <li>Rent a Windows VPS (ForexVPS, Contabo, Vultr — from $5/mo).</li>
+            <li>Connect via Remote Desktop (RDP) using credentials from your VPS provider.</li>
+            <li>Download MT5 from your broker (Exness, Deriv, IC Markets, etc.) and install it on the VPS.</li>
+            <li>Log in with your trading account credentials.</li>
+            <li>Install the BOTVIO Bridge EA the same way as Step 2 above.</li>
+            <li>Generate a NEW Terminal UID here (use the "Add another MT5 terminal" button) and paste it into the EA on the VPS.</li>
+            <li>Keep the EA running — close RDP but leave the VPS on. MT5 stays online 24/7.</li>
+          </ol>
+          <Alert className="border-primary/30 bg-primary/5">
+            <AlertDescription className="text-xs">
+              <strong>Multiple brokers?</strong> Install several MT5 terminals on the same VPS — one per broker.
+              Generate a unique Terminal UID for each so trades route correctly.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     </div>
   );
 };
