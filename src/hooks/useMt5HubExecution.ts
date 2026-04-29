@@ -97,7 +97,9 @@ export function useMt5HubExecution({
         }
         toast({
           title: `MT5 trade queued: ${live.signal} ${symbol}`,
-          description: `Volume ${json.volume} • Terminal ${json.terminal_uid?.slice(0, 8)}…`,
+          description: json.adjusted
+            ? `Volume auto-adjusted to ${json.volume} (broker min for ${symbol}) • Terminal ${json.terminal_uid?.slice(0, 8)}…`
+            : `Volume ${json.volume} • Terminal ${json.terminal_uid?.slice(0, 8)}…`,
         });
       } catch (err) {
         console.error("[MT5 Auto] Error:", err);

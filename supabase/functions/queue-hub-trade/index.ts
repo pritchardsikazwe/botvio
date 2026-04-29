@@ -37,6 +37,65 @@ function mapToMt5Symbol(input: string): string {
   return aliases[s] ?? s;
 }
 
+/**
+ * Deriv MT5 broker minimum lot per symbol.
+ * Boom/Crash, Volatility, Step, Range Break, Jump indices each have different
+ * minimums. If the user's default_lot is below the minimum, MT5 rejects the
+ * order with error 4756 ("invalid volume"). We clamp UP to the symbol minimum
+ * so the trade actually executes.
+ */
+const SYMBOL_MIN_LOT: Record<string, number> = {
+  // Boom indices
+  "BOOM300": 1.00,
+  "BOOM500": 0.20,
+  "BOOM600": 0.20,
+  "BOOM900": 0.20,
+  "BOOM1000": 0.20,
+  "BOOM1500": 0.20,
+  "BOOM50": 4.00,
+  "BOOM150": 1.00,
+  // Crash indices
+  "CRASH300": 0.50,
+  "CRASH500": 0.20,
+  "CRASH600": 0.20,
+  "CRASH900": 0.20,
+  "CRASH1000": 0.20,
+  "CRASH1500": 0.20,
+  "CRASH50": 4.00,
+  "CRASH150": 1.00,
+  // Volatility indices
+  "VOLATILITY10": 0.50,
+  "VOLATILITY10(1S)": 0.50,
+  "VOLATILITY25": 0.50,
+  "VOLATILITY25(1S)": 0.01,
+  "VOLATILITY50": 4.00,
+  "VOLATILITY50(1S)": 0.01,
+  "VOLATILITY75": 0.001,
+  "VOLATILITY75(1S)": 0.05,
+  "VOLATILITY100": 0.50,
+  "VOLATILITY100(1S)": 0.20,
+  // Forex / Metals (most Deriv MT5 brokers)
+  "XAUUSD": 0.01,
+  "XAGUSD": 0.01,
+  "EURUSD": 0.01,
+  "GBPUSD": 0.01,
+  "USDJPY": 0.01,
+  "USDCAD": 0.01,
+  "USDCHF": 0.01,
+  "AUDUSD": 0.01,
+  "NZDUSD": 0.01,
+  "EURJPY": 0.01,
+  "EURGBP": 0.01,
+  // Crypto
+  "BTCUSD": 0.01,
+  "ETHUSD": 0.01,
+};
+
+function getSymbolMinLot(mt5Symbol: string): number {
+  const key = mt5Symbol.toUpperCase().replace(/[\s_-]/g, "");
+  return SYMBOL_MIN_LOT[key] ?? 0.01;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -132,7 +191,10 @@ serve(async (req) => {
     }
 
     const mt5Symbol = mapToMt5Symbol(symbol);
-    const volume = Number(lot) > 0 ? Number(lot) : Number(terminal.default_lot) || 0.01;
+    const requested = Number(lot) > 0 ? Number(lot) : Number(terminal.default_lot) || 0.01;
+    const minLot = getSymbolMinLot(mt5Symbol);
+    // Clamp UP to broker minimum so MT5 doesn't reject with error 4756 ("invalid volume").
+    const volume = requested < minLot ? minLot : requested;
 
     const command: Record<string, unknown> = {
       action: "OPEN",
@@ -171,6 +233,8 @@ serve(async (req) => {
         symbol: mt5Symbol,
         direction,
         volume,
+        min_lot: minLot,
+        adjusted: volume !== requested,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
