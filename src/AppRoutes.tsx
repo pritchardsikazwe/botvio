@@ -83,6 +83,7 @@ import AlphabetHub from "./pages/stock-hubs/AlphabetHub";
 
 import WeltradeHub from "./pages/WeltradeHub";
 import SyntheticHub from "./pages/SyntheticHub";
+import AutoTrade from "./pages/AutoTrade";
 import DerivOptions from "./pages/DerivOptions";
 import NewsCalendar from "./pages/NewsCalendar";
 import GlobalMarkets from "./pages/markets/GlobalMarkets";
