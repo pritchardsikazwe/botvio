@@ -414,6 +414,54 @@ const MT5BridgeSetupWizard = () => {
               </p>
             </div>
 
+            {/* Existing terminals selector */}
+            {terminals && terminals.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Your Registered Terminals</Label>
+                <div className="space-y-1.5">
+                  {terminals.map((t: any) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setActiveTerminalUid(t.terminal_uid)}
+                      className={`w-full flex items-center justify-between p-2 rounded-md border text-left text-xs transition-colors ${
+                        t.terminal_uid === terminalUid
+                          ? "border-primary bg-primary/10"
+                          : "border-border/50 hover:bg-muted/30"
+                      }`}
+                    >
+                      <div>
+                        <p className="font-medium">{t.nickname || "Terminal"}</p>
+                        <p className="font-mono text-[10px] text-muted-foreground">{t.terminal_uid}</p>
+                      </div>
+                      {t.terminal_uid === terminalUid && (
+                        <Badge variant="default" className="text-[10px]">Active</Badge>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add another terminal */}
+            <div className="space-y-2 p-3 rounded-md border border-dashed border-primary/30 bg-primary/5">
+              <Label className="text-sm font-medium">Add another MT5 terminal</Label>
+              <p className="text-xs text-muted-foreground">
+                Connecting a 2nd account / VPS / broker? Generate a new unique UID so each EA reports separately.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={newTerminalNickname}
+                  onChange={(e) => setNewTerminalNickname(e.target.value)}
+                  placeholder="Nickname (e.g. Exness VPS, Deriv MT5)"
+                  className="text-sm"
+                />
+                <Button onClick={createNewTerminal} disabled={creatingTerminal} size="sm">
+                  {creatingTerminal ? <Loader2 className="h-4 w-4 animate-spin" /> : "+ Generate UID"}
+                </Button>
+              </div>
+            </div>
+
             <Alert className="border-amber-500/30 bg-amber-500/5">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <AlertDescription className="text-xs">
