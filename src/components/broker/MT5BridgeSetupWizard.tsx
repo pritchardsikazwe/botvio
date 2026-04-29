@@ -30,8 +30,11 @@ const MT5BridgeSetupWizard = () => {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<"idle" | "success" | "fail">("idle");
   const [autoDetecting, setAutoDetecting] = useState(false);
+  const [activeTerminalUid, setActiveTerminalUid] = useState<string>("");
+  const [newTerminalNickname, setNewTerminalNickname] = useState<string>("");
+  const [creatingTerminal, setCreatingTerminal] = useState(false);
 
-  const terminalUid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
+  const baseUid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
   const supabaseUrl = "https://tqqkzeblmjapgbnsbtgw.supabase.co";
 
   const steps: WizardStep[] = [
@@ -58,6 +61,71 @@ const MT5BridgeSetupWizard = () => {
     enabled: !!user,
     refetchInterval: autoDetecting ? 5000 : false,
   });
+
+  // Fetch all registered terminals (one per physical MT5 install)
+  const { data: terminals, refetch: refetchTerminals } = useQuery({
+    queryKey: ["user-mt5-terminals", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("user_mt5_terminals")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  // Default the active UID to the most recently created terminal
+  useEffect(() => {
+    if (!activeTerminalUid && terminals && terminals.length > 0) {
+      setActiveTerminalUid(terminals[terminals.length - 1].terminal_uid);
+    }
+  }, [terminals, activeTerminalUid]);
+
+  const terminalUid = activeTerminalUid || baseUid;
+
+  const createNewTerminal = async () => {
+    if (!user) return;
+    setCreatingTerminal(true);
+    try {
+      // Determine next suffix based on existing terminals
+      const existing = terminals ?? [];
+      const usedSuffixes = existing
+        .map((t: any) => {
+          const m = String(t.terminal_uid).match(/-(\d+)$/);
+          return m ? parseInt(m[1], 10) : 0;
+        });
+      // If user has zero terminals yet, first one is base UID; subsequent get -1, -2 ...
+      let newUid: string;
+      if (existing.length === 0) {
+        newUid = baseUid;
+      } else {
+        const next = (usedSuffixes.length ? Math.max(...usedSuffixes) : 0) + 1;
+        newUid = `${baseUid}-${next}`;
+      }
+
+      const { error } = await supabase.from("user_mt5_terminals").insert({
+        user_id: user.id,
+        terminal_uid: newUid,
+        nickname: newTerminalNickname || `Terminal ${existing.length + 1}`,
+      });
+      if (error) throw error;
+
+      setActiveTerminalUid(newUid);
+      setNewTerminalNickname("");
+      await refetchTerminals();
+      toast.success(`New Terminal UID created: ${newUid}`, {
+        description: "Use this UID in the EA on a separate MT5 install.",
+      });
+    } catch (err: any) {
+      toast.error("Failed to create terminal: " + err.message);
+    } finally {
+      setCreatingTerminal(false);
+    }
+  };
 
   // Auto-detect: when a new account appears while detecting
   useEffect(() => {
