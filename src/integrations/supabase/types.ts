@@ -581,6 +581,96 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_trade_instruments: {
+        Row: {
+          contract_family: string
+          created_at: string
+          deriv_connection_id: string | null
+          display_symbol: string
+          enabled: boolean
+          id: string
+          instrument_key: string
+          last_signal_at: string | null
+          last_trade_at: string | null
+          min_confidence: number
+          multiplier: number | null
+          route: string
+          stake: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contract_family?: string
+          created_at?: string
+          deriv_connection_id?: string | null
+          display_symbol: string
+          enabled?: boolean
+          id?: string
+          instrument_key: string
+          last_signal_at?: string | null
+          last_trade_at?: string | null
+          min_confidence?: number
+          multiplier?: number | null
+          route?: string
+          stake?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contract_family?: string
+          created_at?: string
+          deriv_connection_id?: string | null
+          display_symbol?: string
+          enabled?: boolean
+          id?: string
+          instrument_key?: string
+          last_signal_at?: string | null
+          last_trade_at?: string | null
+          min_confidence?: number
+          multiplier?: number | null
+          route?: string
+          stake?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      auto_trade_runs: {
+        Row: {
+          candidates_scanned: number
+          details: Json | null
+          errors: number
+          finished_at: string | null
+          id: string
+          started_at: string
+          status: string
+          trades_placed: number
+          trades_skipped: number
+        }
+        Insert: {
+          candidates_scanned?: number
+          details?: Json | null
+          errors?: number
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          trades_placed?: number
+          trades_skipped?: number
+        }
+        Update: {
+          candidates_scanned?: number
+          details?: Json | null
+          errors?: number
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          trades_placed?: number
+          trades_skipped?: number
+        }
+        Relationships: []
+      }
       auto_trade_settings: {
         Row: {
           account_type: string
@@ -621,6 +711,42 @@ export type Database = {
           min_confidence?: number
           multiplier?: number
           stake_usd?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      auto_trade_user_limits: {
+        Row: {
+          created_at: string
+          max_daily_loss_usd: number
+          max_open_positions: number
+          max_trades_per_day: number
+          paused: boolean
+          paused_reason: string | null
+          target_profit_usd: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          max_daily_loss_usd?: number
+          max_open_positions?: number
+          max_trades_per_day?: number
+          paused?: boolean
+          paused_reason?: string | null
+          target_profit_usd?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          max_daily_loss_usd?: number
+          max_open_positions?: number
+          max_trades_per_day?: number
+          paused?: boolean
+          paused_reason?: string | null
+          target_profit_usd?: number | null
           updated_at?: string
           user_id?: string
         }
