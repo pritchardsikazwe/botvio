@@ -204,6 +204,8 @@ export const AppRoutes = () => (
     <Route path="synthetic-hub" element={<SyntheticHub />} />
     <Route path="synthetic" element={<SyntheticHub />} />
     <Route path="synthetics" element={<SyntheticHub />} />
+    <Route path="auto-trade" element={<AutoTrade />} />
+    <Route path="auto" element={<AutoTrade />} />
     <Route path="news-calendar" element={<NewsCalendar />} />
     <Route path="markets" element={<GlobalMarkets />} />
     <Route path="markets/us" element={<USMarket />} />
