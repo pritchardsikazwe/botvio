@@ -9,6 +9,7 @@ import { Trash2, Plus, Zap, Cpu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { MT5_SYMBOL_MIN_LOT } from "@/lib/mt5MinLot";
 
 interface TerminalRow {
   id: string;
@@ -199,6 +200,27 @@ export function Mt5AutoExecuteCard() {
       <p className="text-[10px] text-muted-foreground/70">
         Signals at ≥70% confidence will be queued instantly. Your EA picks them up within ~2 seconds and executes on your MT5 account.
       </p>
+
+      {/* Per-symbol minimum lot reference */}
+      <details className="rounded-lg border border-border/50 bg-background/30 p-3">
+        <summary className="text-xs font-semibold cursor-pointer text-muted-foreground hover:text-foreground">
+          Per-symbol minimum lot (Deriv MT5)
+        </summary>
+        <p className="text-[10px] text-muted-foreground/80 mt-2">
+          Each Deriv synthetic has a different broker minimum (e.g. Boom 500 = 0.20, Crash 300 = 0.50).
+          If your default lot is below the symbol minimum, we automatically clamp UP to the minimum so MT5 doesn't reject the order with error 4756.
+        </p>
+        <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 text-[11px]">
+          {Object.entries(MT5_SYMBOL_MIN_LOT)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([sym, min]) => (
+              <div key={sym} className="flex justify-between border-b border-border/30 py-0.5">
+                <code className="text-muted-foreground">{sym}</code>
+                <span className="font-mono text-primary">{min}</span>
+              </div>
+            ))}
+        </div>
+      </details>
     </Card>
   );
 }
