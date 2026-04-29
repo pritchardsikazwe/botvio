@@ -30,8 +30,11 @@ const MT5BridgeSetupWizard = () => {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<"idle" | "success" | "fail">("idle");
   const [autoDetecting, setAutoDetecting] = useState(false);
+  const [activeTerminalUid, setActiveTerminalUid] = useState<string>("");
+  const [newTerminalNickname, setNewTerminalNickname] = useState<string>("");
+  const [creatingTerminal, setCreatingTerminal] = useState(false);
 
-  const terminalUid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
+  const baseUid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
   const supabaseUrl = "https://tqqkzeblmjapgbnsbtgw.supabase.co";
 
   const steps: WizardStep[] = [
@@ -58,6 +61,71 @@ const MT5BridgeSetupWizard = () => {
     enabled: !!user,
     refetchInterval: autoDetecting ? 5000 : false,
   });
+
+  // Fetch all registered terminals (one per physical MT5 install)
+  const { data: terminals, refetch: refetchTerminals } = useQuery({
+    queryKey: ["user-mt5-terminals", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("user_mt5_terminals")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  // Default the active UID to the most recently created terminal
+  useEffect(() => {
+    if (!activeTerminalUid && terminals && terminals.length > 0) {
+      setActiveTerminalUid(terminals[terminals.length - 1].terminal_uid);
+    }
+  }, [terminals, activeTerminalUid]);
+
+  const terminalUid = activeTerminalUid || baseUid;
+
+  const createNewTerminal = async () => {
+    if (!user) return;
+    setCreatingTerminal(true);
+    try {
+      // Determine next suffix based on existing terminals
+      const existing = terminals ?? [];
+      const usedSuffixes = existing
+        .map((t: any) => {
+          const m = String(t.terminal_uid).match(/-(\d+)$/);
+          return m ? parseInt(m[1], 10) : 0;
+        });
+      // If user has zero terminals yet, first one is base UID; subsequent get -1, -2 ...
+      let newUid: string;
+      if (existing.length === 0) {
+        newUid = baseUid;
+      } else {
+        const next = (usedSuffixes.length ? Math.max(...usedSuffixes) : 0) + 1;
+        newUid = `${baseUid}-${next}`;
+      }
+
+      const { error } = await supabase.from("user_mt5_terminals").insert({
+        user_id: user.id,
+        terminal_uid: newUid,
+        nickname: newTerminalNickname || `Terminal ${existing.length + 1}`,
+      });
+      if (error) throw error;
+
+      setActiveTerminalUid(newUid);
+      setNewTerminalNickname("");
+      await refetchTerminals();
+      toast.success(`New Terminal UID created: ${newUid}`, {
+        description: "Use this UID in the EA on a separate MT5 install.",
+      });
+    } catch (err: any) {
+      toast.error("Failed to create terminal: " + err.message);
+    } finally {
+      setCreatingTerminal(false);
+    }
+  };
 
   // Auto-detect: when a new account appears while detecting
   useEffect(() => {
@@ -346,6 +414,54 @@ const MT5BridgeSetupWizard = () => {
               </p>
             </div>
 
+            {/* Existing terminals selector */}
+            {terminals && terminals.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Your Registered Terminals</Label>
+                <div className="space-y-1.5">
+                  {terminals.map((t: any) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setActiveTerminalUid(t.terminal_uid)}
+                      className={`w-full flex items-center justify-between p-2 rounded-md border text-left text-xs transition-colors ${
+                        t.terminal_uid === terminalUid
+                          ? "border-primary bg-primary/10"
+                          : "border-border/50 hover:bg-muted/30"
+                      }`}
+                    >
+                      <div>
+                        <p className="font-medium">{t.nickname || "Terminal"}</p>
+                        <p className="font-mono text-[10px] text-muted-foreground">{t.terminal_uid}</p>
+                      </div>
+                      {t.terminal_uid === terminalUid && (
+                        <Badge variant="default" className="text-[10px]">Active</Badge>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add another terminal */}
+            <div className="space-y-2 p-3 rounded-md border border-dashed border-primary/30 bg-primary/5">
+              <Label className="text-sm font-medium">Add another MT5 terminal</Label>
+              <p className="text-xs text-muted-foreground">
+                Connecting a 2nd account / VPS / broker? Generate a new unique UID so each EA reports separately.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={newTerminalNickname}
+                  onChange={(e) => setNewTerminalNickname(e.target.value)}
+                  placeholder="Nickname (e.g. Exness VPS, Deriv MT5)"
+                  className="text-sm"
+                />
+                <Button onClick={createNewTerminal} disabled={creatingTerminal} size="sm">
+                  {creatingTerminal ? <Loader2 className="h-4 w-4 animate-spin" /> : "+ Generate UID"}
+                </Button>
+              </div>
+            </div>
+
             <Alert className="border-amber-500/30 bg-amber-500/5">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <AlertDescription className="text-xs">
@@ -513,6 +629,36 @@ const MT5BridgeSetupWizard = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* VPS guide */}
+      <Card className="glass-card border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Monitor className="h-4 w-4 text-primary" />
+            Run MT5 24/7 on a Windows VPS
+          </CardTitle>
+          <CardDescription>
+            For uninterrupted bridge execution even when your PC is off
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <ol className="space-y-2 list-decimal list-inside text-muted-foreground">
+            <li>Rent a Windows VPS (ForexVPS, Contabo, Vultr — from $5/mo).</li>
+            <li>Connect via Remote Desktop (RDP) using credentials from your VPS provider.</li>
+            <li>Download MT5 from your broker (Exness, Deriv, IC Markets, etc.) and install it on the VPS.</li>
+            <li>Log in with your trading account credentials.</li>
+            <li>Install the BOTVIO Bridge EA the same way as Step 2 above.</li>
+            <li>Generate a NEW Terminal UID here (use the "Add another MT5 terminal" button) and paste it into the EA on the VPS.</li>
+            <li>Keep the EA running — close RDP but leave the VPS on. MT5 stays online 24/7.</li>
+          </ol>
+          <Alert className="border-primary/30 bg-primary/5">
+            <AlertDescription className="text-xs">
+              <strong>Multiple brokers?</strong> Install several MT5 terminals on the same VPS — one per broker.
+              Generate a unique Terminal UID for each so trades route correctly.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     </div>
   );
 };

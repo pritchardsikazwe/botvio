@@ -191,6 +191,16 @@ const Index = () => {
                 <TrendingUp className="h-4 w-4" /> 🔥 Binance Hub
               </Button>
             </Link>
+            <Link to="/synthetic-hub" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10 animate-pulse">
+                <Sparkles className="h-4 w-4" /> 🚀 Synthetic Hub
+              </Button>
+            </Link>
+            <Link to="/auto-trade" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-success/40 text-success hover:bg-success/10 animate-pulse">
+                <Bot className="h-4 w-4" /> 🤖 24/7 Auto Trade
+              </Button>
+            </Link>
           </div>
 
           {/* Broker Quick Links */}
