@@ -14,6 +14,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { SYNTHETICS } from "@/config/synthetics";
 import { Bot, Cloud, Server, ShieldCheck, Activity, Pause, Play, ExternalLink, Zap } from "lucide-react";
 
+const CONTABO_VPS_IP = "167.86.89.31";
+const CONTABO_VPS_NAME = "vmi3267408 · Cloud VPS 10 SSD";
+
 type Route = "deriv" | "mt5";
 
 interface InstrumentRow {
@@ -271,6 +274,30 @@ export default function AutoTrade() {
             <CardTitle className="flex items-center gap-2"><Server className="h-5 w-5 text-primary" /> Contabo Windows VPS → Link Botvio + MT5 (24/7)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
+            {/* Your VPS quick reference */}
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+              <div className="flex items-center gap-2"><Cloud className="h-4 w-4 text-primary" /><strong>Your Contabo VPS (pre-filled)</strong></div>
+              <div className="grid sm:grid-cols-2 gap-2 text-xs">
+                <div><span className="text-muted-foreground">Server:</span> <code className="font-mono">{CONTABO_VPS_NAME}</code></div>
+                <div><span className="text-muted-foreground">IP address:</span> <code className="font-mono select-all">{CONTABO_VPS_IP}</code></div>
+                <div><span className="text-muted-foreground">RDP user:</span> <code className="font-mono">Administrator</code></div>
+                <div><span className="text-muted-foreground">RDP password:</span> <span className="text-muted-foreground">from your Contabo welcome email</span></div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Use these in <code>mstsc</code> (Windows) or Microsoft Remote Desktop (Mac) to log into the server.
+              </p>
+            </div>
+
+            {/* Security warning about API credentials */}
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 space-y-1">
+              <div className="flex items-center gap-2 text-destructive"><ShieldCheck className="h-4 w-4" /><strong>Important — Contabo API credentials</strong></div>
+              <p className="text-xs text-muted-foreground">
+                Your <strong>Client ID</strong> and <strong>Client Secret</strong> are for the Contabo Cloud API (managing the
+                server itself: reboot, rebuild, etc.). <strong>Botvio does NOT need them</strong> for trading — only the VPS
+                IP + MT5 + Bridge EA. If you shared that secret anywhere public, rotate it now in Contabo → API → Credentials.
+              </p>
+            </div>
+
             <p className="text-muted-foreground">
               You bought a <strong>Contabo Windows VPS</strong> — perfect. Follow the steps below to install MT5,
               attach the <strong>Botvio Bridge EA</strong>, and let auto-trading run 24/7 even when your laptop is off.
@@ -281,8 +308,8 @@ export default function AutoTrade() {
               <div className="flex items-center gap-2"><Cloud className="h-4 w-4 text-primary" /><strong>Step 1 — Connect to your Contabo VPS</strong></div>
               <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
                 <li>Log in at <a className="underline" href="https://my.contabo.com" target="_blank" rel="noopener noreferrer">my.contabo.com</a> → <strong>Your Services</strong> → open your VPS.</li>
-                <li>Copy the <strong>IP address</strong>, <strong>Username</strong> (usually <code>Administrator</code>), and the <strong>Initial Password</strong> from the email Contabo sent you.</li>
-                <li>On Windows: press <kbd>Win+R</kbd> → type <code>mstsc</code> → enter the IP → connect → paste the password. (On Mac, install <em>Microsoft Remote Desktop</em> from the App Store.)</li>
+                <li>Your IP is <code className="font-mono select-all">{CONTABO_VPS_IP}</code>, user is <code>Administrator</code>, password is in the Contabo welcome email.</li>
+                <li>On Windows: press <kbd>Win+R</kbd> → type <code>mstsc</code> → enter <code>{CONTABO_VPS_IP}</code> → connect → paste the password. (On Mac, install <em>Microsoft Remote Desktop</em> from the App Store.)</li>
                 <li>Once you see the Windows desktop, you're inside your VPS — it stays online 24/7.</li>
               </ol>
             </div>
