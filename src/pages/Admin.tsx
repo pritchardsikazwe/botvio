@@ -65,6 +65,7 @@ import { AdminAdvertsTab } from "@/components/admin/AdminAdvertsTab";
 import { AdminTrainingVideosTab } from "@/components/admin/AdminTrainingVideosTab";
 import { AdminChartLimitsTab } from "@/components/admin/AdminChartLimitsTab";
 import { AdminManagedMt5Tab } from "@/components/admin/AdminManagedMt5Tab";
+import { AdminBridgeRequestsTab } from "@/components/admin/AdminBridgeRequestsTab";
 
 interface Provider {
   id: string;
@@ -1104,6 +1105,10 @@ const Admin = () => {
               <Server className="w-4 h-4" />
               Managed MT5
             </TabsTrigger>
+            <TabsTrigger value="bridge_requests" className="flex items-center gap-2">
+              <Server className="w-4 h-4" />
+              Bridge Requests
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1189,6 +1194,11 @@ const Admin = () => {
           {/* Managed MT5 Provisioning Tab */}
           <TabsContent value="managed_mt5">
             <AdminManagedMt5Tab />
+          </TabsContent>
+
+          {/* Bridge Requests Tab */}
+          <TabsContent value="bridge_requests">
+            <AdminBridgeRequestsTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

@@ -152,6 +152,21 @@ const Connections = () => {
           </TabsContent>
 
           <TabsContent value="mt5" className="space-y-6">
+            <Card className="glass-card border-primary/40">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span>No VPS? Use our Managed Bridge</span>
+                </CardTitle>
+                <CardDescription>
+                  Skip the EA install. Submit your MT5 demo credentials and our team will provision a dedicated terminal for you on our VPS — usually within 24 hours.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => (window.location.href = "/bridge-request")}>
+                  Request Managed MT5 Bridge →
+                </Button>
+              </CardContent>
+            </Card>
             <MT5BridgeSetupWizard />
             <Mt5AutoExecuteCard />
           </TabsContent>

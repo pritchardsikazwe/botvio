@@ -979,6 +979,66 @@ export type Database = {
         }
         Relationships: []
       }
+      bridge_connection_requests: {
+        Row: {
+          account_login: string
+          account_type: string
+          admin_note: string | null
+          broker: string
+          contact_email: string | null
+          contact_whatsapp: string | null
+          created_at: string
+          id: string
+          investor_password: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          server_name: string
+          status: string
+          terminal_uid: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_login: string
+          account_type?: string
+          admin_note?: string | null
+          broker: string
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          id?: string
+          investor_password: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          server_name: string
+          status?: string
+          terminal_uid?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_login?: string
+          account_type?: string
+          admin_note?: string | null
+          broker?: string
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          id?: string
+          investor_password?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          server_name?: string
+          status?: string
+          terminal_uid?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       broker_click_events: {
         Row: {
           broker_id: string
