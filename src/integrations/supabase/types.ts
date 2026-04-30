@@ -3488,6 +3488,63 @@ export type Database = {
           },
         ]
       }
+      paper_trades: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          direction: string
+          entry_price: number
+          exit_price: number | null
+          id: string
+          lot: number
+          opened_at: string
+          outcome: string | null
+          pnl_usd: number | null
+          sl: number | null
+          source: string | null
+          status: string
+          symbol: string
+          tp: number | null
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          direction: string
+          entry_price: number
+          exit_price?: number | null
+          id?: string
+          lot?: number
+          opened_at?: string
+          outcome?: string | null
+          pnl_usd?: number | null
+          sl?: number | null
+          source?: string | null
+          status?: string
+          symbol: string
+          tp?: number | null
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          direction?: string
+          entry_price?: number
+          exit_price?: number | null
+          id?: string
+          lot?: number
+          opened_at?: string
+          outcome?: string | null
+          pnl_usd?: number | null
+          sl?: number | null
+          source?: string | null
+          status?: string
+          symbol?: string
+          tp?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       partner_links: {
         Row: {
           category: string | null
@@ -6059,6 +6116,7 @@ export type Database = {
           notifications_enabled: boolean | null
           risk_per_trade: number | null
           updated_at: string
+          use_demo_mt5: boolean
           user_id: string
         }
         Insert: {
@@ -6077,6 +6135,7 @@ export type Database = {
           notifications_enabled?: boolean | null
           risk_per_trade?: number | null
           updated_at?: string
+          use_demo_mt5?: boolean
           user_id: string
         }
         Update: {
@@ -6095,6 +6154,7 @@ export type Database = {
           notifications_enabled?: boolean | null
           risk_per_trade?: number | null
           updated_at?: string
+          use_demo_mt5?: boolean
           user_id?: string
         }
         Relationships: []
