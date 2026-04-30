@@ -70,18 +70,32 @@ const SYMBOL_MIN_LOT: Record<string, number> = {
   "CRASH1000": 0.20,
   "CRASH1500": 0.20,
   "CRASH50": 4.00,
-  "CRASH150": 1.00,
+  "CRASH150": 0.20,
   // Volatility indices
+  // NOTE: keys are normalised (no spaces/parens); "1s" suffix collapses to "1S"
   "VOLATILITY10": 0.50,
-  "VOLATILITY10(1S)": 0.50,
+  "VOLATILITY101S": 0.50,
   "VOLATILITY25": 0.50,
-  "VOLATILITY25(1S)": 0.01,
+  "VOLATILITY251S": 0.01,
   "VOLATILITY50": 4.00,
-  "VOLATILITY50(1S)": 0.01,
+  "VOLATILITY501S": 0.01,
   "VOLATILITY75": 0.001,
-  "VOLATILITY75(1S)": 0.05,
+  "VOLATILITY751S": 0.05,
   "VOLATILITY100": 0.50,
-  "VOLATILITY100(1S)": 0.20,
+  "VOLATILITY1001S": 0.20,
+  // Step / Range / Jump / Bear-Bull / DEX
+  "STEP": 0.10,
+  "STEP200": 0.10,
+  "STEP500": 0.10,
+  "RANGEBREAK100": 1.00,
+  "RANGEBREAK200": 0.40,
+  "JUMP10": 0.01,
+  "JUMP25": 0.01,
+  "JUMP50": 0.01,
+  "JUMP75": 0.01,
+  "JUMP100": 0.01,
+  "BEARMARKET": 0.20,
+  "BULLMARKET": 0.20,
   // Forex / Metals (most Deriv MT5 brokers)
   "XAUUSD": 0.01,
   "XAGUSD": 0.01,
@@ -100,9 +114,9 @@ const SYMBOL_MIN_LOT: Record<string, number> = {
 };
 
 function getSymbolMinLot(mt5Symbol: string): number {
-  // Strip spaces / punctuation for the table lookup so "Boom 500 Index"
-  // matches the "BOOM500" key (we drop the trailing "INDEX" too).
-  let key = mt5Symbol.toUpperCase().replace(/[\s_\-\(\)]/g, "");
+  // Normalise "Volatility 75 (1s) Index" -> "VOLATILITY751S",
+  // "Step Index" -> "STEP", "Crash 150 Index" -> "CRASH150".
+  let key = mt5Symbol.toUpperCase().replace(/[\s_\-\(\)\.]/g, "");
   key = key.replace(/INDEX$/i, "");
   return SYMBOL_MIN_LOT[key] ?? 0.01;
 }
