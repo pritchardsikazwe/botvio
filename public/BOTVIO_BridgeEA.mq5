@@ -563,13 +563,13 @@ bool ExecuteModifyCommand(string response, string &errorMsg)
    request.sl = sl;
    request.tp = tp;
    
-   if(OrderSend(request, result))
+   if(OrderSend(request, result) && (result.retcode == TRADE_RETCODE_DONE || result.retcode == TRADE_RETCODE_PLACED))
    {
       return true;
    }
    else
    {
-      errorMsg = StringFormat("Modify failed. Error: %d", GetLastError());
+      errorMsg = StringFormat("Modify failed. Retcode: %d Error: %d", result.retcode, GetLastError());
       return false;
    }
 }
