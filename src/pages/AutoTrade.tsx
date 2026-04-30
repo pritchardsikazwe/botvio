@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SYNTHETICS } from "@/config/synthetics";
 import { Bot, Cloud, Server, ShieldCheck, Activity, Pause, Play, ExternalLink, Zap } from "lucide-react";
+import { ActivateCloudWorkerWizard } from "@/components/trading/ActivateCloudWorkerWizard";
+import { ManagedMt5Onboarding } from "@/components/broker/ManagedMt5Onboarding";
 
 const CONTABO_VPS_IP = "167.86.89.31";
 const CONTABO_VPS_NAME = "vmi3267408 · Cloud VPS 10 SSD";
@@ -166,6 +168,12 @@ export default function AutoTrade() {
             </Badge>
           </div>
         </div>
+
+        {/* Activation wizard */}
+        <ActivateCloudWorkerWizard />
+
+        {/* Managed MT5 — no install */}
+        <ManagedMt5Onboarding />
 
         {/* Safety limits */}
         <Card>

@@ -112,6 +112,21 @@ serve(async (req) => {
     }
 
     for (const [userId, items] of byUser) {
+      // ── Plan gating: only paid tiers (basic / standard / vip) get the cloud worker ──
+      const { data: planRow } = await admin
+        .from("user_plan_subscriptions")
+        .select("status, pricing_plans!inner(code)")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .maybeSingle();
+      const planCode = (planRow as any)?.pricing_plans?.code ?? "free";
+      const PAID_PLANS = ["basic", "standard", "vip", "pro", "premium"];
+      if (!PAID_PLANS.includes(planCode)) {
+        skipped += items.length;
+        details.push({ userId, reason: "free_plan", planCode });
+        continue;
+      }
+
       // Load limits (defaults if missing)
       const { data: limits } = await admin.from("auto_trade_user_limits").select("*").eq("user_id", userId).maybeSingle();
       const maxTradesPerDay = limits?.max_trades_per_day ?? 20;
