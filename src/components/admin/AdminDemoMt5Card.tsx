@@ -162,6 +162,52 @@ export function AdminDemoMt5Card() {
               <Switch checked={cfg.enabled} onCheckedChange={(v) => setCfg({ ...cfg, enabled: v })} />
             </div>
 
+            <div className="rounded-lg border border-border bg-card/40 p-4 space-y-3">
+              <p className="text-sm font-semibold">Public credentials shown to traders</p>
+              <p className="text-[11px] text-muted-foreground">
+                Displayed on Trading Hubs / Deriv API / Automation pages so users can log in to MT5
+                mobile/desktop and watch trades land. Use a <strong>read-only investor password</strong>.
+              </p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="demo-broker">Broker</Label>
+                  <Input id="demo-broker" placeholder="Deriv MT5"
+                    value={cfg.broker_name ?? ""}
+                    onChange={(e) => setCfg({ ...cfg, broker_name: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="demo-email">Public contact email</Label>
+                  <Input id="demo-email" placeholder="demo@botvio.live"
+                    value={cfg.public_email ?? ""}
+                    onChange={(e) => setCfg({ ...cfg, public_email: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="demo-login">MT5 Login</Label>
+                  <Input id="demo-login" placeholder="12345678"
+                    value={cfg.mt5_login ?? ""}
+                    onChange={(e) => setCfg({ ...cfg, mt5_login: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="demo-server">MT5 Server</Label>
+                  <Input id="demo-server" placeholder="DerivBVI-Demo"
+                    value={cfg.mt5_server ?? ""}
+                    onChange={(e) => setCfg({ ...cfg, mt5_server: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="demo-password">MT5 Investor Password</Label>
+                  <Input id="demo-password" placeholder="read-only password"
+                    value={cfg.mt5_password ?? ""}
+                    onChange={(e) => setCfg({ ...cfg, mt5_password: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="demo-limit">Daily send limit / user</Label>
+                  <Input id="demo-limit" type="number" min={1} step={1}
+                    value={cfg.daily_send_limit ?? 5}
+                    onChange={(e) => setCfg({ ...cfg, daily_send_limit: Number(e.target.value) })} />
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving}>
                 <Save className="w-4 h-4 mr-1" /> {saving ? "Saving…" : "Save settings"}
