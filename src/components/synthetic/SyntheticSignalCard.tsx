@@ -254,17 +254,17 @@ export function SyntheticSignalCard({
           </Button>
         </div>
 
-        {/* When signal is WAIT, expose explicit BUY/SELL choice for manual entry */}
-        {!dir && (showBuy || showSell) && (
+        {/* When signal is WAIT (or bias allows both sides), expose explicit BUY/SELL choice. */}
+        {!dir && (
           <div className="flex items-center gap-2 pt-1 border-t border-border/30">
             <span className="text-[10px] text-muted-foreground">Manual:</span>
-            {showBuy && (
+            {(instrument.bias === "buy" || instrument.bias === "both") && (
               <>
                 <Button size="sm" variant="ghost" className="h-6 text-[10px] text-emerald-400 hover:bg-emerald-500/10" onClick={() => tradeOnDeriv("BUY")}>BUY · Deriv</Button>
                 <Button size="sm" variant="ghost" className="h-6 text-[10px] text-emerald-400 hover:bg-emerald-500/10" onClick={() => sendToMt5("BUY")}>BUY · MT5</Button>
               </>
             )}
-            {showSell && (
+            {(instrument.bias === "sell" || instrument.bias === "both") && (
               <>
                 <Button size="sm" variant="ghost" className="h-6 text-[10px] text-red-400 hover:bg-red-500/10" onClick={() => tradeOnDeriv("SELL")}>SELL · Deriv</Button>
                 <Button size="sm" variant="ghost" className="h-6 text-[10px] text-red-400 hover:bg-red-500/10" onClick={() => sendToMt5("SELL")}>SELL · MT5</Button>
