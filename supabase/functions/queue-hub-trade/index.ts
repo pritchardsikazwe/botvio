@@ -22,6 +22,30 @@ function mapToMt5Symbol(input: string): string {
     /^(Boom|Crash|Volatility|Step|Range Break|Jump|Bear Market|Bull Market)/i.test(trimmed);
   if (isSynthetic) return trimmed;
 
+  // Weltrade proprietary synthetics — symbols are case-sensitive in Market Watch
+  // and use a SPACE between family and number, e.g. "PainX 10", "GainX 100",
+  // "TrendX 50". The specialty ones have no number: "FlipX", "SwitchX", "BreakX".
+  const isWeltradeSyntx =
+    /^(PainX|GainX|TrendX|FlipX|SwitchX|BreakX)(\s+\d+)?$/i.test(trimmed);
+  if (isWeltradeSyntx) {
+    // Normalise capitalisation but preserve spacing.
+    const familyMatch = trimmed.match(/^([A-Za-z]+)(?:\s+(\d+))?$/);
+    if (familyMatch) {
+      const fam = familyMatch[1];
+      const canon = fam.charAt(0).toUpperCase() + fam.slice(1, -1).toLowerCase() + "X";
+      // Re-derive: PainX, GainX, TrendX, FlipX, SwitchX, BreakX
+      const proper =
+        fam.toLowerCase() === "painx" ? "PainX" :
+        fam.toLowerCase() === "gainx" ? "GainX" :
+        fam.toLowerCase() === "trendx" ? "TrendX" :
+        fam.toLowerCase() === "flipx" ? "FlipX" :
+        fam.toLowerCase() === "switchx" ? "SwitchX" :
+        fam.toLowerCase() === "breakx" ? "BreakX" : canon;
+      return familyMatch[2] ? `${proper} ${familyMatch[2]}` : proper;
+    }
+    return trimmed;
+  }
+
   const s = trimmed.toUpperCase().replace(/[\/\s_-]/g, "");
   // Common aliases
   const aliases: Record<string, string> = {
@@ -111,6 +135,20 @@ const SYMBOL_MIN_LOT: Record<string, number> = {
   // Crypto
   "BTCUSD": 0.01,
   "ETHUSD": 0.01,
+  // ── Weltrade synthetics (PainX / GainX / TrendX + specialty) ──
+  // Lookup keys are normalised: spaces stripped, "INDEX" trimmed.
+  "PAINX10": 0.01,
+  "PAINX50": 0.01,
+  "PAINX100": 0.01,
+  "PAINX200": 0.01,
+  "GAINX10": 0.01,
+  "GAINX50": 0.01,
+  "GAINX100": 0.01,
+  "TRENDX10": 0.01,
+  "TRENDX50": 0.01,
+  "FLIPX": 0.01,
+  "SWITCHX": 0.01,
+  "BREAKX": 0.01,
 };
 
 function getSymbolMinLot(mt5Symbol: string): number {
