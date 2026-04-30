@@ -82,6 +82,7 @@ import MetaHub from "./pages/stock-hubs/MetaHub";
 import AlphabetHub from "./pages/stock-hubs/AlphabetHub";
 
 import WeltradeHub from "./pages/WeltradeHub";
+import WeltradeTrade from "./pages/WeltradeTrade";
 import SyntheticHub from "./pages/SyntheticHub";
 import AutoTrade from "./pages/AutoTrade";
 import DerivOptions from "./pages/DerivOptions";
@@ -201,6 +202,7 @@ export const AppRoutes = () => (
     <Route path="stocks/googl" element={<AlphabetHub />} />
 
     <Route path="weltrade" element={<WeltradeHub />} />
+    <Route path="weltrade-trade" element={<WeltradeTrade />} />
     <Route path="synthetic-hub" element={<SyntheticHub />} />
     <Route path="synthetic" element={<SyntheticHub />} />
     <Route path="synthetics" element={<SyntheticHub />} />
