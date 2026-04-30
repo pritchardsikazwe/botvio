@@ -49,7 +49,7 @@ export function DemoMt5Card({ symbol, sl, tp, source = "demo-card" }: Props) {
       const { data } = await supabase
         .from("app_settings").select("value").eq("key", "demo_mt5").maybeSingle();
       if (!active) return;
-      setCfg((data?.value ?? null) as DemoCfg | null);
+      setCfg((data?.value ?? null) as unknown as DemoCfg | null);
       setLoading(false);
     })();
     return () => { active = false; };
