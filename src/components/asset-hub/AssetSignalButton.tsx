@@ -6,6 +6,7 @@ import { useMarketSession } from "@/hooks/useMarketSession";
 import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
 import { usePersistLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
 import { useMt5HubExecution } from "@/hooks/useMt5HubExecution";
+import { HubAutoMt5Toggle } from "@/components/trading/HubAutoMt5Toggle";
 
 const SIGNAL_CONFIG: Record<DerivSignalType, {
   bg: string;
@@ -157,6 +158,9 @@ export function AssetSignalButton({
           <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">{state.strategy}</Badge>
           <p className="text-xs text-muted-foreground leading-relaxed">{state.reason}</p>
         </div>
+
+        {/* Per-instrument auto-send to MT5 */}
+        <HubAutoMt5Toggle symbol={persistSymbol} label={`${assetLabel} (${displaySymbol})`} />
 
         <p className="text-[10px] text-muted-foreground/60 text-center">
           Signal based on Botvio AI strategy rules • Not financial advice • Always manage risk

@@ -54,8 +54,24 @@ export function useMt5HubExecution({
     refetchInterval: 30_000,
   });
 
+  // Per-symbol "Auto-send to MT5" toggle from user_settings.hub_auto_mt5_symbols
+  const { data: hubAutoEnabled } = useQuery({
+    queryKey: ["hub-auto-mt5", user?.id, symbol],
+    enabled: !!user?.id && !!symbol,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("hub_auto_mt5_symbols")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      const map = (data?.hub_auto_mt5_symbols as Record<string, boolean> | null) ?? {};
+      return map[symbol] === true;
+    },
+    refetchInterval: 15_000,
+  });
+
   useEffect(() => {
-    if (!user || !enabled || !hasAutoTerminal) return;
+    if (!user || !enabled || !hasAutoTerminal || !hubAutoEnabled) return;
     if (live.signal !== "BUY" && live.signal !== "SELL") return;
     if (live.confidence < minConfidence) return;
 
@@ -106,5 +122,5 @@ export function useMt5HubExecution({
         lastFiredRef.current = null;
       }
     })();
-  }, [user, enabled, hasAutoTerminal, live.signal, live.confidence, symbol, minConfidence, source]);
+  }, [user, enabled, hasAutoTerminal, hubAutoEnabled, live.signal, live.confidence, symbol, minConfidence, source]);
 }
