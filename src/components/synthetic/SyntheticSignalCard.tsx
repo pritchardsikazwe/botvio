@@ -131,7 +131,13 @@ export function SyntheticSignalCard({
   // ─── Send to MT5 Bridge EA (queue-hub-trade) ─────────────────────
   const sendToMt5 = async (forcedDir?: "BUY" | "SELL") => {
     const direction = forcedDir ?? dir;
-    if (!direction) return;
+    if (!direction) {
+      toast({
+        title: "No live signal direction",
+        description: "Use the manual BUY · MT5 / SELL · MT5 buttons below to send this trade.",
+      });
+      return;
+    }
     if (!user) {
       toast({ title: "Sign in required", variant: "destructive" });
       return;
