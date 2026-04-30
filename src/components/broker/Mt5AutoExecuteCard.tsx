@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Plus, Zap, Cpu, Sparkles, Copy, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ interface TerminalRow {
   default_lot: number;
   auto_execute: boolean;
   last_seen_at: string | null;
+  route: "mt5" | "deriv";
 }
 
 /**
@@ -30,6 +32,7 @@ export function Mt5AutoExecuteCard() {
   const [newUid, setNewUid] = useState("");
   const [newNickname, setNewNickname] = useState("");
   const [newLot, setNewLot] = useState("0.01");
+  const [newRoute, setNewRoute] = useState<"mt5" | "deriv">("mt5");
   const [busy, setBusy] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -66,14 +69,14 @@ export function Mt5AutoExecuteCard() {
     if (!user) return;
     const { data, error } = await supabase
       .from("user_mt5_terminals")
-      .select("id, terminal_uid, nickname, default_lot, auto_execute, last_seen_at")
+      .select("id, terminal_uid, nickname, default_lot, auto_execute, last_seen_at, route")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     if (error) {
       toast({ title: "Failed to load terminals", description: error.message, variant: "destructive" });
       return;
     }
-    setRows(data ?? []);
+    setRows((data ?? []) as TerminalRow[]);
   };
 
   useEffect(() => { load(); }, [user?.id]);
@@ -93,14 +96,15 @@ export function Mt5AutoExecuteCard() {
       nickname: newNickname.trim() || null,
       default_lot: Number.isFinite(lot) && lot > 0 ? lot : 0.01,
       auto_execute: true,
-    });
+      route: newRoute,
+    } as any);
     setBusy(false);
     if (error) {
       toast({ title: "Could not save terminal", description: error.message, variant: "destructive" });
       return;
     }
     toast({ title: "Terminal linked — auto-execute is ON" });
-    setNewUid(""); setNewNickname(""); setNewLot("0.01");
+    setNewUid(""); setNewNickname(""); setNewLot("0.01"); setNewRoute("mt5");
     load();
   };
 
@@ -114,6 +118,19 @@ export function Mt5AutoExecuteCard() {
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, auto_execute: value } : r)));
+  };
+
+  const updateRoute = async (row: TerminalRow, value: "mt5" | "deriv") => {
+    const { error } = await supabase
+      .from("user_mt5_terminals")
+      .update({ route: value } as any)
+      .eq("id", row.id);
+    if (error) {
+      toast({ title: "Route update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, route: value } : r)));
+    toast({ title: `Route set to ${value === "mt5" ? "MT5 Bridge" : "Deriv API"}` });
   };
 
   const updateLot = async (row: TerminalRow, val: string) => {
@@ -192,6 +209,18 @@ export function Mt5AutoExecuteCard() {
             <Plus className="h-4 w-4 mr-1" /> Link
           </Button>
         </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Default route</Label>
+          <Select value={newRoute} onValueChange={(v) => setNewRoute(v as "mt5" | "deriv")}>
+            <SelectTrigger className="h-8 w-[200px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mt5">MT5 Bridge (EA on VPS)</SelectItem>
+              <SelectItem value="deriv">Deriv API (CFD multipliers)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <p className="text-[10px] text-muted-foreground/80 leading-relaxed">
           💡 <strong>Multiple MT5 accounts?</strong> Generate a separate Terminal UID for each MT5 account
           (e.g. one for Deriv MT5, another for Exness). Paste each UID into the matching MT5 terminal's
@@ -234,6 +263,18 @@ export function Mt5AutoExecuteCard() {
                   onBlur={(e) => updateLot(row, e.target.value)}
                   className="w-20 h-8 text-xs"
                 />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="text-xs">Route</Label>
+                <Select value={row.route} onValueChange={(v) => updateRoute(row, v as "mt5" | "deriv")}>
+                  <SelectTrigger className="h-8 w-[160px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mt5">MT5 Bridge</SelectItem>
+                    <SelectItem value="deriv">Deriv API</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="text-xs">Auto</Label>
