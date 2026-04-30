@@ -38,7 +38,8 @@ import {
   Mail,
   Contact,
   Phone,
-  Trophy
+  Trophy,
+  Server
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
