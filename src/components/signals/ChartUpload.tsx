@@ -3,6 +3,7 @@ import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ChartSendToMt5Button } from "@/components/chart/ChartSendToMt5Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -705,6 +706,24 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                         <p className="text-xs text-muted-foreground">Stop Loss</p>
                         <p className="font-mono font-bold text-destructive">{structuredResult.stop_loss || "TBD"}</p>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Send AI Chart recommendation to MT5 Bridge EA */}
+                  {structuredResult?.recommendation && symbol && (
+                    <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 p-3">
+                      <div className="text-xs">
+                        <p className="font-semibold text-foreground">Execute on MT5</p>
+                        <p className="text-muted-foreground">
+                          Routes to your Bridge EA terminal with the AI's SL/TP attached.
+                        </p>
+                      </div>
+                      <ChartSendToMt5Button
+                        symbol={symbol}
+                        recommendation={structuredResult.recommendation}
+                        stopLoss={structuredResult.stop_loss ? parseFloat(structuredResult.stop_loss) : null}
+                        takeProfit={structuredResult.take_profit ? parseFloat(structuredResult.take_profit) : null}
+                      />
                     </div>
                   )}
 
