@@ -20,6 +20,7 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const BRIDGE_SHARED_SECRET = Deno.env.get("BRIDGE_SHARED_SECRET") ?? "";
 const DERIV_APP_ID = Deno.env.get("DERIV_APP_ID") || "99139";
 const DERIV_WS = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
 
@@ -132,8 +133,8 @@ async function queueMt5Trade(args: {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${SERVICE_KEY}`,
       "apikey": SERVICE_KEY,
+      "x-internal-secret": BRIDGE_SHARED_SECRET,
       "x-internal-user-id": args.userId,
     },
     body: JSON.stringify({
