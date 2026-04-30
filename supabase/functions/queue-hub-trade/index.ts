@@ -100,7 +100,10 @@ const SYMBOL_MIN_LOT: Record<string, number> = {
 };
 
 function getSymbolMinLot(mt5Symbol: string): number {
-  const key = mt5Symbol.toUpperCase().replace(/[\s_-]/g, "");
+  // Strip spaces / punctuation for the table lookup so "Boom 500 Index"
+  // matches the "BOOM500" key (we drop the trailing "INDEX" too).
+  let key = mt5Symbol.toUpperCase().replace(/[\s_\-\(\)]/g, "");
+  key = key.replace(/INDEX$/i, "");
   return SYMBOL_MIN_LOT[key] ?? 0.01;
 }
 
