@@ -2656,6 +2656,54 @@ export type Database = {
           },
         ]
       }
+      managed_mt5_requests: {
+        Row: {
+          account_type: string
+          admin_notes: string | null
+          assigned_terminal_uid: string | null
+          broker_name: string | null
+          created_at: string
+          id: string
+          mt5_login: string
+          mt5_server: string
+          nickname: string
+          password_encrypted: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_type?: string
+          admin_notes?: string | null
+          assigned_terminal_uid?: string | null
+          broker_name?: string | null
+          created_at?: string
+          id?: string
+          mt5_login: string
+          mt5_server: string
+          nickname: string
+          password_encrypted: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_type?: string
+          admin_notes?: string | null
+          assigned_terminal_uid?: string | null
+          broker_name?: string | null
+          created_at?: string
+          id?: string
+          mt5_login?: string
+          mt5_server?: string
+          nickname?: string
+          password_encrypted?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       market_candles: {
         Row: {
           asset_id: string
