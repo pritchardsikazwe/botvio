@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 export interface HubSignalSnapshot {
   signal: "BUY" | "SELL" | "WAIT" | "HOLD";
   confidence: number;
+  /** Latest price — used to derive SL/TP brackets when sending to MT5 */
+  lastPrice?: number | null;
 }
 
 interface Options {
@@ -20,6 +22,10 @@ interface Options {
   minConfidence?: number;
   /** Source label for logging (e.g. "gold-hub", "btc-hub") */
   source?: string;
+  /** Stop-loss as a fraction of price (default 0.0025 = 0.25%) */
+  slPct?: number;
+  /** Take-profit as a fraction of price (default 0.005 = 0.5%) */
+  tpPct?: number;
 }
 
 /**
@@ -34,6 +40,8 @@ export function useMt5HubExecution({
   enabled,
   minConfidence = 70,
   source = "hub-signal",
+  slPct = 0.0025,
+  tpPct = 0.005,
 }: Options) {
   const { user } = useAuth();
   const lastFiredRef = useRef<string | null>(null);
@@ -86,6 +94,19 @@ export function useMt5HubExecution({
         const accessToken = session?.access_token;
         if (!accessToken) return;
 
+        // Compute SL/TP from the latest price (matches cloud-worker brackets)
+        let sl: number | undefined;
+        let tp: number | undefined;
+        const px = live.lastPrice;
+        if (typeof px === "number" && px > 0) {
+          const isBuy = live.signal === "BUY";
+          const slRaw = isBuy ? px * (1 - slPct) : px * (1 + slPct);
+          const tpRaw = isBuy ? px * (1 + tpPct) : px * (1 - tpPct);
+          // 5-decimal precision is fine for FX/metals/crypto on MT5
+          sl = Number(slRaw.toFixed(5));
+          tp = Number(tpRaw.toFixed(5));
+        }
+
         const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/queue-hub-trade`;
         const resp = await fetch(url, {
           method: "POST",
@@ -97,6 +118,8 @@ export function useMt5HubExecution({
             symbol,
             direction: live.signal,
             source,
+            ...(sl ? { sl } : {}),
+            ...(tp ? { tp } : {}),
           }),
         });
         const json = await resp.json().catch(() => ({}));
@@ -114,13 +137,13 @@ export function useMt5HubExecution({
         toast({
           title: `MT5 trade queued: ${live.signal} ${symbol}`,
           description: json.adjusted
-            ? `Volume auto-adjusted to ${json.volume} (broker min for ${symbol}) • Terminal ${json.terminal_uid?.slice(0, 8)}…`
-            : `Volume ${json.volume} • Terminal ${json.terminal_uid?.slice(0, 8)}…`,
+            ? `Vol ${json.volume} (broker min) • SL ${sl ?? "—"} / TP ${tp ?? "—"}`
+            : `Vol ${json.volume} • SL ${sl ?? "—"} / TP ${tp ?? "—"}`,
         });
       } catch (err) {
         console.error("[MT5 Auto] Error:", err);
         lastFiredRef.current = null;
       }
     })();
-  }, [user, enabled, hasAutoTerminal, hubAutoEnabled, live.signal, live.confidence, symbol, minConfidence, source]);
+  }, [user, enabled, hasAutoTerminal, hubAutoEnabled, live.signal, live.confidence, live.lastPrice, symbol, minConfidence, source, slPct, tpPct]);
 }
