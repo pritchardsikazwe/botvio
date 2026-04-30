@@ -158,6 +158,39 @@ serve(async (req) => {
 
           const idempotencyKey = `auto:${userId}:${inst.instrument_key}:${Math.floor(Date.now() / (5 * 60 * 1000))}`;
 
+          // Auto-post the signal to the public feed (best-effort, non-blocking on failure)
+          if (inst.auto_post !== false) {
+            try {
+              const lastClose = candles[candles.length - 1]?.close ?? 0;
+              const isBuy = sig.signal === "BUY";
+              // Tight scalp brackets: ~0.25% SL, ~0.5% TP
+              const slPct = 0.0025;
+              const tpPct = 0.005;
+              const sl = isBuy ? lastClose * (1 - slPct) : lastClose * (1 + slPct);
+              const tp = isBuy ? lastClose * (1 + tpPct) : lastClose * (1 - tpPct);
+              await admin.from("trading_signals").insert({
+                strategy_name: "Botvio AI Strategy",
+                symbol: inst.display_symbol,
+                timeframe: "M1",
+                direction: sig.signal,
+                entry_price: Number(lastClose.toFixed(5)),
+                stop_loss: Number(sl.toFixed(5)),
+                take_profit: Number(tp.toFixed(5)),
+                reason: `Cloud worker · ${sig.reason}`,
+                confidence: sig.confidence,
+                status: "ACTIVE",
+                category: inst.category || "synthetic",
+                broker: ["deriv", "weltrade", "exness"],
+                is_manual: false,
+                posted_by: userId,
+                signal_lifecycle: "approved",
+                expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+              });
+            } catch (postErr) {
+              console.warn("auto-post failed", inst.instrument_key, postErr);
+            }
+          }
+
           if (inst.route === "deriv") {
             if (!inst.deriv_connection_id) { skipped++; continue; }
             const contractType = sig.signal === "BUY" ? "MULTUP" : "MULTDOWN";

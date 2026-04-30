@@ -583,6 +583,7 @@ export type Database = {
       }
       auto_trade_instruments: {
         Row: {
+          auto_post: boolean
           contract_family: string
           created_at: string
           deriv_connection_id: string | null
@@ -600,6 +601,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_post?: boolean
           contract_family?: string
           created_at?: string
           deriv_connection_id?: string | null
@@ -617,6 +619,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_post?: boolean
           contract_family?: string
           created_at?: string
           deriv_connection_id?: string | null
