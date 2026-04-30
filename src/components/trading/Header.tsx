@@ -156,6 +156,10 @@ export const Header = () => {
                       <ArrowLeftRight className="w-4 h-4 mr-2" />
                       Broker Connections / MT5 Bridge
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/bridge-request')}>
+                      <ArrowLeftRight className="w-4 h-4 mr-2" />
+                      Request Managed MT5 Bridge
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/sports-betting')}>
                       <BarChart3 className="w-4 h-4 mr-2" />
                       Sports Betting
