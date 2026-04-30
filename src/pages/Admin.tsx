@@ -38,7 +38,8 @@ import {
   Mail,
   Contact,
   Phone,
-  Trophy
+  Trophy,
+  Server
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,6 +64,7 @@ import { AdminLiveStreamsTab } from "@/components/admin/AdminLiveStreamsTab";
 import { AdminAdvertsTab } from "@/components/admin/AdminAdvertsTab";
 import { AdminTrainingVideosTab } from "@/components/admin/AdminTrainingVideosTab";
 import { AdminChartLimitsTab } from "@/components/admin/AdminChartLimitsTab";
+import { AdminManagedMt5Tab } from "@/components/admin/AdminManagedMt5Tab";
 
 interface Provider {
   id: string;
@@ -1098,6 +1100,10 @@ const Admin = () => {
                 Chart Limits
               </TabsTrigger>
             )}
+            <TabsTrigger value="managed_mt5" className="flex items-center gap-2">
+              <Server className="w-4 h-4" />
+              Managed MT5
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1178,6 +1184,11 @@ const Admin = () => {
           {/* Chart Upload Limits Tab */}
           <TabsContent value="chart_limits">
             <AdminChartLimitsTab />
+          </TabsContent>
+
+          {/* Managed MT5 Provisioning Tab */}
+          <TabsContent value="managed_mt5">
+            <AdminManagedMt5Tab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}
