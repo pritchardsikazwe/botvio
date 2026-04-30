@@ -6,6 +6,7 @@ import { useMarketSession } from "@/hooks/useMarketSession";
 import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
 import { usePersistGoldLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
 import { useMt5HubExecution } from "@/hooks/useMt5HubExecution";
+import { HubAutoMt5Toggle } from "@/components/trading/HubAutoMt5Toggle";
 
 type SignalType = DerivSignalType;
 
@@ -148,6 +149,9 @@ export function GoldBotvioSignalButton() {
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">{effectiveState.reason}</p>
         </div>
+
+        {/* Per-instrument auto-send to MT5 */}
+        <HubAutoMt5Toggle symbol="XAUUSD" label="Gold (XAU/USD)" />
 
         {/* Disclaimer */}
         <p className="text-[10px] text-muted-foreground/60 text-center">
