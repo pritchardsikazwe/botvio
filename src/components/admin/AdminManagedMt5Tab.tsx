@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Server, RefreshCw, CheckCircle2, XCircle, Ban, Cloud } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AdminDemoMt5Card } from "./AdminDemoMt5Card";
 
 type Req = {
   id: string;
@@ -120,7 +121,9 @@ export function AdminManagedMt5Tab() {
   };
 
   return (
-    <Card className="glass-card">
+    <div className="space-y-4">
+      <AdminDemoMt5Card />
+      <Card className="glass-card">
       <CardHeader>
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
