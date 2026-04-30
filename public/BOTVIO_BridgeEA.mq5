@@ -357,6 +357,26 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
    int volEnd = StringFind(response, ",", volStart);
    if(volEnd < 0) volEnd = StringFind(response, "}", volStart);
    double volume = StringToDouble(StringSubstr(response, volStart, volEnd - volStart));
+
+   // Extract optional SL/TP from the OPEN command so MT5 receives the full trade plan.
+   double sl = 0, tp = 0;
+   int slStart = StringFind(response, "\"sl\":");
+   if(slStart >= 0)
+   {
+      slStart += 5;
+      int slEnd = StringFind(response, ",", slStart);
+      if(slEnd < 0) slEnd = StringFind(response, "}", slStart);
+      sl = StringToDouble(StringSubstr(response, slStart, slEnd - slStart));
+   }
+
+   int tpStart = StringFind(response, "\"tp\":");
+   if(tpStart >= 0)
+   {
+      tpStart += 5;
+      int tpEnd = StringFind(response, ",", tpStart);
+      if(tpEnd < 0) tpEnd = StringFind(response, "}", tpStart);
+      tp = StringToDouble(StringSubstr(response, tpStart, tpEnd - tpStart));
+   }
    
    // Execute trade
    MqlTradeRequest request = {};
@@ -370,6 +390,8 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
    request.deviation = 10;
    request.magic = 123456;
    request.comment = "BOTVIO";
+   if(sl > 0) request.sl = sl;
+   if(tp > 0) request.tp = tp;
    
    if(OrderSend(request, result))
    {
