@@ -199,6 +199,7 @@ serve(async (req) => {
       tp,               // optional take-profit price
       source,           // optional string (e.g. "gold-hub", "btc-hub")
       terminal_uid,     // optional explicit terminal; default = first auto_execute=true
+      use_demo,         // boolean — explicit "send to shared Demo MT5" (public test button)
     } = body ?? {};
 
     if (!symbol || typeof symbol !== "string") {
@@ -233,7 +234,7 @@ serve(async (req) => {
         .eq("terminal_uid", terminal_uid)
         .maybeSingle();
       terminal = data ?? null;
-    } else {
+    } else if (!use_demo) {
       const { data } = await adminClient
         .from("user_mt5_terminals")
         .select("terminal_uid, default_lot, auto_execute")
@@ -245,23 +246,46 @@ serve(async (req) => {
       terminal = data ?? null;
     }
 
-    // Demo MT5 fallback: user has no personal terminal but opted into shared demo
+    // Demo MT5: explicit `use_demo` from public test button OR user opted in
     if (!terminal) {
-      const { data: settings } = await adminClient
-        .from("user_settings")
-        .select("use_demo_mt5")
-        .eq("user_id", userId)
-        .maybeSingle();
-      if (settings?.use_demo_mt5) {
+      let optedIn = !!use_demo;
+      if (!optedIn) {
+        const { data: settings } = await adminClient
+          .from("user_settings")
+          .select("use_demo_mt5")
+          .eq("user_id", userId)
+          .maybeSingle();
+        optedIn = !!settings?.use_demo_mt5;
+      }
+      if (optedIn) {
         const { data: demoCfg } = await adminClient
           .from("app_settings")
           .select("value")
           .eq("key", "demo_mt5")
           .maybeSingle();
         const cfg = (demoCfg?.value ?? {}) as {
-          enabled?: boolean; terminal_uid?: string; max_lot?: number;
+          enabled?: boolean; terminal_uid?: string; max_lot?: number; daily_send_limit?: number;
         };
         if (cfg.enabled && cfg.terminal_uid) {
+          // Per-user daily rate limit on demo sends (default 5)
+          const dailyLimit = Number(cfg.daily_send_limit) || 5;
+          const today = new Date().toISOString().slice(0, 10);
+          const { count: usedToday } = await adminClient
+            .from("demo_mt5_test_sends")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId)
+            .eq("sent_on", today);
+          if ((usedToday ?? 0) >= dailyLimit) {
+            return new Response(
+              JSON.stringify({
+                error: "Daily Demo MT5 send limit reached",
+                hint: `You've used your ${dailyLimit} test signals for today. Try again tomorrow or connect your own MT5 Bridge.`,
+                used: usedToday,
+                limit: dailyLimit,
+              }),
+              { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
           terminal = {
             terminal_uid: cfg.terminal_uid,
             default_lot: Number(cfg.max_lot) || 0.01,
@@ -323,6 +347,16 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Failed to queue command" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Audit demo send for rate limiting
+    if (usingDemo) {
+      await adminClient.from("demo_mt5_test_sends").insert({
+        user_id: userId,
+        symbol: mt5Symbol,
+        direction,
+        command_id: inserted?.id ?? null,
       });
     }
 
