@@ -14,7 +14,15 @@ const corsHeaders = {
  * exact symbol; if you use a suffix-broker, you can override per terminal later.
  */
 function mapToMt5Symbol(input: string): string {
-  const s = input.toUpperCase().replace(/[\/\s_-]/g, "");
+  // Deriv MT5 brokers (Deriv MT5, Deriv Synthetic) use SPACE-separated symbols
+  // for synthetic indices, e.g. "Boom 500 Index", "Volatility 75 (1s) Index".
+  // We must NOT strip spaces for those — return the input verbatim.
+  const trimmed = input.trim();
+  const isSynthetic =
+    /^(Boom|Crash|Volatility|Step|Range Break|Jump|Bear Market|Bull Market)/i.test(trimmed);
+  if (isSynthetic) return trimmed;
+
+  const s = trimmed.toUpperCase().replace(/[\/\s_-]/g, "");
   // Common aliases
   const aliases: Record<string, string> = {
     "XAUUSD": "XAUUSD",
