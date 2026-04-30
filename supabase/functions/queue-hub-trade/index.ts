@@ -170,6 +170,8 @@ serve(async (req) => {
     let terminal:
       | { terminal_uid: string; default_lot: number; auto_execute: boolean }
       | null = null;
+    let usingDemo = false;
+    let demoMaxLot: number | null = null;
 
     if (terminal_uid) {
       const { data } = await adminClient
@@ -191,6 +193,34 @@ serve(async (req) => {
       terminal = data ?? null;
     }
 
+    // Demo MT5 fallback: user has no personal terminal but opted into shared demo
+    if (!terminal) {
+      const { data: settings } = await adminClient
+        .from("user_settings")
+        .select("use_demo_mt5")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (settings?.use_demo_mt5) {
+        const { data: demoCfg } = await adminClient
+          .from("app_settings")
+          .select("value")
+          .eq("key", "demo_mt5")
+          .maybeSingle();
+        const cfg = (demoCfg?.value ?? {}) as {
+          enabled?: boolean; terminal_uid?: string; max_lot?: number;
+        };
+        if (cfg.enabled && cfg.terminal_uid) {
+          terminal = {
+            terminal_uid: cfg.terminal_uid,
+            default_lot: Number(cfg.max_lot) || 0.01,
+            auto_execute: true,
+          };
+          usingDemo = true;
+          demoMaxLot = Number(cfg.max_lot) || 0.01;
+        }
+      }
+    }
+
     if (!terminal) {
       return new Response(
         JSON.stringify({
@@ -205,14 +235,20 @@ serve(async (req) => {
     const requested = Number(lot) > 0 ? Number(lot) : Number(terminal.default_lot) || 0.01;
     const minLot = getSymbolMinLot(mt5Symbol);
     // Clamp UP to broker minimum so MT5 doesn't reject with error 4756 ("invalid volume").
-    const volume = requested < minLot ? minLot : requested;
+    let volume = requested < minLot ? minLot : requested;
+    // Demo: hard-cap at admin-configured max_lot (strict safety).
+    if (usingDemo && demoMaxLot && volume > demoMaxLot) {
+      volume = Math.max(minLot, demoMaxLot);
+    }
 
     const command: Record<string, unknown> = {
       action: "OPEN",
       symbol: mt5Symbol,
       type: direction,
       volume,
-      source: source ?? "hub-signal",
+      source: usingDemo ? `demo:${source ?? "hub-signal"}` : (source ?? "hub-signal"),
+      demo: usingDemo || undefined,
+      demo_user_id: usingDemo ? userId : undefined,
       requested_at: new Date().toISOString(),
     };
     if (typeof sl === "number" && sl > 0) command.sl = sl;
@@ -246,6 +282,7 @@ serve(async (req) => {
         volume,
         min_lot: minLot,
         adjusted: volume !== requested,
+        demo: usingDemo,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
