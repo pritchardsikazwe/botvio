@@ -15,6 +15,7 @@ import { SYNTHETICS } from "@/config/synthetics";
 import { Bot, Cloud, Server, ShieldCheck, Activity, Pause, Play, ExternalLink, Zap } from "lucide-react";
 import { ActivateCloudWorkerWizard } from "@/components/trading/ActivateCloudWorkerWizard";
 import { ManagedMt5Onboarding } from "@/components/broker/ManagedMt5Onboarding";
+import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
 
 const CONTABO_VPS_IP = "167.86.89.31";
 const CONTABO_VPS_NAME = "vmi3267408 · Cloud VPS 10 SSD";
@@ -174,6 +175,9 @@ export default function AutoTrade() {
 
         {/* Managed MT5 — no install */}
         <ManagedMt5Onboarding />
+
+        {/* Shared Demo MT5 — try before you connect your own */}
+        <DemoMt5Card symbol="XAUUSD" source="auto-trade" />
 
         {/* Safety limits */}
         <Card>

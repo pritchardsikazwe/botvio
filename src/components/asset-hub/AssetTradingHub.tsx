@@ -12,6 +12,7 @@ import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
 import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
 import { AssetSignalButton } from "./AssetSignalButton";
 import { AssetSignalsList } from "./AssetSignalsList";
+import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
 
 export interface AssetTradingHubConfig {
   seoKey?: string;
@@ -115,6 +116,8 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
           </h2>
           <AssetSignalsList symbolPatterns={config.symbolPatterns} assetLabel={config.assetLabel} />
         </div>
+
+        <DemoMt5Card symbol={config.displaySymbol} source={`hub:${config.assetLabel}`} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-4 bg-card border border-border/50 h-12">
