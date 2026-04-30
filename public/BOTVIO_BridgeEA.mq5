@@ -395,7 +395,19 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
    
    if(OrderSend(request, result))
    {
-      ticket = result.deal;
+      ticket = 0;
+      for(int i = PositionsTotal() - 1; i >= 0; i--)
+      {
+         ulong posTicket = PositionGetTicket(i);
+         if(PositionSelectByTicket(posTicket)
+            && PositionGetString(POSITION_SYMBOL) == symbol
+            && PositionGetInteger(POSITION_MAGIC) == 123456)
+         {
+            ticket = posTicket;
+            break;
+         }
+      }
+      if(ticket == 0) ticket = result.order;
       return true;
    }
    else
