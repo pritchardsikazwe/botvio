@@ -11,6 +11,17 @@ export interface HubSignalSnapshot {
   lastPrice?: number | null;
 }
 
+/**
+ * Per-symbol scalp brackets for 1-minute hub signals.
+ * Tighter than the default 0.25% / 0.5% so trades close fast on M1.
+ * Add new symbols here as scalping rolls out.
+ */
+const SCALP_BRACKETS: Record<string, { slPct: number; tpPct: number }> = {
+  XAUUSD: { slPct: 0.0008, tpPct: 0.0012 }, // Gold:    ~$2 SL / ~$3 TP @ $2500
+  XAGUSD: { slPct: 0.0010, tpPct: 0.0015 }, // Silver:  slightly wider, lower price
+  BTCUSD: { slPct: 0.0010, tpPct: 0.0015 }, // Bitcoin: ~$60 SL / ~$90 TP @ $60k
+};
+
 interface Options {
   /** Symbol to execute on MT5 (e.g. "XAUUSD", "BTCUSD", "EURUSD") */
   symbol: string;
@@ -22,9 +33,9 @@ interface Options {
   minConfidence?: number;
   /** Source label for logging (e.g. "gold-hub", "btc-hub") */
   source?: string;
-  /** Stop-loss as a fraction of price (default 0.0025 = 0.25%) */
+  /** Stop-loss as a fraction of price (overrides per-symbol scalp default) */
   slPct?: number;
-  /** Take-profit as a fraction of price (default 0.005 = 0.5%) */
+  /** Take-profit as a fraction of price (overrides per-symbol scalp default) */
   tpPct?: number;
 }
 
@@ -40,9 +51,14 @@ export function useMt5HubExecution({
   enabled,
   minConfidence = 70,
   source = "hub-signal",
-  slPct = 0.0025,
-  tpPct = 0.005,
+  slPct,
+  tpPct,
 }: Options) {
+  // Choose scalp brackets: explicit override > symbol-specific scalp > legacy default
+  const scalp = SCALP_BRACKETS[symbol.toUpperCase()];
+  const effSlPct = slPct ?? scalp?.slPct ?? 0.0025;
+  const effTpPct = tpPct ?? scalp?.tpPct ?? 0.005;
+
   const { user } = useAuth();
   const lastFiredRef = useRef<string | null>(null);
 
@@ -100,8 +116,8 @@ export function useMt5HubExecution({
         const px = live.lastPrice;
         if (typeof px === "number" && px > 0) {
           const isBuy = live.signal === "BUY";
-          const slRaw = isBuy ? px * (1 - slPct) : px * (1 + slPct);
-          const tpRaw = isBuy ? px * (1 + tpPct) : px * (1 - tpPct);
+          const slRaw = isBuy ? px * (1 - effSlPct) : px * (1 + effSlPct);
+          const tpRaw = isBuy ? px * (1 + effTpPct) : px * (1 - effTpPct);
           // 5-decimal precision is fine for FX/metals/crypto on MT5
           sl = Number(slRaw.toFixed(5));
           tp = Number(tpRaw.toFixed(5));
@@ -145,5 +161,5 @@ export function useMt5HubExecution({
         lastFiredRef.current = null;
       }
     })();
-  }, [user, enabled, hasAutoTerminal, hubAutoEnabled, live.signal, live.confidence, live.lastPrice, symbol, minConfidence, source, slPct, tpPct]);
+  }, [user, enabled, hasAutoTerminal, hubAutoEnabled, live.signal, live.confidence, live.lastPrice, symbol, minConfidence, source, effSlPct, effTpPct]);
 }
