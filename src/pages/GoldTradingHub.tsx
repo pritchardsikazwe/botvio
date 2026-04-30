@@ -3,6 +3,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GoldChartSection } from "@/components/gold/GoldChartSection";
+import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
 import { GoldSignalsSection } from "@/components/gold/GoldSignalsSection";
 import { GoldTipsSection } from "@/components/gold/GoldTipsSection";
 import { GoldCommunitySection } from "@/components/gold/GoldCommunitySection";
@@ -106,6 +107,9 @@ const GoldTradingHub = () => {
 
           <TabsContent value="charts" className="mt-6">
             <GoldChartSection />
+            <div className="mt-6">
+              <DemoMt5Card symbol="XAUUSD" source="gold-hub" />
+            </div>
           </TabsContent>
           <TabsContent value="signals" className="mt-6">
             <GoldSignalsSection />

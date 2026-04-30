@@ -1,6 +1,7 @@
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { DerivConnection } from "@/components/trading/DerivConnection";
+import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
 
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -118,6 +119,10 @@ const DerivOptions = () => {
             <Wifi className="h-5 w-5 text-primary" /> Connect Your Deriv Account
           </h2>
           <DerivConnection />
+        </section>
+
+        <section>
+          <DemoMt5Card symbol="Volatility 75 Index" source="deriv-options" />
         </section>
 
         {/* Quick Trade Modes as Info Cards */}
