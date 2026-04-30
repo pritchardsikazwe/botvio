@@ -6051,6 +6051,7 @@ export type Database = {
           created_at: string
           default_pair: string | null
           default_timeframe: string | null
+          hub_auto_mt5_symbols: Json
           id: string
           kill_switch: boolean | null
           max_daily_loss_usd: number | null
@@ -6068,6 +6069,7 @@ export type Database = {
           created_at?: string
           default_pair?: string | null
           default_timeframe?: string | null
+          hub_auto_mt5_symbols?: Json
           id?: string
           kill_switch?: boolean | null
           max_daily_loss_usd?: number | null
@@ -6085,6 +6087,7 @@ export type Database = {
           created_at?: string
           default_pair?: string | null
           default_timeframe?: string | null
+          hub_auto_mt5_symbols?: Json
           id?: string
           kill_switch?: boolean | null
           max_daily_loss_usd?: number | null
