@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Zap, Cpu } from "lucide-react";
+import { Trash2, Plus, Zap, Cpu, Sparkles, Copy, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +31,36 @@ export function Mt5AutoExecuteCard() {
   const [newNickname, setNewNickname] = useState("");
   const [newLot, setNewLot] = useState("0.01");
   const [busy, setBusy] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Generate a unique BOTVIO_xxxx-N Terminal UID for this user.
+  // Pattern: BOTVIO_<first 4 of user id>-<next sequential number>
+  const generateUid = () => {
+    if (!user) return;
+    const prefix = `BOTVIO_${user.id.slice(0, 4).toUpperCase()}`;
+    // Find the highest -N already used by this user with this prefix
+    let maxN = 0;
+    for (const r of rows) {
+      const m = r.terminal_uid.match(new RegExp(`^${prefix}-(\\d+)$`));
+      if (m) maxN = Math.max(maxN, parseInt(m[1], 10));
+    }
+    const next = maxN + 1;
+    const uid = `${prefix}-${next}`;
+    setNewUid(uid);
+    if (!newNickname.trim()) setNewNickname(`MT5 Terminal #${next}`);
+    toast({ title: "New Terminal UID generated", description: `Paste this into your Bridge EA: ${uid}` });
+  };
+
+  const copyUid = async (row: TerminalRow) => {
+    try {
+      await navigator.clipboard.writeText(row.terminal_uid);
+      setCopiedId(row.id);
+      setTimeout(() => setCopiedId(null), 1500);
+      toast({ title: "Terminal UID copied" });
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
 
   const load = async () => {
     if (!user) return;
@@ -127,10 +157,21 @@ export function Mt5AutoExecuteCard() {
 
       {/* Add new terminal */}
       <div className="space-y-2 rounded-lg border border-dashed border-primary/30 p-3 bg-background/30">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Add MT5 terminal</Label>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Add MT5 terminal</Label>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={generateUid}
+            className="h-7 text-xs"
+          >
+            <Sparkles className="h-3.5 w-3.5 mr-1" /> Generate new Terminal UID
+          </Button>
+        </div>
         <div className="grid gap-2 md:grid-cols-[1fr_140px_100px_auto]">
           <Input
-            placeholder="Terminal UID (from Bridge EA)"
+            placeholder="Terminal UID (click Generate, or paste from EA)"
             value={newUid}
             onChange={(e) => setNewUid(e.target.value)}
           />
@@ -151,6 +192,11 @@ export function Mt5AutoExecuteCard() {
             <Plus className="h-4 w-4 mr-1" /> Link
           </Button>
         </div>
+        <p className="text-[10px] text-muted-foreground/80 leading-relaxed">
+          💡 <strong>Multiple MT5 accounts?</strong> Generate a separate Terminal UID for each MT5 account
+          (e.g. one for Deriv MT5, another for Exness). Paste each UID into the matching MT5 terminal's
+          Bridge EA on your VPS. The same Bridge Shared Secret works for all of them.
+        </p>
       </div>
 
       {/* Existing terminals */}
@@ -164,7 +210,19 @@ export function Mt5AutoExecuteCard() {
             <div key={row.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border p-3 bg-background/40">
               <div className="flex-1 min-w-[200px]">
                 <div className="font-semibold text-sm">{row.nickname || "MT5 Terminal"}</div>
-                <code className="text-[10px] text-muted-foreground break-all">{row.terminal_uid}</code>
+                <button
+                  type="button"
+                  onClick={() => copyUid(row)}
+                  className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary break-all group"
+                  title="Click to copy"
+                >
+                  <code className="break-all">{row.terminal_uid}</code>
+                  {copiedId === row.id ? (
+                    <Check className="h-3 w-3 text-primary shrink-0" />
+                  ) : (
+                    <Copy className="h-3 w-3 opacity-60 group-hover:opacity-100 shrink-0" />
+                  )}
+                </button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="text-xs">Lot</Label>
