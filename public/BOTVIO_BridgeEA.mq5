@@ -205,7 +205,7 @@ void PushState()
       {
          if(i > 0) positions += ",";
          positions += StringFormat(
-            "{\"ticket\":%d,\"symbol\":\"%s\",\"type\":\"%s\",\"volume\":%.2f,\"price\":%.5f,\"profit\":%.2f,\"sl\":%.5f,\"tp\":%.5f}",
+            "{\"ticket\":%I64u,\"symbol\":\"%s\",\"type\":\"%s\",\"volume\":%.2f,\"price\":%.5f,\"profit\":%.2f,\"sl\":%.5f,\"tp\":%.5f}",
             PositionGetInteger(POSITION_TICKET),
             PositionGetString(POSITION_SYMBOL),
             PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY ? "BUY" : "SELL",
@@ -393,7 +393,7 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
    if(sl > 0) request.sl = sl;
    if(tp > 0) request.tp = tp;
    
-   if(OrderSend(request, result))
+    if(OrderSend(request, result) && (result.retcode == TRADE_RETCODE_DONE || result.retcode == TRADE_RETCODE_PLACED))
    {
       ticket = 0;
       for(int i = PositionsTotal() - 1; i >= 0; i--)
@@ -407,12 +407,26 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
             break;
          }
       }
+      if(ticket == 0)
+      {
+         for(int i = PositionsTotal() - 1; i >= 0; i--)
+         {
+            ulong posTicket = PositionGetTicket(i);
+            if(PositionSelectByTicket(posTicket)
+               && PositionGetString(POSITION_SYMBOL) == symbol
+               && PositionGetInteger(POSITION_TYPE) == (orderType == ORDER_TYPE_BUY ? POSITION_TYPE_BUY : POSITION_TYPE_SELL))
+            {
+               ticket = posTicket;
+               break;
+            }
+         }
+      }
       if(ticket == 0) ticket = result.order;
       return true;
    }
    else
    {
-      errorMsg = StringFormat("OrderSend failed. Error: %d", GetLastError());
+      errorMsg = StringFormat("OrderSend failed. Retcode: %d Error: %d", result.retcode, GetLastError());
       return false;
    }
 }
@@ -584,8 +598,8 @@ void AckCommand(string commandId, string status, ulong ticket, string errorMsg)
       errorMsg
    );
    
-   string body = StringFormat(
-      "{\"command_id\":\"%s\",\"status\":\"%s\",\"ticket\":%d,\"result\":%s}",
+    string body = StringFormat(
+       "{\"command_id\":\"%s\",\"status\":\"%s\",\"ticket\":%I64u,\"result\":%s}",
       commandId,
       status,
       ticket,
