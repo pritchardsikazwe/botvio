@@ -4533,6 +4533,36 @@ export type Database = {
         }
         Relationships: []
       }
+      scalp_mt5_sends: {
+        Row: {
+          display_symbol: string
+          id: string
+          sent_at: string
+          side: string
+          signal_id: string
+          tf: string
+          user_id: string
+        }
+        Insert: {
+          display_symbol: string
+          id?: string
+          sent_at?: string
+          side: string
+          signal_id: string
+          tf: string
+          user_id: string
+        }
+        Update: {
+          display_symbol?: string
+          id?: string
+          sent_at?: string
+          side?: string
+          signal_id?: string
+          tf?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       seo_affiliate_links: {
         Row: {
           broker_key: string
