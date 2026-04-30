@@ -54,6 +54,29 @@ serve(async (req) => {
       })
       .eq('id', command_id);
 
+    // Older Bridge EA builds open the trade first and do not attach SL/TP on OPEN.
+    // If the original command carried SL/TP, enqueue a follow-up MODIFY command
+    // after MT5 returns the ticket so the existing EA can apply the brackets.
+    if (command.command?.action === 'OPEN' && status === 'SUCCESS' && ticket) {
+      const sl = Number(command.command?.sl);
+      const tp = Number(command.command?.tp);
+      const modifyCommand: Record<string, unknown> = {
+        action: 'MODIFY',
+        ticket: Number(ticket),
+        source: command.command?.source ?? 'mt5-open-brackets',
+        requested_at: new Date().toISOString(),
+      };
+      if (Number.isFinite(sl) && sl > 0) modifyCommand.sl = sl;
+      if (Number.isFinite(tp) && tp > 0) modifyCommand.tp = tp;
+      if (modifyCommand.sl || modifyCommand.tp) {
+        await supabase.from('mt5_commands').insert({
+          terminal_uid: command.terminal_uid,
+          command: modifyCommand,
+          status: 'QUEUED',
+        });
+      }
+    }
+
     // If this was a trade command, create execution record
     if (command.command?.action === 'OPEN' && status === 'SUCCESS' && ticket) {
       // Find the trading account

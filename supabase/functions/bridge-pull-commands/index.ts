@@ -33,14 +33,15 @@ serve(async (req) => {
       throw new Error('Missing terminal_uid');
     }
 
-    // Get queued commands for this terminal
+    // The current Bridge EA parser executes the first command in the response.
+    // Send one command per poll so follow-up MODIFY commands for SL/TP are never skipped.
     const { data: commands, error } = await supabase
       .from('mt5_commands')
       .select('*')
       .eq('terminal_uid', terminal_uid)
       .eq('status', 'QUEUED')
       .order('created_at', { ascending: true })
-      .limit(10);
+      .limit(1);
 
     if (error) {
       throw error;

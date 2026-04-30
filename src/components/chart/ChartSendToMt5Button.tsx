@@ -39,6 +39,8 @@ export function ChartSendToMt5Button({ symbol, recommendation, stopLoss, takePro
     if (!symbol || !direction) return;
     setBusy(true);
     try {
+      const sl = typeof stopLoss === "number" && Number.isFinite(stopLoss) && stopLoss > 0 ? stopLoss : undefined;
+      const tp = typeof takeProfit === "number" && Number.isFinite(takeProfit) && takeProfit > 0 ? takeProfit : undefined;
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token;
       if (!accessToken) throw new Error("No active session");
@@ -52,8 +54,8 @@ export function ChartSendToMt5Button({ symbol, recommendation, stopLoss, takePro
         body: JSON.stringify({
           symbol,
           direction,
-          sl: typeof stopLoss === "number" && stopLoss > 0 ? stopLoss : undefined,
-          tp: typeof takeProfit === "number" && takeProfit > 0 ? takeProfit : undefined,
+          sl,
+          tp,
           source: "ai-chart-analysis",
         }),
       });
@@ -61,7 +63,7 @@ export function ChartSendToMt5Button({ symbol, recommendation, stopLoss, takePro
       if (!resp.ok) throw new Error(json?.error ?? "MT5 queue failed");
       toast({
         title: `MT5 ${direction} queued`,
-        description: `${symbol} • Volume ${json.volume} • Terminal ${json.terminal_uid?.slice(0, 8)}…`,
+        description: `${symbol} • Volume ${json.volume} • SL ${json.sl ?? sl ?? "—"} / TP ${json.tp ?? tp ?? "—"} • Terminal ${json.terminal_uid?.slice(0, 8)}…`,
       });
     } catch (e: any) {
       toast({

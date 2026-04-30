@@ -292,6 +292,8 @@ serve(async (req) => {
     if (usingDemo && demoMaxLot && volume > demoMaxLot) {
       volume = Math.max(minLot, demoMaxLot);
     }
+    const stopLoss = Number(sl);
+    const takeProfit = Number(tp);
 
     const command: Record<string, unknown> = {
       action: "OPEN",
@@ -303,8 +305,8 @@ serve(async (req) => {
       demo_user_id: usingDemo ? userId : undefined,
       requested_at: new Date().toISOString(),
     };
-    if (typeof sl === "number" && sl > 0) command.sl = sl;
-    if (typeof tp === "number" && tp > 0) command.tp = tp;
+    if (Number.isFinite(stopLoss) && stopLoss > 0) command.sl = stopLoss;
+    if (Number.isFinite(takeProfit) && takeProfit > 0) command.tp = takeProfit;
 
     const { data: inserted, error: insErr } = await adminClient
       .from("mt5_commands")
@@ -335,6 +337,8 @@ serve(async (req) => {
         min_lot: minLot,
         adjusted: volume !== requested,
         demo: usingDemo,
+        sl: command.sl ?? null,
+        tp: command.tp ?? null,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

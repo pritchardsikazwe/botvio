@@ -53,6 +53,62 @@ serve(async (req) => {
         updated_at: new Date().toISOString()
       }, { onConflict: 'terminal_uid' });
 
+    // Compatibility fallback for older Bridge EA builds: they acknowledge OPEN with
+    // a deal/order ticket, while MODIFY needs the actual position ticket. The EA
+    // pushes open positions here, so attach missing SL/TP using that live ticket.
+    if (Array.isArray(positions) && positions.length > 0) {
+      const { data: openCommands } = await supabase
+        .from('mt5_commands')
+        .select('id, command, created_at')
+        .eq('terminal_uid', terminal_uid)
+        .eq('status', 'ACKED')
+        .eq('command->>action', 'OPEN')
+        .gte('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      for (const cmd of openCommands ?? []) {
+        const command = cmd.command ?? {};
+        const sl = Number(command.sl);
+        const tp = Number(command.tp);
+        if (!(Number.isFinite(sl) && sl > 0) && !(Number.isFinite(tp) && tp > 0)) continue;
+
+        const matched = positions.find((p: any) => {
+          const sameSymbol = String(p?.symbol ?? '') === String(command.symbol ?? '');
+          const sameType = String(p?.type ?? '') === String(command.type ?? '');
+          const sameVolume = Math.abs(Number(p?.volume ?? 0) - Number(command.volume ?? 0)) < 0.000001;
+          const missingSl = Number.isFinite(sl) && sl > 0 && Math.abs(Number(p?.sl ?? 0) - sl) > 0.00001;
+          const missingTp = Number.isFinite(tp) && tp > 0 && Math.abs(Number(p?.tp ?? 0) - tp) > 0.00001;
+          return sameSymbol && sameType && sameVolume && (missingSl || missingTp) && Number(p?.ticket) > 0;
+        });
+        if (!matched) continue;
+
+        const { data: existing } = await supabase
+          .from('mt5_commands')
+          .select('id')
+          .eq('terminal_uid', terminal_uid)
+          .eq('command->>parent_command_id', cmd.id)
+          .limit(1);
+        if ((existing?.length ?? 0) > 0) continue;
+
+        const modifyCommand: Record<string, unknown> = {
+          action: 'MODIFY',
+          ticket: Number(matched.ticket),
+          parent_command_id: cmd.id,
+          source: 'attach-open-sl-tp',
+          requested_at: new Date().toISOString(),
+        };
+        if (Number.isFinite(sl) && sl > 0) modifyCommand.sl = sl;
+        if (Number.isFinite(tp) && tp > 0) modifyCommand.tp = tp;
+
+        await supabase.from('mt5_commands').insert({
+          terminal_uid,
+          command: modifyCommand,
+          status: 'QUEUED',
+        });
+      }
+    }
+
     return new Response(JSON.stringify({
       success: true
     }), {
