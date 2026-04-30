@@ -14,6 +14,13 @@ interface DemoCfg {
   terminal_uid: string;
   max_lot: number;
   note?: string;
+  // Public credentials displayed to traders so they can log in to MT5 mobile/desktop
+  public_email?: string;
+  mt5_login?: string;
+  mt5_server?: string;
+  mt5_password?: string;
+  broker_name?: string;
+  daily_send_limit?: number;
 }
 
 /**
@@ -39,6 +46,12 @@ export function AdminDemoMt5Card() {
       terminal_uid: v.terminal_uid ?? "",
       max_lot: Number(v.max_lot) || 0.01,
       note: v.note,
+      public_email: v.public_email ?? "",
+      mt5_login: v.mt5_login ?? "",
+      mt5_server: v.mt5_server ?? "",
+      mt5_password: v.mt5_password ?? "",
+      broker_name: v.broker_name ?? "",
+      daily_send_limit: Number(v.daily_send_limit) || 5,
     });
     setUsageCount(count ?? 0);
     setLoading(false);
@@ -64,6 +77,12 @@ export function AdminDemoMt5Card() {
             terminal_uid: cfg.terminal_uid.trim(),
             max_lot: Number(cfg.max_lot) || 0.01,
             note: cfg.note ?? "Shared demo MT5 terminal running on Botvio VPS",
+            public_email: cfg.public_email?.trim() || "",
+            mt5_login: cfg.mt5_login?.trim() || "",
+            mt5_server: cfg.mt5_server?.trim() || "",
+            mt5_password: cfg.mt5_password ?? "",
+            broker_name: cfg.broker_name?.trim() || "",
+            daily_send_limit: Number(cfg.daily_send_limit) || 5,
           },
         },
         { onConflict: "key" },
