@@ -78,6 +78,21 @@ export function useMt5HubExecution({
     refetchInterval: 30_000,
   });
 
+  // Is shared demo MT5 enabled by admin AND opted-in by user?
+  const { data: demoEnabled } = useQuery({
+    queryKey: ["demo-mt5-active", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const [{ data: us }, { data: cfg }] = await Promise.all([
+        supabase.from("user_settings").select("use_demo_mt5").eq("user_id", user!.id).maybeSingle(),
+        supabase.from("app_settings").select("value").eq("key", "demo_mt5").maybeSingle(),
+      ]);
+      const v = (cfg?.value ?? {}) as { enabled?: boolean; terminal_uid?: string };
+      return !!us?.use_demo_mt5 && !!v.enabled && !!v.terminal_uid;
+    },
+    refetchInterval: 60_000,
+  });
+
   // Per-symbol "Auto-send to MT5" toggle from user_settings.hub_auto_mt5_symbols
   const { data: hubAutoEnabled } = useQuery({
     queryKey: ["hub-auto-mt5", user?.id, symbol],
@@ -95,7 +110,11 @@ export function useMt5HubExecution({
   });
 
   useEffect(() => {
-    if (!user || !enabled || !hasAutoTerminal || !hubAutoEnabled) return;
+    if (!user || !enabled || !hubAutoEnabled) return;
+    // Allow either personal terminal OR shared demo MT5
+    if (!hasAutoTerminal && !demoEnabled) {
+      // Fall through to paper-trade simulation below
+    }
     if (live.signal !== "BUY" && live.signal !== "SELL") return;
     if (live.confidence < minConfidence) return;
 
@@ -106,11 +125,7 @@ export function useMt5HubExecution({
 
     (async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const accessToken = session?.access_token;
-        if (!accessToken) return;
-
-        // Compute SL/TP from the latest price (matches cloud-worker brackets)
+        // Compute SL/TP from the latest price
         let sl: number | undefined;
         let tp: number | undefined;
         const px = live.lastPrice;
@@ -118,10 +133,39 @@ export function useMt5HubExecution({
           const isBuy = live.signal === "BUY";
           const slRaw = isBuy ? px * (1 - effSlPct) : px * (1 + effSlPct);
           const tpRaw = isBuy ? px * (1 + effTpPct) : px * (1 - effTpPct);
-          // 5-decimal precision is fine for FX/metals/crypto on MT5
           sl = Number(slRaw.toFixed(5));
           tp = Number(tpRaw.toFixed(5));
         }
+
+        // No MT5 path → record a paper trade (simulation)
+        if (!hasAutoTerminal && !demoEnabled) {
+          if (typeof px !== "number" || px <= 0) return;
+          const { error: ptErr } = await supabase.from("paper_trades").insert({
+            user_id: user.id,
+            symbol,
+            direction: live.signal,
+            lot: 0.01,
+            entry_price: Number(px.toFixed(5)),
+            sl,
+            tp,
+            source: `paper:${source}`,
+            status: "OPEN",
+          });
+          if (ptErr) {
+            console.warn("[Paper] insert failed:", ptErr);
+            lastFiredRef.current = null;
+            return;
+          }
+          toast({
+            title: `📝 Paper trade opened: ${live.signal} ${symbol}`,
+            description: `Entry ${px.toFixed(5)} · SL ${sl ?? "—"} / TP ${tp ?? "—"} · Connect MT5 to trade live.`,
+          });
+          return;
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token;
+        if (!accessToken) return;
 
         const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/queue-hub-trade`;
         const resp = await fetch(url, {
@@ -151,7 +195,7 @@ export function useMt5HubExecution({
           return;
         }
         toast({
-          title: `MT5 trade queued: ${live.signal} ${symbol}`,
+          title: `${json.demo ? "🧪 Demo " : ""}MT5 trade queued: ${live.signal} ${symbol}`,
           description: json.adjusted
             ? `Vol ${json.volume} (broker min) • SL ${sl ?? "—"} / TP ${tp ?? "—"}`
             : `Vol ${json.volume} • SL ${sl ?? "—"} / TP ${tp ?? "—"}`,
@@ -161,5 +205,5 @@ export function useMt5HubExecution({
         lastFiredRef.current = null;
       }
     })();
-  }, [user, enabled, hasAutoTerminal, hubAutoEnabled, live.signal, live.confidence, live.lastPrice, symbol, minConfidence, source, effSlPct, effTpPct]);
+  }, [user, enabled, hasAutoTerminal, demoEnabled, hubAutoEnabled, live.signal, live.confidence, live.lastPrice, symbol, minConfidence, source, effSlPct, effTpPct]);
 }
