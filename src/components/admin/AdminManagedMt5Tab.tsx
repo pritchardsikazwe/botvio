@@ -320,5 +320,6 @@ export function AdminManagedMt5Tab() {
         </DialogContent>
       </Dialog>
     </Card>
+    </div>
   );
 }
