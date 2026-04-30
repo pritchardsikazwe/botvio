@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins } from "lucide-react";
+import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Bot, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface BrokerCard {
   id: string;
@@ -149,6 +150,57 @@ export const BrokerStarterCards = () => {
             </Card>
           );
         })}
+
+        {/* Deriv MT5 Bridge Automation Poster */}
+        <Card className="glass-card border-success/40 hover:scale-[1.02] transition-all overflow-hidden flex flex-col relative">
+          <div className="h-1 bg-gradient-to-r from-success via-primary to-success" />
+          <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/20 border border-success/40">
+            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+            <span className="text-[9px] font-bold text-success uppercase tracking-wide">Automated</span>
+          </div>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-success/20 to-primary/10">
+                <Bot className="h-5 w-5 text-success" />
+              </div>
+              <Badge className="text-[10px] font-bold border bg-success/15 text-success border-success/30 mt-6">
+                NEW
+              </Badge>
+            </div>
+            <CardTitle className="text-base leading-tight flex items-center gap-1.5">
+              Deriv MT5 Bridge
+              <Zap className="h-3.5 w-3.5 text-warning" />
+            </CardTitle>
+            <CardDescription className="text-xs font-medium text-foreground/80">
+              Auto-execute Botvio AI signals on your Deriv MT5
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 flex-1 flex flex-col">
+            <p className="text-xs text-muted-foreground">
+              Connect your Deriv MT5 terminal via our Bridge EA — try it free on a demo account.
+            </p>
+            <ul className="space-y-1.5 flex-1">
+              {[
+                "1. Open Deriv MT5 Demo account",
+                "2. Download Botvio Bridge EA",
+                "3. Attach EA to any chart",
+                "4. Enable auto-execute in dashboard",
+                "5. Signals trade automatically 24/7",
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0 mt-0.5" />
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ul>
+            <Button variant="gold" size="sm" className="w-full mt-2" asChild>
+              <Link to="/connections">
+                Setup MT5 Bridge
+                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
