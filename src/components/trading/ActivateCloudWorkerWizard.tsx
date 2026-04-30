@@ -121,7 +121,7 @@ export function ActivateCloudWorkerWizard() {
               <Button
                 size="lg"
                 className="w-full gap-2"
-                disabled={!ready || activating || !s.paused && ready}
+                disabled={!ready || activating || (ready && !s.paused)}
                 onClick={handleActivate}
               >
                 {activating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
