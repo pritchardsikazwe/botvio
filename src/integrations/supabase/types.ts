@@ -1526,6 +1526,36 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_mt5_test_sends: {
+        Row: {
+          command_id: string | null
+          created_at: string
+          direction: string
+          id: string
+          sent_on: string
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          command_id?: string | null
+          created_at?: string
+          direction: string
+          id?: string
+          sent_on?: string
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          command_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          sent_on?: string
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       deriv_connection_logs: {
         Row: {
           created_at: string
