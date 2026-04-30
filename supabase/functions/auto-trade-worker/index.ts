@@ -238,7 +238,14 @@ serve(async (req) => {
               .limit(1)
               .maybeSingle();
             if (!terminal) { skipped++; continue; }
-            const command = {
+            // Derive SL/TP from latest close (same brackets as auto-post)
+            const lastClose = candles[candles.length - 1]?.close ?? 0;
+            const isBuy = sig.signal === "BUY";
+            const slPct = 0.0025;
+            const tpPct = 0.005;
+            const slPx = lastClose > 0 ? Number((isBuy ? lastClose * (1 - slPct) : lastClose * (1 + slPct)).toFixed(5)) : undefined;
+            const tpPx = lastClose > 0 ? Number((isBuy ? lastClose * (1 + tpPct) : lastClose * (1 - tpPct)).toFixed(5)) : undefined;
+            const command: Record<string, unknown> = {
               action: "OPEN",
               symbol: inst.display_symbol, // synthetic-hub already passes broker MT5 symbol
               type: sig.signal,
@@ -247,6 +254,8 @@ serve(async (req) => {
               requested_at: new Date().toISOString(),
               idempotency_key: idempotencyKey,
             };
+            if (slPx) command.sl = slPx;
+            if (tpPx) command.tp = tpPx;
             const { error: insErr } = await admin.from("mt5_commands").insert({
               terminal_uid: terminal.terminal_uid, command, status: "QUEUED",
             });
