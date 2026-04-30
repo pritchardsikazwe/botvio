@@ -102,7 +102,6 @@ export default function BridgeRequest() {
       <SEOHead
         title="Request Managed MT5 Bridge | Botvio"
         description="Submit your MT5 demo or live credentials and let Botvio's team set up a managed bridge for 24/7 auto-execution — no VPS install required."
-        canonicalUrl="https://botvio.live/bridge-request"
       />
       <Header />
       <div className="container mx-auto px-4 py-8 max-w-5xl">
