@@ -1,13 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BarChart3, TrendingUp, Zap, ArrowUpDown, Activity } from "lucide-react";
+import { ExternalLink, BarChart3, TrendingUp, Zap, ArrowUpDown, Activity, Target, Brain } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
-/* ─── Live Charts (standard pairs available on Weltrade) ─── */
+/* ─── Live Charts (Weltrade SyntX + standard markets) ─── */
 interface ChartSymbol {
   label: string;
   tvSymbol: string;
@@ -15,12 +15,21 @@ interface ChartSymbol {
 }
 
 const CHART_SYMBOLS: ChartSymbol[] = [
+  // SyntX proprietary indices (hosted on TradingView under WELTRADE:)
+  { label: "PainX 10",  tvSymbol: "WELTRADE:PAINX10",  category: "PainX" },
+  { label: "PainX 50",  tvSymbol: "WELTRADE:PAINX50",  category: "PainX" },
+  { label: "PainX 100", tvSymbol: "WELTRADE:PAINX100", category: "PainX" },
+  { label: "PainX 200", tvSymbol: "WELTRADE:PAINX200", category: "PainX" },
+  { label: "GainX 10",  tvSymbol: "WELTRADE:GAINX10",  category: "GainX" },
+  { label: "GainX 50",  tvSymbol: "WELTRADE:GAINX50",  category: "GainX" },
+  { label: "GainX 100", tvSymbol: "WELTRADE:GAINX100", category: "GainX" },
+  { label: "TrendX 10", tvSymbol: "WELTRADE:TRENDX10", category: "TrendX" },
+  { label: "TrendX 50", tvSymbol: "WELTRADE:TRENDX50", category: "TrendX" },
+  // Standard markets
   { label: "XAU/USD", tvSymbol: "OANDA:XAUUSD", category: "Metal" },
   { label: "EUR/USD", tvSymbol: "OANDA:EURUSD", category: "Forex" },
   { label: "GBP/USD", tvSymbol: "OANDA:GBPUSD", category: "Forex" },
   { label: "BTC/USD", tvSymbol: "BITSTAMP:BTCUSD", category: "Crypto" },
-  { label: "USD/JPY", tvSymbol: "OANDA:USDJPY", category: "Forex" },
-  { label: "GBP/JPY", tvSymbol: "OANDA:GBPJPY", category: "Forex" },
 ];
 
 function LiveChart({ symbol }: { symbol: string }) {
@@ -66,25 +75,28 @@ function LiveChart({ symbol }: { symbol: string }) {
 /* ─── SyntX Index Catalog ─── */
 interface SyntxIndex {
   label: string;
+  tvSymbol?: string;
   category: "PainX" | "GainX" | "TrendX" | "Specialty";
   description: string;
   volatility: "Extreme" | "High" | "Medium";
   bestFor: string;
+  strategy: string;
+  signalEngine: string;
 }
 
 const SYNTX_INDICES: SyntxIndex[] = [
-  { label: "PainX 10", category: "PainX", description: "Low-tier volatility spikes", volatility: "Medium", bestFor: "Beginners, small accounts" },
-  { label: "PainX 50", category: "PainX", description: "Mid-tier spike index", volatility: "High", bestFor: "Scalping, quick entries" },
-  { label: "PainX 100", category: "PainX", description: "Aggressive spike bursts", volatility: "Extreme", bestFor: "Experienced scalpers" },
-  { label: "PainX 200", category: "PainX", description: "Ultra-volatile spikes", volatility: "Extreme", bestFor: "High-risk traders" },
-  { label: "GainX 10", category: "GainX", description: "Gentle trending momentum", volatility: "Medium", bestFor: "Swing trading" },
-  { label: "GainX 50", category: "GainX", description: "Steady trend moves", volatility: "Medium", bestFor: "Trend following" },
-  { label: "GainX 100", category: "GainX", description: "Strong directional moves", volatility: "High", bestFor: "Momentum trading" },
-  { label: "TrendX 10", category: "TrendX", description: "Light trend bias index", volatility: "Medium", bestFor: "Breakout setups" },
-  { label: "TrendX 50", category: "TrendX", description: "Medium trend bias", volatility: "High", bestFor: "Continuation trades" },
-  { label: "FlipX", category: "Specialty", description: "Sudden direction reversals", volatility: "Extreme", bestFor: "Reversal traders" },
-  { label: "SwitchX", category: "Specialty", description: "Alternating trend phases", volatility: "High", bestFor: "Range & breakout" },
-  { label: "BreakX", category: "Specialty", description: "Consolidation breakouts", volatility: "High", bestFor: "Breakout strategies" },
+  { label: "PainX 10",  tvSymbol: "WELTRADE:PAINX10",  category: "PainX", description: "Low-tier volatility spikes", volatility: "Medium", bestFor: "Beginners, small accounts", strategy: "BUY-only scalp on pullbacks; tight SL above wicks", signalEngine: "Botvio Spike Engine — RSI(14) + EMA(20/50) bias, 1m breakout" },
+  { label: "PainX 50",  tvSymbol: "WELTRADE:PAINX50",  category: "PainX", description: "Mid-tier spike index", volatility: "High", bestFor: "Scalping, quick entries", strategy: "BUY pullbacks to EMA20 on 1m; exit on RSI > 75", signalEngine: "Botvio Spike Engine — Donchian(20) breakout, ATR-scaled SL" },
+  { label: "PainX 100", tvSymbol: "WELTRADE:PAINX100", category: "PainX", description: "Aggressive spike bursts", volatility: "Extreme", bestFor: "Experienced scalpers", strategy: "BUY momentum bursts; trail SL aggressively", signalEngine: "Botvio Spike Engine — Volatility-adjusted Donchian breakout" },
+  { label: "PainX 200", tvSymbol: "WELTRADE:PAINX200", category: "PainX", description: "Ultra-volatile spikes", volatility: "Extreme", bestFor: "High-risk traders", strategy: "BUY only on confirmed momentum; small lot sizes", signalEngine: "Botvio Spike Engine — wide ATR filter, 5m confirmation" },
+  { label: "GainX 10",  tvSymbol: "WELTRADE:GAINX10",  category: "GainX", description: "Gentle trending momentum", volatility: "Medium", bestFor: "Swing trading", strategy: "SELL rallies into EMA50; multi-hour holds", signalEngine: "Botvio Trend Engine — EMA(20/50) cross, MACD confirmation" },
+  { label: "GainX 50",  tvSymbol: "WELTRADE:GAINX50",  category: "GainX", description: "Steady trend moves", volatility: "Medium", bestFor: "Trend following", strategy: "SELL on lower-high rejections; ride trend", signalEngine: "Botvio Trend Engine — EMA pullback + RSI bear cross" },
+  { label: "GainX 100", tvSymbol: "WELTRADE:GAINX100", category: "GainX", description: "Strong directional moves", volatility: "High", bestFor: "Momentum trading", strategy: "SELL strong impulses; ATR-based TP at 1:2 R:R", signalEngine: "Botvio Trend Engine — Donchian(20) reverse breakout" },
+  { label: "TrendX 10", tvSymbol: "WELTRADE:TRENDX10", category: "TrendX", description: "Light trend bias index", volatility: "Medium", bestFor: "Breakout setups", strategy: "Trade range breaks both directions on 5m", signalEngine: "Botvio Breakout Engine — Bollinger squeeze + volume" },
+  { label: "TrendX 50", tvSymbol: "WELTRADE:TRENDX50", category: "TrendX", description: "Medium trend bias", volatility: "High", bestFor: "Continuation trades", strategy: "Buy/Sell continuation after pullback to EMA20", signalEngine: "Botvio Breakout Engine — EMA stack + ADX > 20" },
+  { label: "FlipX",     category: "Specialty", description: "Sudden direction reversals", volatility: "Extreme", bestFor: "Reversal traders", strategy: "Trade post-flip in new direction; very small lots", signalEngine: "Botvio Reversal Engine — RSI divergence + flip detector" },
+  { label: "SwitchX",   category: "Specialty", description: "Alternating trend phases", volatility: "High", bestFor: "Range & breakout", strategy: "Range trade until phase switch confirmed", signalEngine: "Botvio Phase Engine — regime classifier (trend vs range)" },
+  { label: "BreakX",    category: "Specialty", description: "Consolidation breakouts", volatility: "High", bestFor: "Breakout strategies", strategy: "Enter on confirmed breakout candle close", signalEngine: "Botvio Breakout Engine — Donchian(20) + ATR filter" },
 ];
 
 const CATEGORIES = ["All", "PainX", "GainX", "TrendX", "Specialty"] as const;
