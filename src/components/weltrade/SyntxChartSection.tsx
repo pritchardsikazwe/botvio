@@ -180,21 +180,47 @@ export function SyntxChartSection() {
           ))}
         </div>
 
-        {/* Indices Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* Indices Grid — each card embeds a TradingView chart + strategy + signal engine */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((idx) => (
-            <Card key={idx.label} className="bg-card border-border/50 hover:border-primary/30 transition-colors">
-              <CardContent className="p-4 space-y-2">
+            <Card key={idx.label} className="bg-card border-border/50 hover:border-primary/30 transition-colors overflow-hidden">
+              <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-extrabold text-foreground">{idx.label}</span>
-                  <Badge variant="outline" className="text-[10px]">{idx.category}</Badge>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant="outline" className="text-[10px]">{idx.category}</Badge>
+                    <Badge variant="outline" className={`text-[10px] ${volatilityColor[idx.volatility]}`}>{idx.volatility}</Badge>
+                  </div>
                 </div>
+
+                {idx.tvSymbol ? (
+                  <div className="rounded-lg overflow-hidden border border-border/50" style={{ height: 260 }}>
+                    <LiveChart symbol={idx.tvSymbol} compact />
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border/50 bg-muted/20 p-4 text-center">
+                    <p className="text-[11px] text-muted-foreground">Chart unavailable on TradingView — view live on Weltrade MT4/MT5.</p>
+                  </div>
+                )}
+
                 <p className="text-xs text-muted-foreground">{idx.description}</p>
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-muted-foreground">
-                    Volatility: <span className={`font-bold ${volatilityColor[idx.volatility]}`}>{idx.volatility}</span>
-                  </span>
-                  <span className="text-muted-foreground">Best: <span className="font-bold text-foreground">{idx.bestFor}</span></span>
+
+                <div className="rounded-md border border-primary/20 bg-primary/5 p-2.5 space-y-1">
+                  <p className="text-[10px] font-bold text-primary flex items-center gap-1">
+                    <Target className="h-3 w-3" /> Strategy
+                  </p>
+                  <p className="text-[11px] text-foreground leading-snug">{idx.strategy}</p>
+                </div>
+
+                <div className="rounded-md border border-warning/20 bg-warning/5 p-2.5 space-y-1">
+                  <p className="text-[10px] font-bold text-warning flex items-center gap-1">
+                    <Brain className="h-3 w-3" /> Signal Engine
+                  </p>
+                  <p className="text-[11px] text-foreground leading-snug">{idx.signalEngine}</p>
+                </div>
+
+                <div className="text-[10px] text-muted-foreground">
+                  Best for: <span className="font-bold text-foreground">{idx.bestFor}</span>
                 </div>
               </CardContent>
             </Card>
