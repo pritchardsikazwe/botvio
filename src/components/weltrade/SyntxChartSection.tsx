@@ -1,13 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BarChart3, TrendingUp, Zap, ArrowUpDown, Activity } from "lucide-react";
+import { ExternalLink, BarChart3, TrendingUp, Zap, ArrowUpDown, Activity, Target, Brain } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
-/* ─── Live Charts (standard pairs available on Weltrade) ─── */
+/* ─── Live Charts (Weltrade SyntX + standard markets) ─── */
 interface ChartSymbol {
   label: string;
   tvSymbol: string;
@@ -15,15 +15,24 @@ interface ChartSymbol {
 }
 
 const CHART_SYMBOLS: ChartSymbol[] = [
+  // SyntX proprietary indices (hosted on TradingView under WELTRADE:)
+  { label: "PainX 10",  tvSymbol: "WELTRADE:PAINX10",  category: "PainX" },
+  { label: "PainX 50",  tvSymbol: "WELTRADE:PAINX50",  category: "PainX" },
+  { label: "PainX 100", tvSymbol: "WELTRADE:PAINX100", category: "PainX" },
+  { label: "PainX 200", tvSymbol: "WELTRADE:PAINX200", category: "PainX" },
+  { label: "GainX 10",  tvSymbol: "WELTRADE:GAINX10",  category: "GainX" },
+  { label: "GainX 50",  tvSymbol: "WELTRADE:GAINX50",  category: "GainX" },
+  { label: "GainX 100", tvSymbol: "WELTRADE:GAINX100", category: "GainX" },
+  { label: "TrendX 10", tvSymbol: "WELTRADE:TRENDX10", category: "TrendX" },
+  { label: "TrendX 50", tvSymbol: "WELTRADE:TRENDX50", category: "TrendX" },
+  // Standard markets
   { label: "XAU/USD", tvSymbol: "OANDA:XAUUSD", category: "Metal" },
   { label: "EUR/USD", tvSymbol: "OANDA:EURUSD", category: "Forex" },
   { label: "GBP/USD", tvSymbol: "OANDA:GBPUSD", category: "Forex" },
   { label: "BTC/USD", tvSymbol: "BITSTAMP:BTCUSD", category: "Crypto" },
-  { label: "USD/JPY", tvSymbol: "OANDA:USDJPY", category: "Forex" },
-  { label: "GBP/JPY", tvSymbol: "OANDA:GBPJPY", category: "Forex" },
 ];
 
-function LiveChart({ symbol }: { symbol: string }) {
+function LiveChart({ symbol, compact = false }: { symbol: string; compact?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,28 +45,29 @@ function LiveChart({ symbol }: { symbol: string }) {
     script.innerHTML = JSON.stringify({
       autosize: true,
       symbol,
-      interval: "5",
+      interval: compact ? "15" : "5",
       timezone: "Etc/UTC",
       theme: "dark",
       style: "1",
       locale: "en",
-      hide_top_toolbar: false,
-      hide_legend: false,
+      hide_top_toolbar: compact,
+      hide_legend: compact,
+      hide_side_toolbar: compact,
       allow_symbol_change: false,
       save_image: false,
       calendar: false,
       support_host: "https://www.tradingview.com",
-      studies: [
+      studies: compact ? ["MAExp@tv-basicstudies"] : [
         "MAExp@tv-basicstudies",
         "RSI@tv-basicstudies",
         "BB@tv-basicstudies",
       ],
     });
     containerRef.current.appendChild(script);
-  }, [symbol]);
+  }, [symbol, compact]);
 
   return (
-    <div className="tradingview-widget-container rounded-lg overflow-hidden border border-border/50" style={{ height: 420 }}>
+    <div className="tradingview-widget-container rounded-lg overflow-hidden border border-border/50" style={{ height: compact ? "100%" : 420 }}>
       <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
     </div>
   );
@@ -66,25 +76,28 @@ function LiveChart({ symbol }: { symbol: string }) {
 /* ─── SyntX Index Catalog ─── */
 interface SyntxIndex {
   label: string;
+  tvSymbol?: string;
   category: "PainX" | "GainX" | "TrendX" | "Specialty";
   description: string;
   volatility: "Extreme" | "High" | "Medium";
   bestFor: string;
+  strategy: string;
+  signalEngine: string;
 }
 
 const SYNTX_INDICES: SyntxIndex[] = [
-  { label: "PainX 10", category: "PainX", description: "Low-tier volatility spikes", volatility: "Medium", bestFor: "Beginners, small accounts" },
-  { label: "PainX 50", category: "PainX", description: "Mid-tier spike index", volatility: "High", bestFor: "Scalping, quick entries" },
-  { label: "PainX 100", category: "PainX", description: "Aggressive spike bursts", volatility: "Extreme", bestFor: "Experienced scalpers" },
-  { label: "PainX 200", category: "PainX", description: "Ultra-volatile spikes", volatility: "Extreme", bestFor: "High-risk traders" },
-  { label: "GainX 10", category: "GainX", description: "Gentle trending momentum", volatility: "Medium", bestFor: "Swing trading" },
-  { label: "GainX 50", category: "GainX", description: "Steady trend moves", volatility: "Medium", bestFor: "Trend following" },
-  { label: "GainX 100", category: "GainX", description: "Strong directional moves", volatility: "High", bestFor: "Momentum trading" },
-  { label: "TrendX 10", category: "TrendX", description: "Light trend bias index", volatility: "Medium", bestFor: "Breakout setups" },
-  { label: "TrendX 50", category: "TrendX", description: "Medium trend bias", volatility: "High", bestFor: "Continuation trades" },
-  { label: "FlipX", category: "Specialty", description: "Sudden direction reversals", volatility: "Extreme", bestFor: "Reversal traders" },
-  { label: "SwitchX", category: "Specialty", description: "Alternating trend phases", volatility: "High", bestFor: "Range & breakout" },
-  { label: "BreakX", category: "Specialty", description: "Consolidation breakouts", volatility: "High", bestFor: "Breakout strategies" },
+  { label: "PainX 10",  tvSymbol: "WELTRADE:PAINX10",  category: "PainX", description: "Low-tier volatility spikes", volatility: "Medium", bestFor: "Beginners, small accounts", strategy: "BUY-only scalp on pullbacks; tight SL above wicks", signalEngine: "Botvio Spike Engine — RSI(14) + EMA(20/50) bias, 1m breakout" },
+  { label: "PainX 50",  tvSymbol: "WELTRADE:PAINX50",  category: "PainX", description: "Mid-tier spike index", volatility: "High", bestFor: "Scalping, quick entries", strategy: "BUY pullbacks to EMA20 on 1m; exit on RSI > 75", signalEngine: "Botvio Spike Engine — Donchian(20) breakout, ATR-scaled SL" },
+  { label: "PainX 100", tvSymbol: "WELTRADE:PAINX100", category: "PainX", description: "Aggressive spike bursts", volatility: "Extreme", bestFor: "Experienced scalpers", strategy: "BUY momentum bursts; trail SL aggressively", signalEngine: "Botvio Spike Engine — Volatility-adjusted Donchian breakout" },
+  { label: "PainX 200", tvSymbol: "WELTRADE:PAINX200", category: "PainX", description: "Ultra-volatile spikes", volatility: "Extreme", bestFor: "High-risk traders", strategy: "BUY only on confirmed momentum; small lot sizes", signalEngine: "Botvio Spike Engine — wide ATR filter, 5m confirmation" },
+  { label: "GainX 10",  tvSymbol: "WELTRADE:GAINX10",  category: "GainX", description: "Gentle trending momentum", volatility: "Medium", bestFor: "Swing trading", strategy: "SELL rallies into EMA50; multi-hour holds", signalEngine: "Botvio Trend Engine — EMA(20/50) cross, MACD confirmation" },
+  { label: "GainX 50",  tvSymbol: "WELTRADE:GAINX50",  category: "GainX", description: "Steady trend moves", volatility: "Medium", bestFor: "Trend following", strategy: "SELL on lower-high rejections; ride trend", signalEngine: "Botvio Trend Engine — EMA pullback + RSI bear cross" },
+  { label: "GainX 100", tvSymbol: "WELTRADE:GAINX100", category: "GainX", description: "Strong directional moves", volatility: "High", bestFor: "Momentum trading", strategy: "SELL strong impulses; ATR-based TP at 1:2 R:R", signalEngine: "Botvio Trend Engine — Donchian(20) reverse breakout" },
+  { label: "TrendX 10", tvSymbol: "WELTRADE:TRENDX10", category: "TrendX", description: "Light trend bias index", volatility: "Medium", bestFor: "Breakout setups", strategy: "Trade range breaks both directions on 5m", signalEngine: "Botvio Breakout Engine — Bollinger squeeze + volume" },
+  { label: "TrendX 50", tvSymbol: "WELTRADE:TRENDX50", category: "TrendX", description: "Medium trend bias", volatility: "High", bestFor: "Continuation trades", strategy: "Buy/Sell continuation after pullback to EMA20", signalEngine: "Botvio Breakout Engine — EMA stack + ADX > 20" },
+  { label: "FlipX",     category: "Specialty", description: "Sudden direction reversals", volatility: "Extreme", bestFor: "Reversal traders", strategy: "Trade post-flip in new direction; very small lots", signalEngine: "Botvio Reversal Engine — RSI divergence + flip detector" },
+  { label: "SwitchX",   category: "Specialty", description: "Alternating trend phases", volatility: "High", bestFor: "Range & breakout", strategy: "Range trade until phase switch confirmed", signalEngine: "Botvio Phase Engine — regime classifier (trend vs range)" },
+  { label: "BreakX",    category: "Specialty", description: "Consolidation breakouts", volatility: "High", bestFor: "Breakout strategies", strategy: "Enter on confirmed breakout candle close", signalEngine: "Botvio Breakout Engine — Donchian(20) + ATR filter" },
 ];
 
 const CATEGORIES = ["All", "PainX", "GainX", "TrendX", "Specialty"] as const;
@@ -168,21 +181,47 @@ export function SyntxChartSection() {
           ))}
         </div>
 
-        {/* Indices Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* Indices Grid — each card embeds a TradingView chart + strategy + signal engine */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((idx) => (
-            <Card key={idx.label} className="bg-card border-border/50 hover:border-primary/30 transition-colors">
-              <CardContent className="p-4 space-y-2">
+            <Card key={idx.label} className="bg-card border-border/50 hover:border-primary/30 transition-colors overflow-hidden">
+              <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-extrabold text-foreground">{idx.label}</span>
-                  <Badge variant="outline" className="text-[10px]">{idx.category}</Badge>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant="outline" className="text-[10px]">{idx.category}</Badge>
+                    <Badge variant="outline" className={`text-[10px] ${volatilityColor[idx.volatility]}`}>{idx.volatility}</Badge>
+                  </div>
                 </div>
+
+                {idx.tvSymbol ? (
+                  <div className="rounded-lg overflow-hidden border border-border/50" style={{ height: 260 }}>
+                    <LiveChart symbol={idx.tvSymbol} compact />
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border/50 bg-muted/20 p-4 text-center">
+                    <p className="text-[11px] text-muted-foreground">Chart unavailable on TradingView — view live on Weltrade MT4/MT5.</p>
+                  </div>
+                )}
+
                 <p className="text-xs text-muted-foreground">{idx.description}</p>
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-muted-foreground">
-                    Volatility: <span className={`font-bold ${volatilityColor[idx.volatility]}`}>{idx.volatility}</span>
-                  </span>
-                  <span className="text-muted-foreground">Best: <span className="font-bold text-foreground">{idx.bestFor}</span></span>
+
+                <div className="rounded-md border border-primary/20 bg-primary/5 p-2.5 space-y-1">
+                  <p className="text-[10px] font-bold text-primary flex items-center gap-1">
+                    <Target className="h-3 w-3" /> Strategy
+                  </p>
+                  <p className="text-[11px] text-foreground leading-snug">{idx.strategy}</p>
+                </div>
+
+                <div className="rounded-md border border-warning/20 bg-warning/5 p-2.5 space-y-1">
+                  <p className="text-[10px] font-bold text-warning flex items-center gap-1">
+                    <Brain className="h-3 w-3" /> Signal Engine
+                  </p>
+                  <p className="text-[11px] text-foreground leading-snug">{idx.signalEngine}</p>
+                </div>
+
+                <div className="text-[10px] text-muted-foreground">
+                  Best for: <span className="font-bold text-foreground">{idx.bestFor}</span>
                 </div>
               </CardContent>
             </Card>
