@@ -32,7 +32,7 @@ const CHART_SYMBOLS: ChartSymbol[] = [
   { label: "BTC/USD", tvSymbol: "BITSTAMP:BTCUSD", category: "Crypto" },
 ];
 
-function LiveChart({ symbol }: { symbol: string }) {
+function LiveChart({ symbol, compact = false }: { symbol: string; compact?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,28 +45,29 @@ function LiveChart({ symbol }: { symbol: string }) {
     script.innerHTML = JSON.stringify({
       autosize: true,
       symbol,
-      interval: "5",
+      interval: compact ? "15" : "5",
       timezone: "Etc/UTC",
       theme: "dark",
       style: "1",
       locale: "en",
-      hide_top_toolbar: false,
-      hide_legend: false,
+      hide_top_toolbar: compact,
+      hide_legend: compact,
+      hide_side_toolbar: compact,
       allow_symbol_change: false,
       save_image: false,
       calendar: false,
       support_host: "https://www.tradingview.com",
-      studies: [
+      studies: compact ? ["MAExp@tv-basicstudies"] : [
         "MAExp@tv-basicstudies",
         "RSI@tv-basicstudies",
         "BB@tv-basicstudies",
       ],
     });
     containerRef.current.appendChild(script);
-  }, [symbol]);
+  }, [symbol, compact]);
 
   return (
-    <div className="tradingview-widget-container rounded-lg overflow-hidden border border-border/50" style={{ height: 420 }}>
+    <div className="tradingview-widget-container rounded-lg overflow-hidden border border-border/50" style={{ height: compact ? "100%" : 420 }}>
       <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
     </div>
   );
