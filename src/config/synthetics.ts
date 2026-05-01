@@ -34,6 +34,15 @@ export interface SyntheticInstrument {
 export const SYNTHETICS: SyntheticInstrument[] = [
   // ── Boom ────────────────────────────────────────────────────────
   {
+    key: "boom-300",
+    label: "Boom 300 Index",
+    category: "boom",
+    derivSymbol: "BOOM300N",
+    mt5Symbol: "Boom 300 Index",
+    bias: "buy",
+    blurb: "Frequent upward spikes — quick buy setups.",
+  },
+  {
     key: "boom-500",
     label: "Boom 500 Index",
     category: "boom",
@@ -41,6 +50,33 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     mt5Symbol: "Boom 500 Index",
     bias: "buy",
     blurb: "Upward spike opportunities — best for buy-focused strategies.",
+  },
+  {
+    key: "boom-600",
+    label: "Boom 600 Index",
+    category: "boom",
+    derivSymbol: "BOOM600",
+    mt5Symbol: "Boom 600 Index",
+    bias: "buy",
+    blurb: "Mid-range boom — balanced upward spikes.",
+  },
+  {
+    key: "boom-900",
+    label: "Boom 900 Index",
+    category: "boom",
+    derivSymbol: "BOOM900",
+    mt5Symbol: "Boom 900 Index",
+    bias: "buy",
+    blurb: "Slow-burn boom — large up moves.",
+  },
+  {
+    key: "boom-1000",
+    label: "Boom 1000 Index",
+    category: "boom",
+    derivSymbol: "BOOM1000",
+    mt5Symbol: "Boom 1000 Index",
+    bias: "buy",
+    blurb: "Classic boom — clean upward spikes every ~1000 ticks.",
   },
 
   // ── Crash ───────────────────────────────────────────────────────
@@ -88,6 +124,15 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     mt5Symbol: "Crash 900 Index",
     bias: "sell",
     blurb: "Slow-burn crash — large move setups.",
+  },
+  {
+    key: "crash-1000",
+    label: "Crash 1000 Index",
+    category: "crash",
+    derivSymbol: "CRASH1000",
+    mt5Symbol: "Crash 1000 Index",
+    bias: "sell",
+    blurb: "Classic crash — clean downward spikes every ~1000 ticks.",
   },
 
   // ── Volatility ──────────────────────────────────────────────────
