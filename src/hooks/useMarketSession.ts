@@ -70,18 +70,36 @@ export const useMarketSession = (symbol?: string) => {
 
   const marketType = useMemo(() => {
     if (!symbol) return null;
-    
-    // Check direct match
-    if (symbolToMarketType[symbol]) {
-      return symbolToMarketType[symbol];
+
+    // Pattern-based detection (covers all Deriv synthetics, crypto, etc.)
+    const s = symbol.toUpperCase().replace(/\s+/g, "");
+
+    // Synthetic indices (24/7): Boom/Crash, Volatility (R_*, *V, 1HZ*V), Jump, Step, Range Break
+    if (
+      /BOOM|CRASH/.test(s) ||
+      /^R_\d+/.test(s) ||
+      /^\d+HZ\d+V/.test(s) ||
+      /VOLATILITY/.test(s) ||
+      /^JD?\d+/.test(s) ||
+      /JUMP\d+/.test(s) ||
+      /STEP/.test(s) ||
+      /RANGE.*BREAK|RB\d+/.test(s) ||
+      /^DEX\d+/.test(s) ||
+      /GAINX|PAINX|TRENDX/.test(s)
+    ) {
+      return "synthetic";
     }
-    
-    // Check with prefixes removed
+
+    // Crypto (24/7)
+    if (/BTC|ETH|XRP|LTC|BNB|SOL|ADA|DOGE|USDT/.test(s)) {
+      return "crypto";
+    }
+
+    // Direct match
+    if (symbolToMarketType[symbol]) return symbolToMarketType[symbol];
     const cleanSymbol = symbol.replace(/^(frx|cry)/, "");
-    if (symbolToMarketType[cleanSymbol]) {
-      return symbolToMarketType[cleanSymbol];
-    }
-    
+    if (symbolToMarketType[cleanSymbol]) return symbolToMarketType[cleanSymbol];
+
     // Default to forex if unknown
     return "forex";
   }, [symbol]);
