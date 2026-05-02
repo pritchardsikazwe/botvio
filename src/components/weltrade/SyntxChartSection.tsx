@@ -107,6 +107,13 @@ const SYNTX_INDICES: SyntxIndex[] = [
 
 const CATEGORIES = ["All", "PainX", "GainX", "TrendX", "Specialty"] as const;
 
+/** Symbols streamed by BOTVIO_BridgeEA from a Weltrade MT5 terminal. */
+const BRIDGE_SYMBOLS = [
+  "GainX 100", "GainX 50", "GainX 10",
+  "PainX 100", "PainX 50", "PainX 10", "PainX 200",
+  "TrendX 100", "TrendX 50", "TrendX 10",
+] as const;
+
 const volatilityColor: Record<string, string> = {
   Extreme: "text-destructive",
   High: "text-warning",
