@@ -255,6 +255,75 @@ void PushState()
 }
 
 //+------------------------------------------------------------------+
+//| Push live ticks for configured symbols (SyntX/Weltrade etc.)     |
+//+------------------------------------------------------------------+
+void PushTicks()
+{
+   if(StringLen(InpTickSymbols) == 0) return;
+
+   // Parse comma-separated symbols
+   string symbols[];
+   int count = StringSplit(InpTickSymbols, ',', symbols);
+   if(count <= 0) return;
+
+   string ticks = "[";
+   bool firstTick = true;
+   string brokerName = EscapeJson(AccountInfoString(ACCOUNT_COMPANY));
+
+   for(int i = 0; i < count; i++)
+   {
+      string sym = symbols[i];
+      // Trim whitespace
+      StringTrimLeft(sym);
+      StringTrimRight(sym);
+      if(StringLen(sym) == 0) continue;
+
+      // Ensure symbol is in MarketWatch so quotes update
+      if(!SymbolSelect(sym, true))
+      {
+         continue; // symbol not available on this broker
+      }
+
+      double bid = SymbolInfoDouble(sym, SYMBOL_BID);
+      double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
+      if(bid <= 0.0 && ask <= 0.0) continue;
+
+      double last = (bid > 0.0 && ask > 0.0) ? (bid + ask) / 2.0 : (bid > 0.0 ? bid : ask);
+
+      if(!firstTick) ticks += ",";
+      firstTick = false;
+
+      ticks += StringFormat(
+         "{\"symbol\":\"%s\",\"bid\":%.5f,\"ask\":%.5f,\"last\":%.5f}",
+         EscapeJson(sym), bid, ask, last
+      );
+   }
+   ticks += "]";
+
+   if(firstTick) return; // no usable symbols
+
+   string url = InpBridgeURL + "/bridge-push-ticks";
+   string headers = "Content-Type: application/json\r\nx-bridge-secret: " + InpBridgeSecret;
+
+   string body = StringFormat(
+      "{\"terminal_uid\":\"%s\",\"broker\":\"%s\",\"ticks\":%s}",
+      InpTerminalUID, brokerName, ticks
+   );
+
+   char data[];
+   char result[];
+   string resultHeaders;
+   int len = StringToCharArray(body, data, 0, -1, CP_UTF8);
+   if(len > 0) ArrayResize(data, len - 1);
+
+   int res = WebRequest("POST", url, headers, 3000, data, result, resultHeaders);
+   if(res != 200)
+   {
+      Print("Tick push failed. HTTP code: ", res);
+   }
+}
+
+//+------------------------------------------------------------------+
 //| Poll and execute commands                                        |
 //+------------------------------------------------------------------+
 void PollCommands()
