@@ -15,11 +15,14 @@ input string   InpBridgeURL = "https://tqqkzeblmjapgbnsbtgw.supabase.co/function
 input int      InpHeartbeatInterval = 10;     // Heartbeat interval (seconds)
 input int      InpCommandPollInterval = 2;    // Command poll interval (seconds)
 input int      InpStatePushInterval = 10;     // State push interval (seconds)
+input int      InpTickPushInterval = 3;       // Tick push interval (seconds, 0=off)
+input string   InpTickSymbols = "GainX 100,GainX 50,GainX 10,PainX 100,PainX 50,PainX 10,PainX 200,TrendX 100,TrendX 50,TrendX 10"; // Symbols to stream (comma-separated)
 
 //--- Global variables
 datetime g_lastHeartbeat = 0;
 datetime g_lastCommandPoll = 0;
 datetime g_lastStatePush = 0;
+datetime g_lastTickPush = 0;
 bool g_registered = false;
 
 //+------------------------------------------------------------------+
@@ -109,6 +112,13 @@ void OnTimer()
    {
       PushState();
       g_lastStatePush = now;
+   }
+
+   // Push live ticks for SyntX/configured symbols
+   if(InpTickPushInterval > 0 && now - g_lastTickPush >= InpTickPushInterval)
+   {
+      PushTicks();
+      g_lastTickPush = now;
    }
 }
 
