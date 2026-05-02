@@ -4,6 +4,7 @@ import { ExternalLink, BarChart3, TrendingUp, Zap, ArrowUpDown, Activity, Target
 import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
+import { SyntxBridgeChart } from "@/components/weltrade/SyntxBridgeChart";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
@@ -106,6 +107,13 @@ const SYNTX_INDICES: SyntxIndex[] = [
 
 const CATEGORIES = ["All", "PainX", "GainX", "TrendX", "Specialty"] as const;
 
+/** Symbols streamed by BOTVIO_BridgeEA from a Weltrade MT5 terminal. */
+const BRIDGE_SYMBOLS = [
+  "GainX 100", "GainX 50", "GainX 10",
+  "PainX 100", "PainX 50", "PainX 10", "PainX 200",
+  "TrendX 100", "TrendX 50", "TrendX 10",
+] as const;
+
 const volatilityColor: Record<string, string> = {
   Extreme: "text-destructive",
   High: "text-warning",
@@ -115,6 +123,7 @@ const volatilityColor: Record<string, string> = {
 export function SyntxChartSection() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [activeChart, setActiveChart] = useState(0);
+  const [activeBridgeSymbol, setActiveBridgeSymbol] = useState<string>("GainX 100");
 
   const filtered = activeCategory === "All"
     ? SYNTX_INDICES
@@ -122,10 +131,44 @@ export function SyntxChartSection() {
 
   return (
     <div className="space-y-6">
+      {/* ── Live Bridge Feed (real Weltrade SyntX prices via MT5 EA) ── */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+            <Activity className="h-4 w-4 text-emerald-400" /> Live SyntX Feed (Weltrade Bridge)
+          </h3>
+          <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-400">
+            Real Weltrade prices via MT5 Bridge EA
+          </Badge>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {BRIDGE_SYMBOLS.map((sym) => (
+            <Button
+              key={sym}
+              size="sm"
+              variant={activeBridgeSymbol === sym ? "default" : "outline"}
+              className={`text-[11px] h-7 px-2.5 font-bold ${activeBridgeSymbol === sym ? "bg-emerald-500 hover:bg-emerald-500/90 text-white" : ""}`}
+              onClick={() => setActiveBridgeSymbol(sym)}
+            >
+              {sym}
+            </Button>
+          ))}
+        </div>
+        <SyntxBridgeChart symbol={activeBridgeSymbol} label={activeBridgeSymbol} height={340} />
+        <div className="text-[11px] text-muted-foreground space-y-1 leading-relaxed">
+          <p>
+            🔌 <span className="font-bold text-foreground">How to enable:</span> Download <span className="font-mono">BOTVIO_BridgeEA.mq5</span> from <a className="text-primary underline" href="/install">Install</a>, attach it to any chart in your <span className="font-bold">Weltrade MT5</span> terminal, and add SyntX symbols (GainX, PainX, TrendX) to Market Watch. The EA pushes live prices to Botvio every 3 seconds.
+          </p>
+          <p>
+            ⚙️ The EA's <span className="font-mono">InpTickSymbols</span> input controls which symbols stream. Default covers all common SyntX indices.
+          </p>
+        </div>
+      </section>
+
       {/* ── Live Charts ── */}
       <section className="space-y-3">
         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-primary" /> Live Charts (Weltrade Markets)
+          <BarChart3 className="h-4 w-4 text-primary" /> Live Charts (TradingView proxies)
         </h3>
         <div className="flex items-center gap-2 flex-wrap">
           {CHART_SYMBOLS.map((cs, i) => (
