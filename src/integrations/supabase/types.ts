@@ -1039,6 +1039,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bridge_ticks: {
+        Row: {
+          ask: number | null
+          bid: number | null
+          broker: string | null
+          created_at: string
+          id: number
+          last_price: number | null
+          symbol: string
+          terminal_uid: string
+          ts: string
+        }
+        Insert: {
+          ask?: number | null
+          bid?: number | null
+          broker?: string | null
+          created_at?: string
+          id?: number
+          last_price?: number | null
+          symbol: string
+          terminal_uid: string
+          ts?: string
+        }
+        Update: {
+          ask?: number | null
+          bid?: number | null
+          broker?: string | null
+          created_at?: string
+          id?: number
+          last_price?: number | null
+          symbol?: string
+          terminal_uid?: string
+          ts?: string
+        }
+        Relationships: []
+      }
       broker_click_events: {
         Row: {
           broker_id: string
