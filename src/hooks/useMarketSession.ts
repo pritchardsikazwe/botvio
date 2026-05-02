@@ -106,7 +106,10 @@ export const useMarketSession = (symbol?: string) => {
 
   const isMarketOpen = useMemo(() => {
     if (!sessions || !marketType) return true; // Default to open if no data
-    
+
+    // Synthetic indices and crypto are 24/7 — never closed
+    if (marketType === "synthetic" || marketType === "crypto") return true;
+
     const session = sessions.find(s => s.market_type === marketType);
     if (!session) return true;
     
