@@ -16,7 +16,7 @@ input int      InpHeartbeatInterval = 10;     // Heartbeat interval (seconds)
 input int      InpCommandPollInterval = 2;    // Command poll interval (seconds)
 input int      InpStatePushInterval = 10;     // State push interval (seconds)
 input int      InpTickPushInterval = 3;       // Tick push interval (seconds, 0=off)
-input string   InpTickSymbols = "GainX 100,GainX 50,GainX 10,PainX 100,PainX 50,PainX 10,PainX 200,TrendX 100,TrendX 50,TrendX 10"; // Symbols to stream (comma-separated)
+input string   InpTickSymbols = "GainX 400,GainX 600,GainX 800,PainX 400,PainX 600,PainX 800,FlipX 1,FlipX 2,FlipX 3,FlipX 4,FlipX 5,SwitchX 600,SwitchX 1200,SwitchX 1800,FX 20,FX 40,FX 80"; // Symbols to stream (comma-separated)
 
 //--- Global variables
 datetime g_lastHeartbeat = 0;

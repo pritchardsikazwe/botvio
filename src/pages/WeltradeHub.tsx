@@ -4,11 +4,9 @@ import { Header } from "@/components/trading/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Signal, Lightbulb, Users, Crosshair, ExternalLink } from "lucide-react";
+import { BarChart3, Signal, Users, Sparkles, ExternalLink } from "lucide-react";
 import { SyntxChartSection } from "@/components/weltrade/SyntxChartSection";
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
-import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
-import { SyntxTipsSection } from "@/components/weltrade/SyntxTipsSection";
 import { SyntxCommunitySection } from "@/components/weltrade/SyntxCommunitySection";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
@@ -19,27 +17,31 @@ const WeltradeHub = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead seoKey="weltrade"
-        title="Weltrade Hub – PainX, GainX & TrendX Charts & Signals"
-        description="Your complete SyntX trading terminal. Live PainX, GainX, TrendX charts, Botvio AI strategies, signals, tips & community for Weltrade synthetic indices."
+        title="Weltrade Hub – GainX, PainX, FlipX, SwitchX & FX Charts & Signals"
+        description="Live Weltrade SyntX terminal. GainX 400/600/800, PainX 400/600/800, FlipX 1-5, SwitchX 600/1200/1800, FX 20/40/80 — charts, signals & community."
         ogImage="https://botvio.live/icon-512.png"
       />
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Hero */}
+        {/* Hero — compact, matches SyntheticHub */}
         <div className="relative overflow-hidden rounded-2xl border border-warning/20 bg-gradient-to-br from-warning/10 via-card to-card p-6 md:p-8">
           <div className="absolute top-0 right-0 w-64 h-64 bg-warning/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-warning/20 text-warning border-warning/30 font-mono text-xs">SyntX</Badge>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge className="bg-warning/20 text-warning border-warning/30 font-mono text-xs">SYNTX</Badge>
                 <Badge variant="outline" className="border-success/40 text-success text-xs">24/5 Market</Badge>
+                <Badge variant="outline" className="border-warning/30 text-warning text-xs">
+                  <Sparkles className="h-3 w-3 mr-1" /> Live Bridge Feed
+                </Badge>
               </div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 Weltrade <span className="text-warning">Hub</span>
               </h1>
-              <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                PainX, GainX, TrendX & Volatility indices — charts, Botvio AI strategies, signals & community all in one place.
+              <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+                Real-time charts and signals for GainX, PainX, FlipX, SwitchX and FX indices — streamed direct from your Weltrade MT5 via the BOTVIO Bridge EA.
               </p>
             </div>
             <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
@@ -50,13 +52,7 @@ const WeltradeHub = () => {
           </div>
         </div>
 
-        {/* Strategy & Tips — Always visible outside tabs */}
-        <section className="space-y-6">
-          <SyntxBotvioStrategy />
-          <SyntxTipsSection />
-        </section>
-
-        {/* Tabs for Charts, Signals, Community */}
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-3 bg-card border border-border/50 h-12">
             <TabsTrigger value="charts" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
