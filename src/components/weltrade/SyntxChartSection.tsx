@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Rocket, Bomb, RefreshCw, Shuffle, Zap, BarChart3, ExternalLink } from "lucide-react";
 import { SyntxBridgeChart } from "@/components/weltrade/SyntxBridgeChart";
+import { SyntxHauzaSignalButton } from "@/components/weltrade/SyntxHauzaSignalButton";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
@@ -12,7 +13,8 @@ type SyntxCategory = "GainX" | "PainX" | "FlipX" | "SwitchX" | "FX";
 
 interface SyntxInst {
   key: string;
-  label: string;          // MT5 symbol
+  label: string;          // Display label
+  mt5Symbol: string;      // Exact Weltrade MT5 ticker
   category: SyntxCategory;
   bias: "buy" | "sell" | "both";
   blurb: string;
@@ -20,27 +22,27 @@ interface SyntxInst {
 
 const SYNTX: SyntxInst[] = [
   // GainX (sell bias — boom-style)
-  { key: "gainx-400", label: "GainX 400", category: "GainX", bias: "sell", blurb: "Frequent upward spikes — sell bias scalping." },
-  { key: "gainx-600", label: "GainX 600", category: "GainX", bias: "sell", blurb: "Mid-range gainx — balanced spikes." },
-  { key: "gainx-800", label: "GainX 800", category: "GainX", bias: "sell", blurb: "Slow-burn — larger moves between spikes." },
+  { key: "gainx-400", label: "GainX 400", mt5Symbol: "GainX 400", category: "GainX", bias: "sell", blurb: "Frequent upward spikes — sell bias scalping." },
+  { key: "gainx-600", label: "GainX 600", mt5Symbol: "GainX 600", category: "GainX", bias: "sell", blurb: "Mid-range gainx — balanced spikes." },
+  { key: "gainx-800", label: "GainX 800", mt5Symbol: "GainX 800", category: "GainX", bias: "sell", blurb: "Slow-burn — larger moves between spikes." },
   // PainX (buy bias — crash-style)
-  { key: "painx-400", label: "PainX 400", category: "PainX", bias: "buy", blurb: "Frequent downward spikes — buy bias scalping." },
-  { key: "painx-600", label: "PainX 600", category: "PainX", bias: "buy", blurb: "Mid-range painx — balanced setups." },
-  { key: "painx-800", label: "PainX 800", category: "PainX", bias: "buy", blurb: "Slow-burn crash — larger move setups." },
+  { key: "painx-400", label: "PainX 400", mt5Symbol: "PainX 400", category: "PainX", bias: "buy", blurb: "Frequent downward spikes — buy bias scalping." },
+  { key: "painx-600", label: "PainX 600", mt5Symbol: "PainX 600", category: "PainX", bias: "buy", blurb: "Mid-range painx — balanced setups." },
+  { key: "painx-800", label: "PainX 800", mt5Symbol: "PainX 800", category: "PainX", bias: "buy", blurb: "Slow-burn crash — larger move setups." },
   // FlipX
-  { key: "flipx-1", label: "FlipX 1", category: "FlipX", bias: "both", blurb: "Reversal-driven — fastest flip cadence." },
-  { key: "flipx-2", label: "FlipX 2", category: "FlipX", bias: "both", blurb: "Quick flips with steady volatility." },
-  { key: "flipx-3", label: "FlipX 3", category: "FlipX", bias: "both", blurb: "Balanced flip behaviour." },
-  { key: "flipx-4", label: "FlipX 4", category: "FlipX", bias: "both", blurb: "Slower flips — cleaner structure." },
-  { key: "flipx-5", label: "FlipX 5", category: "FlipX", bias: "both", blurb: "Slowest flips — wider swings." },
+  { key: "flipx-1", label: "FlipX 1", mt5Symbol: "FlipX 1", category: "FlipX", bias: "both", blurb: "Reversal-driven — fastest flip cadence." },
+  { key: "flipx-2", label: "FlipX 2", mt5Symbol: "FlipX 2", category: "FlipX", bias: "both", blurb: "Quick flips with steady volatility." },
+  { key: "flipx-3", label: "FlipX 3", mt5Symbol: "FlipX 3", category: "FlipX", bias: "both", blurb: "Balanced flip behaviour." },
+  { key: "flipx-4", label: "FlipX 4", mt5Symbol: "FlipX 4", category: "FlipX", bias: "both", blurb: "Slower flips — cleaner structure." },
+  { key: "flipx-5", label: "FlipX 5", mt5Symbol: "FlipX 5", category: "FlipX", bias: "both", blurb: "Slowest flips — wider swings." },
   // SwitchX
-  { key: "switchx-600",  label: "SwitchX 600",  category: "SwitchX", bias: "both", blurb: "Phase switches every ~600 ticks." },
-  { key: "switchx-1200", label: "SwitchX 1200", category: "SwitchX", bias: "both", blurb: "Mid-cycle phase switches." },
-  { key: "switchx-1800", label: "SwitchX 1800", category: "SwitchX", bias: "both", blurb: "Slow phase rotations — trend setups." },
-  // FX
-  { key: "fx-20", label: "FX 20", category: "FX", bias: "both", blurb: "Low-noise FX index — clean structure." },
-  { key: "fx-40", label: "FX 40", category: "FX", bias: "both", blurb: "Balanced FX volatility." },
-  { key: "fx-80", label: "FX 80", category: "FX", bias: "both", blurb: "Higher volatility FX — aggressive setups." },
+  { key: "switchx-600",  label: "SwitchX 600",  mt5Symbol: "SwitchX 600",  category: "SwitchX", bias: "both", blurb: "Phase switches every ~600 ticks." },
+  { key: "switchx-1200", label: "SwitchX 1200", mt5Symbol: "SwitchX 1200", category: "SwitchX", bias: "both", blurb: "Mid-cycle phase switches." },
+  { key: "switchx-1800", label: "SwitchX 1800", mt5Symbol: "SwitchX 1800", category: "SwitchX", bias: "both", blurb: "Slow phase rotations — trend setups." },
+  // FX (Weltrade tickers are "FX VOL 20/40/80")
+  { key: "fx-20", label: "FX VOL 20", mt5Symbol: "FX VOL 20", category: "FX", bias: "both", blurb: "Low-noise FX index — clean structure." },
+  { key: "fx-40", label: "FX VOL 40", mt5Symbol: "FX VOL 40", category: "FX", bias: "both", blurb: "Balanced FX volatility." },
+  { key: "fx-80", label: "FX VOL 80", mt5Symbol: "FX VOL 80", category: "FX", bias: "both", blurb: "Higher volatility FX — aggressive setups." },
 ];
 
 const CATEGORY_META: Record<SyntxCategory, { icon: typeof Rocket; tone: string }> = {
@@ -65,28 +67,22 @@ export function SyntxChartSection() {
     <div className="space-y-6">
       {/* Active chart + info */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <Card className="lg:col-span-1 bg-card border-border/50">
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-extrabold text-foreground">{active.label}</span>
-              <Badge variant="outline" className={`text-[10px] ${CATEGORY_META[active.category].tone}`}>
-                {active.category}
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground">{active.blurb}</p>
-            <Badge variant="outline" className="text-[10px] border-primary/30 text-primary uppercase">
-              {active.bias === "buy" ? "Buy bias" : active.bias === "sell" ? "Sell bias" : "Both"}
-            </Badge>
-            <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="block">
-              <Button variant="gold" className="w-full font-bold text-xs">
-                <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Trade on Weltrade
-              </Button>
-            </a>
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-1 space-y-3">
+          <SyntxHauzaSignalButton
+            mt5Symbol={active.mt5Symbol}
+            label={active.label}
+            category={active.category}
+            bias={active.bias}
+          />
+          <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="block">
+            <Button variant="gold" className="w-full font-bold text-xs">
+              <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Trade on Weltrade
+            </Button>
+          </a>
+        </div>
 
         <div className="lg:col-span-3">
-          <SyntxBridgeChart symbol={active.label} label={active.label} height={460} />
+          <SyntxBridgeChart symbol={active.mt5Symbol} label={active.label} height={460} />
           <p className="text-[11px] text-muted-foreground mt-2 px-2">
             🔌 Live prices stream from your Weltrade MT5 terminal via the BOTVIO Bridge EA. Add this symbol to MT5 Market Watch to see the feed.
           </p>
