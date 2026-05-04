@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { createChart, ColorType, LineStyle, type IChartApi, type ISeriesApi, type UTCTimestamp, LineSeries } from "lightweight-charts";
+import { createChart, ColorType, LineStyle, type IChartApi, type ISeriesApi, type UTCTimestamp, CandlestickSeries } from "lightweight-charts";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, WifiOff, Wifi } from "lucide-react";
@@ -13,24 +13,39 @@ interface Props {
 
 /**
  * Live SyntX chart fed by the BOTVIO Bridge EA running inside the user's
- * Weltrade MT5 terminal. Renders a tick line chart from real Weltrade prices.
+ * Weltrade MT5 terminal. Renders 30-second candlesticks aggregated from real
+ * Weltrade tick prices.
  */
 export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
-  const { ticks, latest, hasFeed } = useBridgeTicks(symbol, 600);
+  const { ticks, latest, hasFeed } = useBridgeTicks(symbol, 2000);
 
-  const lineData = useMemo(() => {
-    return ticks
+  // Aggregate ticks into 30-second OHLC candles
+  const candleData = useMemo(() => {
+    const BUCKET = 30; // seconds
+    if (!ticks.length) return [];
+    const ordered = [...ticks]
       .filter((t) => t.last_price != null)
-      .map((t) => ({
-        time: Math.floor(new Date(t.ts).getTime() / 1000) as UTCTimestamp,
-        value: Number(t.last_price),
-      }))
-      // dedupe by timestamp (chart requires monotonic)
-      .filter((p, i, arr) => i === 0 || p.time > arr[i - 1].time);
+      .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
+    const buckets = new Map<number, { open: number; high: number; low: number; close: number }>();
+    for (const t of ordered) {
+      const sec = Math.floor(new Date(t.ts).getTime() / 1000);
+      const bucket = sec - (sec % BUCKET);
+      const px = Number(t.last_price);
+      const c = buckets.get(bucket);
+      if (!c) buckets.set(bucket, { open: px, high: px, low: px, close: px });
+      else {
+        c.high = Math.max(c.high, px);
+        c.low = Math.min(c.low, px);
+        c.close = px;
+      }
+    }
+    return Array.from(buckets.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([epoch, v]) => ({ time: epoch as UTCTimestamp, ...v }));
   }, [ticks]);
 
   // Create chart once
@@ -51,9 +66,13 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
       rightPriceScale: { borderVisible: false },
     });
 
-    const series = chart.addSeries(LineSeries, {
-      color: "#10b981",
-      lineWidth: 2,
+    const series = chart.addSeries(CandlestickSeries, {
+      upColor: "#10b981",
+      downColor: "#ef4444",
+      borderUpColor: "#10b981",
+      borderDownColor: "#ef4444",
+      wickUpColor: "#10b981",
+      wickDownColor: "#ef4444",
     });
 
     chartRef.current = chart;
@@ -77,9 +96,9 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
   // Update data
   useEffect(() => {
     if (!seriesRef.current) return;
-    if (lineData.length === 0) return;
-    seriesRef.current.setData(lineData);
-  }, [lineData]);
+    if (candleData.length === 0) return;
+    seriesRef.current.setData(candleData);
+  }, [candleData]);
 
   return (
     <Card className="overflow-hidden border-border/60">
@@ -111,7 +130,7 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
 
       <div className="relative" style={{ height }}>
         <div ref={containerRef} className="absolute inset-0" />
-        {!hasFeed && lineData.length === 0 && (
+        {!hasFeed && candleData.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
             <div className="text-center max-w-md p-4">
               <WifiOff className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
