@@ -16,7 +16,14 @@ input int      InpHeartbeatInterval = 10;     // Heartbeat interval (seconds)
 input int      InpCommandPollInterval = 2;    // Command poll interval (seconds)
 input int      InpStatePushInterval = 10;     // State push interval (seconds)
 input int      InpTickPushInterval = 3;       // Tick push interval (seconds, 0=off)
-input string   InpTickSymbols = "GainX 400,GainX 600,GainX 800,PainX 400,PainX 600,PainX 800,FlipX 1,FlipX 2,FlipX 3,FlipX 4,FlipX 5,SwitchX 600,SwitchX 1200,SwitchX 1800,FX 20,FX 40,FX 80"; // Symbols to stream (comma-separated)
+
+//--- Broker preset (auto-fills the symbol list below)
+enum ENUM_BROKER_PRESET { PRESET_WELTRADE, PRESET_EXNESS, PRESET_DERIV_MT5, PRESET_CUSTOM };
+input ENUM_BROKER_PRESET InpBrokerPreset = PRESET_WELTRADE; // Broker preset
+input string   InpTickSymbols = ""; // Custom symbols (used only when preset=Custom)
+
+// Resolved symbol list (filled in OnInit based on preset)
+string g_tickSymbols = "";
 
 //--- Global variables
 datetime g_lastHeartbeat = 0;
@@ -48,7 +55,36 @@ int OnInit()
       Print("ERROR: Bridge Shared Secret is required");
       return INIT_PARAMETERS_INCORRECT;
    }
-   
+
+   // Resolve broker preset → symbol list
+   if(InpBrokerPreset == PRESET_WELTRADE)
+   {
+      g_tickSymbols = "GainX 400,GainX 600,GainX 800,PainX 400,PainX 600,PainX 800,"
+                      "FlipX 1,FlipX 2,FlipX 3,FlipX 4,FlipX 5,"
+                      "SwitchX 600,SwitchX 1200,SwitchX 1800,"
+                      "FX VOL 20,FX VOL 40,FX VOL 80";
+      Print("Broker preset: WELTRADE — streaming SyntX (GainX/PainX/FlipX/SwitchX/FX VOL)");
+   }
+   else if(InpBrokerPreset == PRESET_EXNESS)
+   {
+      g_tickSymbols = "XAUUSD,XAGUSD,EURUSD,GBPUSD,USDJPY,USDCHF,AUDUSD,NZDUSD,USDCAD,"
+                      "BTCUSD,ETHUSD,US30,US500,USTEC";
+      Print("Broker preset: EXNESS — streaming FX, metals, crypto and indices");
+   }
+   else if(InpBrokerPreset == PRESET_DERIV_MT5)
+   {
+      g_tickSymbols = "Boom 300 Index,Boom 500 Index,Boom 600 Index,Boom 900 Index,Boom 1000 Index,"
+                      "Crash 300 Index,Crash 500 Index,Crash 600 Index,Crash 900 Index,Crash 1000 Index,"
+                      "Volatility 10 Index,Volatility 25 Index,Volatility 75 Index,Volatility 75 (1s) Index,"
+                      "Step Index";
+      Print("Broker preset: DERIV MT5 — streaming Boom/Crash/Volatility/Step");
+   }
+   else
+   {
+      g_tickSymbols = InpTickSymbols;
+      Print("Broker preset: CUSTOM — using InpTickSymbols");
+   }
+
    // Register terminal on startup
    if(!RegisterTerminal())
    {
@@ -259,11 +295,11 @@ void PushState()
 //+------------------------------------------------------------------+
 void PushTicks()
 {
-   if(StringLen(InpTickSymbols) == 0) return;
+   if(StringLen(g_tickSymbols) == 0) return;
 
    // Parse comma-separated symbols
    string symbols[];
-   int count = StringSplit(InpTickSymbols, ',', symbols);
+   int count = StringSplit(g_tickSymbols, ',', symbols);
    if(count <= 0) return;
 
    string ticks = "[";
