@@ -4,10 +4,11 @@ import { Header } from "@/components/trading/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Signal, Users, Sparkles, ExternalLink } from "lucide-react";
+import { BarChart3, Signal, Users, Sparkles, ExternalLink, Crosshair } from "lucide-react";
 import { SyntxChartSection } from "@/components/weltrade/SyntxChartSection";
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
 import { SyntxCommunitySection } from "@/components/weltrade/SyntxCommunitySection";
+import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
@@ -54,12 +55,15 @@ const WeltradeHub = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-3 bg-card border border-border/50 h-12">
+          <TabsList className="w-full grid grid-cols-4 bg-card border border-border/50 h-12">
             <TabsTrigger value="charts" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
               <BarChart3 className="h-4 w-4" /> Charts
             </TabsTrigger>
             <TabsTrigger value="signals" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
               <Signal className="h-4 w-4" /> Signals
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
+              <Crosshair className="h-4 w-4" /> Strategy
             </TabsTrigger>
             <TabsTrigger value="community" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning font-bold text-xs gap-1.5">
               <Users className="h-4 w-4" /> Community
@@ -71,6 +75,9 @@ const WeltradeHub = () => {
           </TabsContent>
           <TabsContent value="signals" className="mt-6">
             <SyntxSignalsSection />
+          </TabsContent>
+          <TabsContent value="strategy" className="mt-6">
+            <SyntxBotvioStrategy />
           </TabsContent>
           <TabsContent value="community" className="mt-6">
             <SyntxCommunitySection />
