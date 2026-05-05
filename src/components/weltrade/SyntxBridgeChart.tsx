@@ -6,11 +6,11 @@ import {
   type IChartApi,
   type ISeriesApi,
   type UTCTimestamp,
-  type SeriesMarker,
-  type Time,
   CandlestickSeries,
   LineSeries,
 } from "lightweight-charts";
+import { createSeriesMarkers, type SeriesMarker, type ISeriesMarkersPluginApi } from "lightweight-charts";
+import type { Time } from "lightweight-charts";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, WifiOff, Wifi, TrendingUp, TrendingDown } from "lucide-react";
@@ -34,6 +34,7 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
   const supportRef = useRef<ISeriesApi<"Line"> | null>(null);
   const resistanceRef = useRef<ISeriesApi<"Line"> | null>(null);
   const trendlineRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const markersRef = useRef<ISeriesMarkersPluginApi<Time> | null>(null);
 
   const { ticks, latest, hasFeed } = useBridgeTicks(symbol, 2000);
 
@@ -173,6 +174,7 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
     supportRef.current = support;
     resistanceRef.current = resistance;
     trendlineRef.current = trend;
+    markersRef.current = createSeriesMarkers(series, []);
 
     const handleResize = () => {
       if (containerRef.current && chartRef.current) {
@@ -189,6 +191,7 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
       supportRef.current = null;
       resistanceRef.current = null;
       trendlineRef.current = null;
+      markersRef.current = null;
     };
   }, [height]);
 
@@ -200,8 +203,8 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
     if (supportRef.current && overlays.support.length) supportRef.current.setData(overlays.support);
     if (resistanceRef.current && overlays.resistance.length) resistanceRef.current.setData(overlays.resistance);
     if (trendlineRef.current && overlays.trend.length) trendlineRef.current.setData(overlays.trend);
-    if (seriesRef.current && overlays.markers.length) {
-      seriesRef.current.setMarkers(overlays.markers);
+    if (markersRef.current) {
+      markersRef.current.setMarkers(overlays.markers);
     }
   }, [candleData, overlays]);
 
