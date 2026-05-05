@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2024, BOTVIO"
 #property link      "https://botvio.live"
-#property version   "1.10"
+#property version   "1.30"
 #property strict
 
 //--- Input parameters
@@ -450,12 +450,29 @@ void ProcessCommandsResponse(string response)
 //+------------------------------------------------------------------+
 bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
 {
+   PrintFormat("[BOTVIO] OPEN cmd payload: %s", StringSubstr(response, 0, 400));
    // Extract symbol
    int symStart = StringFind(response, "\"symbol\":\"");
    if(symStart < 0) { errorMsg = "Symbol not found"; return false; }
    symStart += 10;
    int symEnd = StringFind(response, "\"", symStart);
    string symbol = StringSubstr(response, symStart, symEnd - symStart);
+
+   // Ensure symbol exists in Market Watch (auto-add if missing)
+   if(!SymbolSelect(symbol, true))
+   {
+      errorMsg = StringFormat("Symbol '%s' not in Market Watch (SymbolSelect failed). Add it manually in MT5.", symbol);
+      PrintFormat("[BOTVIO] %s", errorMsg);
+      return false;
+   }
+   // Force a refresh so SymbolInfoDouble has fresh prices
+   MqlTick lastTick;
+   if(!SymbolInfoTick(symbol, lastTick))
+   {
+      errorMsg = StringFormat("No tick data for '%s'. Open a chart of this symbol in MT5.", symbol);
+      PrintFormat("[BOTVIO] %s", errorMsg);
+      return false;
+   }
    
    // Extract type (BUY/SELL)
    int typeStart = StringFind(response, "\"type\":\"");
@@ -492,23 +509,78 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
       if(tpEnd < 0) tpEnd = StringFind(response, "}", tpStart);
       tp = StringToDouble(StringSubstr(response, tpStart, tpEnd - tpStart));
    }
-   
+
+   // Normalise volume to broker step + min/max
+   double minVol  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
+   double maxVol  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
+   double stepVol = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);
+   if(stepVol > 0) volume = MathRound(volume / stepVol) * stepVol;
+   if(volume < minVol) volume = minVol;
+   if(maxVol > 0 && volume > maxVol) volume = maxVol;
+
+   // Auto-detect supported filling mode for this symbol (Weltrade/Exness use IOC, Deriv MT5 uses FOK, others RETURN)
+   long fillingFlags = SymbolInfoInteger(symbol, SYMBOL_FILLING_MODE);
+   ENUM_ORDER_TYPE_FILLING fillingMode = ORDER_FILLING_RETURN;
+   if((fillingFlags & SYMBOL_FILLING_FOK) != 0)      fillingMode = ORDER_FILLING_FOK;
+   else if((fillingFlags & SYMBOL_FILLING_IOC) != 0) fillingMode = ORDER_FILLING_IOC;
+
+   double askPx = lastTick.ask;
+   double bidPx = lastTick.bid;
+   double price = (orderType == ORDER_TYPE_BUY) ? askPx : bidPx;
+
+   // Validate SL/TP against broker stop level
+   long stopsLevel = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   double point    = SymbolInfoDouble(symbol, SYMBOL_POINT);
+   double minDist  = stopsLevel * point;
+   if(sl > 0 && minDist > 0)
+   {
+      if(orderType == ORDER_TYPE_BUY  && (price - sl) < minDist) sl = price - minDist;
+      if(orderType == ORDER_TYPE_SELL && (sl - price) < minDist) sl = price + minDist;
+   }
+   if(tp > 0 && minDist > 0)
+   {
+      if(orderType == ORDER_TYPE_BUY  && (tp - price) < minDist) tp = price + minDist;
+      if(orderType == ORDER_TYPE_SELL && (price - tp) < minDist) tp = price - minDist;
+   }
+
+   PrintFormat("[BOTVIO] Sending OPEN: %s %s vol=%.2f price=%.5f sl=%.5f tp=%.5f filling=%d",
+               symbol, EnumToString(orderType), volume, price, sl, tp, fillingMode);
+
    // Execute trade
-   MqlTradeRequest request = {};
-   MqlTradeResult result = {};
-   
-   request.action = TRADE_ACTION_DEAL;
-   request.symbol = symbol;
-   request.volume = volume;
-   request.type = orderType;
-   request.price = (orderType == ORDER_TYPE_BUY) ? SymbolInfoDouble(symbol, SYMBOL_ASK) : SymbolInfoDouble(symbol, SYMBOL_BID);
-   request.deviation = 10;
-   request.magic = 123456;
-   request.comment = "BOTVIO";
-   if(sl > 0) request.sl = sl;
-   if(tp > 0) request.tp = tp;
-   
-    if(OrderSend(request, result) && (result.retcode == TRADE_RETCODE_DONE || result.retcode == TRADE_RETCODE_PLACED))
+   MqlTradeRequest request; ZeroMemory(request);
+   MqlTradeResult result;   ZeroMemory(result);
+
+   request.action       = TRADE_ACTION_DEAL;
+   request.symbol       = symbol;
+   request.volume       = volume;
+   request.type         = orderType;
+   request.price        = price;
+   request.deviation    = 50;       // wider slippage tolerance
+   request.magic        = 123456;
+   request.comment      = "BOTVIO";
+   request.type_filling = fillingMode;
+   request.type_time    = ORDER_TIME_GTC;
+   if(sl > 0) request.sl = NormalizeDouble(sl, (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS));
+   if(tp > 0) request.tp = NormalizeDouble(tp, (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS));
+
+   bool sent = OrderSend(request, result);
+   PrintFormat("[BOTVIO] OrderSend → sent=%s retcode=%d order=%I64u deal=%I64u comment=%s",
+               sent ? "true" : "false", result.retcode, result.order, result.deal, result.comment);
+
+   // Retry once with a different filling mode if rejected with "Unsupported filling mode" (10030)
+   if((!sent || result.retcode == 10030) && fillingMode != ORDER_FILLING_RETURN)
+   {
+      ENUM_ORDER_TYPE_FILLING alt = (fillingMode == ORDER_FILLING_FOK) ? ORDER_FILLING_IOC : ORDER_FILLING_FOK;
+      if((fillingFlags & (alt == ORDER_FILLING_FOK ? SYMBOL_FILLING_FOK : SYMBOL_FILLING_IOC)) != 0)
+      {
+         request.type_filling = alt;
+         PrintFormat("[BOTVIO] Retrying OPEN with filling=%d", alt);
+         sent = OrderSend(request, result);
+         PrintFormat("[BOTVIO] Retry → sent=%s retcode=%d", sent ? "true" : "false", result.retcode);
+      }
+   }
+
+   if(sent && (result.retcode == TRADE_RETCODE_DONE || result.retcode == TRADE_RETCODE_PLACED))
    {
       ticket = 0;
       for(int i = PositionsTotal() - 1; i >= 0; i--)
@@ -541,7 +613,8 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
    }
    else
    {
-      errorMsg = StringFormat("OrderSend failed. Retcode: %d Error: %d", result.retcode, GetLastError());
+      errorMsg = StringFormat("OrderSend failed. Retcode=%d Error=%d Comment=%s", result.retcode, GetLastError(), result.comment);
+      PrintFormat("[BOTVIO] %s", errorMsg);
       return false;
    }
 }

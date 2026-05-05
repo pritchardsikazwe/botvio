@@ -8,6 +8,26 @@ import { enforceCanonicalDomain } from "./config/domain";
 // Enforce canonical domain redirect before rendering
 enforceCanonicalDomain();
 
+// Capture install prompt globally so /install page (and any CTA) can trigger it
+declare global {
+  interface WindowEventMap {
+    beforeinstallprompt: BeforeInstallPromptEvent;
+  }
+  interface BeforeInstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  }
+}
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  (window as any).__deferredPwaPrompt = e;
+  window.dispatchEvent(new CustomEvent("pwa-installable"));
+});
+window.addEventListener("appinstalled", () => {
+  (window as any).__deferredPwaPrompt = null;
+  window.dispatchEvent(new CustomEvent("pwa-installed"));
+});
+
 // PWA auto-update: aggressively check for new versions and force reload
 const updateSW = registerSW({
   immediate: true,

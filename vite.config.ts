@@ -23,10 +23,12 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: "Botvio - AI Trading Platform",
         short_name: "Botvio",
+        id: "/",
         description: "Automated trading bots for Deriv, Weltrade & Exness. Copy trading, signals & more.",
         theme_color: "#1A1A2E",
         background_color: "#0D0D1A",
         display: "standalone",
+        display_override: ["standalone", "minimal-ui", "browser"],
         orientation: "portrait",
         scope: "/",
         start_url: "/",
@@ -35,19 +37,31 @@ export default defineConfig(({ mode }) => ({
             src: "/icon-192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "any maskable"
+            purpose: "any"
           },
           {
             src: "/icon-512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable"
+            purpose: "any"
+          },
+          {
+            src: "/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "maskable"
+          },
+          {
+            src: "/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable"
           },
           {
             src: "/apple-touch-icon.png",
             sizes: "180x180",
             type: "image/png",
-            purpose: "apple touch icon"
+            purpose: "any"
           }
         ],
         categories: ["finance", "business", "productivity"],
