@@ -51,7 +51,21 @@ const Install = () => {
       setDeferredPrompt(null);
     });
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    // Pick up a previously-captured global prompt (fired before this page mounted)
+    if ((window as any).__deferredPwaPrompt) {
+      setDeferredPrompt((window as any).__deferredPwaPrompt);
+    }
+    const installable = () => {
+      if ((window as any).__deferredPwaPrompt) {
+        setDeferredPrompt((window as any).__deferredPwaPrompt);
+      }
+    };
+    window.addEventListener('pwa-installable', installable);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('pwa-installable', installable);
+    };
   }, []);
 
   const handleInstall = async () => {
