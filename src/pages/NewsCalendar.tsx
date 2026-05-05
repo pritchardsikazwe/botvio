@@ -10,8 +10,9 @@ import {
   CalendarDays, CheckCircle, XCircle, Lightbulb, Timer, Sparkles, Eye
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const CALENDAR_EVENTS = [
+const FALLBACK_CALENDAR_EVENTS = [
   // Week 1: Apr 7–11
   { date: "Apr 7 (Mon)", currency: "EUR", event: "Eurozone Sentix Investor Confidence", impact: "Medium", implication: "EUR pairs — early-week sentiment gauge" },
   { date: "Apr 7 (Mon)", currency: "USD", event: "Consumer Credit", impact: "Medium", implication: "Household borrowing trends — consumer demand outlook" },
