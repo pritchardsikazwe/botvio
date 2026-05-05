@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2024, BOTVIO"
 #property link      "https://botvio.live"
-#property version   "1.10"
+#property version   "1.30"
 #property strict
 
 //--- Input parameters
