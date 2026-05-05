@@ -238,7 +238,11 @@ const NewsCalendar = () => {
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-primary" /> 📊 Full Week Calendar — Mar 31 – Apr 4, 2026
+                <CalendarDays className="h-4 w-4 text-primary" /> 📊 Live Economic Calendar — Next 30 Days
+                {loadingCal && <Badge variant="outline" className="ml-2 text-[9px]">Loading…</Badge>}
+                {!loadingCal && liveEvents && liveEvents !== FALLBACK_CALENDAR_EVENTS && (
+                  <Badge className="ml-2 text-[9px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30">LIVE</Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
