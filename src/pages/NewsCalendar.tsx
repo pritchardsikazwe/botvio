@@ -77,6 +77,39 @@ function LiveClock() {
 }
 
 const NewsCalendar = () => {
+  const [liveEvents, setLiveEvents] = useState<typeof FALLBACK_CALENDAR_EVENTS | null>(null);
+  const [loadingCal, setLoadingCal] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("economic-calendar");
+        if (error) throw error;
+        const events = (data?.events ?? []) as Array<{
+          time: string; currency: string; event: string; impact: string;
+        }>;
+        if (!alive) return;
+        const mapped = events.slice(0, 200).map((e) => {
+          const d = new Date(e.time);
+          const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", weekday: "short" });
+          return {
+            date,
+            currency: e.currency || "—",
+            event: e.event || "—",
+            impact: ["High", "Medium", "Low"].includes(e.impact) ? e.impact : "Medium",
+            implication: `${e.currency} pairs — ${e.impact?.toLowerCase() ?? "medium"}-impact event`,
+          };
+        });
+        setLiveEvents(mapped.length ? mapped : FALLBACK_CALENDAR_EVENTS);
+      } catch {
+        setLiveEvents(FALLBACK_CALENDAR_EVENTS);
+      } finally {
+        if (alive) setLoadingCal(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+  const CALENDAR_EVENTS = liveEvents ?? FALLBACK_CALENDAR_EVENTS;
   return (
     <div className="min-h-screen bg-background">
         <SEOHead seoKey="newsCalendar"
