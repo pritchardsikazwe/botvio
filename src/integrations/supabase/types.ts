@@ -6157,6 +6157,9 @@ export type Database = {
       user_mt5_terminals: {
         Row: {
           auto_execute: boolean
+          bridge_secret_hash: string | null
+          bridge_secret_hint: string | null
+          bridge_secret_set_at: string | null
           created_at: string
           default_lot: number
           id: string
@@ -6169,6 +6172,9 @@ export type Database = {
         }
         Insert: {
           auto_execute?: boolean
+          bridge_secret_hash?: string | null
+          bridge_secret_hint?: string | null
+          bridge_secret_set_at?: string | null
           created_at?: string
           default_lot?: number
           id?: string
@@ -6181,6 +6187,9 @@ export type Database = {
         }
         Update: {
           auto_execute?: boolean
+          bridge_secret_hash?: string | null
+          bridge_secret_hint?: string | null
+          bridge_secret_set_at?: string | null
           created_at?: string
           default_lot?: number
           id?: string

@@ -26,8 +26,10 @@ function mapToMt5Symbol(input: string): string {
   // and use a SPACE between family and number, e.g. "PainX 10", "GainX 100",
   // "TrendX 50". The specialty ones have no number: "FlipX", "SwitchX", "BreakX".
   const isWeltradeSyntx =
-    /^(PainX|GainX|TrendX|FlipX|SwitchX|BreakX)(\s+\d+)?$/i.test(trimmed);
+    /^(PainX|GainX|TrendX|FlipX|SwitchX|BreakX)(\s+\d+)?$/i.test(trimmed) || /^FX\s*VOL\s*\d+$/i.test(trimmed);
   if (isWeltradeSyntx) {
+    const fxVolMatch = trimmed.match(/^FX\s*VOL\s*(\d+)$/i);
+    if (fxVolMatch) return `FX VOL ${fxVolMatch[1]}`;
     // Normalise capitalisation but preserve spacing.
     const familyMatch = trimmed.match(/^([A-Za-z]+)(?:\s+(\d+))?$/);
     if (familyMatch) {
@@ -249,9 +251,21 @@ serve(async (req) => {
         .eq("user_id", userId)
         .eq("auto_execute", true)
         .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      terminal = data ?? null;
+        .limit(10);
+
+      const candidates = data ?? [];
+      if (candidates.length > 0) {
+        const terminalIds = candidates.map((row) => row.terminal_uid);
+        const { data: states } = await adminClient
+          .from("mt5_states")
+          .select("terminal_uid, updated_at")
+          .in("terminal_uid", terminalIds)
+          .gte("updated_at", new Date(Date.now() - 2 * 60 * 1000).toISOString())
+          .order("updated_at", { ascending: false });
+
+        const onlineUid = states?.[0]?.terminal_uid;
+        terminal = candidates.find((row) => row.terminal_uid === onlineUid) ?? candidates[0] ?? null;
+      }
     }
 
     // Demo MT5: explicit `use_demo` from public test button OR user opted in
