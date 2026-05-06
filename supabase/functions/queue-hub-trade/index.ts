@@ -229,7 +229,11 @@ serve(async (req) => {
       auth: { persistSession: false },
     });
 
-    // Find the user's MT5 terminal — prefer explicit terminal_uid, else first auto_execute=true
+    const mt5Symbol = mapToMt5Symbol(symbol);
+
+    // Find the user's MT5 terminal — prefer explicit terminal_uid, else the live terminal
+    // streaming this exact broker symbol. This prevents Weltrade signals being queued
+    // to an older Deriv/Exness terminal UID that will never pull or execute them.
     let terminal:
       | { terminal_uid: string; default_lot: number; auto_execute: boolean }
       | null = null;
@@ -256,6 +260,15 @@ serve(async (req) => {
       const candidates = data ?? [];
       if (candidates.length > 0) {
         const terminalIds = candidates.map((row) => row.terminal_uid);
+        const { data: symbolFeeds } = await adminClient
+          .from("bridge_ticks")
+          .select("terminal_uid, ts")
+          .eq("symbol", mt5Symbol)
+          .in("terminal_uid", terminalIds)
+          .gte("ts", new Date(Date.now() - 2 * 60 * 1000).toISOString())
+          .order("ts", { ascending: false })
+          .limit(1);
+
         const { data: states } = await adminClient
           .from("mt5_states")
           .select("terminal_uid, updated_at")
@@ -263,8 +276,11 @@ serve(async (req) => {
           .gte("updated_at", new Date(Date.now() - 2 * 60 * 1000).toISOString())
           .order("updated_at", { ascending: false });
 
+        const symbolFeedUid = symbolFeeds?.[0]?.terminal_uid;
         const onlineUid = states?.[0]?.terminal_uid;
-        terminal = candidates.find((row) => row.terminal_uid === onlineUid) ?? candidates[0] ?? null;
+        terminal = candidates.find((row) => row.terminal_uid === symbolFeedUid)
+          ?? candidates.find((row) => row.terminal_uid === onlineUid)
+          ?? null;
       }
     }
 
@@ -329,7 +345,6 @@ serve(async (req) => {
       );
     }
 
-    const mt5Symbol = mapToMt5Symbol(symbol);
     const requested = Number(lot) > 0 ? Number(lot) : Number(terminal.default_lot) || 0.01;
     const minLot = getSymbolMinLot(mt5Symbol);
     // Clamp UP to broker minimum so MT5 doesn't reject with error 4756 ("invalid volume").
