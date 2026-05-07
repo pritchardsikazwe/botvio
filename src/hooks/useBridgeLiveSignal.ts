@@ -136,7 +136,7 @@ function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
 }
 
 export function useBridgeLiveSignal(symbol: string | null): DerivLiveSignal {
-  const { ticks, hasFeed } = useBridgeTicks(symbol, 2000);
+  const { ticks, hasFeed } = useBridgeTicks(symbol, 300);
 
   const candles = useMemo<Candle[]>(() => {
     if (!ticks.length) return [];

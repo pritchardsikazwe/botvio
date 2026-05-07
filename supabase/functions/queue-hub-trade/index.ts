@@ -260,15 +260,6 @@ serve(async (req) => {
       const candidates = data ?? [];
       if (candidates.length > 0) {
         const terminalIds = candidates.map((row) => row.terminal_uid);
-        const { data: symbolFeeds } = await adminClient
-          .from("bridge_ticks")
-          .select("terminal_uid, ts")
-          .eq("symbol", mt5Symbol)
-          .in("terminal_uid", terminalIds)
-          .gte("ts", new Date(Date.now() - 2 * 60 * 1000).toISOString())
-          .order("ts", { ascending: false })
-          .limit(1);
-
         const { data: states } = await adminClient
           .from("mt5_states")
           .select("terminal_uid, updated_at")
@@ -276,10 +267,9 @@ serve(async (req) => {
           .gte("updated_at", new Date(Date.now() - 2 * 60 * 1000).toISOString())
           .order("updated_at", { ascending: false });
 
-        const symbolFeedUid = symbolFeeds?.[0]?.terminal_uid;
         const onlineUid = states?.[0]?.terminal_uid;
-        terminal = candidates.find((row) => row.terminal_uid === symbolFeedUid)
-          ?? candidates.find((row) => row.terminal_uid === onlineUid)
+        terminal = candidates.find((row) => row.terminal_uid === onlineUid)
+          ?? candidates[0]
           ?? null;
       }
     }

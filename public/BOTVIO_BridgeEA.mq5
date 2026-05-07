@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2024, BOTVIO"
 #property link      "https://botvio.live"
-#property version   "1.30"
+#property version   "1.31"
 #property strict
 
 //--- Input parameters
@@ -13,9 +13,11 @@ input string   InpTerminalUID = "";           // Your BOTVIO Terminal UID
 input string   InpBridgeSecret = "";          // Bridge Shared Secret
 input string   InpBridgeURL = "https://tqqkzeblmjapgbnsbtgw.supabase.co/functions/v1";
 input int      InpHeartbeatInterval = 10;     // Heartbeat interval (seconds)
-input int      InpCommandPollInterval = 2;    // Command poll interval (seconds)
+input int      InpCommandPollInterval = 3;    // Command poll interval (seconds)
 input int      InpStatePushInterval = 10;     // State push interval (seconds)
-input int      InpTickPushInterval = 3;       // Tick push interval (seconds, 0=off)
+input int      InpTickPushInterval = 15;      // Tick push interval (seconds, 0=off)
+input int      InpMaxSymbolsPerTickPush = 4;  // Max symbols per tick push (prevents backend overload)
+input double   InpFixedLotOverride = 0.0;     // Optional fixed lot override (0=use Botvio/dashboard lot)
 
 //--- Broker preset (auto-fills the symbol list below)
 enum ENUM_BROKER_PRESET { PRESET_WELTRADE, PRESET_EXNESS, PRESET_DERIV_MT5, PRESET_CUSTOM };
@@ -24,6 +26,7 @@ input string   InpTickSymbols = ""; // Custom symbols (used only when preset=Cus
 
 // Resolved symbol list (filled in OnInit based on preset)
 string g_tickSymbols = "";
+int g_tickCursor = 0;
 
 //--- Global variables
 datetime g_lastHeartbeat = 0;
@@ -306,9 +309,13 @@ void PushTicks()
    bool firstTick = true;
    string brokerName = EscapeJson(AccountInfoString(ACCOUNT_COMPANY));
 
-   for(int i = 0; i < count; i++)
+    int maxPush = InpMaxSymbolsPerTickPush;
+    if(maxPush <= 0 || maxPush > count) maxPush = count;
+
+    for(int pushed = 0; pushed < maxPush; pushed++)
    {
-      string sym = symbols[i];
+       int i = (g_tickCursor + pushed) % count;
+       string sym = symbols[i];
       // Trim whitespace
       StringTrimLeft(sym);
       StringTrimRight(sym);
@@ -336,7 +343,8 @@ void PushTicks()
    }
    ticks += "]";
 
-   if(firstTick) return; // no usable symbols
+    g_tickCursor = (g_tickCursor + maxPush) % count;
+    if(firstTick) return; // no usable symbols in this rotation
 
    string url = InpBridgeURL + "/bridge-push-ticks";
    string headers = "Content-Type: application/json\r\nx-bridge-secret: " + InpBridgeSecret;
@@ -488,7 +496,8 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
    volStart += 9;
    int volEnd = StringFind(response, ",", volStart);
    if(volEnd < 0) volEnd = StringFind(response, "}", volStart);
-   double volume = StringToDouble(StringSubstr(response, volStart, volEnd - volStart));
+    double volume = StringToDouble(StringSubstr(response, volStart, volEnd - volStart));
+    if(InpFixedLotOverride > 0.0) volume = InpFixedLotOverride;
 
    // Extract optional SL/TP from the OPEN command so MT5 receives the full trade plan.
    double sl = 0, tp = 0;
