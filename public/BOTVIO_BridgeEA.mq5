@@ -17,6 +17,7 @@ input int      InpCommandPollInterval = 3;    // Command poll interval (seconds)
 input int      InpStatePushInterval = 10;     // State push interval (seconds)
 input int      InpTickPushInterval = 15;      // Tick push interval (seconds, 0=off)
 input int      InpMaxSymbolsPerTickPush = 4;  // Max symbols per tick push (prevents backend overload)
+input double   InpFixedLotOverride = 0.0;     // Optional fixed lot override (0=use Botvio/dashboard lot)
 
 //--- Broker preset (auto-fills the symbol list below)
 enum ENUM_BROKER_PRESET { PRESET_WELTRADE, PRESET_EXNESS, PRESET_DERIV_MT5, PRESET_CUSTOM };
@@ -495,7 +496,8 @@ bool ExecuteOpenCommand(string response, ulong &ticket, string &errorMsg)
    volStart += 9;
    int volEnd = StringFind(response, ",", volStart);
    if(volEnd < 0) volEnd = StringFind(response, "}", volStart);
-   double volume = StringToDouble(StringSubstr(response, volStart, volEnd - volStart));
+    double volume = StringToDouble(StringSubstr(response, volStart, volEnd - volStart));
+    if(InpFixedLotOverride > 0.0) volume = InpFixedLotOverride;
 
    // Extract optional SL/TP from the OPEN command so MT5 receives the full trade plan.
    double sl = 0, tp = 0;
