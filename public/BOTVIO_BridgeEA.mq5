@@ -308,9 +308,13 @@ void PushTicks()
    bool firstTick = true;
    string brokerName = EscapeJson(AccountInfoString(ACCOUNT_COMPANY));
 
-   for(int i = 0; i < count; i++)
+    int maxPush = InpMaxSymbolsPerTickPush;
+    if(maxPush <= 0 || maxPush > count) maxPush = count;
+
+    for(int pushed = 0; pushed < maxPush; pushed++)
    {
-      string sym = symbols[i];
+       int i = (g_tickCursor + pushed) % count;
+       string sym = symbols[i];
       // Trim whitespace
       StringTrimLeft(sym);
       StringTrimRight(sym);
@@ -339,6 +343,7 @@ void PushTicks()
    ticks += "]";
 
    if(firstTick) return; // no usable symbols
+    g_tickCursor = (g_tickCursor + maxPush) % count;
 
    string url = InpBridgeURL + "/bridge-push-ticks";
    string headers = "Content-Type: application/json\r\nx-bridge-secret: " + InpBridgeSecret;
