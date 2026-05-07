@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2024, BOTVIO"
 #property link      "https://botvio.live"
-#property version   "1.30"
+#property version   "1.31"
 #property strict
 
 //--- Input parameters
@@ -13,9 +13,10 @@ input string   InpTerminalUID = "";           // Your BOTVIO Terminal UID
 input string   InpBridgeSecret = "";          // Bridge Shared Secret
 input string   InpBridgeURL = "https://tqqkzeblmjapgbnsbtgw.supabase.co/functions/v1";
 input int      InpHeartbeatInterval = 10;     // Heartbeat interval (seconds)
-input int      InpCommandPollInterval = 2;    // Command poll interval (seconds)
+input int      InpCommandPollInterval = 3;    // Command poll interval (seconds)
 input int      InpStatePushInterval = 10;     // State push interval (seconds)
-input int      InpTickPushInterval = 3;       // Tick push interval (seconds, 0=off)
+input int      InpTickPushInterval = 15;      // Tick push interval (seconds, 0=off)
+input int      InpMaxSymbolsPerTickPush = 4;  // Max symbols per tick push (prevents backend overload)
 
 //--- Broker preset (auto-fills the symbol list below)
 enum ENUM_BROKER_PRESET { PRESET_WELTRADE, PRESET_EXNESS, PRESET_DERIV_MT5, PRESET_CUSTOM };
@@ -24,6 +25,7 @@ input string   InpTickSymbols = ""; // Custom symbols (used only when preset=Cus
 
 // Resolved symbol list (filled in OnInit based on preset)
 string g_tickSymbols = "";
+int g_tickCursor = 0;
 
 //--- Global variables
 datetime g_lastHeartbeat = 0;
