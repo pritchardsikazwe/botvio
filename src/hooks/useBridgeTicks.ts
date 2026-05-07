@@ -28,6 +28,8 @@ export function useBridgeTicks(symbol: string | null, historyLimit = 300) {
 
     let cancelled = false;
 
+    const safeHistoryLimit = Math.min(Math.max(historyLimit, 50), 300);
+
     // 1) Initial backfill
     (async () => {
       const { data } = await supabase
@@ -35,7 +37,7 @@ export function useBridgeTicks(symbol: string | null, historyLimit = 300) {
         .select("symbol,bid,ask,last_price,ts")
         .eq("symbol", symbol)
         .order("ts", { ascending: false })
-        .limit(historyLimit);
+        .limit(safeHistoryLimit);
       if (cancelled) return;
       const rows = (data ?? []).reverse() as BridgeTick[];
       setTicks(rows);
@@ -64,8 +66,8 @@ export function useBridgeTicks(symbol: string | null, historyLimit = 300) {
           setHasFeed(true);
           setTicks((prev) => {
             const next = [...prev, row];
-            return next.length > historyLimit
-              ? next.slice(next.length - historyLimit)
+            return next.length > safeHistoryLimit
+              ? next.slice(next.length - safeHistoryLimit)
               : next;
           });
         },
