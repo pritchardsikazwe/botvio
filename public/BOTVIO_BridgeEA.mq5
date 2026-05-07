@@ -342,8 +342,8 @@ void PushTicks()
    }
    ticks += "]";
 
-   if(firstTick) return; // no usable symbols
     g_tickCursor = (g_tickCursor + maxPush) % count;
+    if(firstTick) return; // no usable symbols in this rotation
 
    string url = InpBridgeURL + "/bridge-push-ticks";
    string headers = "Content-Type: application/json\r\nx-bridge-secret: " + InpBridgeSecret;
