@@ -51,8 +51,9 @@ serve(async (req) => {
       );
     }
 
-    // Cap to 200 ticks per push to prevent abuse
-    const capped = ticks.slice(0, 200);
+    // Keep this endpoint lightweight: older EA builds could push every symbol
+    // every few seconds, which starved auth/admin and command polling.
+    const capped = ticks.slice(0, 4);
     const rows = capped
       .filter((t) => t && typeof t.symbol === "string" && t.symbol.length > 0)
       .map((t) => ({
