@@ -86,6 +86,101 @@ function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
   const nearSupport = (last.close - swingLow) / range < 0.35;
   const nearResistance = (swingHigh - last.close) / range < 0.35;
 
+  // ── Hauza overlays: breakout, trendline slope ──────────────────────
+  // Use the prior 18 candles (exclude current) to detect a true breakout
+  // of the latest candle through the established swing high/low.
+  const priorWindow = recent.slice(0, -1);
+  const priorHigh = priorWindow.length ? Math.max(...priorWindow.map((c) => c.high)) : swingHigh;
+  const priorLow = priorWindow.length ? Math.min(...priorWindow.map((c) => c.low)) : swingLow;
+  const breakoutUp = last.close > priorHigh && prev.close <= priorHigh;
+  const breakoutDown = last.close < priorLow && prev.close >= priorLow;
+
+  // Linear-regression trendline slope on last 20 closes (per-bar slope, in
+  // price units). Positive = ascending trendline, negative = descending.
+  const reg = recent.map((c) => c.close);
+  const nReg = reg.length;
+  const sumX = (nReg * (nReg - 1)) / 2;
+  const sumX2 = reg.reduce((a, _, i) => a + i * i, 0);
+  const sumY = reg.reduce((a, v) => a + v, 0);
+  const sumXY = reg.reduce((a, v, i) => a + i * v, 0);
+  const denom = nReg * sumX2 - sumX * sumX;
+  const slope = denom ? (nReg * sumXY - sumX * sumY) / denom : 0;
+  const slopePct = (slope * nReg) / (last.close || 1); // normalised drift across window
+  const trendlineUp = slopePct > 0.0008;
+  const trendlineDown = slopePct < -0.0008;
+
+  // ── 1) Breakout (highest conviction Hauza path) ────────────────────
+  if (breakoutUp) {
+    let conf = 74;
+    if (trendUp) conf += 8;
+    if (trendlineUp) conf += 6;
+    if (rsiValue > 55) conf += 4;
+    return {
+      signal: "BUY", confidence: Math.min(94, conf),
+      reason: `Breakout above swing high ${priorHigh.toFixed(4)}, ascending trendline (slope ${(slopePct * 100).toFixed(3)}%), RSI ${rsiValue.toFixed(0)}.`,
+      strategy: "Hauza Breakout",
+      lastPrice: last.close, ema20: e20, ema50: e50, rsi14: rsiValue,
+    };
+  }
+  if (breakoutDown) {
+    let conf = 74;
+    if (trendDown) conf += 8;
+    if (trendlineDown) conf += 6;
+    if (rsiValue < 45) conf += 4;
+    return {
+      signal: "SELL", confidence: Math.min(94, conf),
+      reason: `Breakdown below swing low ${priorLow.toFixed(4)}, descending trendline (slope ${(slopePct * 100).toFixed(3)}%), RSI ${rsiValue.toFixed(0)}.`,
+      strategy: "Hauza Breakout",
+      lastPrice: last.close, ema20: e20, ema50: e50, rsi14: rsiValue,
+    };
+  }
+
+  // ── 2) S/R bounce with trendline confirmation ──────────────────────
+  if (nearSupport && trendlineUp && (isBullCandle || lowerWick > body)) {
+    let conf = 70;
+    if (trendUp) conf += 8;
+    if (rsiValue > 40 && rsiValue < 65) conf += 6;
+    return {
+      signal: "BUY", confidence: Math.min(90, conf),
+      reason: `Bounce off support ${swingLow.toFixed(4)} with ascending trendline, RSI ${rsiValue.toFixed(0)}.`,
+      strategy: "Hauza S/R Bounce",
+      lastPrice: last.close, ema20: e20, ema50: e50, rsi14: rsiValue,
+    };
+  }
+  if (nearResistance && trendlineDown && (isBearCandle || upperWick > body)) {
+    let conf = 70;
+    if (trendDown) conf += 8;
+    if (rsiValue < 60 && rsiValue > 35) conf += 6;
+    return {
+      signal: "SELL", confidence: Math.min(90, conf),
+      reason: `Rejection at resistance ${swingHigh.toFixed(4)} with descending trendline, RSI ${rsiValue.toFixed(0)}.`,
+      strategy: "Hauza S/R Rejection",
+      lastPrice: last.close, ema20: e20, ema50: e50, rsi14: rsiValue,
+    };
+  }
+
+  // ── 3) Trendline ride (no breakout, no S/R touch) ──────────────────
+  if (trendUp && trendlineUp && momentumUp) {
+    let conf = 66;
+    if (rsiValue > 50 && rsiValue < 70) conf += 8;
+    return {
+      signal: "BUY", confidence: Math.min(86, conf),
+      reason: `Riding ascending trendline (slope ${(slopePct * 100).toFixed(3)}%), fast EMA > slow EMA, RSI ${rsiValue.toFixed(0)}.`,
+      strategy: "Hauza Trendline Ride",
+      lastPrice: last.close, ema20: e20, ema50: e50, rsi14: rsiValue,
+    };
+  }
+  if (trendDown && trendlineDown && momentumDown) {
+    let conf = 66;
+    if (rsiValue < 50 && rsiValue > 30) conf += 8;
+    return {
+      signal: "SELL", confidence: Math.min(86, conf),
+      reason: `Riding descending trendline (slope ${(slopePct * 100).toFixed(3)}%), fast EMA < slow EMA, RSI ${rsiValue.toFixed(0)}.`,
+      strategy: "Hauza Trendline Ride",
+      lastPrice: last.close, ema20: e20, ema50: e50, rsi14: rsiValue,
+    };
+  }
+
   if (trendUp && (momentumUp || (lowerWick > body * 1.5 && isBullCandle))) {
     let conf = 66;
     if (nearSupport) conf += 12;
