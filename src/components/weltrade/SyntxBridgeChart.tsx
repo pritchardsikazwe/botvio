@@ -36,7 +36,7 @@ export function SyntxBridgeChart({ symbol, label, height = 320 }: Props) {
   const trendlineRef = useRef<ISeriesApi<"Line"> | null>(null);
   const markersRef = useRef<ISeriesMarkersPluginApi<Time> | null>(null);
 
-  const { ticks, latest, hasFeed } = useBridgeTicks(symbol, 300);
+  const { ticks, latest, hasFeed } = useBridgeTicks(symbol, 600);
 
   // Aggregate ticks into 30-second OHLC candles
   const candleData = useMemo(() => {
