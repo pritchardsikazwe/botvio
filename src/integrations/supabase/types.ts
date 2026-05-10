@@ -1039,6 +1039,39 @@ export type Database = {
         }
         Relationships: []
       }
+      bridge_latest_ticks: {
+        Row: {
+          ask: number | null
+          bid: number | null
+          broker: string | null
+          last_price: number | null
+          symbol: string
+          terminal_uid: string
+          ts: string
+          updated_at: string
+        }
+        Insert: {
+          ask?: number | null
+          bid?: number | null
+          broker?: string | null
+          last_price?: number | null
+          symbol: string
+          terminal_uid: string
+          ts?: string
+          updated_at?: string
+        }
+        Update: {
+          ask?: number | null
+          bid?: number | null
+          broker?: string | null
+          last_price?: number | null
+          symbol?: string
+          terminal_uid?: string
+          ts?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bridge_ticks: {
         Row: {
           ask: number | null

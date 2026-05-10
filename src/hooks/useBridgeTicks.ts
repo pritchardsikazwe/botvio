@@ -28,7 +28,9 @@ export function useBridgeTicks(symbol: string | null, historyLimit = 300) {
 
     let cancelled = false;
 
-    const safeHistoryLimit = Math.min(Math.max(historyLimit, 50), 300);
+    // Cap at 800 — enough for ~3-5 min of signal candles while still well below
+    // the backend's row-budget for chart/signal panels.
+    const safeHistoryLimit = Math.min(Math.max(historyLimit, 50), 800);
 
     // 1) Initial backfill
     (async () => {

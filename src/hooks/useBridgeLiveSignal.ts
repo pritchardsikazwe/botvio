@@ -18,7 +18,7 @@ interface Candle {
   epoch: number; // bucket start in seconds
 }
 
-const BUCKET_SECS = 60; // 1-min candles
+const BUCKET_SECS = 15; // 15-second candles — keeps signals responsive even with a 300-tick history budget
 
 function ema(values: number[], period: number): number | null {
   if (values.length < period) return null;
@@ -41,7 +41,7 @@ function rsi(values: number[], period = 14): number | null {
 }
 
 function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
-  if (candles.length < 6) {
+  if (candles.length < 4) {
     return {
       signal: "WAIT",
       confidence: 0,
@@ -87,7 +87,7 @@ function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
   const nearResistance = (swingHigh - last.close) / range < 0.35;
 
   if (trendUp && (momentumUp || (lowerWick > body * 1.5 && isBullCandle))) {
-    let conf = 60;
+    let conf = 66;
     if (nearSupport) conf += 12;
     if (rsiValue > 50 && rsiValue < 70) conf += 10;
     if (lowerWick > body * 1.5) conf += 8;
@@ -99,7 +99,7 @@ function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
     };
   }
   if (trendDown && (momentumDown || (upperWick > body * 1.5 && isBearCandle))) {
-    let conf = 60;
+    let conf = 66;
     if (nearResistance) conf += 12;
     if (rsiValue < 50 && rsiValue > 30) conf += 10;
     if (upperWick > body * 1.5) conf += 8;
@@ -136,7 +136,9 @@ function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
 }
 
 export function useBridgeLiveSignal(symbol: string | null): DerivLiveSignal {
-  const { ticks, hasFeed } = useBridgeTicks(symbol, 300);
+  // Ask for a slightly bigger window so the EMA/RSI engine has enough candles
+  // to confirm trend + momentum on Weltrade SyntX symbols.
+  const { ticks, hasFeed } = useBridgeTicks(symbol, 600);
 
   const candles = useMemo<Candle[]>(() => {
     if (!ticks.length) return [];
