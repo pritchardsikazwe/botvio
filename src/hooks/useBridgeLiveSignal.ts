@@ -136,7 +136,9 @@ function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
 }
 
 export function useBridgeLiveSignal(symbol: string | null): DerivLiveSignal {
-  const { ticks, hasFeed } = useBridgeTicks(symbol, 300);
+  // Ask for a slightly bigger window so the EMA/RSI engine has enough candles
+  // to confirm trend + momentum on Weltrade SyntX symbols.
+  const { ticks, hasFeed } = useBridgeTicks(symbol, 600);
 
   const candles = useMemo<Candle[]>(() => {
     if (!ticks.length) return [];
