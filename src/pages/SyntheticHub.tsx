@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Sparkles, Rocket, Bomb, Zap, Activity } from "lucide-react";
+import { BarChart3, Sparkles, Rocket, Bomb, Zap, Activity, Radio, ArrowRight } from "lucide-react";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { SyntheticSignalCard } from "@/components/synthetic/SyntheticSignalCard";
 import { SYNTHETICS, findSynthetic, type SyntheticCategory } from "@/config/synthetics";
@@ -24,7 +24,7 @@ export default function SyntheticHub() {
   const [filter, setFilter] = useState<SyntheticCategory | "all">("all");
 
   const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
-  const chartSymbol = active.derivSymbol ?? active.chartProxy ?? "BOOM500";
+  const chartSymbol = active.derivSymbol;
 
   const filtered = useMemo(
     () => (filter === "all" ? SYNTHETICS : SYNTHETICS.filter((s) => s.category === filter)),
@@ -73,18 +73,43 @@ export default function SyntheticHub() {
             />
           </div>
           <div className="lg:col-span-3">
-            <DerivLiveChart
-              displaySymbol={chartSymbol}
-              height={460}
-              defaultGranularity={300}
-              showHauza
-              signalMarker={chartMarker}
-            />
-            {!active.derivSymbol && (
-              <p className="text-[11px] text-warning/90 mt-2 px-2">
-                Showing closest live proxy ({active.chartProxy}) — {active.label} streams only on MT5 brokers.
-                Use the “Send to MT5” button for live execution on your Bridge EA.
-              </p>
+            {chartSymbol ? (
+              <DerivLiveChart
+                displaySymbol={chartSymbol}
+                height={460}
+                defaultGranularity={300}
+                showHauza
+                signalMarker={chartMarker}
+              />
+            ) : (
+              <div
+                className="flex flex-col items-center justify-center text-center rounded-xl border border-warning/30 bg-gradient-to-br from-warning/5 via-card to-card p-8"
+                style={{ minHeight: 460 }}
+              >
+                <div className="p-3 rounded-full bg-warning/10 border border-warning/30 mb-3">
+                  <Radio className="h-6 w-6 text-warning" />
+                </div>
+                <h3 className="text-base font-extrabold text-foreground">
+                  {active.label} — MT5-Only Instrument
+                </h3>
+                <p className="text-xs text-muted-foreground mt-2 max-w-md">
+                  This index does not stream on Deriv's public WebSocket feed, so we don't show a
+                  misleading chart from a different symbol. Open the live chart inside your MT5
+                  terminal and use <strong className="text-foreground">Send to MT5</strong> to
+                  auto-execute Botvio signals via your Bridge EA.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+                  <Badge variant="outline" className="text-[10px] border-warning/40 text-warning font-mono">
+                    MT5 Symbol: {active.mt5Symbol}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
+                    Bias: {active.bias === "buy" ? "Buy" : active.bias === "sell" ? "Sell" : "Both"}
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground/80 mt-4 flex items-center gap-1">
+                  Use the signal card on the left <ArrowRight className="h-3 w-3" /> tap “Send to MT5”
+                </p>
+              </div>
             )}
           </div>
         </div>
