@@ -77,7 +77,8 @@ function LiveClock() {
 }
 
 const NewsCalendar = () => {
-  const [liveEvents, setLiveEvents] = useState<typeof FALLBACK_CALENDAR_EVENTS | null>(null);
+  type CalEvent = (typeof FALLBACK_CALENDAR_EVENTS)[number] & { ts?: number };
+  const [liveEvents, setLiveEvents] = useState<CalEvent[] | null>(null);
   const [loadingCal, setLoadingCal] = useState(true);
   useEffect(() => {
     let alive = true;
@@ -89,15 +90,23 @@ const NewsCalendar = () => {
           time: string; currency: string; event: string; impact: string;
         }>;
         if (!alive) return;
-        const mapped = events.slice(0, 200).map((e) => {
-          const d = new Date(e.time);
+        // Filter out events that have already passed; once "news is done" it leaves the list.
+        const nowTs = Date.now();
+        const upcoming = events
+          .map((e) => ({ ...e, ts: new Date(e.time).getTime() }))
+          .filter((e) => Number.isFinite(e.ts) && e.ts >= nowTs - 30 * 60 * 1000) // keep 30-min grace so currently-live events stay visible
+          .sort((a, b) => a.ts - b.ts);
+        const mapped: CalEvent[] = upcoming.slice(0, 250).map((e) => {
+          const d = new Date(e.ts);
           const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", weekday: "short" });
+          const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
           return {
-            date,
+            date: `${date} • ${time} UTC`,
             currency: e.currency || "—",
             event: e.event || "—",
             impact: ["High", "Medium", "Low"].includes(e.impact) ? e.impact : "Medium",
             implication: `${e.currency} pairs — ${e.impact?.toLowerCase() ?? "medium"}-impact event`,
+            ts: e.ts,
           };
         });
         setLiveEvents(mapped.length ? mapped : FALLBACK_CALENDAR_EVENTS);
@@ -110,11 +119,14 @@ const NewsCalendar = () => {
     return () => { alive = false; };
   }, []);
   const CALENDAR_EVENTS = liveEvents ?? FALLBACK_CALENDAR_EVENTS;
+  const isLive = !!liveEvents && liveEvents !== FALLBACK_CALENDAR_EVENTS;
+  const upcomingCount = isLive ? CALENDAR_EVENTS.length : 0;
+  const highImpactCount = isLive ? CALENDAR_EVENTS.filter((e) => e.impact === "High").length : 0;
   return (
     <div className="min-h-screen bg-background">
         <SEOHead seoKey="newsCalendar"
-          title="Forex News Calendar — Week of Mar 31 – Apr 4, 2026 | Botvio"
-          description="This week's high-impact forex events: NFP, ISM Manufacturing, ADP, Eurozone CPI. Trading strategies, entry levels, and risk management."
+          title="Forex News Calendar — Live 30-Day Economic Events | Botvio"
+          description="Live forex economic calendar — upcoming high-impact events through May 30. NFP, CPI, FOMC, ECB & more with Botvio AI trading implications."
         />
       <Header />
 
@@ -124,11 +136,11 @@ const NewsCalendar = () => {
           <div className="flex items-center justify-center gap-2">
             <Newspaper className="h-8 w-8 text-destructive" />
             <h1 className="text-2xl md:text-3xl font-black text-foreground">
-              News Calendar — Week of Mar 31 – Apr 4
+              Forex News Calendar — Live Through May 30
             </h1>
           </div>
           <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-            This week's biggest market movers: NFP Friday, ISM Manufacturing, ADP Employment & Eurozone CPI. Plan your trades with Botvio AI strategies.
+            Auto-fetched live economic events for the next 30 days. Past releases drop off the list automatically — only what's still ahead is shown.
           </p>
           <div className="flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
@@ -136,8 +148,14 @@ const NewsCalendar = () => {
               <LiveClock />
             </div>
             <Badge className="bg-destructive/20 text-destructive border-destructive/30 animate-pulse">
-              <Flame className="h-3 w-3 mr-1" /> NFP Week — 5 High-Impact Events
+              <Flame className="h-3 w-3 mr-1" />
+              {isLive ? `${highImpactCount} High-Impact Ahead` : "High-Impact Week"}
             </Badge>
+            {isLive && (
+              <Badge variant="outline" className="border-emerald-500/40 text-emerald-400">
+                {upcomingCount} upcoming events
+              </Badge>
+            )}
           </div>
         </section>
 
@@ -238,7 +256,7 @@ const NewsCalendar = () => {
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-primary" /> 📊 Live Economic Calendar — Next 30 Days
+                <CalendarDays className="h-4 w-4 text-primary" /> 📊 Live Economic Calendar — Upcoming Events Only
                 {loadingCal && <Badge variant="outline" className="ml-2 text-[9px]">Loading…</Badge>}
                 {!loadingCal && liveEvents && liveEvents !== FALLBACK_CALENDAR_EVENTS && (
                   <Badge className="ml-2 text-[9px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30">LIVE</Badge>
