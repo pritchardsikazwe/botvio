@@ -101,14 +101,14 @@ const Index = () => {
         {/* 0 — Shortcuts */}
         <section>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
+            <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="block">
               <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold text-sm gap-2">
-                <TrendingUp className="h-4 w-4" /> Trade on Exness
+                <TrendingUp className="h-4 w-4" /> Trade on Deriv
               </Button>
             </a>
-            <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="block">
-              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-destructive/40 text-destructive hover:bg-destructive/10">
-                <TrendingUp className="h-4 w-4" /> Trade on Deriv
+            <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
+                <TrendingUp className="h-4 w-4" /> Trade on Exness
               </Button>
             </a>
             <Link to="/gold" className="block">

@@ -127,14 +127,7 @@ export const BrokerStarterCards = () => {
               </CardHeader>
               <CardContent className="space-y-3 flex-1 flex flex-col">
                 <p className="text-xs text-muted-foreground">{broker.description}</p>
-                <ul className="space-y-1.5 flex-1">
-                  {broker.bullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs">
-                      <CheckCircle2 className={`h-3.5 w-3.5 ${broker.iconClass} flex-shrink-0 mt-0.5`} />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex-1" />
                 <Button
                   variant="gold"
                   size="sm"
