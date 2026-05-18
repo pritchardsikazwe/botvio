@@ -48,6 +48,7 @@ import { useManualSignals, useUpdateSignalStatus, ManualSignal } from "@/hooks/u
 import { useAdminPaymentRequests, useProcessPaymentRequest } from "@/hooks/useAdminBilling";
 import { SubscriptionRequestsTab } from "@/components/admin/SubscriptionRequestsTab";
 import { AdminDerivConnectionsTab } from "@/components/admin/AdminDerivConnectionsTab";
+import { AdminApiAccountsTab } from "@/components/admin/AdminApiAccountsTab";
 import { AdminPricingPlansTab } from "@/components/admin/AdminPricingPlansTab";
 import { SignalApprovalsTab } from "@/components/admin/SignalApprovalsTab";
 import { SignalManagersTab } from "@/components/admin/SignalManagersTab";
@@ -1022,6 +1023,12 @@ const Admin = () => {
               </TabsTrigger>
             )}
             {isSuperAdmin && (
+              <TabsTrigger value="api_accounts" className="flex items-center gap-2">
+                <Wallet className="w-4 h-4" />
+                API Accounts
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
               <TabsTrigger value="pricing_plans" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
                 Pricing Plans
@@ -1634,6 +1641,11 @@ const Admin = () => {
           {/* Deriv Connections Tab */}
           <TabsContent value="deriv_connections">
             <AdminDerivConnectionsTab />
+          </TabsContent>
+
+          {/* API-Connected Accounts Tab */}
+          <TabsContent value="api_accounts">
+            <AdminApiAccountsTab />
           </TabsContent>
 
           {/* Pricing Plans Tab */}
