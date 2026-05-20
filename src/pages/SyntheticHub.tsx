@@ -24,7 +24,8 @@ export default function SyntheticHub() {
   const [filter, setFilter] = useState<SyntheticCategory | "all">("all");
 
   const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
-  const chartSymbol = active.derivSymbol;
+  const chartSymbol = active.derivSymbol ?? active.chartProxy ?? null;
+  const isProxy = !active.derivSymbol && !!active.chartProxy;
 
   const filtered = useMemo(
     () => (filter === "all" ? SYNTHETICS : SYNTHETICS.filter((s) => s.category === filter)),
@@ -74,13 +75,28 @@ export default function SyntheticHub() {
           </div>
           <div className="lg:col-span-3">
             {chartSymbol ? (
-              <DerivLiveChart
-                displaySymbol={chartSymbol}
-                height={460}
-                defaultGranularity={300}
-                showHauza
-                signalMarker={chartMarker}
-              />
+              <div className="space-y-2">
+                {isProxy && (
+                  <div className="flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2">
+                    <Badge variant="outline" className="text-[10px] border-warning/40 text-warning font-mono">
+                      REFERENCE CHART
+                    </Badge>
+                    <p className="text-[11px] text-muted-foreground leading-tight">
+                      <strong className="text-foreground">{active.label}</strong> doesn't stream on Deriv's
+                      public feed. Signals are computed from the closest streamable proxy
+                      (<span className="font-mono text-warning">{active.chartProxy}</span>) — execute on
+                      your MT5 terminal via <strong className="text-foreground">Send to MT5</strong>.
+                    </p>
+                  </div>
+                )}
+                <DerivLiveChart
+                  displaySymbol={chartSymbol}
+                  height={isProxy ? 420 : 460}
+                  defaultGranularity={300}
+                  showHauza
+                  signalMarker={chartMarker}
+                />
+              </div>
             ) : (
               <div
                 className="flex flex-col items-center justify-center text-center rounded-xl border border-warning/30 bg-gradient-to-br from-warning/5 via-card to-card p-8"
