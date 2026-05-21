@@ -4,7 +4,7 @@ import { Header } from "@/components/trading/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart3, Signal, Lightbulb, Crosshair, Target, TrendingUp, Clock, ShieldCheck, ExternalLink, Zap, Layers } from "lucide-react";
+import { BarChart3, Signal, Lightbulb, Crosshair, Target, TrendingUp, Clock, ShieldCheck, ExternalLink, Zap, Layers, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { TradingViewAdvancedChart } from "@/components/chart/TradingViewAdvancedChart";
@@ -113,38 +113,40 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
           })}
         </div>
 
-        {locked && (
-          <UpgradePrompt
-            feature={`the ${config.assetLabel} Trading Hub`}
-            requiredPlan="Basic"
-          />
-        )}
-
-        {!locked && (
-        <>
         <div>
           <h2 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
             <Signal className="h-5 w-5 text-primary" />
             Active {config.assetLabel} Signals
           </h2>
-          <AssetSignalsList symbolPatterns={config.symbolPatterns} assetLabel={config.assetLabel} />
+          {locked ? (
+            <UpgradePrompt feature={`${config.assetLabel} live signals`} requiredPlan="Basic" />
+          ) : (
+            <AssetSignalsList symbolPatterns={config.symbolPatterns} assetLabel={config.assetLabel} />
+          )}
         </div>
 
         <DemoMt5Card symbol={config.displaySymbol} source={`hub:${config.assetLabel}`} />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => {
+            if (locked && v !== "charts") return;
+            setActiveTab(v);
+          }}
+          className="w-full"
+        >
           <TabsList className="w-full grid grid-cols-4 bg-card border border-border/50 h-12">
             <TabsTrigger value="charts" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
               <BarChart3 className="h-4 w-4" /> Charts
             </TabsTrigger>
-            <TabsTrigger value="signals" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
-              <Signal className="h-4 w-4" /> Signals
+            <TabsTrigger value="signals" disabled={locked} className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5 disabled:opacity-60">
+              {locked ? <Lock className="h-3.5 w-3.5" /> : <Signal className="h-4 w-4" />} Signals
             </TabsTrigger>
-            <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
-              <Crosshair className="h-4 w-4" /> Strategy
+            <TabsTrigger value="strategy" disabled={locked} className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5 disabled:opacity-60">
+              {locked ? <Lock className="h-3.5 w-3.5" /> : <Crosshair className="h-4 w-4" />} Strategy
             </TabsTrigger>
-            <TabsTrigger value="tips" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5">
-              <Lightbulb className="h-4 w-4" /> Tips
+            <TabsTrigger value="tips" disabled={locked} className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary font-bold text-xs gap-1.5 disabled:opacity-60">
+              {locked ? <Lock className="h-3.5 w-3.5" /> : <Lightbulb className="h-4 w-4" />} Tips
             </TabsTrigger>
           </TabsList>
 
@@ -329,7 +331,11 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
             </div>
           </TabsContent>
         </Tabs>
-        </>
+        {locked && (
+          <UpgradePrompt
+            feature={`full ${config.assetLabel} signals, strategies & tips`}
+            requiredPlan="Basic"
+          />
         )}
       </main>
     </div>
