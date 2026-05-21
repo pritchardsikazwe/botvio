@@ -11,6 +11,7 @@ import { SyntheticSignalCard } from "@/components/synthetic/SyntheticSignalCard"
 import { SYNTHETICS, findSynthetic, type SyntheticCategory } from "@/config/synthetics";
 import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 
 const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Rocket; tone: string }> = {
@@ -26,7 +27,8 @@ export default function SyntheticHub() {
   const [chartMarker, setChartMarker] = useState<{ direction: "BUY" | "SELL"; confidence: number } | null>(null);
   const [filter, setFilter] = useState<SyntheticCategory | "all">("all");
   const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
-  const locked = !gateLoading && !isPaid;
+  const { isAdmin, isSuperAdmin } = useAuth();
+  const locked = !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
 
   const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
   const chartSymbol = active.derivSymbol ?? active.chartProxy ?? null;
