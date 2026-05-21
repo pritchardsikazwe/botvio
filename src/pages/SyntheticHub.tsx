@@ -26,7 +26,8 @@ export default function SyntheticHub() {
   const [chartMarker, setChartMarker] = useState<{ direction: "BUY" | "SELL"; confidence: number } | null>(null);
   const [filter, setFilter] = useState<SyntheticCategory | "all">("all");
   const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
-  const locked = !gateLoading && !isPaid;
+  const { isAdmin, isSuperAdmin } = useAuth();
+  const locked = !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
 
   const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
   const chartSymbol = active.derivSymbol ?? active.chartProxy ?? null;
