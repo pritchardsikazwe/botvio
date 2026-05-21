@@ -153,7 +153,14 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
           <TabsContent value="charts" className="mt-6 space-y-4">
             <MarketClosedBanner symbol={config.sessionSymbol} />
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            {locked ? (
+              <UpgradePrompt
+                feature={`the ${config.assetLabel} live chart & Botvio scalp signals`}
+                requiredPlan="Basic"
+              />
+            ) : (
+              <>
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <div className="lg:col-span-1">
                 <AssetSignalButton
                   displaySymbol={config.displaySymbol}
@@ -193,6 +200,8 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
                 displaySymbol={config.siblingScalp.displaySymbol}
                 assetLabel={config.siblingScalp.assetLabel}
               />
+            )}
+              </>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
