@@ -11,6 +11,7 @@ import { SyntheticSignalCard } from "@/components/synthetic/SyntheticSignalCard"
 import { SYNTHETICS, findSynthetic, type SyntheticCategory } from "@/config/synthetics";
 import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 
 const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Rocket; tone: string }> = {
