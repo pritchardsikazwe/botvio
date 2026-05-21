@@ -152,7 +152,7 @@ export default function SyntheticHub() {
             const meta = CATEGORY_META[inst.category];
             const CatIcon = meta.icon;
             const isActive = inst.key === active.key;
-            const isLockedInst = locked && inst.key !== FREE_KEY;
+            const isLockedInst = locked;
             return (
               <button
                 key={inst.key}
@@ -208,10 +208,10 @@ export default function SyntheticHub() {
                 <Lock className="h-5 w-5 text-warning" />
               </div>
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-base font-extrabold text-foreground">Only Boom 500 is unlocked on the free preview</h3>
+                <h3 className="text-base font-extrabold text-foreground">All synthetic instruments are VIP-locked</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Upgrade to a paid plan to unlock every Boom, Crash, Volatility and Step index with live
-                  auto-signals and MT5 auto-execute.
+                  Upgrade to a paid plan to unlock every Boom, Crash, Volatility and Step index with
+                  live auto-signals and MT5 auto-execute.
                 </p>
               </div>
               <Button asChild variant="default" className="bg-warning text-warning-foreground hover:bg-warning/90 font-bold">
