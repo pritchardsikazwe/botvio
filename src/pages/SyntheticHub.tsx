@@ -5,11 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Sparkles, Rocket, Bomb, Zap, Activity, Radio, ArrowRight } from "lucide-react";
+import { BarChart3, Sparkles, Rocket, Bomb, Zap, Activity, Radio, ArrowRight, Lock, Crown } from "lucide-react";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { SyntheticSignalCard } from "@/components/synthetic/SyntheticSignalCard";
 import { SYNTHETICS, findSynthetic, type SyntheticCategory } from "@/config/synthetics";
 import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { Link } from "react-router-dom";
 
 const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Rocket; tone: string }> = {
   boom: { label: "Boom", icon: Rocket, tone: "text-emerald-400 border-emerald-500/40" },
@@ -19,9 +21,12 @@ const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Roc
 };
 
 export default function SyntheticHub() {
-  const [activeKey, setActiveKey] = useState<string>("boom-500");
+  const FREE_KEY = "boom-500";
+  const [activeKey, setActiveKey] = useState<string>(FREE_KEY);
   const [chartMarker, setChartMarker] = useState<{ direction: "BUY" | "SELL"; confidence: number } | null>(null);
   const [filter, setFilter] = useState<SyntheticCategory | "all">("all");
+  const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
+  const locked = !gateLoading && !isPaid;
 
   const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
   const chartSymbol = active.derivSymbol ?? active.chartProxy ?? null;
@@ -147,16 +152,30 @@ export default function SyntheticHub() {
             const meta = CATEGORY_META[inst.category];
             const CatIcon = meta.icon;
             const isActive = inst.key === active.key;
+            const isLockedInst = locked && inst.key !== FREE_KEY;
             return (
               <button
                 key={inst.key}
-                onClick={() => { setActiveKey(inst.key); setChartMarker(null); }}
-                className={`text-left rounded-xl border-2 p-3 transition-all ${
+                onClick={() => {
+                  if (isLockedInst) return;
+                  setActiveKey(inst.key);
+                  setChartMarker(null);
+                }}
+                aria-disabled={isLockedInst}
+                tabIndex={isLockedInst ? -1 : 0}
+                className={`relative text-left rounded-xl border-2 p-3 transition-all ${
                   isActive
                     ? "border-primary bg-primary/5 ring-2 ring-primary/30"
-                    : "border-border/50 bg-card hover:border-primary/40"
+                    : isLockedInst
+                      ? "border-border/40 bg-card/60 opacity-60 cursor-not-allowed"
+                      : "border-border/50 bg-card hover:border-primary/40"
                 }`}
               >
+                {isLockedInst && (
+                  <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-warning/15 border border-warning/40 px-1.5 py-0.5 text-[9px] font-bold text-warning">
+                    <Lock className="h-2.5 w-2.5" /> VIP
+                  </span>
+                )}
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2 min-w-0">
                     <CatIcon className={`h-4 w-4 ${meta.tone.split(" ")[0]} shrink-0`} />
@@ -181,6 +200,28 @@ export default function SyntheticHub() {
             );
           })}
         </div>
+
+        {locked && (
+          <Card className="border-2 border-warning/40 bg-gradient-to-r from-warning/10 to-amber-500/5">
+            <CardContent className="p-5 flex flex-col md:flex-row items-center gap-4">
+              <div className="p-3 rounded-full bg-warning/15 border border-warning/30">
+                <Lock className="h-5 w-5 text-warning" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-base font-extrabold text-foreground">Only Boom 500 is unlocked on the free preview</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upgrade to a paid plan to unlock every Boom, Crash, Volatility and Step index with live
+                  auto-signals and MT5 auto-execute.
+                </p>
+              </div>
+              <Button asChild variant="default" className="bg-warning text-warning-foreground hover:bg-warning/90 font-bold">
+                <Link to="/billing">
+                  <Crown className="h-4 w-4 mr-2" /> Upgrade
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* MT5 auto-execute setup */}
         <Mt5AutoExecuteCard />

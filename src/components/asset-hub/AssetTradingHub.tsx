@@ -13,6 +13,8 @@ import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
 import { AssetSignalButton } from "./AssetSignalButton";
 import { AssetSignalsList } from "./AssetSignalsList";
 import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
+import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 export interface AssetTradingHubConfig {
   seoKey?: string;
@@ -62,6 +64,8 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
   const [activeTab, setActiveTab] = useState("charts");
   const [activeStrat, setActiveStrat] = useState<number | null>(0);
   const stats = config.quickStats ?? DEFAULT_QUICK_STATS;
+  const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
+  const locked = !gateLoading && !isPaid;
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,6 +113,15 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
           })}
         </div>
 
+        {locked && (
+          <UpgradePrompt
+            feature={`the ${config.assetLabel} Trading Hub`}
+            requiredPlan="Basic"
+          />
+        )}
+
+        {!locked && (
+        <>
         <div>
           <h2 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
             <Signal className="h-5 w-5 text-primary" />
@@ -316,6 +329,8 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
             </div>
           </TabsContent>
         </Tabs>
+        </>
+        )}
       </main>
     </div>
   );
