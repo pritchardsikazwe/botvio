@@ -152,7 +152,7 @@ export default function SyntheticHub() {
             const meta = CATEGORY_META[inst.category];
             const CatIcon = meta.icon;
             const isActive = inst.key === active.key;
-            const isLockedInst = locked && inst.key !== FREE_KEY;
+            const isLockedInst = locked;
             return (
               <button
                 key={inst.key}
