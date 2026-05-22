@@ -49,6 +49,8 @@ export interface AssetTradingHubConfig {
   chartProvider?: "deriv" | "tradingview";
   /** TradingView symbol (required when chartProvider === "tradingview"), e.g. "NASDAQ:NVDA". */
   tvSymbol?: string;
+  /** When true, bypass the VIP/paid lock for this hub (free public access). */
+  publicAccess?: boolean;
 }
 
 const DEFAULT_QUICK_STATS = [
@@ -67,7 +69,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
   const stats = config.quickStats ?? DEFAULT_QUICK_STATS;
   const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
   const { isAdmin, isSuperAdmin } = useAuth();
-  const locked = !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
+  const locked = !config.publicAccess && !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
 
   return (
     <div className="min-h-screen bg-background">

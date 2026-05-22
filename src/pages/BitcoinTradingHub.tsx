@@ -84,6 +84,7 @@ const CONFIG: AssetTradingHubConfig = {
   ],
   // Show ETH alongside BTC for crypto cross-confirmation
   siblingScalp: { displaySymbol: "ETH/USD", assetLabel: "Ethereum" },
+  publicAccess: true,
 };
 
 const BitcoinTradingHub = () => <AssetTradingHub config={CONFIG} />;
