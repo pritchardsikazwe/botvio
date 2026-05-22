@@ -81,6 +81,7 @@ const CONFIG: AssetTradingHubConfig = {
       note: "Only trade in Daily trend direction. Skip Friday afternoons.",
     },
   ],
+  publicAccess: true,
 };
 
 const GbpUsdTradingHub = () => <AssetTradingHub config={CONFIG} />;
