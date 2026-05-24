@@ -1151,7 +1151,7 @@ export const blogContent: Record<string, BlogPostData> = {
     `
   },
 
-  "how-to-make-money-online-2026": {
+  "make-money-online-2026-methods": {
     title: "How to Make Money Online in 2026 — 10 Proven Methods",
     excerpt: "From AI-assisted trading to affiliate marketing, freelancing and digital products — the 10 realistic ways people are earning online in 2026.",
     category: "Earn Online",
