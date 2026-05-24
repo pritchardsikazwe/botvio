@@ -36,6 +36,42 @@ const Disclaimer = () => (
 
           <Separator className="my-6" />
 
+          <section className="mb-8 rounded-lg border border-warning/40 bg-warning/5 p-5">
+            <h2 className="text-xl font-semibold mb-4 text-warning">
+              Important — What Botvio Does NOT Do
+            </h2>
+            <p className="text-muted-foreground mb-3">
+              Please read this carefully before using Botvio. To keep our service transparent and
+              compliant, you must understand the following:
+            </p>
+            <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+              <li>
+                <strong className="text-foreground">We do NOT offer financial advice.</strong>
+                {" "}Nothing on Botvio is a recommendation to buy, sell, or hold any instrument.
+              </li>
+              <li>
+                <strong className="text-foreground">We do NOT offer account management.</strong>
+                {" "}We will never trade on your behalf, ask for your broker login, or manage your funds.
+              </li>
+              <li>
+                <strong className="text-foreground">We do NOT offer investments or savings products.</strong>
+                {" "}Botvio does not accept deposits, pool funds, or promise returns of any kind.
+              </li>
+              <li>
+                <strong className="text-foreground">You only pay for classes and AI tool access.</strong>
+                {" "}Your subscription strictly covers educational content, training videos, and use
+                of our AI chart analysis &amp; signal tools for <em>demo / analysis purposes</em>.
+              </li>
+              <li>
+                <strong className="text-foreground">Always consult a licensed professional</strong>
+                {" "}before going live with real money. Practice on a demo account first, and use
+                Botvio's outputs as a learning aid — never as a guaranteed trade.
+              </li>
+            </ul>
+          </section>
+
+          <Separator className="my-6" />
+
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4">2. No Financial Advice</h2>
             <p className="text-muted-foreground">
