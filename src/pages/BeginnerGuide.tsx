@@ -1,0 +1,357 @@
+import { SEOHead } from "@/components/seo/SEOHead";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  ExternalLink,
+  Play,
+  Rocket,
+  Coins,
+  TrendingUp,
+  Bitcoin,
+  Trophy,
+  ShieldCheck,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+
+const DERIV_URL =
+  "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827";
+const EXNESS_URL = "https://one.exness-track.com/a/ts1kvs1k";
+const WELTRADE_URL = "https://gowt.net/ib67505";
+const BINANCE_URL = "https://accounts.binance.com/register?ref=42924116";
+const BYBIT_URL = "https://www.bybit.com/invite?ref=BOTVIO";
+const FTMO_URL = "https://trader.ftmo.com/?affiliates=botvio";
+const MFF_URL = "https://myforexfunds.com/?ref=botvio";
+
+interface GuideSection {
+  id: string;
+  name: string;
+  tagline: string;
+  Icon: typeof Rocket;
+  iconClass: string;
+  borderClass: string;
+  badge: string;
+  signupUrl: string;
+  ctaLabel: string;
+  image: string;
+  steps: string[];
+  videos: { title: string; url: string }[];
+}
+
+const SECTIONS: GuideSection[] = [
+  {
+    id: "deriv",
+    name: "Deriv",
+    tagline: "Synthetic indices, forex & 24/7 markets",
+    Icon: Rocket,
+    iconClass: "text-primary",
+    borderClass: "border-primary/40",
+    badge: "Most Recommended",
+    signupUrl: DERIV_URL,
+    ctaLabel: "Open Deriv Account",
+    image:
+      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=70",
+    steps: [
+      'Visit the Deriv website and tap "Sign Up"',
+      "Register using Email, Google, or Facebook",
+      "Verify your email address using the link sent to your inbox",
+      "Create a secure password (min 8 chars, upper + lower + number)",
+      "Fill in your personal details (name, country, phone)",
+      "Complete KYC verification: upload ID + proof of address",
+      "Choose a Demo or Real account (Standard / Synthetic / MT5)",
+      "Deposit funds via card, Skrill, USDT or local payment",
+      "Practice on the Demo account before going live",
+    ],
+    videos: [
+      { title: "How to Open a Deriv Account (Full Walkthrough)", url: "https://www.youtube.com/watch?v=Y0H2WgRkV9o" },
+      { title: "Deriv MT5 Setup for Beginners", url: "https://www.youtube.com/watch?v=ZQX4t9c4Vw0" },
+    ],
+  },
+  {
+    id: "exness",
+    name: "Exness",
+    tagline: "Tight-spread gold, forex & metals",
+    Icon: Coins,
+    iconClass: "text-warning",
+    borderClass: "border-warning/40",
+    badge: "Lowest Spreads",
+    signupUrl: EXNESS_URL,
+    ctaLabel: "Open Exness Account",
+    image:
+      "https://images.unsplash.com/photo-1620266757065-5814239881fd?auto=format&fit=crop&w=1200&q=70",
+    steps: [
+      "Go to the Exness registration page",
+      "Select your country and enter your email",
+      "Create a strong password and continue",
+      "Choose your account type (Standard recommended for beginners)",
+      "Verify your phone number via SMS code",
+      "Upload your government-issued ID for KYC",
+      "Upload proof of address (bank statement / utility bill)",
+      "Fund your account via card, crypto or local bank",
+      "Download MT4 / MT5 and log in with your credentials",
+    ],
+    videos: [
+      { title: "Exness Registration & Verification Guide", url: "https://www.youtube.com/watch?v=8mP4xQ1n3vY" },
+      { title: "Deposit & Withdraw on Exness", url: "https://www.youtube.com/watch?v=YOMcD8oXyfM" },
+    ],
+  },
+  {
+    id: "weltrade",
+    name: "Weltrade",
+    tagline: "Syntx, PainX & GainX exclusive indices",
+    Icon: TrendingUp,
+    iconClass: "text-info",
+    borderClass: "border-info/40",
+    badge: "Exclusive Indices",
+    signupUrl: WELTRADE_URL,
+    ctaLabel: "Open Weltrade Account",
+    image:
+      "https://images.unsplash.com/photo-1642790551116-18e150f248e3?auto=format&fit=crop&w=1200&q=70",
+    steps: [
+      "Visit the Weltrade signup page",
+      "Enter your full name, email and phone number",
+      "Set a secure password and confirm your country",
+      "Verify your email through the confirmation link",
+      "Open a new trading account (Pro / Premium / Crypto)",
+      "Submit KYC documents (ID + selfie + proof of address)",
+      "Fund your account via card, crypto, or e-wallet",
+      "Download MT4 / MT5 and log in",
+      "Subscribe to Syntx / PainX / GainX in the platform",
+    ],
+    videos: [
+      { title: "Weltrade Account Opening (Step by Step)", url: "https://www.youtube.com/watch?v=Q1m2pH7s9aE" },
+      { title: "How to Trade Syntx on Weltrade", url: "https://www.youtube.com/watch?v=lqJpJxF7hH4" },
+    ],
+  },
+  {
+    id: "crypto",
+    name: "Crypto Accounts (Binance & Bybit)",
+    tagline: "Spot, futures & USDT funding wallets",
+    Icon: Bitcoin,
+    iconClass: "text-warning",
+    borderClass: "border-warning/40",
+    badge: "USDT Ready",
+    signupUrl: BINANCE_URL,
+    ctaLabel: "Open Binance Account",
+    image:
+      "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&w=1200&q=70",
+    steps: [
+      "Pick an exchange — Binance (most liquidity) or Bybit (great for futures)",
+      "Sign up with email or phone — use a strong password and 2FA",
+      "Verify identity (KYC): passport / national ID + selfie",
+      "Enable Google Authenticator for security",
+      "Buy USDT with card, P2P or local bank transfer",
+      "Transfer USDT to your Spot or Futures wallet",
+      "Subscribe to Botvio Binance signals for entries & exits",
+      "Use only 1–2% of capital per trade",
+      "Withdraw profits to your bank or wallet weekly",
+    ],
+    videos: [
+      { title: "Binance Account Setup & KYC", url: "https://www.youtube.com/watch?v=t_T8FfBl1lY" },
+      { title: "Bybit Futures for Beginners", url: "https://www.youtube.com/watch?v=GU7lQ9R9ESs" },
+    ],
+  },
+  {
+    id: "funded",
+    name: "Funded / Prop Firm Accounts",
+    tagline: "Trade firm capital — keep up to 90% profit",
+    Icon: Trophy,
+    iconClass: "text-primary",
+    borderClass: "border-primary/40",
+    badge: "Prop Trading",
+    signupUrl: FTMO_URL,
+    ctaLabel: "Start FTMO Challenge",
+    image:
+      "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=70",
+    steps: [
+      "Choose a prop firm — FTMO, MyForexFunds, FundedNext or The5ers",
+      "Pick your account size ($10k → $200k+)",
+      "Pay the one-time evaluation fee (refunded on payout)",
+      "Pass Phase 1: hit profit target (usually 8–10%) without breaking rules",
+      "Pass Phase 2: lower target (4–5%) — proves consistency",
+      "Sign the trader agreement to receive a funded account",
+      "Trade with firm capital — follow daily/max drawdown rules",
+      "Withdraw profits monthly (typically 80–90% split)",
+      "Scale your account by hitting consistent profit milestones",
+    ],
+    videos: [
+      { title: "FTMO Challenge: How to Pass First Try", url: "https://www.youtube.com/watch?v=A9aS5ZJjQjI" },
+      { title: "Best Prop Firms in 2025 Compared", url: "https://www.youtube.com/watch?v=8M6cT0p2nJg" },
+    ],
+  },
+];
+
+const TOC_ITEMS = SECTIONS.map((s) => ({ id: s.id, name: s.name, Icon: s.Icon }));
+
+const BeginnerGuide = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Beginner Guide: How to Create a Trading Account | Botvio"
+        description="Step-by-step guide to opening a Deriv, Exness, Weltrade, crypto exchange, and funded prop-firm account. Includes images and YouTube tutorials."
+        ogType="article"
+      />
+
+      <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to home
+        </Link>
+
+        {/* Hero */}
+        <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background to-warning/10 p-6 md:p-8">
+          <div className="absolute top-4 right-4 flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40">
+            <BookOpen className="h-3 w-3 text-primary" />
+            <span className="text-[9px] font-bold text-primary uppercase tracking-wide">Beginner Guide</span>
+          </div>
+          <p className="text-[10px] font-black tracking-[0.2em] text-primary uppercase">📘 Step-by-Step</p>
+          <h1 className="text-2xl md:text-4xl font-black leading-tight mt-2">
+            How to Create a Trading Account
+          </h1>
+          <p className="text-sm text-muted-foreground mt-3 max-w-2xl">
+            Complete beginner-friendly walkthroughs for Deriv, Exness, Weltrade, crypto exchanges, and funded prop firms. Watch the YouTube videos for each broker and follow every step.
+          </p>
+        </div>
+
+        {/* Table of contents */}
+        <Card className="glass-card border-border/60">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              What you'll learn
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {TOC_ITEMS.map(({ id, name, Icon }) => (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  className="flex items-center gap-2 p-2 rounded-md border border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
+                >
+                  <Icon className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span className="text-xs font-semibold leading-tight truncate">{name}</span>
+                </a>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Sections */}
+        {SECTIONS.map((section) => {
+          const { Icon } = section;
+          return (
+            <Card
+              key={section.id}
+              id={section.id}
+              className={`glass-card ${section.borderClass} overflow-hidden scroll-mt-20`}
+            >
+              <div className="relative aspect-[16/6] bg-muted overflow-hidden">
+                <img
+                  src={section.image}
+                  alt={`${section.name} trading account setup`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+                <Badge className={`absolute top-3 right-3 text-[10px] font-bold border bg-background/80 backdrop-blur-sm ${section.iconClass} ${section.borderClass}`}>
+                  {section.badge}
+                </Badge>
+              </div>
+
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg bg-background border ${section.borderClass}`}>
+                    <Icon className={`h-5 w-5 ${section.iconClass}`} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">{section.name}</CardTitle>
+                    <CardDescription className="text-xs">{section.tagline}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                {/* Steps */}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-2">
+                    Step-by-step
+                  </p>
+                  <ol className="space-y-1.5">
+                    {section.steps.map((step, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs">
+                        <span className={`flex-shrink-0 w-5 h-5 rounded-full bg-primary/15 text-primary text-[10px] font-bold flex items-center justify-center mt-0.5`}>
+                          {i + 1}
+                        </span>
+                        <span className="leading-relaxed">{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* Videos */}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-2">
+                    Watch on YouTube
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {section.videos.map((v) => (
+                      <a
+                        key={v.url}
+                        href={v.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2.5 p-2.5 rounded-md border border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
+                      >
+                        <div className="p-1.5 rounded-md bg-destructive/15 border border-destructive/30 flex-shrink-0">
+                          <Play className="h-3.5 w-3.5 text-destructive fill-destructive" />
+                        </div>
+                        <span className="text-xs font-semibold leading-tight">{v.title}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <Button variant="gold" size="sm" className="flex-1" asChild>
+                    <a href={section.signupUrl} target="_blank" rel="noopener noreferrer sponsored">
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                      {section.ctaLabel}
+                      <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                    </a>
+                  </Button>
+                  {section.id === "crypto" && (
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <a href={BYBIT_URL} target="_blank" rel="noopener noreferrer sponsored">
+                        Open Bybit Account
+                        <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                      </a>
+                    </Button>
+                  )}
+                  {section.id === "funded" && (
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <a href={MFF_URL} target="_blank" rel="noopener noreferrer sponsored">
+                        MyForexFunds Challenge
+                        <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+
+        <p className="text-[10px] text-muted-foreground text-center py-4">
+          ⚠️ Trading involves risk. Capital is at risk. Some links contain affiliate referrals which support Botvio at no cost to you.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default BeginnerGuide;
