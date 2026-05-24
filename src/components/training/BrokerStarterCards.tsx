@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import {
   CheckCircle2,
   ExternalLink,
@@ -13,6 +14,7 @@ import {
   KeyRound,
   ShieldCheck,
   Wallet,
+  ArrowRight,
 } from "lucide-react";
 
 const DERIV_URL =
@@ -112,6 +114,13 @@ export const BrokerStarterCards = () => {
                   Open Deriv Forex Account
                   <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
                 </a>
+              </Button>
+              <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+                <Link to="/beginner-guide">
+                  <BookOpen className="h-3.5 w-3.5 mr-1.5" />
+                  Read more — Full Beginner Guide
+                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                </Link>
               </Button>
             </div>
 

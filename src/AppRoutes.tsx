@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Install from "./pages/Install";
 import Learn from "./pages/Learn";
 import Lesson from "./pages/Lesson";
+import BeginnerGuide from "./pages/BeginnerGuide";
 import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
 import Connections from "./pages/Connections";
@@ -160,6 +161,7 @@ export const AppRoutes = () => (
     <Route path="disclaimer" element={<Disclaimer />} />
     <Route path="learn" element={<Learn />} />
     <Route path="learn/:slug" element={<Lesson />} />
+    <Route path="beginner-guide" element={<BeginnerGuide />} />
     <Route path="auth/deriv/callback" element={<DerivCallback />} />
     <Route path="trading" element={<Trading />} />
     <Route path="chart/:symbol" element={<ChartPage />} />
