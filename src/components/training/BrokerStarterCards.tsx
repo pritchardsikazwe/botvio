@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Bot, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
+import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Gift, Copy } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import oneWinGuide from "@/assets/1win-register-guide.jpg";
 
 interface BrokerCard {
   id: string;
@@ -144,57 +146,96 @@ export const BrokerStarterCards = () => {
           );
         })}
 
-        {/* Deriv MT5 Bridge Automation Poster */}
-        <Card className="glass-card border-success/40 hover:scale-[1.02] transition-all overflow-hidden flex flex-col relative">
-          <div className="h-1 bg-gradient-to-r from-success via-primary to-success" />
-          <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/20 border border-success/40">
-            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-            <span className="text-[9px] font-bold text-success uppercase tracking-wide">Automated</span>
-          </div>
+        <OneWinRegisterCard />
+      </div>
+    </div>
+  );
+};
+
+const PROMO_CODE = "ZED4429";
+const ONE_WIN_URL = "https://1wskbe.life/?p=5gjo";
+
+const OneWinRegisterCard = () => {
+  const [copied, setCopied] = useState(false);
+
+  const copyPromo = async () => {
+    try {
+      await navigator.clipboard.writeText(PROMO_CODE);
+      setCopied(true);
+      toast.success(`Promo code ${PROMO_CODE} copied`);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy promo code");
+    }
+  };
+
+  return (
+    <Card className="glass-card border-warning/40 hover:scale-[1.02] transition-all overflow-hidden flex flex-col relative md:col-span-2 lg:col-span-3">
+      <div className="h-1 bg-gradient-to-r from-warning via-primary to-warning" />
+      <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/20 border border-warning/40 z-10">
+        <Gift className="h-3 w-3 text-warning" />
+        <span className="text-[9px] font-bold text-warning uppercase tracking-wide">500% Bonus</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+        <div className="relative bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-3">
+          <img
+            src={oneWinGuide}
+            alt="How to register on 1Win — step by step guide with promo code ZED4429"
+            loading="lazy"
+            className="w-full h-auto max-h-[420px] object-contain rounded-md"
+          />
+        </div>
+
+        <div className="flex flex-col">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-success/20 to-primary/10">
-                <Bot className="h-5 w-5 text-success" />
-              </div>
-              <Badge className="text-[10px] font-bold border bg-success/15 text-success border-success/30 mt-6">
-                NEW
-              </Badge>
-            </div>
-            <CardTitle className="text-base leading-tight flex items-center gap-1.5">
-              Deriv MT5 Bridge
-              <Zap className="h-3.5 w-3.5 text-warning" />
+            <Badge className="w-fit text-[10px] font-bold border bg-warning/15 text-warning border-warning/30">
+              STEP 1 · HOW TO REGISTER
+            </Badge>
+            <CardTitle className="text-base leading-tight mt-2">
+              Create your 1Win account
             </CardTitle>
             <CardDescription className="text-xs font-medium text-foreground/80">
-              Auto-execute Botvio AI signals on your Deriv MT5
+              Use promo code <span className="font-bold text-warning">{PROMO_CODE}</span> for a 500% bonus on your first 4 deposits.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 flex-1 flex flex-col">
-            <p className="text-xs text-muted-foreground">
-              Connect your Deriv MT5 terminal via our Bridge EA — try it free on a demo account.
-            </p>
-            <ul className="space-y-1.5 flex-1">
+            <ul className="space-y-1.5">
               {[
-                "1. Open Deriv MT5 Demo account",
-                "2. Download Botvio Bridge EA",
-                "3. Attach EA to any chart",
-                "4. Enable auto-execute in dashboard",
-                "5. Signals trade automatically 24/7",
+                "Click the registration link below",
+                "Write your phone number",
+                "Add your email address (Gmail preferred — needed for withdrawal verification)",
+                "Create your password",
+                `Click "Add promo code" and enter ${PROMO_CODE}`,
+                'Finalize your registration by clicking "Register"',
               ].map((step, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-warning flex-shrink-0 mt-0.5" />
                   <span>{step}</span>
                 </li>
               ))}
             </ul>
-            <Button variant="gold" size="sm" className="w-full mt-2" asChild>
-              <Link to="/connections">
-                Setup MT5 Bridge
+
+            <div className="flex items-center justify-between gap-2 p-2 rounded-md border border-warning/30 bg-warning/5">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Promo code</p>
+                <p className="text-sm font-bold text-warning truncate">{PROMO_CODE}</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={copyPromo} className="flex-shrink-0">
+                <Copy className="h-3.5 w-3.5 mr-1.5" />
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+
+            <Button variant="gold" size="sm" className="w-full mt-auto" asChild>
+              <a href={ONE_WIN_URL} target="_blank" rel="noopener noreferrer sponsored">
+                Register on 1Win
                 <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
-              </Link>
+              </a>
             </Button>
           </CardContent>
-        </Card>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };
