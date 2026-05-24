@@ -20,6 +20,13 @@ import {
   Youtube,
   Instagram,
   Facebook,
+  Sparkles,
+  LineChart,
+  Bell,
+  Zap,
+  Clock,
+  Target,
+  Shield,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -454,6 +461,145 @@ const BeginnerGuide = () => {
             </Card>
           );
         })}
+
+        {/* Now use Botvio — beginner workflow */}
+        <Card className="glass-card border-primary/40 bg-gradient-to-br from-primary/10 via-background to-info/5">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-1 mb-1">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">After Sign Up</span>
+            </div>
+            <CardTitle className="text-xl md:text-2xl">Now Use Botvio to Trade Smarter</CardTitle>
+            <CardDescription className="text-xs">
+              Your account is ready. Here are the 3 simple ways Botvio helps you find winning trades — no experience needed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Step 1 — AI Chart Analysis */}
+            <div className="rounded-lg border border-primary/30 bg-background/50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center">
+                  <span className="text-sm font-black text-primary">1</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <h3 className="text-sm font-bold">AI Chart Analysis (Upload Any Chart)</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                    Take a screenshot of any chart — forex, gold, crypto, synthetics — and upload it to Botvio.
+                    Our AI reads the candles, trend, support/resistance, and momentum indicators, then tells you in plain English:
+                    <strong className="text-foreground"> buy or sell, entry price, stop loss, and take profit.</strong>
+                  </p>
+                  <ul className="text-[11px] text-muted-foreground space-y-0.5 mb-2">
+                    <li>• Works on TradingView, MT4/MT5, Deriv, or your phone screenshots</li>
+                    <li>• Confidence score shows how strong the setup is</li>
+                    <li>• Multi-timeframe view (1H → 4H → Daily) like a pro trader</li>
+                  </ul>
+                  <Button variant="gold" size="sm" asChild>
+                    <Link to="/chart">
+                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      Try AI Chart Analysis
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 — Trading Hubs */}
+            <div className="rounded-lg border border-warning/30 bg-background/50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-warning/15 border border-warning/40 flex items-center justify-center">
+                  <span className="text-sm font-black text-warning">2</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <LineChart className="h-4 w-4 text-warning" />
+                    <h3 className="text-sm font-bold">Trading Hubs — Live Signals by Asset</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                    Each asset has its own hub — Gold, Bitcoin, EUR/USD, GBP/USD, Boom & Crash, Volatility indices, and more.
+                    Open a hub to see <strong className="text-foreground">live price, AI-generated signal, win-rate, and the exact trade plan</strong> for that market right now.
+                  </p>
+                  <ul className="text-[11px] text-muted-foreground space-y-0.5 mb-2">
+                    <li>• Signals refresh automatically every few minutes</li>
+                    <li>• Built-in chart so you can verify before you trade</li>
+                    <li>• Hauxa strategy overlay (EMA 20/50, RSI, ATR) on every signal</li>
+                  </ul>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/gold-trading-hub">Gold Hub</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/bitcoin-trading-hub">Bitcoin Hub</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/synthetic">Synthetic Hub</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 — Home signals feed */}
+            <div className="rounded-lg border border-info/30 bg-background/50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-info/15 border border-info/40 flex items-center justify-center">
+                  <span className="text-sm font-black text-info">3</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Bell className="h-4 w-4 text-info" />
+                    <h3 className="text-sm font-bold">Follow Signals on the Home Page</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                    Don't want to upload charts or pick a hub? Just open the Botvio home page.
+                    Every signal posted by our team and AI appears in the live feed —
+                    <strong className="text-foreground"> buy/sell direction, entry, SL, TP, and reasoning.</strong>
+                    Copy the trade into your broker (Deriv, Exness, Weltrade, Binance) and you're done.
+                  </p>
+                  <ul className="text-[11px] text-muted-foreground space-y-0.5 mb-2">
+                    <li>• Free signals visible to everyone — no setup needed</li>
+                    <li>• Win / Loss / Running tags so you can track performance</li>
+                    <li>• Optional WhatsApp & Telegram alerts the second a signal drops</li>
+                  </ul>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/signals">
+                      <Bell className="h-3.5 w-3.5 mr-1.5" />
+                      View Live Signals
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Why Botvio */}
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5 text-primary" />
+                Why Beginners Choose Botvio
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {[
+                  { Icon: Zap, title: "No experience needed", desc: "AI does the analysis — you just follow the trade plan." },
+                  { Icon: Target, title: "Clear entry, SL & TP", desc: "Every signal is complete — no guesswork on where to enter or exit." },
+                  { Icon: Clock, title: "Saves hours daily", desc: "Skip 100s of charts — Botvio scans markets 24/7 for you." },
+                  { Icon: Shield, title: "Risk-managed", desc: "Built-in lockouts after losses keep your account safe." },
+                  { Icon: LineChart, title: "Works on any broker", desc: "Deriv, Exness, Weltrade, Binance, MT4/MT5 — all supported." },
+                  { Icon: Sparkles, title: "Multi-market coverage", desc: "Forex, gold, crypto, synthetics & stocks in one place." },
+                ].map(({ Icon, title, desc }) => (
+                  <div key={title} className="flex items-start gap-2">
+                    <Icon className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold leading-tight">{title}</p>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Social media links */}
         <Card className="glass-card border-primary/30">
