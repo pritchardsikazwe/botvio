@@ -295,7 +295,7 @@ const blogPosts = [
     image: "https://images.unsplash.com/photo-1620266757065-5814239881fd?auto=format&fit=crop&w=1200&q=70",
   },
   {
-    slug: "how-to-make-money-online-2026",
+    slug: "make-money-online-2026-methods",
     title: "How to Make Money Online in 2026 — 10 Proven Methods",
     excerpt: "From AI-assisted trading to affiliate marketing, freelancing and digital products — the 10 realistic ways people are earning online in 2026.",
     category: "Earn Online",
