@@ -116,7 +116,7 @@ export const BrokerStarterCards = () => {
                 </a>
               </Button>
               <Button variant="outline" size="sm" className="w-full mt-2" asChild>
-                <Link to="/beginner-guide">
+                <Link to="/forex-beginner-guide">
                   <BookOpen className="h-3.5 w-3.5 mr-1.5" />
                   Read more — Full Beginner Guide
                   <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
