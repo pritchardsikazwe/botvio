@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Gift, Copy } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 import oneWinGuide from "@/assets/1win-register-guide.jpg";
