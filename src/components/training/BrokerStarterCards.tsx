@@ -280,7 +280,7 @@ const DERIV_GUIDE_URL = "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-
 const EXNESS_GUIDE_URL = "https://one.exness-track.com/a/ts1kvs1k";
 const WELTRADE_GUIDE_URL = "https://gowt.net/ib67505";
 
-const DerivBeginnerGuideCard = () => {
+function DerivBeginnerGuideCard() {
   const steps = [
     { Icon: ExternalLink, text: 'Visit the Deriv website and tap "Sign Up"' },
     { Icon: Mail, text: "Register using Email, Google, or Facebook" },
@@ -380,4 +380,4 @@ const DerivBeginnerGuideCard = () => {
       </div>
     </Card>
   );
-};
+}
