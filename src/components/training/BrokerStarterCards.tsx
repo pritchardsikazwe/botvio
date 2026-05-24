@@ -106,6 +106,13 @@ export const BrokerStarterCards = () => {
               <p className="text-xs text-muted-foreground mt-2">
                 Follow these simple steps to open your first trading account and start receiving Botvio signals.
               </p>
+              <Button variant="gold" size="sm" className="w-full mt-3" asChild>
+                <a href={DERIV_URL} target="_blank" rel="noopener noreferrer sponsored">
+                  <Rocket className="h-3.5 w-3.5 mr-1.5" />
+                  Open Deriv Forex Account
+                  <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                </a>
+              </Button>
             </div>
 
             <ul className="space-y-1.5">
