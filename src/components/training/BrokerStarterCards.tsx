@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Gift, Copy, Zap, BadgePercent, Wallet, Sparkles } from "lucide-react";
+import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Gift, Copy, Zap, BadgePercent, Wallet, Sparkles, BookOpen, ShieldCheck, Mail, KeyRound } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -146,6 +146,7 @@ export const BrokerStarterCards = () => {
         })}
 
         <OneWinRegisterCard />
+        <DerivBeginnerGuideCard />
       </div>
     </div>
   );
