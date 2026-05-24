@@ -1,0 +1,1 @@
+UPDATE public.training_videos SET is_active = false WHERE id IN ('a99fac13-3c9e-43be-a113-8a71285f3812','b2d331e0-6425-4547-89ad-3d492f116076');
