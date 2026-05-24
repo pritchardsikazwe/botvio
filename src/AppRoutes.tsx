@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Install from "./pages/Install";
 import Learn from "./pages/Learn";
 import Lesson from "./pages/Lesson";
+import BeginnerGuide from "./pages/BeginnerGuide";
 import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
 import Connections from "./pages/Connections";
