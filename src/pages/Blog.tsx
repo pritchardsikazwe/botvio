@@ -328,8 +328,17 @@ const Blog = () => {
                 {featured.map(post => (
                   <Link key={post.slug} to={`/blog/${post.slug}`}>
                     <Card className="h-full hover:border-primary/50 transition-all hover:shadow-lg cursor-pointer group overflow-hidden">
-                      <div className="h-32 bg-gradient-to-br from-primary/20 to-warning/20 flex items-center justify-center text-5xl">
-                        {post.image}
+                      <div className="h-40 bg-gradient-to-br from-primary/20 to-warning/20 flex items-center justify-center text-5xl overflow-hidden">
+                        {post.image?.startsWith("http") || post.image?.startsWith("/") ? (
+                          <img
+                            src={post.image}
+                            alt={post.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <span>{post.image}</span>
+                        )}
                       </div>
                       <CardHeader className="pb-2">
                         <div className="flex items-center gap-2 mb-2">
@@ -353,8 +362,12 @@ const Blog = () => {
                 <Link key={post.slug} to={`/blog/${post.slug}`}>
                   <Card className="hover:border-primary/50 transition-all hover:shadow-md cursor-pointer group">
                     <CardContent className="flex items-center gap-6 py-5">
-                      <div className="text-3xl w-12 h-12 flex items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-warning/10 shrink-0">
-                        {post.image}
+                      <div className="text-3xl w-16 h-16 flex items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-warning/10 shrink-0 overflow-hidden">
+                        {post.image?.startsWith("http") || post.image?.startsWith("/") ? (
+                          <img src={post.image} alt={post.title} loading="lazy" className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{post.image}</span>
+                        )}
                       </div>
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
