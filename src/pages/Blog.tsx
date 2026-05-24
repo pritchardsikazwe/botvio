@@ -235,6 +235,121 @@ const blogPosts = [
   { slug: "solana-trading-binance", title: "Solana Trading on Binance", excerpt: "Guide & AI signals for SOL trading.", category: "Market Analysis", readTime: "6 min", date: "2026-01-14", featured: false, image: "☀️" },
   { slug: "how-to-short-bitcoin-binance", title: "How to Short Bitcoin on Binance", excerpt: "Profit when BTC price drops.", category: "Education", readTime: "6 min", date: "2026-01-12", featured: false, image: "📉" },
   { slug: "binance-smart-money-concepts", title: "Smart Money Concepts for Binance", excerpt: "Apply institutional SMC to crypto trading.", category: "Strategies", readTime: "9 min", date: "2026-01-10", featured: false, image: "🏦" },
+
+  // ══════ TRENDING 2026 — Forex, Deriv, Bitcoin, Crypto, Synthetics, Weltrade, Make Money Online ══════
+  {
+    slug: "forex-trends-2026",
+    title: "Forex Trading Trends in 2026: What Every Trader Must Know",
+    excerpt: "The biggest forex shifts in 2026 — AI signals, prop-firm dominance, USD weakness, gold's record run, and what it means for retail traders.",
+    category: "Forex",
+    readTime: "11 min",
+    date: "2026-05-22",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "deriv-synthetic-indices-trending",
+    title: "Deriv Synthetic Indices: 2026 Trending Setups That Actually Work",
+    excerpt: "Boom 1000, Crash 500, Volatility 75 and Step Index — the synthetic indices traders are scalping in 2026 and the exact setups Botvio uses.",
+    category: "Synthetic Indices",
+    readTime: "12 min",
+    date: "2026-05-20",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1642790551116-18e150f248e3?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "bitcoin-2026-price-outlook",
+    title: "Bitcoin 2026 Price Outlook: Post-Halving Bull Run & Key Levels",
+    excerpt: "BTC is rewriting the cycle playbook. Here are the macro drivers, halving aftershock, ETF flows, and the price levels every trader is watching.",
+    category: "Market Analysis",
+    readTime: "10 min",
+    date: "2026-05-18",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "trending-crypto-coins-2026",
+    title: "Trending Crypto Coins to Watch in 2026 (Beyond BTC & ETH)",
+    excerpt: "The altcoins gaining serious volume in 2026 — SOL, AVAX, SUI, TON, and a few low-cap gems with AI signal coverage on Botvio.",
+    category: "Market Analysis",
+    readTime: "9 min",
+    date: "2026-05-16",
+    image: "https://images.unsplash.com/photo-1640340434855-6084b1f4901c?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "synthetic-indices-guide-2026",
+    title: "Synthetic Indices Trading Guide for 2026 (Full Beginner Walkthrough)",
+    excerpt: "What synthetic indices are, why they trade 24/7, how Deriv generates them, and the safest way to start with Botvio AI signals.",
+    category: "Synthetic Indices",
+    readTime: "13 min",
+    date: "2026-05-14",
+    image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "weltrade-syntx-painx-gainx-explained",
+    title: "Weltrade Syntx, PainX & GainX Explained — 2026 Edition",
+    excerpt: "Weltrade's exclusive synthetic indices are exploding in 2026. Here's how Syntx, PainX and GainX behave and the Botvio strategies that win.",
+    category: "Weltrade",
+    readTime: "10 min",
+    date: "2026-05-12",
+    image: "https://images.unsplash.com/photo-1620266757065-5814239881fd?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "make-money-online-2026-methods",
+    title: "How to Make Money Online in 2026 — 10 Proven Methods",
+    excerpt: "From AI-assisted trading to affiliate marketing, freelancing and digital products — the 10 realistic ways people are earning online in 2026.",
+    category: "Earn Online",
+    readTime: "14 min",
+    date: "2026-05-10",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "best-websites-to-make-money-online",
+    title: "Best Websites to Make Money Online in 2026 (Real & Trusted)",
+    excerpt: "The legit websites people are actually getting paid on in 2026 — trading, freelancing, micro-tasks, affiliate, and creator platforms.",
+    category: "Earn Online",
+    readTime: "12 min",
+    date: "2026-05-08",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "forex-vs-crypto-which-pays-more",
+    title: "Forex vs Crypto in 2026 — Which Actually Pays More?",
+    excerpt: "Volatility, leverage, capital required, win-rates and lifestyle. A blunt 2026 comparison between forex trading and crypto trading.",
+    category: "Comparison",
+    readTime: "9 min",
+    date: "2026-05-06",
+    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "boom-crash-trending-strategy-2026",
+    title: "Boom & Crash Trending Strategy for 2026 (Botvio Spike Drought)",
+    excerpt: "The spike-drought + EMA filter strategy Botvio uses to catch Boom 1000 and Crash 500 reversals with high accuracy in 2026.",
+    category: "Strategy",
+    readTime: "11 min",
+    date: "2026-05-04",
+    image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "gold-trading-2026-outlook",
+    title: "Gold Trading 2026 Outlook: XAUUSD Bull Run & Key Setups",
+    excerpt: "Why gold keeps making all-time highs in 2026, the macro drivers, and the XAUUSD setups Botvio is catching with AI chart analysis.",
+    category: "Gold",
+    readTime: "10 min",
+    date: "2026-05-02",
+    image: "https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=1200&q=70",
+  },
+  {
+    slug: "passive-income-trading-bots-2026",
+    title: "Passive Income with Trading Bots in 2026 (Honest Guide)",
+    excerpt: "Can trading bots really make passive income in 2026? Realistic numbers, the risks, and how to set up Botvio for hands-off trading.",
+    category: "Earn Online",
+    readTime: "10 min",
+    date: "2026-04-30",
+    image: "https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?auto=format&fit=crop&w=1200&q=70",
+  },
 ];
 
 // Categories auto-detected from posts below
@@ -328,8 +443,17 @@ const Blog = () => {
                 {featured.map(post => (
                   <Link key={post.slug} to={`/blog/${post.slug}`}>
                     <Card className="h-full hover:border-primary/50 transition-all hover:shadow-lg cursor-pointer group overflow-hidden">
-                      <div className="h-32 bg-gradient-to-br from-primary/20 to-warning/20 flex items-center justify-center text-5xl">
-                        {post.image}
+                      <div className="h-40 bg-gradient-to-br from-primary/20 to-warning/20 flex items-center justify-center text-5xl overflow-hidden">
+                        {post.image?.startsWith("http") || post.image?.startsWith("/") ? (
+                          <img
+                            src={post.image}
+                            alt={post.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <span>{post.image}</span>
+                        )}
                       </div>
                       <CardHeader className="pb-2">
                         <div className="flex items-center gap-2 mb-2">
@@ -353,8 +477,12 @@ const Blog = () => {
                 <Link key={post.slug} to={`/blog/${post.slug}`}>
                   <Card className="hover:border-primary/50 transition-all hover:shadow-md cursor-pointer group">
                     <CardContent className="flex items-center gap-6 py-5">
-                      <div className="text-3xl w-12 h-12 flex items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-warning/10 shrink-0">
-                        {post.image}
+                      <div className="text-3xl w-16 h-16 flex items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-warning/10 shrink-0 overflow-hidden">
+                        {post.image?.startsWith("http") || post.image?.startsWith("/") ? (
+                          <img src={post.image} alt={post.title} loading="lazy" className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{post.image}</span>
+                        )}
                       </div>
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
