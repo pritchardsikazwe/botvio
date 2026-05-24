@@ -14,6 +14,12 @@ import {
   Bitcoin,
   Trophy,
   ShieldCheck,
+  ImageIcon,
+  Send,
+  MessageCircle,
+  Youtube,
+  Instagram,
+  Facebook,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -39,6 +45,12 @@ interface GuideSection {
   image: string;
   steps: string[];
   videos: { title: string; url: string }[];
+  /**
+   * Optional picture-guide screenshots for SEO + visual walkthrough.
+   * Add objects like: { src: "/guides/deriv-step-1.png", caption: "Sign up screen" }
+   * Place files in `public/guides/` so they resolve from the site root.
+   */
+  imageGuides?: { src: string; caption: string }[];
 }
 
 const SECTIONS: GuideSection[] = [
@@ -69,6 +81,11 @@ const SECTIONS: GuideSection[] = [
       { title: "How to Open a Deriv Account (Full Walkthrough)", url: "https://www.youtube.com/watch?v=Y0H2WgRkV9o" },
       { title: "Deriv MT5 Setup for Beginners", url: "https://www.youtube.com/watch?v=ZQX4t9c4Vw0" },
     ],
+    imageGuides: [
+      // Drop screenshots into public/guides/ and reference them here:
+      // { src: "/guides/deriv-1-signup.png", caption: "Step 1 — Sign Up form" },
+      // { src: "/guides/deriv-2-verify.png", caption: "Step 2 — Email verification" },
+    ],
   },
   {
     id: "exness",
@@ -96,6 +113,9 @@ const SECTIONS: GuideSection[] = [
     videos: [
       { title: "Exness Registration & Verification Guide", url: "https://www.youtube.com/watch?v=8mP4xQ1n3vY" },
       { title: "Deposit & Withdraw on Exness", url: "https://www.youtube.com/watch?v=YOMcD8oXyfM" },
+    ],
+    imageGuides: [
+      // { src: "/guides/exness-1-signup.png", caption: "Exness signup page" },
     ],
   },
   {
@@ -125,6 +145,9 @@ const SECTIONS: GuideSection[] = [
       { title: "Weltrade Account Opening (Step by Step)", url: "https://www.youtube.com/watch?v=Q1m2pH7s9aE" },
       { title: "How to Trade Syntx on Weltrade", url: "https://www.youtube.com/watch?v=lqJpJxF7hH4" },
     ],
+    imageGuides: [
+      // { src: "/guides/weltrade-1-signup.png", caption: "Weltrade signup form" },
+    ],
   },
   {
     id: "crypto",
@@ -152,6 +175,10 @@ const SECTIONS: GuideSection[] = [
     videos: [
       { title: "Binance Account Setup & KYC", url: "https://www.youtube.com/watch?v=t_T8FfBl1lY" },
       { title: "Bybit Futures for Beginners", url: "https://www.youtube.com/watch?v=GU7lQ9R9ESs" },
+    ],
+    imageGuides: [
+      // { src: "/guides/binance-1-signup.png", caption: "Binance signup screen" },
+      // { src: "/guides/bybit-1-signup.png", caption: "Bybit signup screen" },
     ],
   },
   {
@@ -181,10 +208,64 @@ const SECTIONS: GuideSection[] = [
       { title: "FTMO Challenge: How to Pass First Try", url: "https://www.youtube.com/watch?v=A9aS5ZJjQjI" },
       { title: "Best Prop Firms in 2025 Compared", url: "https://www.youtube.com/watch?v=8M6cT0p2nJg" },
     ],
+    imageGuides: [
+      // { src: "/guides/ftmo-1-dashboard.png", caption: "FTMO dashboard overview" },
+    ],
   },
 ];
 
 const TOC_ITEMS = SECTIONS.map((s) => ({ id: s.id, name: s.name, Icon: s.Icon }));
+
+const SOCIAL_LINKS = [
+  {
+    name: "Telegram",
+    Icon: Send,
+    url: "https://t.me/boaborea",
+    handle: "@boaborea",
+    color: "text-info",
+    border: "border-info/40",
+  },
+  {
+    name: "WhatsApp Channel",
+    Icon: MessageCircle,
+    url: "https://whatsapp.com/channel/0029VbAfFXbIT6Kbng6ypX0V",
+    handle: "Follow channel",
+    color: "text-success",
+    border: "border-success/40",
+  },
+  {
+    name: "YouTube",
+    Icon: Youtube,
+    url: "https://www.youtube.com/@botvio",
+    handle: "@botvio",
+    color: "text-destructive",
+    border: "border-destructive/40",
+  },
+  {
+    name: "Instagram",
+    Icon: Instagram,
+    url: "https://www.instagram.com/botvio.live",
+    handle: "@botvio.live",
+    color: "text-primary",
+    border: "border-primary/40",
+  },
+  {
+    name: "Facebook",
+    Icon: Facebook,
+    url: "https://www.facebook.com/botvio",
+    handle: "Botvio",
+    color: "text-info",
+    border: "border-info/40",
+  },
+  {
+    name: "TikTok",
+    Icon: Play,
+    url: "https://www.tiktok.com/@botvio",
+    handle: "@botvio",
+    color: "text-warning",
+    border: "border-warning/40",
+  },
+];
 
 const BeginnerGuide = () => {
   return (
@@ -315,6 +396,34 @@ const BeginnerGuide = () => {
                   </div>
                 </div>
 
+                {/* Picture guide gallery */}
+                {section.imageGuides && section.imageGuides.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <ImageIcon className="h-3 w-3" />
+                      Picture Guide
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {section.imageGuides.map((img, i) => (
+                        <figure
+                          key={i}
+                          className="rounded-md overflow-hidden border border-border bg-muted"
+                        >
+                          <img
+                            src={img.src}
+                            alt={`${section.name} guide — ${img.caption}`}
+                            loading="lazy"
+                            className="w-full h-28 object-cover"
+                          />
+                          <figcaption className="px-2 py-1.5 text-[10px] text-muted-foreground leading-tight">
+                            {img.caption}
+                          </figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* CTA */}
                 <div className="flex flex-col sm:flex-row gap-2 pt-1">
                   <Button variant="gold" size="sm" className="flex-1" asChild>
@@ -345,6 +454,38 @@ const BeginnerGuide = () => {
             </Card>
           );
         })}
+
+        {/* Social media links */}
+        <Card className="glass-card border-primary/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Send className="h-4 w-4 text-primary" />
+              Follow Botvio for Daily Signals & Tutorials
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Join our community across every platform — free signals, account setup help, and live trading sessions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {SOCIAL_LINKS.map(({ name, Icon, url, handle, color, border }) => (
+                <a
+                  key={name}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2.5 p-2.5 rounded-md border ${border} hover:bg-primary/5 transition-all`}
+                >
+                  <Icon className={`h-4 w-4 flex-shrink-0 ${color}`} />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold leading-tight truncate">{name}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{handle}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <p className="text-[10px] text-muted-foreground text-center py-4">
           ⚠️ Trading involves risk. Capital is at risk. Some links contain affiliate referrals which support Botvio at no cost to you.
