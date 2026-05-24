@@ -1,10 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Gift, Copy } from "lucide-react";
+import { CheckCircle2, ExternalLink, Rocket, TrendingUp, Coins, Gift, Copy, Zap, BadgePercent, Wallet, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import oneWinGuide from "@/assets/1win-register-guide.jpg";
 
 interface BrokerCard {
   id: string;
@@ -178,13 +177,49 @@ const OneWinRegisterCard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-        <div className="relative bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-3">
-          <img
-            src={oneWinGuide}
-            alt="How to register on 1Win — step by step guide with promo code ZED4429"
-            loading="lazy"
-            className="w-full h-auto max-h-[420px] object-contain rounded-md"
-          />
+        <div className="relative bg-gradient-to-br from-warning/10 via-background to-primary/10 p-4 flex flex-col justify-between gap-4 border-b md:border-b-0 md:border-r border-warning/20">
+          <div>
+            <p className="text-[10px] font-black tracking-[0.2em] text-warning uppercase">1Win</p>
+            <h4 className="text-2xl md:text-3xl font-black leading-tight mt-1">
+              How to create an account on 1Win
+            </h4>
+            <p className="text-xs text-muted-foreground mt-2">
+              Fast registration · Instant play · Mobile-first
+            </p>
+          </div>
+
+          <ul className="grid grid-cols-2 gap-2">
+            {[
+              { Icon: Zap, label: "Fast Payouts" },
+              { Icon: BadgePercent, label: "High Multipliers" },
+              { Icon: Wallet, label: "No Deposit / Withdrawal Fees" },
+              { Icon: Sparkles, label: "Welcome Bonuses" },
+            ].map(({ Icon, label }, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-2 p-2 rounded-md bg-background/60 border border-warning/20"
+              >
+                <Icon className="h-3.5 w-3.5 text-warning flex-shrink-0" />
+                <span className="text-[11px] font-semibold leading-tight">{label}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="rounded-md border border-warning/40 bg-background/70 p-3 space-y-1.5">
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-bold">
+              Registration Form
+            </p>
+            <div className="space-y-1 text-[11px]">
+              <p>• Currency: ZMW · Zambian Kwacha</p>
+              <p>• Phone (+260) — your number</p>
+              <p>• Email address</p>
+              <p>• Password (8+ chars, 1 digit, upper &amp; lower case)</p>
+              <p>
+                • Add promo code:{" "}
+                <span className="font-bold text-warning">{PROMO_CODE}</span>
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col">
