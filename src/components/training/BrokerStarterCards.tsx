@@ -33,8 +33,8 @@ const STEPS = [
 ];
 
 const FOREX_BROKERS = [
-  { name: "Exness", url: EXNESS_URL, tag: "Gold · Forex · Low Spreads", Icon: Coins },
   { name: "Deriv", url: DERIV_URL, tag: "Forex · Metals · CFDs", Icon: Rocket },
+  { name: "Exness", url: EXNESS_URL, tag: "Gold · Forex · Low Spreads", Icon: Coins },
 ];
 
 const SYNTHETIC_BROKERS = [
