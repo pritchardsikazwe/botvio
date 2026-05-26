@@ -22,10 +22,9 @@ type DerivWebSocketOptions = {
 };
 
 /**
- * Deriv WebSocket service (browser)
- * Supports both:
- * - Legacy: wss://ws.derivws.com/websockets/v3?app_id=X + { authorize: token }
- * - New API: OTP-based URL from deriv-get-otp edge function (pre-authenticated)
+ * Deriv WebSocket service (browser).
+ * Public market data via wss://api.derivws.com/trading/v1/options/ws/public,
+ * authenticated sessions via OTP-derived URL from the deriv-get-otp edge function.
  */
 export class DerivWebSocketService {
   private ws: WebSocket | null = null;
