@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Activity, Wifi, WifiOff, Lock, Crosshair } from "lucide-react";
-import { getDerivWebSocketUrl } from "@/config/derivEnv";
+import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 import { useMarketSession } from "@/hooks/useMarketSession";
 
@@ -65,7 +65,7 @@ export function DerivLiveChart({
       if (cancelled) return;
       let ws: WebSocket;
       try {
-        ws = new WebSocket(getDerivWebSocketUrl());
+        ws = new WebSocket(getDerivPublicWebSocketUrl());
       } catch {
         return;
       }

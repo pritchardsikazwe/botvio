@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getDerivWebSocketUrl } from "@/config/derivEnv";
+import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 
 /**
  * Map display symbol (e.g. "XAU/USD") → Deriv WebSocket symbol code.
@@ -74,7 +74,7 @@ export function useDerivLiveTicks(displaySymbol: string | null | undefined) {
       if (cancelled) return;
       let ws: WebSocket;
       try {
-        ws = new WebSocket(getDerivWebSocketUrl());
+        ws = new WebSocket(getDerivPublicWebSocketUrl());
       } catch (err) {
         console.warn("[DerivLive] Failed to open WS:", err);
         return;
