@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Target, Clock, ExternalLink, ArrowUpRight, ArrowDownRight, Shield } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
@@ -26,6 +27,19 @@ export function SyntxSignalsSection() {
 
   return (
     <div className="space-y-6">
+      {/* Botvio Scalp Robot — live auto signals with Entry / SL / TP.
+          Weltrade SyntX indices don't stream on Deriv's public WS, so we use
+          the closest Deriv synthetic proxies (Boom/Crash/Vol) for live setups. */}
+      <MultiAssetScalpRobot
+        title="Botvio Scalp Robot · SyntX Proxies"
+        assets={[
+          { displaySymbol: "BOOM1000", label: "GainX proxy (Boom 1000)", emoji: "🚀", cryptoAlwaysOpen: true },
+          { displaySymbol: "CRASH1000", label: "PainX proxy (Crash 1000)", emoji: "💥", cryptoAlwaysOpen: true },
+          { displaySymbol: "R_75", label: "FX/FlipX proxy (Vol 75)", emoji: "📈", cryptoAlwaysOpen: true },
+          { displaySymbol: "R_100", label: "SwitchX proxy (Vol 100)", emoji: "📊", cryptoAlwaysOpen: true },
+        ]}
+      />
+
       <div>
         <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
           <Target className="h-4 w-4 text-primary" /> Active SyntX Signals
