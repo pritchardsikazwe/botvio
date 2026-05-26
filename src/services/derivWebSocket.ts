@@ -1,5 +1,5 @@
 import type { DerivMessage, DerivTick, DerivBalance, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
-import { getDerivWebSocketUrl, getDerivPublicWebSocketUrl } from "@/config/derivEnv";
+import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 
 type ConnectionStatus = "idle" | "connecting" | "open" | "closed";
 
@@ -75,7 +75,7 @@ export class DerivWebSocketService {
   private readonly pingIntervalMs: number;
 
   constructor(opts: DerivWebSocketOptions = {}) {
-    this.defaultUrl = opts.url ?? getDerivWebSocketUrl();
+    this.defaultUrl = opts.url ?? getDerivPublicWebSocketUrl();
     this.currentUrl = this.defaultUrl;
     this.autoReconnect = opts.autoReconnect ?? true;
     this.reconnectBaseDelayMs = opts.reconnectBaseDelayMs ?? 1000;
