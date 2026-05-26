@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { startDerivOAuthLogin } from "@/lib/derivAuth";
 
 const ACCOUNT_RE = /^[A-Z]{2,5}\d{3,12}$/;
 
@@ -63,10 +64,26 @@ export default function DerivOtpTester() {
         <CardHeader>
           <CardTitle>Deriv OTP Tester</CardTitle>
           <CardDescription>
-            Request a fresh WebSocket URL from the server using your admin PAT. OTPs are short-lived — use immediately.
+            Request a fresh WebSocket URL for any of your Deriv accounts. The
+            new Deriv API requires an OAuth2 access token (legacy PATs no
+            longer work), so connect your Deriv account first. OTPs are
+            short-lived — connect immediately after generating.
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-5 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 p-3">
+            <p className="text-xs text-muted-foreground">
+              No Deriv OAuth token yet? Connect first so we can request OTPs on your behalf.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => startDerivOAuthLogin()}
+            >
+              Connect Deriv
+            </Button>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="account_id">Account ID</Label>
