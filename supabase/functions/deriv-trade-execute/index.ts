@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const TOKEN_ENCRYPTION_KEY = Deno.env.get("TOKEN_ENCRYPTION_KEY");
-const DERIV_CLIENT_ID = "32JZaZ9lNagFr75qPkuhO";
+const DERIV_CLIENT_ID = "33nuILr2Iyxx5ZWuDZylH";
 
 // Simple XOR encryption/decryption for tokens
 function decryptToken(encrypted: string): string {

@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     }
 
     // The client_id — same for all environments in the new API
-    const clientId = "32JZaZ9lNagFr75qPkuhO";
+    const clientId = "33nuILr2Iyxx5ZWuDZylH";
 
     // Exchange authorization code for access token via Deriv's token endpoint
     const tokenResponse = await fetch("https://auth.deriv.com/oauth2/token", {
