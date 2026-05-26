@@ -68,8 +68,8 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   }, [user, currentEnv]);
 
   const handleTokenVerify = async () => {
-    if (!apiToken.trim()) { toast.error("Please enter your API token"); return; }
-    if (apiToken.length < 10) { toast.error("Invalid token format"); return; }
+    if (!apiToken.trim()) { toast.error("Please enter your Deriv PAT"); return; }
+    if (apiToken.length < 10) { toast.error("Invalid PAT format"); return; }
 
     setIsVerifying(true);
     try {
@@ -77,10 +77,14 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         body: { token: apiToken, env: currentEnv },
       });
       if (fnError || !data?.ok) {
-        toast.error(data?.error || fnError?.message || "Verification failed");
+        toast.error(
+          data?.error ||
+            fnError?.message ||
+            "Verification failed. Make sure you pasted a new Personal Access Token (PAT) from Deriv.",
+        );
         return;
       }
-      toast.success(`Token verified! Account: ${data.loginid}`);
+      toast.success(`PAT verified! Account: ${data.loginid}`);
       const { data: conn } = await supabase
         .from("deriv_connections")
         .select("*")
@@ -88,50 +92,35 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         .eq("env", currentEnv)
         .single();
       setStoredConnection(conn);
-      await handleTokenConnect();
-    } catch (e: any) {
-      toast.error(e.message || "Verification failed");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
 
-  const handleTokenConnect = async () => {
-    if (!apiToken.trim()) { toast.error("Please enter your API token"); return; }
-    if (apiToken.length < 10) { toast.error("Invalid token format"); return; }
-
-    setIsConnecting(true);
-    try {
-      const balanceResult = await connect(apiToken);
-      toast.success(`Connected as ${balanceResult.loginid}`);
-      setStoredSession(balanceResult.loginid ?? "");
-
+      // Save to trading_accounts (replaces the old WS-based connect which
+      // does not accept PATs). The new Deriv REST API is invoked server-side.
       if (saveToAccount && user) {
         setIsSaving(true);
-        const label = accountLabel || `Deriv ${balanceResult.loginid}`;
+        const label = accountLabel || `Deriv ${data.loginid}`;
         const { error: saveError } = await supabase.from("trading_accounts").insert({
           user_id: user.id,
           broker: "deriv",
           label,
           api_key_encrypted: apiToken,
-          login_id: balanceResult.loginid,
-          connection_type: "api_token",
+          login_id: data.loginid,
+          connection_type: "pat",
           connection_status: "connected",
-          is_virtual: balanceResult.loginid?.startsWith("VRTC"),
+          is_virtual: !!data.is_virtual,
         });
         if (saveError) {
           console.error("Failed to save account:", saveError);
-          toast.error("Connected but failed to save account");
+          toast.error("Verified but failed to save account");
         } else {
           toast.success("Account saved for future use");
         }
         setIsSaving(false);
       }
-      onConnected?.(balanceResult);
+      onConnected?.({ loginid: data.loginid, balance: data.balance, currency: data.currency });
     } catch (e: any) {
-      toast.error(e.message || "Connection failed");
+      toast.error(e.message || "Verification failed");
     } finally {
-      setIsConnecting(false);
+      setIsVerifying(false);
     }
   };
 
@@ -392,49 +381,52 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   </>
                 )}
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={handleTokenVerify}
-                    disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
-                  >
-                    {isVerifying ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Verifying...</>
-                    ) : (
-                      <><CheckCircle className="h-4 w-4 mr-2" />Verify Token</>
-                    )}
-                  </Button>
-                  <Button
-                    className="flex-1"
-                    onClick={handleTokenConnect}
-                    disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
-                  >
-                    {isConnecting || loading ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Connecting...</>
-                    ) : (
-                      <><Wifi className="h-4 w-4 mr-2" />Connect</>
-                    )}
-                  </Button>
-                </div>
+                <Alert>
+                  <Shield className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    Legacy API tokens are no longer accepted. Use a new
+                    <strong> Personal Access Token (PAT)</strong> created on the
+                    updated Deriv API page.
+                  </AlertDescription>
+                </Alert>
+
+                <Button
+                  className="w-full"
+                  onClick={handleTokenVerify}
+                  disabled={isVerifying || isSaving || !apiToken.trim()}
+                >
+                  {isVerifying || isSaving ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Verifying PAT...</>
+                  ) : (
+                    <><CheckCircle className="h-4 w-4 mr-2" />Verify &amp; Save PAT</>
+                  )}
+                </Button>
 
                 <div className="p-3 rounded-lg bg-muted/50 text-sm">
-                  <p className="font-medium mb-2">How to get your API Token:</p>
+                  <p className="font-medium mb-2">How to get your Personal Access Token (PAT):</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
                     <li>
                       <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         Log in to Deriv
                       </a>{" "}or{" "}
                       <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        Create a free demo account
+                        create a free demo account
                       </a>
                     </li>
-                    <li>Go to Settings → API Token</li>
-                    <li>Create a token with <strong>Trade</strong> and <strong>Read</strong> permissions</li>
-                    <li>Copy and paste the token above</li>
+                    <li>
+                      Open{" "}
+                      <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        Settings → API Token
+                      </a>
+                    </li>
+                    <li>
+                      Create a <strong>Personal Access Token (PAT)</strong> with
+                      {" "}<strong>Read</strong> and <strong>Trade</strong> scopes
+                    </li>
+                    <li>Copy and paste it above, then click Verify &amp; Save</li>
                   </ol>
-                  <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary mt-2 hover:underline">
-                    Get your Demo API Token <ExternalLink className="h-3 w-3" />
+                  <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary mt-2 hover:underline">
+                    Open Deriv PAT page <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               </TabsContent>
