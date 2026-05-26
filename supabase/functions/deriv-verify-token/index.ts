@@ -35,7 +35,7 @@ async function verifyPatWithDeriv(token: string, env: string): Promise<{
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
+    const errorText = (await response.text()).trim();
     return {
       ok: false,
       error: response.status === 404
