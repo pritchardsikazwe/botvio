@@ -6,13 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Key, Eye, EyeOff, Wallet, LogOut, Loader2,
-  AlertCircle, CheckCircle, TestTube, DollarSign,
-  ExternalLink, Copy, Check,
+  AlertCircle, CheckCircle, DollarSign,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
 const DERIV_AFFILIATE_LINK = "https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827";
-const DEMO_TOKEN = "03Ddx1HRu2yFRJ8";
 
 interface DerivConnectionProps {
   onSymbolChange?: (symbol: string) => void;
@@ -27,15 +26,19 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [token, setToken] = useState("");
   const [showToken, setShowToken] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [copiedDemo, setCopiedDemo] = useState(false);
   const autoConnectAttempted = useRef(false);
+
+  const addLog = useCallback((line: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs((prev) => [`[${timestamp}] ${line}`, ...prev].slice(0, 20));
+  }, []);
 
   // Auto-reconnect using stored token on mount
   useEffect(() => {
     if (authorized || loading || autoConnectAttempted.current) return;
     autoConnectAttempted.current = true;
 
-    const storedToken = localStorage.getItem("deriv_oauth_token");
+    const storedToken = localStorage.getItem("deriv_pat_token");
     if (storedToken && storedToken.length >= 10) {
       addLog("🔄 Auto-reconnecting with saved session...");
       connect(storedToken)
@@ -44,15 +47,10 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
         })
         .catch(() => {
           addLog("⚠️ Saved session expired. Please reconnect.");
-          localStorage.removeItem("deriv_oauth_token");
+          localStorage.removeItem("deriv_pat_token");
         });
     }
-  }, [authorized, loading, connect]);
-
-  const addLog = useCallback((line: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogs((prev) => [`[${timestamp}] ${line}`, ...prev].slice(0, 20));
-  }, []);
+  }, [authorized, loading, connect, addLog]);
 
   useEffect(() => {
     if (error) addLog(`❌ Error: ${error}`);
@@ -66,50 +64,30 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
 
   const handleTokenConnect = async () => {
     const trimmedToken = token.trim();
-    if (!trimmedToken) { toast.error("Please enter your Deriv API token"); return; }
+    if (!trimmedToken) { toast.error("Please enter your Deriv PAT"); return; }
     if (!isValidToken(trimmedToken)) { toast.error("Invalid token format."); return; }
 
     addLog("🔄 Connecting to Deriv API...");
     try {
       const bal = await connect(trimmedToken);
-      localStorage.setItem("deriv_oauth_token", trimmedToken);
+      localStorage.setItem("deriv_pat_token", trimmedToken);
       addLog(`✅ Authorized: ${bal.loginid}`);
       addLog(`💰 Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
       toast.success(`Connected! Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
-    } catch (e: any) {
-      addLog(`❌ Connection failed: ${e?.message || "Unknown error"}`);
-      toast.error(e?.message || "Failed to connect");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to connect";
+      addLog(`❌ Connection failed: ${message}`);
+      toast.error(message);
     }
   };
 
   const handleDisconnect = () => {
     disconnect();
     setToken("");
-    localStorage.removeItem("deriv_oauth_token");
+    localStorage.removeItem("deriv_pat_token");
     autoConnectAttempted.current = false;
     addLog("🔌 Disconnected");
     toast.info("Disconnected from Deriv");
-  };
-
-  const handleCopyDemo = () => {
-    navigator.clipboard.writeText(DEMO_TOKEN);
-    setCopiedDemo(true);
-    toast.success("Demo token copied!");
-    setTimeout(() => setCopiedDemo(false), 2000);
-  };
-
-  const handleUseDemoToken = async () => {
-    setToken(DEMO_TOKEN);
-    addLog("🔄 Connecting with demo token...");
-    try {
-      const bal = await connect(DEMO_TOKEN);
-      localStorage.setItem("deriv_oauth_token", DEMO_TOKEN);
-      addLog(`✅ Demo connected: ${bal.loginid}`);
-      toast.success(`Demo connected! Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
-    } catch (e: any) {
-      addLog(`❌ Demo connection failed: ${e?.message}`);
-      toast.error(e?.message || "Demo token failed");
-    }
   };
 
   const balanceDisplay = useMemo(() => {
@@ -173,24 +151,6 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       ) : (
         /* Not Authorized View - Token Only */
         <div className="space-y-4">
-          {/* Demo Token - Quick Start */}
-          <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg space-y-2">
-            <div className="flex items-center gap-2">
-              <TestTube className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-blue-500">🧪 Demo — Try Instantly</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs bg-background/50 px-2 py-1 rounded font-mono">{DEMO_TOKEN}</code>
-              <Button size="sm" variant="ghost" className="h-7 px-2" onClick={handleCopyDemo}>
-                {copiedDemo ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
-              </Button>
-            </div>
-            <Button size="sm" variant="outline" className="w-full text-blue-500 border-blue-500/30 hover:bg-blue-500/10" onClick={handleUseDemoToken} disabled={loading}>
-              {loading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <TestTube className="w-3 h-3 mr-1" />}
-              Connect Demo Account
-            </Button>
-          </div>
-
           {/* Real Token Input */}
           <div className="p-3 bg-success/5 border border-success/20 rounded-lg space-y-2">
             <div className="flex items-center gap-2">

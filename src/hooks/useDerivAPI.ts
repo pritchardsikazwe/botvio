@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { DerivWebSocketService } from "@/services/derivWebSocket";
 import type { DerivBalance, DerivTick, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
-import { getDerivConfig } from "@/config/derivEnv";
+import { supabase } from "@/integrations/supabase/client";
 
 export type DerivProposal = {
   id: string;
@@ -27,6 +27,10 @@ interface DerivAPIState {
   accountInfo: DerivAccountInfo | null;
 }
 
+type DerivOtpResponse = { ok?: boolean; ws_url?: string; error?: string };
+type DerivProposalResponse = { proposal: { id: string; ask_price: number; payout: number; longcode: string } };
+type DerivBuyResponse = { buy: { contract_id: number; buy_price: number; payout: number; longcode: string } };
+
 export const useDerivAPI = () => {
   const [state, setState] = useState<DerivAPIState>({
     connected: false,
@@ -42,12 +46,11 @@ export const useDerivAPI = () => {
     setState(prev => ({ ...prev, ...partial }));
   }, []);
 
-  const derivConfig = getDerivConfig();
-
   const service = useMemo(() => {
     const s = new DerivWebSocketService();
     return s;
-  }, [derivConfig.clientId]);
+  }, []);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   const [tickSubscriptions, setTickSubscriptions] = useState<Record<string, string>>({});
 
@@ -65,8 +68,15 @@ export const useDerivAPI = () => {
     async (apiToken: string): Promise<DerivBalance> => {
       updateState({ loading: true, error: null });
       try {
-        await service.open();
-        updateState({ connected: true });
+        const getOtpUrl = async () => {
+          const { data, error } = await supabase.functions.invoke<DerivOtpResponse>("deriv-get-otp", {
+            body: { deriv_token: apiToken },
+          });
+          if (error || !data?.ok || !data?.ws_url) {
+            throw new Error(data?.error || error?.message || "Failed to create Deriv PAT session");
+          }
+          return data.ws_url as string;
+        };
 
         const offStatus = service.onStatus((st) => {
           updateState({ connected: st === "open" });
@@ -93,8 +103,14 @@ export const useDerivAPI = () => {
           updateState({ balance: bal });
         });
 
-        const balance = await service.authorize(apiToken);
-        const acctInfo = service.account;
+        const wsUrl = await getOtpUrl();
+        const balance = await service.connectWithOtpUrl(wsUrl, getOtpUrl);
+        const acctInfo: DerivAccountInfo = {
+          loginid: balance.loginid,
+          is_virtual: balance.loginid.startsWith("VRTC"),
+          currency: balance.currency,
+          fullname: balance.fullname,
+        };
         
         console.log(`[AUTH] loginid=${balance.loginid} is_virtual=${acctInfo?.is_virtual} currency=${balance.currency} balance=${balance.balance}`);
         
@@ -114,7 +130,7 @@ export const useDerivAPI = () => {
 
         updateState({ loading: false });
 
-        (disconnect as any).__cleanup = () => {
+        cleanupRef.current = () => {
           offStatus();
           offError();
           offTick();
@@ -122,8 +138,9 @@ export const useDerivAPI = () => {
         };
 
         return balance;
-      } catch (e: any) {
-        updateState({ loading: false, connected: false, authorized: false, error: e?.message || "Connection error" });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Connection error";
+        updateState({ loading: false, connected: false, authorized: false, error: message });
         throw e;
       }
     },
@@ -131,9 +148,8 @@ export const useDerivAPI = () => {
   );
 
   const disconnect = useCallback(() => {
-    const cleanup = (disconnect as any).__cleanup as undefined | (() => void);
-    cleanup?.();
-    (disconnect as any).__cleanup = undefined;
+    cleanupRef.current?.();
+    cleanupRef.current = null;
 
     service.close();
     setTickSubscriptions({});
@@ -216,7 +232,7 @@ export const useDerivAPI = () => {
       }
 
       console.log("[Deriv] getProposal request:", JSON.stringify(request));
-      const response: any = await service.send(request);
+      const response = await service.send<DerivProposalResponse>(request);
 
       return {
         id: response.proposal.id,
@@ -230,7 +246,7 @@ export const useDerivAPI = () => {
 
   const buyContract = useCallback(
     async (proposalId: string, price: number): Promise<DerivContract> => {
-      const response: any = await service.send({
+      const response = await service.send<DerivBuyResponse>({
         buy: proposalId,
         price,
       });
@@ -251,7 +267,7 @@ export const useDerivAPI = () => {
       console.log(`[BUY] Subscribing to contract ${contractId}`);
       // Track for re-subscription on reconnect (critical for minute-based contracts)
       service.trackContractSubscription(contractId);
-      const response: any = await service.send({
+      const response = await service.send({
         proposal_open_contract: 1,
         contract_id: contractId,
         subscribe: 1,
