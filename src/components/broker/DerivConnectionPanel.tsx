@@ -381,49 +381,52 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   </>
                 )}
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={handleTokenVerify}
-                    disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
-                  >
-                    {isVerifying ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Verifying...</>
-                    ) : (
-                      <><CheckCircle className="h-4 w-4 mr-2" />Verify Token</>
-                    )}
-                  </Button>
-                  <Button
-                    className="flex-1"
-                    onClick={handleTokenConnect}
-                    disabled={isConnecting || isVerifying || loading || !apiToken.trim()}
-                  >
-                    {isConnecting || loading ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Connecting...</>
-                    ) : (
-                      <><Wifi className="h-4 w-4 mr-2" />Connect</>
-                    )}
-                  </Button>
-                </div>
+                <Alert>
+                  <Shield className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    Legacy API tokens are no longer accepted. Use a new
+                    <strong> Personal Access Token (PAT)</strong> created on the
+                    updated Deriv API page.
+                  </AlertDescription>
+                </Alert>
+
+                <Button
+                  className="w-full"
+                  onClick={handleTokenVerify}
+                  disabled={isVerifying || isSaving || !apiToken.trim()}
+                >
+                  {isVerifying || isSaving ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Verifying PAT...</>
+                  ) : (
+                    <><CheckCircle className="h-4 w-4 mr-2" />Verify &amp; Save PAT</>
+                  )}
+                </Button>
 
                 <div className="p-3 rounded-lg bg-muted/50 text-sm">
-                  <p className="font-medium mb-2">How to get your API Token:</p>
+                  <p className="font-medium mb-2">How to get your Personal Access Token (PAT):</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
                     <li>
                       <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         Log in to Deriv
                       </a>{" "}or{" "}
                       <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        Create a free demo account
+                        create a free demo account
                       </a>
                     </li>
-                    <li>Go to Settings → API Token</li>
-                    <li>Create a token with <strong>Trade</strong> and <strong>Read</strong> permissions</li>
-                    <li>Copy and paste the token above</li>
+                    <li>
+                      Open{" "}
+                      <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        Settings → API Token
+                      </a>
+                    </li>
+                    <li>
+                      Create a <strong>Personal Access Token (PAT)</strong> with
+                      {" "}<strong>Read</strong> and <strong>Trade</strong> scopes
+                    </li>
+                    <li>Copy and paste it above, then click Verify &amp; Save</li>
                   </ol>
-                  <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary mt-2 hover:underline">
-                    Get your Demo API Token <ExternalLink className="h-3 w-3" />
+                  <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary mt-2 hover:underline">
+                    Open Deriv PAT page <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               </TabsContent>
