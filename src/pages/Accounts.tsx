@@ -228,13 +228,13 @@ const Accounts = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="api_key">
-                    {formData.broker === "deriv" ? "API Token *" : "API Key *"}
+                    {formData.broker === "deriv" ? "Personal Access Token (PAT) *" : "API Key *"}
                   </Label>
                   <div className="relative">
                     <Input
                       id="api_key"
                       type={showToken ? "text" : "password"}
-                      placeholder={formData.broker === "deriv" ? "Your Deriv API token" : "Your API key"}
+                      placeholder={formData.broker === "deriv" ? "Paste your Deriv PAT (new API only)" : "Your API key"}
                       value={formData.api_key}
                       onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
                     />
@@ -275,20 +275,23 @@ const Accounts = () => {
 
                 {formData.broker === "deriv" && (
                   <div className="p-3 rounded-lg bg-muted/50 text-sm">
-                    <p className="font-medium mb-2">How to get your Deriv API Token:</p>
+                    <p className="font-medium mb-2">How to get your Deriv Personal Access Token (PAT):</p>
                     <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      <li>Log in to Deriv.com</li>
-                      <li>Go to Settings → API Token</li>
-                      <li>Create a token with <strong>Trade</strong> permission</li>
-                      <li>Copy and paste the token above</li>
+                      <li>Sign up or log in at <strong>app.deriv.com</strong> using a <strong>new email</strong> (legacy API accounts are not supported)</li>
+                      <li>Open <strong>Account Settings → API Token</strong> on the new Deriv API</li>
+                      <li>Create a <strong>Personal Access Token (PAT)</strong> with <strong>Read</strong> and <strong>Trade</strong> scopes</li>
+                      <li>Copy the PAT and paste it above — legacy API tokens will be rejected</li>
                     </ol>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Note: Botvio now uses Deriv&apos;s new REST API. Old/legacy tokens no longer work — you must generate a fresh PAT.
+                    </p>
                     <a
                       href="https://app.deriv.com/account/api-token"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-primary mt-2 hover:underline"
                     >
-                      Open Deriv API Token page <ExternalLink className="h-3 w-3" />
+                      Open Deriv PAT page <ExternalLink className="h-3 w-3" />
                     </a>
                   </div>
                 )}
