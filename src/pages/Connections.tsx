@@ -10,9 +10,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, RefreshCw, Monitor } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Wallet,
+  RefreshCw,
+  Monitor,
+  Info,
+  ShieldCheck,
+  Zap,
+  Clock,
+  HelpCircle,
+  ExternalLink,
+  Copy,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Connections = () => {
   const { user } = useAuth();
@@ -54,6 +73,7 @@ const Connections = () => {
   const copyTerminalUid = () => {
     const uid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
     navigator.clipboard.writeText(uid);
+    toast.success("Terminal UID copied", { description: uid });
   };
 
   if (!user) {
@@ -79,6 +99,31 @@ const Connections = () => {
           </p>
         </div>
 
+        {/* Global trust strip */}
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30">
+            <ShieldCheck className="h-5 w-5 text-success mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium">Tokens encrypted at rest</p>
+              <p className="text-xs text-muted-foreground">Server-side only — never exposed to your browser.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30">
+            <Zap className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium">Revoke anytime</p>
+              <p className="text-xs text-muted-foreground">Disconnect from this page or from your broker dashboard.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30">
+            <Clock className="h-5 w-5 text-warning mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium">~2 minute setup</p>
+              <p className="text-xs text-muted-foreground">Deriv via OAuth is one click. MT5 needs an EA install.</p>
+            </div>
+          </div>
+        </div>
+
         <Tabs defaultValue="deriv" className="space-y-6">
           <TabsList className="grid grid-cols-2 w-full max-w-md">
             <TabsTrigger value="deriv" className="flex items-center gap-2">
@@ -92,6 +137,74 @@ const Connections = () => {
           </TabsList>
 
           <TabsContent value="deriv" className="space-y-6">
+            {/* Important notice — legacy PATs no longer work */}
+            <Alert className="border-warning/40 bg-warning/5">
+              <Info className="h-4 w-4 text-warning" />
+              <AlertTitle>Deriv now requires OAuth — legacy API tokens are deprecated</AlertTitle>
+              <AlertDescription className="text-sm text-muted-foreground">
+                If your old API token suddenly stopped working, that's why. Click{" "}
+                <strong>Connect with Deriv</strong> below to authorize Botvio in one step —
+                no token copying, no expiry headaches.
+              </AlertDescription>
+            </Alert>
+
+            {/* How to connect — step by step */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <HelpCircle className="h-4 w-4 text-primary" />
+                  How to connect your Deriv account
+                </CardTitle>
+                <CardDescription>3 steps · ~60 seconds · works on demo and real</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ol className="space-y-3 text-sm">
+                  {[
+                    {
+                      t: "Click \"Connect with Deriv\"",
+                      d: "We'll send you to Deriv to log in securely. No password ever touches Botvio.",
+                    },
+                    {
+                      t: "Approve Botvio's access",
+                      d: "Deriv asks once. You can revoke from your Deriv settings at any time.",
+                    },
+                    {
+                      t: "Pick your active account",
+                      d: "All your demo & real accounts appear in the switcher above. Toggle the one Botvio should trade with.",
+                    },
+                  ].map((s, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <p className="font-medium">{s.t}</p>
+                        <p className="text-muted-foreground">{s.d}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+
+                <Accordion type="single" collapsible className="mt-4">
+                  <AccordionItem value="trouble" className="border-border">
+                    <AccordionTrigger className="text-sm">Having trouble connecting?</AccordionTrigger>
+                    <AccordionContent className="space-y-2 text-sm text-muted-foreground">
+                      <p>• Sign out of all Deriv tabs first, then retry — mixed sessions are the #1 cause of failures.</p>
+                      <p>• Disable popup blockers and ad-blockers for botvio.live and deriv.com.</p>
+                      <p>• If "AccountNotFound" appears, the account you picked isn't owned by the Deriv login you used. Switch login.</p>
+                      <p>
+                        Still stuck? Email{" "}
+                        <a href="mailto:info@botvio.live" className="text-primary hover:underline">
+                          info@botvio.live
+                        </a>{" "}
+                        with a screenshot.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+
             {/* Multi-Account Switcher */}
             {derivTokens.length > 0 && (
               <AccountSwitcher
@@ -152,6 +265,52 @@ const Connections = () => {
           </TabsContent>
 
           <TabsContent value="mt5" className="space-y-6">
+            {/* How MT5 Bridge works */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <HelpCircle className="h-4 w-4 text-primary" />
+                  How the MT5 Bridge works
+                </CardTitle>
+                <CardDescription>
+                  Two routes — pick the one that matches your setup
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg border border-border p-4">
+                  <Badge variant="secondary" className="mb-2">Easiest</Badge>
+                  <p className="font-medium">Managed Bridge (no VPS)</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Submit MT5 demo creds → we provision a dedicated terminal on our VPS within 24h.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border p-4">
+                  <Badge className="mb-2">Self-hosted</Badge>
+                  <p className="font-medium">Install the EA on your VPS/PC</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Download BOTVIO_BridgeEA.mq5, attach it to any chart, paste your Terminal UID.
+                  </p>
+                </div>
+
+                <div className="sm:col-span-2 flex flex-wrap items-center gap-2 pt-2 border-t border-border">
+                  <span className="text-sm text-muted-foreground">Your Terminal UID:</span>
+                  <code className="px-2 py-1 rounded bg-muted text-xs font-mono">
+                    BOTVIO_{user.id.slice(0, 8).toUpperCase()}
+                  </code>
+                  <Button variant="ghost" size="sm" onClick={copyTerminalUid}>
+                    <Copy className="h-3 w-3 mr-1" /> Copy
+                  </Button>
+                  <a
+                    href="/BOTVIO_BridgeEA.mq5"
+                    download
+                    className="ml-auto text-sm text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    Download EA <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="glass-card border-primary/40">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
