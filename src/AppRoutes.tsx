@@ -27,6 +27,7 @@ import ReferralRedirect from "./pages/ReferralRedirect";
 import Signals from "./pages/Signals";
 import SignalsHistory from "./pages/SignalsHistory";
 import Settings from "./pages/Settings";
+import DerivOtpTester from "./pages/DerivOtpTester";
 import Marketplace from "./pages/Marketplace";
 import MyProducts from "./pages/MyProducts";
 import BinanceSettings from "./pages/BinanceSettings";
@@ -151,6 +152,7 @@ export const AppRoutes = () => (
     <Route path="my-products" element={<MyProducts />} />
     <Route path="settings" element={<Settings />} />
     <Route path="settings/binance" element={<BinanceSettings />} />
+    <Route path="settings/deriv-otp" element={<ErrorBoundary><RequireSuperAdmin><DerivOtpTester /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="binance" element={<BinanceHub />} />
     <Route path="bots/binance" element={<BinanceBots />} />
     <Route path="bots/binance/:id" element={<BinanceBotDetail />} />
