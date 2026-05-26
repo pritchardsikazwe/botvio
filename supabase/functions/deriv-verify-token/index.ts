@@ -10,21 +10,6 @@ interface VerifyRequest {
   env: "prod" | "dev";
 }
 
-interface DerivAuthorizeResponse {
-  authorize?: {
-    loginid: string;
-    balance: number;
-    currency: string;
-    fullname?: string;
-    scopes?: string[];
-    is_virtual?: number;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
-}
-
 /**
  * Verify a Personal Access Token (PAT) against the updated Deriv REST API.
  * Legacy WS `authorize` tokens are no longer accepted — users must create a
