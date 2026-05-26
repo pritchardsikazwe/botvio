@@ -42,17 +42,17 @@ Deno.serve(async (req) => {
 
     const userId = claimsData.user.id;
     const body = await req.json();
-    const { connection_id, account_id } = body;
+    const { connection_id, account_id, deriv_token } = body;
 
-    if (!connection_id && !account_id) {
+    if (!connection_id && !account_id && !deriv_token) {
       return new Response(
-        JSON.stringify({ ok: false, error: "Missing connection_id or account_id" }),
+        JSON.stringify({ ok: false, error: "Missing connection_id, account_id, or PAT" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // Get the Deriv access token from the connection
-    let derivAccessToken: string | null = null;
+    let derivAccessToken: string | null = typeof deriv_token === "string" ? deriv_token.trim() : null;
     let accountIdToUse = account_id;
 
     if (connection_id) {
@@ -91,6 +91,20 @@ Deno.serve(async (req) => {
         derivAccessToken = conn.oauth_access_token;
         if (!accountIdToUse) accountIdToUse = conn.login_id;
       }
+    }
+
+    if (derivAccessToken && !accountIdToUse) {
+      const accountsResponse = await fetch("https://api.derivws.com/trading/v1/options/accounts", {
+        method: "GET",
+        headers: {
+          "Deriv-App-ID": "32JZaZ9lNagFr75qPkuhO",
+          "Authorization": `Bearer ${derivAccessToken}`,
+        },
+      });
+      const accountsPayload = await accountsResponse.json().catch(() => ({}));
+      const accounts = Array.isArray(accountsPayload?.data) ? accountsPayload.data : [];
+      const account = accounts.find((a: any) => a?.status === "active") || accounts[0];
+      accountIdToUse = account?.account_id;
     }
 
     if (!derivAccessToken || !accountIdToUse) {
