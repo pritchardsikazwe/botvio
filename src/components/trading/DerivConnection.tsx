@@ -28,6 +28,11 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [logs, setLogs] = useState<string[]>([]);
   const autoConnectAttempted = useRef(false);
 
+  const addLog = useCallback((line: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs((prev) => [`[${timestamp}] ${line}`, ...prev].slice(0, 20));
+  }, []);
+
   // Auto-reconnect using stored token on mount
   useEffect(() => {
     if (authorized || loading || autoConnectAttempted.current) return;
@@ -45,12 +50,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
           localStorage.removeItem("deriv_pat_token");
         });
     }
-  }, [authorized, loading, connect]);
-
-  const addLog = useCallback((line: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogs((prev) => [`[${timestamp}] ${line}`, ...prev].slice(0, 20));
-  }, []);
+  }, [authorized, loading, connect, addLog]);
 
   useEffect(() => {
     if (error) addLog(`❌ Error: ${error}`);
