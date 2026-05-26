@@ -68,8 +68,8 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   }, [user, currentEnv]);
 
   const handleTokenVerify = async () => {
-    if (!apiToken.trim()) { toast.error("Please enter your API token"); return; }
-    if (apiToken.length < 10) { toast.error("Invalid token format"); return; }
+    if (!apiToken.trim()) { toast.error("Please enter your Deriv PAT"); return; }
+    if (apiToken.length < 10) { toast.error("Invalid PAT format"); return; }
 
     setIsVerifying(true);
     try {
@@ -77,10 +77,14 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         body: { token: apiToken, env: currentEnv },
       });
       if (fnError || !data?.ok) {
-        toast.error(data?.error || fnError?.message || "Verification failed");
+        toast.error(
+          data?.error ||
+            fnError?.message ||
+            "Verification failed. Make sure you pasted a new Personal Access Token (PAT) from Deriv.",
+        );
         return;
       }
-      toast.success(`Token verified! Account: ${data.loginid}`);
+      toast.success(`PAT verified! Account: ${data.loginid}`);
       const { data: conn } = await supabase
         .from("deriv_connections")
         .select("*")
@@ -88,50 +92,35 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         .eq("env", currentEnv)
         .single();
       setStoredConnection(conn);
-      await handleTokenConnect();
-    } catch (e: any) {
-      toast.error(e.message || "Verification failed");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
 
-  const handleTokenConnect = async () => {
-    if (!apiToken.trim()) { toast.error("Please enter your API token"); return; }
-    if (apiToken.length < 10) { toast.error("Invalid token format"); return; }
-
-    setIsConnecting(true);
-    try {
-      const balanceResult = await connect(apiToken);
-      toast.success(`Connected as ${balanceResult.loginid}`);
-      setStoredSession(balanceResult.loginid ?? "");
-
+      // Save to trading_accounts (replaces the old WS-based connect which
+      // does not accept PATs). The new Deriv REST API is invoked server-side.
       if (saveToAccount && user) {
         setIsSaving(true);
-        const label = accountLabel || `Deriv ${balanceResult.loginid}`;
+        const label = accountLabel || `Deriv ${data.loginid}`;
         const { error: saveError } = await supabase.from("trading_accounts").insert({
           user_id: user.id,
           broker: "deriv",
           label,
           api_key_encrypted: apiToken,
-          login_id: balanceResult.loginid,
-          connection_type: "api_token",
+          login_id: data.loginid,
+          connection_type: "pat",
           connection_status: "connected",
-          is_virtual: balanceResult.loginid?.startsWith("VRTC"),
+          is_virtual: !!data.is_virtual,
         });
         if (saveError) {
           console.error("Failed to save account:", saveError);
-          toast.error("Connected but failed to save account");
+          toast.error("Verified but failed to save account");
         } else {
           toast.success("Account saved for future use");
         }
         setIsSaving(false);
       }
-      onConnected?.(balanceResult);
+      onConnected?.({ loginid: data.loginid, balance: data.balance, currency: data.currency });
     } catch (e: any) {
-      toast.error(e.message || "Connection failed");
+      toast.error(e.message || "Verification failed");
     } finally {
-      setIsConnecting(false);
+      setIsVerifying(false);
     }
   };
 
