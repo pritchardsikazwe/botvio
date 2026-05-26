@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Legacy WS API requires numeric app_id, not the new OAuth2 client_id
+// Public Deriv WebSocket for market metadata (contracts_for)
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
