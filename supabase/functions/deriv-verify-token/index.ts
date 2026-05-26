@@ -10,11 +10,12 @@ interface VerifyRequest {
   env: "prod" | "dev";
 }
 
+const DERIV_CLIENT_ID = "32JZaZ9lNagFr75qPkuhO";
+const DERIV_REST_BASE = "https://api.derivws.com";
+
 /**
- * Verify a Deriv Personal Access Token (PAT) via the official WebSocket
- * `authorize` endpoint. This is the documented + supported way to validate
- * a Deriv API token (both legacy + new PAT) and returns full account info,
- * balance, currency and granted scopes in a single call.
+ * Verify a Deriv Personal Access Token (PAT) via the new REST API.
+ * Legacy WebSocket `authorize` token verification is intentionally not used.
  */
 async function verifyPatWithDeriv(token: string, env: string): Promise<{
   ok: boolean;
@@ -25,61 +26,40 @@ async function verifyPatWithDeriv(token: string, env: string): Promise<{
   scope?: string[];
   error?: string;
 }> {
-  const appId = env === "prod" ? 99139 : 124208;
-  const wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
-
-  return await new Promise((resolve) => {
-    let settled = false;
-    const done = (r: any) => { if (!settled) { settled = true; try { ws.close(); } catch {} resolve(r); } };
-
-    let ws: WebSocket;
-    try {
-      ws = new WebSocket(wsUrl);
-    } catch (e: any) {
-      return resolve({ ok: false, error: e?.message || "WS connect failed" });
-    }
-
-    const timer = setTimeout(() => done({ ok: false, error: "Deriv verification timed out" }), 12000);
-
-    ws.onopen = () => {
-      try {
-        ws.send(JSON.stringify({ authorize: token }));
-      } catch (e: any) {
-        clearTimeout(timer);
-        done({ ok: false, error: e?.message || "WS send failed" });
-      }
-    };
-
-    ws.onerror = () => {
-      clearTimeout(timer);
-      done({ ok: false, error: "WebSocket error contacting Deriv" });
-    };
-
-    ws.onmessage = (ev) => {
-      clearTimeout(timer);
-      try {
-        const msg = JSON.parse(typeof ev.data === "string" ? ev.data : "");
-        if (msg?.error) {
-          return done({
-            ok: false,
-            error: msg.error.message || msg.error.code || "Invalid Deriv token",
-          });
-        }
-        const a = msg?.authorize;
-        if (!a) return done({ ok: false, error: "Unexpected response from Deriv" });
-        done({
-          ok: true,
-          loginid: a.loginid,
-          balance: typeof a.balance === "number" ? a.balance : Number(a.balance) || 0,
-          currency: a.currency,
-          is_virtual: a.is_virtual === 1 || a.is_virtual === true,
-          scope: a.scopes || ["read"],
-        });
-      } catch (e: any) {
-        done({ ok: false, error: e?.message || "Failed to parse Deriv response" });
-      }
-    };
+  const response = await fetch(`${DERIV_REST_BASE}/trading/v1/options/accounts`, {
+    method: "GET",
+    headers: {
+      "Deriv-App-ID": DERIV_CLIENT_ID,
+      "Authorization": `Bearer ${token}`,
+    },
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    return {
+      ok: false,
+      error: response.status === 404
+        ? "Deriv PAT endpoint was not found. Please try again in a moment."
+        : errorText || `Deriv PAT verification failed (${response.status})`,
+    };
+  }
+
+  const payload = await response.json();
+  const accounts = Array.isArray(payload?.data) ? payload.data : [];
+  const account = accounts.find((a: any) => a?.status === "active") || accounts[0];
+
+  if (!account?.account_id) {
+    return { ok: false, error: "PAT verified, but no Deriv Options account was found." };
+  }
+
+  return {
+    ok: true,
+    loginid: account.account_id,
+    balance: typeof account.balance === "number" ? account.balance : Number(account.balance) || 0,
+    currency: account.currency,
+    is_virtual: account.account_type === "demo" || account.is_virtual === true,
+    scope: ["read", "trade"],
+  };
 }
 
 function maskToken(token: string): string {
@@ -136,9 +116,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Verify with Deriv API
-    // Only the new Personal Access Token (PAT) REST flow is supported.
-    // Legacy WS `authorize` tokens have been removed.
+    // Verify with Deriv's new PAT REST flow only.
     const result = await verifyPatWithDeriv(derivToken, env);
 
     const tokenMasked = maskToken(derivToken);
