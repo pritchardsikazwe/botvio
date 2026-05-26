@@ -74,9 +74,10 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       addLog(`✅ Authorized: ${bal.loginid}`);
       addLog(`💰 Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
       toast.success(`Connected! Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
-    } catch (e: any) {
-      addLog(`❌ Connection failed: ${e?.message || "Unknown error"}`);
-      toast.error(e?.message || "Failed to connect");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to connect";
+      addLog(`❌ Connection failed: ${message}`);
+      toast.error(message);
     }
   };
 
