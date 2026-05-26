@@ -374,13 +374,10 @@ function aggregateCandlesTo4H(candles: any[]): any[] {
     });
 }
 
-async function requestDeriv(payload: Record<string, unknown>, preferredAppId: string): Promise<any | null> {
-  const appIds = Array.from(new Set([preferredAppId, "124208", "99139"].filter(Boolean)));
-
-  for (const appId of appIds) {
-    const result = await new Promise<any | null>((resolve) => {
-      const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${appId}`);
-      const timeout = setTimeout(() => {
+async function requestDeriv(payload: Record<string, unknown>, _preferredAppId?: string): Promise<any | null> {
+  const result = await new Promise<any | null>((resolve) => {
+    const ws = new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
+    const timeout = setTimeout(() => {
         try { ws.close(); } catch {}
         resolve(null);
       }, 7000);
@@ -417,10 +414,7 @@ async function requestDeriv(payload: Record<string, unknown>, preferredAppId: st
       };
     });
 
-    if (result) return result;
-  }
-
-  return null;
+  return result;
 }
 
 async function fetchPriceDeriv(symbol: string, appId: string): Promise<PriceResult | null> {
