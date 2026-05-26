@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 // Legacy WS API requires numeric app_id, not the new OAuth2 client_id
-const DERIV_APP_ID = "99139";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,7 +20,7 @@ serve(async (req) => {
     }
 
     // Connect to Deriv WS
-    const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
+    const ws = new WebSocket(`wss://api.derivws.com/trading/v1/options/ws/public`);
     
     const result = await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {

@@ -14,8 +14,7 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const DERIV_APP_ID = Deno.env.get("DERIV_APP_ID") || "99139";
-const DERIV_WS = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
+const DERIV_WS = `wss://api.derivws.com/trading/v1/options/ws/public`;
 
 interface Candle { epoch: number; open: number; high: number; low: number; close: number; }
 
