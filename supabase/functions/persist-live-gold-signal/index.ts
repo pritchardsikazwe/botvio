@@ -62,8 +62,7 @@ interface Candle { open: number; high: number; low: number; close: number; epoch
 
 // Fetch last N candles from Deriv WS (one-shot, no subscription).
 async function fetchCandles(derivSymbol: string, granularity: number, count = 60): Promise<Candle[]> {
-  const appId = Deno.env.get("DERIV_APP_ID") || "1089";
-  const url = `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
+  const url = `wss://api.derivws.com/trading/v1/options/ws/public`;
   return new Promise((resolve) => {
     let done = false;
     const finish = (out: Candle[]) => { if (!done) { done = true; try { ws.close(); } catch { /* noop */ } resolve(out); } };
