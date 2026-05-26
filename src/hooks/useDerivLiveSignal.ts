@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getDerivWebSocketUrl } from "@/config/derivEnv";
+import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 
 export type DerivSignalType = "BUY" | "SELL" | "WAIT" | "HOLD";
@@ -221,7 +221,7 @@ export function useDerivLiveSignal(
       if (cancelled) return;
       let ws: WebSocket;
       try {
-        ws = new WebSocket(getDerivWebSocketUrl());
+        ws = new WebSocket(getDerivPublicWebSocketUrl());
       } catch {
         return;
       }

@@ -17,7 +17,7 @@ import {
   Target,
   Zap,
 } from "lucide-react";
-import { getDerivWebSocketUrl } from "@/config/derivEnv";
+import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { detectSupportResistance, detectBreakouts, type PriceLevel } from "@/lib/chartAnalysis";
@@ -92,7 +92,7 @@ export function BotvioScalpRobot({ displaySymbol, assetLabel, cryptoAlwaysOpen =
       if (cancelled) return;
       let ws: WebSocket;
       try {
-        ws = new WebSocket(getDerivWebSocketUrl());
+        ws = new WebSocket(getDerivPublicWebSocketUrl());
       } catch {
         return;
       }
