@@ -1,21 +1,16 @@
+## Goal
+Verify the `deriv-admin-otp` edge function returns a valid OTP / WebSocket URL for account `CR1072161` using the newly-updated `DERIV_ADMIN_PAT`.
 
+## Steps
+1. Deploy the latest `deriv-admin-otp` (with `X-API-Key` header fix) to ensure the live version matches the source.
+2. Curl the function with `{ "account_id": "CR1072161", "environment": "real" }`.
+3. Inspect the response:
+   - **200 + `ws_url`** → PAT works; report success and confirm the connect flow is unblocked.
+   - **401/403** → PAT is invalid, expired, or missing the required scope (`admin` / `trading`); ask user to regenerate with correct scopes.
+   - **404 / account-not-found** → PAT doesn't own/manage `CR1072161`; the PAT must belong to an account with admin access to it.
+   - **Other error** → pull `edge_function_logs` for `deriv-admin-otp` and inspect Deriv's error body, then iterate (e.g. try alternate header `Authorization: Bearer`, alternate endpoint path).
+4. Report findings and propose the next concrete fix (rotate PAT, change scope, or adjust endpoint/header).
 
-## Plan: Fix Advert Banner Position, Speed & Add Strategy Posts
-
-### Changes
-
-**1. Move advert banner outside AI Chart Analysis (Index.tsx)**
-- Move `<ScrollingAdvertBanner />` from its current position (line 246, right after ChartUpload) to sit between the Broker Quick-Links section and the News Events section — making it fully independent of AI Chart Analysis.
-
-**2. Speed up marquee animation (index.css)**
-- Change `animation: marquee 30s linear infinite` to `animation: marquee 15s linear infinite` for a noticeably faster scroll.
-
-**3. Add 3 Strategy posts below Latest Articles (Index.tsx)**
-- Create a new `<LatestStrategies />` component (inline in Index.tsx) that fetches 3 strategies from the `strategies` table (public, ordered by downloads desc, limit 3).
-- Render them as cards with title, market badge, pricing badge, and description — linking to `/strategies/{slug}`.
-- Place this section directly below `<LatestArticles />` and above the footer.
-
-### Files to modify
-- `src/pages/Index.tsx` — move banner, add LatestStrategies section
-- `src/index.css` — speed up marquee from 30s → 15s
-
+## Notes
+- No code changes planned in this step — purely diagnostic.
+- If Deriv's response indicates the REST OTP endpoint path or auth scheme is different from what we're using, I'll patch `supabase/functions/deriv-admin-otp/index.ts` in a follow-up.

@@ -1,6 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
 const PAT = Deno.env.get('DERIV_ADMIN_PAT');
+const DERIV_APP_ID = Deno.env.get('DERIV_APP_ID') ?? '99139';
 const DERIV_REST_BASE = 'https://api.derivws.com';
 
 Deno.serve(async (req) => {
@@ -30,7 +31,8 @@ Deno.serve(async (req) => {
       {
         method: 'POST',
         headers: {
-          'X-API-Key': PAT,
+          'Authorization': `Bearer ${PAT}`,
+          'Deriv-App-ID': DERIV_APP_ID,
           'Content-Type': 'application/json',
         },
       },
@@ -44,19 +46,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    const otp = otpJson.otp || otpJson.data?.otp;
-    if (!otp) {
-      return new Response(JSON.stringify({ error: 'otp_missing_in_response', details: otpJson }), {
+    // Deriv returns { data: { url: "wss://...?otp=..." } }
+    const ws_url = otpJson.data?.url || otpJson.url;
+    if (!ws_url) {
+      return new Response(JSON.stringify({ error: 'ws_url_missing_in_response', details: otpJson }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const envPath = environment === 'demo' ? 'demo' : 'real';
-    const ws_url = `wss://api.derivws.com/trading/v1/options/ws/${envPath}?otp=${encodeURIComponent(otp)}`;
 
     return new Response(
-      JSON.stringify({ ws_url, otp, expires_in: otpJson.expires_in ?? null, environment: envPath }),
+      JSON.stringify({ ws_url, environment: envPath }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   } catch (err) {
