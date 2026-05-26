@@ -232,7 +232,7 @@ export const useDerivAPI = () => {
       }
 
       console.log("[Deriv] getProposal request:", JSON.stringify(request));
-      const response: any = await service.send(request);
+      const response = await service.send<DerivProposalResponse>(request);
 
       return {
         id: response.proposal.id,
@@ -246,7 +246,7 @@ export const useDerivAPI = () => {
 
   const buyContract = useCallback(
     async (proposalId: string, price: number): Promise<DerivContract> => {
-      const response: any = await service.send({
+      const response = await service.send<DerivBuyResponse>({
         buy: proposalId,
         price,
       });
@@ -267,7 +267,7 @@ export const useDerivAPI = () => {
       console.log(`[BUY] Subscribing to contract ${contractId}`);
       // Track for re-subscription on reconnect (critical for minute-based contracts)
       service.trackContractSubscription(contractId);
-      const response: any = await service.send({
+      const response = await service.send({
         proposal_open_contract: 1,
         contract_id: contractId,
         subscribe: 1,
