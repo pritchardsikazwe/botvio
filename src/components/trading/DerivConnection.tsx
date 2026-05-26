@@ -150,24 +150,6 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       ) : (
         /* Not Authorized View - Token Only */
         <div className="space-y-4">
-          {/* Demo Token - Quick Start */}
-          <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg space-y-2">
-            <div className="flex items-center gap-2">
-              <TestTube className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-blue-500">🧪 Demo — Try Instantly</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs bg-background/50 px-2 py-1 rounded font-mono">{DEMO_TOKEN}</code>
-              <Button size="sm" variant="ghost" className="h-7 px-2" onClick={handleCopyDemo}>
-                {copiedDemo ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
-              </Button>
-            </div>
-            <Button size="sm" variant="outline" className="w-full text-blue-500 border-blue-500/30 hover:bg-blue-500/10" onClick={handleUseDemoToken} disabled={loading}>
-              {loading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <TestTube className="w-3 h-3 mr-1" />}
-              Connect Demo Account
-            </Button>
-          </div>
-
           {/* Real Token Input */}
           <div className="p-3 bg-success/5 border border-success/20 rounded-lg space-y-2">
             <div className="flex items-center gap-2">
