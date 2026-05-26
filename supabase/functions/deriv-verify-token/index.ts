@@ -11,10 +11,10 @@ interface VerifyRequest {
 }
 
 /**
- * Verify a Personal Access Token (PAT) against the updated Deriv REST API.
- * Legacy WS `authorize` tokens are no longer accepted — users must create a
- * PAT in their Deriv account and we hit https://api.derivws.com/trading/v1/*
- * as a Bearer token.
+ * Verify a Deriv Personal Access Token (PAT) via the official WebSocket
+ * `authorize` endpoint. This is the documented + supported way to validate
+ * a Deriv API token (both legacy + new PAT) and returns full account info,
+ * balance, currency and granted scopes in a single call.
  */
 async function verifyPatWithDeriv(token: string, env: string): Promise<{
   ok: boolean;
@@ -26,50 +26,60 @@ async function verifyPatWithDeriv(token: string, env: string): Promise<{
   error?: string;
 }> {
   const appId = env === "prod" ? 99139 : 124208;
-  const base = "https://api.derivws.com";
-  try {
-    const res = await fetch(`${base}/trading/v1/accounts`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Deriv-App-ID": String(appId),
-        Accept: "application/json",
-      },
-    });
-    const json: any = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      const msg =
-        json?.error?.message ||
-        json?.message ||
-        `PAT verification failed (HTTP ${res.status})`;
-      return { ok: false, error: msg };
+  const wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
+
+  return await new Promise((resolve) => {
+    let settled = false;
+    const done = (r: any) => { if (!settled) { settled = true; try { ws.close(); } catch {} resolve(r); } };
+
+    let ws: WebSocket;
+    try {
+      ws = new WebSocket(wsUrl);
+    } catch (e: any) {
+      return resolve({ ok: false, error: e?.message || "WS connect failed" });
     }
-    // Response shape: { data: [{ account_id, currency, is_virtual, balance, ... }] } or array
-    const accounts: any[] = Array.isArray(json?.data)
-      ? json.data
-      : Array.isArray(json)
-      ? json
-      : json?.accounts ?? [];
-    if (!accounts.length) {
-      return { ok: false, error: "No accounts returned for this PAT" };
-    }
-    // Prefer real account, otherwise first
-    const acc =
-      accounts.find((a) => a.is_virtual === false || a.is_virtual === 0) ||
-      accounts[0];
-    const loginid = acc.account_id || acc.loginid || acc.login_id;
-    const isVirtual = acc.is_virtual === true || acc.is_virtual === 1;
-    return {
-      ok: true,
-      loginid,
-      balance: typeof acc.balance === "number" ? acc.balance : undefined,
-      currency: acc.currency,
-      is_virtual: isVirtual,
-      scope: acc.scopes || acc.scope || ["pat"],
+
+    const timer = setTimeout(() => done({ ok: false, error: "Deriv verification timed out" }), 12000);
+
+    ws.onopen = () => {
+      try {
+        ws.send(JSON.stringify({ authorize: token }));
+      } catch (e: any) {
+        clearTimeout(timer);
+        done({ ok: false, error: e?.message || "WS send failed" });
+      }
     };
-  } catch (e: any) {
-    return { ok: false, error: e?.message || "PAT verification error" };
-  }
+
+    ws.onerror = () => {
+      clearTimeout(timer);
+      done({ ok: false, error: "WebSocket error contacting Deriv" });
+    };
+
+    ws.onmessage = (ev) => {
+      clearTimeout(timer);
+      try {
+        const msg = JSON.parse(typeof ev.data === "string" ? ev.data : "");
+        if (msg?.error) {
+          return done({
+            ok: false,
+            error: msg.error.message || msg.error.code || "Invalid Deriv token",
+          });
+        }
+        const a = msg?.authorize;
+        if (!a) return done({ ok: false, error: "Unexpected response from Deriv" });
+        done({
+          ok: true,
+          loginid: a.loginid,
+          balance: typeof a.balance === "number" ? a.balance : Number(a.balance) || 0,
+          currency: a.currency,
+          is_virtual: a.is_virtual === 1 || a.is_virtual === true,
+          scope: a.scopes || ["read"],
+        });
+      } catch (e: any) {
+        done({ ok: false, error: e?.message || "Failed to parse Deriv response" });
+      }
+    };
+  });
 }
 
 function maskToken(token: string): string {
