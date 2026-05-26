@@ -44,7 +44,7 @@ export function getDerivConfig(): DerivConfig {
 
   const prod: DerivConfig = {
     env: "prod",
-    clientId: "32JZaZ9lNagFr75qPkuhO",
+    clientId: "33nuILr2Iyxx5ZWuDZylH",
     legacyAppId: 99139,
     redirectUrl: "https://botvio.live/auth/deriv/callback",
     baseDomain: "https://botvio.live",
@@ -56,7 +56,7 @@ export function getDerivConfig(): DerivConfig {
 
   const dev: DerivConfig = {
     env: "dev",
-    clientId: "32JZaZ9lNagFr75qPkuhO",
+    clientId: "33nuILr2Iyxx5ZWuDZylH",
     legacyAppId: 124208,
     redirectUrl: `${typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app"}/auth/deriv/callback`,
     baseDomain: typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app",
