@@ -6,13 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Key, Eye, EyeOff, Wallet, LogOut, Loader2,
-  AlertCircle, CheckCircle, TestTube, DollarSign,
-  ExternalLink, Copy, Check,
+  AlertCircle, CheckCircle, DollarSign,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
 const DERIV_AFFILIATE_LINK = "https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827";
-const DEMO_TOKEN = "03Ddx1HRu2yFRJ8";
 
 interface DerivConnectionProps {
   onSymbolChange?: (symbol: string) => void;
@@ -27,7 +26,6 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const [token, setToken] = useState("");
   const [showToken, setShowToken] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [copiedDemo, setCopiedDemo] = useState(false);
   const autoConnectAttempted = useRef(false);
 
   // Auto-reconnect using stored token on mount
@@ -89,27 +87,6 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     autoConnectAttempted.current = false;
     addLog("🔌 Disconnected");
     toast.info("Disconnected from Deriv");
-  };
-
-  const handleCopyDemo = () => {
-    navigator.clipboard.writeText(DEMO_TOKEN);
-    setCopiedDemo(true);
-    toast.success("Demo token copied!");
-    setTimeout(() => setCopiedDemo(false), 2000);
-  };
-
-  const handleUseDemoToken = async () => {
-    setToken(DEMO_TOKEN);
-    addLog("🔄 Connecting with demo token...");
-    try {
-      const bal = await connect(DEMO_TOKEN);
-      localStorage.setItem("deriv_pat_token", DEMO_TOKEN);
-      addLog(`✅ Demo connected: ${bal.loginid}`);
-      toast.success(`Demo connected! Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
-    } catch (e: any) {
-      addLog(`❌ Demo connection failed: ${e?.message}`);
-      toast.error(e?.message || "Demo token failed");
-    }
   };
 
   const balanceDisplay = useMemo(() => {
