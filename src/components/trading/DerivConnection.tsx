@@ -60,7 +60,8 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
 
   const isValidToken = (t: string) => {
     const trimmed = t.trim();
-    return trimmed.length >= 10 && /^[a-zA-Z0-9]+$/.test(trimmed);
+    // Deriv PATs may include letters, digits, hyphens, and underscores
+    return trimmed.length >= 10 && /^[A-Za-z0-9_-]+$/.test(trimmed);
   };
 
   const handleTokenConnect = async () => {
