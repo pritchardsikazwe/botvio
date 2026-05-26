@@ -1,7 +1,6 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { DerivWebSocketService } from "@/services/derivWebSocket";
 import type { DerivBalance, DerivTick, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
-import { getDerivConfig } from "@/config/derivEnv";
 import { supabase } from "@/integrations/supabase/client";
 
 export type DerivProposal = {
@@ -28,6 +27,10 @@ interface DerivAPIState {
   accountInfo: DerivAccountInfo | null;
 }
 
+type DerivOtpResponse = { ok?: boolean; ws_url?: string; error?: string };
+type DerivProposalResponse = { proposal: { id: string; ask_price: number; payout: number; longcode: string } };
+type DerivBuyResponse = { buy: { contract_id: number; buy_price: number; payout: number; longcode: string } };
+
 export const useDerivAPI = () => {
   const [state, setState] = useState<DerivAPIState>({
     connected: false,
@@ -43,12 +46,11 @@ export const useDerivAPI = () => {
     setState(prev => ({ ...prev, ...partial }));
   }, []);
 
-  const derivConfig = getDerivConfig();
-
   const service = useMemo(() => {
     const s = new DerivWebSocketService();
     return s;
-  }, [derivConfig.clientId]);
+  }, []);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   const [tickSubscriptions, setTickSubscriptions] = useState<Record<string, string>>({});
 
