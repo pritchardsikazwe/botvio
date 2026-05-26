@@ -25,90 +25,11 @@ interface DerivAuthorizeResponse {
   };
 }
 
-async function verifyTokenWithDeriv(token: string, env: string): Promise<{
-  ok: boolean;
-  loginid?: string;
-  balance?: number;
-  currency?: string;
-  is_virtual?: boolean;
-  scope?: string[];
-  error?: string;
-}> {
-  const appId = env === "prod" ? 99139 : 124208;
-  const wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
-
-  return new Promise((resolve) => {
-    let resolved = false;
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resolve({ ok: false, error: "Connection timeout" });
-      }
-    }, 30000);
-
-    try {
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ authorize: token, req_id: 1 }));
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data: DerivAuthorizeResponse = JSON.parse(event.data);
-          
-          if (data.error) {
-            clearTimeout(timeout);
-            resolved = true;
-            ws.close();
-            resolve({ ok: false, error: data.error.message });
-            return;
-          }
-
-          if (data.authorize) {
-            clearTimeout(timeout);
-            resolved = true;
-            ws.close();
-            resolve({
-              ok: true,
-              loginid: data.authorize.loginid,
-              balance: data.authorize.balance,
-              currency: data.authorize.currency,
-              is_virtual: data.authorize.is_virtual === 1,
-              scope: data.authorize.scopes || [],
-            });
-          }
-        } catch (e) {
-          console.error("Parse error:", e);
-        }
-      };
-
-      ws.onerror = (error) => {
-        if (!resolved) {
-          clearTimeout(timeout);
-          resolved = true;
-          resolve({ ok: false, error: "WebSocket connection error" });
-        }
-      };
-
-      ws.onclose = () => {
-        if (!resolved) {
-          clearTimeout(timeout);
-          resolved = true;
-          resolve({ ok: false, error: "Connection closed unexpectedly" });
-        }
-      };
-    } catch (e: any) {
-      clearTimeout(timeout);
-      resolve({ ok: false, error: e.message });
-    }
-  });
-}
-
 /**
- * Verify a NEW-style Personal Access Token (PAT) against the updated Deriv API.
- * Legacy WS `authorize` rejects PATs with "Token invalid". The new REST API
- * accepts them as Bearer tokens at https://api.derivws.com/trading/v1/*.
+ * Verify a Personal Access Token (PAT) against the updated Deriv REST API.
+ * Legacy WS `authorize` tokens are no longer accepted — users must create a
+ * PAT in their Deriv account and we hit https://api.derivws.com/trading/v1/*
+ * as a Bearer token.
  */
 async function verifyPatWithDeriv(token: string, env: string): Promise<{
   ok: boolean;
@@ -221,21 +142,9 @@ Deno.serve(async (req) => {
     }
 
     // Verify with Deriv API
-    // 1) Try legacy WS `authorize` (covers existing API tokens).
-    // 2) If that rejects the token as invalid, fall back to the new REST PAT flow.
-    let result = await verifyTokenWithDeriv(derivToken, env);
-    if (
-      !result.ok &&
-      /invalid|InvalidToken|Token invalid|unauthor/i.test(result.error || "")
-    ) {
-      console.log("Legacy WS rejected token, trying new PAT REST flow…");
-      const patResult = await verifyPatWithDeriv(derivToken, env);
-      if (patResult.ok) result = patResult;
-      else if (patResult.error) {
-        // Surface the most descriptive error
-        result = { ok: false, error: `${result.error} | PAT: ${patResult.error}` };
-      }
-    }
+    // Only the new Personal Access Token (PAT) REST flow is supported.
+    // Legacy WS `authorize` tokens have been removed.
+    const result = await verifyPatWithDeriv(derivToken, env);
 
     const tokenMasked = maskToken(derivToken);
     const tokenHash = await hashToken(derivToken);
