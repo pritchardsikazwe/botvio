@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { DerivWebSocketService } from "@/services/derivWebSocket";
 import type { DerivBalance, DerivTick, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
 import { getDerivConfig } from "@/config/derivEnv";
+import { supabase } from "@/integrations/supabase/client";
 
 export type DerivProposal = {
   id: string;
@@ -65,8 +66,15 @@ export const useDerivAPI = () => {
     async (apiToken: string): Promise<DerivBalance> => {
       updateState({ loading: true, error: null });
       try {
-        await service.open();
-        updateState({ connected: true });
+        const getOtpUrl = async () => {
+          const { data, error } = await supabase.functions.invoke("deriv-get-otp", {
+            body: { deriv_token: apiToken },
+          });
+          if (error || !data?.ok || !data?.ws_url) {
+            throw new Error(data?.error || error?.message || "Failed to create Deriv PAT session");
+          }
+          return data.ws_url as string;
+        };
 
         const offStatus = service.onStatus((st) => {
           updateState({ connected: st === "open" });
@@ -93,8 +101,14 @@ export const useDerivAPI = () => {
           updateState({ balance: bal });
         });
 
-        const balance = await service.authorize(apiToken);
-        const acctInfo = service.account;
+        const wsUrl = await getOtpUrl();
+        const balance = await service.connectWithOtpUrl(wsUrl, getOtpUrl);
+        const acctInfo: DerivAccountInfo = {
+          loginid: balance.loginid,
+          is_virtual: balance.loginid.startsWith("VRTC"),
+          currency: balance.currency,
+          fullname: balance.fullname,
+        };
         
         console.log(`[AUTH] loginid=${balance.loginid} is_virtual=${acctInfo?.is_virtual} currency=${balance.currency} balance=${balance.balance}`);
         
