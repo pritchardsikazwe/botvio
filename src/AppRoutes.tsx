@@ -27,6 +27,7 @@ import ReferralRedirect from "./pages/ReferralRedirect";
 import Signals from "./pages/Signals";
 import SignalsHistory from "./pages/SignalsHistory";
 import Settings from "./pages/Settings";
+import DerivOtpTester from "./pages/DerivOtpTester";
 import Marketplace from "./pages/Marketplace";
 import MyProducts from "./pages/MyProducts";
 import BinanceSettings from "./pages/BinanceSettings";
