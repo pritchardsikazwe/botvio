@@ -69,7 +69,7 @@ export const useDerivAPI = () => {
       updateState({ loading: true, error: null });
       try {
         const getOtpUrl = async () => {
-          const { data, error } = await supabase.functions.invoke("deriv-get-otp", {
+          const { data, error } = await supabase.functions.invoke<DerivOtpResponse>("deriv-get-otp", {
             body: { deriv_token: apiToken },
           });
           if (error || !data?.ok || !data?.ws_url) {
@@ -130,7 +130,7 @@ export const useDerivAPI = () => {
 
         updateState({ loading: false });
 
-        (disconnect as any).__cleanup = () => {
+        cleanupRef.current = () => {
           offStatus();
           offError();
           offTick();
@@ -138,8 +138,9 @@ export const useDerivAPI = () => {
         };
 
         return balance;
-      } catch (e: any) {
-        updateState({ loading: false, connected: false, authorized: false, error: e?.message || "Connection error" });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Connection error";
+        updateState({ loading: false, connected: false, authorized: false, error: message });
         throw e;
       }
     },
@@ -147,9 +148,8 @@ export const useDerivAPI = () => {
   );
 
   const disconnect = useCallback(() => {
-    const cleanup = (disconnect as any).__cleanup as undefined | (() => void);
-    cleanup?.();
-    (disconnect as any).__cleanup = undefined;
+    cleanupRef.current?.();
+    cleanupRef.current = null;
 
     service.close();
     setTickSubscriptions({});
