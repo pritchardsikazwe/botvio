@@ -13,6 +13,7 @@ import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
 
 const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Rocket; tone: string }> = {
   boom: { label: "Boom", icon: Rocket, tone: "text-emerald-400 border-emerald-500/40" },
@@ -227,6 +228,20 @@ export default function SyntheticHub() {
 
         {/* MT5 auto-execute setup */}
         <Mt5AutoExecuteCard />
+
+        {/* Botvio Scalp Robot — auto signals with Entry / SL / TP */}
+        <MultiAssetScalpRobot
+          title="Botvio Scalp Robot · Synthetics"
+          assets={[
+            { displaySymbol: "BOOM500", label: "Boom 500", emoji: "🚀", cryptoAlwaysOpen: true },
+            { displaySymbol: "BOOM1000", label: "Boom 1000", emoji: "🚀", cryptoAlwaysOpen: true },
+            { displaySymbol: "CRASH500", label: "Crash 500", emoji: "💥", cryptoAlwaysOpen: true },
+            { displaySymbol: "CRASH1000", label: "Crash 1000", emoji: "💥", cryptoAlwaysOpen: true },
+            { displaySymbol: "R_75", label: "Vol 75", emoji: "📈", cryptoAlwaysOpen: true },
+            { displaySymbol: "R_100", label: "Vol 100", emoji: "📊", cryptoAlwaysOpen: true },
+            { displaySymbol: "stpRNG", label: "Step Index", emoji: "🪜", cryptoAlwaysOpen: true },
+          ]}
+        />
 
         {/* How it works */}
         <Card className="border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
