@@ -233,12 +233,13 @@ export default function SyntheticHub() {
         <MultiAssetScalpRobot
           title="Botvio Scalp Robot · Synthetics"
           assets={[
+            { displaySymbol: "R_75", label: "Vol 75", emoji: "📈", cryptoAlwaysOpen: true },
+            { displaySymbol: "R_100", label: "Vol 100", emoji: "📊", cryptoAlwaysOpen: true },
+            { displaySymbol: "R_50", label: "Vol 50", emoji: "📉", cryptoAlwaysOpen: true },
             { displaySymbol: "BOOM500", label: "Boom 500", emoji: "🚀", cryptoAlwaysOpen: true },
             { displaySymbol: "BOOM1000", label: "Boom 1000", emoji: "🚀", cryptoAlwaysOpen: true },
             { displaySymbol: "CRASH500", label: "Crash 500", emoji: "💥", cryptoAlwaysOpen: true },
             { displaySymbol: "CRASH1000", label: "Crash 1000", emoji: "💥", cryptoAlwaysOpen: true },
-            { displaySymbol: "R_75", label: "Vol 75", emoji: "📈", cryptoAlwaysOpen: true },
-            { displaySymbol: "R_100", label: "Vol 100", emoji: "📊", cryptoAlwaysOpen: true },
             { displaySymbol: "stpRNG", label: "Step Index", emoji: "🪜", cryptoAlwaysOpen: true },
           ]}
         />

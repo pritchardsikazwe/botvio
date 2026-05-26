@@ -33,10 +33,10 @@ export function SyntxSignalsSection() {
       <MultiAssetScalpRobot
         title="Botvio Scalp Robot · SyntX Proxies"
         assets={[
+          { displaySymbol: "R_75", label: "FlipX proxy (Vol 75)", emoji: "🔁", cryptoAlwaysOpen: true },
+          { displaySymbol: "R_100", label: "SwitchX proxy (Vol 100)", emoji: "📊", cryptoAlwaysOpen: true },
           { displaySymbol: "BOOM1000", label: "GainX proxy (Boom 1000)", emoji: "🚀", cryptoAlwaysOpen: true },
           { displaySymbol: "CRASH1000", label: "PainX proxy (Crash 1000)", emoji: "💥", cryptoAlwaysOpen: true },
-          { displaySymbol: "R_75", label: "FX/FlipX proxy (Vol 75)", emoji: "📈", cryptoAlwaysOpen: true },
-          { displaySymbol: "R_100", label: "SwitchX proxy (Vol 100)", emoji: "📊", cryptoAlwaysOpen: true },
         ]}
       />
 
