@@ -6,8 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const DERIV_APP_ID = "123162";
-const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
+const DERIV_CLIENT_ID = "33nuILr2Iyxx5ZWuDZylH";
 
 interface TradeRequest {
   provider_id: string;
@@ -29,10 +28,48 @@ interface CopyResult {
   error?: string;
 }
 
-// Simple Deriv WebSocket client for edge function
-async function createDerivConnection(): Promise<WebSocket> {
+// Fetch the user's first active Deriv account loginid using their PAT.
+async function getDerivLoginId(token: string): Promise<string> {
+  const res = await fetch("https://api.derivws.com/trading/v1/options/accounts", {
+    headers: {
+      "Deriv-App-ID": DERIV_CLIENT_ID,
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error(`Account lookup failed: HTTP ${res.status}`);
+  const json = await res.json();
+  const accounts = json?.data ?? json?.accounts ?? [];
+  const first = Array.isArray(accounts) ? accounts[0] : null;
+  const loginid = first?.loginid || first?.account_id;
+  if (!loginid) throw new Error("No active Deriv account found");
+  return loginid;
+}
+
+// Get an OTP-authenticated WebSocket URL for the given account.
+async function getOtpWebSocketUrl(token: string, accountId: string): Promise<string> {
+  const res = await fetch(
+    `https://api.derivws.com/trading/v1/options/accounts/${accountId}/otp`,
+    {
+      method: "POST",
+      headers: {
+        "Deriv-App-ID": DERIV_CLIENT_ID,
+        "Authorization": `Bearer ${token}`,
+      },
+    },
+  );
+  if (!res.ok) throw new Error(`OTP request failed: HTTP ${res.status}`);
+  const data = await res.json();
+  const wsUrl = data?.data?.url || data?.url;
+  if (!wsUrl) throw new Error("No WebSocket URL in OTP response");
+  return wsUrl;
+}
+
+// Connect to Deriv via OTP (pre-authenticated WebSocket).
+async function createDerivConnection(token: string): Promise<WebSocket> {
+  const loginid = await getDerivLoginId(token);
+  const wsUrl = await getOtpWebSocketUrl(token, loginid);
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(DERIV_WS_URL);
+    const ws = new WebSocket(wsUrl);
     const timeout = setTimeout(() => {
       ws.close();
       reject(new Error("Connection timeout"));
@@ -84,15 +121,10 @@ async function placeDerivTrade(
   contractType?: string,
   barrier?: number
 ): Promise<{ contract_id: string; buy_price: number }> {
-  const ws = await createDerivConnection();
+  const ws = await createDerivConnection(token);
 
   try {
-    // Authorize
-    const authRes = await sendDerivRequest(ws, { authorize: token });
-    if (!authRes.authorize) {
-      throw new Error("Authorization failed");
-    }
-
+    // OTP socket is already authenticated — no authorize call needed.
     // Determine contract type - default to CALL/PUT based on direction
     const derivContractType = contractType || (direction === "BUY" ? "CALL" : "PUT");
     
@@ -133,11 +165,10 @@ async function placeDerivTrade(
 }
 
 async function getDerivBalance(token: string): Promise<number> {
-  const ws = await createDerivConnection();
+  const ws = await createDerivConnection(token);
   try {
-    const authRes = await sendDerivRequest(ws, { authorize: token });
-    if (!authRes.authorize) throw new Error("Auth failed");
-    return authRes.authorize.balance || 0;
+    const balRes = await sendDerivRequest(ws, { balance: 1, account: "current" });
+    return balRes?.balance?.balance ?? 0;
   } finally {
     ws.close();
   }
