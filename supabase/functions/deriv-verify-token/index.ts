@@ -17,7 +17,7 @@ const DERIV_REST_BASE = "https://api.derivws.com";
  * Verify a Deriv Personal Access Token (PAT) via the new REST API.
  * Legacy WebSocket `authorize` token verification is intentionally not used.
  */
-async function verifyPatWithDeriv(token: string, env: string): Promise<{
+async function verifyPatWithDeriv(token: string): Promise<{
   ok: boolean;
   loginid?: string;
   balance?: number;
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
     }
 
     // Verify with Deriv's new PAT REST flow only.
-    const result = await verifyPatWithDeriv(derivToken, env);
+    const result = await verifyPatWithDeriv(derivToken);
 
     const tokenMasked = maskToken(derivToken);
     const tokenHash = await hashToken(derivToken);
