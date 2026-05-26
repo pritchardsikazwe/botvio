@@ -14,8 +14,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const DERIV_APP_ID = Deno.env.get("DERIV_APP_ID") || "1089";
-const DERIV_WS = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
+const DERIV_WS = `wss://api.derivws.com/trading/v1/options/ws/public`;
 
 // Map our display symbol → Deriv WS symbol.
 function toDerivSymbol(sym: string): string | null {

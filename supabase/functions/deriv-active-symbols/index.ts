@@ -5,7 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const DERIV_APP_ID = Deno.env.get("DERIV_APP_ID") || "99139";
 
 // Cache for active symbols (refresh every 5 minutes)
 let cachedSymbols: any = null;
@@ -30,7 +29,7 @@ serve(async (req) => {
     }
 
     // Connect to Deriv WS
-    const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
+    const ws = new WebSocket(`wss://api.derivws.com/trading/v1/options/ws/public`);
     
     const result = await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {

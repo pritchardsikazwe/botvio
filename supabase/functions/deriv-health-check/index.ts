@@ -10,80 +10,40 @@ interface HealthCheckRequest {
   env?: "prod" | "dev";
 }
 
-async function checkConnection(token: string, connectionType: string, env: string): Promise<{
+const DERIV_CLIENT_ID = "33nuILr2Iyxx5ZWuDZylH";
+
+async function checkConnection(token: string, _connectionType: string, _env: string): Promise<{
   ok: boolean;
   balance?: number;
   currency?: string;
   loginid?: string;
   error?: string;
 }> {
-  const appId = env === "prod" ? 99139 : 124208;
-  const wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
-
-  return new Promise((resolve) => {
-    let resolved = false;
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resolve({ ok: false, error: "Connection timeout" });
-      }
-    }, 15000);
-
-    try {
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ authorize: token, req_id: 1 }));
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.error) {
-            clearTimeout(timeout);
-            resolved = true;
-            ws.close();
-            resolve({ ok: false, error: data.error.message });
-            return;
-          }
-
-          if (data.authorize) {
-            clearTimeout(timeout);
-            resolved = true;
-            ws.close();
-            resolve({
-              ok: true,
-              loginid: data.authorize.loginid,
-              balance: data.authorize.balance,
-              currency: data.authorize.currency,
-            });
-          }
-        } catch (e) {
-          console.error("Parse error:", e);
-        }
-      };
-
-      ws.onerror = () => {
-        if (!resolved) {
-          clearTimeout(timeout);
-          resolved = true;
-          resolve({ ok: false, error: "WebSocket error" });
-        }
-      };
-
-      ws.onclose = () => {
-        if (!resolved) {
-          clearTimeout(timeout);
-          resolved = true;
-          resolve({ ok: false, error: "Connection closed" });
-        }
-      };
-    } catch (e: any) {
-      clearTimeout(timeout);
-      resolve({ ok: false, error: e.message });
+  try {
+    const res = await fetch("https://api.derivws.com/trading/v1/options/accounts", {
+      method: "GET",
+      headers: {
+        "Deriv-App-ID": DERIV_CLIENT_ID,
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      return { ok: false, error: `HTTP ${res.status}: ${txt.slice(0, 200)}` };
     }
-  });
+    const json = await res.json();
+    const accounts = json?.data ?? json?.accounts ?? [];
+    const first = Array.isArray(accounts) ? accounts[0] : null;
+    if (!first) return { ok: false, error: "No accounts returned" };
+    return {
+      ok: true,
+      loginid: first.loginid || first.account_id,
+      balance: typeof first.balance === "number" ? first.balance : Number(first.balance) || undefined,
+      currency: first.currency,
+    };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || "Verification failed" };
+  }
 }
 
 Deno.serve(async (req) => {

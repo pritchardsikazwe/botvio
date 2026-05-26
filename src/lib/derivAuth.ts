@@ -82,7 +82,7 @@ export function clearPKCEStorage(): void {
 
 // ─── Backwards-compatible exports ───────────────────────────────────────────
 const cfg = getDerivConfig();
-const DERIV_APP_ID = cfg.legacyAppId;
+const DERIV_CLIENT_ID = cfg.clientId;
 const DERIV_REDIRECT_URI = cfg.redirectUrl;
 
-export { DERIV_APP_ID, DERIV_REDIRECT_URI };
+export { DERIV_CLIENT_ID, DERIV_REDIRECT_URI };

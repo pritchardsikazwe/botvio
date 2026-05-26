@@ -1,5 +1,5 @@
 import type { DerivMessage, DerivTick, DerivBalance, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
-import { getDerivWebSocketUrl, getDerivPublicWebSocketUrl } from "@/config/derivEnv";
+import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 
 type ConnectionStatus = "idle" | "connecting" | "open" | "closed";
 
@@ -22,10 +22,9 @@ type DerivWebSocketOptions = {
 };
 
 /**
- * Deriv WebSocket service (browser)
- * Supports both:
- * - Legacy: wss://ws.derivws.com/websockets/v3?app_id=X + { authorize: token }
- * - New API: OTP-based URL from deriv-get-otp edge function (pre-authenticated)
+ * Deriv WebSocket service (browser).
+ * Public market data via wss://api.derivws.com/trading/v1/options/ws/public,
+ * authenticated sessions via OTP-derived URL from the deriv-get-otp edge function.
  */
 export class DerivWebSocketService {
   private ws: WebSocket | null = null;
@@ -75,7 +74,7 @@ export class DerivWebSocketService {
   private readonly pingIntervalMs: number;
 
   constructor(opts: DerivWebSocketOptions = {}) {
-    this.defaultUrl = opts.url ?? getDerivWebSocketUrl();
+    this.defaultUrl = opts.url ?? getDerivPublicWebSocketUrl();
     this.currentUrl = this.defaultUrl;
     this.autoReconnect = opts.autoReconnect ?? true;
     this.reconnectBaseDelayMs = opts.reconnectBaseDelayMs ?? 1000;

@@ -25,8 +25,6 @@ export interface DerivConfig {
   env: DerivEnv;
   /** New OAuth2 client_id (string format, e.g. "app12345" or alphanumeric) */
   clientId: string;
-  /** Legacy numeric app_id — kept for backward compat during migration */
-  legacyAppId: number;
   redirectUrl: string;
   baseDomain: string;
   /** New OAuth2 authorization URL */
@@ -35,8 +33,6 @@ export interface DerivConfig {
   tokenUrl: string;
   /** New REST API base URL */
   restApiUrl: string;
-  /** Legacy OAuth URL (deprecated) */
-  oauthUrl: string;
 }
 
 export function getDerivConfig(): DerivConfig {
@@ -45,25 +41,21 @@ export function getDerivConfig(): DerivConfig {
   const prod: DerivConfig = {
     env: "prod",
     clientId: "33nuILr2Iyxx5ZWuDZylH",
-    legacyAppId: 99139,
     redirectUrl: "https://botvio.live/auth/deriv/callback",
     baseDomain: "https://botvio.live",
     authUrl: "https://auth.deriv.com/oauth2/auth",
     tokenUrl: "https://auth.deriv.com/oauth2/token",
     restApiUrl: "https://api.derivws.com",
-    oauthUrl: "https://oauth.deriv.com/oauth2/authorize",
   };
 
   const dev: DerivConfig = {
     env: "dev",
     clientId: "33nuILr2Iyxx5ZWuDZylH",
-    legacyAppId: 124208,
     redirectUrl: `${typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app"}/auth/deriv/callback`,
     baseDomain: typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app",
     authUrl: "https://auth.deriv.com/oauth2/auth",
     tokenUrl: "https://auth.deriv.com/oauth2/token",
     restApiUrl: "https://api.derivws.com",
-    oauthUrl: "https://oauth.deriv.com/oauth2/authorize",
   };
 
   return env === "prod" ? prod : dev;
@@ -101,19 +93,6 @@ export function buildDerivSignupUrl(codeChallenge: string, state: string): strin
  */
 export function getDerivPublicWebSocketUrl(): string {
   return "wss://api.derivws.com/trading/v1/options/ws/public";
-}
-
-/**
- * @deprecated Use OTP-based WebSocket connection instead.
- * Kept for backward compat during migration.
- */
-export function getDerivWebSocketUrl(): string {
-  const { legacyAppId } = getDerivConfig();
-  if (!Number.isFinite(legacyAppId) || legacyAppId <= 0) {
-    console.error(`Invalid Deriv legacy app_id: ${legacyAppId}`);
-    throw new Error(`Invalid Deriv app_id: ${legacyAppId}`);
-  }
-  return `wss://ws.derivws.com/websockets/v3?app_id=${legacyAppId}`;
 }
 
 /**

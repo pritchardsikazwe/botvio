@@ -50,28 +50,13 @@ async function getOtpWebSocketUrl(derivToken: string, accountId: string): Promis
 
 /**
  * Connect to Deriv WebSocket using OTP URL (new API).
- * Falls back to legacy authorize if OTP fails.
+ * Requires an accountId — legacy authorize flow is no longer supported.
  */
 async function connectDerivWS(derivToken: string, accountId?: string): Promise<WebSocket> {
-  let wsUrl: string;
-  let useOtp = false;
-
-  // Try new OTP-based connection first
-  if (accountId) {
-    try {
-      wsUrl = await getOtpWebSocketUrl(derivToken, accountId);
-      useOtp = true;
-    } catch (e) {
-      console.warn("OTP connection failed, falling back to legacy:", e);
-      // Fallback to legacy
-      const legacyAppId = Deno.env.get("DERIV_APP_ID") || "99139";
-      wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${legacyAppId}`;
-    }
-  } else {
-    // No account ID — use legacy flow
-    const legacyAppId = Deno.env.get("DERIV_APP_ID") || "99139";
-    wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${legacyAppId}`;
+  if (!accountId) {
+    throw new Error("Missing Deriv account/login id — reconnect your Deriv account.");
   }
+  const wsUrl = await getOtpWebSocketUrl(derivToken, accountId);
 
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(wsUrl);
@@ -79,30 +64,12 @@ async function connectDerivWS(derivToken: string, accountId?: string): Promise<W
       ws.close();
       reject(new Error("WebSocket connection timeout"));
     }, 15000);
-    
+
     ws.onopen = () => {
-      if (useOtp) {
-        // OTP-based: already authenticated, no authorize needed
-        clearTimeout(timeout);
-        resolve(ws);
-      } else {
-        // Legacy: send authorize message
-        ws.send(JSON.stringify({ authorize: derivToken }));
-      }
+      clearTimeout(timeout);
+      resolve(ws);
     };
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.authorize) {
-        clearTimeout(timeout);
-        resolve(ws);
-      } else if (data.error) {
-        clearTimeout(timeout);
-        ws.close();
-        reject(new Error(data.error.message));
-      }
-    };
-    
+
     ws.onerror = (err) => {
       clearTimeout(timeout);
       reject(err);
