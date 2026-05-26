@@ -105,6 +105,67 @@ async function verifyTokenWithDeriv(token: string, env: string): Promise<{
   });
 }
 
+/**
+ * Verify a NEW-style Personal Access Token (PAT) against the updated Deriv API.
+ * Legacy WS `authorize` rejects PATs with "Token invalid". The new REST API
+ * accepts them as Bearer tokens at https://api.derivws.com/trading/v1/*.
+ */
+async function verifyPatWithDeriv(token: string, env: string): Promise<{
+  ok: boolean;
+  loginid?: string;
+  balance?: number;
+  currency?: string;
+  is_virtual?: boolean;
+  scope?: string[];
+  error?: string;
+}> {
+  const appId = env === "prod" ? 99139 : 124208;
+  const base = "https://api.derivws.com";
+  try {
+    const res = await fetch(`${base}/trading/v1/accounts`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Deriv-App-ID": String(appId),
+        Accept: "application/json",
+      },
+    });
+    const json: any = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg =
+        json?.error?.message ||
+        json?.message ||
+        `PAT verification failed (HTTP ${res.status})`;
+      return { ok: false, error: msg };
+    }
+    // Response shape: { data: [{ account_id, currency, is_virtual, balance, ... }] } or array
+    const accounts: any[] = Array.isArray(json?.data)
+      ? json.data
+      : Array.isArray(json)
+      ? json
+      : json?.accounts ?? [];
+    if (!accounts.length) {
+      return { ok: false, error: "No accounts returned for this PAT" };
+    }
+    // Prefer real account, otherwise first
+    const acc =
+      accounts.find((a) => a.is_virtual === false || a.is_virtual === 0) ||
+      accounts[0];
+    const loginid = acc.account_id || acc.loginid || acc.login_id;
+    const isVirtual = acc.is_virtual === true || acc.is_virtual === 1;
+    return {
+      ok: true,
+      loginid,
+      balance: typeof acc.balance === "number" ? acc.balance : undefined,
+      currency: acc.currency,
+      is_virtual: isVirtual,
+      scope: acc.scopes || acc.scope || ["pat"],
+    };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || "PAT verification error" };
+  }
+}
+
 function maskToken(token: string): string {
   if (token.length <= 8) return "***";
   return token.slice(0, 4) + "..." + token.slice(-4);
@@ -160,7 +221,21 @@ Deno.serve(async (req) => {
     }
 
     // Verify with Deriv API
-    const result = await verifyTokenWithDeriv(derivToken, env);
+    // 1) Try legacy WS `authorize` (covers existing API tokens).
+    // 2) If that rejects the token as invalid, fall back to the new REST PAT flow.
+    let result = await verifyTokenWithDeriv(derivToken, env);
+    if (
+      !result.ok &&
+      /invalid|InvalidToken|Token invalid|unauthor/i.test(result.error || "")
+    ) {
+      console.log("Legacy WS rejected token, trying new PAT REST flow…");
+      const patResult = await verifyPatWithDeriv(derivToken, env);
+      if (patResult.ok) result = patResult;
+      else if (patResult.error) {
+        // Surface the most descriptive error
+        result = { ok: false, error: `${result.error} | PAT: ${patResult.error}` };
+      }
+    }
 
     const tokenMasked = maskToken(derivToken);
     const tokenHash = await hashToken(derivToken);
