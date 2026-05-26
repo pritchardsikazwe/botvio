@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       {
         method: 'POST',
         headers: {
-          'X-API-Key': PAT,
+          'Authorization': `Bearer ${PAT}`,
           'Content-Type': 'application/json',
         },
       },
