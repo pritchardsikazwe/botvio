@@ -125,6 +125,8 @@ const Accounts = () => {
     }
 
     try {
+      let verifiedDerivAccount: any = null;
+
       // Ensure Deriv token is persisted to backend connection table first.
       if (formData.broker === "deriv") {
         const env = resolveDerivEnv();
@@ -135,6 +137,8 @@ const Accounts = () => {
         if (verifyError || !verifyData?.ok) {
           throw new Error(verifyData?.error || verifyError?.message || "Token verification failed");
         }
+
+        verifiedDerivAccount = verifyData;
       }
 
       await addAccount.mutateAsync({
@@ -142,7 +146,7 @@ const Accounts = () => {
         label: formData.label,
         api_key: formData.api_key,
         api_secret: formData.broker === "binance" ? formData.api_secret : undefined,
-        login_id: formData.login_id || undefined,
+        login_id: verifiedDerivAccount?.loginid || formData.login_id || undefined,
       });
 
       toast.success("Account connected successfully!");

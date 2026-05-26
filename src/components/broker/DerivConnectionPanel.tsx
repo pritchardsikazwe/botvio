@@ -348,7 +348,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="token" className="flex items-center gap-2">
                   <Key className="h-4 w-4" />
-                  API Token
+                  PAT
                 </TabsTrigger>
                 <TabsTrigger value="oauth" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -358,17 +358,17 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
 
               <TabsContent value="token" className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="api_token">API Token</Label>
+                  <Label htmlFor="api_token">Personal Access Token (PAT)</Label>
                   <Input
                     id="api_token"
                     type="password"
-                    placeholder="Enter your Deriv API token"
+                    placeholder="Paste your new Deriv PAT"
                     value={apiToken}
                     onChange={(e) => setApiToken(e.target.value)}
                     disabled={isConnecting || isVerifying}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Your token is verified securely via our backend
+                    Your PAT is checked against Deriv&apos;s new REST API before it is saved.
                   </p>
                 </div>
 
