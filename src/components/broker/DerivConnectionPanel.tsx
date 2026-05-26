@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getDerivConfig, resolveDerivEnv } from "@/config/derivEnv";
 import { startDerivOAuthLogin } from "@/lib/derivAuth";
 import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
+import { useDerivTokens } from "@/hooks/useDerivTokens";
 
 interface DerivConnectionPanelProps {
   onConnected?: (balance: any) => void;
@@ -26,6 +27,7 @@ interface DerivConnectionPanelProps {
 export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true }: DerivConnectionPanelProps) => {
   const { user } = useAuth();
   const { connected, authorized, balance, error, loading, connect, disconnect } = useDeriv();
+  const { upsertToken: upsertDerivToken } = useDerivTokens();
 
   const [connectionMethod, setConnectionMethod] = useState<"token" | "oauth">("token");
   const [apiToken, setApiToken] = useState("");
@@ -113,6 +115,22 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
           toast.error("Verified but failed to save account");
         } else {
           toast.success("Account saved for future use");
+        }
+
+        // Register in user_deriv_tokens so the account appears in the
+        // multi-account switcher and can be set as the active trading account
+        // for the bot. Marking it active here also deactivates any other token.
+        try {
+          await upsertDerivToken({
+            loginid: data.loginid,
+            is_virtual: !!data.is_virtual,
+            currency: data.currency || "USD",
+            token_encrypted: apiToken,
+            label,
+          });
+          toast.success(`${data.loginid} is now your active trading account`);
+        } catch (e: any) {
+          console.error("Failed to register active token:", e);
         }
         setIsSaving(false);
       }
