@@ -35,7 +35,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     if (authorized || loading || autoConnectAttempted.current) return;
     autoConnectAttempted.current = true;
 
-    const storedToken = localStorage.getItem("deriv_oauth_token");
+    const storedToken = localStorage.getItem("deriv_pat_token");
     if (storedToken && storedToken.length >= 10) {
       addLog("🔄 Auto-reconnecting with saved session...");
       connect(storedToken)
@@ -44,7 +44,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
         })
         .catch(() => {
           addLog("⚠️ Saved session expired. Please reconnect.");
-          localStorage.removeItem("deriv_oauth_token");
+          localStorage.removeItem("deriv_pat_token");
         });
     }
   }, [authorized, loading, connect]);
@@ -66,13 +66,13 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
 
   const handleTokenConnect = async () => {
     const trimmedToken = token.trim();
-    if (!trimmedToken) { toast.error("Please enter your Deriv API token"); return; }
+    if (!trimmedToken) { toast.error("Please enter your Deriv PAT"); return; }
     if (!isValidToken(trimmedToken)) { toast.error("Invalid token format."); return; }
 
     addLog("🔄 Connecting to Deriv API...");
     try {
       const bal = await connect(trimmedToken);
-      localStorage.setItem("deriv_oauth_token", trimmedToken);
+      localStorage.setItem("deriv_pat_token", trimmedToken);
       addLog(`✅ Authorized: ${bal.loginid}`);
       addLog(`💰 Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
       toast.success(`Connected! Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
@@ -85,7 +85,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const handleDisconnect = () => {
     disconnect();
     setToken("");
-    localStorage.removeItem("deriv_oauth_token");
+    localStorage.removeItem("deriv_pat_token");
     autoConnectAttempted.current = false;
     addLog("🔌 Disconnected");
     toast.info("Disconnected from Deriv");
@@ -103,7 +103,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     addLog("🔄 Connecting with demo token...");
     try {
       const bal = await connect(DEMO_TOKEN);
-      localStorage.setItem("deriv_oauth_token", DEMO_TOKEN);
+      localStorage.setItem("deriv_pat_token", DEMO_TOKEN);
       addLog(`✅ Demo connected: ${bal.loginid}`);
       toast.success(`Demo connected! Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
     } catch (e: any) {
