@@ -46,11 +46,28 @@ const CountryPage = () => {
     description: info.metaDescription,
     url: `https://botvio.live/${country}`,
     publisher: { "@type": "Organization", name: "Botvio" },
+    inLanguage: "en",
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+        { "@type": "ListItem", position: 2, name: info.name, item: `https://botvio.live/${country}` },
+      ],
+    },
   };
+
+  const title = `Botvio AI Trading Bot in ${info.name} — Forex, Gold & Deriv Signals`;
+  const ogImage = `/blog/botvio-in-${country}-country-page.png`;
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title={`AI Trading Bot in ${info.name}`} description={info.metaDescription} jsonLd={jsonLd} />
+      <SEOHead
+        title={title}
+        description={info.metaDescription}
+        ogImage={ogImage}
+        ogType="website"
+        jsonLd={jsonLd}
+      />
       <Header />
       <main className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

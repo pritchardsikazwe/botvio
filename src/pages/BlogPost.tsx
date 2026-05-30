@@ -173,11 +173,20 @@ const BlogPost = () => {
     author: { "@type": "Organization", name: "Botvio" },
     publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live", logo: { "@type": "ImageObject", url: "https://botvio.live/icon-512.png" } },
     mainEntityOfPage: `https://botvio.live/blog/${slug}`,
+    image: post.coverImage || `https://botvio.live/blog/${slug}.png`,
   };
+
+  const ogImage = post.coverImage || `/blog/${slug}.png`;
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <SEOHead title={post.metaTitle || post.title} description={post.metaDescription || post.excerpt} jsonLd={jsonLd} />
+      <SEOHead
+        title={post.metaTitle || post.title}
+        description={post.metaDescription || post.excerpt}
+        ogImage={ogImage}
+        ogType="article"
+        jsonLd={jsonLd}
+      />
       <Header />
 
       {/* Contextual Affiliate top bar */}
