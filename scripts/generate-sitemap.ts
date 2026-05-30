@@ -1,7 +1,7 @@
 import fs from "fs";
-import { blogContent } from "src/content/blogPosts";
-import { binanceBlogPosts } from "src/content/binanceBlogPosts";
-import { countryData } from "src/content/countryData";
+import { blogContent } from "../src/content/blogPosts";
+import { binanceBlogPosts } from "../src/content/binanceBlogPosts";
+import { countryData } from "../src/content/countryData";
 
 const BASE = "https://botvio.live";
 const xml = fs.readFileSync("public/sitemap.xml", "utf8");
