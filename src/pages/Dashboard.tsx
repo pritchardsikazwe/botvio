@@ -218,7 +218,11 @@ const Dashboard = () => {
                           </p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={instance.status === "active" ? `Pause bot ${instance.name}` : `Start bot ${instance.name}`}
+                      >
                         {instance.status === "active" ? (
                           <Pause className="h-4 w-4" />
                         ) : (

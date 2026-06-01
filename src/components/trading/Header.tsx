@@ -49,7 +49,7 @@ export const Header = () => {
                 <Bot className="w-6 h-6 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-bold text-lg gold-text">BOTVIO</h1>
+                <span className="font-bold text-lg gold-text block">BOTVIO</span>
                 <p className="text-[10px] text-muted-foreground">powered by Deriv</p>
               </div>
             </div>
@@ -228,7 +228,7 @@ export const Header = () => {
             <nav className="lg:hidden flex items-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" aria-label="Open navigation menu">
                       <Menu className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -336,7 +336,7 @@ export const Header = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button variant="ghost" size="icon" className="rounded-full" aria-label="Open account menu">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/20 text-primary">
                         {getInitials()}

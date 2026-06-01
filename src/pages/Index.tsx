@@ -98,6 +98,7 @@ const Index = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-8">
+        <h1 className="sr-only">Botvio — Forex Signals and AI Analysis Dashboard</h1>
         {/* 0 — Shortcuts */}
         <section>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
