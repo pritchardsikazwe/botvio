@@ -1,0 +1,35 @@
+# Botvio
+
+> Botvio delivers AI-powered forex signals, gold (XAU/USD) trading analysis, automated trading bots, and mentorship for traders using Deriv, Exness, Weltrade, Pocket Option, and Binance.
+
+Botvio combines live market signals, chart analysis, copy trading, and educational content to help retail traders across Africa and worldwide trade forex, crypto, synthetic indices, and binary options responsibly.
+
+## Pages
+
+- [Home](/): AI forex signals, gold trading, and automation overview.
+- [Signals](/signals): Live forex, gold, crypto, and synthetic trading signals.
+- [AI Chart Analysis](/authority-signals): Upload a chart and get AI-powered analysis.
+- [Marketplace](/marketplace): Trading bots, signal packs, and educational products.
+- [Bots](/bots): Catalog of automated trading bots for Deriv and Binance.
+- [Gold Hub](/gold): XAU/USD analysis, signals, and scalping tools.
+- [Bitcoin Hub](/bitcoin): BTC market analysis and trading signals.
+- [Synthetic Hub](/synthetic-hub): Boom, Crash, and Volatility index analysis.
+- [Binary Options](/binary-options): Binary options signals and strategy guides.
+- [Strategies](/strategies): Public trading strategies marketplace.
+- [Learn](/learn): Free and premium trading education.
+- [Blog](/blog): Articles on forex, crypto, AI trading, and African markets.
+- [Affiliate](/affiliate): Earn commissions promoting Botvio.
+- [Brokers — Pocket Option](/brokers/pocket-option): Pocket Option signals and guide.
+- [Brokers — Deriv](/brokers/deriv): Deriv signals and integration.
+- [Brokers — Exness](/brokers/exness): Exness signals and integration.
+- [FAQ](/faq): Common questions about Botvio.
+- [About](/about): Company and mission.
+- [Contact](/contact): Get in touch with the Botvio team.
+
+## Optional
+
+- [Testimonials](/testimonials): Trader testimonials.
+- [Press](/press): Press mentions.
+- [Privacy](/privacy): Privacy policy.
+- [Terms](/terms): Terms of service.
+- [Disclaimer](/disclaimer): Risk disclaimer.

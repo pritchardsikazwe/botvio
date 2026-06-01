@@ -158,7 +158,7 @@ const Signals = () => {
                 <TrendingUp className="h-4 w-4 mr-2 text-success" />
                 {activeCount} Active
               </Badge>
-              <Button variant="outline" size="icon" onClick={() => refetch()}>
+              <Button variant="outline" size="icon" onClick={() => refetch()} aria-label="Refresh signals">
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>

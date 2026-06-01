@@ -1291,4 +1291,9 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url><loc>https://botvio.live/dashboard</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://botvio.live/accounts</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://botvio.live/connections</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://botvio.live/bridge-request</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://botvio.live/trade-history</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
 </urlset>
