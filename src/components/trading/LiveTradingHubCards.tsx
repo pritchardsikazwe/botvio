@@ -224,7 +224,7 @@ export function LiveTradingHubCards() {
       <p className="text-xs text-muted-foreground -mt-2">
         Tap any market to open its full trading desk — live charts, AI scalping signals, S/R overlays, and strategies.
       </p>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {HUBS.map((h) => (
           <HubCard key={h.label} hub={h} />
         ))}
