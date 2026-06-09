@@ -18,6 +18,33 @@ const BlogAdSlot = (_: { slot: string }) => null;
 
 const blogPosts = [
   {
+    slug: "how-to-trade-us30-dow-jones",
+    title: "How to Trade US30 (Dow Jones 30) — Strategies, Sessions & Signals",
+    excerpt: "Complete US30 trading guide: opening-range breakouts, VWAP pullbacks, key news catalysts and how to use Botvio AI signals on the Dow Jones 30.",
+    category: "Indices",
+    readTime: "11 min",
+    date: "2026-03-04",
+    image: "🇺🇸",
+  },
+  {
+    slug: "how-to-trade-nas100-nasdaq-100",
+    title: "How to Trade NAS100 (Nasdaq 100 / USTEC) — Scalping & Swing Setups",
+    excerpt: "Master NAS100 trading: cash-open breakouts, tech-earnings drift, VWAP scalps and how Botvio AI scalping signals work on the Nasdaq 100.",
+    category: "Indices",
+    readTime: "12 min",
+    date: "2026-03-03",
+    image: "💻",
+  },
+  {
+    slug: "how-to-trade-ger40-dax",
+    title: "How to Trade GER40 (DAX 40 / Germany 40) — Frankfurt-Open Strategy",
+    excerpt: "Trade GER40 like a pro: Frankfurt-open momentum, London/NY overlap, ECB-day risk filters and live Botvio AI signals for the DAX 40.",
+    category: "Indices",
+    readTime: "11 min",
+    date: "2026-03-02",
+    image: "🇩🇪",
+  },
+  {
     slug: "what-is-botvio-ai-trading-bot",
     title: "What is Botvio AI Trading Bot?",
     excerpt: "Botvio is an AI-powered trading bot platform that automates your Deriv trading with advanced Botvio AI strategies.",

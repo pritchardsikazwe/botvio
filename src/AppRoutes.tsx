@@ -84,6 +84,11 @@ import AmazonHub from "./pages/stock-hubs/AmazonHub";
 import MetaHub from "./pages/stock-hubs/MetaHub";
 import AlphabetHub from "./pages/stock-hubs/AlphabetHub";
 
+// Index hubs (US30, NAS100, GER40)
+import Us30Hub from "./pages/index-hubs/Us30Hub";
+import Nas100Hub from "./pages/index-hubs/Nas100Hub";
+import Ger40Hub from "./pages/index-hubs/Ger40Hub";
+
 import WeltradeHub from "./pages/WeltradeHub";
 import WeltradeTrade from "./pages/WeltradeTrade";
 import SyntheticHub from "./pages/SyntheticHub";
@@ -207,6 +212,17 @@ export const AppRoutes = () => (
     <Route path="stocks/amzn" element={<AmazonHub />} />
     <Route path="stocks/meta" element={<MetaHub />} />
     <Route path="stocks/googl" element={<AlphabetHub />} />
+
+    {/* Index hubs */}
+    <Route path="us30" element={<Us30Hub />} />
+    <Route path="dow" element={<Us30Hub />} />
+    <Route path="dj30" element={<Us30Hub />} />
+    <Route path="nas100" element={<Nas100Hub />} />
+    <Route path="nasdaq100" element={<Nas100Hub />} />
+    <Route path="ustec" element={<Nas100Hub />} />
+    <Route path="ger40" element={<Ger40Hub />} />
+    <Route path="dax" element={<Ger40Hub />} />
+    <Route path="de40" element={<Ger40Hub />} />
 
     <Route path="weltrade" element={<WeltradeHub />} />
     <Route path="weltrade-trade" element={<WeltradeTrade />} />

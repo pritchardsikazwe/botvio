@@ -1378,5 +1378,98 @@ export const blogContent: Record<string, BlogPostData> = {
     `
   },
 
+  "how-to-trade-us30-dow-jones": {
+    title: "How to Trade US30 (Dow Jones 30) — Strategies, Sessions & Signals",
+    excerpt: "Complete US30 trading guide: opening-range breakouts, VWAP pullbacks, key news catalysts and how to use Botvio AI signals on the Dow Jones 30.",
+    category: "Indices",
+    readTime: "11 min",
+    date: "2026-03-04",
+    content: `
+<h2>What is US30?</h2>
+<p>US30 is the CFD ticker most brokers use for the <strong>Dow Jones Industrial Average (DJIA)</strong> — 30 of the largest US blue-chip companies. It moves with US economic sentiment, FOMC policy and mega-cap earnings (AAPL, MSFT, JPM, GS, UNH).</p>
+
+<h2>Best Sessions to Trade US30</h2>
+<p>US30's cleanest, most directional moves happen during the <strong>US cash session: 13:30 UTC → 20:00 UTC</strong>. The London/NY overlap (12:00–16:00 UTC) is when liquidity and volatility peak. Avoid Asian-session chop and Friday afternoons.</p>
+
+<h2>Top US30 Strategies</h2>
+<h3>1. Opening Range Breakout</h3>
+<p>Mark the first 15-minute high/low after the US cash open. When a 5m candle closes beyond the range on above-average volume, enter in the breakout direction. Stop on the opposite side of the range, target 1.5–2× range size.</p>
+
+<h3>2. VWAP Pullback</h3>
+<p>Identify the daily trend relative to VWAP. Wait for a pullback into VWAP, then enter on a rejection candle. Target PDH/PDL or 1:2 risk-reward.</p>
+
+<h3>3. News Reversion</h3>
+<p>After red-folder releases (FOMC, NFP, CPI), wait for the first 5-minute impulse to complete, then fade extreme moves back to VWAP.</p>
+
+<h2>Risk Management on US30</h2>
+<p>US30 can move 100–300 points around news. Cap risk at <strong>1–2% per trade</strong>, use ATR-based stops, and avoid pyramiding into trends after big extensions.</p>
+
+<h2>Using Botvio AI on US30</h2>
+<p>The <a href="/us30">US30 Trading Hub</a> ships with live TradingView charts, Botvio AI scalping signals and pre-built strategy playbooks. Pair it with the <a href="/news-calendar">News Calendar</a> to filter out high-impact event windows.</p>
+    `,
+  },
+
+  "how-to-trade-nas100-nasdaq-100": {
+    title: "How to Trade NAS100 (Nasdaq 100 / USTEC) — Scalping & Swing Setups",
+    excerpt: "Master NAS100 trading: cash-open breakouts, tech-earnings drift, VWAP scalps and how Botvio AI scalping signals work on the Nasdaq 100.",
+    category: "Indices",
+    readTime: "12 min",
+    date: "2026-03-03",
+    content: `
+<h2>What is NAS100?</h2>
+<p>NAS100 (also called <strong>USTEC</strong> or NDX) tracks the 100 largest non-financial Nasdaq companies — heavily weighted in mega-cap tech (AAPL, MSFT, NVDA, META, AMZN, GOOGL). It's one of the most volatile and trader-friendly indices on the planet.</p>
+
+<h2>Best Sessions for NAS100</h2>
+<p>Focus on the <strong>US cash session (13:30–20:00 UTC)</strong>. The first 90 minutes deliver the strongest directional moves; the last hour ("power hour") often produces clean reversals or trend continuations.</p>
+
+<h2>Best NAS100 Strategies</h2>
+<h3>1. Cash-Open Breakout</h3>
+<p>Mark the 15-minute opening range. Trade the first decisive 5m close beyond it, confirmed by volume. SL on the opposite side, TP at 1.5–2× range.</p>
+
+<h3>2. VWAP Pullback Scalp</h3>
+<p>In a clean trend, NAS100 respects VWAP as dynamic support/resistance. Wait for pullback + rejection, then ride toward PDH/PDL.</p>
+
+<h3>3. Earnings Drift (Swing)</h3>
+<p>The day after major tech earnings (NVDA, AAPL, MSFT), NAS100 often drifts in the gap direction for 2–5 days. Confirm with 1H higher-highs / lower-lows.</p>
+
+<h2>Risk &amp; Position Sizing</h2>
+<p>NAS100 routinely moves 200–500 points intraday. Use ATR-based stops, cap risk at 1–2% per trade, and don't chase parabolic extensions.</p>
+
+<h2>Botvio AI on NAS100</h2>
+<p>The <a href="/nas100">NAS100 Trading Hub</a> includes live charts, auto-posted scalping signals, S/R overlays and strategy playbooks. Combine it with the <a href="/signals">live signals feed</a> for full coverage of the US tech complex.</p>
+    `,
+  },
+
+  "how-to-trade-ger40-dax": {
+    title: "How to Trade GER40 (DAX 40 / Germany 40) — Frankfurt-Open Strategy",
+    excerpt: "Trade GER40 like a pro: Frankfurt-open momentum, London/NY overlap, ECB-day risk filters and live Botvio AI signals for the DAX 40.",
+    category: "Indices",
+    readTime: "11 min",
+    date: "2026-03-02",
+    content: `
+<h2>What is GER40?</h2>
+<p>GER40 (also called <strong>DE40</strong> or DAX 40) is the flagship German equity index — the 40 largest companies listed on the Frankfurt Stock Exchange. Heavyweights include SAP, Siemens, Allianz, Mercedes-Benz, BMW and Deutsche Telekom.</p>
+
+<h2>Best Sessions for GER40</h2>
+<p>The Frankfurt cash open at <strong>07:00 UTC</strong> typically prints the day's first directional move. The <strong>London/NY overlap (12:00–16:00 UTC)</strong> is the highest-liquidity window and the best window for breakout setups.</p>
+
+<h2>Top GER40 Strategies</h2>
+<h3>1. Frankfurt-Open Breakout</h3>
+<p>Mark the prior day's high/low. Trade the first decisive 5m close beyond the level after Frankfurt opens. SL beyond the level, TP 1.5–2× the breakout size.</p>
+
+<h3>2. London/NY Overlap Trend Ride</h3>
+<p>If 1H structure is trending into 12:00 UTC, take pullbacks to the 20 EMA on the 15m chart. Trail with the 20 EMA, exit on a clean trend break.</p>
+
+<h3>3. ECB / German Data Fade</h3>
+<p>After ECB decisions or German IFO/ZEW prints, wait for the first impulse, then fade extreme moves back to VWAP — only when the catalyst is familiar.</p>
+
+<h2>Risk Management on GER40</h2>
+<p>GER40 commonly moves 100–250 points per session. Always use ATR-based stops, cap risk at 1–2% per trade, and stand aside 5 minutes before red-folder events.</p>
+
+<h2>Trade GER40 with Botvio</h2>
+<p>The <a href="/ger40">GER40 Trading Hub</a> ships with live TradingView charts, Botvio AI scalping signals and pre-built session playbooks. Pair it with the <a href="/news-calendar">News Calendar</a> for ECB and EU CPI windows.</p>
+    `,
+  },
+
 };
 
