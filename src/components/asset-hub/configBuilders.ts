@@ -195,3 +195,103 @@ export function buildStockHubConfig(opts: {
     ],
   };
 }
+
+/**
+ * Build a TradingView-backed index hub config (e.g. US30, NAS100, GER40).
+ * Mirrors stock hub but with index-specific copy/strategies.
+ */
+export function buildIndexHubConfig(opts: {
+  ticker: string;        // "US30"
+  longName: string;      // "Dow Jones 30"
+  tvSymbol: string;      // "OANDA:US30USD"
+  region: string;        // "US Cash + Futures"
+  bestSession: string;   // "US Cash Open (13:30 UTC) → 20:00 UTC"
+  keyLevels: string;     // "Round 100/500 levels, PDH/PDL"
+  catalysts: string;     // "FOMC, NFP, CPI, ISM, mega-cap earnings"
+  patterns: string[];    // ["US30", "DJ30", "Dow Jones"]
+}): AssetTradingHubConfig {
+  const { ticker, longName, tvSymbol, region, bestSession, keyLevels, catalysts, patterns } = opts;
+  return {
+    seoTitle: `${ticker} (${longName}) Trading Hub – Live Index Charts, Signals & Strategies`,
+    seoDescription: `Real-time ${ticker} (${longName}) trading desk with live TradingView charts, Botvio AI scalping signals, S/R overlays, expert tips and session strategies for the ${longName} index.`,
+    assetLabel: ticker,
+    displaySymbol: ticker,
+    sessionSymbol: ticker,
+    persistSymbol: ticker,
+    category: "indices",
+    symbolPatterns: patterns,
+    tagline: `Live ${longName} (${ticker}) charts with Botvio AI scalping engine, auto-posted signals, expert tips & proven session strategies — your full ${ticker} trading desk.`,
+    chartProvider: "tradingview",
+    tvSymbol,
+    quickStats: [
+      { label: "Index", value: `${longName} · ${region}` },
+      { label: "Best Sessions", value: bestSession },
+      { label: "Key Levels", value: keyLevels },
+      { label: "Risk Rule", value: "Max 2% per trade" },
+    ],
+    tips: [
+      { title: `Trade ${ticker} during cash open`, body: `The cleanest moves on ${ticker} happen at ${bestSession}. Spreads tighten and direction usually picks within the first 30 minutes.` },
+      { title: "Use index correlation", body: `${ticker} usually moves with the broader risk-on/off tone — confirm direction against S&P 500 (SPX) or VIX before entering.` },
+      { title: `Mind ${catalysts}`, body: `${ticker} is most volatile around ${catalysts}. Flatten before red-folder news or wait 30m for spreads to normalise.` },
+      { title: "Anchor to PDH / PDL", body: `Prior day high/low are the most respected levels on ${ticker}. Use them for breakout or reversion setups intraday.` },
+    ],
+    strategies: [
+      {
+        title: "Opening Range Breakout",
+        icon: Zap,
+        tf: "5m / 15m",
+        color: "text-warning",
+        bgColor: "bg-warning/10",
+        quickSteps: [
+          "Mark first 15-minute high/low after cash open",
+          "Wait for 5m candle close beyond the range",
+          "Volume on breakout > 1.5× recent average",
+          "SL: opposite side of range | TP: 1.5–2× range size",
+        ],
+        note: `Skip on FOMC days or if ${ticker} gaps >1.5%.`,
+      },
+      {
+        title: "VWAP Pullback",
+        icon: Target,
+        tf: "5m / 15m",
+        color: "text-success",
+        bgColor: "bg-success/10",
+        quickSteps: [
+          "Identify trend (above or below VWAP)",
+          "Wait for pullback into VWAP",
+          "Rejection candle + RSI confirmation → Enter",
+          "SL: 1 ATR beyond VWAP | TP: PDH/PDL or 1:2 RR",
+        ],
+        note: "Best in the first 2 hours of the cash session.",
+      },
+      {
+        title: "News Reversion",
+        icon: Crosshair,
+        tf: "5m / 15m",
+        color: "text-destructive",
+        bgColor: "bg-destructive/10",
+        quickSteps: [
+          "Wait for first impulse after red-folder release",
+          "Mark the initial high/low formed in 5 minutes",
+          "Fade extreme moves back toward VWAP",
+          "Tight SL beyond extreme | TP at VWAP or PDH/PDL",
+        ],
+        note: `Use only on familiar catalysts. Skip if ${ticker} keeps trending after news.`,
+      },
+      {
+        title: "MTF Trend Ride",
+        icon: TrendingUp,
+        tf: "1H / Daily",
+        color: "text-primary",
+        bgColor: "bg-primary/10",
+        quickSteps: [
+          "Daily EMA 50 confirms trend direction",
+          "1H pullback to 20 EMA or prior breakout level",
+          "Bullish/bearish engulfing on 1H → Enter",
+          "Trail with 1H EMA 20 — hold 1–3 days",
+        ],
+        note: "Only trade in Daily trend direction. Cut on Daily trend break.",
+      },
+    ],
+  };
+}
