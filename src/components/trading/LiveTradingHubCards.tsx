@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
-import { ArrowRight, Activity, TrendingUp, Bitcoin, Gem, Coins, PoundSterling, ArrowUp, ArrowDown, Pause, Globe2, BarChart4 } from "lucide-react";
+import { ArrowRight, Activity, TrendingUp, Bitcoin, Gem, Coins, PoundSterling, ArrowUp, ArrowDown, Pause, Globe2, BarChart4, BarChart3, Landmark } from "lucide-react";
 import { LineChart } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
