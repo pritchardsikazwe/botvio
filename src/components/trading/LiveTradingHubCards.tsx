@@ -230,7 +230,7 @@ export function LiveTradingHubCards() {
         ))}
       </div>
 
-      {/* Quick-access chip rails: shown directly below the 4 main hub buttons */}
+      {/* Quick-access chip rails: shown directly below the main hub cards */}
       <ShortcutRail
         title="Forex Pairs"
         subtitle="Top 10 most-traded"
