@@ -218,5 +218,20 @@
     "title": "Install Botvio – Mobile App for Traders",
     "description": "Install Botvio as a PWA on Android and iOS for fast access to signals, charts and live alerts.",
     "keywords": "install Botvio app, PWA trading app, mobile trading"
+  },
+  "us30": {
+    "title": "US30 Trading Hub – Live Dow Jones 30 Charts, Signals & Strategies",
+    "description": "Real-time US30 (Dow Jones 30) trading desk with live TradingView charts, Botvio AI scalping signals, opening-range strategies, VWAP setups and risk-managed playbooks.",
+    "keywords": "US30 signals, Dow Jones signals, DJ30 trading, US30 strategy, US30 scalping, Dow Jones live chart, US30 trading bot, US30 forex hub"
+  },
+  "nas100": {
+    "title": "NAS100 Trading Hub – Live Nasdaq 100 Charts, Signals & Strategies",
+    "description": "Real-time NAS100 (Nasdaq 100 / USTEC) trading desk with live TradingView charts, Botvio AI scalping signals, VWAP and opening-range setups, plus session strategies for US tech.",
+    "keywords": "NAS100 signals, Nasdaq 100 signals, USTEC trading, NAS100 strategy, NAS100 scalping, Nasdaq live chart, NAS100 bot, US tech index trading"
+  },
+  "ger40": {
+    "title": "GER40 Trading Hub – Live DAX 40 Charts, Signals & Strategies",
+    "description": "Real-time GER40 (DAX 40 / Germany 40) trading desk with live TradingView charts, Botvio AI scalping signals, Frankfurt-open breakouts and London/NY overlap strategies.",
+    "keywords": "GER40 signals, DAX 40 signals, DE40 trading, DAX strategy, GER40 scalping, DAX live chart, GER40 bot, Frankfurt index trading"
   }
 }
