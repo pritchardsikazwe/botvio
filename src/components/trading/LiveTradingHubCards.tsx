@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 import { ArrowRight, Activity, TrendingUp, Bitcoin, Gem, Coins, PoundSterling, ArrowUp, ArrowDown, Pause, Globe2, BarChart4 } from "lucide-react";
+import { LineChart } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -233,6 +234,19 @@ export function LiveTradingHubCards() {
           { label: "AMZN", route: "/stocks/amzn" },
           { label: "META", route: "/stocks/meta" },
           { label: "GOOGL", route: "/stocks/googl" },
+        ]}
+      />
+
+      <ShortcutRail
+        title="Indices"
+        subtitle="US30 · NAS100 · GER40"
+        icon={LineChart}
+        accentClass="text-success"
+        chipClass="border-success/30 hover:bg-success/10 hover:border-success/60 hover:text-success"
+        items={[
+          { label: "US30 (Dow)", route: "/us30" },
+          { label: "NAS100 (Nasdaq)", route: "/nas100" },
+          { label: "GER40 (DAX)", route: "/ger40" },
         ]}
       />
     </div>
