@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
-import { ArrowRight, Activity, TrendingUp, Bitcoin, Gem, Coins, PoundSterling, ArrowUp, ArrowDown, Pause, Globe2, BarChart4 } from "lucide-react";
+import { ArrowRight, Activity, TrendingUp, Bitcoin, Gem, Coins, PoundSterling, ArrowUp, ArrowDown, Pause, Globe2, BarChart4, BarChart3, Landmark } from "lucide-react";
 import { LineChart } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -66,6 +66,39 @@ const HUBS: Hub[] = [
     border: "border-success/30 hover:border-success/60",
     decimals: 5,
     tagline: "Cable • London scalp engine",
+  },
+  {
+    label: "US30",
+    symbol: "OTC_DJI",
+    route: "/us30",
+    icon: BarChart3,
+    accent: "text-[#3b82f6]",
+    bg: "from-[#3b82f6]/15 via-card to-card",
+    border: "border-[#3b82f6]/30 hover:border-[#3b82f6]/60",
+    decimals: 2,
+    tagline: "Dow Jones • US cash + futures",
+  },
+  {
+    label: "NAS100",
+    symbol: "OTC_NDX",
+    route: "/nas100",
+    icon: LineChart,
+    accent: "text-[#8b5cf6]",
+    bg: "from-[#8b5cf6]/15 via-card to-card",
+    border: "border-[#8b5cf6]/30 hover:border-[#8b5cf6]/60",
+    decimals: 2,
+    tagline: "Nasdaq 100 • Tech cash + futures",
+  },
+  {
+    label: "GER40",
+    symbol: "OTC_DE40",
+    route: "/ger40",
+    icon: Landmark,
+    accent: "text-[#f97316]",
+    bg: "from-[#f97316]/15 via-card to-card",
+    border: "border-[#f97316]/30 hover:border-[#f97316]/60",
+    decimals: 2,
+    tagline: "DAX 40 • Frankfurt / Eurex",
   },
 ];
 
@@ -191,13 +224,13 @@ export function LiveTradingHubCards() {
       <p className="text-xs text-muted-foreground -mt-2">
         Tap any market to open its full trading desk — live charts, AI scalping signals, S/R overlays, and strategies.
       </p>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {HUBS.map((h) => (
           <HubCard key={h.label} hub={h} />
         ))}
       </div>
 
-      {/* Quick-access chip rails: shown directly below the 4 main hub buttons */}
+      {/* Quick-access chip rails: shown directly below the main hub cards */}
       <ShortcutRail
         title="Forex Pairs"
         subtitle="Top 10 most-traded"
