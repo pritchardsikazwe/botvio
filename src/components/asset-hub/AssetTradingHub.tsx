@@ -56,6 +56,11 @@ export interface AssetTradingHubConfig {
    * (trendlines, breakouts, S/R, HH/HL channel). Used by index hubs.
    */
   accentColor?: string;
+  /**
+   * Enable the Hauza pivot S/R + breakout engine for the signal button
+   * (used by index hubs: US30, NAS100, GER40).
+   */
+  useHauzaBreakouts?: boolean;
 }
 
 const DEFAULT_QUICK_STATS = [
@@ -178,6 +183,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
                   persistSymbol={config.persistSymbol}
                   category={config.category}
                   alwaysOpen={config.alwaysOpen}
+                  useHauzaBreakouts={config.useHauzaBreakouts}
                 />
               </div>
               <div className="lg:col-span-3">
