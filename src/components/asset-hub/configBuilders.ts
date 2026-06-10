@@ -229,6 +229,9 @@ export function buildIndexHubConfig(opts: {
     chartProvider: "deriv",
     tvSymbol,
     accentColor,
+    // Drive auto entry signals from the chart's Hauza overlay
+    // (pivot S/R breakouts, S/R rejections, HH/HL continuations).
+    useHauzaBreakouts: true,
     quickStats: [
       { label: "Index", value: `${longName} · ${region}` },
       { label: "Best Sessions", value: bestSession },
