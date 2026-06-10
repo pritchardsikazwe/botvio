@@ -33,6 +33,12 @@ interface DerivLiveChartProps {
    * Used by the Synthetic Hub to show the active signal directly on the chart.
    */
   signalMarker?: { direction: "BUY" | "SELL"; confidence: number } | null;
+  /**
+   * Optional accent color (CSS color) applied to the Hauza overlay primitives:
+   * trendline, HH/HL channel, breakout markers, and S/R lines/labels.
+   * Used by index hubs (US30 blue, NAS100 purple, GER40 orange) to brand the chart.
+   */
+  accentColor?: string;
 }
 
 export function DerivLiveChart({
@@ -41,6 +47,7 @@ export function DerivLiveChart({
   defaultGranularity = 900,
   showHauza = true,
   signalMarker = null,
+  accentColor,
 }: DerivLiveChartProps) {
   const derivSymbol = useMemo(() => mapToDerivSymbol(displaySymbol), [displaySymbol]);
   const [granularity, setGranularity] = useState(defaultGranularity);
@@ -180,6 +187,19 @@ export function DerivLiveChart({
     ? (change / visible[0].open) * 100
     : 0;
   const isUp = change >= 0;
+
+  // Price formatting: 2 decimals for big-number indices/metals/crypto, 5 for FX.
+  const priceDecimals = /^(XAU|XAG|BTC|ETH|US30|NAS100|GER40|SPX500|UK100|JP225|HK50|AUS200|DOW|DJI|NDX|NASDAQ|DAX|FTSE|NIKKEI|HSI)/i.test(displaySymbol)
+    ? 2
+    : 5;
+
+  // Accent helpers — when an accent color is set, the overlay layers (trend,
+  // breakouts, channel, S/R) all use it. Otherwise we keep the original
+  // semantic palette (success/destructive).
+  const accentOn = !!accentColor;
+  const ACCENT = accentColor || "hsl(var(--primary))";
+  const RES_COLOR = accentOn ? ACCENT : "hsl(var(--destructive))";
+  const SUP_COLOR = accentOn ? ACCENT : "hsl(var(--success))";
 
   // ─── Hauza Strategy Overlay ───────────────────────────────────────────
   // Pivot-based S/R + linear regression trend line + breakout markers
@@ -363,7 +383,7 @@ export function DerivLiveChart({
             </span>
             {lastPrice !== null && (
               <span className={`text-xs font-bold tabular-nums ${isUp ? "text-success" : "text-destructive"}`}>
-                {lastPrice.toFixed(displaySymbol.startsWith("XAU") || displaySymbol.startsWith("BTC") ? 2 : 5)}
+                {lastPrice.toFixed(priceDecimals)}
               </span>
             )}
             {visible.length >= 2 && (
