@@ -10,6 +10,7 @@ const CONFIG = buildIndexHubConfig({
   keyLevels: "Round 100/500 levels, PDH / PDL, prior week high/low",
   catalysts: "FOMC, NFP, CPI, ISM, mega-cap earnings (AAPL, MSFT, JPM)",
   patterns: ["US30", "DJ30", "DOW", "DJI"],
+  accentColor: "#3b82f6", // blue
 });
 
 const Us30Hub = () => <AssetTradingHub config={CONFIG} />;

@@ -51,6 +51,11 @@ export interface AssetTradingHubConfig {
   tvSymbol?: string;
   /** When true, bypass the VIP/paid lock for this hub (free public access). */
   publicAccess?: boolean;
+  /**
+   * Optional accent color (CSS string) applied to the Deriv chart Hauza overlay
+   * (trendlines, breakouts, S/R, HH/HL channel). Used by index hubs.
+   */
+  accentColor?: string;
 }
 
 const DEFAULT_QUICK_STATS = [
@@ -190,6 +195,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
                     height={420}
                     defaultGranularity={300}
                     showHauza
+                    accentColor={config.accentColor}
                   />
                 )}
               </div>

@@ -10,6 +10,7 @@ const CONFIG = buildIndexHubConfig({
   keyLevels: "Round 50/100 levels, PDH / PDL, prior week high/low",
   catalysts: "ECB, German IFO/ZEW, EU CPI, US NFP & CPI spillover",
   patterns: ["GER40", "DE40", "DAX", "DE30"],
+  accentColor: "#f97316", // orange
 });
 
 const Ger40Hub = () => <AssetTradingHub config={CONFIG} />;

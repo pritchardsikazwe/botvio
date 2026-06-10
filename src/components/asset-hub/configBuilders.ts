@@ -203,14 +203,16 @@ export function buildStockHubConfig(opts: {
 export function buildIndexHubConfig(opts: {
   ticker: string;        // "US30"
   longName: string;      // "Dow Jones 30"
-  tvSymbol: string;      // "OANDA:US30USD"
+  tvSymbol?: string;     // "OANDA:US30USD" — fallback only; Deriv WS is primary
   region: string;        // "US Cash + Futures"
   bestSession: string;   // "US Cash Open (13:30 UTC) → 20:00 UTC"
   keyLevels: string;     // "Round 100/500 levels, PDH/PDL"
   catalysts: string;     // "FOMC, NFP, CPI, ISM, mega-cap earnings"
   patterns: string[];    // ["US30", "DJ30", "Dow Jones"]
+  /** Accent color for the live chart Hauza overlay (trendlines, breakouts, S/R). */
+  accentColor?: string;
 }): AssetTradingHubConfig {
-  const { ticker, longName, tvSymbol, region, bestSession, keyLevels, catalysts, patterns } = opts;
+  const { ticker, longName, tvSymbol, region, bestSession, keyLevels, catalysts, patterns, accentColor } = opts;
   return {
     seoTitle: `${ticker} (${longName}) Trading Hub – Live Index Charts, Signals & Strategies`,
     seoDescription: `Real-time ${ticker} (${longName}) trading desk with live TradingView charts, Botvio AI scalping signals, S/R overlays, expert tips and session strategies for the ${longName} index.`,
@@ -221,8 +223,12 @@ export function buildIndexHubConfig(opts: {
     category: "indices",
     symbolPatterns: patterns,
     tagline: `Live ${longName} (${ticker}) charts with Botvio AI scalping engine, auto-posted signals, expert tips & proven session strategies — your full ${ticker} trading desk.`,
-    chartProvider: "tradingview",
+    // Use Deriv live WebSocket candles so trendlines, breakouts and S/R
+    // overlays render the same way as the Gold hub. (US30 → OTC_DJI,
+    // NAS100 → OTC_NDX, GER40 → OTC_GDAXI are supported by mapToDerivSymbol.)
+    chartProvider: "deriv",
     tvSymbol,
+    accentColor,
     quickStats: [
       { label: "Index", value: `${longName} · ${region}` },
       { label: "Best Sessions", value: bestSession },
