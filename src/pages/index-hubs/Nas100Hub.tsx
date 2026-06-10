@@ -10,6 +10,7 @@ const CONFIG = buildIndexHubConfig({
   keyLevels: "Round 100 levels, PDH / PDL, prior week high/low",
   catalysts: "FOMC, CPI, NFP, mega-cap tech earnings (NVDA, AAPL, MSFT, META)",
   patterns: ["NAS100", "NDX", "Nasdaq", "USTEC"],
+  accentColor: "#8b5cf6", // purple
 });
 
 const Nas100Hub = () => <AssetTradingHub config={CONFIG} />;
