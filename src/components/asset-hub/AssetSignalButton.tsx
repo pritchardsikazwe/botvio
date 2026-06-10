@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crosshair, TrendingUp, TrendingDown, Pause, Shield, Activity, Clock } from "lucide-react";
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { useDerivLiveSignal, type DerivSignalType } from "@/hooks/useDerivLiveSignal";
+import { useHauzaBreakoutSignal } from "@/hooks/useHauzaBreakoutSignal";
 import { usePersistLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
 import { useMt5HubExecution } from "@/hooks/useMt5HubExecution";
 import { HubAutoMt5Toggle } from "@/components/trading/HubAutoMt5Toggle";
@@ -63,6 +64,13 @@ interface Props {
   category: string;
   /** Force-treat as 24/7 (e.g. crypto) */
   alwaysOpen?: boolean;
+  /**
+   * Use the Hauza pivot S/R + breakout engine (mirrors the chart overlay).
+   * Enabled for index hubs (US30, NAS100, GER40) so entry signals fire on
+   * breakouts / S/R rejections / HH-HL continuations directly off the chart.
+   * The base Deriv engine still acts as a fallback when Hauza is on WAIT.
+   */
+  useHauzaBreakouts?: boolean;
 }
 
 export function AssetSignalButton({
@@ -72,11 +80,17 @@ export function AssetSignalButton({
   persistSymbol,
   category,
   alwaysOpen,
+  useHauzaBreakouts,
 }: Props) {
   const { isMarketOpen, isLoading: sessionLoading } = useMarketSession(sessionSymbol);
   const effOpen = alwaysOpen ? true : isMarketOpen;
 
-  const live = useDerivLiveSignal(displaySymbol, 300);
+  const baseLive = useDerivLiveSignal(displaySymbol, 300);
+  const hauzaLive = useHauzaBreakoutSignal(useHauzaBreakouts ? displaySymbol : null, 300);
+  // Prefer Hauza when it has an actionable BUY/SELL; otherwise fall back to base engine.
+  const live = useHauzaBreakouts && (hauzaLive.signal === "BUY" || hauzaLive.signal === "SELL")
+    ? hauzaLive
+    : baseLive;
 
   // Persist real BUY/SELL signals to DB so they appear on Hub + Home + /signals
   usePersistLiveSignal(live, !sessionLoading && effOpen, persistSymbol, category);
