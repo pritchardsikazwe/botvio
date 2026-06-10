@@ -501,7 +501,7 @@ export function DerivLiveChart({
                         x2={padding.left + chartW}
                         y1={yFor(r.price)}
                         y2={yFor(r.price)}
-                        stroke="hsl(var(--destructive))"
+                        stroke={RES_COLOR}
                         strokeWidth={1.2}
                         strokeDasharray="6,4"
                         strokeOpacity={0.85}
@@ -511,7 +511,7 @@ export function DerivLiveChart({
                         y={yFor(r.price) - 7}
                         width={28}
                         height={12}
-                        fill="hsl(var(--destructive))"
+                        fill={RES_COLOR}
                         rx={2}
                       />
                       <text
@@ -520,7 +520,7 @@ export function DerivLiveChart({
                         fontSize="9"
                         fontWeight="bold"
                         textAnchor="middle"
-                        fill="hsl(var(--destructive-foreground))"
+                        fill="hsl(var(--background))"
                       >
                         R{i + 1}
                       </text>
@@ -534,17 +534,17 @@ export function DerivLiveChart({
                         x2={padding.left + chartW}
                         y1={yFor(s.price)}
                         y2={yFor(s.price)}
-                        stroke="hsl(var(--success))"
+                        stroke={SUP_COLOR}
                         strokeWidth={1.2}
                         strokeDasharray="6,4"
-                        strokeOpacity={0.85}
+                        strokeOpacity={accentOn ? 0.55 : 0.85}
                       />
                       <rect
                         x={padding.left + 2}
                         y={yFor(s.price) - 7}
                         width={28}
                         height={12}
-                        fill="hsl(var(--success))"
+                        fill={SUP_COLOR}
                         rx={2}
                       />
                       <text
@@ -566,21 +566,27 @@ export function DerivLiveChart({
                     y1={yFor(hauza.trendStart)}
                     y2={yFor(hauza.trendEnd)}
                     stroke={
-                      hauza.trendDir === "up"
+                      accentOn
+                        ? ACCENT
+                        : hauza.trendDir === "up"
                         ? "hsl(var(--success))"
                         : hauza.trendDir === "down"
                         ? "hsl(var(--destructive))"
                         : "hsl(var(--muted-foreground))"
                     }
                     strokeWidth={1.6}
-                    strokeOpacity={0.7}
+                    strokeOpacity={accentOn ? 0.85 : 0.7}
                   />
                   {/* Breakout markers */}
                   {hauza.breakouts.map((b, i) => {
                     const x = padding.left + b.idx * step + step / 2;
                     const y = yFor(b.price);
                     const arrow = b.type === "up" ? "▲" : "▼";
-                    const color = b.type === "up" ? "hsl(var(--success))" : "hsl(var(--destructive))";
+                    const color = accentOn
+                      ? ACCENT
+                      : b.type === "up"
+                      ? "hsl(var(--success))"
+                      : "hsl(var(--destructive))";
                     return (
                       <g key={`bo-${i}`}>
                         <circle cx={x} cy={y} r={6} fill={color} fillOpacity={0.25} stroke={color} strokeWidth={1.5} />
@@ -597,10 +603,11 @@ export function DerivLiveChart({
               {hhhl && (
                 <g>
                   {(() => {
-                    const color =
-                      hhhl.trend === "uptrend"
-                        ? "hsl(var(--success))"
-                        : "hsl(var(--destructive))";
+                    const color = accentOn
+                      ? ACCENT
+                      : hhhl.trend === "uptrend"
+                      ? "hsl(var(--success))"
+                      : "hsl(var(--destructive))";
                     const x1 = padding.left + hhhl.highLine.startIdx * step + step / 2;
                     const x2 = padding.left + hhhl.highLine.endIdx * step + step / 2;
                     return (
