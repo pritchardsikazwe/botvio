@@ -232,6 +232,8 @@ export function buildIndexHubConfig(opts: {
     // Drive auto entry signals from the chart's Hauza overlay
     // (pivot S/R breakouts, S/R rejections, HH/HL continuations).
     useHauzaBreakouts: true,
+    // Open access — match Gold hub. Signals/Strategy/Tips tabs unlocked for everyone.
+    publicAccess: true,
     quickStats: [
       { label: "Index", value: `${longName} · ${region}` },
       { label: "Best Sessions", value: bestSession },
