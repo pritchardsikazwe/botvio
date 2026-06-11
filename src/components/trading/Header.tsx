@@ -90,6 +90,36 @@ export const Header = () => {
                 Blog
               </Button>
 
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={['/gold','/silver','/bitcoin','/us30','/nas100','/ger40'].includes(location.pathname) ? 'secondary' : 'ghost'}
+                    size="sm"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-1" />
+                    Hubs
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48 glass-card">
+                  <DropdownMenuLabel>Trading Hubs</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/gold')}>Gold (XAU/USD)</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/silver')}>Silver (XAG/USD)</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/bitcoin')}>Bitcoin (BTC/USD)</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/us30')}>
+                    <span style={{ color: '#3b82f6' }}>● </span>US30 (Dow)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/nas100')}>
+                    <span style={{ color: '#8b5cf6' }}>● </span>NAS100 (Nasdaq)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/ger40')}>
+                    <span style={{ color: '#f97316' }}>● </span>GER40 (DAX)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               {!user && (
                 <Button 
                   variant={location.pathname === '/authority-signals' ? 'secondary' : 'ghost'} 
@@ -247,6 +277,15 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/blog')}>
                       Blog
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Trading Hubs</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => navigate('/gold')}>Gold (XAU/USD)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/silver')}>Silver (XAG/USD)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/bitcoin')}>Bitcoin (BTC/USD)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/us30')}>US30 (Dow)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/nas100')}>NAS100 (Nasdaq)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/ger40')}>GER40 (DAX)</DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
                       <ScanSearch className="w-4 h-4 mr-2" />
                       AI Analysis
