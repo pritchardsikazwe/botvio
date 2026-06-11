@@ -277,6 +277,15 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/blog')}>
                       Blog
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Trading Hubs</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => navigate('/gold')}>Gold (XAU/USD)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/silver')}>Silver (XAG/USD)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/bitcoin')}>Bitcoin (BTC/USD)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/us30')}>US30 (Dow)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/nas100')}>NAS100 (Nasdaq)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/ger40')}>GER40 (DAX)</DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/authority-signals')}>
                       <ScanSearch className="w-4 h-4 mr-2" />
                       AI Analysis
