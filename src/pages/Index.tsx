@@ -127,6 +127,21 @@ const Index = () => {
                 🥈 Silver Hub
               </Button>
             </Link>
+            <Link to="/us30" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-[#3b82f6]/40 text-[#3b82f6] hover:bg-[#3b82f6]/10">
+                <BarChart3 className="h-4 w-4" /> US30 Hub
+              </Button>
+            </Link>
+            <Link to="/nas100" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-[#8b5cf6]/40 text-[#8b5cf6] hover:bg-[#8b5cf6]/10">
+                <TrendingUp className="h-4 w-4" /> NAS100 Hub
+              </Button>
+            </Link>
+            <Link to="/ger40" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-[#f97316]/40 text-[#f97316] hover:bg-[#f97316]/10">
+                <Activity className="h-4 w-4" /> GER40 Hub
+              </Button>
+            </Link>
             <Link to="/gbpusd" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10">
                 £ GBP/USD Hub
