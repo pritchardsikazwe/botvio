@@ -54,7 +54,6 @@ export default function MarketAnalysis() {
       <SEOHead
         title="Daily Market Analysis — Gold, EURUSD, GBPUSD & BTCUSD Forecast"
         description="Daily forex and crypto market analysis from Botvio. Gold (XAUUSD), EURUSD, GBPUSD and BTCUSD forecasts updated every trading day with key levels and trade setups."
-        canonical="https://botvio.live/market-analysis"
       />
       <Header />
       <main className="container mx-auto px-4 py-10 max-w-6xl">
