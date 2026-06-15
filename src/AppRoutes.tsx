@@ -112,6 +112,7 @@ import Unsubscribe from "./pages/Unsubscribe";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Disclaimer from "./pages/Disclaimer";
+import MarketAnalysis from "./pages/MarketAnalysis";
 
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
@@ -150,6 +151,7 @@ export const AppRoutes = () => (
     <Route path="strategies/:category/:slug" element={<StrategyDetail />} />
     <Route path="r/:code" element={<ReferralRedirect />} />
     <Route path="signals" element={<Signals />} />
+    <Route path="market-analysis" element={<MarketAnalysis />} />
     <Route path="signals/history" element={<SignalsHistory />} />
     <Route path="signals-history" element={<SignalsHistory />} />
     <Route path="track-record" element={<SignalsHistory />} />
