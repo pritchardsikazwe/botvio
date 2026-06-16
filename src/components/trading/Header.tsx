@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download, ScanSearch } from "lucide-react";
+import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download, ScanSearch, TrendingUp } from "lucide-react";
 import { TradesDrawer } from "@/components/trading/TradesDrawer";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -88,6 +88,15 @@ export const Header = () => {
                 onClick={() => navigate('/blog')}
               >
                 Blog
+              </Button>
+
+              <Button
+                variant={location.pathname === '/market-analysis' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => navigate('/market-analysis')}
+              >
+                <TrendingUp className="w-4 h-4 mr-1" />
+                Analysis
               </Button>
 
               <DropdownMenu>
@@ -276,6 +285,10 @@ export const Header = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/blog')}>
                       Blog
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/market-analysis')}>
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Market Analysis
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>Trading Hubs</DropdownMenuLabel>

@@ -8,6 +8,8 @@ import { DerivProvider } from "@/contexts/DerivContext";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { LocalePrefixRouter } from "@/i18n/LocalePrefixRouter";
 import { AppRoutes } from "./AppRoutes";
+import { CookieConsent } from "@/components/CookieConsent";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +30,9 @@ const App = () => (
               */}
               <LocalePrefixRouter>
                 <AppRoutes />
+                <SiteFooter />
               </LocalePrefixRouter>
+              <CookieConsent />
             </BrowserRouter>
           </DerivProvider>
         </AuthProvider>
