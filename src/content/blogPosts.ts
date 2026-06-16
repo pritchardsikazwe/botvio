@@ -1926,5 +1926,679 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Open the <a href="/signals">signals page</a>, filter by Exness-compatible instruments, and enable browser push.</p>
     `
   },
+
+  "boom-500-strategy-botvio": {
+    title: "Best Boom 500 Strategy with Botvio (Spike Hunter Setup)",
+    excerpt: "Trade Boom 500 like a pro using Botvio's spike-drought engine, tick filters and disciplined risk rules.",
+    category: "Strategy",
+    readTime: "10 min",
+    date: "2026-06-10",
+    content: `
+<h2>Why Boom 500 Deserves Its Own Playbook</h2>
+<p>Boom 500 spikes upward roughly once every 500 ticks on average. That sounds simple, but the average hides everything that matters — droughts, clusters and the false confidence that destroys most accounts. A real Boom 500 strategy has to respect the distribution, not the average.</p>
+<p>Botvio approaches Boom 500 as a probability problem: the longer the drought since the last spike, the closer we get to a high-conviction long entry. The strategy is not about predicting the exact tick, but about being positioned in the right window with controlled risk.</p>
+
+<h2>The Spike Drought Engine</h2>
+<p>Botvio tracks the number of ticks since the last spike on Boom 500 in real time. A drought of 600+ ticks (the 80th percentile in our backtest sample) lifts the long bias. A drought of 800+ ticks (90th+ percentile) is treated as the high-conviction zone — these are the trades Botvio publishes as Boom 500 signals.</p>
+<p>Below 400 ticks we sit out. Cluster spikes happen, but trading inside them dilutes win rate and increases drawdown variance.</p>
+
+<h2>Entry Rules</h2>
+<ol>
+  <li><strong>Drought ≥ 800 ticks</strong> → arm the entry.</li>
+  <li>Wait for a green M1 candle close to confirm momentum is not collapsing.</li>
+  <li>Enter Rise/Multipliers long with a fixed stake, no martingale.</li>
+  <li>Hard SL at 2× ATR(14) below the entry candle low.</li>
+  <li>Trail 50% after a 1R move, take final profit at 2R or on the next spike.</li>
+</ol>
+
+<h2>Risk Management for Boom 500</h2>
+<p>Boom 500 will punish you for over-leveraging. Botvio enforces 1–2% risk per trade and a hard daily cap of 3 losses, after which the bot locks the instrument for 10 minutes. This single rule is what separates strategies that survive 6 months from those that don't.</p>
+
+<h2>Automating It With Botvio</h2>
+<p>Select <strong>Boom 500 — Spike Hunter</strong> inside the Botvio dashboard, set your stake, and enable auto mode. Botvio handles the drought tracking, the entry, the SL/TP and the daily caps. You can also receive every Boom 500 signal on the <a href="/signals">signals page</a> if you prefer to trade manually.</p>
+
+<h2>Mistakes to Avoid</h2>
+<ul>
+  <li>Chasing spikes after they've already happened (no R:R left).</li>
+  <li>Removing the SL because "the next spike is coming". It might not.</li>
+  <li>Using martingale. Boom 500 droughts can run 1200+ ticks.</li>
+  <li>Trading multiple Boom indices simultaneously with full size.</li>
+</ul>
+
+<h2>Final Word</h2>
+<p>Boom 500 is a beautiful instrument for traders who respect probability. Pair Botvio's spike-drought engine with the 2% risk rule and you'll have a process that compounds — not a gamble that decays.</p>
+    `
+  },
+
+  "crash-500-strategy-deep-dive": {
+    title: "Crash 500 Strategy Deep Dive — Catching the Drop",
+    excerpt: "How to trade Crash 500 with Botvio: spike timing, lot sizing, and how to avoid the most common scalper traps.",
+    category: "Strategy",
+    readTime: "10 min",
+    date: "2026-06-09",
+    content: `
+<h2>Crash 500 in One Paragraph</h2>
+<p>Crash 500 is the inverse twin of Boom 500. Instead of upward spikes, it drops sharply on average once every 500 ticks. Between drops, the market grinds slowly upward — which is what tricks traders into buying the rally right before the dump. This guide gives you a Crash 500 strategy that works with the structure, not against it.</p>
+
+<h2>The Two Ways to Trade Crash 500</h2>
+<p><strong>1. Spike trading (sell side).</strong> Wait for a drought, then sell with Botvio's spike forecast.<br/><strong>2. Grind trading (buy side).</strong> Buy small between drops, with hard SLs to survive the next drop. Botvio supports both; the spike side is statistically cleaner.</p>
+
+<h2>Spike Side Setup</h2>
+<ol>
+  <li>Drought ≥ 800 ticks since the last drop.</li>
+  <li>M1 forms a red engulfing candle near a prior swing high.</li>
+  <li>Enter Fall / Multipliers down with a fixed stake.</li>
+  <li>SL: 1.5–2× ATR(14) above the entry candle.</li>
+  <li>TP: trail 50% at 1R, full at 2R or on the next drop.</li>
+</ol>
+
+<h2>Why Crash 500 Eats Beginners</h2>
+<p>Most beginners watch the slow grind up and think "this market only goes up". Then a 50–80 point drop wipes a week of micro-gains in a single tick. Botvio's Crash 500 engine intentionally skips the grind unless you've selected the grind sub-strategy with the safety filters on.</p>
+
+<h2>Risk Controls</h2>
+<p>Treat Crash 500 like a tactical sniper, not a machine gun. Botvio caps it at 1% risk per trade by default and stops trading after 2 consecutive losses for 10 minutes. Combined with strict SLs, this turns Crash 500 from a casino into a strategy.</p>
+
+<h2>Botvio Automation</h2>
+<p>Open the bot dashboard, choose <strong>Crash 500 — Drop Hunter</strong>, pick your stake, and Botvio will execute the rules above 24/7. Signals are also broadcast to the <a href="/signals">live signals page</a> for manual traders.</p>
+
+<h2>Closing Thoughts</h2>
+<p>The Crash 500 strategy that wins is boring: wait, confirm, enter small, trail. Botvio enforces the boring part so the math compounds. That's the entire edge.</p>
+    `
+  },
+
+  "crash-1000-strategy-botvio": {
+    title: "Crash 1000 Strategy with Botvio — Patience Pays",
+    excerpt: "A patience-first Crash 1000 strategy using Botvio's spike forecasting, stake control and structured exits.",
+    category: "Strategy",
+    readTime: "10 min",
+    date: "2026-06-08",
+    content: `
+<h2>Crash 1000 Is a Patience Game</h2>
+<p>Crash 1000 drops on average every 1000 ticks. That makes it slower, smoother, and far more punishing if you panic. The strategy below is built around patience and Botvio's drought engine — not random guesses.</p>
+
+<h2>Core Setup</h2>
+<ol>
+  <li>Drought ≥ 1300 ticks since the last drop (80th+ percentile).</li>
+  <li>Price is at or above the 20-EMA on M5.</li>
+  <li>Confirm with a bearish reversal candle on M1.</li>
+  <li>Enter Fall / Multipliers down with 1% risk.</li>
+  <li>SL: 2× ATR(14) above the recent swing high.</li>
+  <li>TP: trail 50% at 1R, exit balance at 2R or on the next drop.</li>
+</ol>
+
+<h2>What Makes Crash 1000 Hard</h2>
+<p>Droughts can extend to 1500–2000 ticks. The trader who holds 4 losing positions stacked together gets liquidated in one drop. Botvio's rule is simple: one position at a time, hard SL, and no averaging down. Ever.</p>
+
+<h2>Automation</h2>
+<p>Select <strong>Crash 1000 — Patience Hunter</strong> in Botvio, enable auto mode, and the bot will track the drought, take the entry, manage the trade and respect the daily loss cap. Manual traders can subscribe to the same signals on the <a href="/signals">signals page</a>.</p>
+
+<h2>Common Mistakes</h2>
+<ul>
+  <li>Doubling stake after a loss.</li>
+  <li>Closing winners too early before the trailing TP triggers.</li>
+  <li>Switching to higher leverage Multipliers after a losing day.</li>
+</ul>
+
+<h2>Final Take</h2>
+<p>If Boom 500 rewards speed, Crash 1000 rewards patience. Pair Botvio's drought engine with disciplined sizing and you've got a long-term edge that survives the messy weeks.</p>
+    `
+  },
+
+  "volatility-75-trading-strategy": {
+    title: "Volatility 75 (V75) Trading Strategy for 2026",
+    excerpt: "Trend-trade V75 with EMA stacks, ATR-based stops and the Botvio risk filter that keeps drawdowns in check.",
+    category: "Synthetic Indices",
+    readTime: "11 min",
+    date: "2026-06-07",
+    content: `
+<h2>Volatility 75 in Plain English</h2>
+<p>V75 is the most popular synthetic index in the world for one reason — clean trends, 24/7. Where forex needs sessions and news, V75 just keeps going. That also means losses can compound just as fast as gains, so a structured strategy is non-negotiable.</p>
+
+<h2>The Trend-Stack Strategy</h2>
+<ol>
+  <li>Use EMA 20, 50 and 200 on the M5 chart.</li>
+  <li>Stacked up (20 > 50 > 200) = long bias only.</li>
+  <li>Stacked down = short bias only.</li>
+  <li>Enter on a pullback to EMA 20 with a confirmation candle.</li>
+  <li>SL: 1.5× ATR(14) on the opposite side of EMA 50.</li>
+  <li>TP1 at 1R (close 50%), trail rest below EMA 50.</li>
+</ol>
+
+<h2>Why ATR Stops Matter on V75</h2>
+<p>V75 has volatile swings inside trends. Fixed-pip SLs get stopped on noise. ATR-based stops scale with the actual market move, which dramatically improves win rate without hurting R:R.</p>
+
+<h2>Risk Rules</h2>
+<p>Maximum 1% risk per V75 trade, maximum 3 open positions across all synthetics, hard daily loss cap of 4%. Botvio enforces these automatically so you cannot revenge-trade a bad afternoon.</p>
+
+<h2>Automation in Botvio</h2>
+<p>Pick <strong>V75 — Trend Stack</strong> inside Botvio, set your stake, choose Rise/Fall or Multipliers, and the bot handles the EMA filter, the pullback entry, the ATR stop and the trailing exit.</p>
+
+<h2>Final Word</h2>
+<p>V75 is the cleanest paper-trading classroom and the most ruthless live-trading teacher. The trend-stack strategy keeps you on the right side of the move, and Botvio's risk filter keeps you alive long enough to profit from it.</p>
+    `
+  },
+
+  "volatility-25-trading-guide": {
+    title: "Volatility 25 (V25) Trading Guide — Smooth & Profitable",
+    excerpt: "Why V25 is the perfect starter synthetic index and how Botvio's range and pullback engine plays it.",
+    category: "Synthetic Indices",
+    readTime: "9 min",
+    date: "2026-06-06",
+    content: `
+<h2>Why V25 Is the Best Starter Synthetic</h2>
+<p>Volatility 25 is the calmest of the synthetic indices. It still trends and ranges like a real market, but the moves are smaller and slower — perfect for traders learning structure, position sizing and patience before scaling up to V75 or V100.</p>
+
+<h2>The V25 Range-and-Trend Playbook</h2>
+<p>V25 spends most of the day in tight ranges punctuated by short trending bursts. Botvio's strategy plays both modes:</p>
+<ol>
+  <li>Identify range high and range low on M15 with at least 2 touches.</li>
+  <li>Sell the top, buy the bottom with 1% risk and a 1R take profit.</li>
+  <li>When price breaks the range with a strong candle, switch to trend mode and ride the EMA 20 with a 2× ATR stop.</li>
+</ol>
+
+<h2>Botvio Automation</h2>
+<p>Select <strong>V25 — Range &amp; Trend</strong> inside Botvio. The bot detects which regime is active, takes only A-grade setups and enforces the daily loss limit. New traders can paper-trade it on a Deriv demo first.</p>
+
+<h2>Risk Notes</h2>
+<p>Because V25 is quiet, traders over-leverage. Don't. Keep risk at 1% even if the win rate is high. The few violent moves V25 makes can wipe weeks of small gains if you're 5× over your normal size.</p>
+
+<h2>Conclusion</h2>
+<p>V25 is the gym, not the championship. Build discipline here, then scale to V75 or V100 with the same Botvio playbook — and you'll already be ahead of 90% of synthetic-index traders.</p>
+    `
+  },
+
+  "step-index-trading-strategy": {
+    title: "Step Index Trading Strategy — Mean Reversion that Works",
+    excerpt: "Trade Deriv's Step Index using a mean-reversion playbook, with Botvio's filter to skip the bad sessions.",
+    category: "Synthetic Indices",
+    readTime: "9 min",
+    date: "2026-06-05",
+    content: `
+<h2>What Makes the Step Index Different</h2>
+<p>The Step Index moves in fixed 0.1 increments. That makes it the cleanest mean-reverting synthetic index on Deriv — every move is symmetric, predictable in magnitude, and easy to model. Botvio treats it as a statistics problem.</p>
+
+<h2>The Mean-Reversion Setup</h2>
+<ol>
+  <li>Calculate a 50-period SMA on M1.</li>
+  <li>Calculate the standard deviation over the same window.</li>
+  <li>When price hits +2σ above the SMA → short with 1% risk.</li>
+  <li>When price hits −2σ → long with 1% risk.</li>
+  <li>TP at the SMA, SL at ±3σ.</li>
+</ol>
+
+<h2>Botvio's Filter</h2>
+<p>Mean reversion fails during regime changes. Botvio's filter skips entries when ATR(14) jumps more than 50% above its 100-period average — a sign that a trend is replacing the range. This single filter saves several losing trades per week.</p>
+
+<h2>Automation</h2>
+<p>Select <strong>Step Index — Mean Reversion</strong> in Botvio. Stake, daily caps and the ATR filter are pre-wired. Manual traders can grab the same setups on the <a href="/signals">signals page</a>.</p>
+
+<h2>Conclusion</h2>
+<p>The Step Index rewards patience and discipline. With Botvio's filter you'll trade fewer setups but win a much higher percentage — exactly what mean reversion is supposed to deliver.</p>
+    `
+  },
+
+  "jump-100-trading-guide": {
+    title: "Jump 100 Index Trading Guide — Catching Controlled Jumps",
+    excerpt: "Jump 100 is built for breakout traders. Here's the exact Botvio playbook for catching jumps without overtrading.",
+    category: "Synthetic Indices",
+    readTime: "9 min",
+    date: "2026-06-04",
+    content: `
+<h2>Why Jump 100 Exists</h2>
+<p>Jump indices add a probabilistic jump (about 3 per hour on Jump 100) on top of normal volatility. They reward traders who can spot the difference between noise and a real jump-driven breakout.</p>
+
+<h2>The Botvio Jump 100 Strategy</h2>
+<ol>
+  <li>Mark the M15 range high/low.</li>
+  <li>Wait for a candle close outside the range with ATR ≥ 1.5× average.</li>
+  <li>Enter Rise/Fall in the breakout direction with 1% risk.</li>
+  <li>SL: 1× ATR(14) inside the range.</li>
+  <li>TP1 at 1R, trail rest with the EMA 20.</li>
+</ol>
+
+<h2>Avoiding the Fake-Out</h2>
+<p>Most Jump 100 losses come from chasing wicks. Botvio requires a candle close + ATR confirmation before arming entry, which filters out 70%+ of fake-outs.</p>
+
+<h2>Risk Management</h2>
+<p>1% risk, maximum 2 simultaneous Jump trades, hard daily cap of 3%. Botvio enforces all three automatically.</p>
+
+<h2>Final Word</h2>
+<p>Jump 100 is breakout heaven if you respect the ATR filter. Pair Botvio's signal with strict risk and you'll capture the moves that scare amateurs out of the market.</p>
+    `
+  },
+
+  "nfp-trading-playbook-forex": {
+    title: "NFP Trading Playbook — Forex, Gold & Indices",
+    excerpt: "How to trade Non-Farm Payrolls without getting smoked: pre-NFP bias, post-release confirmation, and Botvio safe-mode rules.",
+    category: "News Trading",
+    readTime: "11 min",
+    date: "2026-06-03",
+    content: `
+<h2>NFP Is the Most Misunderstood Trading Day</h2>
+<p>Non-Farm Payrolls drop the first Friday of every month at 13:30 UTC. Spreads widen, slippage spikes and most retail traders blow accounts trying to predict the print. The professional approach is the opposite: trade the reaction, not the forecast.</p>
+
+<h2>Pre-NFP Bias</h2>
+<p>Botvio's pre-NFP playbook is simple — flat exposure 15 minutes before release, no pending orders inside the spread, and no new positions until the first 5-minute candle after release closes.</p>
+
+<h2>Post-NFP Strategy</h2>
+<ol>
+  <li>Wait for the first 5-minute candle to close.</li>
+  <li>If price closes strongly in one direction with expanded ATR → trade the continuation.</li>
+  <li>Use EURUSD, GBPUSD, XAUUSD or US30 as the cleanest instruments.</li>
+  <li>SL: prior 5-minute high/low + 5 pips buffer.</li>
+  <li>TP1 at 1R, trail rest with M15 EMA 20.</li>
+</ol>
+
+<h2>Botvio Safe Mode</h2>
+<p>The Botvio bot enters NFP safe mode automatically: open positions are kept but no new trades are placed for 5 minutes around the release. After confirmation, the bot re-enables entries with tighter risk (0.5% per trade instead of 1%).</p>
+
+<h2>Instruments to Avoid During NFP</h2>
+<ul>
+  <li>Exotic forex pairs (huge spread widening).</li>
+  <li>Low-volume crypto pairs.</li>
+  <li>Synthetic indices unaffected by news — they don't move on NFP anyway.</li>
+</ul>
+
+<h2>Conclusion</h2>
+<p>NFP is a fantastic trading day if you wait. Botvio's safe mode + the 5-minute confirmation rule turns NFP from a coin flip into a high-conviction setup.</p>
+    `
+  },
+
+  "fomc-trading-strategy-gold-forex": {
+    title: "FOMC Trading Strategy for Gold & Forex",
+    excerpt: "A pro framework for trading FOMC days on XAUUSD, EURUSD and US30 — bias, hedges and the 60-minute post-release window.",
+    category: "News Trading",
+    readTime: "11 min",
+    date: "2026-06-02",
+    content: `
+<h2>FOMC Is a Two-Phase Event</h2>
+<p>The FOMC statement (18:00 UTC on decision days) and the Powell press conference (18:30 UTC) move the market in opposite directions surprisingly often. A real FOMC strategy treats them as two separate trading events.</p>
+
+<h2>Phase 1 — Statement Release</h2>
+<ol>
+  <li>Be flat 10 minutes before 18:00 UTC.</li>
+  <li>After the first 5-minute candle closes, trade the direction of the close on XAUUSD, EURUSD or US30.</li>
+  <li>SL: opposite extreme of the release candle + buffer.</li>
+  <li>Hold until 18:25 UTC, then flatten before the press conference.</li>
+</ol>
+
+<h2>Phase 2 — Press Conference</h2>
+<ol>
+  <li>Wait 5 minutes into the conference.</li>
+  <li>If the market reverses Phase 1 → trade the reversal with 0.5% risk.</li>
+  <li>Use M1 structure breaks for entry.</li>
+  <li>TP at the next round number / liquidity pool.</li>
+</ol>
+
+<h2>Botvio Automation</h2>
+<p>The Botvio bot recognises FOMC days from the economic calendar and switches to FOMC mode automatically — reduced risk per trade, larger SL buffer and disabled grid strategies. You can also follow every FOMC signal on the <a href="/signals">signals page</a>.</p>
+
+<h2>Why XAUUSD Is the Cleanest FOMC Instrument</h2>
+<p>Gold reacts to real yields and rate expectations in a way that is easier to model than DXY or US30. Botvio's gold engine is tuned specifically for FOMC and NFP days.</p>
+
+<h2>Final Word</h2>
+<p>FOMC is not a guessing game — it's a two-phase reaction trade. Wait for confirmation, size down, and let Botvio handle the discipline.</p>
+    `
+  },
+
+  "smart-money-concepts-forex-trading": {
+    title: "Smart Money Concepts (SMC) for Forex Trading — Beginner to Pro",
+    excerpt: "Order blocks, liquidity sweeps, fair-value gaps and how Botvio combines SMC with AI signals for higher-confidence entries.",
+    category: "Education",
+    readTime: "13 min",
+    date: "2026-06-01",
+    content: `
+<h2>What Smart Money Concepts Actually Mean</h2>
+<p>Smart Money Concepts (SMC) is a framework for reading the market the way institutional desks do — focusing on liquidity, order blocks and inefficiencies instead of indicators.</p>
+
+<h2>The Three Pillars</h2>
+<p><strong>1. Liquidity.</strong> Areas above swing highs and below swing lows where stops are clustered. Smart money pushes price into these zones to fill large orders.</p>
+<p><strong>2. Order Blocks.</strong> The last opposite-coloured candle before a strong impulsive move. These zones often act as high-probability re-entry points.</p>
+<p><strong>3. Fair Value Gaps (FVGs).</strong> Three-candle imbalances where price moved so fast it left a gap. Price tends to revisit these to "fill" the inefficiency.</p>
+
+<h2>The Botvio + SMC Workflow</h2>
+<ol>
+  <li>Mark daily and H4 liquidity highs/lows.</li>
+  <li>Identify the most recent H1 order block.</li>
+  <li>Wait for price to sweep liquidity, then break structure on M15.</li>
+  <li>Enter on a return to the order block or FVG inside it.</li>
+  <li>SL: just beyond the order block.</li>
+  <li>TP: next liquidity pool.</li>
+</ol>
+
+<h2>Why Botvio Pairs So Well With SMC</h2>
+<p>SMC tells you <em>where</em> to look. Botvio's AI signal engine tells you <em>when</em> the trigger is high-confidence. Combining both increases win rate without doubling screen time.</p>
+
+<h2>Common SMC Mistakes</h2>
+<ul>
+  <li>Marking too many order blocks (only the most recent strong one matters).</li>
+  <li>Entering before structure breaks.</li>
+  <li>Ignoring higher-timeframe bias.</li>
+</ul>
+
+<h2>Conclusion</h2>
+<p>SMC is not a magic bullet — it's a lens. Pair it with discipline and Botvio's AI confirmation and you'll trade fewer setups with much higher conviction.</p>
+    `
+  },
+
+  "ict-killzones-london-new-york": {
+    title: "ICT Killzones — London & New York Session Setups",
+    excerpt: "Trade ICT killzones like the smart-money crowd. Exact times, instruments and Botvio confluence filters.",
+    category: "Education",
+    readTime: "10 min",
+    date: "2026-05-31",
+    content: `
+<h2>What Is a Killzone?</h2>
+<p>In ICT (Inner Circle Trader) methodology, a killzone is a high-probability time window where smart-money flows produce the cleanest moves. The two most-traded killzones are London (07:00–10:00 UTC) and New York (12:30–15:00 UTC).</p>
+
+<h2>London Killzone Playbook</h2>
+<ol>
+  <li>At 07:00 UTC, mark the Asia session range.</li>
+  <li>Wait for liquidity sweep above or below the range.</li>
+  <li>Trade the reversal back into the range with SL beyond the sweep.</li>
+  <li>TP at the opposite side of the Asia range.</li>
+</ol>
+
+<h2>New York Killzone Playbook</h2>
+<ol>
+  <li>At 12:30 UTC, watch the reaction to the US economic release.</li>
+  <li>Mark the first 15-minute high/low.</li>
+  <li>Trade the break with confirmation, SL on the opposite side.</li>
+  <li>TP at prior day high/low or next liquidity pool.</li>
+</ol>
+
+<h2>Botvio Confluence Filter</h2>
+<p>Botvio overlays an EMA 20/50 trend filter and ATR-based volatility check on top of the killzone entry. Trades only fire when both ICT structure and Botvio confirmation align.</p>
+
+<h2>Best Instruments by Killzone</h2>
+<ul>
+  <li><strong>London:</strong> EURUSD, GBPUSD, XAUUSD, DAX.</li>
+  <li><strong>New York:</strong> XAUUSD, US30, NAS100, BTCUSD.</li>
+</ul>
+
+<h2>Final Word</h2>
+<p>Killzones concentrate edge into 3-hour windows. Wake up, trade them, walk away — Botvio handles the rest.</p>
+    `
+  },
+
+  "fibonacci-retracement-gold-trading": {
+    title: "Fibonacci Retracement for Gold Trading (XAUUSD)",
+    excerpt: "Use Fibonacci 38.2 / 50 / 61.8 confluence on XAUUSD with Botvio's trend filter to stack the odds in your favour.",
+    category: "Gold",
+    readTime: "9 min",
+    date: "2026-05-30",
+    content: `
+<h2>Why Fibonacci Works on Gold</h2>
+<p>XAUUSD respects Fibonacci levels more than almost any other market because of the heavy algorithmic and institutional participation. The 38.2%, 50% and 61.8% retracements are obvious decision points that everyone trades.</p>
+
+<h2>The Fib Confluence Setup</h2>
+<ol>
+  <li>On H4 XAUUSD, identify a clear impulsive swing.</li>
+  <li>Draw Fibonacci from swing low to swing high (uptrend) or vice versa.</li>
+  <li>Mark the 38.2 / 50 / 61.8 levels.</li>
+  <li>Drop to M15 and wait for a reversal candle inside any Fib level.</li>
+  <li>Enter with SL beyond the next Fib level, TP back to the swing extreme.</li>
+</ol>
+
+<h2>Botvio Trend Filter</h2>
+<p>To avoid trading retracements that are actually trend reversals, Botvio overlays the H1 EMA 50. Long Fib trades only fire when price is above EMA 50, shorts only fire below. This single filter dramatically improves the win rate.</p>
+
+<h2>Automation &amp; Signals</h2>
+<p>Select <strong>XAUUSD — Fib Confluence</strong> inside Botvio and the bot handles the swing detection, level drawing and entry. Manual traders can subscribe to gold signals on the <a href="/signals">signals page</a>.</p>
+
+<h2>Conclusion</h2>
+<p>Fibonacci on gold is one of the highest-edge classic strategies — provided you combine it with trend filtering and strict SLs. Botvio does both for you.</p>
+    `
+  },
+
+  "xauusd-scalping-strategy-1min-5min": {
+    title: "XAUUSD Scalping Strategy on 1-Minute & 5-Minute Charts",
+    excerpt: "A complete intraday gold scalping system using EMA 20/50, RSI and Botvio's session liquidity map.",
+    category: "Gold",
+    readTime: "11 min",
+    date: "2026-05-29",
+    content: `
+<h2>Why Scalp XAUUSD?</h2>
+<p>Gold offers tight spreads (0.0–0.3 pips on raw-spread accounts), 24/5 liquidity and explosive moves during London and New York sessions. That is scalping paradise — if you have a system.</p>
+
+<h2>The EMA + RSI Scalp Setup</h2>
+<ol>
+  <li>Add EMA 20 and EMA 50 to the M1 and M5 charts.</li>
+  <li>Wait for the M5 to align (EMA 20 above EMA 50 = long bias).</li>
+  <li>On M1, wait for a pullback to EMA 20 with RSI between 40 and 60.</li>
+  <li>Enter on the next bullish candle close.</li>
+  <li>SL: 5 pips below the most recent swing low.</li>
+  <li>TP1: 1R (close 50%), trail rest with EMA 20.</li>
+</ol>
+
+<h2>Session Map</h2>
+<p>Best windows: London open (07:00–09:00 UTC) and New York open (13:30–15:30 UTC). Avoid the Asia session for scalping — too tight, too random.</p>
+
+<h2>Botvio Automation</h2>
+<p>Use <strong>XAUUSD — Session Scalper</strong> inside Botvio. The bot enforces the session window, EMA alignment, RSI filter and SL/TP automatically. Live signals also stream to the <a href="/signals">signals page</a>.</p>
+
+<h2>Risk Rules</h2>
+<p>Maximum 0.5% risk per scalp, maximum 3 simultaneous trades, daily loss cap 3%. Without these rules, scalping XAUUSD is a fast way to lose money.</p>
+
+<h2>Conclusion</h2>
+<p>Gold scalping is a process, not a feeling. EMA + RSI + session window + Botvio enforcement = a system you can run for years.</p>
+    `
+  },
+
+  "eurusd-london-breakout-strategy": {
+    title: "EURUSD London Breakout Strategy (Step-by-Step)",
+    excerpt: "The classic London open breakout, rebuilt for 2026 with Botvio confirmation, ATR stops and clear invalidation rules.",
+    category: "Forex",
+    readTime: "10 min",
+    date: "2026-05-28",
+    content: `
+<h2>Why the London Breakout Still Works</h2>
+<p>The London open (07:00 UTC) brings 35–40% of daily forex volume. EURUSD usually breaks the Asia session range within the first 30 minutes — and that breakout is one of the most reliable intraday setups in forex.</p>
+
+<h2>The Setup</h2>
+<ol>
+  <li>At 06:55 UTC, mark the high and low of the Asia session (22:00–06:55 UTC).</li>
+  <li>Wait for a 15-minute candle close outside the range.</li>
+  <li>Enter in the breakout direction.</li>
+  <li>SL: opposite side of the Asia range.</li>
+  <li>TP1: range width (1R), trail rest with M15 EMA 20.</li>
+</ol>
+
+<h2>Botvio Confirmation</h2>
+<p>Botvio adds two filters: ATR ≥ 1.2× average to confirm real momentum, and EMA 20 slope alignment. With both filters, win rate jumps significantly compared to vanilla breakout strategies.</p>
+
+<h2>What to Avoid</h2>
+<ul>
+  <li>Trading on red-folder news days without confirmation.</li>
+  <li>Chasing the breakout 30+ minutes late.</li>
+  <li>Holding through New York close if TP is not hit — close and reassess.</li>
+</ul>
+
+<h2>Automation</h2>
+<p>Select <strong>EURUSD — London Breakout</strong> in Botvio. The bot waits for the candle close, fires the entry, manages the SL/TP and respects the daily loss cap. Signals also publish on the <a href="/signals">signals page</a>.</p>
+
+<h2>Conclusion</h2>
+<p>The London breakout is simple, repeatable and quantifiable. Add Botvio's filters and you'll trade it with consistency instead of guesswork.</p>
+    `
+  },
+
+  "risk-management-trading-2-percent-rule": {
+    title: "Risk Management for Traders — The 2% Rule, Done Right",
+    excerpt: "Position sizing, daily loss limits, kill switches and how Botvio's risk guardrails protect your account 24/7.",
+    category: "Education",
+    readTime: "10 min",
+    date: "2026-05-27",
+    content: `
+<h2>Why Risk Management Beats Strategy</h2>
+<p>You can run an average strategy with great risk management and still grow your account. You cannot run a great strategy with bad risk management and survive. Risk management is the strategy.</p>
+
+<h2>The 2% Rule</h2>
+<p>Never risk more than 2% of your account on a single trade. For a $1,000 account, that is $20 of potential loss per trade. With a 1:2 R:R you need a win rate above 33% to be profitable — which most traders can achieve.</p>
+
+<h2>Daily Loss Limit</h2>
+<p>Cap daily losses at 5% of the account. After three consecutive losses, stop trading for the day. Botvio enforces this automatically with a 10-minute lockout after 3 consecutive losses and a hard daily loss cap.</p>
+
+<h2>Position Sizing Formula</h2>
+<p><code>Position size = (Account × Risk %) / (SL pips × Pip value)</code></p>
+<p>Botvio calculates this for every trade automatically. Manual traders can use a <a href="/blog/forex-position-sizing-calculator-guide">position sizing calculator</a> instead.</p>
+
+<h2>Kill Switches</h2>
+<ul>
+  <li>Maximum 3 consecutive losses → 10-min cooldown.</li>
+  <li>Maximum 5% daily loss → stop trading for the day.</li>
+  <li>Maximum 20 trades per session → no overtrading.</li>
+</ul>
+
+<h2>Why Botvio Bakes This In</h2>
+<p>Discipline is hard. The whole point of automation is to take the decision away from the emotional trader. Botvio enforces every risk rule above by default — you cannot disable them in live mode.</p>
+
+<h2>Conclusion</h2>
+<p>The 2% rule is not boring — it's the reason traders stay in business. Apply it religiously and your strategy will have time to work.</p>
+    `
+  },
+
+  "forex-position-sizing-calculator-guide": {
+    title: "Forex Position Sizing — Free Lot Calculator Guide",
+    excerpt: "How to calculate exact lot size for any forex, gold or index trade, with worked examples and Botvio auto-sizing.",
+    category: "Education",
+    readTime: "9 min",
+    date: "2026-05-26",
+    content: `
+<h2>Why Position Sizing Matters</h2>
+<p>Position sizing is the single biggest determinant of long-term profitability. A 1% risk per trade survives 100 losing trades in a row; a 10% risk does not survive 10.</p>
+
+<h2>The Formula</h2>
+<p><code>Lot size = (Account × Risk %) / (SL in pips × Pip value)</code></p>
+<p>For a $1,000 account, 1% risk, 20-pip SL on EURUSD ($10/pip per lot):</p>
+<p><code>Lot = (1000 × 0.01) / (20 × 10) = 0.05 lots</code></p>
+
+<h2>Worked Examples</h2>
+<ul>
+  <li><strong>EURUSD, 30-pip SL, 2% risk, $5,000 account:</strong> Lot = (5000×0.02)/(30×10) = 0.33 lots.</li>
+  <li><strong>XAUUSD, 300-pip SL, 1% risk, $1,000 account:</strong> Lot = (1000×0.01)/(300×1) = 0.03 lots.</li>
+  <li><strong>US30, 50-point SL, 1% risk, $2,000 account:</strong> Lot = (2000×0.01)/(50×1) = 0.4 lots.</li>
+</ul>
+
+<h2>Botvio Auto-Sizing</h2>
+<p>Botvio calculates lot size for every trade automatically using the configured account, risk % and SL distance. The number you see in the bot UI is the exact lot size that respects your risk rule.</p>
+
+<h2>Common Mistakes</h2>
+<ul>
+  <li>Using "fixed lot" sizing across very different SL distances.</li>
+  <li>Ignoring instrument pip value differences (XAUUSD vs EURUSD vs US30).</li>
+  <li>Increasing lot size after losses ("revenge sizing").</li>
+</ul>
+
+<h2>Conclusion</h2>
+<p>Position sizing is math, not opinion. Apply the formula every trade, or let Botvio do it for you — your future self will thank you.</p>
+    `
+  },
+
+  "choosing-best-forex-broker-zambia-africa": {
+    title: "Choosing the Best Forex Broker in Zambia & Africa (2026)",
+    excerpt: "Local-friendly forex brokers for Zambia, Nigeria, Kenya and South Africa — fees, payments, regulation and signal compatibility.",
+    category: "Brokers",
+    readTime: "11 min",
+    date: "2026-05-25",
+    content: `
+<h2>What African Traders Actually Need</h2>
+<p>Most "best broker" lists are written for European traders. African traders need: mobile-money deposits, tight gold spreads, low minimum deposits, fast withdrawals and reliable customer support in local time zones.</p>
+
+<h2>The Shortlist</h2>
+<p><strong>Deriv.</strong> Strong for synthetic indices and binary options, $5 minimum deposit, mobile-money support in several African countries, perfect compatibility with Botvio auto-execute.</p>
+<p><strong>Exness.</strong> Best raw spreads on XAUUSD and EURUSD, instant withdrawals, strong regulation, local payment partners across Africa.</p>
+<p><strong>Weltrade.</strong> Friendly for new traders, copy-trading focused, low minimum deposit, good local support in Nigeria and Kenya.</p>
+<p><strong>HFM (HotForex).</strong> Good education, multiple account types, regulated, supports African payment methods.</p>
+
+<h2>What to Look For</h2>
+<ul>
+  <li>Regulation (FSA, FSCA, CySEC).</li>
+  <li>Spreads on the instruments you actually trade.</li>
+  <li>Deposit/withdrawal methods that work in your country.</li>
+  <li>Compatibility with Botvio signals and auto-execute.</li>
+  <li>Customer support in your time zone.</li>
+</ul>
+
+<h2>What to Avoid</h2>
+<ul>
+  <li>Unregulated brokers, no matter how nice the bonuses look.</li>
+  <li>Brokers without local payment methods (FX conversion eats profits).</li>
+  <li>Brokers that block algorithmic trading or scalping.</li>
+</ul>
+
+<h2>Conclusion</h2>
+<p>For Zambian and African traders, Deriv + Exness covers 95% of needs. Both integrate cleanly with Botvio, both support local payments and both offer the spreads serious traders need.</p>
+    `
+  },
+
+  "trading-psychology-discipline-rules": {
+    title: "Trading Psychology — 10 Discipline Rules That Compound",
+    excerpt: "The mindset rules pro traders use to stay consistent when the market gets emotional, plus Botvio guardrails to enforce them.",
+    category: "Education",
+    readTime: "10 min",
+    date: "2026-05-24",
+    content: `
+<h2>Strategy Without Psychology Is Useless</h2>
+<p>Two traders run the same strategy. One compounds, one blows up. The difference is discipline. Here are the ten rules that separate the two.</p>
+
+<h2>The 10 Rules</h2>
+<ol>
+  <li><strong>Never risk more than 2% per trade.</strong> Ever.</li>
+  <li><strong>Stop after 3 consecutive losses.</strong> Take a 30-minute break.</li>
+  <li><strong>Daily loss cap at 5%.</strong> No exceptions.</li>
+  <li><strong>Trade your plan, not your feelings.</strong> If the setup isn't there, you don't trade.</li>
+  <li><strong>Journal every trade.</strong> Entry, exit, reason, emotion.</li>
+  <li><strong>No screen time without a plan.</strong> Define what you will do today before you open the chart.</li>
+  <li><strong>No revenge trades.</strong> The market doesn't owe you anything.</li>
+  <li><strong>Take profits when the plan says so.</strong> Greed is more expensive than discipline.</li>
+  <li><strong>Review weekly.</strong> What worked, what didn't, what changes for next week.</li>
+  <li><strong>Protect the routine.</strong> Sleep, exercise, no trading drunk or tired.</li>
+</ol>
+
+<h2>How Botvio Enforces These Automatically</h2>
+<p>Botvio bakes rules 1–3 and 7 into the bot itself: position size is locked to your risk %, the bot pauses after 3 losses, daily loss cap stops trading, and the bot won't take revenge trades because it has no emotions. The other rules are still on you — but the bot removes the biggest temptations.</p>
+
+<h2>Conclusion</h2>
+<p>Strategy gets you in the game. Psychology keeps you there. The traders who win are not the smartest — they are the most disciplined.</p>
+    `
+  },
+
+  "ai-trading-bots-vs-human-traders-2026": {
+    title: "AI Trading Bots vs Human Traders in 2026 — Who Wins?",
+    excerpt: "A data-driven look at AI bots vs discretionary traders in 2026 across forex, gold, crypto and synthetic indices.",
+    category: "AI Trading",
+    readTime: "11 min",
+    date: "2026-05-23",
+    content: `
+<h2>The Honest Answer</h2>
+<p>AI bots and human traders win at different things. The interesting question in 2026 is not "who is better" but "what does each do better, and how do you combine them?"</p>
+
+<h2>Where AI Bots Win</h2>
+<ul>
+  <li><strong>Speed:</strong> microseconds vs human reaction time.</li>
+  <li><strong>Consistency:</strong> the bot trades the same plan today, tomorrow and at 3am.</li>
+  <li><strong>Risk discipline:</strong> no revenge trades, no over-sizing.</li>
+  <li><strong>Coverage:</strong> 24/7 across many instruments.</li>
+  <li><strong>Backtesting:</strong> statistically validated strategies, not opinions.</li>
+</ul>
+
+<h2>Where Humans Still Win</h2>
+<ul>
+  <li><strong>Context:</strong> reading geopolitics, central-bank tone, narrative shifts.</li>
+  <li><strong>Adaptation:</strong> spotting regime changes weeks before the data confirms them.</li>
+  <li><strong>Creativity:</strong> building new strategies, not just running them.</li>
+  <li><strong>Discretion:</strong> stepping aside when nothing makes sense.</li>
+</ul>
+
+<h2>The 2026 Winner: Human + Bot</h2>
+<p>The traders crushing it in 2026 use AI bots like Botvio to handle execution, risk and 24/7 coverage, and use their human judgement for bias, instrument selection and macro overlay. This is the same model hedge funds use — quants execute, PMs steer.</p>
+
+<h2>How Botvio Fits</h2>
+<p>Botvio is built for this hybrid model. The AI engine generates signals, the bot executes with risk controls, and you stay in charge of which strategies are enabled, which instruments are on, and when to step aside.</p>
+
+<h2>Conclusion</h2>
+<p>It's not bots vs humans. It's bots + humans vs the rest of the market. That's the 2026 edge — and it's available to every Botvio user today.</p>
+    `
+  },
 };
 
