@@ -1,5 +1,5 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,20 +111,25 @@ export default function MarketAnalysis() {
     })),
   };
 
+  useEffect(() => {
+    const nodes: HTMLScriptElement[] = [];
+    [breadcrumbJsonLd, faqJsonLd].forEach((data) => {
+      const s = document.createElement("script");
+      s.type = "application/ld+json";
+      s.text = JSON.stringify(data);
+      s.dataset.botvioJsonld = "market-analysis";
+      document.head.appendChild(s);
+      nodes.push(s);
+    });
+    return () => nodes.forEach((n) => n.remove());
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Daily Market Analysis — Gold, EURUSD, GBPUSD & BTCUSD Forecast"
         description="Daily forex and crypto market analysis from Botvio. Gold (XAUUSD), EURUSD, GBPUSD and BTCUSD forecasts updated every trading day with key levels and trade setups."
       />
-      <Helmet>
-        <link rel="canonical" href="https://botvio.live/market-analysis" />
-        <meta property="og:title" content="Daily Market Analysis — Botvio" />
-        <meta property="og:url" content="https://botvio.live/market-analysis" />
-        <meta property="og:type" content="website" />
-        <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
-        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
-      </Helmet>
       <Header />
       <main className="container mx-auto px-4 py-10 max-w-6xl">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs text-muted-foreground">
