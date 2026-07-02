@@ -166,14 +166,47 @@ const BlogPost = () => {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
-    description: post.excerpt,
-    datePublished: post.date,
-    author: { "@type": "Organization", name: "Botvio" },
-    publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live", logo: { "@type": "ImageObject", url: "https://botvio.live/icon-512.png" } },
-    mainEntityOfPage: `https://botvio.live/blog/${slug}`,
-    image: post.coverImage || `https://botvio.live/blog/${slug}.png`,
+    "@graph": [
+      {
+        "@type": "Article",
+        headline: post.title,
+        description: post.excerpt,
+        datePublished: post.date,
+        dateModified: post.date,
+        author: { "@type": "Organization", name: "Botvio", url: "https://botvio.live" },
+        publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live", logo: { "@type": "ImageObject", url: "https://botvio.live/icon-512.png" } },
+        mainEntityOfPage: `https://botvio.live/blog/${slug}`,
+        image: post.coverImage || `https://botvio.live/blog/${slug}.png`,
+        articleSection: post.category,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+          { "@type": "ListItem", position: 2, name: "Blog", item: "https://botvio.live/blog" },
+          { "@type": "ListItem", position: 3, name: post.title, item: `https://botvio.live/blog/${slug}` },
+        ],
+      },
+      ...(() => {
+        // Extract H3 FAQ pairs from post.content (h3 = question, following p = answer)
+        const faqs: { q: string; a: string }[] = [];
+        const html = post.content || "";
+        const re = /<h3[^>]*>([^<]+?\?)<\/h3>\s*<p[^>]*>([\s\S]*?)<\/p>/g;
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(html)) && faqs.length < 8) {
+          faqs.push({ q: m[1].trim(), a: m[2].replace(/<[^>]+>/g, "").trim() });
+        }
+        if (!faqs.length) return [];
+        return [{
+          "@type": "FAQPage",
+          mainEntity: faqs.map(f => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }];
+      })(),
+    ],
   };
 
   const ogImage = post.coverImage || `/blog/${slug}.png`;
