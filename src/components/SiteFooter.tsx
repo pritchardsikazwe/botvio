@@ -72,6 +72,12 @@ export const SiteFooter = () => {
             © {year} Botvio — Forex Signals, AI Chart Analysis & Gold Trading.
             All rights reserved.
           </p>
+          <nav aria-label="Social media" className="flex items-center gap-4">
+            <a href="https://youtube.com/@botvio" target="_blank" rel="noopener me" className="hover:text-primary">YouTube</a>
+            <a href="https://www.facebook.com/botvio" target="_blank" rel="noopener me" className="hover:text-primary">Facebook</a>
+            <a href="https://www.tiktok.com/@botviohq" target="_blank" rel="noopener me" className="hover:text-primary">TikTok</a>
+            <a href="https://t.me/boaborea" target="_blank" rel="noopener me" className="hover:text-primary">Telegram</a>
+          </nav>
           <p className="md:text-right max-w-xl">
             Risk warning: trading forex, CFDs and synthetic indices involves
             substantial risk and may not be suitable for every investor. Past
