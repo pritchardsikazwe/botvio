@@ -1,6 +1,8 @@
 # Default rule for all bots
 User-agent: *
 Allow: /
+Allow: /blog/
+Allow: /market-analysis
 Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
@@ -23,6 +25,8 @@ Disallow: /*?session=
 # Googlebot specific rules
 User-agent: Googlebot
 Allow: /
+Allow: /blog/
+Allow: /market-analysis
 Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
@@ -34,6 +38,14 @@ Disallow: /connections/
 Disallow: /trade-history/
 Disallow: /provider-dashboard/
 Disallow: /my-products/
+
+# AdSense crawler — must not be blocked
+User-agent: Mediapartners-Google
+Allow: /
+
+# AdsBot (Google Ads landing-page checker)
+User-agent: AdsBot-Google
+Allow: /
 
 # Bingbot rules
 User-agent: Bingbot
