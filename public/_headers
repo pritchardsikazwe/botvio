@@ -27,3 +27,8 @@
 /*
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(self)
+  Content-Security-Policy: default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-src https:; object-src 'none'; base-uri 'self'; form-action 'self' https:; upgrade-insecure-requests
+  X-XSS-Protection: 1; mode=block
