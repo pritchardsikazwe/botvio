@@ -121,7 +121,7 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false, homeMode = fa
   const handleEnrollClick = (course: CourseProgram) => {
     if (course.isFree) {
       if (onEnroll) onEnroll(course.category);
-      else navigate(`/learn?category=${course.category}`);
+      else navigate(`/learn/${course.category}`);
       return;
     }
     if (!user) {
@@ -209,7 +209,7 @@ export const CourseEnrollmentCards = ({ onEnroll, compact = false, homeMode = fa
             onEnroll={() => handleEnrollClick(program)}
             onViewLessons={() => {
               if (onEnroll) onEnroll(program.category);
-              else navigate(`/learn?category=${program.category}`);
+              else navigate(`/learn/${program.category}`);
             }}
             enrolling={enrollingId === program.id}
           />

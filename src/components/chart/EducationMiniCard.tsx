@@ -21,7 +21,7 @@ export function EducationMiniCard() {
           {MINI_LESSONS.map((lesson) => (
             <div
               key={lesson.slug}
-              onClick={() => navigate(`/learn/${lesson.slug}?category=botvio-sniper`)}
+              onClick={() => navigate(`/learn/botvio-sniper/${lesson.slug}`)}
               className="flex items-center justify-between px-3 py-2 rounded-lg bg-muted/20 border border-border/30 cursor-pointer hover:bg-muted/40 transition-all"
             >
               <span className="text-xs text-foreground font-medium">{lesson.title}</span>
