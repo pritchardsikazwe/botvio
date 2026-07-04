@@ -148,6 +148,38 @@ const Lesson = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={`${lesson.title} — Botvio Academy`}
+        description={lesson.content.replace(/[#*`>\-]/g, "").slice(0, 155).trim()}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "LearningResource",
+              name: lesson.title,
+              url: `https://botvio.live/learn/${category}/${lesson.slug}`,
+              inLanguage: "en",
+              learningResourceType: "Lesson",
+              educationalLevel: "beginner-to-advanced",
+              isPartOf: {
+                "@type": "Course",
+                name: category.replace(/-/g, " "),
+                url: `https://botvio.live/learn/${category}`,
+                provider: { "@type": "Organization", name: "Botvio", sameAs: "https://botvio.live" },
+              },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+                { "@type": "ListItem", position: 2, name: "Learn", item: "https://botvio.live/learn" },
+                { "@type": "ListItem", position: 3, name: category.replace(/-/g, " "), item: `https://botvio.live/learn/${category}` },
+                { "@type": "ListItem", position: 4, name: lesson.title, item: `https://botvio.live/learn/${category}/${lesson.slug}` },
+              ],
+            },
+          ],
+        }}
+      />
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
