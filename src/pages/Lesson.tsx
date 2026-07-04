@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { SEOHead } from "@/components/seo/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
@@ -16,14 +17,13 @@ interface Lesson {
 }
 
 const Lesson = () => {
-  const { slug } = useParams();
-  const [searchParams] = useSearchParams();
+  const { slug, category: pathCategory } = useParams<{ slug: string; category?: string }>();
   const navigate = useNavigate();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const category = searchParams.get("category") || "botvio-sniper";
+  const category = pathCategory || "botvio-sniper";
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -134,7 +134,7 @@ const Lesson = () => {
         <Header />
         <div className="container mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Lesson Not Found</h1>
-          <Button onClick={() => navigate(`/learn?category=${category}`)}>Back to Academy</Button>
+          <Button onClick={() => navigate(`/learn/${category}`)}>Back to Academy</Button>
         </div>
       </div>
     );
@@ -142,18 +142,53 @@ const Lesson = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={`${lesson.title} — Botvio Academy`}
+        description={lesson.content.replace(/[#*`>\-]/g, "").slice(0, 155).trim()}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "LearningResource",
+              name: lesson.title,
+              url: `https://botvio.live/learn/${category}/${lesson.slug}`,
+              inLanguage: "en",
+              learningResourceType: "Lesson",
+              educationalLevel: "beginner-to-advanced",
+              isPartOf: {
+                "@type": "Course",
+                name: category.replace(/-/g, " "),
+                url: `https://botvio.live/learn/${category}`,
+                provider: { "@type": "Organization", name: "Botvio", sameAs: "https://botvio.live" },
+              },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+                { "@type": "ListItem", position: 2, name: "Learn", item: "https://botvio.live/learn" },
+                { "@type": "ListItem", position: 3, name: category.replace(/-/g, " "), item: `https://botvio.live/learn/${category}` },
+                { "@type": "ListItem", position: 4, name: lesson.title, item: `https://botvio.live/learn/${category}/${lesson.slug}` },
+              ],
+            },
+          ],
+        }}
+      />
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/learn?category=${category}`)}>
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Academy
-          </Button>
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mb-6">
+          <Link to="/" className="hover:text-primary">Home</Link>
           <span>/</span>
-          <span>Lesson {lesson.lesson_number}</span>
-        </div>
+          <Link to="/learn" className="hover:text-primary">Learn</Link>
+          <span>/</span>
+          <Link to={`/learn/${category}`} className="hover:text-primary capitalize">
+            {category.replace(/-/g, " ")}
+          </Link>
+          <span>/</span>
+          <span className="text-foreground">Lesson {lesson.lesson_number}</span>
+        </nav>
 
         {/* Lesson Content */}
         <div className="glass-card p-8 mb-8">
@@ -172,7 +207,7 @@ const Lesson = () => {
           {prevLesson ? (
             <Button 
               variant="outline" 
-              onClick={() => navigate(`/learn/${prevLesson.slug}?category=${category}`)}
+              onClick={() => navigate(`/learn/${category}/${prevLesson.slug}`)}
             >
               <ChevronLeft className="w-4 h-4 mr-2" />
               {prevLesson.title}
@@ -184,13 +219,13 @@ const Lesson = () => {
           {nextLesson ? (
             <Button 
               variant="default" 
-              onClick={() => navigate(`/learn/${nextLesson.slug}?category=${category}`)}
+              onClick={() => navigate(`/learn/${category}/${nextLesson.slug}`)}
             >
               {nextLesson.title}
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={() => navigate(`/learn?category=${category}`)}>
+            <Button onClick={() => navigate(`/learn/${category}`)}>
               Complete Course
             </Button>
           )}

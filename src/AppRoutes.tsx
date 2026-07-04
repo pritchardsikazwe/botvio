@@ -169,7 +169,8 @@ export const AppRoutes = () => (
     <Route path="contact" element={<Contact />} />
     <Route path="disclaimer" element={<Disclaimer />} />
     <Route path="learn" element={<Learn />} />
-    <Route path="learn/:slug" element={<Lesson />} />
+    <Route path="learn/:category" element={<Learn />} />
+    <Route path="learn/:category/:slug" element={<Lesson />} />
     <Route path="forex-beginner-guide" element={<BeginnerGuide />} />
     <Route path="beginner-guide" element={<BeginnerGuide />} />
     <Route path="auth/deriv/callback" element={<DerivCallback />} />

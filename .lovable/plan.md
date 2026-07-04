@@ -1,94 +1,109 @@
-## Organic Traffic Expansion Plan
+## Goal
 
-Three parallel workstreams: content depth (30 new posts), on-page SEO polish, and multilingual reach.
+Move Botvio's learning academy from `?category=` query URLs to clean, SEO-friendly path URLs, add category-page SEO (canonical, Course/Breadcrumb schema, metadata), preserve rankings via 301-style redirects, and expand the category taxonomy.
 
-### 1. Content: 30 new long-form articles (800–1200 words each)
+## Scope (this migration)
 
-Added to `src/content/blogPosts.ts`. Category mix targets high-intent long-tail:
+Focused on the Learn/education surface — the actual "courses" the user cites. Blog, strategies, and other slugs already use clean URLs and are out of scope.
 
-**Synthetic Indices (Deriv) — 8 posts**
-- Volatility 75 Index scalping strategy 2026
-- Boom 1000 vs Boom 500: which pays more
-- Crash 300 Index spike trading guide
-- Step Index vs Range Break: choosing the right synthetic
-- Jump 25 Index strategy for beginners
-- Deriv MT5 vs DTrader: which platform wins
-- Deriv accumulator options: full playbook
-- V10 (1s) micro-scalping tactics
+## URL structure
 
-**Gold / XAUUSD — 6 posts**
-- XAUUSD London session breakout system
-- Gold NY open reversal strategy
-- Gold correlation with DXY explained
-- XAUUSD scalping with EMA 20/50 confluence
-- Gold weekly forecast framework
-- Trading gold during FOMC (safe entry rules)
+```
+/learn                              → academy index (all categories)
+/learn/:category                    → category page (e.g. /learn/forex, /learn/smart-money-concepts)
+/learn/:category/:lesson            → lesson page
+```
 
-**Forex majors — 6 posts**
-- EURUSD Asian range breakout playbook
-- GBPUSD London killzone strategy
-- USDJPY carry trade guide
-- GBPJPY volatility scalping
-- Best forex pairs for African traders
-- Best forex pairs for Asian traders (INR, PKR, PHP context)
+Legacy → new (client-side 301-equivalent using `<Navigate replace>`):
+- `/learn?category=X`           → `/learn/X`
+- `/learn/:lesson?category=X`   → `/learn/X/:lesson`
 
-**Crypto — 4 posts**
-- BTCUSD daily bias framework
-- ETH/BTC ratio for altseason timing
-- Crypto scalping on Binance: 5m setup
-- Trading Bitcoin halving cycles
+Slugs are lowercase, hyphen-separated, unique. True HTTP 301s are not possible from a static SPA; permanent client redirects + updated sitemap + canonical tags carry the SEO signal, which is the standard SPA pattern.
 
-**Regional / Broker — 6 posts**
-- Best forex brokers in Zambia 2026
-- Best forex brokers in Nigeria (regulated list)
-- Deriv payment methods in Kenya
-- Forex trading in South Africa: FSCA rules
-- Deriv India: legality + funding guide
-- Forex in Pakistan: brokers + PKR funding
-- Forex trading in the Philippines
+## Database
 
-Each article includes: intro hook, strategy/steps, risk parameters, worked example, common mistakes, FAQ (3–5 Qs), CTA to relevant signal/hub page, and 3–5 internal links.
+Add categories as first-class rows so slugs, titles, descriptions, and SEO metadata are editable in one place.
 
-### 2. Internal linking + schema
+```
+public.learn_categories(
+  id, slug (unique), name, description,
+  parent_slug, sort_order, icon, hero_image_url,
+  seo_title, seo_description, is_active,
+  created_at, updated_at
+)
+```
 
-**BlogPost.tsx**
-- Article + BreadcrumbList + FAQPage JSON-LD injected per post
-- Author byline block (Botvio Research Desk)
-- Related posts widget (3 posts, same category)
-- Table of contents for posts >800 words
-- Contextual "Trade this now" CTA linking to the relevant hub (`/gold`, `/chart/EURUSD`, `/binance`, etc.)
+`education_lessons` already has `slug` + `category`; add FK-style `category_slug` alignment and backfill. New lessons/categories auto-generate slugs (slugify on insert) with uniqueness check.
 
-**MarketAnalysis.tsx + hub pages**
-- Add "Latest analysis" strip linking to newest 6 blog posts
-- Reciprocal links from `/gold`, `/chart/*`, `/binance` back to relevant analysis articles
+Seed the expanded taxonomy from the user's list, grouped by parent:
+- Financial Markets (forex, smc, ict, price-action, gold, synthetic-indices, boom-crash, crypto, binary-options, …)
+- Investing (stock-investing, etf, reits, dividend, …)
+- Make Money Online (affiliate-marketing, blogging, youtube-automation, freelancing, …)
+- Side Hustles (student-side-hustles, ai-side-hustles, dropshipping, print-on-demand, …)
+- Business (business-planning, accounting, sales, branding, …)
+- Entrepreneurship (startup-funding, lean-startup, scaling, …)
 
-### 3. Multilingual SEO (FR, ES, PT, AR)
+## Routing changes
 
-- Extend `src/i18n/seoRegistry.ts` + `src/i18n/seo/{fr,es,pt,ar}.json` with translated titles/descriptions/keywords for: home, /signals, /gold, /market-analysis, /marketplace, /blog, /learn, /binance, /trade-modes
-- Sitemap already emits hreflang per language — verify `/market-analysis` and blog slugs are included
-- Regional article slugs (Zambia, Nigeria, India, etc.) remain English-only (regional audiences search in English)
+- `AppRoutes.tsx`: add `/learn/:category` and `/learn/:category/:lesson`; keep `/learn` index.
+- Add `<LegacyLearnRedirect />` mounted on `/learn` that reads `?category=` and `<Navigate replace to={/learn/${cat}}>`. Same for `/learn/:lesson?category=`.
+- `Learn.tsx`: when `:category` param present, filter to that category; otherwise show all-category index.
+- `Lesson.tsx`: read category from path, remove query-param reads; update prev/next/back links.
 
-### 4. Sitemap + robots
+## SEO per page
 
-- Add `/market-analysis` and all 30 new blog slugs to `supabase/functions/sitemap-xml/index.ts` (dynamic — pulled from `blogPosts.ts`? No, blog posts live in code, so hardcode via a static list export from `blogPosts.ts`)
-- Confirm robots.txt still allows `/blog/` and `/market-analysis`
+Every `/learn/:category` and `/learn/:category/:lesson` gets:
+- Dynamic `<title>` and meta description (from DB or derived).
+- `<link rel="canonical">` self-referencing the clean URL (handled by existing `SEOHead`).
+- Open Graph + Twitter tags.
+- JSON-LD: `BreadcrumbList` (Home › Learn › Category › Lesson) and `Course` schema on category/lesson pages (name, description, provider = Botvio, inLanguage, educationalLevel).
+- Visible breadcrumb component at top of category/lesson pages.
 
-### Technical details
+## Internal links
 
-- `blogPosts.ts` grows by ~30 entries with `slug`, `title`, `description`, `keywords`, `category`, `date`, `readTime`, `content` (HTML). No DB migration.
-- JSON-LD via inline `<script type="application/ld+json">` in BlogPost.tsx `<Helmet>`.
-- Related posts: filter `blogPosts` by category, exclude current slug, take 3.
-- No new dependencies. No backend/edge function changes except sitemap update.
+Update every place that links to `?category=`:
+- `src/pages/Learn.tsx` (lesson cards)
+- `src/pages/Lesson.tsx` (back / prev / next)
+- `src/components/chart/EducationMiniCard.tsx`
+- `src/components/courses/CourseEnrollmentCards.tsx`
+- Footer, homepage learn tiles, search results, related-course widgets
 
-### Files touched
-- `src/content/blogPosts.ts` (append 30 posts)
-- `src/pages/BlogPost.tsx` (JSON-LD, byline, related posts, TOC)
-- `src/pages/MarketAnalysis.tsx` (latest-analysis strip)
-- `src/i18n/seo/{fr,es,pt,ar}.json` (translated metadata)
-- `src/i18n/seoRegistry.ts` (register new keys if needed)
-- `supabase/functions/sitemap-xml/index.ts` (add blog slugs + /market-analysis if missing)
+## Sitemap
 
-### Out of scope
-- Backlink outreach (off-platform)
-- Real Google Analytics/AdSense IDs (user-provided secrets)
-- Translating full article bodies (only meta translated — bodies stay English)
+Update `supabase/functions/sitemap-xml/index.ts`:
+- Emit `/learn` + one entry per category (`/learn/:slug`) from `learn_categories`.
+- Continue emitting `/learn/:category/:lesson` for every published lesson under its category.
+- Remove any legacy `?category=` variants.
+
+## Admin
+
+Extend the admin education panel:
+- CRUD for `learn_categories` (slug editor with live preview + duplicate detection).
+- Slug regenerate button; on slug change, insert redirect mapping row so the old URL keeps resolving.
+- Lesson editor gains a category picker sourced from the new table.
+
+## Performance & polish
+
+- Lazy-load category hero images (`loading="lazy"`).
+- Prefetch adjacent lessons on hover.
+- No changes to build pipeline needed beyond what Vite already does (minify, code-split).
+
+## Out of scope
+
+- True 301 responses from origin (SPA constraint; client `Navigate replace` + canonical + sitemap is the intended equivalent).
+- Renaming `/learn` → `/courses` (the two options were alternatives; sticking with `/learn` for backwards continuity and existing indexed URLs).
+- Non-learning slugs (blog, strategies, chart pairs) — already clean.
+
+## Deliverables
+
+1. Migration: `learn_categories` table + seed rows + backfill of `education_lessons.category`.
+2. Route additions + legacy redirect components.
+3. `Learn.tsx` / `Lesson.tsx` rewrites to path-based params + breadcrumbs + Course/BreadcrumbList schema.
+4. All internal links updated.
+5. `sitemap-xml` edge function updated.
+6. Admin category manager.
+
+## Confirmations needed
+
+1. Keep the URL prefix as `/learn/...` (not `/courses/...`)?
+2. OK to add the full expanded taxonomy you listed (~120 categories) as seed data, even if most have zero lessons today? (Empty categories will render a "coming soon" state and still be indexable.)

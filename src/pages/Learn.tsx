@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasProductType, useHasEntitlement } from "@/hooks/useEntitlements";
@@ -188,10 +188,24 @@ const Learn = () => {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+  const { category: pathCategory } = useParams<{ category?: string }>();
+
   const FREE_LESSON_LIMIT = 2;
-  
-  const activeCategory = searchParams.get("category") || "botvio-sniper";
+
+  const queryCategory = searchParams.get("category");
+  const activeCategory = pathCategory || "botvio-sniper";
+
+  // Legacy support (runs after mount to preserve hook order):
+  //   /learn?category=X                 → /learn/X
+  //   /learn/:lessonSlug?category=X     → /learn/X/:lessonSlug
+  useEffect(() => {
+    if (!queryCategory) return;
+    if (pathCategory) {
+      navigate(`/learn/${queryCategory}/${pathCategory}`, { replace: true });
+    } else {
+      navigate(`/learn/${queryCategory}`, { replace: true });
+    }
+  }, [queryCategory, pathCategory, navigate]);
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -212,7 +226,7 @@ const Learn = () => {
   }, [activeCategory]);
 
   const handleCategoryChange = (category: string) => {
-    setSearchParams({ category });
+    navigate(`/learn/${category}`);
   };
 
   const activeCategoryInfo = strategyCategories.find(c => c.id === activeCategory);
@@ -220,7 +234,53 @@ const Learn = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead seoKey="learn" title="Learn Trading — Free Forex & Gold Trading Courses" description="Free trading education for beginners and advanced traders. Learn forex fundamentals, gold trading strategies, technical analysis, risk management, and how to use AI tools for smarter trading decisions." />
+      <SEOHead
+        seoKey={pathCategory ? undefined : "learn"}
+        title={
+          pathCategory && activeCategoryInfo
+            ? `${activeCategoryInfo.name} Course — Botvio Academy`
+            : "Learn Trading — Free Forex & Gold Trading Courses"
+        }
+        description={
+          pathCategory && activeCategoryInfo
+            ? `${activeCategoryInfo.description} Full lesson-by-lesson course inside the Botvio Trading Academy.`
+            : "Free trading education for beginners and advanced traders. Learn forex fundamentals, gold trading strategies, technical analysis, risk management, and how to use AI tools for smarter trading decisions."
+        }
+        jsonLd={
+          pathCategory && activeCategoryInfo
+            ? {
+                "@context": "https://schema.org",
+                "@graph": [
+                  {
+                    "@type": "Course",
+                    name: activeCategoryInfo.name,
+                    description: activeCategoryInfo.description,
+                    provider: {
+                      "@type": "Organization",
+                      name: "Botvio",
+                      sameAs: "https://botvio.live",
+                    },
+                    inLanguage: "en",
+                    url: `https://botvio.live/learn/${activeCategory}`,
+                  },
+                  {
+                    "@type": "BreadcrumbList",
+                    itemListElement: [
+                      { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+                      { "@type": "ListItem", position: 2, name: "Learn", item: "https://botvio.live/learn" },
+                      {
+                        "@type": "ListItem",
+                        position: 3,
+                        name: activeCategoryInfo.name,
+                        item: `https://botvio.live/learn/${activeCategory}`,
+                      },
+                    ],
+                  },
+                ],
+              }
+            : undefined
+        }
+      />
       <Header />
 
       <main className="container mx-auto px-4 py-8">
@@ -355,7 +415,7 @@ const Learn = () => {
                 <Card 
                   key={lesson.id} 
                   className={`glass-card transition-all group ${isLocked ? 'opacity-60' : 'hover:border-primary/50 cursor-pointer'}`}
-                  onClick={() => !isLocked && navigate(`/learn/${lesson.slug}?category=${activeCategory}`)}
+                  onClick={() => !isLocked && navigate(`/learn/${activeCategory}/${lesson.slug}`)}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
