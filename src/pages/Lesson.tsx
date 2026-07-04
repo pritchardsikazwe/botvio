@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams, Navigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
@@ -18,18 +18,12 @@ interface Lesson {
 
 const Lesson = () => {
   const { slug, category: pathCategory } = useParams<{ slug: string; category?: string }>();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const queryCategory = searchParams.get("category");
-  // Legacy: /learn/:slug?category=X → /learn/X/:slug
-  if (!pathCategory && queryCategory && slug) {
-    return <Navigate to={`/learn/${queryCategory}/${slug}`} replace />;
-  }
-  const category = pathCategory || queryCategory || "botvio-sniper";
+  const category = pathCategory || "botvio-sniper";
 
   useEffect(() => {
     const fetchLessons = async () => {
