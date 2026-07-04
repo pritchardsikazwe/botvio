@@ -193,16 +193,19 @@ const Learn = () => {
   const FREE_LESSON_LIMIT = 2;
 
   const queryCategory = searchParams.get("category");
-  // Legacy support: /learn?category=X → /learn/X
-  // Legacy lesson: /learn/:lessonSlug?category=X → /learn/X/:lessonSlug
-  if (queryCategory) {
-    if (pathCategory) {
-      return <Navigate to={`/learn/${queryCategory}/${pathCategory}`} replace />;
-    }
-    return <Navigate to={`/learn/${queryCategory}`} replace />;
-  }
-
   const activeCategory = pathCategory || "botvio-sniper";
+
+  // Legacy support (runs after mount to preserve hook order):
+  //   /learn?category=X                 → /learn/X
+  //   /learn/:lessonSlug?category=X     → /learn/X/:lessonSlug
+  useEffect(() => {
+    if (!queryCategory) return;
+    if (pathCategory) {
+      navigate(`/learn/${queryCategory}/${pathCategory}`, { replace: true });
+    } else {
+      navigate(`/learn/${queryCategory}`, { replace: true });
+    }
+  }, [queryCategory, pathCategory, navigate]);
 
   useEffect(() => {
     const fetchLessons = async () => {
