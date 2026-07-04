@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams, Navigate } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasProductType, useHasEntitlement } from "@/hooks/useEntitlements";
@@ -188,10 +188,21 @@ const Learn = () => {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+  const { category: pathCategory } = useParams<{ category?: string }>();
+
   const FREE_LESSON_LIMIT = 2;
-  
-  const activeCategory = searchParams.get("category") || "botvio-sniper";
+
+  const queryCategory = searchParams.get("category");
+  // Legacy support: /learn?category=X → /learn/X
+  // Legacy lesson: /learn/:lessonSlug?category=X → /learn/X/:lessonSlug
+  if (queryCategory) {
+    if (pathCategory) {
+      return <Navigate to={`/learn/${queryCategory}/${pathCategory}`} replace />;
+    }
+    return <Navigate to={`/learn/${queryCategory}`} replace />;
+  }
+
+  const activeCategory = pathCategory || "botvio-sniper";
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -212,7 +223,7 @@ const Learn = () => {
   }, [activeCategory]);
 
   const handleCategoryChange = (category: string) => {
-    setSearchParams({ category });
+    navigate(`/learn/${category}`);
   };
 
   const activeCategoryInfo = strategyCategories.find(c => c.id === activeCategory);
@@ -355,7 +366,7 @@ const Learn = () => {
                 <Card 
                   key={lesson.id} 
                   className={`glass-card transition-all group ${isLocked ? 'opacity-60' : 'hover:border-primary/50 cursor-pointer'}`}
-                  onClick={() => !isLocked && navigate(`/learn/${lesson.slug}?category=${activeCategory}`)}
+                  onClick={() => !isLocked && navigate(`/learn/${activeCategory}/${lesson.slug}`)}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
