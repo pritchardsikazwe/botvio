@@ -234,14 +234,29 @@ ${alternates}
   // Dynamic pages: English-only for now (separate translation pipeline later)
   const { data: lessons } = await supabase
     .from("education_lessons")
-    .select("slug, created_at")
+    .select("slug, category, created_at")
     .order("lesson_number");
+  const categories = new Set<string>();
   lessons?.forEach((lesson) => {
+    if (lesson.category) categories.add(lesson.category);
+    const catPath = lesson.category
+      ? `/learn/${lesson.category}/${lesson.slug}`
+      : `/learn/${lesson.slug}`;
     urls.push(`  <url>
-    <loc>${siteUrl}/learn/${lesson.slug}</loc>
+    <loc>${siteUrl}${catPath}</loc>
     <lastmod>${lesson.created_at?.split("T")[0] || now}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>`);
+  });
+
+  // Category landing pages
+  categories.forEach((cat) => {
+    urls.push(`  <url>
+    <loc>${siteUrl}/learn/${cat}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>`);
   });
 
