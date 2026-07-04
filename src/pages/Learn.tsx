@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, useParams, Navigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasProductType, useHasEntitlement } from "@/hooks/useEntitlements";
