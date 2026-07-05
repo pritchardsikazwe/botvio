@@ -273,6 +273,47 @@ const Index = () => {
           <HomeSignalsWidget />
         </section>
 
+        {/* 1.5 — Join Signal Groups */}
+        <section>
+          <Card className="glass-card border-success/30 bg-gradient-to-br from-success/10 via-primary/5 to-transparent">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-foreground flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-success" />
+                    Get Free Signals Instantly
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Join our WhatsApp & Telegram groups for live entries, exits and market alerts.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:min-w-[360px]">
+                  <a
+                    href="https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Button className="w-full h-12 bg-success hover:bg-success/90 text-success-foreground font-extrabold gap-2">
+                      <MessageCircle className="h-4 w-4" /> Join WhatsApp Group
+                    </Button>
+                  </a>
+                  <a
+                    href="https://t.me/+AZjYpDncHEA5OTM0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Button className="w-full h-12 bg-[#229ED9] hover:bg-[#1b8dc4] text-white font-extrabold gap-2">
+                      <Signal className="h-4 w-4" /> 📩 Join Telegram
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
         {/* 2.5 — Training Videos */}
 
         {/* 2.5 — Training Videos */}
