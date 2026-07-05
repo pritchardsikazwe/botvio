@@ -1,3 +1,2 @@
 # ads.txt — https://iabtechlab.com/ads-txt/
-# Replace pub-XXXXXXXXXXXXXXXX with your real AdSense publisher ID once approved.
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-8741937856196827, DIRECT, f08c47fec0942fa0
