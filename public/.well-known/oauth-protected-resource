@@ -1,0 +1,7 @@
+{
+  "resource": "https://botvio.live/",
+  "authorization_servers": ["https://tqqkzeblmjapgbnsbtgw.supabase.co/auth/v1"],
+  "bearer_methods_supported": ["header"],
+  "scopes_supported": ["openid", "email", "profile"],
+  "resource_documentation": "https://botvio.live/docs"
+}

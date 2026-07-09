@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/schema/server-card.schema.json",
+  "serverInfo": {
+    "name": "botvio-mcp",
+    "title": "Botvio MCP",
+    "version": "0.1.0",
+    "description": "Botvio trading signals, market analysis and AI chart tools exposed via MCP."
+  },
+  "transport": {
+    "type": "http",
+    "url": "https://tqqkzeblmjapgbnsbtgw.supabase.co/functions/v1/mcp"
+  },
+  "capabilities": {
+    "tools": { "listChanged": false },
+    "resources": { "listChanged": false }
+  },
+  "authorization_servers": ["https://tqqkzeblmjapgbnsbtgw.supabase.co/auth/v1"]
+}
