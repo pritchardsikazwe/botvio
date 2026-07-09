@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agentskills.io/schemas/index.v0.2.0.json",
+  "version": "0.2.0",
+  "skills": [
+    {
+      "name": "botvio-forex-signals",
+      "type": "reference",
+      "description": "Discover current Botvio forex, gold and synthetic index signals with entry, SL and TP levels.",
+      "url": "https://botvio.live/signals",
+      "sha256": ""
+    },
+    {
+      "name": "botvio-market-analysis",
+      "type": "reference",
+      "description": "Live market analysis across US, Europe, Asia, crypto and commodities.",
+      "url": "https://botvio.live/market-analysis",
+      "sha256": ""
+    },
+    {
+      "name": "botvio-chart-analysis",
+      "type": "reference",
+      "description": "AI-powered chart analysis for uploaded price charts.",
+      "url": "https://botvio.live/chart-analysis",
+      "sha256": ""
+    }
+  ]
+}

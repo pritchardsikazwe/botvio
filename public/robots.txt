@@ -1,5 +1,6 @@
 # Default rule for all bots
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
 Allow: /blog/
 Allow: /market-analysis

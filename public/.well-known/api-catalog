@@ -1,0 +1,16 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://botvio.live/",
+      "service-desc": [
+        { "href": "https://botvio.live/openapi.json", "type": "application/json" }
+      ],
+      "service-doc": [
+        { "href": "https://botvio.live/docs", "type": "text/html" }
+      ],
+      "status": [
+        { "href": "https://botvio.live/api/health", "type": "application/json" }
+      ]
+    }
+  ]
+}
