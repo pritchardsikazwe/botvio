@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ interface AuthModalProps {
 
 export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -80,6 +82,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       toast({ title: "Welcome back!", description: "You have been signed in successfully." });
       onOpenChange(false);
       setEmail(""); setPassword("");
+      navigate("/deriv-app");
     }
     setLoading(false);
   };
