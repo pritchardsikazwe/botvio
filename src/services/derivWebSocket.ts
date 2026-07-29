@@ -277,15 +277,33 @@ export class DerivWebSocketService {
     this.emitStatus("closed");
   }
 
-  private scheduleReconnect() {
+  private scheduleReconnect(forcedDelayMs?: number) {
     this.clearReconnectTimer();
-    const delay = Math.min(
+
+    if (this.reconnectAttempt >= this.maxReconnectAttempts) {
+      this.log("Reconnect attempts exhausted. Please reconnect manually.");
+      this.emitError("Lost connection to Deriv. Please reconnect.");
+      this.emitStatus("closed");
+      return;
+    }
+
+    // Exponential backoff with full jitter (avoids thundering herd on Deriv)
+    const base = Math.min(
       this.reconnectMaxDelayMs,
       this.reconnectBaseDelayMs * Math.pow(2, this.reconnectAttempt),
     );
+    const delay = forcedDelayMs ?? Math.round(base / 2 + Math.random() * (base / 2));
     this.reconnectAttempt += 1;
-    this.log(`Reconnecting in ${delay}ms...`);
+    this.emitStatus("reconnecting");
+    this.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempt}/${this.maxReconnectAttempts})...`);
     this.reconnectTimer = window.setTimeout(async () => {
+      this.reconnectTimer = null;
+      if (this.isManualClose) return;
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        this.log("Offline — waiting for network before retrying");
+        this.scheduleReconnect();
+        return;
+      }
       try {
         if (this.otpMode && this.otpUrlGetter) {
           // For OTP mode, get a fresh OTP URL before reconnecting
@@ -333,8 +351,14 @@ export class DerivWebSocketService {
             this.activeContractSubscriptions.delete(contractId);
           }
         }
-      } catch {
-        // open() will trigger close/error handlers and schedule another reconnect
+
+        this.log("Reconnected to Deriv");
+      } catch (e) {
+        // If the socket never opened, no close event fires — schedule the next attempt here.
+        const isOpen = this.ws?.readyState === WebSocket.OPEN;
+        if (!isOpen && !this.isManualClose && this.autoReconnect && !this.reconnectTimer) {
+          this.scheduleReconnect();
+        }
       }
     }, delay);
   }
