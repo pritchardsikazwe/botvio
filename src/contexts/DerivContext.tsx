@@ -93,26 +93,75 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
     if (rehydrateAttempted.current) return;
     rehydrateAttempted.current = true;
 
-    const stored =
-      localStorage.getItem("deriv_pat_token") ||
-      localStorage.getItem("deriv_oauth_token");
+    /**
+     * Credential lookup order. Local storage is only a CREDENTIAL cache — never
+     * proof of authentication: we always re-run a live Deriv authorize below.
+     * 1. localStorage (PAT / OAuth token)
+     * 2. the active row in user_deriv_tokens (survives cleared browser storage)
+     * 3. a connected Deriv row in trading_accounts
+     */
+    const findCredential = async (): Promise<string | null> => {
+      const local =
+        localStorage.getItem("deriv_pat_token") ||
+        localStorage.getItem("deriv_oauth_token");
+      if (local && local.length >= 10) return local;
 
-    if (!stored || stored.length < 10) {
-      console.log("[DERIV][init] no stored Deriv session — status=disconnected");
-      setInitializing(false);
-      return;
-    }
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth?.user?.id;
+      if (!uid) return null;
 
-    console.log("[DERIV][init] rehydrating Deriv session from stored credentials");
-    derivAPI
-      .connect(stored)
-      .then((bal) => console.log(`[DERIV][init] session restored — accountId=${bal.loginid}`))
-      .catch((e) => {
+      const { data: tokenRows } = await supabase
+        .from("user_deriv_tokens" as any)
+        .select("token_encrypted, is_active, created_at")
+        .eq("user_id", uid)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const dbToken = (tokenRows as any[] | null)?.[0]?.token_encrypted;
+      if (dbToken && dbToken !== "session-active" && dbToken.length >= 10) return dbToken;
+
+      const { data: accountRows } = await supabase
+        .from("trading_accounts" as any)
+        .select("api_key_encrypted, created_at")
+        .eq("user_id", uid)
+        .eq("broker", "deriv")
+        .eq("connection_status", "connected")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const acctToken = (accountRows as any[] | null)?.[0]?.api_key_encrypted;
+      if (acctToken && acctToken.length >= 10) return acctToken;
+
+      return null;
+    };
+
+    (async () => {
+      let stored: string | null = null;
+      try {
+        stored = await findCredential();
+      } catch (e) {
+        console.warn("[DERIV][init] credential lookup failed");
+      }
+
+      if (!stored) {
+        console.log("[DERIV][init] no stored Deriv session — global connection state = disconnected");
+        setInitializing(false);
+        return;
+      }
+
+      console.log("[DERIV][init] rehydrating Deriv session — performing fresh authorization");
+      try {
+        const bal = await derivAPI.connect(stored);
+        localStorage.setItem("deriv_pat_token", stored);
+        console.log(`[DERIV] Authorization successful — Account: ${bal.loginid}`);
+        console.log("[DERIV] Global connection state = connected");
+      } catch (e) {
         console.warn("[DERIV][init] stored session invalid:", e instanceof Error ? e.message : e);
         localStorage.removeItem("deriv_pat_token");
         localStorage.removeItem("deriv_oauth_token");
-      })
-      .finally(() => setInitializing(false));
+      } finally {
+        setInitializing(false);
+      }
+    })();
   }, [derivAPI.connect]);
 
   /** Re-verify live authorization when the user returns to the tab / dashboard. */
@@ -178,15 +227,21 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
         is_virtual: info.is_virtual,
         currency: info.currency,
       });
-      // New multi-account token store - use a placeholder for encrypted token
-      // The actual encrypted token is stored during OAuth/API token flow
-      upsertToken({
-        loginid: info.loginid,
-        is_virtual: info.is_virtual,
-        currency: info.currency,
-        token_encrypted: "session-active",
-        label: info.is_virtual ? "Demo" : "Real",
-      });
+      // Multi-account token store. NEVER overwrite a stored credential with a
+      // placeholder — that used to wipe the token needed to re-authorize after
+      // a refresh. Only register the account when we still hold the credential.
+      const held =
+        localStorage.getItem("deriv_pat_token") ||
+        localStorage.getItem("deriv_oauth_token");
+      if (held && held.length >= 10) {
+        upsertToken({
+          loginid: info.loginid,
+          is_virtual: info.is_virtual,
+          currency: info.currency,
+          token_encrypted: held,
+          label: info.is_virtual ? "Demo" : "Real",
+        });
+      }
     }
   }, [derivAPI.authorized, derivAPI.accountInfo?.loginid]);
 
