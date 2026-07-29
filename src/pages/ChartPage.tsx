@@ -16,6 +16,7 @@ import { WatchlistCard } from "@/components/chart/WatchlistCard";
 
 import { EducationMiniCard } from "@/components/chart/EducationMiniCard";
 import { ChartAnalysisPanel } from "@/components/chart/ChartAnalysisPanel";
+import { ChartCreditsCard } from "@/components/chart/ChartCreditsCard";
 import { ChartBrokerLinks } from "@/components/chart/ChartBrokerLinks";
 import { BotvioStrategyCard } from "@/components/chart/HauzaStrategyCard";
 import { ChartTipsPanel } from "@/components/chart/ChartTipsPanel";
@@ -228,6 +229,7 @@ const ChartPage = () => {
               {/* RIGHT COLUMN (Sidebar) */}
               <div className="lg:col-span-4 xl:col-span-3 space-y-4">
                 <QuickActionsCard />
+                <ChartCreditsCard />
                 <BotvioStrategyCard
                   symbol={displaySymbol}
                   signal={signal?.signal ?? null}
