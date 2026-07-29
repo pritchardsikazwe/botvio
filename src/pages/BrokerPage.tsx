@@ -20,6 +20,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrokerButtons } from "@/components/signals/BrokerButtons";
 import { TopAssetsWidget } from "@/components/trading/TopAssetsWidget";
+import BrokerReview from "./BrokerReview";
+import { brokerReviews } from "@/data/brokerReviews";
 
 // ── Broker-specific strategies ──
 const BROKER_STRATEGIES: Record<string, Array<{
@@ -151,6 +153,11 @@ const BROKER_TIPS: Record<string, { dos: string[]; donts: string[]; proTip: stri
 
 const BrokerPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  // Editorial CFD/forex broker reviews (Deriv, Exness, HFM, XM, Weltrade,
+  // IC Markets, FP Markets) render the long-form review layout.
+  if (slug && brokerReviews[slug]) {
+    return <BrokerReview slug={slug} />;
+  }
   const { data: brokers } = useSignalBrokers();
   const { data: signals, refetch } = useManualSignals({ status: "ACTIVE", broker: slug || "all" });
   const trackClick = useTrackBrokerClick();

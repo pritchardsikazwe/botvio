@@ -111,6 +111,7 @@ import AsiaMarket from "./pages/markets/AsiaMarket";
 import CryptoMarket from "./pages/markets/CryptoMarket";
 import AfricaMarket from "./pages/markets/AfricaMarket";
 import BrokerPage from "./pages/BrokerPage";
+import BrokersIndex from "./pages/BrokersIndex";
 import BinaryOptions from "./pages/BinaryOptions";
 import LiveFeed from "./pages/LiveFeed";
 import FlippingChallenges from "./pages/FlippingChallenges";
@@ -274,6 +275,7 @@ export const AppRoutes = () => (
     <Route path="trade-modes" element={<Paid><TradeModes /></Paid>} />
     <Route path="deriv-options" element={<Paid><DerivOptions /></Paid>} />
     <Route path="binary-options" element={<Paid><BinaryOptions /></Paid>} />
+    <Route path="brokers" element={<BrokersIndex />} />
     <Route path="brokers/:slug" element={<BrokerPage />} />
     <Route path="live" element={<LiveFeed />} />
     <Route path="flipping-challenges" element={<FlippingChallenges />} />
