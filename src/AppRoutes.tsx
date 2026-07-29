@@ -102,6 +102,7 @@ import WeltradeTrade from "./pages/WeltradeTrade";
 import SyntheticHub from "./pages/SyntheticHub";
 import AutoTrade from "./pages/AutoTrade";
 import DerivOptions from "./pages/DerivOptions";
+import DerivApp from "./pages/DerivApp";
 import NewsCalendar from "./pages/NewsCalendar";
 import GlobalMarkets from "./pages/markets/GlobalMarkets";
 import USMarket from "./pages/markets/USMarket";
@@ -274,6 +275,7 @@ export const AppRoutes = () => (
     <Route path="markets/africa" element={<AfricaMarket />} />
     <Route path="trade-modes" element={<Paid><TradeModes /></Paid>} />
     <Route path="deriv-options" element={<Paid><DerivOptions /></Paid>} />
+    <Route path="deriv-app" element={<DerivApp />} />
     <Route path="binary-options" element={<Paid><BinaryOptions /></Paid>} />
     <Route path="brokers" element={<BrokersIndex />} />
     <Route path="brokers/:slug" element={<BrokerPage />} />
