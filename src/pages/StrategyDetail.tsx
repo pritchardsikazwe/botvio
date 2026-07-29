@@ -135,7 +135,7 @@ const StrategyDetail = () => {
   }
 
   const ogImageUrl = strategy.cover_image_url || `${window.location.origin}/placeholder.svg`;
-  const ogDescription = strategy.description || `Trading strategy for ${strategy.market}`;
+  const ogDescription = strategyExcerpt(strategy.description || "", 155) || `Trading strategy for ${strategy.market}`;
 
   return (
     <>
@@ -194,7 +194,7 @@ const StrategyDetail = () => {
                   <h1 className="text-3xl font-bold">{strategy.title}</h1>
                 </div>
                 
-                <p className="text-muted-foreground text-lg">{strategy.description}</p>
+                <p className="text-muted-foreground text-lg">{strategyExcerpt(strategy.description || "", 220)}</p>
                 
                 <div className="flex items-center gap-6 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -256,7 +256,7 @@ const StrategyDetail = () => {
                   prose-p:text-muted-foreground prose-p:leading-relaxed
                   prose-ul:my-2 prose-li:my-0.5">
                   {strategy.description ? (
-                    <div dangerouslySetInnerHTML={{ __html: formatDescription(strategy.description) }} />
+                    <div dangerouslySetInnerHTML={{ __html: renderStrategyMarkdown(strategy.description, strategy.title) }} />
                   ) : (
                     <p className="text-muted-foreground">{t("strategies.noDescription", "No description provided")}</p>
                   )}
