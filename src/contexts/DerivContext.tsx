@@ -4,6 +4,7 @@ import { useRunningTrades, RunningTrade } from "@/hooks/useRunningTrades";
 import { useActiveToken, ActiveToken } from "@/hooks/useActiveToken";
 import { useDerivTokens, DerivTokenRow } from "@/hooks/useDerivTokens";
 import { useDerivTrades } from "@/hooks/useDerivTrades";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DerivContextType {
   connected: boolean;
