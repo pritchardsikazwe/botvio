@@ -29,6 +29,9 @@ import {
   HelpCircle,
   ExternalLink,
   Copy,
+  Plus,
+  Power,
+  Trash2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +41,7 @@ const Connections = () => {
   const { user } = useAuth();
   const { derivTokens, switchDerivToken, removeDerivToken } = useDeriv();
   const [authOpen, setAuthOpen] = useState(false);
+  const [busyConnId, setBusyConnId] = useState<string | null>(null);
 
   // Fetch all connections
   const { data: connections, refetch: refetchConnections } = useQuery({
@@ -76,6 +80,42 @@ const Connections = () => {
     const uid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
     navigator.clipboard.writeText(uid);
     toast.success("Terminal UID copied", { description: uid });
+  };
+
+  const scrollToConnect = () => {
+    document.getElementById("deriv-connect")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const disconnectConnection = async (id: string) => {
+    setBusyConnId(id);
+    try {
+      const { error } = await supabase
+        .from("deriv_connections")
+        .update({ is_connected: false })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Connection disconnected");
+      refetchConnections();
+    } catch (e: any) {
+      toast.error("Could not disconnect", { description: e?.message });
+    } finally {
+      setBusyConnId(null);
+    }
+  };
+
+  const deleteConnection = async (id: string) => {
+    if (!window.confirm("Remove this connection permanently?")) return;
+    setBusyConnId(id);
+    try {
+      const { error } = await supabase.from("deriv_connections").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Connection removed");
+      refetchConnections();
+    } catch (e: any) {
+      toast.error("Could not remove connection", { description: e?.message });
+    } finally {
+      setBusyConnId(null);
+    }
   };
 
   if (!user) {
