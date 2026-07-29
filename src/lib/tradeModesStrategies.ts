@@ -196,7 +196,7 @@ export const STRATEGY_GUIDES: Record<TradeModeKey, StrategyGuide> = {
     paceTag: "Fast",
     marketTag: "Synthetic",
     whatItIs:
-      "Enter RISE when last 3 ticks are all bullish. Pure price action — no indicators needed. 65-75% win rate.",
+      "Enter RISE when last 3 ticks are all bullish. Pure price action — no indicators needed. Performance varies by market and configuration.",
     howItWorks: [
       "Watch micro momentum in the tick stream.",
       "If last 3 ticks are all up → enter RISE.",
@@ -228,7 +228,7 @@ export const STRATEGY_GUIDES: Record<TradeModeKey, StrategyGuide> = {
     paceTag: "Steady",
     marketTag: "Synthetic",
     whatItIs:
-      "Enter when price stays inside Bollinger Bands. Growth rate 1-3%. Duration 10-30 minutes. 90%+ win rate in ranging markets.",
+      "Enter when price stays inside Bollinger Bands. Growth rate 1-3%. Duration 10-30 minutes. Designed for ranging markets; performance varies by conditions.",
     howItWorks: [
       "Check Bollinger Bands — price must be inside bands.",
       "Enter accumulator when volatility is low and price is ranging.",

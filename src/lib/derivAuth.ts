@@ -68,6 +68,32 @@ export function clearDerivOAuthToken(): void {
   window.dispatchEvent(new CustomEvent("deriv:token-cleared"));
 }
 
+// ─── PAT / Session Token Storage ────────────────────────────────────────────
+
+/** Any Deriv credential the app can re-authorize with (PAT or OAuth token). */
+export function getStoredDerivToken(): string | null {
+  const t =
+    localStorage.getItem("deriv_pat_token") ||
+    localStorage.getItem("deriv_oauth_token");
+  return t && t.length >= 10 ? t : null;
+}
+
+/**
+ * Persist a verified Deriv PAT so the global connection store can re-authorize
+ * after a full page refresh, and notify the provider to authorize immediately.
+ */
+export function setDerivSessionToken(token: string): void {
+  if (!token || token.length < 10) return;
+  localStorage.setItem("deriv_pat_token", token);
+  window.dispatchEvent(new CustomEvent("deriv:token-updated", { detail: { token } }));
+}
+
+export function clearDerivSessionToken(): void {
+  localStorage.removeItem("deriv_pat_token");
+  localStorage.removeItem("deriv_oauth_token");
+  window.dispatchEvent(new CustomEvent("deriv:token-cleared"));
+}
+
 // ─── PKCE Storage Helpers ───────────────────────────────────────────────────
 
 export function getStoredCodeVerifier(): string | null {

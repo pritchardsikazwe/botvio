@@ -4,7 +4,8 @@ import { getStyleById, type ContractTypeConfig } from "@/config/tradingStyles";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { DerivConnectCTA } from "@/components/trading/DerivConnectCTA";
-import { useDeriv } from "@/contexts/DerivContext";
+import { useDeriv, useDerivConnection } from "@/contexts/DerivContext";
+import { DerivDiagnosticsPanel } from "@/components/trading/DerivDiagnosticsPanel";
 import { useContractCapabilities } from "@/hooks/useContractCapabilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,9 @@ const StyleTrade = () => {
     getProposal, buyContract, subscribeContract, onContractUpdate, refreshBalance,
     accountInfo, activeDerivToken,
   } = useDeriv();
+  // ONE global connection state — no local `connected` flag in this module.
+  const conn = useDerivConnection();
+  const isDerivReady = conn.isDerivReady;
   const style = getStyleById(styleId || "");
 
   const [selectedSymbol, setSelectedSymbol] = useState(() => searchParams.get("symbol") || "");
@@ -59,12 +63,25 @@ const StyleTrade = () => {
 
   // Signal engine state
   const tickBuffer = useRef<number[]>([]);
+  const [tickCount, setTickCount] = useState(0);
+  const [lastDigits, setLastDigits] = useState<number[]>([]);
   const [currentSignal, setCurrentSignal] = useState<SignalResult | null>(null);
   const [riskSession, setRiskSession] = useState<RiskSession>(
     createDefaultRiskSession(balance?.balance)
   );
   const [autoMode, setAutoMode] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+
+  // Debug logging: prove the module receives the global state (no second login).
+  useEffect(() => {
+    console.log(`[TRADING HUB] Deriv state received = ${conn.status}`);
+    console.log(
+      `[${(style?.title || "STYLE").toUpperCase()}] Deriv state received = ${conn.status} — trading engine = ${isDerivReady ? "READY" : "NOT READY"}`,
+    );
+    if (!isDerivReady && conn.status !== "connecting") {
+      console.log("[TRADING HUB] Trading disabled");
+    }
+  }, [conn.status, isDerivReady, style?.title]);
   const consecutiveSameRef = useRef(0);
   const lastSignalRef = useRef<string>("WAIT");
 
@@ -117,12 +134,15 @@ const StyleTrade = () => {
 
   // Subscribe to ticks
   useEffect(() => {
-    if (authorized && selectedSymbol) {
+    if (isDerivReady && selectedSymbol) {
       tickBuffer.current = [];
+      setTickCount(0);
+      setLastDigits([]);
+      console.log(`[FAST DIGITS] Tick subscription started — ${selectedSymbol}`);
       subscribeTicks(selectedSymbol);
       return () => { unsubscribeTicks(selectedSymbol); };
     }
-  }, [authorized, selectedSymbol]);
+  }, [isDerivReady, selectedSymbol]);
 
   // Track price + buffer ticks for engine
   useEffect(() => {
@@ -130,6 +150,9 @@ const StyleTrade = () => {
       setCurrentPrice(lastTick.quote);
       tickBuffer.current.push(lastTick.quote);
       if (tickBuffer.current.length > 300) tickBuffer.current = tickBuffer.current.slice(-300);
+      setTickCount(c => c + 1);
+      const digit = Number(String(lastTick.quote).replace(".", "").slice(-1));
+      setLastDigits(prev => [...prev, digit].slice(-5));
     }
   }, [lastTick, selectedSymbol]);
 
@@ -396,6 +419,30 @@ const StyleTrade = () => {
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold">{style.title}</h1>
             <p className="text-sm text-muted-foreground">{style.description}</p>
+            {/* Live Deriv status derived from the ONE global connection store */}
+            <div className="mt-1 flex items-center gap-2 text-xs flex-wrap">
+              {conn.initializing || conn.status === "connecting" ? (
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Deriv · Checking connection…
+                </span>
+              ) : isDerivReady ? (
+                <>
+                  <span className="flex items-center gap-1.5 text-success font-medium">
+                    <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                    Deriv Connected
+                  </span>
+                  <span className="text-muted-foreground">Account: <span className="text-foreground font-medium">{conn.accountId}</span></span>
+                  <span className="text-muted-foreground">
+                    {conn.environment === "prod" ? "Production" : "—"}
+                  </span>
+                </>
+              ) : (
+                <span className="flex items-center gap-1.5 text-destructive font-medium">
+                  <span className="h-2 w-2 rounded-full bg-destructive" />
+                  Deriv Disconnected — reconnect to continue trading
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline">{style.riskTag}</Badge>
@@ -417,7 +464,7 @@ const StyleTrade = () => {
           </div>
         </div>
 
-        {!isDerivConnected ? (
+        {!isDerivReady ? (
           <DerivConnectCTA />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -452,6 +499,31 @@ const StyleTrade = () => {
                       <div className="text-2xl font-mono font-bold">{currentPrice.toFixed(4)}</div>
                     </div>
                   )}
+
+                  {/* Live tick stream from the same authenticated Deriv socket */}
+                  <div className="mt-3 p-3 rounded-lg border border-border/60 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium tracking-wide">LIVE TICKS</span>
+                      <span className={`h-2 w-2 rounded-full ${tickCount > 0 ? "bg-success animate-pulse" : "bg-muted-foreground"}`} />
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">Last 5 Digits</div>
+                    <div className="flex gap-1.5">
+                      {(lastDigits.length ? lastDigits : [null, null, null, null, null]).map((d, i) => (
+                        <span
+                          key={i}
+                          className="w-7 h-7 rounded-md bg-muted flex items-center justify-center font-mono text-sm"
+                        >
+                          {d ?? "–"}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Ticks received: <span className="text-foreground font-medium">{tickCount}</span> · Connection:{" "}
+                      <span className={isDerivReady ? "text-success font-medium" : "text-destructive font-medium"}>
+                        {isDerivReady ? "LIVE" : "OFFLINE"}
+                      </span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -805,6 +877,21 @@ const StyleTrade = () => {
             </div>
           </div>
         )}
+
+        {/* Diagnostics — surfaces state-sync issues between hub and modules */}
+        <details className="rounded-lg border border-border/60">
+          <summary className="cursor-pointer px-4 py-2 text-xs text-muted-foreground">
+            Deriv connection diagnostics
+          </summary>
+          <div className="p-4 pt-0">
+            <DerivDiagnosticsPanel />
+            <div className="mt-2 text-[11px] text-muted-foreground space-y-0.5">
+              <div>Global connection state: <span className="text-foreground font-medium">{conn.status.toUpperCase()}</span></div>
+              <div>Trading hub state: <span className="text-foreground font-medium">{isDerivReady ? "CONNECTED" : "DISCONNECTED"}</span></div>
+              <div>{style.title} state: <span className="text-foreground font-medium">{isDerivReady ? "READY" : "NOT READY"}</span></div>
+            </div>
+          </div>
+        </details>
       </main>
     </div>
   );
