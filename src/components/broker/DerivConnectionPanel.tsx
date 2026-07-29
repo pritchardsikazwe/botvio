@@ -29,7 +29,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
   const { connected, authorized, balance, error, loading, connect, disconnect } = useDeriv();
   const { upsertToken: upsertDerivToken } = useDerivTokens();
 
-  const [connectionMethod, setConnectionMethod] = useState<"token" | "oauth">("token");
+  const [connectionMethod, setConnectionMethod] = useState<"token" | "oauth">("oauth");
   const [apiToken, setApiToken] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
