@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getDerivConfig, resolveDerivEnv } from "@/config/derivEnv";
-import { startDerivOAuthLogin } from "@/lib/derivAuth";
+import { startDerivOAuthLogin, setDerivSessionToken } from "@/lib/derivAuth";
 import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
 import { useDerivTokens } from "@/hooks/useDerivTokens";
 
@@ -87,6 +87,9 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         return;
       }
       toast.success(`PAT verified! Account: ${data.loginid}`);
+      // Persist the verified credential so the ONE global Deriv connection store
+      // can authorize now and re-authorize after a browser refresh.
+      setDerivSessionToken(apiToken);
       const { data: conn } = await supabase
         .from("deriv_connections")
         .select("*")
