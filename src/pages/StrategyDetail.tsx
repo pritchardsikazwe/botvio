@@ -11,6 +11,7 @@ import { ArrowLeft, Download, Star, Share2, Copy, ShoppingCart, CheckCircle, Tre
 import { Header } from "@/components/trading/Header";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
+import { renderStrategyMarkdown, strategyExcerpt } from "@/lib/strategyMarkdown";
 
 const REFERRAL_STORAGE_KEY = "botvio_referral";
 
@@ -21,19 +22,6 @@ const BROKER_LINKS: Record<string, { name: string; url: string }> = {
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
 };
 
-
-/* ── Convert markdown-like text to HTML ── */
-const formatDescription = (text: string): string => {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^• (.+)$/gm, '<li>$1</li>')
-    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
-    .replace(/^✅ (.+)$/gm, '<li>✅ $1</li>')
-    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul class="list-disc pl-5 space-y-1">$1</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n/g, '<br/>')
-    .replace(/^/, '<p>').replace(/$/, '</p>');
-};
 
 const StrategyDetail = () => {
   const { t } = useTranslation();
