@@ -1,5 +1,6 @@
 import type { DerivMessage, DerivTick, DerivBalance, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
 import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
+import { normalizeDerivError } from "@/lib/derivErrors";
 
 type ConnectionStatus = "idle" | "connecting" | "reconnecting" | "open" | "closed";
 
@@ -340,7 +341,7 @@ export class DerivWebSocketService {
         // Re-subscribe to balance stream
         try {
           console.log("[RECONNECT] Re-subscribing to balance stream");
-          await this.send({ balance: 1, account: "current", subscribe: 1 }, 15000);
+          await this.send({ balance: 1, subscribe: 1 }, 15000);
         } catch (e) {
           console.warn("[RECONNECT] Failed to re-subscribe balance:", e);
         }
@@ -390,7 +391,7 @@ export class DerivWebSocketService {
     this.lastMessageAt = Date.now();
 
     if (data?.error?.message) {
-      this.emitError(data.error.message);
+      this.emitError(normalizeDerivError(data.error.message));
     }
 
     // resolve request/response by req_id
@@ -398,7 +399,7 @@ export class DerivWebSocketService {
       const p = this.pending.get(data.req_id)!;
       window.clearTimeout(p.timeout);
       this.pending.delete(data.req_id);
-      if (data.error) p.reject(new Error(data.error.message));
+      if (data.error) p.reject(new Error(normalizeDerivError(data.error.message)));
       else p.resolve(data);
     }
 
@@ -485,7 +486,7 @@ export class DerivWebSocketService {
         const refreshBalanceNow = async () => {
           if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
           try {
-            const res: any = await this.send({ balance: 1, account: "current" }, 10000);
+            const res: any = await this.send({ balance: 1 }, 10000);
             if (res?.balance) {
               const freshBal: DerivBalance = {
                 balance: res.balance.balance,
@@ -560,7 +561,7 @@ export class DerivWebSocketService {
 
     // After OTP connection, the session is already authenticated.
     // Request balance to get account info.
-    const balRes: any = await this.send({ balance: 1, account: "current", subscribe: 1 }, 15000);
+    const balRes: any = await this.send({ balance: 1, subscribe: 1 }, 15000);
     
     if (balRes?.balance) {
       const balance: DerivBalance = {
@@ -642,7 +643,7 @@ export class DerivWebSocketService {
 
   /** Request balance; optionally subscribe for streaming updates */
   async getBalance(subscribe = true): Promise<DerivBalance> {
-    const payload: Record<string, unknown> = { balance: 1, account: "current" };
+    const payload: Record<string, unknown> = { balance: 1 };
     if (subscribe) {
       payload.subscribe = 1;
     }

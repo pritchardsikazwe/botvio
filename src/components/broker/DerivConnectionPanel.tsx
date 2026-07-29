@@ -18,6 +18,7 @@ import { getDerivConfig, resolveDerivEnv } from "@/config/derivEnv";
 import { startDerivOAuthLogin, setDerivSessionToken } from "@/lib/derivAuth";
 import { useOAuthCooldown } from "@/hooks/useOAuthCooldown";
 import { useDerivTokens } from "@/hooks/useDerivTokens";
+import { normalizeDerivError } from "@/lib/derivErrors";
 
 interface DerivConnectionPanelProps {
   onConnected?: (balance: any) => void;
@@ -80,8 +81,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
       });
       if (fnError || !data?.ok) {
         toast.error(
-          data?.error ||
-            fnError?.message ||
+          normalizeDerivError(data?.error || fnError?.message) ||
             "Verification failed. Make sure you pasted a new Personal Access Token (PAT) from Deriv.",
         );
         return;
@@ -195,7 +195,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
         if (data?.code === "NO_CONNECTION") {
           toast.warning("No saved connection. Please verify your token first.");
         } else {
-          toast.error(data?.error || fnError?.message || "Health check failed");
+          toast.error(normalizeDerivError(data?.error || fnError?.message) || "Health check failed");
         }
         return;
       }
@@ -203,7 +203,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
       if (result?.is_connected) {
         toast.success("Connection is healthy!");
       } else {
-        toast.warning(result?.last_error || "Connection needs re-verification");
+        toast.warning(result?.last_error ? normalizeDerivError(result.last_error) : "Connection needs re-verification");
       }
       const { data: conn } = await supabase
         .from("deriv_connections")
