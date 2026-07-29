@@ -48,9 +48,9 @@ export function ChartCreditsCard() {
 
         {depleted && (
           <Button asChild size="sm" className="w-full">
-            <Link to={user ? "/billing" : "/auth"}>
+            <Link to="/billing">
               <Zap className="h-3.5 w-3.5 mr-1.5" />
-              {user ? "Get more credits" : "Sign in for more"}
+              {user ? "Get more credits" : "See plans"}
             </Link>
           </Button>
         )}
