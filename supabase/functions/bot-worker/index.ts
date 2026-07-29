@@ -9,7 +9,11 @@ const corsHeaders = {
 };
 
 // Deriv WebSocket API configuration
-const DERIV_WS_URL = "wss://ws.binaryws.com/websockets/v3?app_id=1089";
+// New Deriv API endpoint (replaces legacy ws.binaryws.com). PATs work on this
+// WebSocket via the standard `authorize` message, same as the REST Bearer flow
+// used by deriv-verify-token / deriv-get-otp.
+const DERIV_APP_ID = "33XSUutrVPDWusVXuDUwW";
+const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
 
 interface TradingSignal {
   symbol: string;
