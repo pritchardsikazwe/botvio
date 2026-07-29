@@ -63,6 +63,8 @@ const StyleTrade = () => {
 
   // Signal engine state
   const tickBuffer = useRef<number[]>([]);
+  const [tickCount, setTickCount] = useState(0);
+  const [lastDigits, setLastDigits] = useState<number[]>([]);
   const [currentSignal, setCurrentSignal] = useState<SignalResult | null>(null);
   const [riskSession, setRiskSession] = useState<RiskSession>(
     createDefaultRiskSession(balance?.balance)
