@@ -125,6 +125,11 @@ import FactChecking from "./pages/FactChecking";
 import Corrections from "./pages/Corrections";
 import AffiliateDisclosure from "./pages/AffiliateDisclosure";
 import AiContentPolicy from "./pages/AiContentPolicy";
+import LearningPaths from "./pages/LearningPaths";
+import LearningPathDetail from "./pages/LearningPathDetail";
+import Methodology from "./pages/Methodology";
+import PerformanceTransparency from "./pages/PerformanceTransparency";
+import Trust from "./pages/Trust";
 
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
@@ -185,6 +190,11 @@ export const AppRoutes = () => (
     <Route path="corrections" element={<Corrections />} />
     <Route path="affiliate-disclosure" element={<AffiliateDisclosure />} />
     <Route path="ai-content-policy" element={<AiContentPolicy />} />
+    <Route path="learning-paths" element={<LearningPaths />} />
+    <Route path="learning-paths/:slug" element={<LearningPathDetail />} />
+    <Route path="methodology" element={<Methodology />} />
+    <Route path="performance-transparency" element={<PerformanceTransparency />} />
+    <Route path="trust" element={<Trust />} />
     <Route path="learn" element={<Learn />} />
     <Route path="learn/:category" element={<Learn />} />
     <Route path="learn/:category/:slug" element={<Lesson />} />
