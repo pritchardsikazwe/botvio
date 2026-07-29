@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { AffiliateDisclosureBadge } from "@/components/AffiliateDisclosureBadge";
 import { useState } from "react";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
