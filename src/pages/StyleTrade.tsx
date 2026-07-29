@@ -38,7 +38,7 @@ const StyleTrade = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
-    authorized, balance, lastTick, subscribeTicks, unsubscribeTicks,
+    authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
     getProposal, buyContract, subscribeContract, onContractUpdate, refreshBalance,
     accountInfo, activeDerivToken,
   } = useDeriv();
