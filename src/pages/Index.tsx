@@ -204,6 +204,11 @@ const Index = () => {
                 <ExternalLink className="h-4 w-4" /> YouTube
               </Button>
             </a>
+            <Link to="/deriv-app" className="block">
+              <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10 animate-pulse">
+                <Smartphone className="h-4 w-4" /> Deriv App
+              </Button>
+            </Link>
             <Link to="/deriv-options" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-primary/40 text-primary hover:bg-primary/10 animate-pulse">
                 <Wifi className="h-4 w-4" /> Deriv AI Options
