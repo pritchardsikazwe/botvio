@@ -119,6 +119,11 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Disclaimer from "./pages/Disclaimer";
 import MarketAnalysis from "./pages/MarketAnalysis";
+import EditorialPolicy from "./pages/EditorialPolicy";
+import FactChecking from "./pages/FactChecking";
+import Corrections from "./pages/Corrections";
+import AffiliateDisclosure from "./pages/AffiliateDisclosure";
+import AiContentPolicy from "./pages/AiContentPolicy";
 
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
@@ -174,6 +179,11 @@ export const AppRoutes = () => (
     <Route path="about" element={<About />} />
     <Route path="contact" element={<Contact />} />
     <Route path="disclaimer" element={<Disclaimer />} />
+    <Route path="editorial-policy" element={<EditorialPolicy />} />
+    <Route path="fact-checking" element={<FactChecking />} />
+    <Route path="corrections" element={<Corrections />} />
+    <Route path="affiliate-disclosure" element={<AffiliateDisclosure />} />
+    <Route path="ai-content-policy" element={<AiContentPolicy />} />
     <Route path="learn" element={<Learn />} />
     <Route path="learn/:category" element={<Learn />} />
     <Route path="learn/:category/:slug" element={<Lesson />} />
