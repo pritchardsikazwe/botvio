@@ -411,6 +411,30 @@ const StyleTrade = () => {
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold">{style.title}</h1>
             <p className="text-sm text-muted-foreground">{style.description}</p>
+            {/* Live Deriv status derived from the ONE global connection store */}
+            <div className="mt-1 flex items-center gap-2 text-xs flex-wrap">
+              {conn.initializing || conn.status === "connecting" ? (
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Deriv · Checking connection…
+                </span>
+              ) : isDerivReady ? (
+                <>
+                  <span className="flex items-center gap-1.5 text-success font-medium">
+                    <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                    Deriv Connected
+                  </span>
+                  <span className="text-muted-foreground">Account: <span className="text-foreground font-medium">{conn.accountId}</span></span>
+                  <span className="text-muted-foreground">
+                    {conn.environment === "prod" ? "Production" : "—"}
+                  </span>
+                </>
+              ) : (
+                <span className="flex items-center gap-1.5 text-destructive font-medium">
+                  <span className="h-2 w-2 rounded-full bg-destructive" />
+                  Deriv Disconnected — reconnect to continue trading
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline">{style.riskTag}</Badge>
@@ -432,7 +456,7 @@ const StyleTrade = () => {
           </div>
         </div>
 
-        {!isDerivConnected ? (
+        {!isDerivReady ? (
           <DerivConnectCTA />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
