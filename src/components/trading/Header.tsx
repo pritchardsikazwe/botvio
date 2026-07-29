@@ -65,15 +65,6 @@ export const Header = () => {
               </Button>
 
               <Button 
-                variant={location.pathname === '/marketplace' ? 'secondary' : 'ghost'} 
-                size="sm"
-                onClick={() => navigate('/marketplace')}
-              >
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Marketplace
-              </Button>
-
-              <Button 
                 variant={location.pathname === '/signals' ? 'secondary' : 'ghost'} 
                 size="sm"
                 onClick={() => navigate('/signals')}
@@ -159,15 +150,6 @@ export const Header = () => {
 
               {user && (
                 <>
-                  <Button 
-                    variant={location.pathname === '/bots' ? 'secondary' : 'ghost'} 
-                    size="sm"
-                    onClick={() => navigate('/bots')}
-                  >
-                    <Bot className="w-4 h-4 mr-1" />
-                    Bots
-                  </Button>
-
                   <Button 
                     variant={location.pathname.startsWith('/bots/binance') || location.pathname === '/settings/binance' ? 'secondary' : 'ghost'} 
                     size="sm"
