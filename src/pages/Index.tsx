@@ -27,6 +27,7 @@ import { TradingHubsSidebar } from "@/components/trading/TradingHubsSidebar";
 import { NotificationBanner } from "@/components/notifications/NotificationBanner";
 import { NewsEventCards } from "@/components/news/NewsEventCard";
 import { useNavigate, Link } from "react-router-dom";
+import { PremiumHomeSections } from "@/components/home/PremiumHomeSections";
 
 const Index = () => {
   const { user } = useAuth();
@@ -98,7 +99,10 @@ const Index = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-8">
-        <h1 className="sr-only">Botvio — Forex Signals and AI Analysis Dashboard</h1>
+        {/* Premium editorial homepage (hero + trending + market overview +
+            education + brokers + latest articles + testimonials + FAQ).
+            Contains the sole <h1> for the page. */}
+        <PremiumHomeSections />
         {/* Start Here — free learning paths band */}
         <section aria-label="Start Here" className="rounded-xl border border-primary/30 bg-primary/5 p-4 md:p-5">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
