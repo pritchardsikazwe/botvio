@@ -10,11 +10,16 @@ Disallow: /auth/
 Disallow: /login
 Disallow: /register
 Disallow: /dashboard/
+Disallow: /dashboard
 Disallow: /settings/
 Disallow: /billing/
 Disallow: /accounts/
+Disallow: /accounts
 Disallow: /connections/
+Disallow: /connections
 Disallow: /trade-history/
+Disallow: /trade-history
+Disallow: /bridge-request
 Disallow: /provider-dashboard/
 Disallow: /my-products/
 Disallow: /private/
@@ -32,11 +37,16 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
 Disallow: /dashboard/
+Disallow: /dashboard
 Disallow: /settings/
 Disallow: /billing/
 Disallow: /accounts/
+Disallow: /accounts
 Disallow: /connections/
+Disallow: /connections
 Disallow: /trade-history/
+Disallow: /trade-history
+Disallow: /bridge-request
 Disallow: /provider-dashboard/
 Disallow: /my-products/
 
