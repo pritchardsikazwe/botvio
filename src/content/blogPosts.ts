@@ -6888,5 +6888,264 @@ export const blogContent: Record<string, BlogPostData> = {
 <li><a href=\"/ai-content-policy\">AI Content Policy</a> — how we use AI tools responsibly in research</li>
 </ul>`
   },
+  "gold-trading-complete-guide-2026": {
+    title: "Gold Trading Complete Guide 2026: XAUUSD Fundamentals, Technicals & Risk",
+    excerpt: "A cornerstone guide to trading gold in 2026 — what actually moves XAUUSD, how professionals structure trades, and the risk rules that separate durable traders from blown accounts.",
+    category: "Cornerstone",
+    readTime: "18 min",
+    date: "2026-07-29",
+    content: `
+<h2>Why Gold, and Why Now</h2>
+<p>Gold is the oldest tradable asset humans still price in dollars. That single fact matters because gold's behaviour is shaped by things that pre-date modern equity markets: monetary distrust, geopolitical stress, real interest rates, and central bank balance sheets. In 2026 those forces are unusually loud, which is why XAUUSD volatility has averaged higher than in the 2015–2019 window. This cornerstone guide is not a signal service — it is the framework we teach at Botvio for reading gold, structuring trades, and staying solvent long enough to compound.</p>
+
+<h2>Part 1 — What Actually Moves Gold</h2>
+<p>Retail traders are told "gold is a safe haven" and left there. That is incomplete. Four drivers explain the vast majority of XAUUSD moves.</p>
+<h3>1. Real yields (the single biggest driver)</h3>
+<p>Real yield = nominal Treasury yield minus expected inflation. Gold pays no coupon, so when real yields rise the opportunity cost of holding gold rises with them and demand falls. When real yields fall — whether because inflation runs hot or nominal yields collapse — gold catches a bid. The cleanest proxy is the US 10-year TIPS yield. Watch it every day; if it moves 15 basis points, expect gold to move.</p>
+<h3>2. The US dollar (DXY)</h3>
+<p>Gold is priced in dollars, so a stronger dollar makes gold more expensive for holders of every other currency and generally caps rallies. The correlation is not 1:1 — there are weeks when both DXY and gold rise together, usually during acute risk-off — but on any horizon longer than a month, a rising dollar is a headwind.</p>
+<h3>3. Central bank buying</h3>
+<p>Since 2022, official-sector buying (PBoC, RBI, CBR, National Bank of Poland and others) has been the marginal buyer of physical gold. This structural bid is why dips have been shallower than macro models predicted. Track the World Gold Council's quarterly Gold Demand Trends report; it is public and free.</p>
+<h3>4. Geopolitical risk premium</h3>
+<p>Elections, wars, sanctions and sovereign-debt scares add a variable premium. Unlike the first three drivers, this one is discontinuous — it appears in a single headline and can add or subtract 2–3% in a session. You cannot forecast it; you can only size positions so that a surprise doesn't ruin you.</p>
+
+<h2>Part 2 — The Trading Sessions That Matter</h2>
+<p>XAUUSD trades 23 hours a day but is not equally liquid throughout. The London fix (10:30 and 15:00 London time) sets the reference price used by physical markets and pulls liquidity into those windows. The New York cash open (13:30 UTC in winter) is when US-linked data lands — non-farm payrolls, CPI, FOMC statements — and where most swing traders in Botvio's community place their intraday setups. The Asia session is quieter, thinner, and prone to false breakouts driven by low volume. If you are new, avoid initiating fresh trades between 21:00 and 01:00 UTC; the risk-reward is against you.</p>
+
+<h2>Part 3 — Technical Structure That Actually Works on Gold</h2>
+<p>Gold respects structure. It doesn't respect every retail indicator equally. Here is what has held up in Botvio's internal backtests across 2018–2025.</p>
+<h3>Higher-timeframe bias</h3>
+<p>Start on the weekly chart. If price is above the 50-week EMA and the EMA is rising, you are in a bull regime — take longs on pullbacks, ignore short setups. If below and falling, mirror the logic. Trying to short gold in a monetary-easing cycle is how accounts die.</p>
+<h3>Daily structure</h3>
+<p>Mark the last three swing highs and lows on the daily chart. Trades taken in the direction of daily structure, at retests of prior structure, have consistently outperformed reversal attempts.</p>
+<h3>Intraday execution</h3>
+<p>On the 15-minute chart, use a 20-EMA as the mean and Bollinger Bands (20, 2) as the volatility envelope. Setups worth taking: a pullback to the 20-EMA after a fresh session high with a bullish engulfing candle, or the mirror image for shorts. Do not try to catch the exact top or bottom.</p>
+
+<h2>Part 4 — Risk Rules Non-Negotiable</h2>
+<p>Gold can move 300 pips in an hour on an unexpected CPI print. That is not a bug of the market; it is the market. Trade accordingly.</p>
+<ul>
+<li><strong>Fixed fractional risk.</strong> Never risk more than 1% of account equity on a single XAUUSD trade. New traders should be at 0.5%.</li>
+<li><strong>Stop placement.</strong> Stops go beyond structure, never at a round number. Round numbers get swept intentionally.</li>
+<li><strong>News blackout.</strong> Do not carry XAUUSD positions through NFP, CPI or FOMC unless the trade is specifically a news trade with sized-for-news risk.</li>
+<li><strong>Session cap.</strong> Three losing trades in a session and you stop for the day. This rule has saved more accounts in our community than any indicator ever will.</li>
+</ul>
+
+<h2>Part 5 — Common Ways New Gold Traders Blow Accounts</h2>
+<ol>
+<li><strong>Over-leverage on 1:500 accounts.</strong> A 1-lot XAUUSD position on a $1,000 account is a 50% drawdown at 50 pips against you.</li>
+<li><strong>Fading strong trends.</strong> Gold's biggest moves are trend moves. Selling into a fresh weekly high because it "looks extended" is one of the most consistent losers in retail.</li>
+<li><strong>Averaging down.</strong> Adding to losers on gold is how single trades become 20% drawdowns.</li>
+<li><strong>Ignoring the calendar.</strong> Holding a trade into FOMC without a plan is not trading; it is gambling.</li>
+</ol>
+
+<h2>Part 6 — Building a Weekly Gold Routine</h2>
+<p>The traders in our community who compound consistently share one thing: a routine. A workable template: Sunday evening, mark weekly and daily structure and note the week's high-impact events. London open, confirm bias against overnight action. New York open, execute planned setups only. Friday close, journal every trade and calculate expectancy for the week. Without a journal you cannot know whether you are improving or getting lucky.</p>
+
+<h2>Where Botvio Fits</h2>
+<p>Botvio publishes daily gold context on the <a href="/market-analysis">Market Analysis hub</a>, and our <a href="/features/ai-chart-analysis-overview">AI Chart Analysis</a> tool applies a documented multi-timeframe framework to charts users upload. Read our <a href="/methodology">Methodology</a> and <a href="/performance-transparency">Performance Transparency</a> pages before you rely on any published number.</p>
+
+<h2>Risk Disclosure</h2>
+<p>Trading XAUUSD involves substantial risk of loss. Leveraged CFD trading can result in losses exceeding your deposit at some brokers. Nothing here is personal financial advice.</p>`
+  },
+  "forex-risk-management-cornerstone-guide": {
+    title: "Forex Risk Management: The Cornerstone Guide That Keeps Traders Alive",
+    excerpt: "Position sizing, stop placement, correlation, drawdown discipline and the psychological rules that separate lifetime traders from one-year traders.",
+    category: "Cornerstone",
+    readTime: "16 min",
+    date: "2026-07-29",
+    content: `
+<h2>Why Risk Management Beats Strategy</h2>
+<p>Every experienced trader eventually says the same thing: it isn't the entry that makes you money, it's what you do after the entry. A mediocre strategy with disciplined risk survives; a brilliant strategy without it does not. This cornerstone lays out the risk framework Botvio teaches — the same one used by the desks and funded programs our community trades through.</p>
+
+<h2>Part 1 — Fixed Fractional Position Sizing</h2>
+<p>The single most important calculation in retail trading is this one: <em>risk per trade = account equity × risk %</em>. Then <em>position size = risk per trade ÷ (stop distance in price × pip value)</em>. Everything else — lot size, leverage — falls out of that. Beginners should sit at 0.5% per trade. Consistently profitable traders sit at 1%. Anyone risking 5% per trade is not trading; they are running a martingale disguised as conviction.</p>
+
+<h2>Part 2 — Stop Placement That Isn't Just A Round Number</h2>
+<p>Stops belong beyond structure — beyond the swing low that invalidates your idea, beyond the ATR-based envelope of normal noise, beyond the session's opening range. Stops placed at "50 pips because that's what I always use" get swept by design. The order-flow logic is boring but real: liquidity clusters where retail traders stack their stops, and price hunts liquidity.</p>
+
+<h2>Part 3 — The Risk of Ruin Math</h2>
+<p>If you risk 2% per trade with a 50% win rate and a 1:1 R:R, your probability of hitting a 50% drawdown in 100 trades is meaningfully non-zero. At 1% risk it's near zero. At 5% risk it approaches certainty. The math punishes optimism. Run the numbers before you decide what "small" means; feel is a bad calibrator.</p>
+
+<h2>Part 4 — Correlation, The Silent Killer</h2>
+<p>Three "different" trades — long EURUSD, long GBPUSD, short USDCHF — are one trade: short dollar. If the dollar rips, all three lose together and your realised risk is 3× what you thought. Track correlation across your open positions. As a rule of thumb, sum your directional dollar exposure; that number is your real risk. Diversification only diversifies when the underlyings actually move independently.</p>
+
+<h2>Part 5 — The Loss Sequence Rule</h2>
+<p>Three losses in a session, stop for the day. Two losing days in a row, cut risk by half for the next day. A losing week, go to journal-only mode and paper trade for two sessions before returning. These aren't superstitions; they're circuit breakers that stop tilt from turning a drawdown into a blow-up.</p>
+
+<h2>Part 6 — Psychology, Made Concrete</h2>
+<p>"Master your psychology" is useless advice. What works is rules that make psychology irrelevant. Pre-commit your setups. Pre-commit your stop and target. Pre-commit your maximum daily loss. If the rules are written down and public (to yourself, on a journal), breaking them feels like breaking a promise, not making a decision. That is the entire trick.</p>
+
+<h2>Part 7 — The One-Year Journal</h2>
+<p>Every trader we know who lasted more than three years kept a journal. Every trader we know who blew up in year one did not. The journal is not for entries and exits; it's for the story around them: what you saw, what you felt, whether you followed the plan. Review it weekly. Patterns emerge that no backtest can show you.</p>
+
+<h2>Risk Disclosure</h2>
+<p>All trading involves risk of loss. Nothing in this guide is personal financial advice. The rules described here reduce risk of ruin; they do not eliminate loss.</p>
+
+<h2>Further Reading</h2>
+<ul>
+<li><a href="/learning-paths/forex-from-zero">Forex From Zero learning path</a></li>
+<li><a href="/blog/gold-trading-complete-guide-2026">Gold Trading Complete Guide</a></li>
+<li><a href="/methodology">Botvio Methodology</a></li>
+</ul>`
+  },
+  "smart-money-concepts-cornerstone": {
+    title: "Smart Money Concepts Explained: A Cornerstone Guide Without the Hype",
+    excerpt: "Order blocks, liquidity, fair value gaps and market structure — what the terminology actually means, what the evidence supports, and where SMC influencers overreach.",
+    category: "Cornerstone",
+    readTime: "17 min",
+    date: "2026-07-29",
+    content: `
+<h2>What Smart Money Concepts Really Claim</h2>
+<p>Smart Money Concepts (SMC) is a family of ideas popularised in the last decade that reframe technical analysis around order flow, liquidity and institutional participation. Strip away the marketing and the core claim is defensible: institutions leave footprints on the chart, retail traders cluster stops predictably, and price frequently sweeps those stops before continuing. That is not a conspiracy; it is auction market microstructure. But SMC is also oversold on social media, and traders who lean on it without a framework lose money like anyone else. This cornerstone separates what is useful from what is theatre.</p>
+
+<h2>Market Structure — The Foundation</h2>
+<p>Everything in SMC rests on identifying market structure: higher highs and higher lows (uptrend), lower highs and lower lows (downtrend). A "break of structure" is a close beyond the last swing point in the direction of trend; a "change of character" is a close beyond a swing point against the prevailing trend. Neither concept is proprietary — they're just formal names for what price action traders have always drawn.</p>
+
+<h2>Liquidity — Where The Real Edge Lives</h2>
+<p>Liquidity, in SMC vocabulary, is any zone where stop orders and pending orders accumulate: prior swing highs, round numbers, session highs and lows, equal highs. Institutions with size cannot fill their orders in a vacuum; they need counterparties. Sweeps into liquidity — the "stop hunt" — are how large orders get filled. Trading in the direction of the sweep, after the reaction, is the single most durable SMC edge in our community's data.</p>
+
+<h2>Order Blocks — Useful With Discipline</h2>
+<p>An order block is the last bearish candle before an impulsive bullish move (or vice versa). The claim: institutions loaded orders there, so price returns to fill unfilled orders. Empirically, retests of order blocks do hold more often than random levels — but only when combined with higher-timeframe context. Isolated order blocks marked on the 5-minute chart without a daily bias are noise.</p>
+
+<h2>Fair Value Gaps</h2>
+<p>A fair value gap (FVG) is a three-candle pattern where the middle candle's range is not overlapped by the first and third — an inefficiency in price delivery. SMC theory says price returns to fill these gaps. Sometimes it does, sometimes it doesn't. FVGs are best used as confluence with structure, not as standalone signals.</p>
+
+<h2>Where SMC Overreaches</h2>
+<p>The gap between SMC as an analytical framework and SMC as an internet subculture is wide. The framework is fine. The subculture claims 90% win rates, retrofits every chart perfectly in hindsight, and sells $2000 mentorships built on that retrofit. If a course promises certainty, it is selling you the certainty, not the trading.</p>
+
+<h2>A Practical SMC Checklist</h2>
+<ol>
+<li>Higher-timeframe bias: weekly and daily direction, non-negotiable.</li>
+<li>Identify liquidity: prior swing highs/lows, session extremes, equal highs.</li>
+<li>Wait for a sweep into liquidity in the direction opposite your bias.</li>
+<li>Look for a change-of-character on the lower timeframe after the sweep.</li>
+<li>Enter on retest of the order block or FVG that formed with the CHoCH.</li>
+<li>Stop beyond the sweep. Target the next liquidity pool in your bias direction.</li>
+</ol>
+<p>That is not magic. It is disciplined trend continuation, dressed in newer language.</p>
+
+<h2>Risk Disclosure and Further Reading</h2>
+<p>SMC does not exempt you from risk management. Everything in our <a href="/blog/forex-risk-management-cornerstone-guide">risk cornerstone</a> applies. See also our <a href="/methodology">Methodology</a> and <a href="/editorial-policy">Editorial Policy</a> for how we evaluate concepts before recommending them.</p>`
+  },
+  "prop-firm-trading-cornerstone-guide": {
+    title: "Prop Firm Trading in 2026: A Cornerstone Guide to Passing and Keeping the Account",
+    excerpt: "How modern prop firms work, why most challenges are lost in the first week, and the systematic approach that actually gets funded — and stays funded.",
+    category: "Cornerstone",
+    readTime: "16 min",
+    date: "2026-07-29",
+    content: `
+<h2>Why Prop Firms Exist</h2>
+<p>The retail prop model — pay a fee, pass a two-phase challenge, trade a simulated account against real payouts — expanded rapidly after 2020. The economics are simple: challenge fees fund payouts on the small percentage of traders who pass and remain profitable. Most participants fail. That is the business. Understanding it changes how you approach it.</p>
+
+<h2>Reading The Rules Like A Contract</h2>
+<p>Before you buy any challenge, read the rulebook end to end. The ones that matter:</p>
+<ul>
+<li><strong>Daily loss limit</strong> — usually 4–5% of starting balance, measured on floating equity, not closed P&L. This kills more traders than the total loss rule.</li>
+<li><strong>Total loss limit</strong> — usually 8–10%. Non-negotiable; hit it and the account is gone.</li>
+<li><strong>Profit target</strong> — typically 8–10% for phase one, 5% for phase two.</li>
+<li><strong>Minimum trading days</strong> — usually 3–5, sometimes 10. Ignore this at your peril; passing the target in one day still fails you.</li>
+<li><strong>News trading, weekend holding, EAs, consistency rules</strong> — vary wildly by firm. Read them.</li>
+</ul>
+
+<h2>The Real Reason Most Challenges Fail</h2>
+<p>It is not skill. Most people who buy challenges can identify a valid setup. They fail because they treat the challenge like a race. The target is 8%; they arrive thinking "I need 8%", size up, take one bad loss, tilt, revenge-trade, hit the daily loss limit. The account is not gone because of the market; it is gone because of the trader's response to the market. Approach the challenge as if the target didn't exist. Trade your normal setups at normal size. The percentage arrives as a byproduct.</p>
+
+<h2>A Systematic Approach That Works</h2>
+<p>The Botvio community traders who have passed multiple challenges share a template:</p>
+<ol>
+<li>Risk 0.5% per trade. Not 1%. Prop rules punish drawdowns.</li>
+<li>Take a maximum of two trades per day. More than that on a challenge is impatience.</li>
+<li>Stop for the day after one losing trade until you've had three winning days.</li>
+<li>Never trade in the first hour of the London or New York session for the first week — let volatility reveal itself.</li>
+<li>Do not carry positions through high-impact news, ever, unless the firm explicitly allows and you have a news-trading edge.</li>
+</ol>
+<p>At 0.5% risk with a 2:1 average R:R and a 45% win rate, you reach 8% in roughly 20–30 trades. That is realistic in a month.</p>
+
+<h2>After The Funded Account</h2>
+<p>Passing is the easy part; keeping the account is where 80% of funded traders fail within three months. The reason is simple: humans dial up risk after early success. Do not. Trade the funded account like a challenge — same size, same rules — until you have withdrawn at least three times the challenge fee. Then, and only then, consider scaling.</p>
+
+<h2>Choosing A Prop Firm</h2>
+<p>Look for firms that have paid consistent payouts to public traders for at least two years, publish clear rules, and don't add "consistency" or "gambling" clauses that let them refuse payouts subjectively. Cheap challenges from new firms are cheap for a reason.</p>
+
+<h2>Risk Disclosure</h2>
+<p>Prop challenge fees are at risk of total loss. Payouts depend on continued compliance with firm rules that can change. Nothing in this article endorses any specific firm; see our <a href="/affiliate-disclosure">Affiliate Disclosure</a> for how we handle any partnerships.</p>`
+  },
+  "reading-economic-calendar-cornerstone": {
+    title: "Reading the Economic Calendar: A Cornerstone Guide for Retail Traders",
+    excerpt: "What each release actually measures, which ones move markets in 2026, how to trade the reaction rather than the print, and when to stay flat.",
+    category: "Cornerstone",
+    readTime: "15 min",
+    date: "2026-07-29",
+    content: `
+<h2>Why Retail Traders Misread The Calendar</h2>
+<p>Most beginners open an economic calendar, see a row of red flags, and either (a) trade every single one and lose, or (b) hide from all of them and miss the year's most tradable moves. Neither is right. The calendar is a schedule of scheduled volatility. Learning which prints matter, why they matter, and how to structure exposure around them is one of the highest-leverage skills in trading.</p>
+
+<h2>The Releases That Actually Move Markets in 2026</h2>
+<h3>US CPI</h3>
+<p>The single most market-moving monthly release. It sets expectations for Fed policy, which drives real yields, which drives DXY and gold. A 0.1% miss in either direction routinely produces 80–150 pip moves in EURUSD within minutes.</p>
+<h3>US Non-Farm Payrolls (NFP)</h3>
+<p>First Friday of each month, 13:30 UTC. Less market-moving than CPI in 2024–2026 because the Fed has been more focused on inflation, but still capable of large reactions when it surprises materially.</p>
+<h3>FOMC statement and Powell press conference</h3>
+<p>Eight times a year. The statement lands at 19:00 UTC; the press conference thirty minutes later. The press conference frequently reverses the initial statement reaction. Do not trade the first thirty minutes if you cannot handle 200 pip swings.</p>
+<h3>US PCE (core)</h3>
+<p>The Fed's preferred inflation measure. Less volatile than CPI because it lags, but the trend-confirmation trade is real.</p>
+<h3>ECB and BoE rate decisions</h3>
+<p>Materially move EURUSD, GBPUSD, EURGBP. Same rule as FOMC: the press conference is where the real move happens.</p>
+
+<h2>Trading The Reaction, Not The Print</h2>
+<p>Guessing what a data print will be is a coin flip. Reading how price reacts to the print is skill. Wait for the first candle to close on the timeframe you trade, note the reaction relative to structure and prior liquidity, and take the second-move continuation only if it aligns with your higher-timeframe bias. Traders who fade the first spike consistently outperform traders who chase it.</p>
+
+<h2>When to Stay Flat</h2>
+<p>Sometimes the right trade is no trade. Rules of thumb:</p>
+<ul>
+<li>Do not carry medium-term positions through FOMC, NFP or CPI without a written plan.</li>
+<li>Do not initiate positions in the 30 minutes before a high-impact release unless the trade is explicitly a news trade.</li>
+<li>Do not trade the first 5 minutes after a release. Spreads widen, slippage is real, and the "obvious" direction reverses often enough to matter.</li>
+</ul>
+
+<h2>Reading The Calendar Like An Analyst</h2>
+<p>Each calendar entry has three numbers: previous, forecast, and actual. What matters is the deviation between actual and forecast, not the absolute number. A "hot" CPI at 3.1% is bearish for bonds only if the market expected 2.9%. The same 3.1% with a 3.2% forecast is dovish. Always check the forecast before you interpret the print.</p>
+
+<h2>Risk Disclosure and Related Reading</h2>
+<p>Trading around economic releases involves elevated risk of slippage and gap moves. See our <a href="/blog/forex-risk-management-cornerstone-guide">risk cornerstone</a> for sizing rules around news. Botvio's <a href="/news-calendar">news calendar</a> highlights the releases we consider tradable each week.</p>`
+  },
+  "trading-psychology-cornerstone-guide": {
+    title: "Trading Psychology: A Cornerstone Guide to the Mind, Not the Chart",
+    excerpt: "Why smart people make dumb trading decisions, the specific biases that empty retail accounts, and the concrete practices that build durable discipline.",
+    category: "Cornerstone",
+    readTime: "16 min",
+    date: "2026-07-29",
+    content: `
+<h2>Trading Is A Behavioural Business</h2>
+<p>Two traders can be given the same signal, the same account size, and the same rules — and finish the year with opposite results. The difference is not intelligence; it is behaviour under stress. This cornerstone lays out the biases that punish retail traders most reliably and the practices that push back against them.</p>
+
+<h2>The Biases That Do The Damage</h2>
+<h3>Loss aversion</h3>
+<p>Behavioural finance's most-replicated finding: losses hurt roughly twice as much as gains feel good. In practice this means traders hold losers too long (unwilling to accept the pain) and cut winners too fast (locking in relief). The countermeasure is mechanical: pre-set stops and targets, and let the market close the trade for you.</p>
+<h3>Recency bias</h3>
+<p>The last three trades feel more informative than the last three hundred. A three-loss streak feels like the strategy is broken; three wins feel like the trader is finally "clicking". Neither is usually true. Judge strategies over hundreds of trades, not tens.</p>
+<h3>Confirmation bias</h3>
+<p>Once we form a market opinion, we notice evidence that supports it and discount evidence that contradicts it. This is why long biases become long positions become long convictions become blown accounts. The countermeasure is to write, before entry, exactly what would invalidate the trade.</p>
+<h3>Sunk cost fallacy</h3>
+<p>"I've already lost $200, I might as well hold." The $200 is gone regardless. The only question is whether the current setup, judged fresh, is worth being in. If it isn't, exit.</p>
+
+<h2>Tilt, and How To Recognise It</h2>
+<p>Tilt is not "being angry". Tilt is trading while the reasoning brain is offline and the reward-seeking brain is driving. Symptoms: doubling down after a loss, sizing up on a "sure thing", checking the chart every 30 seconds, chasing entries you would normally skip. The moment you notice any of these, close the platform. Not "trade more carefully" — close the platform. Every trader who lasted got there by being willing to walk away.</p>
+
+<h2>The Practices That Work</h2>
+<ol>
+<li><strong>Pre-committed rules.</strong> Write your setup, stop, target and risk before you place the trade. Break them and you owe your journal an explanation.</li>
+<li><strong>Journaling.</strong> Every trade, screenshot before and after, one sentence on what you saw and what you felt. Review weekly.</li>
+<li><strong>Circuit breakers.</strong> Two losses, half size. Three losses, done for the day. Two losing days, done for the week. Not negotiable.</li>
+<li><strong>Physical baseline.</strong> Sleep, food, sunlight. This sounds trivial and isn't. Cognitive load is finite; poor sleep is the single most reliable predictor of bad execution.</li>
+<li><strong>Small stakes early.</strong> New strategies get tested at 0.25% risk for at least 40 trades before scaling. Ego resists this. Ego is expensive.</li>
+</ol>
+
+<h2>What Botvio Does Not Promise</h2>
+<p>We do not promise you a mindset that guarantees profits. Nobody can. We do publish the frameworks that our most consistent community members share, and we point out — openly — that most retail traders lose money. See our <a href="/performance-transparency">Performance Transparency</a> page for how we present outcomes.</p>
+
+<h2>Risk Disclosure</h2>
+<p>Trading involves substantial risk of loss. Psychological discipline reduces the probability of blow-ups; it does not eliminate them. Nothing here is personal financial advice.</p>`
+  },
 };
 
