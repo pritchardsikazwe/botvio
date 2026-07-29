@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode, useEffect, useMemo, useCallback, useRef } from "react";
-import { useDerivAPI, DerivBalance, DerivTick, DerivProposal, DerivContract, DerivAccountInfo, DerivContractUpdate } from "@/hooks/useDerivAPI";
+import { useDerivAPI, DerivBalance, DerivTick, DerivProposal, DerivContract, DerivAccountInfo, DerivContractUpdate, type DerivConnectionStatus } from "@/hooks/useDerivAPI";
 import { useRunningTrades, RunningTrade } from "@/hooks/useRunningTrades";
 import { useActiveToken, ActiveToken } from "@/hooks/useActiveToken";
 import { useDerivTokens, DerivTokenRow } from "@/hooks/useDerivTokens";
@@ -8,6 +8,17 @@ import { useDerivTrades } from "@/hooks/useDerivTrades";
 interface DerivContextType {
   connected: boolean;
   authorized: boolean;
+  /** Authoritative state machine: disconnected | connecting | connected | error */
+  status: DerivConnectionStatus;
+  /** The only flag UI should use to gate trading */
+  isDerivConnected: boolean;
+  accountId: string | null;
+  environment: "prod" | null;
+  connectedAt: string | null;
+  lastHeartbeat: number | null;
+  socketReadyState: number;
+  initializing: boolean;
+  refreshDerivConnection: () => Promise<boolean>;
   balance: DerivBalance | null;
   error: string | null;
   loading: boolean;
@@ -64,10 +75,56 @@ const DerivContext = createContext<DerivContextType | undefined>(undefined);
 
 export const DerivProvider = ({ children }: { children: ReactNode }) => {
   const derivAPI = useDerivAPI();
+  const [initializing, setInitializing] = React.useState(true);
   const { runningTrades, runningProfit, addTrade, handleContractUpdate } = useRunningTrades();
   const { activeToken, setToken, validateConnection } = useActiveToken();
   const { tokens: derivTokens, activeToken: activeDerivToken, upsertToken, switchToken: switchDerivToken, removeToken: removeDerivToken } = useDerivTokens();
   const derivTrades = useDerivTrades();
+
+  /**
+   * Rehydrate the Deriv session at PROVIDER level (not inside a page component),
+   * so the dashboard never races ahead of connection init and the connected state
+   * survives SPA navigation and full page refresh.
+   * Historic bug: OAuth stored `deriv_oauth_token` while auto-connect only read
+   * `deriv_pat_token`, so the dashboard kept showing "Connect Deriv to trade".
+   */
+  const rehydrateAttempted = useRef(false);
+  useEffect(() => {
+    if (rehydrateAttempted.current) return;
+    rehydrateAttempted.current = true;
+
+    const stored =
+      localStorage.getItem("deriv_pat_token") ||
+      localStorage.getItem("deriv_oauth_token");
+
+    if (!stored || stored.length < 10) {
+      console.log("[DERIV][init] no stored Deriv session — status=disconnected");
+      setInitializing(false);
+      return;
+    }
+
+    console.log("[DERIV][init] rehydrating Deriv session from stored credentials");
+    derivAPI
+      .connect(stored)
+      .then((bal) => console.log(`[DERIV][init] session restored — accountId=${bal.loginid}`))
+      .catch((e) => {
+        console.warn("[DERIV][init] stored session invalid:", e instanceof Error ? e.message : e);
+        localStorage.removeItem("deriv_pat_token");
+        localStorage.removeItem("deriv_oauth_token");
+      })
+      .finally(() => setInitializing(false));
+  }, [derivAPI.connect]);
+
+  /** Re-verify live authorization when the user returns to the tab / dashboard. */
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!derivAPI.authorized) return;
+      derivAPI.refreshDerivConnection().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [derivAPI.authorized, derivAPI.refreshDerivConnection]);
 
   // Use refs for values that change but shouldn't cause effect re-runs
   // This prevents the onContractUpdate listener from being briefly removed
@@ -189,6 +246,7 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
 
   const value: DerivContextType = {
     ...derivAPI,
+    initializing,
     placeTrade: enhancedPlaceTrade,
     runningTrades,
     runningProfit,
