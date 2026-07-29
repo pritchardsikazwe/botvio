@@ -7880,7 +7880,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Trading forex, CFDs, synthetic indices and cryptocurrencies carries a high level of risk and can result in the loss of all invested capital. Past performance does not guarantee future results. Nothing in this article is personal financial advice — it is published for educational purposes only. Always trade with money you can afford to lose, use a written risk-management plan, and consult a licensed adviser regulated in your jurisdiction before committing real capital.</p>
 `
   },
-  "usdjpy-carry-trade-guide": {
+  "usdjpy-carry-trade-yield-momentum": {
     title: "USD/JPY Carry Trade Guide: Yield, Momentum and Risk",
     excerpt: "BOJ policy context, MOF intervention risk, and how retail traders can approach USD/JPY without getting caught in a policy shift.",
     category: "Forex",
