@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { Header } from "@/components/trading/Header";
@@ -36,6 +37,7 @@ import { toast } from "sonner";
 const Connections = () => {
   const { user } = useAuth();
   const { derivTokens, switchDerivToken, removeDerivToken } = useDeriv();
+  const [authOpen, setAuthOpen] = useState(false);
 
   // Fetch all connections
   const { data: connections, refetch: refetchConnections } = useQuery({
@@ -80,9 +82,68 @@ const Connections = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-2xl font-bold mb-4">Please sign in to manage connections</h1>
-        </div>
+        <main className="container mx-auto px-4 py-12 max-w-3xl">
+          <div className="text-center mb-8">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <Wallet className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Connect Deriv Binary Options</h1>
+            <p className="text-muted-foreground">
+              Sign in to Botvio to link your Deriv account via OAuth and trade Rise/Fall, Digits and
+              Multipliers on Volatility, Boom and Crash indices — straight from your dashboard.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3 mb-8">
+            {[
+              { icon: ShieldCheck, t: "Secure OAuth", d: "No passwords or tokens copied by hand." },
+              { icon: Zap, t: "One-click trading", d: "Execute signals on demo or real accounts." },
+              { icon: Clock, t: "~60 second setup", d: "Authorize once, revoke anytime." },
+            ].map((b, i) => (
+              <div key={i} className="rounded-lg border border-border bg-muted/30 p-4">
+                <b.icon className="h-5 w-5 text-primary mb-2" />
+                <p className="text-sm font-medium">{b.t}</p>
+                <p className="text-xs text-muted-foreground">{b.d}</p>
+              </div>
+            ))}
+          </div>
+
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-base">Get started</CardTitle>
+              <CardDescription>
+                Create a free Botvio account or sign in to manage your broker connections.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-3">
+              <Button onClick={() => setAuthOpen(true)}>Sign in / Create account</Button>
+              <Button variant="outline" onClick={() => (window.location.href = "/learn")}>
+                Learn binary options first
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Accordion type="single" collapsible className="mt-6">
+            <AccordionItem value="what" className="border-border">
+              <AccordionTrigger className="text-sm">What can I trade once connected?</AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground space-y-2">
+                <p>• Rise/Fall and Higher/Lower contracts on Volatility 10–100 indices.</p>
+                <p>• Matches/Differs, Even/Odd and Over/Under digit contracts.</p>
+                <p>• Multipliers on Boom 500/1000 and Crash 500/1000.</p>
+                <p>• Forex, metals and stock indices where your Deriv account allows it.</p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="safe" className="border-border">
+              <AccordionTrigger className="text-sm">Is my Deriv account safe?</AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground">
+                Botvio never sees your Deriv password. Access tokens are encrypted at rest on our
+                servers, are never exposed to your browser, and can be revoked from this page or
+                from your Deriv settings at any time.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </main>
+        <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
       </div>
     );
   }
