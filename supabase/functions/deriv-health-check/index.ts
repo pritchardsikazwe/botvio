@@ -141,17 +141,34 @@ Deno.serve(async (req) => {
     const results = [];
 
     for (const conn of connections || []) {
-      // Get the token to verify
-      const tokenToCheck = conn.connection_type === "oauth" 
-        ? conn.oauth_access_token 
-        : null; // For token connections, we can't re-verify without storing the raw token
-      
-      let result;
+      // Resolve the credential server-side only. The account id (e.g. ROT90035652)
+      // is NOT a credential and is never used for authentication.
+      let tokenToCheck: string | null = conn.connection_type === "oauth"
+        ? conn.oauth_access_token
+        : null;
+
+      if (!tokenToCheck) {
+        const { data: tokenRow } = await supabaseAdmin
+          .from("user_deriv_tokens")
+          .select("token_encrypted, loginid, is_active")
+          .eq("user_id", conn.user_id)
+          .eq("is_active", true)
+          .maybeSingle();
+        tokenToCheck = tokenRow?.token_encrypted ?? null;
+      }
+
+      let result: { ok: boolean; balance?: number; currency?: string; loginid?: string; error?: string };
       if (tokenToCheck) {
         result = await checkConnection(tokenToCheck, conn.connection_type, conn.env);
+        // Match the authenticated account against the stored connected account id.
+        if (result.ok && conn.login_id && result.loginid && result.loginid !== conn.login_id) {
+          result = {
+            ok: false,
+            error: `Authenticated account ${result.loginid} does not match connected account ${conn.login_id}.`,
+          };
+        }
       } else {
-        // For token connections without stored raw token, mark as needing re-verification
-        result = { ok: false, error: "Token verification required" };
+        result = { ok: false, error: "Token verification required. Please re-enter your Deriv PAT." };
       }
 
       // Update the connection status
