@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
 import { AdminLogin } from "@/components/admin/AdminLogin";
