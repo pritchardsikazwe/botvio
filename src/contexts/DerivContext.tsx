@@ -363,3 +363,36 @@ export const useDeriv = () => {
   }
   return context;
 };
+
+/**
+ * Read-only view of the ONE authoritative Deriv connection state.
+ * Every trading module (Fast Digits, Digits, Multipliers, Boom/Crash,
+ * Manual/Auto trading, Signal Engine) must gate on `isDerivReady`.
+ */
+export const useDerivConnection = () => {
+  const {
+    status, accountId, environment, currency, isAuthorized,
+    websocketConnected, isDerivConnected, initializing,
+    lastConnectedAt, lastHeartbeat, lastError, refreshDerivConnection,
+  } = useDeriv();
+
+  return {
+    status,
+    accountId,
+    environment,
+    currency,
+    isAuthorized,
+    websocketConnected,
+    initializing,
+    lastConnectedAt,
+    lastHeartbeat,
+    lastError,
+    refreshDerivConnection,
+    isDerivReady:
+      isDerivConnected &&
+      status === "connected" &&
+      isAuthorized &&
+      websocketConnected &&
+      !!accountId,
+  };
+};
