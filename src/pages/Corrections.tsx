@@ -1,7 +1,33 @@
+import { useEffect, useState } from "react";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
-const Corrections = () => (
+interface PublicCorrection {
+  id: string;
+  article_slug: string;
+  article_title: string;
+  correction_type: string;
+  original_text: string | null;
+  corrected_text: string;
+  reason: string;
+  corrected_at: string;
+}
+
+const Corrections = () => {
+  const [items, setItems] = useState<PublicCorrection[]>([]);
+  useEffect(() => {
+    supabase
+      .from("editorial_corrections")
+      .select("id,article_slug,article_title,correction_type,original_text,corrected_text,reason,corrected_at")
+      .eq("status", "published")
+      .order("corrected_at", { ascending: false })
+      .limit(50)
+      .then(({ data }) => setItems((data as PublicCorrection[]) || []));
+  }, []);
+
+  return (
   <div className="min-h-screen bg-background">
     <SEOHead
       title="Corrections Policy – Botvio"
@@ -37,8 +63,34 @@ const Corrections = () => (
         <li>Alter historical signal or performance records to change the outcome.</li>
         <li>Backdate updates to hide an editorial change.</li>
       </ul>
+
+      <h2>Published corrections</h2>
+      {items.length === 0 ? (
+        <p className="text-muted-foreground">No corrections have been published yet.</p>
+      ) : (
+        <ul className="not-prose space-y-4">
+          {items.map((c) => (
+            <li key={c.id} className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="uppercase tracking-wide">{c.correction_type}</span>
+                <span>·</span>
+                <time>{new Date(c.corrected_at).toLocaleDateString()}</time>
+              </div>
+              <Link to={`/blog/${c.article_slug}`} className="block font-semibold text-foreground mt-1">
+                {c.article_title}
+              </Link>
+              {c.original_text && (
+                <p className="text-sm mt-2"><span className="text-muted-foreground">Original: </span><s>{c.original_text}</s></p>
+              )}
+              <p className="text-sm mt-1"><span className="text-muted-foreground">Corrected: </span>{c.corrected_text}</p>
+              <p className="text-xs text-muted-foreground mt-2">{c.reason}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   </div>
-);
+  );
+};
 
 export default Corrections;
