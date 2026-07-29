@@ -99,6 +99,34 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-6 space-y-8">
         <h1 className="sr-only">Botvio — Forex Signals and AI Analysis Dashboard</h1>
+        {/* Start Here — free learning paths band */}
+        <section aria-label="Start Here" className="rounded-xl border border-primary/30 bg-primary/5 p-4 md:p-5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-wider text-primary font-bold mb-1">New here? Start free.</p>
+              <h2 className="text-lg md:text-xl font-extrabold text-foreground">
+                Three structured learning paths — Beginner, Intermediate & Advanced
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Curated by the Botvio Editorial Team. No sign-up required.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link to="/learning-paths/forex-from-zero">
+                <Button size="sm" variant="outline">Forex From Zero</Button>
+              </Link>
+              <Link to="/learning-paths/strategy-builder">
+                <Button size="sm" variant="outline">Strategy Builder</Button>
+              </Link>
+              <Link to="/learning-paths/prop-firm-systematic">
+                <Button size="sm" variant="outline">Prop Firm</Button>
+              </Link>
+              <Link to="/learning-paths">
+                <Button size="sm">All paths</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
         {/* 0 — Shortcuts */}
         <section>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
