@@ -136,14 +136,14 @@
 
   <!-- ═══ Programmatic Signal Pages ═══ -->
   <url><loc>https://botvio.live/signals/gold</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
-  <url><loc>https://botvio.live/signals/eurusd</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/signals/gbpusd</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/signals/usdjpy</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/signals/eur-usd</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/signals/gbp-usd</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/signals/usd-jpy</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/signals/btcusd</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/signals/ethusd</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/signals/silver</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/signals/gbpjpy</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-  <url><loc>https://botvio.live/signals/audusd</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/signals/aud-usd</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/signals/nasdaq</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/signals/xrpusd</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/signals/solusd</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
@@ -1308,15 +1308,15 @@
   </url>
 
   <!-- ═══ Forex Pair Hubs (auto-added) ═══ -->
-  <url><loc>https://botvio.live/eurusd</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/usdjpy</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/audusd</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/usdcad</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/usdchf</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/eur-usd</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/usd-jpy</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/aud-usd</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/usd-cad</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/usd-chf</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/eurgbp</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/eurjpy</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/nzdusd</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/usdcny</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/nzd-usd</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/usd-cny</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
   <!-- ═══ Stock Hubs (auto-added) ═══ -->
   <url><loc>https://botvio.live/stocks/nvda</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
