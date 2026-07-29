@@ -40,8 +40,8 @@ export function getDerivConfig(): DerivConfig {
 
   const prod: DerivConfig = {
     env: "prod",
-    clientId: "33nuILr2Iyxx5ZWuDZylH",
-    redirectUrl: "https://botvio.live/auth/deriv/callback",
+    clientId: "33XSUutrVPDWusVXuDUwW",
+    redirectUrl: "https://botvio.live/callback",
     baseDomain: "https://botvio.live",
     authUrl: "https://auth.deriv.com/oauth2/auth",
     tokenUrl: "https://auth.deriv.com/oauth2/token",
@@ -50,8 +50,8 @@ export function getDerivConfig(): DerivConfig {
 
   const dev: DerivConfig = {
     env: "dev",
-    clientId: "33nuILr2Iyxx5ZWuDZylH",
-    redirectUrl: `${typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app"}/auth/deriv/callback`,
+    clientId: "33XSUutrVPDWusVXuDUwW",
+    redirectUrl: `${typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app"}/callback`,
     baseDomain: typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app",
     authUrl: "https://auth.deriv.com/oauth2/auth",
     tokenUrl: "https://auth.deriv.com/oauth2/token",

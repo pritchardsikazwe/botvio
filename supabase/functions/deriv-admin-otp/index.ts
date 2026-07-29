@@ -6,7 +6,7 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 };
 
-const DERIV_CLIENT_ID = '33nuILr2Iyxx5ZWuDZylH';
+const DERIV_CLIENT_ID = '33XSUutrVPDWusVXuDUwW';
 const DERIV_REST_BASE = 'https://api.derivws.com';
 
 /**

@@ -10,7 +10,7 @@ interface VerifyRequest {
   env: "prod" | "dev";
 }
 
-const DERIV_CLIENT_ID = "33nuILr2Iyxx5ZWuDZylH";
+const DERIV_CLIENT_ID = "33XSUutrVPDWusVXuDUwW";
 const DERIV_REST_BASE = "https://api.derivws.com";
 
 /**

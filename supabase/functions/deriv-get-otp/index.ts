@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       const accountsResponse = await fetch("https://api.derivws.com/trading/v1/options/accounts", {
         method: "GET",
         headers: {
-          "Deriv-App-ID": "33nuILr2Iyxx5ZWuDZylH",
+          "Deriv-App-ID": "33XSUutrVPDWusVXuDUwW",
           "Authorization": `Bearer ${derivAccessToken}`,
         },
       });
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const clientId = "33nuILr2Iyxx5ZWuDZylH";
+    const clientId = "33XSUutrVPDWusVXuDUwW";
 
     // Request OTP from Deriv REST API
     const otpResponse = await fetch(
