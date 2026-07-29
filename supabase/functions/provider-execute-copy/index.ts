@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const DERIV_CLIENT_ID = "33nuILr2Iyxx5ZWuDZylH";
+const DERIV_CLIENT_ID = "33XSUutrVPDWusVXuDUwW";
 
 interface TradeRequest {
   provider_id: string;
