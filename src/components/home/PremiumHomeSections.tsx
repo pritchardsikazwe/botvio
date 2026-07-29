@@ -30,11 +30,11 @@ import { blogContent } from "@/content/blogPosts";
  */
 
 const trending = [
-  { title: "Gold (XAU/USD) Analysis", to: "/market-analysis/xauusd", tag: "Gold" },
-  { title: "EUR/USD Forecast", to: "/market-analysis/eurusd", tag: "Forex" },
-  { title: "GBP/USD Forecast", to: "/market-analysis/gbpusd", tag: "Forex" },
-  { title: "BTC/USD Analysis", to: "/market-analysis/btcusd", tag: "Crypto" },
-  { title: "USD/JPY Forecast", to: "/market-analysis/usdjpy", tag: "Forex" },
+  { title: "Gold (XAU/USD) Analysis", to: "/gold", tag: "Gold" },
+  { title: "EUR/USD Forecast", to: "/eur-usd", tag: "Forex" },
+  { title: "GBP/USD Forecast", to: "/gbp-usd", tag: "Forex" },
+  { title: "BTC/USD Analysis", to: "/bitcoin", tag: "Crypto" },
+  { title: "USD/JPY Forecast", to: "/usd-jpy", tag: "Forex" },
 ];
 
 const marketOverview: {
@@ -55,7 +55,7 @@ const marketOverview: {
     label: "Crypto",
     items: [
       { name: "BTC/USD", to: "/bitcoin" },
-      { name: "ETH/USD", to: "/market-analysis/ethusd" },
+      { name: "ETH/USD", to: "/chart/ETHUSD" },
       { name: "Binance Hub", to: "/binance" },
     ],
   },
@@ -77,9 +77,9 @@ const marketOverview: {
   {
     label: "Synthetic Indices",
     items: [
-      { name: "Boom 1000", to: "/synthetic/boom-1000" },
-      { name: "Crash 1000", to: "/synthetic/crash-1000" },
-      { name: "Volatility 75", to: "/synthetic/volatility-75" },
+      { name: "Boom 1000", to: "/synthetic-hub" },
+      { name: "Crash 1000", to: "/synthetic-hub" },
+      { name: "Volatility 75", to: "/synthetic-hub" },
       { name: "Synthetic Hub", to: "/synthetic-hub" },
     ],
   },

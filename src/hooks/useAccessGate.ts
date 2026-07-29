@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
  * - Admins / super_admins / signal_managers → always allowed.
  * - Users on a paid plan (basic / standard / vip) → allowed.
  * - Free / starter users → allowed only during the free-trial window
- *   (chart_limit_settings.free_trial_days, default 3 days from signup).
+ *   (chart_limit_settings.free_trial_days, default 7 days from signup).
  * - Everyone else → blocked (must be activated by admin via a paid plan).
  */
 export interface AccessGate {
@@ -36,7 +36,7 @@ export function useAccessGate(): AccessGate {
         supabase.from("profiles").select("created_at").eq("user_id", user!.id).maybeSingle(),
         supabase.from("chart_limit_settings").select("free_trial_days").limit(1).maybeSingle(),
       ]);
-      const trialDays = settings?.free_trial_days ?? 3;
+      const trialDays = settings?.free_trial_days ?? 7;
       const signup = profile?.created_at ? new Date(profile.created_at) : new Date();
       const trialEnd = new Date(signup.getTime() + trialDays * 24 * 60 * 60 * 1000);
       const msLeft = trialEnd.getTime() - Date.now();
