@@ -149,6 +149,14 @@ export const Header = () => {
                 Learn
               </Button>
 
+              <Button
+                variant={location.pathname.startsWith('/learning-paths') ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => navigate('/learning-paths')}
+              >
+                Start Here
+              </Button>
+
               {user && (
                 <>
                   <Button 

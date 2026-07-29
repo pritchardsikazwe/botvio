@@ -38,6 +38,7 @@ export const SiteFooter = () => {
           <nav aria-label="Learn">
             <h2 className="font-semibold mb-3 text-foreground">Learn</h2>
             <ul className="space-y-2 text-muted-foreground">
+              <li><Link to="/learning-paths" className="hover:text-primary">Start Here — Learning Paths</Link></li>
               <li><Link to="/learn" className="hover:text-primary">Free Course</Link></li>
               <li><Link to="/blog" className="hover:text-primary">Trading Blog</Link></li>
               <li><Link to="/faq" className="hover:text-primary">FAQ</Link></li>
@@ -58,6 +59,9 @@ export const SiteFooter = () => {
           <nav aria-label="Trust and legal">
             <h2 className="font-semibold mb-3 text-foreground">Trust & Legal</h2>
             <ul className="space-y-2 text-muted-foreground">
+              <li><Link to="/trust" className="hover:text-primary">Trust Center</Link></li>
+              <li><Link to="/methodology" className="hover:text-primary">Methodology</Link></li>
+              <li><Link to="/performance-transparency" className="hover:text-primary">Performance Transparency</Link></li>
               <li><Link to="/editorial-policy" className="hover:text-primary">Editorial Policy</Link></li>
               <li><Link to="/fact-checking" className="hover:text-primary">Fact-Checking</Link></li>
               <li><Link to="/corrections" className="hover:text-primary">Corrections</Link></li>
