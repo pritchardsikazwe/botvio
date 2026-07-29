@@ -417,7 +417,7 @@ const StyleTrade = () => {
           </div>
         </div>
 
-        {!authorized ? (
+        {!isDerivConnected ? (
           <DerivConnectCTA />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
