@@ -192,7 +192,7 @@ export const TRADING_STYLES: TradingStyle[] = [
   {
     id: "digit-contracts",
     title: "Fast Digits Strategy",
-    description: "Botvio AI — Trade DIFFERS when digits repeat. Watch last 5 ticks, enter when 3-4 digits repeat. 85-92% expected win rate.",
+    description: "Botvio AI — Trade DIFFERS when digits repeat. Analyzes recent digit patterns and identifies repeat-digit conditions across the last 5 ticks. Historical/backtest performance varies by market and configuration.",
     riskTag: "Advanced",
     tempoTag: "Fast",
     contractTypes: [DIGITS_MATCH_DIFFER, DIGITS_OVER_UNDER, DIGITS_EVEN_ODD],
@@ -201,7 +201,7 @@ export const TRADING_STYLES: TradingStyle[] = [
   {
     id: "rise-fall-scalping",
     title: "Rise/Fall Momentum",
-    description: "Botvio AI — EMA 20/50 crossover + pullback retest. Enter Rise when EMA20 > EMA50, Fall when EMA20 < EMA50. 70-80% win rate.",
+    description: "Botvio AI — EMA 20/50 crossover + pullback retest. Enter Rise when EMA20 > EMA50, Fall when EMA20 < EMA50. Performance varies by market and configuration.",
     riskTag: "Medium Risk",
     tempoTag: "Active",
     contractTypes: [RISE_FALL],
@@ -228,7 +228,7 @@ export const TRADING_STYLES: TradingStyle[] = [
   {
     id: "accumulators",
     title: "Accumulator Safe Growth",
-    description: "Botvio AI — Enter when price stays inside Bollinger Bands. 1-3% growth rate. 90%+ win rate in ranging markets. Duration 10-30 min.",
+    description: "Botvio AI — Enter when price stays inside Bollinger Bands. 1-3% growth rate. Designed for ranging markets; performance varies by conditions. Duration 10-30 min.",
     riskTag: "Beginner Friendly",
     tempoTag: "Steady",
     contractTypes: [ACCUMULATORS],
@@ -255,7 +255,7 @@ export const TRADING_STYLES: TradingStyle[] = [
   {
     id: "ticks",
     title: "Ultra Fast Tick Scalping",
-    description: "Botvio AI — 1-5 tick contracts. Enter RISE when last 3 ticks are bullish. Pure price action micro-momentum. 65-75% win rate.",
+    description: "Botvio AI — 1-5 tick contracts. Enter RISE when last 3 ticks are bullish. Pure price action micro-momentum; performance varies by market.",
     riskTag: "Intermediate",
     tempoTag: "Fast",
     contractTypes: [TICKS_RISE_FALL],
