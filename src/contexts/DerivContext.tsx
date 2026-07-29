@@ -126,6 +126,28 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [derivAPI.authorized, derivAPI.refreshDerivConnection]);
 
+  /** Token/account change (OAuth callback, account switch) → re-authorize immediately. */
+  useEffect(() => {
+    const onTokenUpdated = (e: Event) => {
+      const token = (e as CustomEvent<{ token?: string }>).detail?.token;
+      if (!token) return;
+      console.log("[DERIV][init] token updated — re-authorizing");
+      setInitializing(true);
+      derivAPI
+        .connect(token)
+        .catch((err) => console.warn("[DERIV][init] re-authorize failed:", err))
+        .finally(() => setInitializing(false));
+    };
+    const onTokenCleared = () => derivAPI.disconnect();
+
+    window.addEventListener("deriv:token-updated", onTokenUpdated);
+    window.addEventListener("deriv:token-cleared", onTokenCleared);
+    return () => {
+      window.removeEventListener("deriv:token-updated", onTokenUpdated);
+      window.removeEventListener("deriv:token-cleared", onTokenCleared);
+    };
+  }, [derivAPI.connect, derivAPI.disconnect]);
+
   // Use refs for values that change but shouldn't cause effect re-runs
   // This prevents the onContractUpdate listener from being briefly removed
   // when these values change, which was causing missed settlements for
