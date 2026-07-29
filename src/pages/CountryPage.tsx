@@ -18,8 +18,10 @@ const blogLinks = [
 ];
 
 const CountryPage = () => {
-  const { country } = useParams<{ country: string }>();
-  
+  // Route param may be `country` (legacy) or `slug` (via SlugResolver fallback).
+  const params = useParams<{ country?: string; slug?: string }>();
+  const country = params.country ?? params.slug;
+
   // Skip file-like paths (e.g. sitemap.xml, robots.txt) — let static files serve
   if (country?.includes(".")) {
     return null;

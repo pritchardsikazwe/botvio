@@ -2,6 +2,8 @@ import { useParams } from "react-router-dom";
 import { useStrategy } from "@/hooks/useStrategies";
 import StrategyDetail from "./StrategyDetail";
 import CountryPage from "./CountryPage";
+import NotFound from "./NotFound";
+import { countryData } from "@/content/countryData";
 
 /**
  * Resolves /:slug — checks if slug matches a strategy first,
@@ -31,8 +33,13 @@ const SlugResolver = () => {
     return <StrategyDetail />;
   }
 
-  // Otherwise fall back to country page
-  return <CountryPage />;
+  // If the slug matches a known country, render the country page
+  if (slug && countryData[slug]) {
+    return <CountryPage />;
+  }
+
+  // Truly unknown slug → proper 404 instead of "Country not found"
+  return <NotFound />;
 };
 
 export default SlugResolver;
