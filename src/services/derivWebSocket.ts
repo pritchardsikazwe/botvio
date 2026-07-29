@@ -167,6 +167,26 @@ export class DerivWebSocketService {
     }
   }
 
+  /** Reconnect immediately when the browser regains connectivity or the tab is refocused. */
+  private bindNetworkListeners() {
+    if (this.netListenersBound || typeof window === "undefined") return;
+    this.netListenersBound = true;
+
+    const kick = () => {
+      if (this.isManualClose || !this.autoReconnect) return;
+      if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
+      if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+      this.log("Network available — retrying Deriv connection now");
+      this.reconnectAttempt = 0;
+      this.scheduleReconnect(0);
+    };
+
+    window.addEventListener("online", kick);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") kick();
+    });
+  }
+
   private clearPingTimer() {
     if (this.pingTimer) {
       window.clearInterval(this.pingTimer);
