@@ -4,7 +4,8 @@ import { getStyleById, type ContractTypeConfig } from "@/config/tradingStyles";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { DerivConnectCTA } from "@/components/trading/DerivConnectCTA";
-import { useDeriv } from "@/contexts/DerivContext";
+import { useDeriv, useDerivConnection } from "@/contexts/DerivContext";
+import { DerivDiagnosticsPanel } from "@/components/trading/DerivDiagnosticsPanel";
 import { useContractCapabilities } from "@/hooks/useContractCapabilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,9 @@ const StyleTrade = () => {
     getProposal, buyContract, subscribeContract, onContractUpdate, refreshBalance,
     accountInfo, activeDerivToken,
   } = useDeriv();
+  // ONE global connection state — no local `connected` flag in this module.
+  const conn = useDerivConnection();
+  const isDerivReady = conn.isDerivReady;
   const style = getStyleById(styleId || "");
 
   const [selectedSymbol, setSelectedSymbol] = useState(() => searchParams.get("symbol") || "");
@@ -65,6 +69,17 @@ const StyleTrade = () => {
   );
   const [autoMode, setAutoMode] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+
+  // Debug logging: prove the module receives the global state (no second login).
+  useEffect(() => {
+    console.log(`[TRADING HUB] Deriv state received = ${conn.status}`);
+    console.log(
+      `[${(style?.title || "STYLE").toUpperCase()}] Deriv state received = ${conn.status} — trading engine = ${isDerivReady ? "READY" : "NOT READY"}`,
+    );
+    if (!isDerivReady && conn.status !== "connecting") {
+      console.log("[TRADING HUB] Trading disabled");
+    }
+  }, [conn.status, isDerivReady, style?.title]);
   const consecutiveSameRef = useRef(0);
   const lastSignalRef = useRef<string>("WAIT");
 
