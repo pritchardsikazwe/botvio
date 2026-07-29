@@ -271,7 +271,7 @@ const StyleTrade = () => {
     : { allowed: false, reason: null as any, message: "Waiting for signal" };
 
   const handleBuy = async (button: ContractTypeConfig["buyButtons"][0]) => {
-    if (!authorized) {
+    if (!isDerivConnected) {
       toast.error("Connect your Deriv account first");
       return;
     }

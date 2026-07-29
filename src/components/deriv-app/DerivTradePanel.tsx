@@ -27,7 +27,7 @@ interface TradeLog {
 
 export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const {
-    authorized, balance, lastTick, subscribeTicks, unsubscribeTicks,
+    authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
     placeTrade, subscribeContract,
   } = useDeriv();
 
@@ -74,7 +74,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   }, [lastTick, engine]);
 
   const handleBuy = async (contract: string, label: string) => {
-    if (!authorized) { toast.error("Connect your Deriv account first"); return; }
+    if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
     const amount = Number(stake);
     if (!amount || amount <= 0) { toast.error("Enter a valid stake"); return; }
 
@@ -119,8 +119,8 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
             </p>
           </div>
           <div className="text-right space-y-1">
-            <Badge variant="outline" className={cn("text-xs", authorized ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground")}>
-              <Activity className="h-3 w-3 mr-1" />{authorized ? "Live" : "Offline"}
+            <Badge variant="outline" className={cn("text-xs", isDerivConnected ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground")}>
+              <Activity className="h-3 w-3 mr-1" />{isDerivConnected ? "Live" : "Offline"}
             </Badge>
             <p className="text-xs text-muted-foreground">
               Balance {balance ? `${balance.currency} ${balance.balance.toFixed(2)}` : "—"}
@@ -193,7 +193,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
               <Button
                 key={btn.contractType}
                 size="lg"
-                disabled={busy || !authorized}
+                disabled={busy || !isDerivConnected}
                 onClick={() => handleBuy(btn.contractType, btn.label)}
                 className={cn(
                   "h-14 text-base font-bold",
@@ -213,7 +213,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
               </Button>
             ))}
           </div>
-          {!authorized && (
+          {!isDerivConnected && (
             <p className="text-xs text-muted-foreground text-center">Connect a Deriv account in the Account tab to enable trading.</p>
           )}
         </CardContent>
