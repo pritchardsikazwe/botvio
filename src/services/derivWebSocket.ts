@@ -262,6 +262,7 @@ export class DerivWebSocketService {
   close() {
     this.isManualClose = true;
     this.clearReconnectTimer();
+    this.reconnectAttempt = 0;
     this.clearPingTimer();
     this.tickSubscriptionBySymbol.clear();
     this.activeContractSubscriptions.clear();
