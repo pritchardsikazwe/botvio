@@ -10,6 +10,8 @@ import { blogContent } from "@/content/blogPosts";
 import { binanceBlogPosts } from "@/content/binanceBlogPosts";
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { supabase } from "@/integrations/supabase/client";
+import { ArticleMeta } from "@/components/ArticleMeta";
+import { getAuthor } from "@/content/authors";
 
 /* ── Affiliate links ── */
 const AFFILIATE_LINKS = {
@@ -173,15 +175,16 @@ const BlogPost = () => {
         description: post.excerpt,
         datePublished: post.date,
         dateModified: post.date,
-        author: {
-          "@type": "Organization",
-          name: post.author || "Botvio Team",
-          url: "https://botvio.live",
-          sameAs: [
-            "https://youtube.com/@botvio",
-            "https://www.facebook.com/botvio",
-          ],
-        },
+        author: (() => {
+          const a = getAuthor(post.author);
+          return {
+            "@type": "Person",
+            name: a.name,
+            url: `https://botvio.live/authors/${a.slug}`,
+            jobTitle: a.role,
+            knowsAbout: a.expertise,
+          };
+        })(),
         publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live", logo: { "@type": "ImageObject", url: "https://botvio.live/icon-512.png" } },
         mainEntityOfPage: `https://botvio.live/blog/${slug}`,
         image: post.coverImage || `https://botvio.live/blog/${slug}.png`,
@@ -273,15 +276,12 @@ const BlogPost = () => {
             <ArrowLeft className="h-4 w-4" /> Back to Blog
           </Link>
 
-          <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-            <Badge className="bg-primary text-primary-foreground">{post.category}</Badge>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />{post.readTime}</span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-muted-foreground">{post.date}</span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-muted-foreground">By {post.author}</span>
-          </div>
+          <ArticleMeta
+            category={post.category}
+            readTime={post.readTime}
+            publishedDate={post.date}
+            authorName={post.author}
+          />
 
           <h1 className="text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground sm:text-5xl mb-5">
             {post.title}
