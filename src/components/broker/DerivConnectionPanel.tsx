@@ -346,13 +346,16 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
 
             <Tabs value={connectionMethod} onValueChange={(v) => setConnectionMethod(v as "token" | "oauth")}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="token" className="flex items-center gap-2">
-                  <Key className="h-4 w-4" />
-                  PAT
-                </TabsTrigger>
                 <TabsTrigger value="oauth" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   Deriv Login
+                  <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+                    Recommended
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger value="token" className="flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  PAT
                 </TabsTrigger>
               </TabsList>
 
@@ -456,22 +459,27 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   </div>
                   <h3 className="font-semibold text-lg mb-2">Sign in with Deriv</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Use your existing Deriv account to connect securely without sharing your API token
+                    One‑click redirect to Deriv. Log in with your Deriv account and we'll
+                    finish the connection here — no PAT needed.
                   </p>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-success" />
-                    <span>No API token needed</span>
+                    <span>No API token to copy or paste</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Secure OAuth authentication</span>
+                    <span>Secure OAuth 2.0 with PKCE — you stay on Deriv to sign in</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Auto-syncs account info</span>
+                    <span>Auto‑syncs balance, currency & real/demo account</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span>Revoke anytime from Deriv → Security settings</span>
                   </div>
                 </div>
 
@@ -488,8 +496,16 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  You'll be redirected to Deriv to authorize this app
+                  You'll be redirected to <strong>auth.deriv.com</strong> and returned to
+                  <strong> {derivConfig.redirectUrl.replace(/^https?:\/\//, "")}</strong>.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setConnectionMethod("token")}
+                  className="w-full text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                >
+                  Prefer a Personal Access Token? Switch to PAT →
+                </button>
               </TabsContent>
             </Tabs>
           </div>
