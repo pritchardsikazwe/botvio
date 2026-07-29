@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
-  const { authorized, accountInfo, balance, equity, runningTrades } = useDeriv();
+  const { isDerivConnected, accountInfo, balance, equity, runningTrades } = useDeriv();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -344,7 +344,7 @@ export const Header = () => {
             {/* Community Links - visible on desktop */}
             {/* Community links moved to DB-driven partner_links */}
             
-            {authorized && accountInfo ? (
+            {isDerivConnected && accountInfo ? (
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border"
                 style={{
                   backgroundColor: accountInfo.is_virtual ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--success) / 0.1)',

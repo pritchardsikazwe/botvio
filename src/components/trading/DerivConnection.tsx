@@ -33,24 +33,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     setLogs((prev) => [`[${timestamp}] ${line}`, ...prev].slice(0, 20));
   }, []);
 
-  // Auto-reconnect using stored token on mount
-  useEffect(() => {
-    if (authorized || loading || autoConnectAttempted.current) return;
-    autoConnectAttempted.current = true;
-
-    const storedToken = localStorage.getItem("deriv_pat_token");
-    if (storedToken && storedToken.length >= 10) {
-      addLog("🔄 Auto-reconnecting with saved session...");
-      connect(storedToken)
-        .then((bal) => {
-          addLog(`✅ Auto-connected: ${bal.loginid}`);
-        })
-        .catch(() => {
-          addLog("⚠️ Saved session expired. Please reconnect.");
-          localStorage.removeItem("deriv_pat_token");
-        });
-    }
-  }, [authorized, loading, connect, addLog]);
+  // Session rehydration is handled centrally by DerivProvider (single source of truth).
 
   useEffect(() => {
     if (error) addLog(`❌ Error: ${error}`);
@@ -75,6 +58,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     try {
       const bal = await connect(trimmedToken);
       localStorage.setItem("deriv_pat_token", trimmedToken);
+      localStorage.removeItem("deriv_oauth_token");
       addLog(`✅ Authorized: ${bal.loginid}`);
       addLog(`💰 Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
       toast.success(`Connected! Balance: ${bal.currency} ${bal.balance.toFixed(2)}`);
@@ -89,6 +73,7 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
     disconnect();
     setToken("");
     localStorage.removeItem("deriv_pat_token");
+    localStorage.removeItem("deriv_oauth_token");
     autoConnectAttempted.current = false;
     addLog("🔌 Disconnected");
     toast.info("Disconnected from Deriv");

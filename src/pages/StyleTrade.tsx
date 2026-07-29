@@ -38,7 +38,7 @@ const StyleTrade = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
-    authorized, balance, lastTick, subscribeTicks, unsubscribeTicks,
+    authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
     getProposal, buyContract, subscribeContract, onContractUpdate, refreshBalance,
     accountInfo, activeDerivToken,
   } = useDeriv();
@@ -271,7 +271,7 @@ const StyleTrade = () => {
     : { allowed: false, reason: null as any, message: "Waiting for signal" };
 
   const handleBuy = async (button: ContractTypeConfig["buyButtons"][0]) => {
-    if (!authorized) {
+    if (!isDerivConnected) {
       toast.error("Connect your Deriv account first");
       return;
     }
@@ -417,7 +417,7 @@ const StyleTrade = () => {
           </div>
         </div>
 
-        {!authorized ? (
+        {!isDerivConnected ? (
           <DerivConnectCTA />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

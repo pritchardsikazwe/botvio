@@ -52,7 +52,7 @@ interface Execution {
 
 export const AutoTradingPanel = () => {
   const { user } = useAuth();
-  const { authorized, balance } = useDeriv();
+  const { authorized, isDerivConnected, balance } = useDeriv();
   const { strategies, isLoading: strategiesLoading } = useStrategiesWithSelections();
   const queryClient = useQueryClient();
   const [autoTradingEnabled, setAutoTradingEnabled] = useState(false);
@@ -150,7 +150,7 @@ export const AutoTradingPanel = () => {
   const enabledStrategies = strategies?.filter(s => s.enabled) || [];
   const balanceAmount = balance?.balance ?? 0;
   const hasBalance = balanceAmount > 0;
-  const canAutoTrade = authorized && hasBalance && enabledStrategies.length > 0;
+  const canAutoTrade = isDerivConnected && hasBalance && enabledStrategies.length > 0;
 
   const openTrades = tradeIntents?.filter(t => t.status === "SENT" || t.status === "QUEUED") || [];
   const completedTrades = tradeIntents?.filter(t => t.status === "FILLED" || t.status === "REJECTED" || t.status === "FAILED") || [];
@@ -246,9 +246,9 @@ export const AutoTradingPanel = () => {
 
         {/* Status Indicators */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className={`p-2 rounded-lg ${authorized ? 'bg-success/10' : 'bg-destructive/10'}`}>
-            <CheckCircle2 className={`h-4 w-4 mx-auto mb-1 ${authorized ? 'text-success' : 'text-destructive'}`} />
-            <p className="text-xs font-medium">{authorized ? 'Connected' : 'Disconnected'}</p>
+          <div className={`p-2 rounded-lg ${isDerivConnected ? 'bg-success/10' : 'bg-destructive/10'}`}>
+            <CheckCircle2 className={`h-4 w-4 mx-auto mb-1 ${isDerivConnected ? 'text-success' : 'text-destructive'}`} />
+            <p className="text-xs font-medium">{isDerivConnected ? 'Connected' : 'Disconnected'}</p>
           </div>
           <div className={`p-2 rounded-lg ${hasBalance ? 'bg-success/10' : 'bg-warning/10'}`}>
             <DollarSign className={`h-4 w-4 mx-auto mb-1 ${hasBalance ? 'text-success' : 'text-warning'}`} />
@@ -354,11 +354,11 @@ export const AutoTradingPanel = () => {
         )}
 
         {/* Show connect CTA instead of cryptic warnings */}
-        {!authorized && user && (
+        {!isDerivConnected && user && (
           <DerivConnectCTA message="Connect Deriv to enable auto trading" />
         )}
 
-        {authorized && !canAutoTrade && (
+        {isDerivConnected && !canAutoTrade && (
           <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
             <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
             <div className="text-xs">

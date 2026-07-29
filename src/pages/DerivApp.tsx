@@ -30,7 +30,7 @@ const TABS: { id: TabId; label: string; icon: typeof Wifi }[] = [
 
 const DerivApp = () => {
   const { user } = useAuth();
-  const { authorized, balance, equity, derivTokens, switchDerivToken, removeDerivToken } = useDeriv();
+  const { isDerivConnected, accountId, balance, equity, derivTokens, switchDerivToken, removeDerivToken } = useDeriv();
   const [tab, setTab] = useState<TabId>("account");
   const [authOpen, setAuthOpen] = useState(false);
 
@@ -83,11 +83,11 @@ const DerivApp = () => {
           <div className="text-right">
             <Badge
               variant="outline"
-              className={cn("text-[10px]", authorized
+              className={cn("text-[10px]", isDerivConnected
                 ? "bg-success/10 text-success border-success/20"
                 : "bg-muted text-muted-foreground")}
             >
-              {authorized ? "Connected" : "Not connected"}
+              {isDerivConnected ? `Deriv Connected${accountId ? ` · ${accountId}` : ""}` : "Not connected"}
             </Badge>
             <p className="text-[11px] text-muted-foreground mt-0.5">
               Equity {equity ? equity.toFixed(2) : "0.00"}
