@@ -15,6 +15,14 @@ interface DerivContextType {
   isDerivConnected: boolean;
   accountId: string | null;
   environment: "prod" | null;
+  /** Account currency of the authorized Deriv account */
+  currency: string | null;
+  /** Alias of `authorized` — Deriv authorize call succeeded */
+  isAuthorized: boolean;
+  /** Raw socket state: true when the WebSocket is OPEN */
+  websocketConnected: boolean;
+  lastConnectedAt: string | null;
+  lastError: string | null;
   connectedAt: string | null;
   lastHeartbeat: number | null;
   socketReadyState: number;
@@ -325,6 +333,11 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
   const value: DerivContextType = {
     ...derivAPI,
     initializing,
+    currency: derivAPI.balance?.currency ?? derivAPI.accountInfo?.currency ?? null,
+    isAuthorized: derivAPI.authorized,
+    websocketConnected: derivAPI.socketReadyState === 1,
+    lastConnectedAt: derivAPI.connectedAt,
+    lastError: derivAPI.error,
     placeTrade: enhancedPlaceTrade,
     runningTrades,
     runningProfit,
