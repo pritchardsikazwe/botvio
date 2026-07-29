@@ -132,12 +132,15 @@ const StyleTrade = () => {
 
   // Subscribe to ticks
   useEffect(() => {
-    if (authorized && selectedSymbol) {
+    if (isDerivReady && selectedSymbol) {
       tickBuffer.current = [];
+      setTickCount(0);
+      setLastDigits([]);
+      console.log(`[FAST DIGITS] Tick subscription started — ${selectedSymbol}`);
       subscribeTicks(selectedSymbol);
       return () => { unsubscribeTicks(selectedSymbol); };
     }
-  }, [authorized, selectedSymbol]);
+  }, [isDerivReady, selectedSymbol]);
 
   // Track price + buffer ticks for engine
   useEffect(() => {
@@ -145,6 +148,9 @@ const StyleTrade = () => {
       setCurrentPrice(lastTick.quote);
       tickBuffer.current.push(lastTick.quote);
       if (tickBuffer.current.length > 300) tickBuffer.current = tickBuffer.current.slice(-300);
+      setTickCount(c => c + 1);
+      const digit = Number(String(lastTick.quote).replace(".", "").slice(-1));
+      setLastDigits(prev => [...prev, digit].slice(-5));
     }
   }, [lastTick, selectedSymbol]);
 
