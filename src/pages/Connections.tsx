@@ -29,6 +29,9 @@ import {
   HelpCircle,
   ExternalLink,
   Copy,
+  Plus,
+  Power,
+  Trash2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +41,7 @@ const Connections = () => {
   const { user } = useAuth();
   const { derivTokens, switchDerivToken, removeDerivToken } = useDeriv();
   const [authOpen, setAuthOpen] = useState(false);
+  const [busyConnId, setBusyConnId] = useState<string | null>(null);
 
   // Fetch all connections
   const { data: connections, refetch: refetchConnections } = useQuery({
@@ -76,6 +80,42 @@ const Connections = () => {
     const uid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
     navigator.clipboard.writeText(uid);
     toast.success("Terminal UID copied", { description: uid });
+  };
+
+  const scrollToConnect = () => {
+    document.getElementById("deriv-connect")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const disconnectConnection = async (id: string) => {
+    setBusyConnId(id);
+    try {
+      const { error } = await supabase
+        .from("deriv_connections")
+        .update({ is_connected: false })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Connection disconnected");
+      refetchConnections();
+    } catch (e: any) {
+      toast.error("Could not disconnect", { description: e?.message });
+    } finally {
+      setBusyConnId(null);
+    }
+  };
+
+  const deleteConnection = async (id: string) => {
+    if (!window.confirm("Remove this connection permanently?")) return;
+    setBusyConnId(id);
+    try {
+      const { error } = await supabase.from("deriv_connections").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Connection removed");
+      refetchConnections();
+    } catch (e: any) {
+      toast.error("Could not remove connection", { description: e?.message });
+    } finally {
+      setBusyConnId(null);
+    }
   };
 
   if (!user) {
@@ -266,6 +306,25 @@ const Connections = () => {
               </CardContent>
             </Card>
 
+            {/* Connections manager summary */}
+            <Card className="glass-card">
+              <CardHeader>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <CardTitle className="text-base">Connections Manager</CardTitle>
+                    <CardDescription>
+                      {derivTokens.length} linked account{derivTokens.length === 1 ? "" : "s"} ·{" "}
+                      {(connections ?? []).filter((c: any) => c.is_connected).length} active connection
+                      {(connections ?? []).filter((c: any) => c.is_connected).length === 1 ? "" : "s"}
+                    </CardDescription>
+                  </div>
+                  <Button size="sm" onClick={scrollToConnect}>
+                    <Plus className="h-4 w-4 mr-1" /> Add Deriv account
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+
             {/* Multi-Account Switcher */}
             {derivTokens.length > 0 && (
               <AccountSwitcher
@@ -276,15 +335,17 @@ const Connections = () => {
             )}
 
             {/* Connection (OAuth or Token) */}
-            <DerivConnectionPanel />
+            <div id="deriv-connect">
+              <DerivConnectionPanel />
+            </div>
 
             {/* Connection History */}
             <Card className="glass-card">
               <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <CardTitle>Connection History</CardTitle>
-                    <CardDescription>All your saved Deriv connections</CardDescription>
+                    <CardTitle>Saved Connections</CardTitle>
+                    <CardDescription>View, disconnect or remove your Deriv connections</CardDescription>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => refetchConnections()}>
                     <RefreshCw className="h-4 w-4" />
@@ -297,7 +358,7 @@ const Connections = () => {
                     {connections.map((conn: any) => (
                       <div
                         key={conn.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
+                        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-muted/30"
                       >
                         <div className="flex items-center gap-3">
                           <div
@@ -312,14 +373,40 @@ const Connections = () => {
                             </p>
                           </div>
                         </div>
-                        <Badge variant={conn.is_connected ? "default" : "secondary"}>
-                          {conn.is_connected ? "Active" : "Inactive"}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={conn.is_connected ? "default" : "secondary"}>
+                            {conn.is_connected ? "Active" : "Inactive"}
+                          </Badge>
+                          {conn.is_connected && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={busyConnId === conn.id}
+                              onClick={() => disconnectConnection(conn.id)}
+                            >
+                              <Power className="h-3.5 w-3.5 mr-1" /> Disconnect
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            disabled={busyConnId === conn.id}
+                            onClick={() => deleteConnection(conn.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-center py-8">No connections yet</p>
+                  <div className="text-center py-8 space-y-3">
+                    <p className="text-muted-foreground">No connections yet</p>
+                    <Button size="sm" variant="outline" onClick={scrollToConnect}>
+                      <Plus className="h-4 w-4 mr-1" /> Connect your first account
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
