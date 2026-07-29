@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { blogPosts } from "@/content/blogPosts";
+import { blogContent } from "@/content/blogPosts";
 import { FileText, AlertTriangle, CheckCircle2, Trash2 } from "lucide-react";
 
 interface Correction {
@@ -54,9 +54,9 @@ export function AdminEditorialTab() {
 
   useEffect(() => { load(); }, []);
 
-  const audit = blogPosts.map((p) => {
-    const wc = countWords(p.content);
-    return { slug: p.slug, title: p.title, wordCount: wc, thin: wc < 600 };
+  const audit = Object.entries(blogContent).map(([slug, p]) => {
+    const wc = countWords(p.content.replace(/<[^>]+>/g, " "));
+    return { slug, title: p.title, wordCount: wc, thin: wc < 600 };
   });
   const thin = audit.filter((a) => a.thin);
   const avg = Math.round(audit.reduce((s, a) => s + a.wordCount, 0) / Math.max(1, audit.length));
