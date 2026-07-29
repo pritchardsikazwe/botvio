@@ -55,22 +55,26 @@ export const SiteFooter = () => {
               <li><Link to="/marketplace" className="hover:text-primary">Marketplace</Link></li>
             </ul>
           </nav>
-          <nav aria-label="Legal">
-            <h2 className="font-semibold mb-3 text-foreground">Legal</h2>
+          <nav aria-label="Trust and legal">
+            <h2 className="font-semibold mb-3 text-foreground">Trust & Legal</h2>
             <ul className="space-y-2 text-muted-foreground">
+              <li><Link to="/editorial-policy" className="hover:text-primary">Editorial Policy</Link></li>
+              <li><Link to="/fact-checking" className="hover:text-primary">Fact-Checking</Link></li>
+              <li><Link to="/corrections" className="hover:text-primary">Corrections</Link></li>
+              <li><Link to="/affiliate-disclosure" className="hover:text-primary">Affiliate Disclosure</Link></li>
+              <li><Link to="/ai-content-policy" className="hover:text-primary">AI Content Policy</Link></li>
+              <li><Link to="/disclaimer" className="hover:text-primary">Risk Disclosure</Link></li>
               <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
-              <li><Link to="/disclaimer" className="hover:text-primary">Risk Disclaimer</Link></li>
               <li><a href="/sitemap.xml" className="hover:text-primary">Sitemap</a></li>
-              <li><a href="/robots.txt" className="hover:text-primary">Robots</a></li>
             </ul>
           </nav>
         </div>
 
         <div className="mt-8 pt-6 border-t border-border/40 flex flex-col md:flex-row justify-between gap-4 text-xs text-muted-foreground">
           <p>
-            © {year} Botvio — Forex Signals, AI Chart Analysis & Gold Trading.
-            All rights reserved.
+            © {year} Botvio — Independent financial education, market
+            analysis & trading technology. All rights reserved.
           </p>
           <nav aria-label="Social media" className="flex items-center gap-4">
             <a href="https://youtube.com/@botvio" target="_blank" rel="noopener me" className="hover:text-primary">YouTube</a>

@@ -1,7 +1,7 @@
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, MessageCircle, Send, Clock } from "lucide-react";
+import { Mail, MessageCircle, Send, Clock, Phone } from "lucide-react";
 
 const channels = [
   {
@@ -21,9 +21,16 @@ const channels = [
   {
     icon: Mail,
     title: "Email",
-    desc: "For business enquiries, partnerships, or support issues.",
-    link: "mailto:support@botvio.live",
-    label: "support@botvio.live",
+    desc: "Editorial feedback, corrections, partnerships or support enquiries.",
+    link: "mailto:info@botvio.live",
+    label: "info@botvio.live",
+  },
+  {
+    icon: Phone,
+    title: "Phone / WhatsApp",
+    desc: "For account-related enquiries during business hours (CAT / UTC+2).",
+    link: "https://wa.me/260966284085",
+    label: "+260 966 284 085",
   },
 ];
 
@@ -72,16 +79,19 @@ const Contact = () => (
         <Clock className="h-5 w-5 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">
           <strong className="text-foreground">Typical response time:</strong>{" "}
-          Within 24 hours on Telegram, 1–2 business days via email.
+          Within 1 business day on Telegram / WhatsApp, 1–2 business days via email.
         </p>
       </div>
 
       {/* Address / Legal */}
       <div className="mt-8 text-sm text-muted-foreground">
         <p className="font-medium text-foreground mb-1">Botvio</p>
-        <p>Online trading education & AI signal platform</p>
+        <p>Independent financial education, market analysis and trading technology.</p>
+        <p className="mt-1">Operated online; we do not maintain a public walk-in office.</p>
         <p className="mt-1">
-          For legal enquiries, please refer to our{" "}
+          For legal and editorial policies, see our{" "}
+          <a href="/editorial-policy" className="text-primary underline">Editorial Policy</a>,{" "}
+          <a href="/corrections" className="text-primary underline">Corrections Policy</a>,{" "}
           <a href="/terms" className="text-primary underline">Terms of Service</a>{" "}
           and{" "}
           <a href="/privacy" className="text-primary underline">Privacy Policy</a>.
