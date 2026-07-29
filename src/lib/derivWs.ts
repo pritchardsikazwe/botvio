@@ -54,7 +54,7 @@ export async function derivAuthorize(): Promise<DerivAuthorizeResult> {
   });
 
   // OTP socket is pre-authenticated — request balance to get account info
-  ws.send(JSON.stringify({ balance: 1, account: "current" }));
+  ws.send(JSON.stringify({ balance: 1 }));
 
   return await new Promise<DerivAuthorizeResult>((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error("Balance request timeout")), 30000);
