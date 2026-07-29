@@ -59,10 +59,13 @@ export function getDerivOAuthToken(): string | null {
 
 export function setDerivOAuthToken(token: string): void {
   localStorage.setItem("deriv_oauth_token", token);
+  // Tell DerivProvider to (re)authorize immediately — no logout/login required.
+  window.dispatchEvent(new CustomEvent("deriv:token-updated", { detail: { token } }));
 }
 
 export function clearDerivOAuthToken(): void {
   localStorage.removeItem("deriv_oauth_token");
+  window.dispatchEvent(new CustomEvent("deriv:token-cleared"));
 }
 
 // ─── PKCE Storage Helpers ───────────────────────────────────────────────────
