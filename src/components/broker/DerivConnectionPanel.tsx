@@ -450,6 +450,13 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                     Open Deriv PAT page <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setConnectionMethod("oauth")}
+                  className="w-full text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                >
+                  ← Skip the PAT — sign in with your Deriv account instead
+                </button>
               </TabsContent>
 
               <TabsContent value="oauth" className="space-y-4 mt-4">
