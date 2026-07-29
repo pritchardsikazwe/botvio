@@ -1906,6 +1906,54 @@ export type Database = {
         }
         Relationships: []
       }
+      editorial_corrections: {
+        Row: {
+          article_slug: string
+          article_title: string
+          corrected_at: string
+          corrected_text: string
+          correction_type: string
+          created_at: string
+          id: string
+          original_text: string | null
+          reason: string
+          reviewed_by: string | null
+          status: string
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          article_slug: string
+          article_title: string
+          corrected_at?: string
+          corrected_text: string
+          correction_type?: string
+          created_at?: string
+          id?: string
+          original_text?: string | null
+          reason: string
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          article_slug?: string
+          article_title?: string
+          corrected_at?: string
+          corrected_text?: string
+          correction_type?: string
+          created_at?: string
+          id?: string
+          original_text?: string | null
+          reason?: string
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       education_lessons: {
         Row: {
           category: string | null
