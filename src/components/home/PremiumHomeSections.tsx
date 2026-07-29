@@ -44,17 +44,17 @@ const marketOverview: {
   {
     label: "Forex",
     items: [
-      { name: "EUR/USD", to: "/eur-usd" },
-      { name: "GBP/USD", to: "/gbp-usd" },
-      { name: "USD/JPY", to: "/usd-jpy" },
-      { name: "AUD/USD", to: "/aud-usd" },
-      { name: "USD/CAD", to: "/usd-cad" },
+      { name: "EUR/USD", to: "/chart/EURUSD" },
+      { name: "GBP/USD", to: "/chart/GBPUSD" },
+      { name: "USD/JPY", to: "/chart/USDJPY" },
+      { name: "AUD/USD", to: "/chart/AUDUSD" },
+      { name: "USD/CAD", to: "/chart/USDCAD" },
     ],
   },
   {
     label: "Crypto",
     items: [
-      { name: "BTC/USD", to: "/bitcoin" },
+      { name: "BTC/USD", to: "/chart/BTCUSD" },
       { name: "ETH/USD", to: "/chart/ETHUSD" },
       { name: "Binance Hub", to: "/binance" },
     ],
@@ -70,8 +70,8 @@ const marketOverview: {
   {
     label: "Commodities",
     items: [
-      { name: "Gold (XAU/USD)", to: "/gold" },
-      { name: "Silver (XAG/USD)", to: "/silver" },
+      { name: "Gold (XAU/USD)", to: "/chart/XAUUSD" },
+      { name: "Silver (XAG/USD)", to: "/chart/XAGUSD" },
     ],
   },
   {
@@ -121,11 +121,7 @@ const educationCards = [
 const brokers = [
   { name: "Deriv", to: "/brokers/deriv", best: "Synthetic indices & digital options", min: "$5" },
   { name: "Exness", to: "/brokers/exness", best: "Ultra-tight spreads on gold", min: "$10" },
-  { name: "HFM", to: "/brokers/hfm", best: "Copy trading & funded accounts", min: "$5" },
-  { name: "XM", to: "/brokers/xm", best: "Beginners & bonus programs", min: "$5" },
-  { name: "Weltrade", to: "/weltrade", best: "Proprietary indices access", min: "$25" },
-  { name: "IC Markets", to: "/brokers/ic-markets", best: "Raw ECN scalping", min: "$200" },
-  { name: "FP Markets", to: "/brokers/fp-markets", best: "ECN with tight commissions", min: "$100" },
+  { name: "Weltrade", to: "/brokers/weltrade", best: "Proprietary indices access", min: "$25" },
 ];
 
 const testimonials = [
@@ -211,9 +207,9 @@ export function PremiumHomeHero() {
               <BarChart3 className="h-4 w-4" /> View Today's Analysis
             </Button>
           </Link>
-          <Link to="/chart/XAUUSD">
+          <Link to="/signals?tab=chart-analysis">
             <Button size="lg" variant="outline" className="gap-2 font-bold">
-              <Brain className="h-4 w-4" /> Upload Chart
+              <Brain className="h-4 w-4" /> AI Chart Analysis
             </Button>
           </Link>
         </div>
