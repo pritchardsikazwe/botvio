@@ -19,7 +19,7 @@ interface DerivConnectionProps {
 
 export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   const {
-    connected, authorized, balance, error, loading,
+    connected, authorized, balance, error, loading, reconnecting,
     connect, disconnect,
   } = useDeriv();
 
@@ -55,6 +55,10 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
   useEffect(() => {
     if (error) addLog(`❌ Error: ${error}`);
   }, [error, addLog]);
+
+  useEffect(() => {
+    if (reconnecting) addLog("🔄 Connection dropped — reconnecting automatically...");
+  }, [reconnecting, addLog]);
 
   const isValidToken = (t: string) => {
     const trimmed = t.trim();
@@ -123,8 +127,8 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
               {isConnectedDemo ? "🧪 Demo" : "💰 Real"}
             </Badge>
           )}
-          <Badge variant="outline" className={cn("text-xs", authorized ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground")}>
-            {authorized ? "Authorized" : "Disconnected"}
+          <Badge variant="outline" className={cn("text-xs", reconnecting ? "bg-warning/10 text-warning border-warning/20" : authorized ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground")}>
+            {reconnecting ? "Reconnecting…" : authorized ? "Authorized" : "Disconnected"}
           </Badge>
         </div>
       </div>
@@ -132,6 +136,12 @@ export const DerivConnection = ({ onSymbolChange }: DerivConnectionProps) => {
       {/* Authorized View */}
       {authorized && balanceDisplay ? (
         <div className="space-y-4">
+          {reconnecting && (
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-warning/10 border border-warning/20">
+              <Loader2 className="w-3.5 h-3.5 text-warning animate-spin" />
+              <p className="text-xs text-warning">Connection dropped. Reconnecting automatically…</p>
+            </div>
+          )}
           <div className={cn("p-4 rounded-xl border", isConnectedDemo ? "bg-gradient-to-r from-blue-500/10 to-primary/10 border-blue-500/20" : "bg-gradient-to-r from-success/10 to-primary/10 border-success/20")}>
             <div className="flex items-center gap-3 mb-2">
               <Wallet className={cn("w-5 h-5", isConnectedDemo ? "text-blue-500" : "text-success")} />
