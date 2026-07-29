@@ -91,7 +91,12 @@ const Signals = () => {
   const [direction, setDirection] = useState("all");
   const [timeframe, setTimeframe] = useState("all");
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState("signals");
+  const initialTab = (() => {
+    if (typeof window === "undefined") return "signals";
+    const t = new URLSearchParams(window.location.search).get("tab");
+    return t === "chart-analysis" || t === "post-signal" ? t : "signals";
+  })();
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const { data: signals, isLoading, refetch } = useManualSignals({
     category,
