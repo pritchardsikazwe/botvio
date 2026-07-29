@@ -180,6 +180,7 @@ export const AppRoutes = () => (
     <Route path="forex-beginner-guide" element={<BeginnerGuide />} />
     <Route path="beginner-guide" element={<BeginnerGuide />} />
     <Route path="auth/deriv/callback" element={<DerivCallback />} />
+    <Route path="callback" element={<DerivCallback />} />
     <Route path="trading" element={<Paid><Trading /></Paid>} />
     <Route path="chart/:symbol" element={<Paid><ChartPage /></Paid>} />
     <Route path="gold" element={<Paid><GoldTradingHub /></Paid>} />
