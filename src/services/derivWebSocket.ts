@@ -1,7 +1,7 @@
 import type { DerivMessage, DerivTick, DerivBalance, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
 import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 
-type ConnectionStatus = "idle" | "connecting" | "open" | "closed";
+type ConnectionStatus = "idle" | "connecting" | "reconnecting" | "open" | "closed";
 
 type Listener<T> = (payload: T) => void;
 
@@ -15,6 +15,8 @@ type DerivWebSocketOptions = {
   reconnectBaseDelayMs?: number;
   /** Max reconnect delay in ms (default 15000) */
   reconnectMaxDelayMs?: number;
+  /** Max consecutive reconnect attempts before giving up (default 12) */
+  maxReconnectAttempts?: number;
   /** Enable keepalive ping (default true) */
   keepAlive?: boolean;
   /** Ping interval ms (default 25000) */
@@ -40,6 +42,7 @@ export class DerivWebSocketService {
   private reconnectAttempt = 0;
   private reconnectTimer: number | null = null;
   private pingTimer: number | null = null;
+  private netListenersBound = false;
 
   private token: string | null = null;
   /** If set, we connected via OTP and don't need to send authorize */
@@ -70,6 +73,7 @@ export class DerivWebSocketService {
   private readonly autoReconnect: boolean;
   private readonly reconnectBaseDelayMs: number;
   private readonly reconnectMaxDelayMs: number;
+  private readonly maxReconnectAttempts: number;
   private readonly keepAlive: boolean;
   private readonly pingIntervalMs: number;
 
@@ -79,6 +83,7 @@ export class DerivWebSocketService {
     this.autoReconnect = opts.autoReconnect ?? true;
     this.reconnectBaseDelayMs = opts.reconnectBaseDelayMs ?? 1000;
     this.reconnectMaxDelayMs = opts.reconnectMaxDelayMs ?? 15000;
+    this.maxReconnectAttempts = opts.maxReconnectAttempts ?? 12;
     this.keepAlive = opts.keepAlive ?? true;
     this.pingIntervalMs = opts.pingIntervalMs ?? 25000;
     
@@ -105,6 +110,9 @@ export class DerivWebSocketService {
   }
 
   get connectionStatus() { return this.status; }
+  /** True while a scheduled automatic reconnect is pending */
+  get isReconnecting() { return this.reconnectTimer !== null || this.status === "reconnecting"; }
+  get reconnectAttempts() { return this.reconnectAttempt; }
   get authorizedLoginId() { return this.loginid; }
   get latestBalance() { return this.lastBalance; }
   get account() { return this.accountInfo; }
@@ -159,6 +167,26 @@ export class DerivWebSocketService {
     }
   }
 
+  /** Reconnect immediately when the browser regains connectivity or the tab is refocused. */
+  private bindNetworkListeners() {
+    if (this.netListenersBound || typeof window === "undefined") return;
+    this.netListenersBound = true;
+
+    const kick = () => {
+      if (this.isManualClose || !this.autoReconnect) return;
+      if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
+      if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+      this.log("Network available — retrying Deriv connection now");
+      this.reconnectAttempt = 0;
+      this.scheduleReconnect(0);
+    };
+
+    window.addEventListener("online", kick);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") kick();
+    });
+  }
+
   private clearPingTimer() {
     if (this.pingTimer) {
       window.clearInterval(this.pingTimer);
@@ -189,6 +217,7 @@ export class DerivWebSocketService {
 
     const connectUrl = url || this.currentUrl;
     this.isManualClose = false;
+    this.bindNetworkListeners();
     this.emitStatus("connecting");
     this.log(`Connecting: ${connectUrl}`);
 
@@ -233,6 +262,7 @@ export class DerivWebSocketService {
   close() {
     this.isManualClose = true;
     this.clearReconnectTimer();
+    this.reconnectAttempt = 0;
     this.clearPingTimer();
     this.tickSubscriptionBySymbol.clear();
     this.activeContractSubscriptions.clear();
@@ -248,15 +278,33 @@ export class DerivWebSocketService {
     this.emitStatus("closed");
   }
 
-  private scheduleReconnect() {
+  private scheduleReconnect(forcedDelayMs?: number) {
     this.clearReconnectTimer();
-    const delay = Math.min(
+
+    if (this.reconnectAttempt >= this.maxReconnectAttempts) {
+      this.log("Reconnect attempts exhausted. Please reconnect manually.");
+      this.emitError("Lost connection to Deriv. Please reconnect.");
+      this.emitStatus("closed");
+      return;
+    }
+
+    // Exponential backoff with full jitter (avoids thundering herd on Deriv)
+    const base = Math.min(
       this.reconnectMaxDelayMs,
       this.reconnectBaseDelayMs * Math.pow(2, this.reconnectAttempt),
     );
+    const delay = forcedDelayMs ?? Math.round(base / 2 + Math.random() * (base / 2));
     this.reconnectAttempt += 1;
-    this.log(`Reconnecting in ${delay}ms...`);
+    this.emitStatus("reconnecting");
+    this.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempt}/${this.maxReconnectAttempts})...`);
     this.reconnectTimer = window.setTimeout(async () => {
+      this.reconnectTimer = null;
+      if (this.isManualClose) return;
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        this.log("Offline — waiting for network before retrying");
+        this.scheduleReconnect();
+        return;
+      }
       try {
         if (this.otpMode && this.otpUrlGetter) {
           // For OTP mode, get a fresh OTP URL before reconnecting
@@ -304,8 +352,14 @@ export class DerivWebSocketService {
             this.activeContractSubscriptions.delete(contractId);
           }
         }
-      } catch {
-        // open() will trigger close/error handlers and schedule another reconnect
+
+        this.log("Reconnected to Deriv");
+      } catch (e) {
+        // If the socket never opened, no close event fires — schedule the next attempt here.
+        const isOpen = this.ws?.readyState === WebSocket.OPEN;
+        if (!isOpen && !this.isManualClose && this.autoReconnect && !this.reconnectTimer) {
+          this.scheduleReconnect();
+        }
       }
     }, delay);
   }

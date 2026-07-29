@@ -11,6 +11,7 @@ interface DerivContextType {
   balance: DerivBalance | null;
   error: string | null;
   loading: boolean;
+  reconnecting: boolean;
   lastTick: DerivTick | null;
   accountInfo: DerivAccountInfo | null;
   // Running trades & equity

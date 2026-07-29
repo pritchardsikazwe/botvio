@@ -25,6 +25,7 @@ interface DerivAPIState {
   loading: boolean;
   lastTick: DerivTick | null;
   accountInfo: DerivAccountInfo | null;
+  reconnecting: boolean;
 }
 
 type DerivOtpResponse = { ok?: boolean; ws_url?: string; error?: string };
@@ -40,6 +41,7 @@ export const useDerivAPI = () => {
     loading: false,
     lastTick: null,
     accountInfo: null,
+    reconnecting: false,
   });
 
   const updateState = useCallback((partial: Partial<DerivAPIState>) => {
@@ -79,7 +81,7 @@ export const useDerivAPI = () => {
         };
 
         const offStatus = service.onStatus((st) => {
-          updateState({ connected: st === "open" });
+          updateState({ connected: st === "open", reconnecting: st === "reconnecting" });
         });
         const offError = service.onError((msg) => {
           updateState({ error: msg });
@@ -118,6 +120,7 @@ export const useDerivAPI = () => {
           authorized: true, 
           balance,
           accountInfo: acctInfo,
+          reconnecting: false,
         });
 
         // Subscribe to balance updates
@@ -161,6 +164,7 @@ export const useDerivAPI = () => {
       loading: false,
       lastTick: null,
       accountInfo: null,
+      reconnecting: false,
     });
   }, [service, updateState]);
 
