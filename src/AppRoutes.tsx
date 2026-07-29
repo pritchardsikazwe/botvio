@@ -275,6 +275,7 @@ export const AppRoutes = () => (
     <Route path="trade-modes" element={<Paid><TradeModes /></Paid>} />
     <Route path="deriv-options" element={<Paid><DerivOptions /></Paid>} />
     <Route path="binary-options" element={<Paid><BinaryOptions /></Paid>} />
+    <Route path="brokers" element={<BrokersIndex />} />
     <Route path="brokers/:slug" element={<BrokerPage />} />
     <Route path="live" element={<LiveFeed />} />
     <Route path="flipping-challenges" element={<FlippingChallenges />} />
