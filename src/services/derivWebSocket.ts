@@ -51,6 +51,8 @@ export class DerivWebSocketService {
   private lastBalance: DerivBalance | null = null;
   private loginid: string | null = null;
   private accountInfo: DerivAccountInfo | null = null;
+  private lastMessageAt: number | null = null;
+  private lastErrorMessage: string | null = null;
 
   private tickListeners = new Set<Listener<DerivTick>>();
   private statusListeners = new Set<Listener<ConnectionStatus>>();
@@ -116,6 +118,11 @@ export class DerivWebSocketService {
   get authorizedLoginId() { return this.loginid; }
   get latestBalance() { return this.lastBalance; }
   get account() { return this.accountInfo; }
+  /** True only when the underlying socket is genuinely OPEN */
+  get socketOpen() { return this.ws?.readyState === WebSocket.OPEN; }
+  get socketReadyState() { return this.ws?.readyState ?? WebSocket.CLOSED; }
+  get lastHeartbeatAt() { return this.lastMessageAt; }
+  get lastError() { return this.lastErrorMessage; }
 
   onTick(listener: Listener<DerivTick>) {
     this.tickListeners.add(listener);
@@ -157,6 +164,7 @@ export class DerivWebSocketService {
   }
 
   private emitError(message: string) {
+    this.lastErrorMessage = message;
     this.errorListeners.forEach((l) => l(message));
   }
 
@@ -379,6 +387,7 @@ export class DerivWebSocketService {
     } catch {
       return;
     }
+    this.lastMessageAt = Date.now();
 
     if (data?.error?.message) {
       this.emitError(data.error.message);
