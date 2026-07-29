@@ -1,109 +1,51 @@
-## Goal
 
-Move Botvio's learning academy from `?category=` query URLs to clean, SEO-friendly path URLs, add category-page SEO (canonical, Course/Breadcrumb schema, metadata), preserve rankings via 301-style redirects, and expand the category taxonomy.
+# Phase 4 — Learning Paths & Transparency
 
-## Scope (this migration)
+Goal: give visitors a clear "where do I start" journey and prove Botvio is transparent about method, performance, and limits — key AdSense trust signals.
 
-Focused on the Learn/education surface — the actual "courses" the user cites. Blog, strategies, and other slugs already use clean URLs and are out of scope.
+## 1. Structured Learning Paths
 
-## URL structure
+New file `src/content/learningPaths.ts` defining 3 curated paths as ordered reading lists (each item links to an existing lesson, blog post, or hub):
 
-```
-/learn                              → academy index (all categories)
-/learn/:category                    → category page (e.g. /learn/forex, /learn/smart-money-concepts)
-/learn/:category/:lesson            → lesson page
-```
+- **Beginner Path** — "Forex from Zero" (8 steps: what is forex, pips/lots, MT5 setup, first demo trade, risk management, journaling, psychology, 1st live trade checklist)
+- **Intermediate Path** — "Strategy Builder" (8 steps: SMC basics, supply/demand, order blocks, liquidity, session timing, XAUUSD structure, backtesting, building a plan)
+- **Advanced Path** — "Prop Firm & Systematic" (8 steps: prop firm rules, drawdown math, correlation, position sizing models, Deriv indices systematic, algo signals, review cycles, going full-time)
 
-Legacy → new (client-side 301-equivalent using `<Navigate replace>`):
-- `/learn?category=X`           → `/learn/X`
-- `/learn/:lesson?category=X`   → `/learn/X/:lesson`
+New page `src/pages/LearningPaths.tsx` at `/learning-paths` with:
+- Hero explaining the free curriculum
+- 3 path cards, each expandable to show the 8-step checklist
+- Progress persistence in `localStorage` (checkbox per step, per path)
+- Breadcrumbs, SEOHead, Course JSON-LD
+- Link into each step (opens the existing article/lesson)
 
-Slugs are lowercase, hyphen-separated, unique. True HTTP 301s are not possible from a static SPA; permanent client redirects + updated sitemap + canonical tags carry the SEO signal, which is the standard SPA pattern.
+New page `src/pages/LearningPathDetail.tsx` at `/learning-paths/:slug` — dedicated page per path with full step list, "mark complete" checkboxes, estimated time, prerequisites, next-path CTA.
 
-## Database
+Add to header nav under "Learn" (or as a new "Start Here" link) and to homepage as a "New here? Start with our free curriculum" band.
 
-Add categories as first-class rows so slugs, titles, descriptions, and SEO metadata are editable in one place.
+## 2. Transparency Pages
 
-```
-public.learn_categories(
-  id, slug (unique), name, description,
-  parent_slug, sort_order, icon, hero_image_url,
-  seo_title, seo_description, is_active,
-  created_at, updated_at
-)
-```
+- `src/pages/Methodology.tsx` at `/methodology` — how Botvio produces signals, chart analysis, and education: sources, tools, human review, AI usage, limitations, what we don't do (no PAMM, no fund management, no guaranteed returns).
+- `src/pages/PerformanceTransparency.tsx` at `/performance-transparency` — honest framing: signals are educational, hypothetical vs live, why past ≠ future, screenshots policy (from `signals_performance` when present), full risk disclosure. Pulls counts from `signals_performance` if available, otherwise shows a clean "we're publishing verified track record starting {month}" placeholder — no fabricated numbers.
+- `src/pages/Trust.tsx` at `/trust` — index page linking every trust asset (About, Editorial Policy, Fact-Checking, Corrections, Affiliate Disclosure, AI Content Policy, Methodology, Performance Transparency, Contact) with 1-line description each. This becomes the single hub AdSense reviewers can audit.
 
-`education_lessons` already has `slug` + `category`; add FK-style `category_slug` alignment and backfill. New lessons/categories auto-generate slugs (slugify on insert) with uniqueness check.
+## 3. Homepage + Footer wiring
 
-Seed the expanded taxonomy from the user's list, grouped by parent:
-- Financial Markets (forex, smc, ict, price-action, gold, synthetic-indices, boom-crash, crypto, binary-options, …)
-- Investing (stock-investing, etf, reits, dividend, …)
-- Make Money Online (affiliate-marketing, blogging, youtube-automation, freelancing, …)
-- Side Hustles (student-side-hustles, ai-side-hustles, dropshipping, print-on-demand, …)
-- Business (business-planning, accounting, sales, branding, …)
-- Entrepreneurship (startup-funding, lean-startup, scaling, …)
+- Homepage: add a compact "Start Here" section above the fold linking the 3 learning paths.
+- Footer: add "Trust Center" link (`/trust`), "Methodology", "Performance Transparency", and "Start Learning" under existing Trust & Learn columns.
+- Header: add "Start Here" link pointing to `/learning-paths`.
 
-## Routing changes
+## 4. Technical
 
-- `AppRoutes.tsx`: add `/learn/:category` and `/learn/:category/:lesson`; keep `/learn` index.
-- Add `<LegacyLearnRedirect />` mounted on `/learn` that reads `?category=` and `<Navigate replace to={/learn/${cat}}>`. Same for `/learn/:lesson?category=`.
-- `Learn.tsx`: when `:category` param present, filter to that category; otherwise show all-category index.
-- `Lesson.tsx`: read category from path, remove query-param reads; update prev/next/back links.
+- Register 5 new routes in `src/AppRoutes.tsx` (all public, no `<Paid>` wrapper — learning is free per Phase 1 positioning).
+- Add all 5 URLs to `public/sitemap.xml` and the dynamic sitemap edge function.
+- Each new page: SEOHead with unique title/description, single H1, breadcrumbs, canonical.
+- No DB schema changes. No new edge functions. Progress state is client-side only for now (avoids auth-gating free content).
 
-## SEO per page
-
-Every `/learn/:category` and `/learn/:category/:lesson` gets:
-- Dynamic `<title>` and meta description (from DB or derived).
-- `<link rel="canonical">` self-referencing the clean URL (handled by existing `SEOHead`).
-- Open Graph + Twitter tags.
-- JSON-LD: `BreadcrumbList` (Home › Learn › Category › Lesson) and `Course` schema on category/lesson pages (name, description, provider = Botvio, inLanguage, educationalLevel).
-- Visible breadcrumb component at top of category/lesson pages.
-
-## Internal links
-
-Update every place that links to `?category=`:
-- `src/pages/Learn.tsx` (lesson cards)
-- `src/pages/Lesson.tsx` (back / prev / next)
-- `src/components/chart/EducationMiniCard.tsx`
-- `src/components/courses/CourseEnrollmentCards.tsx`
-- Footer, homepage learn tiles, search results, related-course widgets
-
-## Sitemap
-
-Update `supabase/functions/sitemap-xml/index.ts`:
-- Emit `/learn` + one entry per category (`/learn/:slug`) from `learn_categories`.
-- Continue emitting `/learn/:category/:lesson` for every published lesson under its category.
-- Remove any legacy `?category=` variants.
-
-## Admin
-
-Extend the admin education panel:
-- CRUD for `learn_categories` (slug editor with live preview + duplicate detection).
-- Slug regenerate button; on slug change, insert redirect mapping row so the old URL keeps resolving.
-- Lesson editor gains a category picker sourced from the new table.
-
-## Performance & polish
-
-- Lazy-load category hero images (`loading="lazy"`).
-- Prefetch adjacent lessons on hover.
-- No changes to build pipeline needed beyond what Vite already does (minify, code-split).
-
-## Out of scope
-
-- True 301 responses from origin (SPA constraint; client `Navigate replace` + canonical + sitemap is the intended equivalent).
-- Renaming `/learn` → `/courses` (the two options were alternatives; sticking with `/learn` for backwards continuity and existing indexed URLs).
-- Non-learning slugs (blog, strategies, chart pairs) — already clean.
-
-## Deliverables
-
-1. Migration: `learn_categories` table + seed rows + backfill of `education_lessons.category`.
-2. Route additions + legacy redirect components.
-3. `Learn.tsx` / `Lesson.tsx` rewrites to path-based params + breadcrumbs + Course/BreadcrumbList schema.
-4. All internal links updated.
-5. `sitemap-xml` edge function updated.
-6. Admin category manager.
-
-## Confirmations needed
-
-1. Keep the URL prefix as `/learn/...` (not `/courses/...`)?
-2. OK to add the full expanded taxonomy you listed (~120 categories) as seed data, even if most have zero lessons today? (Empty categories will render a "coming soon" state and still be indexable.)
+Deliverables:
+1. `src/content/learningPaths.ts`
+2. `src/pages/LearningPaths.tsx`
+3. `src/pages/LearningPathDetail.tsx`
+4. `src/pages/Methodology.tsx`
+5. `src/pages/PerformanceTransparency.tsx`
+6. `src/pages/Trust.tsx`
+7. Edits to `AppRoutes.tsx`, `Header.tsx`, `SiteFooter.tsx`, `Index.tsx`, `public/sitemap.xml`.
