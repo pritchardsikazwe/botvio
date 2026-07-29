@@ -50,6 +50,7 @@ import ChartPage from "./pages/ChartPage";
 import TradeModes from "./pages/TradeModes";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Author from "./pages/Author";
 import SlugResolver from "./pages/SlugResolver";
 import Docs from "./pages/Docs";
 import FAQ from "./pages/FAQ";
@@ -271,6 +272,7 @@ export const AppRoutes = () => (
     <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
     <Route path="blog/:slug" element={<BlogPost />} />
+    <Route path="authors/:slug" element={<Author />} />
     <Route path="docs" element={<Docs />} />
     <Route path="faq" element={<FAQ />} />
     <Route path="whitepaper" element={<Whitepaper />} />
