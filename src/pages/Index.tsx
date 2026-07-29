@@ -722,41 +722,16 @@ const Index = () => {
       {/* Latest Strategies */}
       <LatestStrategies />
 
-      <footer className="border-t border-border/50 mt-8 py-6 px-4">
-        <div className="container mx-auto">
-          {/* Internal navigation links */}
-          <nav className="flex flex-wrap justify-center gap-4 text-sm mb-4" aria-label="Footer navigation">
-            <Link to="/signals" className="text-muted-foreground hover:text-primary transition-colors">Forex Signals</Link>
-            <Link to="/gold" className="text-muted-foreground hover:text-primary transition-colors">Gold Hub</Link>
-            <Link to="/bots" className="text-muted-foreground hover:text-primary transition-colors">Trading Bots</Link>
-            <Link to="/providers" className="text-muted-foreground hover:text-primary transition-colors">Copy Trading</Link>
-            <Link to="/learn" className="text-muted-foreground hover:text-primary transition-colors">Learn Trading</Link>
-            <Link to="/chart/XAUUSD" className="text-muted-foreground hover:text-primary transition-colors">Chart Analysis</Link>
-            <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link>
-            <Link to="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQ</Link>
-            <Link to="/affiliate" className="text-muted-foreground hover:text-primary transition-colors">Affiliate</Link>
-            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link>
-            <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
-          </nav>
-          <div className="flex justify-center mb-3">
-            <img src="/botvio-logo.png" alt="Botvio Logo" width="160" height="40" className="h-10 w-auto" loading="lazy" decoding="async" />
-          </div>
-          <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto mb-2">
-            <strong>Risk Warning:</strong> Trading binary options and CFDs involves significant risk. Past performance is not indicative of future results.
+      {/* Official Contact Disclaimer (global SiteFooter renders below via App layout) */}
+      <div className="container mx-auto px-4 mt-8">
+        <div className="p-3 rounded-lg bg-muted/50 border border-border/50 max-w-2xl mx-auto">
+          <p className="text-xs text-muted-foreground text-center">
+            <strong className="text-foreground">⚠️ Official Contact Disclaimer:</strong> Our only official contact channels are email{" "}
+            <a href="mailto:info@botvio.live" className="text-primary hover:underline font-medium">info@botvio.live</a>{" "}
+            and WhatsApp numbers provided on this platform. Do not trust any other contact claiming to represent Botvio.
           </p>
-          <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto mb-2">
-            Botvio is powered by Deriv API. Botvio is not affiliated with or endorsed by Deriv.
-          </p>
-          {/* Official Contact Disclaimer */}
-          <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border/50 max-w-2xl mx-auto">
-            <p className="text-xs text-muted-foreground text-center">
-              <strong className="text-foreground">⚠️ Official Contact Disclaimer:</strong> Our only official contact channels are email{" "}
-              <a href="mailto:info@botvio.live" className="text-primary hover:underline font-medium">info@botvio.live</a>{" "}
-              and WhatsApp numbers provided on this platform. Do not trust any other contact claiming to represent Botvio.
-            </p>
-          </div>
         </div>
-      </footer>
+      </div>
 
       {/* Floating WhatsApp Support Button */}
       <a
