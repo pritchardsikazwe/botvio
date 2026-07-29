@@ -17,6 +17,8 @@ export type DerivContract = {
   longcode: string;
 };
 
+export type DerivConnectionStatus = "disconnected" | "connecting" | "connected" | "error";
+
 interface DerivAPIState {
   connected: boolean;
   authorized: boolean;
@@ -26,6 +28,12 @@ interface DerivAPIState {
   lastTick: DerivTick | null;
   accountInfo: DerivAccountInfo | null;
   reconnecting: boolean;
+  /** Single authoritative connection state machine */
+  status: DerivConnectionStatus;
+  accountId: string | null;
+  environment: "prod" | null;
+  connectedAt: string | null;
+  lastHeartbeat: number | null;
 }
 
 type DerivOtpResponse = { ok?: boolean; ws_url?: string; error?: string };
@@ -42,6 +50,11 @@ export const useDerivAPI = () => {
     lastTick: null,
     accountInfo: null,
     reconnecting: false,
+    status: "disconnected",
+    accountId: null,
+    environment: null,
+    connectedAt: null,
+    lastHeartbeat: null,
   });
 
   const updateState = useCallback((partial: Partial<DerivAPIState>) => {
@@ -53,6 +66,57 @@ export const useDerivAPI = () => {
     return s;
   }, []);
   const cleanupRef = useRef<(() => void) | null>(null);
+
+  /**
+   * Authoritative socket-level listeners. Registered once for the lifetime of the
+   * service (NOT only inside connect()) so a dropped socket immediately flips the
+   * global state back to disconnected/error, even if nothing called connect() here.
+   */
+  useEffect(() => {
+    const offStatus = service.onStatus((st) => {
+      const socketOpen = service.socketOpen;
+      console.log(`[DERIV][ws] status=${st} readyState=${service.socketReadyState} loginid=${service.authorizedLoginId ?? "-"}`);
+      setState((prev) => {
+        // "connected" requires: socket OPEN + authorize succeeded + account id
+        const stillConnected = st === "open" && socketOpen && prev.authorized && !!prev.accountId;
+        if (st === "open") {
+          return {
+            ...prev,
+            connected: true,
+            reconnecting: false,
+            status: stillConnected ? "connected" : prev.status === "connected" ? "connecting" : prev.status,
+            lastHeartbeat: Date.now(),
+          };
+        }
+        if (st === "reconnecting" || st === "connecting") {
+          return { ...prev, connected: false, reconnecting: st === "reconnecting", status: "connecting" };
+        }
+        // closed / idle -> hard disconnect, invalidate the trading session
+        console.warn("[DERIV][ws] socket closed — invalidating trading session");
+        return {
+          ...prev,
+          connected: false,
+          authorized: false,
+          reconnecting: false,
+          status: prev.error ? "error" : "disconnected",
+          accountId: null,
+          environment: null,
+          connectedAt: null,
+        };
+      });
+    });
+
+    const offError = service.onError((msg) => {
+      console.error("[DERIV][auth] error:", msg);
+      setState((prev) => ({
+        ...prev,
+        error: msg,
+        status: prev.status === "connected" && service.socketOpen ? prev.status : "error",
+      }));
+    });
+
+    return () => { offStatus(); offError(); };
+  }, [service]);
 
   const [tickSubscriptions, setTickSubscriptions] = useState<Record<string, string>>({});
 
@@ -80,12 +144,7 @@ export const useDerivAPI = () => {
           return data.ws_url as string;
         };
 
-        const offStatus = service.onStatus((st) => {
-          updateState({ connected: st === "open", reconnecting: st === "reconnecting" });
-        });
-        const offError = service.onError((msg) => {
-          updateState({ error: msg });
-        });
+        updateState({ status: "connecting" });
         const offTick = service.onTick((tick) => {
           updateState({
             lastTick: {
@@ -116,12 +175,22 @@ export const useDerivAPI = () => {
         
         console.log(`[AUTH] loginid=${balance.loginid} is_virtual=${acctInfo?.is_virtual} currency=${balance.currency} balance=${balance.balance}`);
         
-        updateState({ 
-          authorized: true, 
+        console.log(`[DERIV][auth] authorize successful — accountId=${balance.loginid} env=prod wsOpen=${service.socketOpen}`);
+
+        updateState({
+          authorized: true,
+          connected: true,
           balance,
           accountInfo: acctInfo,
           reconnecting: false,
+          status: service.socketOpen ? "connected" : "connecting",
+          accountId: balance.loginid,
+          environment: "prod",
+          connectedAt: new Date().toISOString(),
+          lastHeartbeat: Date.now(),
+          error: null,
         });
+        console.log("[DERIV][store] connection store updated — status=connected");
 
         // Subscribe to balance updates
         try {
@@ -134,8 +203,6 @@ export const useDerivAPI = () => {
         updateState({ loading: false });
 
         cleanupRef.current = () => {
-          offStatus();
-          offError();
           offTick();
           offBalance();
         };
@@ -143,7 +210,11 @@ export const useDerivAPI = () => {
         return balance;
       } catch (e: unknown) {
         const message = e instanceof Error ? e.message : "Connection error";
-        updateState({ loading: false, connected: false, authorized: false, error: message });
+        console.error("[DERIV][auth] authorization error:", message);
+        updateState({
+          loading: false, connected: false, authorized: false, error: message,
+          status: "error", accountId: null, environment: null, connectedAt: null,
+        });
         throw e;
       }
     },
@@ -165,7 +236,50 @@ export const useDerivAPI = () => {
       lastTick: null,
       accountInfo: null,
       reconnecting: false,
+      status: "disconnected",
+      accountId: null,
+      environment: null,
+      connectedAt: null,
+      lastHeartbeat: null,
     });
+  }, [service, updateState]);
+
+  /**
+   * Re-check the LIVE Deriv authorization state instead of trusting stale local state.
+   * Returns true only when the socket is open and Deriv answers with an account id.
+   */
+  const refreshDerivConnection = useCallback(async (): Promise<boolean> => {
+    if (!service.socketOpen) {
+      console.warn("[DERIV][refresh] socket not open — marking disconnected");
+      updateState({
+        connected: false, authorized: false, status: "disconnected",
+        accountId: null, environment: null, connectedAt: null,
+      });
+      return false;
+    }
+    try {
+      const b = await service.getBalance(false);
+      console.log(`[DERIV][refresh] live authorization verified — accountId=${b.loginid}`);
+      updateState({
+        balance: b,
+        connected: true,
+        authorized: true,
+        status: "connected",
+        accountId: b.loginid,
+        environment: "prod",
+        lastHeartbeat: Date.now(),
+        error: null,
+      });
+      return true;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Authorization check failed";
+      console.error("[DERIV][refresh] failed:", message);
+      updateState({
+        connected: false, authorized: false, status: "error", error: message,
+        accountId: null, environment: null, connectedAt: null,
+      });
+      return false;
+    }
   }, [service, updateState]);
 
   const subscribeTicks = useCallback(
@@ -341,8 +455,18 @@ export const useDerivAPI = () => {
 
   return {
     ...state,
+    /** Single source of truth for "can this user trade right now" */
+    isDerivConnected:
+      state.status === "connected" &&
+      !!state.accountId &&
+      state.environment === "prod" &&
+      state.authorized &&
+      service.socketOpen,
+    socketReadyState: service.socketReadyState,
+    lastConnectionError: state.error,
     connect,
     disconnect,
+    refreshDerivConnection,
     subscribeTicks,
     unsubscribeTicks,
     getProposal,
