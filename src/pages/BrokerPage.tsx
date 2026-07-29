@@ -226,6 +226,9 @@ const BrokerPage = () => {
                 Open {broker?.name || slug}
               </Button>
               <p className="text-white/60 text-xs text-center">Free demo account available</p>
+              <div className="flex justify-center">
+                <AffiliateDisclosureBadge className="bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/40" />
+              </div>
             </div>
           </div>
         </div>
