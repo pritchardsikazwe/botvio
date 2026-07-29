@@ -1,5 +1,6 @@
 import type { DerivMessage, DerivTick, DerivBalance, DerivAccountInfo, DerivContractUpdate } from "@/types/deriv";
 import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
+import { normalizeDerivError } from "@/lib/derivErrors";
 
 type ConnectionStatus = "idle" | "connecting" | "reconnecting" | "open" | "closed";
 
