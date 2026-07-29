@@ -101,9 +101,9 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     }
   };
 
-  const directionTone = signal?.direction === "RISE" || signal?.direction === "HIGHER"
+  const directionTone = signal?.signal === "RISE" || signal?.signal === "UP"
     ? "text-success"
-    : signal?.direction === "FALL" || signal?.direction === "LOWER"
+    : signal?.signal === "FALL" || signal?.signal === "DOWN"
       ? "text-destructive"
       : "text-muted-foreground";
 
@@ -138,10 +138,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
         </CardHeader>
         <CardContent className="pt-0 space-y-1">
           <p className={cn("text-2xl font-black tracking-tight", directionTone)}>
-            {signal?.direction ?? "WAITING"}
+            {signal?.signal ?? "WAITING"}
           </p>
           <p className="text-xs text-muted-foreground">
-            {signal ? `${signal.confidence}% confidence — ${signal.reason}` : "Collecting live ticks to score the market..."}
+            {signal
+              ? `${signal.confidence}% confidence — ${signal.reasons?.[0] ?? "Live market read"}`
+              : "Collecting live ticks to score the market..."}
           </p>
         </CardContent>
       </Card>
