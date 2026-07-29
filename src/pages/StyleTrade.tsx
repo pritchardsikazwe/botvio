@@ -499,6 +499,31 @@ const StyleTrade = () => {
                       <div className="text-2xl font-mono font-bold">{currentPrice.toFixed(4)}</div>
                     </div>
                   )}
+
+                  {/* Live tick stream from the same authenticated Deriv socket */}
+                  <div className="mt-3 p-3 rounded-lg border border-border/60 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium tracking-wide">LIVE TICKS</span>
+                      <span className={`h-2 w-2 rounded-full ${tickCount > 0 ? "bg-success animate-pulse" : "bg-muted-foreground"}`} />
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">Last 5 Digits</div>
+                    <div className="flex gap-1.5">
+                      {(lastDigits.length ? lastDigits : [null, null, null, null, null]).map((d, i) => (
+                        <span
+                          key={i}
+                          className="w-7 h-7 rounded-md bg-muted flex items-center justify-center font-mono text-sm"
+                        >
+                          {d ?? "–"}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Ticks received: <span className="text-foreground font-medium">{tickCount}</span> · Connection:{" "}
+                      <span className={isDerivReady ? "text-success font-medium" : "text-destructive font-medium"}>
+                        {isDerivReady ? "LIVE" : "OFFLINE"}
+                      </span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
