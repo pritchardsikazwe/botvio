@@ -844,6 +844,21 @@ const StyleTrade = () => {
             </div>
           </div>
         )}
+
+        {/* Diagnostics — surfaces state-sync issues between hub and modules */}
+        <details className="rounded-lg border border-border/60">
+          <summary className="cursor-pointer px-4 py-2 text-xs text-muted-foreground">
+            Deriv connection diagnostics
+          </summary>
+          <div className="p-4 pt-0">
+            <DerivDiagnosticsPanel />
+            <div className="mt-2 text-[11px] text-muted-foreground space-y-0.5">
+              <div>Global connection state: <span className="text-foreground font-medium">{conn.status.toUpperCase()}</span></div>
+              <div>Trading hub state: <span className="text-foreground font-medium">{isDerivReady ? "CONNECTED" : "DISCONNECTED"}</span></div>
+              <div>{style.title} state: <span className="text-foreground font-medium">{isDerivReady ? "READY" : "NOT READY"}</span></div>
+            </div>
+          </div>
+        </details>
       </main>
     </div>
   );
