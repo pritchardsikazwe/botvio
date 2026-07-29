@@ -11,6 +11,7 @@ import { ArrowLeft, Download, Star, Share2, Copy, ShoppingCart, CheckCircle, Tre
 import { Header } from "@/components/trading/Header";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
+import { renderStrategyMarkdown, strategyExcerpt } from "@/lib/strategyMarkdown";
 
 const REFERRAL_STORAGE_KEY = "botvio_referral";
 
@@ -21,19 +22,6 @@ const BROKER_LINKS: Record<string, { name: string; url: string }> = {
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
 };
 
-
-/* ── Convert markdown-like text to HTML ── */
-const formatDescription = (text: string): string => {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^• (.+)$/gm, '<li>$1</li>')
-    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
-    .replace(/^✅ (.+)$/gm, '<li>✅ $1</li>')
-    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul class="list-disc pl-5 space-y-1">$1</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n/g, '<br/>')
-    .replace(/^/, '<p>').replace(/$/, '</p>');
-};
 
 const StrategyDetail = () => {
   const { t } = useTranslation();
@@ -147,7 +135,7 @@ const StrategyDetail = () => {
   }
 
   const ogImageUrl = strategy.cover_image_url || `${window.location.origin}/placeholder.svg`;
-  const ogDescription = strategy.description || `Trading strategy for ${strategy.market}`;
+  const ogDescription = strategyExcerpt(strategy.description || "", 155) || `Trading strategy for ${strategy.market}`;
 
   return (
     <>
@@ -206,7 +194,7 @@ const StrategyDetail = () => {
                   <h1 className="text-3xl font-bold">{strategy.title}</h1>
                 </div>
                 
-                <p className="text-muted-foreground text-lg">{strategy.description}</p>
+                <p className="text-muted-foreground text-lg">{strategyExcerpt(strategy.description || "", 220)}</p>
                 
                 <div className="flex items-center gap-6 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -268,7 +256,7 @@ const StrategyDetail = () => {
                   prose-p:text-muted-foreground prose-p:leading-relaxed
                   prose-ul:my-2 prose-li:my-0.5">
                   {strategy.description ? (
-                    <div dangerouslySetInnerHTML={{ __html: formatDescription(strategy.description) }} />
+                    <div dangerouslySetInnerHTML={{ __html: renderStrategyMarkdown(strategy.description, strategy.title) }} />
                   ) : (
                     <p className="text-muted-foreground">{t("strategies.noDescription", "No description provided")}</p>
                   )}
