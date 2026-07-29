@@ -210,27 +210,27 @@ export const AppRoutes = () => (
     <Route path="btc" element={<Paid><BitcoinTradingHub /></Paid>} />
     <Route path="silver" element={<Paid><SilverTradingHub /></Paid>} />
     <Route path="xag" element={<Paid><SilverTradingHub /></Paid>} />
-    <Route path="gbpusd" element={<Paid><GbpUsdTradingHub /></Paid>} />
+    <Route path="gbpusd" element={<Navigate to="/gbp-usd" replace />} />
     <Route path="gbp-usd" element={<Paid><GbpUsdTradingHub /></Paid>} />
 
     {/* Additional forex pair hubs */}
-    <Route path="eurusd" element={<Paid><EurUsdHub /></Paid>} />
+    <Route path="eurusd" element={<Navigate to="/eur-usd" replace />} />
     <Route path="eur-usd" element={<Paid><EurUsdHub /></Paid>} />
-    <Route path="usdjpy" element={<Paid><UsdJpyHub /></Paid>} />
+    <Route path="usdjpy" element={<Navigate to="/usd-jpy" replace />} />
     <Route path="usd-jpy" element={<Paid><UsdJpyHub /></Paid>} />
-    <Route path="audusd" element={<Paid><AudUsdHub /></Paid>} />
+    <Route path="audusd" element={<Navigate to="/aud-usd" replace />} />
     <Route path="aud-usd" element={<Paid><AudUsdHub /></Paid>} />
-    <Route path="usdcad" element={<Paid><UsdCadHub /></Paid>} />
+    <Route path="usdcad" element={<Navigate to="/usd-cad" replace />} />
     <Route path="usd-cad" element={<Paid><UsdCadHub /></Paid>} />
-    <Route path="usdchf" element={<Paid><UsdChfHub /></Paid>} />
+    <Route path="usdchf" element={<Navigate to="/usd-chf" replace />} />
     <Route path="usd-chf" element={<Paid><UsdChfHub /></Paid>} />
     <Route path="eurgbp" element={<Paid><EurGbpHub /></Paid>} />
     <Route path="eur-gbp" element={<Paid><EurGbpHub /></Paid>} />
     <Route path="eurjpy" element={<Paid><EurJpyHub /></Paid>} />
     <Route path="eur-jpy" element={<Paid><EurJpyHub /></Paid>} />
-    <Route path="nzdusd" element={<Paid><NzdUsdHub /></Paid>} />
+    <Route path="nzdusd" element={<Navigate to="/nzd-usd" replace />} />
     <Route path="nzd-usd" element={<Paid><NzdUsdHub /></Paid>} />
-    <Route path="usdcny" element={<Paid><UsdCnyHub /></Paid>} />
+    <Route path="usdcny" element={<Navigate to="/usd-cny" replace />} />
     <Route path="usd-cny" element={<Paid><UsdCnyHub /></Paid>} />
 
     {/* Stock hubs */}
