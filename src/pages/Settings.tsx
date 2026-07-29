@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DerivDiagnosticsPanel } from "@/components/trading/DerivDiagnosticsPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -281,6 +282,9 @@ const Settings = () => {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Deriv Connection Diagnostics */}
+            <DerivDiagnosticsPanel />
 
             {/* Notification Settings */}
             <Card className="glass-card">
