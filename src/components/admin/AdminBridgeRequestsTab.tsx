@@ -18,7 +18,6 @@ interface BridgeRequest {
   broker: string;
   account_login: string;
   server_name: string;
-  investor_password: string;
   account_type: string;
   notes: string | null;
   contact_whatsapp: string | null;
@@ -37,12 +36,16 @@ export const AdminBridgeRequestsTab = () => {
   const [terminalUid, setTerminalUid] = useState("");
   const [adminNote, setAdminNote] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [revealedPassword, setRevealedPassword] = useState<string | null>(null);
+  const [revealing, setRevealing] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("bridge_connection_requests")
-      .select("*")
+      .select(
+        "id,user_id,broker,account_login,server_name,account_type,notes,contact_whatsapp,contact_email,status,terminal_uid,admin_note,created_at"
+      )
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setRows((data as BridgeRequest[]) || []);
