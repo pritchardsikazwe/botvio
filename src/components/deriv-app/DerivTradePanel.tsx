@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDeriv } from "@/contexts/DerivContext";
 import { getStyleById } from "@/config/tradingStyles";
-import { runEngine, type EngineType, type SignalResult } from "@/lib/signalEngines";
+import { runEngine, rsi, type EngineType, type SignalResult } from "@/lib/signalEngines";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Activity, ArrowDownRight, ArrowUpRight, Loader2, Sparkles } from "lucide-react";
+import { Activity, ArrowDownRight, ArrowUpRight, Gauge, Loader2, Sparkles, UserCircle2 } from "lucide-react";
 
 interface DerivTradePanelProps {
   styleId: "rise-fall-scalping" | "multipliers";
@@ -28,7 +28,7 @@ interface TradeLog {
 export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const {
     authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
-    placeTrade, subscribeContract,
+    placeTrade, subscribeContract, accountInfo,
   } = useDeriv();
 
   const style = getStyleById(styleId);
@@ -41,11 +41,13 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const [multiplier, setMultiplier] = useState("100");
   const [busy, setBusy] = useState(false);
   const [signal, setSignal] = useState<SignalResult | null>(null);
+  const [rsiValue, setRsiValue] = useState<number | null>(null);
   const [logs, setLogs] = useState<TradeLog[]>([]);
   const ticks = useRef<number[]>([]);
   const logId = useRef(0);
 
   const isMultipliers = styleId === "multipliers";
+  const symbolLabel = instruments.find((i) => i.symbol === symbol)?.displayName ?? symbol;
 
   const addLog = useCallback((message: string, tone: TradeLog["tone"] = "info") => {
     logId.current += 1;
@@ -60,6 +62,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     if (!authorized || !symbol) return;
     ticks.current = [];
     setSignal(null);
+    setRsiValue(null);
     subscribeTicks(symbol).catch(() => addLog(`Could not stream ${symbol}`, "error"));
     return () => { unsubscribeTicks(symbol).catch(() => {}); };
   }, [authorized, symbol, subscribeTicks, unsubscribeTicks, addLog]);
@@ -68,6 +71,9 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   useEffect(() => {
     if (!lastTick?.quote) return;
     ticks.current = [...ticks.current, lastTick.quote].slice(-200);
+    if (ticks.current.length >= 15) {
+      try { setRsiValue(rsi(ticks.current, 14)); } catch { /* warm-up */ }
+    }
     if (ticks.current.length >= 30) {
       try { setSignal(runEngine(engine, ticks.current)); } catch { /* engine warm-up */ }
     }
