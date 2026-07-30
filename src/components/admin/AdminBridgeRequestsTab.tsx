@@ -144,6 +144,7 @@ export const AdminBridgeRequestsTab = () => {
                       setTerminalUid(r.terminal_uid || "");
                       setAdminNote(r.admin_note || "");
                       setShowPassword(false);
+                      setRevealedPassword(null);
                     }}>
                       <Eye className="w-4 h-4 mr-1" /> Review
                     </Button>
