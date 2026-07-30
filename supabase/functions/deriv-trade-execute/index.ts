@@ -224,7 +224,8 @@ Deno.serve(async (req) => {
         amount: payload.stake,
         basis: 'stake',
         currency: payload.currency || 'USD',
-        symbol: payload.symbol,
+        // New Deriv options API property name (legacy API used `symbol`).
+        underlying_symbol: payload.symbol,
       };
 
       switch (contract_family) {

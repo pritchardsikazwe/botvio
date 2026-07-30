@@ -28,6 +28,7 @@ import { NotificationBanner } from "@/components/notifications/NotificationBanne
 import { NewsEventCards } from "@/components/news/NewsEventCard";
 import { useNavigate, Link } from "react-router-dom";
 import { PremiumHomeSections } from "@/components/home/PremiumHomeSections";
+import { DerivOptionsHome } from "@/components/home/DerivOptionsHome";
 
 const Index = () => {
   const { user } = useAuth();
@@ -304,6 +305,9 @@ const Index = () => {
             </Link>
           </div>
         </section>
+
+        {/* 0.9 — Deriv Options live movements */}
+        <DerivOptionsHome />
 
         {/* 1 — Latest Trading Signals */}
         <section>
