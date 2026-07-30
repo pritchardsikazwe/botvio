@@ -329,7 +329,9 @@ export const useDerivAPI = () => {
         basis: params.basis || "stake",
         contract_type: params.contract_type,
         currency: params.currency || "USD",
-        symbol,
+        // New Deriv options API expects `underlying_symbol`; the legacy API
+        // expects `symbol`. We send the new key and fall back automatically.
+        underlying_symbol: symbol,
       };
 
       if (params.duration !== undefined && params.duration !== null) {
@@ -350,7 +352,20 @@ export const useDerivAPI = () => {
       }
 
       console.log("[Deriv] getProposal request:", JSON.stringify(request));
-      const response = await service.send<DerivProposalResponse>(request);
+      let response: DerivProposalResponse;
+      try {
+        response = await service.send<DerivProposalResponse>(request);
+      } catch (err: any) {
+        // Legacy endpoint: retry with the old `symbol` property.
+        if (/properties not allowed:\s*underlying_symbol/i.test(err?.message || "")) {
+          const legacy = { ...request };
+          delete legacy.underlying_symbol;
+          legacy.symbol = symbol;
+          response = await service.send<DerivProposalResponse>(legacy);
+        } else {
+          throw err;
+        }
+      }
 
       return {
         id: response.proposal.id,
