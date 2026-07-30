@@ -45,18 +45,18 @@ export const Header = () => {
               className="flex items-center gap-3 cursor-pointer"
               onClick={() => navigate('/')}
             >
-              <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-warning/20 flex items-center justify-center border border-border/50">
+              <div className="w-10 h-10 rounded-xl overflow-hidden bg-background flex items-center justify-center border border-border/50">
                 <img
-                  src="/icon-192.png"
-                  alt="AI Botvio"
-                  className="w-10 h-10 object-cover"
+                  src="/botvio-logo.png"
+                  alt="Botvio logo"
+                  className="w-10 h-10 object-contain"
                   width={40}
                   height={40}
                 />
               </div>
               <div className="hidden sm:block">
-                <span className="font-bold text-lg gold-text block">AI Botvio</span>
-                <p className="text-[10px] text-muted-foreground">AI-Powered Trading Platform</p>
+                <span className="font-bold text-lg gold-text block">BOTVIO</span>
+                <p className="text-[10px] text-muted-foreground">powered by Deriv</p>
               </div>
             </div>
 
