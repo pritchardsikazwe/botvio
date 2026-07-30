@@ -30,10 +30,9 @@ serve(async (req) => {
 
       ws.onopen = () => {
         ws.send(JSON.stringify({
+          // Deriv's schema now rejects currency / landing_company / product_type
+          // here ("Properties not allowed"). Symbol alone is the valid request.
           contracts_for: symbol,
-          currency: 'USD',
-          landing_company: 'svg',
-          product_type: 'basic'
         }));
       };
 
