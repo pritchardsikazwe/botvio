@@ -16,6 +16,7 @@ import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
 import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
+import { isPublicPreviewActive } from "@/config/access";
 
 export interface AssetTradingHubConfig {
   seoKey?: string;
