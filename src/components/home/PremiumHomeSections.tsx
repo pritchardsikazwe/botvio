@@ -183,7 +183,7 @@ export function PremiumHomeHero() {
     >
       <div className="max-w-3xl">
         <Badge className="mb-3 bg-primary/20 text-primary border-primary/30">
-          <Sparkles className="h-3 w-3 mr-1" /> AI-Powered Forex Platform
+          <Sparkles className="h-3 w-3 mr-1" /> AI Botvio Platform
         </Badge>
         <h1
           id="premium-hero-title"
