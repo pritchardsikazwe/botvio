@@ -53,7 +53,9 @@ export default function BridgeRequest() {
     if (!user) return;
     const { data } = await supabase
       .from("bridge_connection_requests")
-      .select("*")
+      .select(
+        "id,user_id,broker,account_login,server_name,account_type,notes,contact_whatsapp,contact_email,status,terminal_uid,admin_note,created_at,updated_at"
+      )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     setRequests(data || []);
