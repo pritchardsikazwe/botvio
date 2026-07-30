@@ -79,7 +79,9 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
   const stats = config.quickStats ?? DEFAULT_QUICK_STATS;
   const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
   const { isAdmin, isSuperAdmin } = useAuth();
-  const locked = !config.publicAccess && !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
+  const locked =
+    !isPublicPreviewActive() &&
+    !config.publicAccess && !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
 
   return (
     <div className="min-h-screen bg-background">
