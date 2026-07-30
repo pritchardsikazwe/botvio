@@ -115,6 +115,31 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Signed-in Deriv account */}
+      <Card className="glass-card">
+        <CardContent className="p-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <UserCircle2 className="h-5 w-5 text-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground">Signed-in account</p>
+              <p className="text-sm font-semibold truncate">
+                {accountInfo?.loginid ?? "Not connected"}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            {accountInfo && (
+              <Badge variant="outline" className="text-[10px]">
+                {accountInfo.is_virtual ? "DEMO" : "REAL"}
+              </Badge>
+            )}
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {balance ? `${balance.currency} ${balance.balance.toFixed(2)}` : "—"}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Live price */}
       <Card className="glass-card overflow-hidden">
         <CardContent className="p-4 flex items-center justify-between gap-3">
@@ -150,6 +175,45 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
             {signal
               ? `${signal.confidence}% confidence — ${signal.reasons?.[0] ?? "Live market read"}`
               : "Collecting live ticks to score the market..."}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* RSI (separate momentum read) */}
+      <Card className="glass-card">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Gauge className="h-4 w-4 text-warning" /> RSI (14) — {symbolLabel}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-2">
+          <div className="flex items-end justify-between">
+            <p className="text-2xl font-black tabular-nums">
+              {rsiValue != null ? rsiValue.toFixed(1) : "—"}
+            </p>
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-[10px]",
+                rsiValue == null && "text-muted-foreground",
+                rsiValue != null && rsiValue >= 70 && "border-destructive/40 text-destructive",
+                rsiValue != null && rsiValue <= 30 && "border-success/40 text-success",
+              )}
+            >
+              {rsiValue == null ? "Warming up" : rsiValue >= 70 ? "Overbought" : rsiValue <= 30 ? "Oversold" : "Neutral"}
+            </Badge>
+          </div>
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div
+              className={cn(
+                "h-full transition-all",
+                rsiValue != null && rsiValue >= 70 ? "bg-destructive" : rsiValue != null && rsiValue <= 30 ? "bg-success" : "bg-primary",
+              )}
+              style={{ width: `${Math.min(100, Math.max(0, rsiValue ?? 0))}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Above 70 favours FALL setups, below 30 favours RISE setups. Computed live from the tick stream.
           </p>
         </CardContent>
       </Card>
@@ -209,12 +273,15 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
                 )}
               >
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                  <>
-                    {btn.variant === "destructive"
-                      ? <ArrowDownRight className="h-5 w-5 mr-1" />
-                      : <ArrowUpRight className="h-5 w-5 mr-1" />}
-                    {btn.label}
-                  </>
+                  <span className="flex flex-col items-center leading-tight">
+                    <span className="flex items-center">
+                      {btn.variant === "destructive"
+                        ? <ArrowDownRight className="h-5 w-5 mr-1" />
+                        : <ArrowUpRight className="h-5 w-5 mr-1" />}
+                      {btn.label}
+                    </span>
+                    <span className="text-[10px] font-medium opacity-80">{symbolLabel}</span>
+                  </span>
                 )}
               </Button>
             ))}
