@@ -732,7 +732,8 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                       <Label className="flex items-center gap-2">
                         <ImageIcon className="h-4 w-4" /> AI Analysis Report
                       </Label>
-                      <SocialShareButtons 
+              <SocialShareButtons
+                label="Share Analysis"
                         title={`Chart Analysis - ${structuredResult?.trend?.toUpperCase() || "TRADING"} Signal`}
                         description={`**Instrument**: ${symbol || "Chart"}\n${structuredResult?.recommendation ? `${structuredResult.recommendation.toUpperCase()} signal with ${structuredResult.confidence || 75}% confidence` : analysisResult?.slice(0, 150) || ""}`}
                         imageUrl={previewUrl || undefined}
