@@ -176,14 +176,49 @@ export const AdminBridgeRequestsTab = () => {
               <div>
                 <Label>Investor Password</Label>
                 <div className="flex gap-2 items-center">
-                  <Input readOnly type={showPassword ? "text" : "password"} value={active.investor_password} />
-                  <Button type="button" size="sm" variant="outline" onClick={() => setShowPassword((s) => !s)}>
-                    {showPassword ? "Hide" : "Show"}
+                  <Input
+                    readOnly
+                    type={showPassword && revealedPassword ? "text" : "password"}
+                    value={revealedPassword ?? "••••••••"}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={revealing}
+                    onClick={async () => {
+                      if (revealedPassword) {
+                        setShowPassword((s) => !s);
+                        return;
+                      }
+                      setRevealing(true);
+                      const { data, error } = await supabase.rpc(
+                        "get_bridge_investor_password" as never,
+                        { _request_id: active.id } as never
+                      );
+                      setRevealing(false);
+                      if (error) {
+                        toast.error(error.message);
+                        return;
+                      }
+                      setRevealedPassword((data as unknown as string) ?? "");
+                      setShowPassword(true);
+                    }}
+                  >
+                    {revealing ? "…" : showPassword && revealedPassword ? "Hide" : "Show"}
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => {
-                    navigator.clipboard.writeText(active.investor_password);
-                    toast.success("Copied");
-                  }}>Copy</Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={!revealedPassword}
+                    onClick={() => {
+                      navigator.clipboard.writeText(revealedPassword || "");
+                      toast.success("Copied");
+                    }}
+                  >
+                    Copy
+                  </Button>
                 </div>
               </div>
               {active.notes && (
