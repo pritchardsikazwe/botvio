@@ -69,6 +69,7 @@ import { AdminPwaHealthTab } from "@/components/admin/AdminPwaHealthTab";
 import { AdminManagedMt5Tab } from "@/components/admin/AdminManagedMt5Tab";
 import { AdminBridgeRequestsTab } from "@/components/admin/AdminBridgeRequestsTab";
 import { AdminEditorialTab } from "@/components/admin/AdminEditorialTab";
+import { AdminCopyFollowersTab } from "@/components/admin/AdminCopyFollowersTab";
 
 interface Provider {
   id: string;
@@ -983,6 +984,12 @@ const Admin = () => {
               </TabsTrigger>
             )}
             {isSuperAdmin && (
+              <TabsTrigger value="copy_followers" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Copy Followers
+              </TabsTrigger>
+            )}
+            {isSuperAdmin && (
               <TabsTrigger value="subscriptions" className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4" />
                 Subscriptions
@@ -1231,6 +1238,11 @@ const Admin = () => {
           {/* Subscription Requests Tab */}
           <TabsContent value="subscription_requests">
             <SubscriptionRequestsTab />
+          </TabsContent>
+
+          {/* Copy Trading Followers Tab */}
+          <TabsContent value="copy_followers">
+            <AdminCopyFollowersTab />
           </TabsContent>
 
           {/* Providers Tab */}

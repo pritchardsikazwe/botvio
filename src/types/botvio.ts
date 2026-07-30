@@ -91,6 +91,12 @@ export interface CopySubscription {
   fixed_stake: number;
   multiplier: number;
   proportional_mode: "balance_ratio" | "equity_ratio";
+  max_drawdown_percent?: number;
+  equity_floor_usd?: number | null;
+  daily_loss_limit_usd?: number | null;
+  baseline_equity_usd?: number | null;
+  drawdown_breached_at?: string | null;
+  approval_status?: "pending" | "approved" | "rejected" | "suspended";
   created_at: string;
   updated_at: string;
   // Joined

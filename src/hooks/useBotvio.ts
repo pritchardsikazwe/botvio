@@ -305,6 +305,10 @@ export function useSubscribeToProvider() {
       copy_mode?: "fixed" | "multiplier" | "proportional";
       fixed_stake?: number;
       multiplier?: number;
+      max_drawdown_percent: number;
+      equity_floor_usd?: number | null;
+      daily_loss_limit_usd?: number | null;
+      baseline_equity_usd?: number | null;
     }) => {
       const { data, error } = await supabase
         .from("copy_subscriptions")
@@ -315,6 +319,11 @@ export function useSubscribeToProvider() {
           copy_mode: subscription.copy_mode || "fixed",
           fixed_stake: subscription.fixed_stake || 1,
           multiplier: subscription.multiplier || 1,
+          max_drawdown_percent: subscription.max_drawdown_percent,
+          equity_floor_usd: subscription.equity_floor_usd ?? null,
+          daily_loss_limit_usd: subscription.daily_loss_limit_usd ?? null,
+          baseline_equity_usd: subscription.baseline_equity_usd ?? null,
+          status: "paused",
         })
         .select()
         .single();
