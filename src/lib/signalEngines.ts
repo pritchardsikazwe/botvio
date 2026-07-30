@@ -34,7 +34,7 @@ function atr(ticks: number[], n: number): number {
   return r.reduce((s, v) => s + Math.abs(v), 0) / r.length || 0.0001;
 }
 
-function rsi(ticks: number[], period = 14): number {
+export function rsi(ticks: number[], period = 14): number {
   const r = returns(ticks);
   if (r.length < period) return 50;
   const recent = r.slice(-period);

@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAccessGate } from "@/hooks/useAccessGate";
+import { isPublicPreviewActive } from "@/config/access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, Crown, Sparkles } from "lucide-react";
@@ -23,6 +24,9 @@ interface Props {
 export function PaidRouteGuard({ children }: Props) {
   const location = useLocation();
   const gate = useAccessGate();
+
+  // Open-access week: anyone (including signed-out visitors) can browse.
+  if (isPublicPreviewActive()) return <>{children}</>;
 
   if (gate.isLoading) {
     return (

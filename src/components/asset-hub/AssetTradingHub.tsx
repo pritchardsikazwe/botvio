@@ -16,6 +16,7 @@ import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
 import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
+import { isPublicPreviewActive } from "@/config/access";
 
 export interface AssetTradingHubConfig {
   seoKey?: string;
@@ -79,7 +80,9 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
   const stats = config.quickStats ?? DEFAULT_QUICK_STATS;
   const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
   const { isAdmin, isSuperAdmin } = useAuth();
-  const locked = !config.publicAccess && !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
+  const locked =
+    !isPublicPreviewActive() &&
+    !config.publicAccess && !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
 
   return (
     <div className="min-h-screen bg-background">
