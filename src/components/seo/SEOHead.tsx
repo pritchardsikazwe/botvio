@@ -62,7 +62,7 @@ export const SEOHead = ({
 
   const pageKeywords = seo?.keywords || settings?.meta_keywords || undefined;
 
-  const ogImageRaw = ogImage || settings?.og_image_url || "/botvio-logo.png";
+  const ogImageRaw = ogImage || settings?.og_image_url || "/botvio-og.jpg";
   const pageOgImage = toAbsoluteUrl(ogImageRaw, baseUrl);
 
   // Canonical = localized URL for the current language
@@ -131,9 +131,9 @@ export const SEOHead = ({
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
       <meta property="og:image" content={pageOgImage} />
-      <meta property="og:image:alt" content={`${siteName} app icon`} />
-      <meta property="og:image:width" content="512" />
-      <meta property="og:image:height" content="512" />
+      <meta property="og:image:alt" content={`${siteName} — AI forex signals, gold trading & chart analysis`} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content={siteName} />
@@ -144,7 +144,7 @@ export const SEOHead = ({
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={pageOgImage} />
-      <meta name="twitter:image:alt" content={`${siteName} app icon`} />
+      <meta name="twitter:image:alt" content={`${siteName} — AI forex signals, gold trading & chart analysis`} />
 
       {/* Verification */}
       {settings?.google_verification_code && (

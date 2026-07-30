@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { SocialShareButtons } from "@/components/social/SocialShareButtons";
 
 /**
  * Sitewide semantic <footer> with grouped navigation. Satisfies
@@ -85,6 +86,11 @@ export const SiteFooter = () => {
             <a href="https://www.facebook.com/botvio" target="_blank" rel="noopener me" className="hover:text-primary">Facebook</a>
             <a href="https://www.tiktok.com/@botviohq" target="_blank" rel="noopener me" className="hover:text-primary">TikTok</a>
             <a href="https://t.me/boaborea" target="_blank" rel="noopener me" className="hover:text-primary">Telegram</a>
+            <SocialShareButtons
+              label="Share Botvio"
+              title="Botvio — AI Forex Signals, Gold Trading & Chart Analysis"
+              description="Free forex & gold signals, AI chart analysis and copy trading for Deriv, Exness and Weltrade."
+            />
           </nav>
           <p className="md:text-right max-w-xl">
             Risk warning: trading forex, CFDs and synthetic indices involves
