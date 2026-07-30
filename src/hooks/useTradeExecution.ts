@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { DerivWebSocketService } from "@/services/derivWebSocket";
 import { toast } from "sonner";
+import { beginCriticalOperation } from "@/services/appUpdateService";
 import type { Json } from "@/integrations/supabase/types";
 
 interface OpenContract {
@@ -201,6 +202,8 @@ export const useTradeExecution = () => {
     setIsExecuting(true);
     const startTime = Date.now();
     serviceRef.current = service;
+    // Block any PWA auto-update reload while this trade is in flight.
+    const releaseUpdateGuard = beginCriticalOperation();
 
     try {
       // Log pending request
@@ -312,6 +315,8 @@ export const useTradeExecution = () => {
       toast.error(`Trade failed: ${errorMsg}`);
       setIsExecuting(false);
       return { success: false, error: errorMsg };
+    } finally {
+      releaseUpdateGuard();
     }
   }, [user, authorized, logExecution, subscribeToContract]);
 

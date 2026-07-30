@@ -65,6 +65,7 @@ import { AdminLiveStreamsTab } from "@/components/admin/AdminLiveStreamsTab";
 import { AdminAdvertsTab } from "@/components/admin/AdminAdvertsTab";
 import { AdminTrainingVideosTab } from "@/components/admin/AdminTrainingVideosTab";
 import { AdminChartLimitsTab } from "@/components/admin/AdminChartLimitsTab";
+import { AdminPwaHealthTab } from "@/components/admin/AdminPwaHealthTab";
 import { AdminManagedMt5Tab } from "@/components/admin/AdminManagedMt5Tab";
 import { AdminBridgeRequestsTab } from "@/components/admin/AdminBridgeRequestsTab";
 import { AdminEditorialTab } from "@/components/admin/AdminEditorialTab";
@@ -1121,6 +1122,10 @@ const Admin = () => {
               <FileText className="w-4 h-4" />
               Editorial
             </TabsTrigger>
+            <TabsTrigger value="pwa_health" className="flex items-center gap-2">
+              <Server className="w-4 h-4" />
+              System Health
+            </TabsTrigger>
           </TabsList>
 
           {/* Signals Tab */}
@@ -1216,6 +1221,11 @@ const Admin = () => {
           {/* Editorial Tab */}
           <TabsContent value="editorial">
             <AdminEditorialTab />
+          </TabsContent>
+
+          {/* System Health / PWA Tab */}
+          <TabsContent value="pwa_health">
+            <AdminPwaHealthTab />
           </TabsContent>
 
           {/* Subscription Requests Tab */}

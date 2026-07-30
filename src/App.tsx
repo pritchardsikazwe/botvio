@@ -10,6 +10,7 @@ import { LocalePrefixRouter } from "@/i18n/LocalePrefixRouter";
 import { AppRoutes } from "./AppRoutes";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SiteFooter } from "@/components/SiteFooter";
+import { UpdateNotifier } from "@/components/UpdateNotifier";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <DerivProvider>
             <Toaster />
             <Sonner />
+            <UpdateNotifier />
             <BrowserRouter>
               {/*
                 LocalePrefixRouter detects /xx/ prefixes (where xx is a
