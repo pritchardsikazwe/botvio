@@ -1,6 +1,9 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 
+/** Injected at build time by vite.config.ts (see botvioVersionPlugin). */
+declare const __APP_VERSION__: string;
+
 interface ImportMetaEnv {
   readonly VITE_DERIV_APP_ID?: string;
   /** Dev-only convenience; prefer user input in UI */

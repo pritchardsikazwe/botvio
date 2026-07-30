@@ -52,7 +52,9 @@ export function AdminManagedMt5Tab() {
     setLoading(true);
     const { data, error } = await supabase
       .from("managed_mt5_requests")
-      .select("*")
+      .select(
+        "id, user_id, nickname, mt5_login, mt5_server, account_type, broker_name, status, assigned_terminal_uid, admin_notes, created_at, updated_at"
+      )
       .order("created_at", { ascending: false });
     if (error) {
       toast({ title: "Failed to load requests", description: error.message, variant: "destructive" });

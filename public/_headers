@@ -17,6 +17,9 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
+/version.json
+  Content-Type: application/json
+  Cache-Control: no-store, no-cache, must-revalidate
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 /registerSW.js

@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import "./i18n";
 import { enforceCanonicalDomain } from "./config/domain";
+import { initAppUpdates, isBusy, markUpdatePending } from "./services/appUpdateService";
 
 // Enforce canonical domain redirect before rendering
 enforceCanonicalDomain();
@@ -60,46 +61,29 @@ window.addEventListener("appinstalled", () => {
   window.dispatchEvent(new CustomEvent("pwa-installed"));
 });
 
-// PWA auto-update: aggressively check for new versions and force reload
+// ── PWA version-aware auto-update ──────────────────────────────────
+// The full lifecycle (version.json polling, SW activation, safe reload,
+// trading-operation guard) lives in src/services/appUpdateService.ts.
+// Nothing here clears storage, IndexedDB or the auth session.
 const updateSW = registerSW({
   immediate: true,
   onNeedRefresh() {
-    // New version available — apply update and hard reload immediately
+    // A new service worker is waiting: activate it unless a trade/payment
+    // is mid-flight — the update service retries once the operation ends.
+    if (isBusy()) {
+      markUpdatePending(() => updateSW(true));
+      return;
+    }
     updateSW(true);
-    // Belt-and-suspenders: force a reload shortly after activation
-    setTimeout(() => {
-      window.location.reload();
-    }, 800);
   },
   onOfflineReady() {
     console.log("Botvio is ready to work offline");
   },
-  onRegisteredSW(swUrl, r) {
-    if (r) {
-      // Check immediately on load
-      r.update().catch(() => {});
-      // Then poll every 30 seconds for new versions
-      setInterval(() => {
-        r.update().catch(() => {});
-      }, 30 * 1000);
-    }
+  onRegisteredSW(_swUrl, r) {
+    if (r) r.update().catch(() => {});
   },
 });
 
-// When the active service worker changes (new version takes control), reload once
-if ("serviceWorker" in navigator) {
-  let reloaded = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (reloaded) return;
-    reloaded = true;
-    window.location.reload();
-  });
-  // Also re-check for updates whenever the tab becomes visible again
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      navigator.serviceWorker.getRegistration().then((reg) => reg?.update().catch(() => {}));
-    }
-  });
-}
+initAppUpdates();
 
 createRoot(document.getElementById("root")!).render(<App />);
