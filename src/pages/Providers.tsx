@@ -34,6 +34,9 @@ const Providers = () => {
     copy_mode: "fixed" as "fixed" | "multiplier" | "proportional",
     fixed_stake: 1,
     multiplier: 1,
+    max_drawdown_percent: 20,
+    equity_floor_usd: "",
+    daily_loss_limit_usd: "",
   });
 
   const canUseCopyTrading = gate.canCopyTrade;
@@ -76,6 +79,18 @@ const Providers = () => {
       return;
     }
 
+    const dd = Number(subscribeForm.max_drawdown_percent);
+    if (!dd || dd <= 0 || dd > 90) {
+      toast.error("Set a maximum equity drawdown between 1% and 90%");
+      return;
+    }
+
+    const selectedAccount = accounts?.find((a) => a.id === subscribeForm.trading_account_id);
+    const baselineEquity =
+      (selectedAccount as unknown as { equity?: number; balance?: number } | undefined)?.equity ??
+      (selectedAccount as unknown as { balance?: number } | undefined)?.balance ??
+      null;
+
     try {
       await subscribe.mutateAsync({
         provider_id: selectedProvider.id,
@@ -83,9 +98,17 @@ const Providers = () => {
         copy_mode: subscribeForm.copy_mode,
         fixed_stake: subscribeForm.fixed_stake,
         multiplier: subscribeForm.multiplier,
+        max_drawdown_percent: dd,
+        equity_floor_usd: subscribeForm.equity_floor_usd ? Number(subscribeForm.equity_floor_usd) : null,
+        daily_loss_limit_usd: subscribeForm.daily_loss_limit_usd
+          ? Number(subscribeForm.daily_loss_limit_usd)
+          : null,
+        baseline_equity_usd: baselineEquity,
       });
 
-      toast.success(`Successfully subscribed to ${selectedProvider.display_name}!`);
+      toast.success(
+        `Request sent for ${selectedProvider.display_name}. Copying starts once an admin approves your follower request.`
+      );
       setIsDialogOpen(false);
       setSelectedProvider(null);
     } catch (error: any) {
@@ -350,6 +373,69 @@ const Providers = () => {
                 Your stake will be calculated as: (Your Balance / Provider Balance) × Provider Stake
               </p>
             )}
+
+            {/* Follower risk controls — required */}
+            <div className="space-y-3 rounded-lg border border-border/60 p-3">
+              <div>
+                <Label className="text-sm font-semibold">Equity drawdown protection</Label>
+                <p className="text-xs text-muted-foreground">
+                  Copying pauses automatically when your account equity falls past these limits.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="max_dd">Max equity drawdown (%) *</Label>
+                <Input
+                  id="max_dd"
+                  type="number"
+                  min="1"
+                  max="90"
+                  step="1"
+                  value={subscribeForm.max_drawdown_percent}
+                  onChange={(e) =>
+                    setSubscribeForm({
+                      ...subscribeForm,
+                      max_drawdown_percent: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="equity_floor">Equity floor (USD)</Label>
+                  <Input
+                    id="equity_floor"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="Optional"
+                    value={subscribeForm.equity_floor_usd}
+                    onChange={(e) =>
+                      setSubscribeForm({ ...subscribeForm, equity_floor_usd: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="daily_loss">Daily loss limit (USD)</Label>
+                  <Input
+                    id="daily_loss"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="Optional"
+                    value={subscribeForm.daily_loss_limit_usd}
+                    onChange={(e) =>
+                      setSubscribeForm({ ...subscribeForm, daily_loss_limit_usd: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Follower requests are reviewed by a Botvio admin before any trade is copied.
+              </p>
+            </div>
           </div>
 
           <DialogFooter>
@@ -357,7 +443,7 @@ const Providers = () => {
               Cancel
             </Button>
             <Button onClick={handleSubmitSubscription} disabled={subscribe.isPending}>
-              {subscribe.isPending ? "Subscribing..." : "Subscribe"}
+              {subscribe.isPending ? "Sending request..." : "Request to follow"}
             </Button>
           </DialogFooter>
         </DialogContent>

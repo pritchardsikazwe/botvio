@@ -22,13 +22,15 @@ interface SocialShareButtonsProps {
   description?: string;
   imageUrl?: string;
   analysisId?: string;
+  label?: string;
 }
 
 export const SocialShareButtons = ({ 
   title, 
   description, 
   imageUrl,
-  analysisId 
+  analysisId,
+  label = "Share",
 }: SocialShareButtonsProps) => {
   const shareUrl = analysisId 
     ? `${window.location.origin}/analysis/${analysisId}` 
@@ -66,7 +68,7 @@ export const SocialShareButtons = ({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Share2 className="h-4 w-4" />
-          Share Analysis
+          {label}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
