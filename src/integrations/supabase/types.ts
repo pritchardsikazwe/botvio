@@ -1463,10 +1463,19 @@ export type Database = {
       }
       copy_subscriptions: {
         Row: {
+          admin_note: string | null
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          baseline_equity_usd: number | null
           copy_mode: string | null
           created_at: string
+          daily_loss_limit_usd: number | null
+          drawdown_breached_at: string | null
+          equity_floor_usd: number | null
           fixed_stake: number | null
           id: string
+          max_drawdown_percent: number
           multiplier: number | null
           proportional_mode: string | null
           provider_id: string
@@ -1476,10 +1485,19 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_note?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          baseline_equity_usd?: number | null
           copy_mode?: string | null
           created_at?: string
+          daily_loss_limit_usd?: number | null
+          drawdown_breached_at?: string | null
+          equity_floor_usd?: number | null
           fixed_stake?: number | null
           id?: string
+          max_drawdown_percent?: number
           multiplier?: number | null
           proportional_mode?: string | null
           provider_id: string
@@ -1489,10 +1507,19 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_note?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          baseline_equity_usd?: number | null
           copy_mode?: string | null
           created_at?: string
+          daily_loss_limit_usd?: number | null
+          drawdown_breached_at?: string | null
+          equity_floor_usd?: number | null
           fixed_stake?: number | null
           id?: string
+          max_drawdown_percent?: number
           multiplier?: number | null
           proportional_mode?: string | null
           provider_id?: string
