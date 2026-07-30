@@ -18,7 +18,6 @@ interface BridgeRequest {
   broker: string;
   account_login: string;
   server_name: string;
-  investor_password: string;
   account_type: string;
   notes: string | null;
   contact_whatsapp: string | null;
@@ -37,12 +36,16 @@ export const AdminBridgeRequestsTab = () => {
   const [terminalUid, setTerminalUid] = useState("");
   const [adminNote, setAdminNote] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [revealedPassword, setRevealedPassword] = useState<string | null>(null);
+  const [revealing, setRevealing] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("bridge_connection_requests")
-      .select("*")
+      .select(
+        "id,user_id,broker,account_login,server_name,account_type,notes,contact_whatsapp,contact_email,status,terminal_uid,admin_note,created_at"
+      )
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setRows((data as BridgeRequest[]) || []);
@@ -141,6 +144,7 @@ export const AdminBridgeRequestsTab = () => {
                       setTerminalUid(r.terminal_uid || "");
                       setAdminNote(r.admin_note || "");
                       setShowPassword(false);
+                      setRevealedPassword(null);
                     }}>
                       <Eye className="w-4 h-4 mr-1" /> Review
                     </Button>
@@ -173,14 +177,49 @@ export const AdminBridgeRequestsTab = () => {
               <div>
                 <Label>Investor Password</Label>
                 <div className="flex gap-2 items-center">
-                  <Input readOnly type={showPassword ? "text" : "password"} value={active.investor_password} />
-                  <Button type="button" size="sm" variant="outline" onClick={() => setShowPassword((s) => !s)}>
-                    {showPassword ? "Hide" : "Show"}
+                  <Input
+                    readOnly
+                    type={showPassword && revealedPassword ? "text" : "password"}
+                    value={revealedPassword ?? "••••••••"}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={revealing}
+                    onClick={async () => {
+                      if (revealedPassword) {
+                        setShowPassword((s) => !s);
+                        return;
+                      }
+                      setRevealing(true);
+                      const { data, error } = await supabase.rpc(
+                        "get_bridge_investor_password" as never,
+                        { _request_id: active.id } as never
+                      );
+                      setRevealing(false);
+                      if (error) {
+                        toast.error(error.message);
+                        return;
+                      }
+                      setRevealedPassword((data as unknown as string) ?? "");
+                      setShowPassword(true);
+                    }}
+                  >
+                    {revealing ? "…" : showPassword && revealedPassword ? "Hide" : "Show"}
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => {
-                    navigator.clipboard.writeText(active.investor_password);
-                    toast.success("Copied");
-                  }}>Copy</Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={!revealedPassword}
+                    onClick={() => {
+                      navigator.clipboard.writeText(revealedPassword || "");
+                      toast.success("Copied");
+                    }}
+                  >
+                    Copy
+                  </Button>
                 </div>
               </div>
               {active.notes && (

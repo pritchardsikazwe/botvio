@@ -6163,6 +6163,24 @@ export type Database = {
           },
         ]
       }
+      unlimited_access: {
+        Row: {
+          created_at: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_active_tokens: {
         Row: {
           created_at: string
@@ -6543,6 +6561,10 @@ export type Database = {
           trade_count: number
           win_count: number
         }[]
+      }
+      get_bridge_investor_password: {
+        Args: { _request_id: string }
+        Returns: string
       }
       get_p2p_trader_stats: {
         Args: { trader_id: string }
