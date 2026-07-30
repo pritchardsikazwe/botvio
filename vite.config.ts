@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => ({
     botvioVersionPlugin(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"],
+      includeAssets: ["apple-touch-icon.png", "icon-192.png", "icon-512.png"],
       manifest: {
         name: "Botvio - AI Trading Platform",
         short_name: "Botvio",
