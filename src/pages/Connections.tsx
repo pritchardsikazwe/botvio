@@ -389,6 +389,15 @@ const Connections = () => {
                             <Button
                               variant="outline"
                               size="sm"
+                              onClick={() => (window.location.href = "/rise-fall")}
+                            >
+                              <Zap className="h-3.5 w-3.5 mr-1" /> Trade Rise &amp; Fall
+                            </Button>
+                          )}
+                          {conn.is_connected && (
+                            <Button
+                              variant="outline"
+                              size="sm"
                               disabled={busyConnId === conn.id}
                               onClick={() => disconnectConnection(conn.id)}
                             >
