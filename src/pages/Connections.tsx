@@ -323,6 +323,14 @@ const Connections = () => {
                   </Button>
                 </div>
               </CardHeader>
+              <CardContent className="flex flex-wrap gap-2 pt-0">
+                <Button size="sm" onClick={() => (window.location.href = "/rise-fall")}>
+                  <Zap className="h-4 w-4 mr-1" /> Trade Rise &amp; Fall
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => (window.location.href = "/deriv-app")}>
+                  Open Deriv workspace
+                </Button>
+              </CardContent>
             </Card>
 
             {/* Multi-Account Switcher */}
