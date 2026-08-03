@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Signal, Users, Sparkles, ExternalLink, Crosshair } from "lucide-react";
-import { SyntxChartSection } from "@/components/weltrade/SyntxChartSection";
+import { WeltradeSignalsEngine } from "@/components/weltrade/WeltradeSignalsEngine";
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
 import { SyntxCommunitySection } from "@/components/weltrade/SyntxCommunitySection";
 import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
@@ -71,7 +71,7 @@ const WeltradeHub = () => {
           </TabsList>
 
           <TabsContent value="charts" className="mt-6">
-            <SyntxChartSection />
+            <WeltradeSignalsEngine />
           </TabsContent>
           <TabsContent value="signals" className="mt-6">
             <SyntxSignalsSection />
