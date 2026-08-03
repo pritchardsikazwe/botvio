@@ -121,7 +121,13 @@ export const WeltradeSignalsEngine = () => {
             size="sm"
             variant={prefs.category === cat ? "secondary" : "outline"}
             className="h-7 px-3 text-xs font-bold"
-            onClick={() => setPrefs((p) => ({ ...p, category: cat }))}
+            onClick={() =>
+              setPrefs((p) => {
+                if (p.category === cat) return p;
+                const first = WELTRADE_INSTRUMENTS.find((i) => i.category === cat);
+                return { ...p, category: cat, instrument: first?.key ?? p.instrument };
+              })
+            }
           >
             {WELTRADE_CATEGORY_LABEL[cat]}
           </Button>
