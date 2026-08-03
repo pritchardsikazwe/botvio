@@ -54,7 +54,7 @@ const TRADING_STEPS = [
       "Start with as low as $1",
       "Demo account available to practice",
     ],
-    link: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827",
+    link: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/",
     linkLabel: "Sign Up on Deriv",
   },
   {

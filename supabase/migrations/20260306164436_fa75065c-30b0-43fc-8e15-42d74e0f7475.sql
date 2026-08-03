@@ -60,7 +60,7 @@ CREATE POLICY "Admins can manage affiliate links"
 -- Seed default affiliate links
 INSERT INTO public.seo_affiliate_links (broker_key, url, label) VALUES
   ('exness', 'https://one.exness-track.com/a/ts1kvs1k', 'Open Exness Account'),
-  ('deriv', 'https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827', 'Open Deriv Account'),
+  ('deriv', 'https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/', 'Open Deriv Account'),
   ('binance', 'https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU', 'Open Binance Account');
 
 -- Updated at trigger

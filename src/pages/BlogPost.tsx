@@ -15,7 +15,7 @@ import { getAuthor } from "@/content/authors";
 
 /* ── Affiliate links ── */
 const AFFILIATE_LINKS = {
-  deriv: { name: "Deriv", url: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827", cta: "Open Deriv Account", color: "from-red-500/10 to-red-600/10" },
+  deriv: { name: "Deriv", url: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/", cta: "Open Deriv Account", color: "from-red-500/10 to-red-600/10" },
   exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k", cta: "Open Exness Account", color: "from-yellow-500/10 to-amber-600/10" },
   weltrade: { name: "Weltrade", url: "https://gowt.net/ib67505", cta: "Open Weltrade Account", color: "from-blue-500/10 to-blue-600/10" },
   iqoption: { name: "IQ Option", url: "https://iqoption.net/lp/pwa-new/en/?aff=818055&aff_model=revenue", cta: "Open IQ Option Account", color: "from-green-500/10 to-green-600/10" },

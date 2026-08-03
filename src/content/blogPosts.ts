@@ -514,7 +514,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio simplifies forex trading by automating the technical analysis that most beginners struggle with. Instead of spending months learning chart patterns, Botvio's AI engine analyzes price movements in real-time and generates high-probability trading signals. Botvio supports all major forex pairs available on Deriv including EUR/USD, GBP/USD, USD/JPY, and more.</p>
 
 <h3>Step 1: Create Your Deriv Account</h3>
-<p>To start trading forex with Botvio, you first need a Deriv broker account. Deriv is a regulated online broker that offers forex, synthetic indices, and binary options. Visit <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv</a> to create your free account. Deriv offers both demo and real accounts, so you can practice with virtual funds before risking real money.</p>
+<p>To start trading forex with Botvio, you first need a Deriv broker account. Deriv is a regulated online broker that offers forex, synthetic indices, and binary options. Visit <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv</a> to create your free account. Deriv offers both demo and real accounts, so you can practice with virtual funds before risking real money.</p>
 
 <h3>Step 2: Connect to Botvio</h3>
 <p>Once your Deriv account is ready, connect it to Botvio using the secure OAuth connection. Botvio never stores your password — it uses Deriv's official API tokens. The connection process takes less than 30 seconds with Botvio's streamlined setup.</p>
@@ -537,7 +537,7 @@ export const blogContent: Record<string, BlogPostData> = {
 </ul>
 
 <h2>Start Your Forex Journey with Botvio Today</h2>
-<p>Whether you're a complete beginner or an experienced trader, Botvio provides the tools and AI-powered analysis you need to succeed in forex trading on Deriv. Create your free <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a> and connect to Botvio to start receiving intelligent trading signals immediately.</p>
+<p>Whether you're a complete beginner or an experienced trader, Botvio provides the tools and AI-powered analysis you need to succeed in forex trading on Deriv. Create your free <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a> and connect to Botvio to start receiving intelligent trading signals immediately.</p>
 
 <h2>Risk Disclosure</h2>
 <p>Trading forex, synthetic indices, crypto and derivatives carries a high level of risk to your capital and is not suitable for every investor. Past performance is not a reliable indicator of future results. You can lose more than your initial deposit on leveraged products. Nothing in this article is financial, investment, tax or legal advice — it is published for education purposes only. Always trade with money you can afford to lose, use a written risk-management plan, and consult a licensed adviser regulated in your jurisdiction before committing real capital.</p>
@@ -588,7 +588,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>Getting Started with Botvio</h2>
 <ol>
-<li>Create a free <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a></li>
+<li>Create a free <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a></li>
 <li>Connect your Deriv account to Botvio</li>
 <li>Start with a demo account to learn how Botvio works</li>
 <li>Configure your risk settings and stake size</li>
@@ -637,7 +637,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Binary options are financial instruments where you predict whether a market will go up or down within a specific timeframe. On Deriv, binary options include Rise/Fall, Higher/Lower, Digits (Match, Differ, Even, Odd, Over, Under), and more. Botvio specializes in trading these contract types with AI-powered precision.</p>
 
 <h2>Why Deriv for Binary Options?</h2>
-<p>Deriv (formerly Binary.com) is one of the world's leading binary options brokers, operating since 1999. Deriv offers unique synthetic indices that trade 24/7, including Volatility indices, Boom/Crash, and Step indices. With Botvio connected to your <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a>, you get the best of both worlds — Deriv's reliable platform and Botvio's intelligent trading signals.</p>
+<p>Deriv (formerly Binary.com) is one of the world's leading binary options brokers, operating since 1999. Deriv offers unique synthetic indices that trade 24/7, including Volatility indices, Boom/Crash, and Step indices. With Botvio connected to your <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a>, you get the best of both worlds — Deriv's reliable platform and Botvio's intelligent trading signals.</p>
 
 <h2>Types of Binary Options on Deriv</h2>
 
@@ -663,7 +663,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Manual binary options trading on Deriv requires constant monitoring and quick decision-making. Botvio eliminates this pressure by automating the analysis. Botvio's confidence scoring system rates every potential trade from 0-100, and Auto Mode only executes when confidence exceeds 70%.</p>
 
 <h2>Getting Started</h2>
-<p>Sign up for a free <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a>, connect it to Botvio, and start with the demo account. Botvio works identically on demo and real accounts, so you can practice risk-free before committing real capital.</p>
+<p>Sign up for a free <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a>, connect it to Botvio, and start with the demo account. Botvio works identically on demo and real accounts, so you can practice risk-free before committing real capital.</p>
 
 <h2>Risk Warning</h2>
 <p>Binary options trading carries significant risk. You can lose your entire investment on a single trade. Botvio helps manage this risk with built-in guardrails, but no system can eliminate market risk entirely. Trade responsibly with Botvio and Deriv.</p>
@@ -716,7 +716,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <h2>5 Ways to Earn with Botvio</h2>
 
 <h3>1. AI Signal Trading</h3>
-<p>Let Botvio generate trading signals and execute them on your <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a>. Botvio's AI engine analyzes market data continuously and alerts you to high-probability opportunities.</p>
+<p>Let Botvio generate trading signals and execute them on your <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a>. Botvio's AI engine analyzes market data continuously and alerts you to high-probability opportunities.</p>
 
 <h3>2. Copy Trading</h3>
 <p>Follow successful signal providers on Botvio's marketplace. When they profit, you profit. Botvio automatically mirrors their trades to your account.</p>
@@ -732,7 +732,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>Getting Started Today</h2>
 <ol>
-<li>Open a free <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a></li>
+<li>Open a free <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a></li>
 <li>Connect to Botvio in under 30 seconds</li>
 <li>Practice on demo with Botvio's AI signals</li>
 <li>Go live when you're confident</li>
@@ -803,7 +803,7 @@ export const blogContent: Record<string, BlogPostData> = {
 </ul>
 
 <h2>Start Trading Synthetic Indices</h2>
-<p>Create your <a href="https://track.deriv.com/_h8vu88Fmx9LFzOFRkVlag/1/3/" target="_blank" rel="noopener">Deriv account</a> and connect to Botvio. Deriv offers free demo accounts with virtual funds, so you can practice trading synthetic indices with Botvio's signals before risking real money.</p>
+<p>Create your <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a> and connect to Botvio. Deriv offers free demo accounts with virtual funds, so you can practice trading synthetic indices with Botvio's signals before risking real money.</p>
 
 <h2>Risk Disclosure</h2>
 <p>Trading forex, synthetic indices, crypto and derivatives carries a high level of risk to your capital and is not suitable for every investor. Past performance is not a reliable indicator of future results. You can lose more than your initial deposit on leveraged products. Nothing in this article is financial, investment, tax or legal advice — it is published for education purposes only. Always trade with money you can afford to lose, use a written risk-management plan, and consult a licensed adviser regulated in your jurisdiction before committing real capital.</p>
@@ -863,7 +863,7 @@ export const blogContent: Record<string, BlogPostData> = {
 </ul>
 
 <h2>Create Your Account</h2>
-<p>Start with a free <a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Deriv demo account</a> and connect it to Botvio. Practice risk management with virtual funds before going live.</p>
+<p>Start with a free <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv demo account</a> and connect it to Botvio. Practice risk management with virtual funds before going live.</p>
 
 <h2>Risk Disclosure</h2>
 <p>Trading forex, synthetic indices, crypto and derivatives carries a high level of risk to your capital and is not suitable for every investor. Past performance is not a reliable indicator of future results. You can lose more than your initial deposit on leveraged products. Nothing in this article is financial, investment, tax or legal advice — it is published for education purposes only. Always trade with money you can afford to lose, use a written risk-management plan, and consult a licensed adviser regulated in your jurisdiction before committing real capital.</p>
@@ -904,7 +904,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Forex trading is one of the most accessible ways to earn money online. With Botvio, you can automate forex trading on Deriv and take advantage of AI-powered signal generation. This guide covers everything beginners need to know about starting forex trading with Botvio.</p>
 
 <h2>Step 1: Choose a Broker</h2>
-<p>Botvio works with <a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Deriv</a>, one of the world's leading online trading platforms. Deriv offers forex pairs, synthetic indices, and binary options — all compatible with Botvio's AI engines.</p>
+<p>Botvio works with <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv</a>, one of the world's leading online trading platforms. Deriv offers forex pairs, synthetic indices, and binary options — all compatible with Botvio's AI engines.</p>
 
 <h2>Step 2: Learn the Basics</h2>
 <p>Forex trading involves buying and selling currency pairs. With Botvio, you don't need years of experience — Botvio's AI analyzes market data and generates signals automatically. However, understanding basics like pips, spreads, and leverage helps you configure Botvio optimally.</p>
@@ -918,7 +918,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <h2>Step 5: Manage Risk</h2>
 <p>Never risk more than 1-2% of your balance per trade. Botvio's built-in risk guardrails help enforce discipline. Set daily loss limits and use the minimum stake to learn.</p>
 
-<p><strong>Ready to start?</strong> <a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Create your free Deriv account</a> and connect Botvio today.</p>
+<p><strong>Ready to start?</strong> <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Create your free Deriv account</a> and connect Botvio today.</p>
 
 <h2>Risk Disclosure</h2>
 <p>Trading forex, synthetic indices, crypto and derivatives carries a high level of risk to your capital and is not suitable for every investor. Past performance is not a reliable indicator of future results. You can lose more than your initial deposit on leveraged products. Nothing in this article is financial, investment, tax or legal advice — it is published for education purposes only. Always trade with money you can afford to lose, use a written risk-management plan, and consult a licensed adviser regulated in your jurisdiction before committing real capital.</p>
@@ -956,7 +956,7 @@ export const blogContent: Record<string, BlogPostData> = {
     date: "2026-02-21",
     content: `
 <h2>How to Earn Money Online with Trading</h2>
-<p>Trading is one of the most popular ways to earn money online in 2026. With platforms like Botvio and brokers like <a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Deriv</a>, anyone can start trading from their phone or computer.</p>
+<p>Trading is one of the most popular ways to earn money online in 2026. With platforms like Botvio and brokers like <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv</a>, anyone can start trading from their phone or computer.</p>
 
 <h2>Why Trading with Botvio?</h2>
 <p>Botvio automates the hard parts of trading — analysis, timing, and execution. You set your preferences, and Botvio's AI does the rest. This means you can earn while you sleep, study, or work your day job.</p>
@@ -971,7 +971,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>Getting Started</h2>
 <ol>
-<li>Create a free <a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Deriv account</a></li>
+<li>Create a free <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv account</a></li>
 <li>Connect to Botvio with your API token</li>
 <li>Start with the demo token to practice risk-free</li>
 <li>When ready, switch to your real account and start earning</li>
@@ -1015,7 +1015,7 @@ export const blogContent: Record<string, BlogPostData> = {
     date: "2026-02-19",
     content: `
 <h2>Making Money Online with Deriv Binary Options</h2>
-<p><a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Deriv</a> is one of the largest binary options platforms in the world, trusted by millions of traders. Combined with Botvio's AI, it becomes a powerful tool for making money online.</p>
+<p><a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv</a> is one of the largest binary options platforms in the world, trusted by millions of traders. Combined with Botvio's AI, it becomes a powerful tool for making money online.</p>
 
 <h2>What Are Binary Options?</h2>
 <p>Binary options are simple: you predict whether a price will go up or down. If your prediction is correct, you earn a payout (typically 80-95% of your stake). If wrong, you lose your stake. Botvio uses advanced algorithms to make these predictions with higher accuracy.</p>
@@ -1031,7 +1031,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Botvio removes emotion from trading. While humans panic, get greedy, or overtrade, Botvio follows strict mathematical rules. Every trade is backed by data analysis — EMA crossovers, RSI readings, and Markov chain probabilities.</p>
 
 <h2>Start Now</h2>
-<p><a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Create your Deriv account</a>, connect Botvio, and start with the free demo token. When you're confident, switch to real trading and start earning.</p>
+<p><a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Create your Deriv account</a>, connect Botvio, and start with the free demo token. When you're confident, switch to real trading and start earning.</p>
 
 <p><strong>⚠️ Risk Warning:</strong> Binary options trading carries significant risk. Past performance does not guarantee future results.</p>
 
@@ -1071,7 +1071,7 @@ export const blogContent: Record<string, BlogPostData> = {
     date: "2026-02-17",
     content: `
 <h2>What is Deriv?</h2>
-<p><a href="https://deriv.com/signup/?utm_source=botvio&utm_medium=affiliate&utm_campaign=CU23827" target="_blank" rel="noopener">Deriv</a> (formerly Binary.com) is a regulated online trading platform offering binary options, CFDs, and synthetic indices. With over 2.5 million users worldwide, Deriv is trusted for its transparency and innovation.</p>
+<p><a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener">Deriv</a> (formerly Binary.com) is a regulated online trading platform offering binary options, CFDs, and synthetic indices. With over 2.5 million users worldwide, Deriv is trusted for its transparency and innovation.</p>
 
 <h2>Binary Options Contract Types</h2>
 <p>Botvio supports all major Deriv contract types:</p>
@@ -1149,7 +1149,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p><strong>Contract Types:</strong> Rise/Fall, Higher/Lower, Multipliers on gold</p>
 <p><strong>Minimum Stake:</strong> $0.35</p>
 <p><strong>Why Deriv?</strong> Deriv lets you trade gold using binary options — predict if gold goes up or down in 1-5 minutes. Perfect for traders who prefer fixed-risk, fixed-reward contracts. Use Botvio's AI to automate gold binary trades on Deriv.</p>
-<p>👉 <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer">Open Deriv Account — Trade Gold Binary Options</a></p>
+<p>👉 <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">Open Deriv Account — Trade Gold Binary Options</a></p>
 
 <h3>3. Weltrade — Best for MT5 Gold Trading</h3>
 <p><strong>Spreads:</strong> From 2.0 pips on XAUUSD</p>
@@ -1227,7 +1227,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h3>On Deriv</h3>
 <p>Trade gold using Multipliers on Deriv for leveraged exposure with controlled risk. Great for smaller accounts.</p>
-<p>👉 <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer">Open Deriv Account</a></p>
+<p>👉 <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">Open Deriv Account</a></p>
 
 <h3>On Weltrade</h3>
 <p>Weltrade's MT5 platform supports gold trading with competitive spreads and up to 100% deposit bonuses.</p>
@@ -1312,7 +1312,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>Get Started</h2>
 <p>Create your free Deriv account to start receiving signals:</p>
-<p>👉 <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer">Open Deriv Account — Free Signals</a></p>
+<p>👉 <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">Open Deriv Account — Free Signals</a></p>
 
 <p>Also available on <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Exness</a> and <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Weltrade</a> for forex and gold signals.</p>
 
@@ -1446,7 +1446,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>Get Started</h2>
 <p>👉 <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Open Weltrade Account — Get 100% Deposit Bonus</a></p>
-<p>Also trade on <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Exness</a> for tighter gold spreads or <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer">Deriv</a> for binary options.</p>
+<p>Also trade on <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Exness</a> for tighter gold spreads or <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">Deriv</a> for binary options.</p>
 
 <p><strong>⚠️ Risk Warning:</strong> Trading involves risk. Past performance is not a guarantee of future results.</p>
 
@@ -1510,7 +1510,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Use Botvio's chart analysis with any broker:</p>
 <ul>
 <li><strong>Exness:</strong> <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Open Account</a> — Best for gold & forex</li>
-<li><strong>Deriv:</strong> <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer">Open Account</a> — Best for synthetics</li>
+<li><strong>Deriv:</strong> <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">Open Account</a> — Best for synthetics</li>
 <li><strong>Weltrade:</strong> <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Open Account</a> — MT5 with synthetics</li>
 </ul>
 
@@ -1595,7 +1595,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Start with demo accounts on these brokers:</p>
 <ul>
 <li><strong>Exness:</strong> <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Free Demo Account</a> — Best spreads for learning gold</li>
-<li><strong>Deriv:</strong> <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer">Free Demo</a> — Practice binary options risk-free</li>
+<li><strong>Deriv:</strong> <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">Free Demo</a> — Practice binary options risk-free</li>
 <li><strong>Weltrade:</strong> <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Free Demo</a> — Learn synthetics + forex on MT5</li>
 </ul>
 
@@ -1722,7 +1722,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <h2>The Botvio Hauxa Overlay</h2>
 <p>Every synthetic signal on Botvio uses the Hauxa overlay: EMA 20, EMA 50, RSI(14), ATR(14). When 3 of 4 align, the signal is auto-approved at 65%+ confidence.</p>
 
-<p><a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer sponsored">Open a free Deriv account</a> to trade these indices, then watch the Botvio Synthetic Hub for live signals.</p>
+<p><a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer sponsored">Open a free Deriv account</a> to trade these indices, then watch the Botvio Synthetic Hub for live signals.</p>
     
 
 <h2>Risk Disclosure</h2>
@@ -2071,7 +2071,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h3>Trading & Investing</h3>
 <ul>
-<li><a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer sponsored">Deriv</a> — synthetic indices, forex, 24/7 markets</li>
+<li><a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer sponsored">Deriv</a> — synthetic indices, forex, 24/7 markets</li>
 <li><a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer sponsored">Exness</a> — tightest spreads on gold &amp; forex</li>
 <li><a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer sponsored">Weltrade</a> — Syntx, PainX, GainX exclusive indices</li>
 <li><a href="https://accounts.binance.com/register?ref=42924116" target="_blank" rel="noopener noreferrer sponsored">Binance</a> — crypto spot, futures, Earn</li>
@@ -2283,7 +2283,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <ul>
 <li><a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer sponsored">Exness</a> — tightest XAUUSD spreads</li>
 <li><a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer sponsored">Weltrade</a> — solid execution on metals</li>
-<li><a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer sponsored">Deriv</a> — gold available on MT5</li>
+<li><a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer sponsored">Deriv</a> — gold available on MT5</li>
 </ul>
     
 

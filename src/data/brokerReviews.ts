@@ -79,7 +79,7 @@ export const brokerReviews: Record<string, BrokerReview> = {
     withdrawal: "Same channels as deposits. Withdrawals typically processed within 24 hours for verified accounts.",
     bonuses: "No universal deposit bonus in regulated regions. Local promos may apply — check Deriv's promotions page.",
     support: "24/7 live chat, email, WhatsApp support and an active help centre. Response times are among the fastest in the industry.",
-    affiliateUrl: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC",
+    affiliateUrl: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/",
     sections: {
       overview: `<p>Deriv has been operating in the retail derivatives space for more than two decades, evolving from the pioneer of online binary options (Binary.com) into a full-service multi-asset broker. Today, Deriv is the go-to platform for two very specific groups of traders: those who want to trade Deriv's proprietary <strong>synthetic indices</strong> (Boom, Crash, Volatility, Step and Jump indices) and those who need <strong>real API automation</strong> that most retail brokers simply do not offer.</p>
       <p>The platform is available in nearly every country and supports client accounts as small as $5. That accessibility — combined with a genuine public API, a visual bot builder (DBot) and full MT5 integration — is why Deriv appears on virtually every "best broker for beginners" and "best broker for algorithmic traders" list in 2026.</p>`,
