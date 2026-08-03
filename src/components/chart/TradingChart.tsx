@@ -137,6 +137,10 @@ function TradingChartBase({
         horzLines: { color: "rgba(148,163,184,0.10)", style: LineStyle.Dotted },
       },
       crosshair: { mode: CrosshairMode.Normal },
+      // Pin the locale: some browsers/OS locales report tags Intl rejects
+      // (e.g. "en-US@posix"), which makes the chart throw while formatting axis
+      // dates and renders a blank canvas.
+      localization: { locale: "en-US" },
       rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.1, bottom: 0.1 } },
       timeScale: { timeVisible: true, secondsVisible: false, borderVisible: false, rightOffset: 4 },
       handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
@@ -223,6 +227,7 @@ function TradingChartBase({
       },
       rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.1, bottom: 0.1 } },
       timeScale: { visible: false, borderVisible: false },
+      localization: { locale: "en-US" },
       crosshair: { mode: CrosshairMode.Normal },
     });
 
