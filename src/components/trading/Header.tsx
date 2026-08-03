@@ -96,6 +96,16 @@ export const Header = () => {
                 Analysis
               </Button>
 
+              <Button
+                variant={location.pathname === '/rise-fall' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="text-primary"
+                onClick={() => navigate('/rise-fall')}
+              >
+                <Zap className="w-4 h-4 mr-1" />
+                Rise & Fall
+              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -285,6 +295,14 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/market-analysis')}>
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Market Analysis
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/rise-fall')}>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Rise &amp; Fall
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/deriv-app')}>
+                      <Bot className="w-4 h-4 mr-2" />
+                      Deriv App
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>Trading Hubs</DropdownMenuLabel>

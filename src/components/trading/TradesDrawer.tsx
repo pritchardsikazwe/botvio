@@ -28,22 +28,40 @@ export const TradesDrawer = () => {
         .limit(100);
 
       if (!error && data) {
-        setTrades(data as unknown as DerivTrade[]);
+        // Numeric columns can arrive as strings — coerce so `.toFixed()` never
+        // throws and blanks the whole drawer/page.
+        setTrades(
+          (data as any[]).map((r) => ({
+            ...r,
+            buy_price: r.buy_price != null ? Number(r.buy_price) : 0,
+            payout: r.payout != null ? Number(r.payout) : null,
+            profit: r.profit != null ? Number(r.profit) : null,
+            sell_price: r.sell_price != null ? Number(r.sell_price) : null,
+          })) as unknown as DerivTrade[]
+        );
       }
     } finally {
       setLoading(false);
     }
   };
 
+  // Always keep open trades loaded (not just while the drawer is open) so the
+  // badge count and running list survive navigation between pages.
   useEffect(() => {
-    if (open && user) {
-      fetchTrades();
-    }
+    if (!user) return;
+    fetchTrades();
+    const id = window.setInterval(fetchTrades, open ? 5000 : 20000);
+    const onFocus = () => fetchTrades();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [open, user]);
 
   // Subscribe to realtime updates
   useEffect(() => {
-    if (!user || !open) return;
+    if (!user) return;
     const channel = supabase
       .channel("trades-drawer")
       .on(
@@ -53,7 +71,7 @@ export const TradesDrawer = () => {
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, open]);
+  }, [user]);
 
   const running = trades.filter(t => t.status === "RUNNING");
   const closed = trades.filter(t => t.status !== "RUNNING");
@@ -157,7 +175,11 @@ export const TradesDrawer = () => {
 const TradeRow = ({ trade }: { trade: DerivTrade }) => {
   const isRunning = trade.status === "RUNNING";
   const isWin = trade.outcome === "WIN";
-  const time = new Date(trade.started_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const started = trade.started_at ? new Date(trade.started_at) : null;
+  const time =
+    started && !Number.isNaN(started.getTime())
+      ? started.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "--:--";
 
   return (
     <div className={`flex items-center gap-2 p-2 rounded-lg text-xs border ${
@@ -182,14 +204,14 @@ const TradeRow = ({ trade }: { trade: DerivTrade }) => {
             {trade.is_virtual ? "DEMO" : "REAL"}
           </Badge>
         </div>
-        <span className="text-muted-foreground">{time} · ${trade.buy_price?.toFixed(2)}</span>
+        <span className="text-muted-foreground">{time} · ${Number(trade.buy_price ?? 0).toFixed(2)}</span>
       </div>
       <div className="text-right shrink-0">
         {isRunning ? (
           <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20">Running</Badge>
         ) : (
           <span className={`font-bold ${isWin ? "text-success" : "text-destructive"}`}>
-            {(trade.profit ?? 0) >= 0 ? '+' : ''}${(trade.profit ?? 0).toFixed(2)}
+            {Number(trade.profit ?? 0) >= 0 ? '+' : ''}${Number(trade.profit ?? 0).toFixed(2)}
           </span>
         )}
       </div>

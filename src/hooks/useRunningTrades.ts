@@ -41,10 +41,29 @@ export const useRunningTrades = () => {
         .eq("user_id", user.id)
         .eq("status", "RUNNING");
       if (data) {
-        setTrades(data.map(mapRow));
+        // Merge with in-memory trades so a reload never drops a trade that was
+        // just placed, and so open trades survive SPA navigation.
+        setTrades((prev) => {
+          const rows = data.map(mapRow);
+          const byContract = new Map<number, RunningTrade>();
+          prev.forEach((t) => byContract.set(t.contract_id, t));
+          rows.forEach((r) => {
+            const existing = byContract.get(r.contract_id);
+            byContract.set(r.contract_id, existing ? { ...r, current_profit: existing.current_profit } : r);
+          });
+          return Array.from(byContract.values());
+        });
       }
     };
     load();
+
+    const onFocus = () => load();
+    const id = window.setInterval(load, 30000);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [user?.id]);
 
   const mapRow = (row: any): RunningTrade => ({

@@ -323,6 +323,14 @@ const Connections = () => {
                   </Button>
                 </div>
               </CardHeader>
+              <CardContent className="flex flex-wrap gap-2 pt-0">
+                <Button size="sm" onClick={() => (window.location.href = "/rise-fall")}>
+                  <Zap className="h-4 w-4 mr-1" /> Trade Rise &amp; Fall
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => (window.location.href = "/deriv-app")}>
+                  Open Deriv workspace
+                </Button>
+              </CardContent>
             </Card>
 
             {/* Multi-Account Switcher */}
@@ -377,6 +385,15 @@ const Connections = () => {
                           <Badge variant={conn.is_connected ? "default" : "secondary"}>
                             {conn.is_connected ? "Active" : "Inactive"}
                           </Badge>
+                          {conn.is_connected && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => (window.location.href = "/rise-fall")}
+                            >
+                              <Zap className="h-3.5 w-3.5 mr-1" /> Trade Rise &amp; Fall
+                            </Button>
+                          )}
                           {conn.is_connected && (
                             <Button
                               variant="outline"

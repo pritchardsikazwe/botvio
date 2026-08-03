@@ -288,6 +288,27 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
     return () => { unsub(); };
   }, [derivAPI.authorized, derivAPI.onContractUpdate]);
 
+  /**
+   * Re-attach contract streams for trades that are still RUNNING.
+   * Historic bug: only the page that placed a trade subscribed to
+   * proposal_open_contract, so navigating away (or reloading) left the trade
+   * with no live stream — it never updated and never settled, so it silently
+   * vanished from the open-trades list. Now the PROVIDER owns the streams, so
+   * open trades survive navigation and refresh from any page.
+   */
+  const resubscribed = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    if (!derivAPI.authorized) return;
+    runningTrades.forEach((t) => {
+      if (resubscribed.current.has(t.contract_id)) return;
+      resubscribed.current.add(t.contract_id);
+      derivAPI.subscribeContract(t.contract_id).catch(() => {
+        // allow a later retry if the socket was not ready yet
+        resubscribed.current.delete(t.contract_id);
+      });
+    });
+  }, [derivAPI.authorized, derivAPI.subscribeContract, runningTrades]);
+
   // Enhanced placeTrade that also tracks running trades
   const enhancedPlaceTrade = useCallback(async (params: Parameters<typeof derivAPI.placeTrade>[0]) => {
     // Validate no demo/real mismatch
