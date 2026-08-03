@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
-const DERIV_LINK = "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827";
+const DERIV_LINK = "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
 const BROKER_FILTERS = [

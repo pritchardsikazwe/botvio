@@ -70,7 +70,7 @@ CREATE POLICY "Admins can manage partner links"
 
 -- Seed initial partner links from hardcoded data
 INSERT INTO public.partner_links (name, url, description, icon, category, sort_order) VALUES
-  ('Deriv', 'https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827', 'Binary options & CFDs', 'TrendingUp', 'broker', 1),
+  ('Deriv', 'https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/', 'Binary options & CFDs', 'TrendingUp', 'broker', 1),
   ('Exness', 'https://one.exness-track.com/a/ts1kvs1k', 'Forex, Gold, Crypto', 'TrendingUp', 'broker', 2),
   ('Binance', 'https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU', 'Crypto exchange', 'Target', 'broker', 3),
   ('WhatsApp', 'https://chat.whatsapp.com/KInahrKam85BTyFbIgC3zJ', 'Trading community', 'MessageCircle', 'community', 4),

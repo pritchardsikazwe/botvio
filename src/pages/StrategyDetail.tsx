@@ -16,7 +16,7 @@ import { renderStrategyMarkdown, strategyExcerpt } from "@/lib/strategyMarkdown"
 const REFERRAL_STORAGE_KEY = "botvio_referral";
 
 const BROKER_LINKS: Record<string, { name: string; url: string }> = {
-  deriv: { name: "Deriv", url: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" },
+  deriv: { name: "Deriv", url: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" },
   exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k" },
   mt5: { name: "Exness MT5", url: "https://one.exness-track.com/a/ts1kvs1k" },
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },

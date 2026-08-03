@@ -168,7 +168,7 @@ const P2P = () => {
                     Create your free Deriv account and start trading synthetic indices today!
                   </p>
                   <a
-                    href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/"
+                    href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

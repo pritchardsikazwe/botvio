@@ -321,7 +321,7 @@ const Dashboard = () => {
                       Trade synthetic indices 24/7. Boom, Crash, Volatility, and more with stakes as low as $0.35!
                     </p>
                     <a
-                      href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/"
+                      href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

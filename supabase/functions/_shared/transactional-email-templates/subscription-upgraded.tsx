@@ -55,7 +55,7 @@ const SubscriptionUpgradedEmail = ({ name, planName }: SubscriptionUpgradedProps
 
         <Section style={brokerSection}>
           <Link
-            href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827"
+            href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/"
             style={brokerBtnDeriv}
           >
             Open Deriv Account →

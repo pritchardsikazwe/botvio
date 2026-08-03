@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink, Clock, BarChart3, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-const DERIV_LINK = "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804UC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827";
+const DERIV_LINK = "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
 
 const DERIV_ADVANTAGES = [
   { icon: Clock, text: "Trade 24/7 on synthetics — no market closures" },

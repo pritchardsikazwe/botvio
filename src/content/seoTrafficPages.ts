@@ -3,7 +3,7 @@ import { SEOPage } from "./seoPages";
 // Affiliate links used in CTAs
 export const AFFILIATE_LINKS = {
   exness: "https://one.exness-track.com/a/ts1kvs1k",
-  deriv: "https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827",
+  deriv: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/",
   binance: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU",
 };
 

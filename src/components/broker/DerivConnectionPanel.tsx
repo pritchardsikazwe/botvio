@@ -430,10 +430,10 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   <p className="font-medium mb-2">How to get your Personal Access Token (PAT):</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
                     <li>
-                      <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         Log in to Deriv
                       </a>{" "}or{" "}
-                      <a href="https://deriv.partners/rx?sidi=F9C8D3BF-5854-499A-8497-F5C370F804DC&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU23827" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         create a free demo account
                       </a>
                     </li>

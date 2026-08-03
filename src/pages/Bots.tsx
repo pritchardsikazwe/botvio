@@ -273,7 +273,7 @@ const Bots = () => {
                     </p>
                     <div className="flex flex-col gap-2">
                       <a
-                        href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/"
+                        href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full"
@@ -370,7 +370,7 @@ const Bots = () => {
                     Browse the marketplace and activate your first trading bot
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                    <a href="https://track.deriv.com/_h8e_odrKXNCTjSHedV4mENd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">
+                    <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">
                       <Button variant="gold">
                         Create Deriv Account First
                       </Button>
