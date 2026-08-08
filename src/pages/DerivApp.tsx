@@ -6,6 +6,9 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
+import { DerivConnectionBar } from "@/components/trading/DerivConnectionBar";
+import { TradingNav } from "@/components/trading/TradingNav";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
 import { DerivTradePanel } from "@/components/deriv-app/DerivTradePanel";
 import { SignalEngineTab } from "@/components/deriv-app/SignalEngineTab";
@@ -97,6 +100,12 @@ const DerivApp = () => {
       </div>
 
       <main className="container mx-auto max-w-3xl px-4 py-5">
+        <div className="mb-4 space-y-3">
+          <DerivConnectionBar />
+          <TradingNav />
+        </div>
+
+        <ErrorBoundary>
         {tab === "account" && (
           <div className="space-y-4">
             <Card className="glass-card">
@@ -141,6 +150,7 @@ const DerivApp = () => {
         {tab === "multipliers" && <DerivTradePanel styleId="multipliers" engine="multipliers" />}
         {tab === "signals" && <SignalEngineTab />}
         {tab === "copy" && <CopyTradingTab />}
+        </ErrorBoundary>
       </main>
 
       {/* App-style bottom tab bar */}

@@ -13,13 +13,22 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DerivConnectionBar } from "@/components/trading/DerivConnectionBar";
+import { TradingNav } from "@/components/trading/TradingNav";
+import { StrategyCards } from "@/components/trading/StrategyCards";
+import { AssetSelector } from "@/components/trading/AssetSelector";
+import { TradeExecutionStatus, type TradeFeedback } from "@/components/trading/TradeExecutionStatus";
+import { useDerivSymbols } from "@/hooks/useDerivSymbols";
+import { friendlyTradeError, validateTradeRequest } from "@/services/deriv/derivValidation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Activity, Bot, Gauge, Loader2, Settings2, Sparkles, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
 type Dir = "RISE" | "FALL" | "NEUTRAL";
+
+/** Deriv contract types behind the Rise/Fall ticket. */
+const RISE_FALL_CONTRACTS = ["CALL", "PUT"];
 
 interface LogRow { id: number; time: string; message: string; tone: "info" | "success" | "error" }
 
@@ -31,6 +40,11 @@ export default function RiseFall() {
 
   const style = getStyleById("rise-fall-scalping");
   const instruments = useMemo(() => style?.instruments ?? [], [style]);
+
+  // Live Deriv availability for every candidate asset (CALL/PUT = Rise/Fall)
+  const {
+    assets, loading: assetsLoading, refresh: refreshAssets, getAsset,
+  } = useDerivSymbols(instruments, RISE_FALL_CONTRACTS);
 
   const [symbol, setSymbol] = useState("1HZ100V");
   const [stake, setStake] = useState("1");
@@ -47,6 +61,7 @@ export default function RiseFall() {
   const [botOn, setBotOn] = useState(false);
   const [maxTrades, setMaxTrades] = useState(10);
   const [botTrades, setBotTrades] = useState(0);
+  const [feedback, setFeedback] = useState<TradeFeedback>({ phase: "idle" });
 
   const [rsiValue, setRsiValue] = useState<number | null>(null);
   const [engineSignal, setEngineSignal] = useState<SignalResult | null>(null);
@@ -58,12 +73,24 @@ export default function RiseFall() {
   const botBusy = useRef(false);
   const lastBotAt = useRef(0);
 
-  const symbolLabel = instruments.find((i) => i.symbol === symbol)?.displayName ?? symbol;
+  const asset = getAsset(symbol);
+  const symbolLabel = asset?.displayName ?? instruments.find((i) => i.symbol === symbol)?.displayName ?? symbol;
+  const assetBlocked = asset?.status === "unavailable";
 
   const addLog = useCallback((message: string, tone: LogRow["tone"] = "info") => {
     logId.current += 1;
     setLogs((p) => [{ id: logId.current, time: new Date().toLocaleTimeString(), message, tone }, ...p].slice(0, 30));
   }, []);
+
+  // Never leave the user on an asset Deriv has just closed or suspended.
+  useEffect(() => {
+    if (!assetBlocked) return;
+    const fallback = assets.find((a) => a.status === "available");
+    if (fallback && fallback.symbol !== symbol) {
+      setSymbol(fallback.symbol);
+      addLog(`${asset?.displayName ?? symbol} is unavailable — switched to ${fallback.displayName}`, "info");
+    }
+  }, [assetBlocked, assets, symbol, asset, addLog]);
 
   // Live ticks
   useEffect(() => {
@@ -119,10 +146,37 @@ export default function RiseFall() {
   }, [rsiValue, overbought, oversold, engineSignal]);
 
   const handleBuy = useCallback(async (contract: "CALL" | "PUT", label: string, viaBot = false) => {
-    if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
     const amount = Number(stake);
-    if (!amount || amount <= 0) { toast.error("Enter a valid stake"); return; }
     setBusy(true);
+    setFeedback({ phase: "validating", message: `Checking ${label} on ${symbolLabel}…` });
+
+    const check = await validateTradeRequest({
+      connected: isDerivConnected,
+      authorized,
+      symbol,
+      displayName: symbolLabel,
+      contractType: contract,
+      stake: amount,
+      duration: Number(duration),
+      durationUnit: "t",
+      balance: balance?.balance ?? null,
+    });
+
+    if (!check.ok) {
+      const recovery =
+        check.step === "connection" || check.step === "authorization"
+          ? "connection"
+          : check.step === "contract_type" || check.step === "trading_availability" || check.step === "symbol"
+            ? "asset"
+            : "retry";
+      setFeedback({ phase: "error", message: check.message, technical: check.technical, recovery });
+      addLog(check.message ?? "Trade blocked", "error");
+      toast.error(check.message);
+      setBusy(false);
+      return;
+    }
+
+    setFeedback({ phase: "submitting", message: `Placing ${label} on ${symbolLabel}…` });
     addLog(`${viaBot ? "🤖 Bot " : ""}Placing ${label} on ${symbolLabel} · $${amount.toFixed(2)} · ${duration}t`);
     try {
       const result = await placeTrade({
@@ -133,16 +187,35 @@ export default function RiseFall() {
         duration_unit: "t",
       });
       await subscribeContract(result.contract_id);
+      setFeedback({
+        phase: "open",
+        message: `${label} is running on ${symbolLabel}.`,
+        contract: {
+          contractId: result.contract_id,
+          symbol: symbolLabel,
+          contractType: contract,
+          stake: Number(result.buy_price ?? amount),
+          payout: Number(result.payout ?? 0),
+          currency: balance?.currency,
+        },
+      });
       addLog(`${label} filled — #${result.contract_id} @ $${result.buy_price}`, "success");
       toast.success(`${label} placed on ${symbolLabel}`);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Trade failed";
+      const raw = e instanceof Error ? e.message : "Trade failed";
+      const message = friendlyTradeError(raw, symbolLabel);
+      setFeedback({
+        phase: "error",
+        message,
+        technical: raw,
+        recovery: /unavailable|contract type/i.test(message) ? "asset" : "retry",
+      });
       addLog(message, "error");
       toast.error(message);
     } finally {
       setBusy(false);
     }
-  }, [isDerivConnected, stake, symbol, symbolLabel, duration, placeTrade, subscribeContract, addLog]);
+  }, [isDerivConnected, authorized, stake, symbol, symbolLabel, duration, balance, placeTrade, subscribeContract, addLog]);
 
   // Auto bot — picks signals from the RSI engine
   useEffect(() => {
@@ -177,6 +250,9 @@ export default function RiseFall() {
       <Header />
 
       <main className="container mx-auto max-w-3xl px-3 py-4 space-y-4">
+        <DerivConnectionBar />
+        <TradingNav />
+
         {/* Account bar */}
         <Card className="glass-card">
           <CardContent className="p-3 flex items-center justify-between gap-3">
@@ -209,18 +285,16 @@ export default function RiseFall() {
         {/* Symbol + price + chart */}
         <Card className="glass-card">
           <CardContent className="p-3 space-y-3">
+            <AssetSelector
+              assets={assets}
+              value={symbol}
+              onChange={setSymbol}
+              loading={assetsLoading}
+              onRefresh={refreshAssets}
+            />
+
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <Select value={symbol} onValueChange={setSymbol}>
-                  <SelectTrigger className="h-9 border-0 px-0 text-base font-bold focus:ring-0">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover z-50 max-h-72">
-                    {instruments.map((i) => (
-                      <SelectItem key={i.symbol} value={i.symbol}>{i.displayName}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <p className="text-2xl font-black tabular-nums">
                   {lastTick?.quote ?? "—"}
                   <span className={cn("ml-2 text-xs font-bold", change >= 0 ? "text-success" : "text-destructive")}>
@@ -241,6 +315,12 @@ export default function RiseFall() {
             />
           </CardContent>
         </Card>
+
+        <TradeExecutionStatus
+          feedback={feedback}
+          onRetry={() => setFeedback({ phase: "idle" })}
+          onChangeAsset={refreshAssets}
+        />
 
         {/* RSI settings */}
         <Card className="glass-card">
@@ -361,7 +441,7 @@ export default function RiseFall() {
             <div className="grid grid-cols-2 gap-3">
               <Button
                 size="lg"
-                disabled={busy || !isDerivConnected}
+                disabled={busy || !isDerivConnected || assetBlocked}
                 onClick={() => handleBuy("CALL", "Rise")}
                 className="h-14 text-base font-bold bg-success hover:bg-success/90 text-success-foreground"
               >
@@ -374,7 +454,7 @@ export default function RiseFall() {
               </Button>
               <Button
                 size="lg"
-                disabled={busy || !isDerivConnected}
+                disabled={busy || !isDerivConnected || assetBlocked}
                 onClick={() => handleBuy("PUT", "Fall")}
                 className="h-14 text-base font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               >
@@ -409,6 +489,8 @@ export default function RiseFall() {
             </ScrollArea>
           </CardContent>
         </Card>
+
+        <StrategyCards currentStyleId="rise-fall-scalping" />
       </main>
     </div>
   );
