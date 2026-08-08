@@ -64,6 +64,10 @@ export class DerivWebSocketService {
 
   private tickSubscriptionBySymbol = new Map<string, string>();
   private activeContractSubscriptions = new Set<number>();
+  /** Symbols we have asked Deriv to stream (set at request time, not on first tick). */
+  private desiredTickSymbols = new Set<string>();
+  private lastRequestSummary: string | null = null;
+  private lastResponseSummary: string | null = null;
 
   // Rate limiting protection
   private lastTickRequestTime = 0;
@@ -124,6 +128,16 @@ export class DerivWebSocketService {
   get socketReadyState() { return this.ws?.readyState ?? WebSocket.CLOSED; }
   get lastHeartbeatAt() { return this.lastMessageAt; }
   get lastError() { return this.lastErrorMessage; }
+  /** Diagnostics only — never includes tokens or credentials. */
+  get activeTickSymbols() { return Array.from(this.desiredTickSymbols); }
+  get activeContractIds() { return Array.from(this.activeContractSubscriptions); }
+  get lastRequest() { return this.lastRequestSummary; }
+  get lastResponse() { return this.lastResponseSummary; }
+  /** True when no message has been seen for longer than 2 keepalive intervals. */
+  get isStale() {
+    if (!this.lastMessageAt) return false;
+    return Date.now() - this.lastMessageAt > this.pingIntervalMs * 2;
+  }
 
   onTick(listener: Listener<DerivTick>) {
     this.tickListeners.add(listener);
@@ -274,6 +288,7 @@ export class DerivWebSocketService {
     this.reconnectAttempt = 0;
     this.clearPingTimer();
     this.tickSubscriptionBySymbol.clear();
+    this.desiredTickSymbols.clear();
     this.activeContractSubscriptions.clear();
     this.token = null;
     this.otpMode = false;
@@ -347,7 +362,8 @@ export class DerivWebSocketService {
         }
 
         // Re-subscribe to tick streams
-        for (const [symbol] of this.tickSubscriptionBySymbol.entries()) {
+        for (const symbol of Array.from(this.desiredTickSymbols)) {
+          this.tickSubscriptionBySymbol.delete(symbol);
           await this.subscribeTicks(symbol);
         }
 
@@ -389,6 +405,7 @@ export class DerivWebSocketService {
       return;
     }
     this.lastMessageAt = Date.now();
+    if (data?.msg_type) this.lastResponseSummary = String(data.msg_type);
 
     if (data?.error?.message) {
       this.emitError(normalizeDerivError(data.error.message));
@@ -526,6 +543,7 @@ export class DerivWebSocketService {
     this.ensureOpen();
     const req_id = this.reqId++;
     const message = { ...payload, req_id };
+    this.lastRequestSummary = Object.keys(payload)[0] ?? "unknown";
 
     return new Promise<T>((resolve, reject) => {
       const timeout = window.setTimeout(() => {
@@ -605,7 +623,7 @@ export class DerivWebSocketService {
 
   /** Subscribe ticks with rate limiting */
   async subscribeTicks(symbol: string): Promise<void> {
-    if (this.tickSubscriptionBySymbol.has(symbol)) {
+    if (this.tickSubscriptionBySymbol.has(symbol) || this.desiredTickSymbols.has(symbol)) {
       console.log(`[Deriv] Already subscribed to ${symbol}, skipping`);
       return;
     }
@@ -619,6 +637,10 @@ export class DerivWebSocketService {
     try {
       await this.waitForRateLimit('tick');
       await this.send({ ticks: symbol, subscribe: 1 }, 15000);
+      this.desiredTickSymbols.add(symbol);
+    } catch (e) {
+      this.desiredTickSymbols.delete(symbol);
+      throw e;
     } finally {
       this.pendingTickRequests.delete(symbol);
     }
@@ -632,6 +654,7 @@ export class DerivWebSocketService {
 
   /** Convenience: unsubscribe current symbol subscription */
   async unsubscribeTicks(symbol: string): Promise<void> {
+    this.desiredTickSymbols.delete(symbol);
     const subId = this.tickSubscriptionBySymbol.get(symbol);
     if (!subId) {
       console.log(`[Deriv] No subscription found for ${symbol}, skipping unsubscribe`);

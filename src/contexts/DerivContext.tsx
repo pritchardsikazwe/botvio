@@ -26,6 +26,13 @@ interface DerivContextType {
   connectedAt: string | null;
   lastHeartbeat: number | null;
   socketReadyState: number;
+  /** The ONLY flag trading modules should gate on */
+  isDerivReady: boolean;
+  /** REAL | DEMO of the authorized account */
+  accountType: "REAL" | "DEMO" | null;
+  /** Diagnostics only */
+  activeTickSymbols: string[];
+  activeContractIds: number[];
   initializing: boolean;
   refreshDerivConnection: () => Promise<boolean>;
   balance: DerivBalance | null;
@@ -357,6 +364,15 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
     currency: derivAPI.balance?.currency ?? derivAPI.accountInfo?.currency ?? null,
     isAuthorized: derivAPI.authorized,
     websocketConnected: derivAPI.socketReadyState === 1,
+    isDerivReady:
+      derivAPI.isDerivConnected &&
+      derivAPI.status === "connected" &&
+      derivAPI.authorized &&
+      derivAPI.socketReadyState === 1 &&
+      !!derivAPI.accountId,
+    accountType: derivAPI.accountInfo
+      ? derivAPI.accountInfo.is_virtual ? "DEMO" : "REAL"
+      : null,
     lastConnectedAt: derivAPI.connectedAt,
     lastError: derivAPI.error,
     placeTrade: enhancedPlaceTrade,

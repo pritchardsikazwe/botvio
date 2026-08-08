@@ -479,6 +479,10 @@ export const useDerivAPI = () => {
       service.socketOpen,
     socketReadyState: service.socketReadyState,
     lastConnectionError: state.error,
+    /** Diagnostics only — symbols/contracts currently streaming. */
+    activeTickSymbols: service.activeTickSymbols,
+    activeContractIds: service.activeContractIds,
+    socketStale: service.isStale,
     connect,
     disconnect,
     refreshDerivConnection,
