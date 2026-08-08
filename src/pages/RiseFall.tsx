@@ -13,8 +13,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DerivConnectionBar } from "@/components/trading/DerivConnectionBar";
+import { TradingNav } from "@/components/trading/TradingNav";
+import { StrategyCards } from "@/components/trading/StrategyCards";
+import { AssetSelector } from "@/components/trading/AssetSelector";
+import { TradeExecutionStatus, type TradeFeedback } from "@/components/trading/TradeExecutionStatus";
+import { useDerivSymbols } from "@/hooks/useDerivSymbols";
+import { friendlyTradeError, validateTradeRequest } from "@/services/deriv/derivValidation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Activity, Bot, Gauge, Loader2, Settings2, Sparkles, TrendingDown, TrendingUp, Wallet } from "lucide-react";
@@ -32,6 +38,11 @@ export default function RiseFall() {
   const style = getStyleById("rise-fall-scalping");
   const instruments = useMemo(() => style?.instruments ?? [], [style]);
 
+  // Live Deriv availability for every candidate asset (CALL/PUT = Rise/Fall)
+  const {
+    assets, loading: assetsLoading, refresh: refreshAssets, getAsset,
+  } = useDerivSymbols(instruments, RISE_FALL_CONTRACTS);
+
   const [symbol, setSymbol] = useState("1HZ100V");
   const [stake, setStake] = useState("1");
   const [duration, setDuration] = useState("5");
@@ -47,6 +58,7 @@ export default function RiseFall() {
   const [botOn, setBotOn] = useState(false);
   const [maxTrades, setMaxTrades] = useState(10);
   const [botTrades, setBotTrades] = useState(0);
+  const [feedback, setFeedback] = useState<TradeFeedback>({ phase: "idle" });
 
   const [rsiValue, setRsiValue] = useState<number | null>(null);
   const [engineSignal, setEngineSignal] = useState<SignalResult | null>(null);
@@ -58,12 +70,24 @@ export default function RiseFall() {
   const botBusy = useRef(false);
   const lastBotAt = useRef(0);
 
-  const symbolLabel = instruments.find((i) => i.symbol === symbol)?.displayName ?? symbol;
+  const asset = getAsset(symbol);
+  const symbolLabel = asset?.displayName ?? instruments.find((i) => i.symbol === symbol)?.displayName ?? symbol;
+  const assetBlocked = asset?.status === "unavailable";
 
   const addLog = useCallback((message: string, tone: LogRow["tone"] = "info") => {
     logId.current += 1;
     setLogs((p) => [{ id: logId.current, time: new Date().toLocaleTimeString(), message, tone }, ...p].slice(0, 30));
   }, []);
+
+  // Never leave the user on an asset Deriv has just closed or suspended.
+  useEffect(() => {
+    if (!assetBlocked) return;
+    const fallback = assets.find((a) => a.status === "available");
+    if (fallback && fallback.symbol !== symbol) {
+      setSymbol(fallback.symbol);
+      addLog(`${asset?.displayName ?? symbol} is unavailable — switched to ${fallback.displayName}`, "info");
+    }
+  }, [assetBlocked, assets, symbol, asset, addLog]);
 
   // Live ticks
   useEffect(() => {
