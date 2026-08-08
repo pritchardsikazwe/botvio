@@ -27,6 +27,9 @@ import { Activity, Bot, Gauge, Loader2, Settings2, Sparkles, TrendingDown, Trend
 
 type Dir = "RISE" | "FALL" | "NEUTRAL";
 
+/** Deriv contract types behind the Rise/Fall ticket. */
+const RISE_FALL_CONTRACTS = ["CALL", "PUT"];
+
 interface LogRow { id: number; time: string; message: string; tone: "info" | "success" | "error" }
 
 export default function RiseFall() {
@@ -143,10 +146,37 @@ export default function RiseFall() {
   }, [rsiValue, overbought, oversold, engineSignal]);
 
   const handleBuy = useCallback(async (contract: "CALL" | "PUT", label: string, viaBot = false) => {
-    if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
     const amount = Number(stake);
-    if (!amount || amount <= 0) { toast.error("Enter a valid stake"); return; }
     setBusy(true);
+    setFeedback({ phase: "validating", message: `Checking ${label} on ${symbolLabel}…` });
+
+    const check = await validateTradeRequest({
+      connected: isDerivConnected,
+      authorized,
+      symbol,
+      displayName: symbolLabel,
+      contractType: contract,
+      stake: amount,
+      duration: Number(duration),
+      durationUnit: "t",
+      balance: balance?.balance ?? null,
+    });
+
+    if (!check.ok) {
+      const recovery =
+        check.step === "connection" || check.step === "authorization"
+          ? "connection"
+          : check.step === "contract_type" || check.step === "trading_availability" || check.step === "symbol"
+            ? "asset"
+            : "retry";
+      setFeedback({ phase: "error", message: check.message, technical: check.technical, recovery });
+      addLog(check.message ?? "Trade blocked", "error");
+      toast.error(check.message);
+      setBusy(false);
+      return;
+    }
+
+    setFeedback({ phase: "submitting", message: `Placing ${label} on ${symbolLabel}…` });
     addLog(`${viaBot ? "🤖 Bot " : ""}Placing ${label} on ${symbolLabel} · $${amount.toFixed(2)} · ${duration}t`);
     try {
       const result = await placeTrade({
@@ -157,16 +187,35 @@ export default function RiseFall() {
         duration_unit: "t",
       });
       await subscribeContract(result.contract_id);
+      setFeedback({
+        phase: "open",
+        message: `${label} is running on ${symbolLabel}.`,
+        contract: {
+          contractId: result.contract_id,
+          symbol: symbolLabel,
+          contractType: contract,
+          stake: Number(result.buy_price ?? amount),
+          payout: Number(result.payout ?? 0),
+          currency: balance?.currency,
+        },
+      });
       addLog(`${label} filled — #${result.contract_id} @ $${result.buy_price}`, "success");
       toast.success(`${label} placed on ${symbolLabel}`);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Trade failed";
+      const raw = e instanceof Error ? e.message : "Trade failed";
+      const message = friendlyTradeError(raw, symbolLabel);
+      setFeedback({
+        phase: "error",
+        message,
+        technical: raw,
+        recovery: /unavailable|contract type/i.test(message) ? "asset" : "retry",
+      });
       addLog(message, "error");
       toast.error(message);
     } finally {
       setBusy(false);
     }
-  }, [isDerivConnected, stake, symbol, symbolLabel, duration, placeTrade, subscribeContract, addLog]);
+  }, [isDerivConnected, authorized, stake, symbol, symbolLabel, duration, balance, placeTrade, subscribeContract, addLog]);
 
   // Auto bot — picks signals from the RSI engine
   useEffect(() => {
@@ -201,6 +250,9 @@ export default function RiseFall() {
       <Header />
 
       <main className="container mx-auto max-w-3xl px-3 py-4 space-y-4">
+        <DerivConnectionBar />
+        <TradingNav />
+
         {/* Account bar */}
         <Card className="glass-card">
           <CardContent className="p-3 flex items-center justify-between gap-3">
@@ -233,18 +285,16 @@ export default function RiseFall() {
         {/* Symbol + price + chart */}
         <Card className="glass-card">
           <CardContent className="p-3 space-y-3">
+            <AssetSelector
+              assets={assets}
+              value={symbol}
+              onChange={setSymbol}
+              loading={assetsLoading}
+              onRefresh={refreshAssets}
+            />
+
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <Select value={symbol} onValueChange={setSymbol}>
-                  <SelectTrigger className="h-9 border-0 px-0 text-base font-bold focus:ring-0">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover z-50 max-h-72">
-                    {instruments.map((i) => (
-                      <SelectItem key={i.symbol} value={i.symbol}>{i.displayName}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <p className="text-2xl font-black tabular-nums">
                   {lastTick?.quote ?? "—"}
                   <span className={cn("ml-2 text-xs font-bold", change >= 0 ? "text-success" : "text-destructive")}>
@@ -265,6 +315,12 @@ export default function RiseFall() {
             />
           </CardContent>
         </Card>
+
+        <TradeExecutionStatus
+          feedback={feedback}
+          onRetry={() => setFeedback({ phase: "idle" })}
+          onChangeAsset={refreshAssets}
+        />
 
         {/* RSI settings */}
         <Card className="glass-card">
@@ -385,7 +441,7 @@ export default function RiseFall() {
             <div className="grid grid-cols-2 gap-3">
               <Button
                 size="lg"
-                disabled={busy || !isDerivConnected}
+                disabled={busy || !isDerivConnected || assetBlocked}
                 onClick={() => handleBuy("CALL", "Rise")}
                 className="h-14 text-base font-bold bg-success hover:bg-success/90 text-success-foreground"
               >
@@ -398,7 +454,7 @@ export default function RiseFall() {
               </Button>
               <Button
                 size="lg"
-                disabled={busy || !isDerivConnected}
+                disabled={busy || !isDerivConnected || assetBlocked}
                 onClick={() => handleBuy("PUT", "Fall")}
                 className="h-14 text-base font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               >
@@ -433,6 +489,8 @@ export default function RiseFall() {
             </ScrollArea>
           </CardContent>
         </Card>
+
+        <StrategyCards currentStyleId="rise-fall-scalping" />
       </main>
     </div>
   );
