@@ -293,7 +293,10 @@ export const AppRoutes = () => (
     <Route path="unsubscribe" element={<Unsubscribe />} />
     <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
+    <Route path="blog/category/:slug" element={<BlogCategory />} />
+    <Route path="research/:slug" element={<ResearchHub />} />
     <Route path="blog/:slug" element={<BlogPost />} />
+
     <Route path="authors/:slug" element={<Author />} />
     <Route path="docs" element={<Docs />} />
     <Route path="faq" element={<FAQ />} />
