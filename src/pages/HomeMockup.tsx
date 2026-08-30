@@ -1,3 +1,4 @@
+import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
