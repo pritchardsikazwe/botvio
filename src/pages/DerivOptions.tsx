@@ -1,6 +1,8 @@
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { DerivConnection } from "@/components/trading/DerivConnection";
+import { DerivConnectionBar } from "@/components/trading/DerivConnectionBar";
+import { TradingNav } from "@/components/trading/TradingNav";
 import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
 
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
@@ -87,6 +89,8 @@ const DerivOptions = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-8">
+        <DerivConnectionBar />
+        <TradingNav />
         {/* Big CTA Hero */}
         <section className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background to-primary/5 p-8 md:p-12 text-center space-y-5">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.15),transparent_60%)]" />
