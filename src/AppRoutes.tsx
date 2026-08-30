@@ -52,6 +52,9 @@ import ChartPage from "./pages/ChartPage";
 import TradeModes from "./pages/TradeModes";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import BlogCategory from "./pages/BlogCategory";
+import ResearchHub from "./pages/ResearchHub";
+
 import Author from "./pages/Author";
 import SlugResolver from "./pages/SlugResolver";
 import Docs from "./pages/Docs";
