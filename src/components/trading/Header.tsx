@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { PRIMARY_NAV, MORE_NAV } from "@/components/nav/mainNav";
+
 
 export const Header = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
