@@ -158,7 +158,7 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
  */
 export const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<HomeMockup />} />
+    <Route path="/" element={<Index />} />
     <Route path="home-preview" element={<HomeMockup />} />
     <Route path="home-classic" element={<Index />} />
     <Route path=".lovable/oauth/consent" element={<OAuthConsent />} />
