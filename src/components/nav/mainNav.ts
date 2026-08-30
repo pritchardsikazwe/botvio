@@ -181,10 +181,12 @@ export const MORE_NAV: { label: string; items: NavItem[] }[] = [
   },
 ];
 
-/** Mobile bottom navigation. */
+/** Mobile bottom navigation — Markets, Signals, Trade, AI, Learn. */
 export const BOTTOM_NAV: NavItem[] = [
-  { label: "Home", to: "/", icon: BarChart3 },
   { label: "Markets", to: "/markets", icon: ChartCandlestick },
   { label: "Signals", to: "/signals", icon: Signal },
-  { label: "AI", to: "/authority-signals", icon: Sparkles },
+  { label: "Trade", to: "/trading", icon: Zap },
+  { label: "AI", to: "/chart/XAUUSD", icon: Sparkles },
+  { label: "Learn", to: "/learn", icon: GraduationCap },
 ];
+
