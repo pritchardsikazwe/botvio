@@ -62,7 +62,7 @@ export const MobileBottomNav = () => {
 
       <nav
         aria-label="Primary mobile navigation"
-        className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-border/60 bg-card/95 backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-6 border-t border-border/60 bg-card/95 backdrop-blur-xl lg:hidden"
       >
         {BOTTOM_NAV.map(({ label, to, icon: Icon }) => (
           <Link
