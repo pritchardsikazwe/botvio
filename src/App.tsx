@@ -33,7 +33,9 @@ const App = () => (
               <LocalePrefixRouter>
                 <AppRoutes />
                 <SiteFooterGate />
+                <MobileBottomNav />
               </LocalePrefixRouter>
+
               <CookieConsent />
             </BrowserRouter>
           </DerivProvider>
