@@ -22,6 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/trading/Header";
 import { ProviderApplicationForm } from "@/components/trading/ProviderApplicationForm";
 import { ProviderPerformancePanel } from "@/components/trading/ProviderPerformancePanel";
+import { LiveStrategyTradeView } from "@/components/copy/LiveStrategyTradeView";
+
 import { useNavigate, Link } from "react-router-dom";
 import { 
   Users, TrendingUp, DollarSign, Target, ArrowUp, ArrowDown, 
