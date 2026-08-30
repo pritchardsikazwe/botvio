@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Search, Globe, Sparkles, ArrowRight, ArrowUpRight, TrendingUp, TrendingDown,
   BarChart3, Bell, Zap, Layers, Upload, Check, Star, Users, ShieldCheck,
-  Headphones, Bitcoin, LineChart, Trophy, Menu,
+  Headphones, Flame, Bitcoin, LineChart, Trophy, Menu,
 } from "lucide-react";
 
 /* ────────────────────────────────────────────────────────────
@@ -407,7 +407,7 @@ const HomeMockup = () => {
         {/* ── Top signals ── */}
         <section className="container mx-auto px-4 py-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-foreground">🔥 Today's Top Signals</h2>
+            <h2 className="flex items-center gap-2 text-lg font-bold text-foreground"><Flame className="h-4 w-4 text-warning" /> Today's Top Signals</h2>
             <Link to="/signals" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
               View all signals <ArrowRight className="h-3 w-3" />
             </Link>
