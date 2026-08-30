@@ -77,18 +77,19 @@ export default function BridgeRequest() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("bridge_connection_requests").insert({
-      user_id: user.id,
-      broker: parsed.data.broker,
-      account_login: parsed.data.account_login,
-      server_name: parsed.data.server_name,
-      investor_password: parsed.data.investor_password,
-      account_type: parsed.data.account_type,
-      contact_whatsapp: parsed.data.contact_whatsapp || null,
-      contact_email: parsed.data.contact_email || null,
-      notes: parsed.data.notes || null,
-      status: "pending",
-    });
+    // Credentials go through a security-definer RPC so the investor password
+    // is stored in a protected table that is never directly readable.
+    const { error } = await supabase.rpc("submit_bridge_connection_request" as never, {
+      _broker: parsed.data.broker,
+      _account_login: parsed.data.account_login,
+      _server_name: parsed.data.server_name,
+      _investor_password: parsed.data.investor_password,
+      _account_type: parsed.data.account_type,
+      _contact_whatsapp: parsed.data.contact_whatsapp || null,
+      _contact_email: parsed.data.contact_email || null,
+      _notes: parsed.data.notes || null,
+    } as never);
+
     setLoading(false);
     if (error) {
       toast.error(error.message);
