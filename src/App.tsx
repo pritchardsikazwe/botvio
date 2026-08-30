@@ -9,7 +9,7 @@ import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { LocalePrefixRouter } from "@/i18n/LocalePrefixRouter";
 import { AppRoutes } from "./AppRoutes";
 import { CookieConsent } from "@/components/CookieConsent";
-import { SiteFooter } from "@/components/SiteFooter";
+import { SiteFooterGate } from "@/components/SiteFooterGate";
 import { UpdateNotifier } from "@/components/UpdateNotifier";
 
 const queryClient = new QueryClient();
@@ -32,7 +32,7 @@ const App = () => (
               */}
               <LocalePrefixRouter>
                 <AppRoutes />
-                <SiteFooter />
+                <SiteFooterGate />
               </LocalePrefixRouter>
               <CookieConsent />
             </BrowserRouter>

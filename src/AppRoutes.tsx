@@ -11,6 +11,7 @@ const Paid = ({ children }: { children: ReactNode }) => (
 );
 
 import Index from "./pages/Index";
+import HomeMockup from "./pages/HomeMockup";
 import Landing from "./pages/Landing";
 import Install from "./pages/Install";
 import Learn from "./pages/Learn";
@@ -148,6 +149,7 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
 export const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Index />} />
+    <Route path="home-preview" element={<HomeMockup />} />
     <Route path="landing" element={<Landing />} />
     <Route path="install" element={<Install />} />
     <Route path="dashboard" element={<Dashboard />} />
