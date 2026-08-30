@@ -405,74 +405,34 @@ const HomeMockup = () => {
           ))}
         </section>
 
-        {/* ── Top signals ── */}
+        {/* ── Live signals (real data) ── */}
         <section className="container mx-auto px-4 py-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg font-bold text-foreground"><Flame className="h-4 w-4 text-warning" /> Today's Top Signals</h2>
-            <Link to="/signals" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-              View all signals <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {SIGNALS.map((s) => {
-              const buy = s.dir === "BUY";
-              return (
-                <article key={s.symbol} className="rounded-xl border border-border/60 bg-card/60 p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-foreground">{s.symbol}</span>
-                      <span className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${buy ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
-                        {buy ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />} {s.dir}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-semibold text-muted-foreground">{s.tf}</span>
-                  </div>
+          <HomeSignalsWidget />
+        </section>
 
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
-                    <div>
-                      <p className="text-muted-foreground">Entry</p>
-                      <p className="font-mono text-foreground">{s.entry}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">TP</p>
-                      <p className="font-mono text-success">{s.tp}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">SL</p>
-                      <p className="font-mono text-destructive">{s.sl}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2.5 text-[11px]">
-                    <span className="text-muted-foreground">Strength</span>
-                    <span className="flex items-center gap-1.5">
-                      <span className={s.dots >= 5 ? "font-semibold text-success" : "font-semibold text-warning"}>{s.strength}</span>
-                      <span className="flex gap-0.5">
-                        {[0, 1, 2, 3, 4].map((i) => (
-                          <span key={i} className={`h-1.5 w-1.5 rounded-full ${i < s.dots ? (s.dots >= 5 ? "bg-success" : "bg-warning") : "bg-muted"}`} />
-                        ))}
-                      </span>
-                    </span>
-                  </div>
-
-                  <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>{s.expiry ? `Expires: ${s.expiry}` : "Session setup"}</span>
-                    <span>{s.brokers}</span>
-                  </div>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className={`mt-3 w-full text-xs font-semibold ${buy ? "border-success/40 bg-success/10 text-success hover:bg-success/20" : "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20"}`}
-                  >
-                    <Link to="/signals">View Signal</Link>
+        {/* ── Quick shortcuts ── */}
+        <section className="container mx-auto px-4 py-6">
+          <div className="rounded-2xl border border-border/60 bg-card/40 p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
+                <Flame className="h-4 w-4 text-warning" /> Quick Access
+              </h2>
+              <Link to="/global-markets" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                All markets <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+              {SHORTCUTS.map((s) => (
+                <Link key={s.label} to={s.to} className="block">
+                  <Button variant="outline" className="h-12 w-full justify-start gap-2 text-xs font-bold">
+                    <s.icon className="h-4 w-4 text-primary" /> {s.label}
                   </Button>
-                </article>
-              );
-            })}
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
+
 
         {/* ── AI chart analysis ── */}
         <section className="container mx-auto px-4 py-6">
