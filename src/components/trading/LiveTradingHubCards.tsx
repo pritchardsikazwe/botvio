@@ -172,13 +172,13 @@ function HubCard({ hub }: { hub: Hub }) {
         </div>
 
         {/* Signal + Confidence row */}
-        <div className="flex items-center justify-between gap-2 rounded-md bg-background/40 border border-border/50 px-2 py-1.5">
-          <Badge variant="outline" className={`text-[10px] font-bold px-1.5 py-0.5 ${sigClass}`}>
+        <div className="flex items-center justify-between gap-1.5 rounded-md bg-background/40 border border-border/50 px-2 py-1.5 overflow-hidden">
+          <Badge variant="outline" className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 ${sigClass}`}>
             <SigIcon className="h-3 w-3 mr-1" />
             {sig}
           </Badge>
-          <div className="flex flex-col items-center leading-tight">
-            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Confidence</span>
+          <div className="flex min-w-0 flex-col items-end leading-tight">
+            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Conf.</span>
             <span
               className={`text-sm font-extrabold tabular-nums ${
                 conf >= 70 ? "text-success" : conf >= 50 ? "text-warning" : "text-muted-foreground"
@@ -187,10 +187,11 @@ function HubCard({ hub }: { hub: Hub }) {
               {conf}%
             </span>
           </div>
-          <div className="w-10 text-right">
-            <span className="text-[9px] text-muted-foreground">{live.strategy?.split(" ")[0] || "—"}</span>
+          <div className="hidden sm:block w-10 shrink-0 text-right">
+            <span className="block truncate text-[9px] text-muted-foreground">{live.strategy?.split(" ")[0] || "—"}</span>
           </div>
         </div>
+
 
         <Button
           variant="ghost"
