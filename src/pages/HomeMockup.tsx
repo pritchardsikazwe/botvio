@@ -479,7 +479,7 @@ const HomeMockup = () => {
             <Badge className="mb-4 bg-primary/15 text-[9px] font-bold uppercase tracking-widest text-primary hover:bg-primary/15">
               New · AI Chart Analysis
             </Badge>
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)_minmax(0,0.8fr)]">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,2fr)]">
               <div>
                 <h2 className="text-2xl font-extrabold leading-tight text-foreground">
                   Understand the market like never before.
@@ -491,48 +491,15 @@ const HomeMockup = () => {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-5 flex items-center gap-3">
-                  <Button asChild className="font-bold">
-                    <Link to="/chart"><Upload className="mr-1.5 h-4 w-4" /> Upload Chart Now</Link>
-                  </Button>
-                  <span className="text-[10px] text-muted-foreground">Max size 5MB · JPG, PNG</span>
-                </div>
+                <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground">
+                  Upload a screenshot of any chart and Botvio returns a structured read of the market. Educational
+                  analysis only — not financial advice.
+                </p>
               </div>
 
-              <div className="relative overflow-hidden rounded-xl border border-border/60 bg-background/60 p-3">
-                <CandleChart />
-                <span className="absolute right-4 top-5 rounded-md bg-destructive/20 px-2 py-1 text-[9px] font-bold text-destructive">
-                  Resistance 2,395.00
-                </span>
-                <span className="absolute right-4 top-1/2 rounded-md bg-success/20 px-2 py-1 text-[9px] font-bold text-success">
-                  Entry Zone 2,384.00 – 2,386.00
-                </span>
-                <span className="absolute bottom-6 right-4 rounded-md bg-primary/20 px-2 py-1 text-[9px] font-bold text-primary">
-                  Support 2,372.00
-                </span>
-              </div>
-
-              <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-                <p className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  AI Analysis Result <ArrowUpRight className="h-3 w-3 text-primary" />
-                </p>
-                <p className="mt-2 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">XAU/USD • H1</span>
-                  <span className="font-bold text-success">BULLISH</span>
-                </p>
-                <dl className="mt-3 space-y-2 text-[11px]">
-                  {[["Trend Direction", "Uptrend"], ["Market Structure", "Higher Highs"], ["Key Level", "2,380.00"], ["Bias", "Strong"], ["Analysis Score", "78/100"]].map(([k, v]) => (
-                    <div key={k} className="flex items-center justify-between border-b border-border/30 pb-1.5">
-                      <dt className="text-muted-foreground">{k}</dt>
-                      <dd className="font-semibold text-foreground">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div className="h-full w-[78%] rounded-full bg-success" />
-                </div>
-              </div>
+              <HomeChartAnalyzer />
             </div>
+
           </div>
         </section>
 
