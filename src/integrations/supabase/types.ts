@@ -989,7 +989,6 @@ export type Database = {
           contact_whatsapp: string | null
           created_at: string
           id: string
-          investor_password: string
           notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1008,7 +1007,6 @@ export type Database = {
           contact_whatsapp?: string | null
           created_at?: string
           id?: string
-          investor_password: string
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1027,7 +1025,6 @@ export type Database = {
           contact_whatsapp?: string | null
           created_at?: string
           id?: string
-          investor_password?: string
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1071,6 +1068,32 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      bridge_request_secrets: {
+        Row: {
+          created_at: string
+          investor_password: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          investor_password: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          investor_password?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bridge_request_secrets_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "bridge_connection_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bridge_ticks: {
         Row: {
@@ -6746,6 +6769,19 @@ export type Database = {
       refresh_follower_count: {
         Args: { target_creator_id: string }
         Returns: undefined
+      }
+      submit_bridge_connection_request: {
+        Args: {
+          _account_login: string
+          _account_type: string
+          _broker: string
+          _contact_email?: string
+          _contact_whatsapp?: string
+          _investor_password: string
+          _notes?: string
+          _server_name: string
+        }
+        Returns: string
       }
     }
     Enums: {
