@@ -225,12 +225,23 @@ const GlobalMarkets = () => {
       />
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <div className="animate-fade-in">
-          <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
-            <Globe className="h-6 w-6 text-primary" /> Global Market Intelligence
-          </h1>
-          <p className="text-sm text-muted-foreground">Week of Apr 7 – Apr 11, 2026 • CPI Wednesday • FOMC Minutes • Q2 Earnings Preview</p>
-        </div>
+        <PageBanner
+          title="Global Market"
+          accent="Intelligence"
+          description="Live intelligence across US, Europe, Middle East, Asia, Crypto and Africa — sessions, sentiment, economic events and AI trading insights in one place."
+          crumbs={[{ label: "Home", to: "/" }, { label: "Markets" }]}
+          features={[
+            { icon: Globe, label: "6 regions", sub: "US, EU, ME, Asia, Crypto, Africa" },
+            { icon: Activity, label: "Live sessions", sub: "Open/closed status in UTC" },
+            { icon: Zap, label: "AI signals", sub: "Botvio AI bias per market" },
+            { icon: Clock, label: "Event risk", sub: "High-impact calendar focus" },
+          ]}
+          stats={REGIONS.slice(0, 4).map((r) => ({
+            value: `${r.emoji} ${r.isOpen ? r.trend : "Closed"}`,
+            label: `${r.name} • ${r.session}`,
+          }))}
+        />
+
 
         {/* Live Ticker Strip */}
         <div className="overflow-x-auto animate-fade-in">
