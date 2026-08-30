@@ -53,6 +53,7 @@ import TradeModes from "./pages/TradeModes";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogCategory from "./pages/BlogCategory";
+import Tools from "./pages/Tools";
 import ResearchHub from "./pages/ResearchHub";
 
 import Author from "./pages/Author";
@@ -298,6 +299,7 @@ export const AppRoutes = () => (
     <Route path="blog" element={<Blog />} />
     <Route path="blog/category/:slug" element={<BlogCategory />} />
     <Route path="research/:slug" element={<ResearchHub />} />
+    <Route path="tools" element={<Tools />} />
     <Route path="blog/:slug" element={<BlogPost />} />
 
     <Route path="authors/:slug" element={<Author />} />
