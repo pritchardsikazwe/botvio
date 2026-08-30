@@ -85,12 +85,22 @@ const TIMEFRAME_OPTIONS = [
 const Signals = () => {
   const { user, isSignalManager } = useAuth();
   const { data: signalBrokers } = useSignalBrokers();
-  const [category, setCategory] = useState("all");
-  const [broker, setBroker] = useState("all");
+  const initialParams = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
+  const initialCategory = (() => {
+    const c = initialParams?.get("market") ?? initialParams?.get("category");
+    return c && CATEGORIES.some((x) => x.value === c) ? c : "all";
+  })();
+  const initialDirection = (() => {
+    const d = initialParams?.get("direction")?.toUpperCase();
+    return d === "BUY" || d === "SELL" ? d : "all";
+  })();
+  const [category, setCategory] = useState(initialCategory);
+  const [broker, setBroker] = useState(initialParams?.get("broker") ?? "all");
   const [status, setStatus] = useState("ACTIVE");
-  const [direction, setDirection] = useState("all");
+  const [direction, setDirection] = useState(initialDirection);
   const [timeframe, setTimeframe] = useState("all");
   const [search, setSearch] = useState("");
+
   const initialTab = (() => {
     if (typeof window === "undefined") return "signals";
     const t = new URLSearchParams(window.location.search).get("tab");
