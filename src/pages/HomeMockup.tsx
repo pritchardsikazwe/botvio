@@ -163,7 +163,6 @@ const HomeMockup = () => {
       <SEOHead
         title="Botvio — AI Trading Intelligence, Live Markets & Signals"
         description="Live markets, AI chart analysis, trading signals and intelligent trading tools — built for modern traders. Explore Botvio's trading hubs, education and verified brokers."
-        canonicalPath="/home-preview"
       />
 
       {/* ── Header ── */}
