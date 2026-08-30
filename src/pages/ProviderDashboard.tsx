@@ -22,6 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/trading/Header";
 import { ProviderApplicationForm } from "@/components/trading/ProviderApplicationForm";
 import { ProviderPerformancePanel } from "@/components/trading/ProviderPerformancePanel";
+import { LiveStrategyTradeView } from "@/components/copy/LiveStrategyTradeView";
+
 import { useNavigate, Link } from "react-router-dom";
 import { 
   Users, TrendingUp, DollarSign, Target, ArrowUp, ArrowDown, 
@@ -310,10 +312,12 @@ const ProviderDashboard = () => {
         <Tabs defaultValue="trade" className="space-y-6">
           <TabsList>
             <TabsTrigger value="trade">Trade Panel</TabsTrigger>
+            <TabsTrigger value="live">Live Trades</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="history">Trade History</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="trade">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -588,9 +592,14 @@ const ProviderDashboard = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="live">
+            <LiveStrategyTradeView providerId={myProvider?.id} />
+          </TabsContent>
+
           <TabsContent value="performance">
             <ProviderPerformancePanel providerId={myProvider?.id} />
           </TabsContent>
+
 
           <TabsContent value="history">
             <Card className="glass-card">
