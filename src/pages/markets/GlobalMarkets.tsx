@@ -238,7 +238,7 @@ const GlobalMarkets = () => {
             { icon: Clock, label: "Event risk", sub: "High-impact calendar focus" },
           ]}
           stats={REGIONS.slice(0, 4).map((r) => ({
-            value: `${r.emoji} ${r.isOpen ? r.trend : "Closed"}`,
+            value: r.isOpen ? r.trend : "Closed",
             label: `${r.name} • ${r.session}`,
           }))}
         />
