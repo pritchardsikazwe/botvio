@@ -57,7 +57,7 @@ export function useResearchArticles() {
     queryFn: async () => {
       const { data } = await supabase
         .from("posts")
-        .select("slug, title, excerpt, category, read_time, published_at, created_at, cover_image, is_featured")
+        .select("slug, title, excerpt, category, read_time, published_at, created_at, cover_image")
         .eq("is_published", true)
         .order("published_at", { ascending: false });
       return data || [];
@@ -73,7 +73,7 @@ export function useResearchArticles() {
         category: p.category || "Guide",
         readTime: p.read_time || "6 min",
         date: p.published_at || p.created_at,
-        featured: Boolean(p.is_featured),
+        featured: false,
         image: p.cover_image || undefined,
         coverImage: p.cover_image,
         source: "db",

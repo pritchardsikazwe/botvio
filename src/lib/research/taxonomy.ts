@@ -221,7 +221,7 @@ export const RESEARCH_MARKETS: ResearchMarket[] = [
 
   // ── Forex ──
   { displaySymbol: "EUR/USD", label: "EUR/USD", broker: "Weltrade", kind: "Forex", hub: "/markets", hubLabel: "Global Markets", keywords: ["eurusd", "eur/usd", "euro dollar"] },
-  { displaySymbol: "GBP/USD", label: "GBP/USD", broker: "Weltrade", kind: "Forex", hub: "/gbpusd", hubLabel: "GBP/USD Trading Hub", keywords: ["gbpusd", "gbp/usd", "cable"] },
+  { displaySymbol: "GBP/USD", label: "GBP/USD", broker: "Weltrade", kind: "Forex", hub: "/gbp-usd", hubLabel: "GBP/USD Trading Hub", keywords: ["gbpusd", "gbp/usd", "cable"] },
   { displaySymbol: "USD/JPY", label: "USD/JPY", broker: "Weltrade", kind: "Forex", hub: "/markets", hubLabel: "Global Markets", keywords: ["usdjpy", "usd/jpy"] },
   { displaySymbol: "AUD/USD", label: "AUD/USD", broker: "Weltrade", kind: "Forex", hub: "/markets", hubLabel: "Global Markets", keywords: ["audusd", "aud/usd"] },
   { displaySymbol: "USD/CAD", label: "USD/CAD", broker: "Weltrade", kind: "Forex", hub: "/markets", hubLabel: "Global Markets", keywords: ["usdcad", "usd/cad"] },
