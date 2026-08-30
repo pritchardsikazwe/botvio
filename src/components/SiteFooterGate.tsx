@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
  * homepage composition) opt out of the sitewide footer to avoid
  * rendering two footers on one document.
  */
-const SELF_FOOTER_ROUTES = [/^\/(?:[a-z]{2}\/)?$/i, /^\/(?:[a-z]{2}\/)?home-preview\/?$/i];
+const SELF_FOOTER_ROUTES = [/^\/(?:[a-z]{2}\/)?home-preview\/?$/i];
 
 export const SiteFooterGate = () => {
   const { pathname } = useLocation();
