@@ -120,7 +120,7 @@ const Tools = () => {
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <SEOHead
-        title="Trading Tools & Calculators — Position Size, Pip Value, Risk | Botvio"
+        title="Trading Tools & Calculators — Position Size, Pip Value, Risk"
         description="Free trading calculators from Botvio: position size, pip value, margin, profit/loss, risk-reward, compounding and drawdown recovery, plus live market session times."
       />
       <Header />
