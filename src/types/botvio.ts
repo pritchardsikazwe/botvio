@@ -62,6 +62,7 @@ export interface Provider {
   display_name: string;
   bio: string | null;
   avatar_url: string | null;
+  primary_market: string | null;
   verified: boolean;
   status: "pending" | "approved" | "rejected" | "suspended";
   total_subscribers: number;
