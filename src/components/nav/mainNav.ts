@@ -153,7 +153,10 @@ export const MORE_NAV: { label: string; items: NavItem[] }[] = [
     label: "Platform",
     items: [
       { label: "Brokers", to: "/brokers", icon: Shield },
+      { label: "Strategies", to: "/strategies", icon: Layers },
+      { label: "Marketplace", to: "/marketplace", icon: Layers },
       { label: "Pricing & Plans", to: "/billing", icon: Coins },
+
       { label: "Live Feed", to: "/live", icon: Zap },
       { label: "Affiliate Program", to: "/affiliate", icon: Users },
       { label: "Install App", to: "/install", icon: Bot },
