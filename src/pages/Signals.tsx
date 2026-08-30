@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
+import { PageBanner } from "@/components/layout/PageBanner";
 import { ManualSignalCard } from "@/components/signals/ManualSignalCard";
 import { ChartUpload } from "@/components/signals/ChartUpload";
 import { AdminSignalForm } from "@/components/signals/AdminSignalForm";
