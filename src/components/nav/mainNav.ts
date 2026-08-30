@@ -38,7 +38,10 @@ export interface NavGroup {
   items?: NavItem[];
 }
 
-/** Primary desktop navigation, in the order required by the redesign brief. */
+/**
+ * Primary desktop navigation — the seven Botvio pillars plus Blog.
+ * Markets · Signals · Trade · Copy Trading · AI · Tools · Learn
+ */
 export const PRIMARY_NAV: NavGroup[] = [
   {
     label: "Markets",
@@ -46,13 +49,16 @@ export const PRIMARY_NAV: NavGroup[] = [
     to: "/markets",
     items: [
       { label: "All Markets", to: "/markets", icon: BarChart3, description: "Live prices, trend & signal per market" },
-      { label: "US Markets", to: "/markets/us", icon: LineChart },
-      { label: "Europe", to: "/markets/europe", icon: LineChart },
-      { label: "Asia", to: "/markets/asia", icon: LineChart },
-      { label: "Middle East", to: "/markets/middle-east", icon: LineChart },
-      { label: "Africa", to: "/markets/africa", icon: LineChart },
-      { label: "Crypto", to: "/markets/crypto", icon: Coins },
-      { label: "Synthetic Indices", to: "/synthetic", icon: Layers },
+      { label: "Gold (XAU/USD)", to: "/gold", icon: Coins, description: "Commodities hub" },
+      { label: "Silver (XAG/USD)", to: "/silver", icon: Coins },
+      { label: "EUR/USD", to: "/eur-usd", icon: LineChart, description: "Forex & CFDs" },
+      { label: "GBP/USD", to: "/gbp-usd", icon: LineChart },
+      { label: "USD/JPY", to: "/usd-jpy", icon: LineChart },
+      { label: "US30 · NAS100 · GER40", to: "/us30", icon: BarChart3, description: "Index CFD hubs" },
+      { label: "Bitcoin (BTC/USD)", to: "/bitcoin", icon: Coins, description: "Crypto" },
+      { label: "Crypto Markets", to: "/markets/crypto", icon: Coins },
+      { label: "Deriv Synthetic Indices", to: "/synthetic", icon: Layers, description: "Volatility, Boom, Crash, Jump" },
+      { label: "Weltrade Markets", to: "/weltrade", icon: Layers },
     ],
   },
   {
@@ -60,11 +66,29 @@ export const PRIMARY_NAV: NavGroup[] = [
     icon: Signal,
     to: "/signals",
     items: [
-      { label: "Live Signals", to: "/signals", icon: Signal, description: "Forex, CFDs, Gold, Crypto & Synthetic" },
-      { label: "Signal History", to: "/signals/history", icon: Newspaper },
+      { label: "Signals Center", to: "/signals", icon: Signal, description: "Every market in one feed" },
+      { label: "Forex & CFD Signals", to: "/signals?market=forex", icon: LineChart },
+      { label: "Synthetic Signals", to: "/signals?market=synthetics", icon: Layers },
+      { label: "Options Signals", to: "/binary-options", icon: ChartCandlestick },
+      { label: "Binance Signals", to: "/signals?market=binance", icon: Coins },
+      { label: "Weltrade Signals", to: "/weltrade", icon: Layers },
       { label: "Authority AI Signals", to: "/authority-signals", icon: Sparkles },
-      { label: "Synthetic Signals", to: "/synthetic", icon: Layers },
-      { label: "Binary Options", to: "/binary-options", icon: ChartCandlestick },
+      { label: "Signal History", to: "/signals/history", icon: Newspaper },
+    ],
+  },
+  {
+    label: "Trade",
+    icon: ChartCandlestick,
+    to: "/trading",
+    items: [
+      { label: "Trading Workspace", to: "/trading", icon: ChartCandlestick, description: "CFD execution & open trades" },
+      { label: "Trade Options", to: "/deriv-options", icon: Zap, description: "Deriv contract selector" },
+      { label: "Rise & Fall", to: "/rise-fall", icon: LineChart },
+      { label: "Deriv App", to: "/deriv-app", icon: Bot },
+      { label: "Synthetic Trading", to: "/synthetic", icon: Layers },
+      { label: "Binance Hub", to: "/binance", icon: Coins },
+      { label: "Trade Modes", to: "/trade-modes", icon: Layers },
+      { label: "Connections", to: "/connections", icon: Shield, description: "Brokers & accounts" },
     ],
   },
   {
@@ -75,75 +99,35 @@ export const PRIMARY_NAV: NavGroup[] = [
       { label: "Discover Providers", to: "/providers", icon: Users, description: "Verified traders & performance" },
       { label: "Provider Dashboard", to: "/provider-dashboard", icon: BarChart3 },
       { label: "My Trades", to: "/trade-history", icon: Newspaper },
+      { label: "P2P Trading", to: "/p2p", icon: Users },
     ],
   },
   {
-    label: "Deriv Options",
-    icon: Zap,
-    to: "/deriv-options",
-    items: [
-      { label: "Options Workspace", to: "/deriv-options", icon: Zap },
-      { label: "Rise & Fall", to: "/rise-fall", icon: LineChart },
-      { label: "Deriv App", to: "/deriv-app", icon: Bot },
-      { label: "Trade Modes", to: "/trade-modes", icon: Layers },
-      { label: "Connections", to: "/connections", icon: Shield },
-    ],
-  },
-  {
-    label: "Binance",
-    icon: Coins,
-    to: "/binance",
-    items: [
-      { label: "Binance Hub", to: "/binance", icon: Coins },
-      { label: "Crypto Markets", to: "/markets/crypto", icon: LineChart },
-      { label: "Trading Bots", to: "/bots/binance", icon: Bot },
-      { label: "Binance Settings", to: "/settings/binance", icon: Wrench },
-    ],
-  },
-  {
-    label: "Trading Hubs",
-    icon: ChartCandlestick,
-    to: "/markets",
-    items: [
-      { label: "Gold (XAU/USD)", to: "/gold", icon: Coins },
-      { label: "Silver (XAG/USD)", to: "/silver", icon: Coins },
-      { label: "Bitcoin (BTC/USD)", to: "/bitcoin", icon: Coins },
-      { label: "EUR/USD", to: "/eur-usd", icon: LineChart },
-      { label: "GBP/USD", to: "/gbp-usd", icon: LineChart },
-      { label: "USD/JPY", to: "/usd-jpy", icon: LineChart },
-      { label: "US30 (Dow)", to: "/us30", icon: BarChart3 },
-      { label: "NAS100 (Nasdaq)", to: "/nas100", icon: BarChart3 },
-      { label: "GER40 (DAX)", to: "/ger40", icon: BarChart3 },
-      { label: "Synthetic Markets", to: "/synthetic", icon: Layers },
-      { label: "Weltrade Hub", to: "/weltrade", icon: Layers },
-    ],
-  },
-  {
-    label: "AI Tools",
+    label: "AI",
     icon: Sparkles,
-    to: "/authority-signals",
+    to: "/chart/XAUUSD",
     items: [
       { label: "AI Chart Analysis", to: "/chart/XAUUSD", icon: ScanSearch, description: "Upload a chart, get structured analysis" },
       { label: "AI Signal Analysis", to: "/authority-signals", icon: Sparkles },
       { label: "Market Scanner", to: "/market-analysis", icon: ScanSearch },
-      { label: "Trading Workspace", to: "/trading", icon: ChartCandlestick },
+      { label: "Strategies", to: "/strategies", icon: Layers },
     ],
   },
   {
     label: "Tools",
     icon: Wrench,
-    to: "/trade-modes",
+    to: "/tools",
     items: [
-      { label: "Strategies", to: "/strategies", icon: Layers },
-      { label: "Trade Modes", to: "/trade-modes", icon: Calculator },
+      { label: "All Trading Tools", to: "/tools", icon: Wrench, description: "Calculators, sessions & calendar" },
       { label: "Economic Calendar", to: "/news-calendar", icon: Newspaper },
+      { label: "Trade Modes", to: "/trade-modes", icon: Calculator },
       { label: "Flipping Challenges", to: "/flipping-challenges", icon: Zap },
-      { label: "P2P Trading", to: "/p2p", icon: Users },
       { label: "Marketplace", to: "/marketplace", icon: Layers },
+      { label: "Performance Transparency", to: "/performance-transparency", icon: BarChart3 },
     ],
   },
   {
-    label: "Education",
+    label: "Learn",
     icon: GraduationCap,
     to: "/learn",
     items: [
@@ -151,19 +135,8 @@ export const PRIMARY_NAV: NavGroup[] = [
       { label: "Academy", to: "/learn", icon: BookOpen },
       { label: "Beginner Guide", to: "/beginner-guide", icon: BookOpen },
       { label: "Case Studies", to: "/case-studies", icon: Newspaper },
-      { label: "Docs", to: "/docs", icon: BookOpen },
-    ],
-  },
-  {
-    label: "Research",
-    icon: LineChart,
-    to: "/market-analysis",
-    items: [
-      { label: "Market Analysis", to: "/market-analysis", icon: LineChart },
-      { label: "News & Calendar", to: "/news-calendar", icon: Newspaper },
       { label: "Methodology", to: "/methodology", icon: Shield },
-      { label: "Performance Transparency", to: "/performance-transparency", icon: BarChart3 },
-      { label: "Whitepaper", to: "/whitepaper", icon: BookOpen },
+      { label: "Docs", to: "/docs", icon: BookOpen },
     ],
   },
   {
@@ -172,6 +145,7 @@ export const PRIMARY_NAV: NavGroup[] = [
     to: "/blog",
   },
 ];
+
 
 /** "More" menu — secondary and trust/legal destinations. */
 export const MORE_NAV: { label: string; items: NavItem[] }[] = [
