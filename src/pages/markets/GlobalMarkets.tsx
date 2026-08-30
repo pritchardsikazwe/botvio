@@ -7,6 +7,7 @@ import { TrendingUp, TrendingDown, ArrowRight, Globe, Activity, Zap, Clock, Spar
 import { Link } from "react-router-dom";
 import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
 import { SessionMarketsBlock, type SessionInstrument } from "@/components/markets/SessionMarketsBlock";
+import { PageBanner } from "@/components/layout/PageBanner";
 
 // Determine if a market is currently open based on UTC day/hour
 type RegionKey = "us" | "europe" | "middleEast" | "asia" | "crypto" | "africa";
