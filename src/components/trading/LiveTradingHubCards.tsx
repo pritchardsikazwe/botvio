@@ -144,16 +144,17 @@ function HubCard({ hub }: { hub: Hub }) {
       className={`cursor-pointer overflow-hidden bg-gradient-to-br ${hub.bg} ${hub.border} transition-all hover:scale-[1.02]`}
     >
       <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`w-9 h-9 rounded-lg bg-background/40 flex items-center justify-center ${hub.accent}`}>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className={`w-9 h-9 shrink-0 rounded-lg bg-background/40 flex items-center justify-center ${hub.accent}`}>
               <Icon className="h-5 w-5" />
             </div>
-            <div>
-              <div className="font-bold text-sm text-foreground leading-tight">{hub.label}</div>
-              <div className="text-[10px] text-muted-foreground">{hub.tagline}</div>
+            <div className="min-w-0">
+              <div className="font-bold text-sm text-foreground leading-tight truncate">{hub.label}</div>
+              <div className="text-[10px] text-muted-foreground line-clamp-2">{hub.tagline}</div>
             </div>
           </div>
+
           <Badge
             variant="outline"
             className={`text-[9px] px-1.5 py-0 ${connected ? "border-success/40 text-success" : "border-border text-muted-foreground"}`}
