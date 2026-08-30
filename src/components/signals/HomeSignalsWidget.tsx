@@ -287,19 +287,20 @@ export const HomeSignalsWidget = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-3 gap-2 text-sm">
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-muted-foreground text-xs">Entry</p>
-                    <p className="font-mono font-medium">{signal.entry_price}</p>
+                    <p className="font-mono font-medium truncate">{signal.entry_price}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-muted-foreground text-xs">TP</p>
-                    <p className="font-mono text-success">{signal.take_profit || "-"}</p>
+                    <p className="font-mono text-success truncate">{signal.take_profit || "-"}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-muted-foreground text-xs">SL</p>
-                    <p className="font-mono text-destructive">{signal.stop_loss || "-"}</p>
+                    <p className="font-mono text-destructive truncate">{signal.stop_loss || "-"}</p>
                   </div>
                 </div>
+
 
                 {signal.reason && (
                   <p className="text-xs text-muted-foreground line-clamp-2">
