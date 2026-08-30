@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
+import { PageBanner } from "@/components/layout/PageBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GoldChartSection } from "@/components/gold/GoldChartSection";
 import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
@@ -33,45 +34,21 @@ const GoldTradingHub = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Hero Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:p-8">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-warning/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-primary/20 text-primary border-primary/30 font-mono text-xs">XAUUSD</Badge>
-                <Badge variant="outline" className="border-success/40 text-success text-xs">Market Open</Badge>
-                <Badge variant="outline" className="border-warning/30 text-warning text-xs">Botvio AI Strategies Live</Badge>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
-                Gold Trading <span className="text-primary">Hub</span>
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                Real-time charts with built-in Botvio AI strategies, AI signals, expert tips & community — everything you need to trade gold profitably.
-              </p>
-            </div>
-            <GoldPriceHeader />
-          </div>
-        </div>
-
-        {/* Quick Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {QUICK_STATS.map((stat, i) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={i} className="bg-card border-border/50">
-                <CardContent className="p-3 flex items-center gap-3">
-                  <Icon className={`h-4 w-4 ${stat.color} shrink-0`} />
-                  <div>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase">{stat.label}</p>
-                    <p className="text-xs font-bold text-foreground">{stat.value}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <PageBanner
+          title="Gold Trading"
+          accent="Hub"
+          description="Real-time XAU/USD charts with built-in Botvio AI strategies, AI signals, expert tips & community — everything you need to trade gold with a plan."
+          crumbs={[{ label: "Home", to: "/" }, { label: "Trading Hubs", to: "/markets" }, { label: "Gold (XAU/USD)" }]}
+          action={
+            <>
+              <Badge className="border-primary/30 bg-primary/20 font-mono text-xs text-primary">XAUUSD</Badge>
+              <Badge variant="outline" className="border-success/40 text-xs text-success">Market Open</Badge>
+              <Badge variant="outline" className="border-warning/30 text-xs text-warning">Botvio AI Strategies Live</Badge>
+            </>
+          }
+          aside={<GoldPriceHeader />}
+          stats={QUICK_STATS.map((s) => ({ icon: s.icon, value: s.value, label: s.label }))}
+        />
 
         {/* Sentiment Gauge Row */}
         <GoldSentimentGauge />
