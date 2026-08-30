@@ -40,12 +40,19 @@ const FEATURES = [
   { icon: Zap, title: "Trading Hubs", desc: "Access 50+ markets, tools and trading environments.", cta: "Explore Hubs", to: "/global-markets" },
 ];
 
-const SIGNALS = [
-  { symbol: "CRASH 500", dir: "SELL", tf: "M1", entry: "2902.55", tp: "2888.00", sl: "2909.77", strength: "Strong", dots: 5, expiry: "28m 15s", brokers: "Deriv • Weltrade" },
-  { symbol: "XAU/USD", dir: "BUY", tf: "M15", entry: "2,386.20", tp: "2,394.00", sl: "2,372.00", strength: "Strong", dots: 5, expiry: null, brokers: "Exness • Deriv" },
-  { symbol: "EUR/USD", dir: "BUY", tf: "H1", entry: "1.0890", tp: "1.0945", sl: "1.0840", strength: "Moderate", dots: 3, expiry: "45m 18s", brokers: "Exness • Weltrade" },
-  { symbol: "BTC/USD", dir: "BUY", tf: "M30", entry: "67,850.00", tp: "68,950.00", sl: "66,900.00", strength: "Strong", dots: 5, expiry: null, brokers: "Binance" },
+const SHORTCUTS: { label: string; to: string; icon: typeof BarChart3 }[] = [
+  { label: "Gold Hub", to: "/gold", icon: LineChart },
+  { label: "Bitcoin Hub", to: "/bitcoin", icon: Bitcoin },
+  { label: "US30 Hub", to: "/us30", icon: BarChart3 },
+  { label: "NAS100 Hub", to: "/nas100", icon: TrendingUp },
+  { label: "GER40 Hub", to: "/ger40", icon: Layers },
+  { label: "Deriv AI Options", to: "/deriv-options", icon: Zap },
+  { label: "Rise & Fall", to: "/rise-fall", icon: TrendingUp },
+  { label: "Synthetic Hub", to: "/synthetic-hub", icon: Sparkles },
+  { label: "AI Chart Analysis", to: "/chart", icon: Upload },
+  { label: "Live Signals", to: "/signals", icon: Bell },
 ];
+
 
 const HUBS = [
   { name: "Gold", sub: "(XAU/USD)", to: "/gold", tint: "text-warning" },
