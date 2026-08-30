@@ -6,6 +6,8 @@ import { Header } from "@/components/trading/Header";
 import { DerivConnectCTA } from "@/components/trading/DerivConnectCTA";
 import { useDeriv, useDerivConnection } from "@/contexts/DerivContext";
 import { DerivDiagnosticsPanel } from "@/components/trading/DerivDiagnosticsPanel";
+import { DerivConnectionBar } from "@/components/trading/DerivConnectionBar";
+import { TradingNav } from "@/components/trading/TradingNav";
 import { useContractCapabilities } from "@/hooks/useContractCapabilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -411,6 +413,8 @@ const StyleTrade = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 space-y-6">
+        <DerivConnectionBar />
+        <TradingNav />
         {/* Title bar */}
         <div className="flex items-center gap-3 flex-wrap">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
