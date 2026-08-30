@@ -135,6 +135,7 @@ import LearningPathDetail from "./pages/LearningPathDetail";
 import Methodology from "./pages/Methodology";
 import PerformanceTransparency from "./pages/PerformanceTransparency";
 import Trust from "./pages/Trust";
+import OAuthConsent from "./pages/OAuthConsent";
 
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
@@ -151,6 +152,7 @@ export const AppRoutes = () => (
     <Route path="/" element={<HomeMockup />} />
     <Route path="home-preview" element={<HomeMockup />} />
     <Route path="home-classic" element={<Index />} />
+    <Route path=".lovable/oauth/consent" element={<OAuthConsent />} />
     <Route path="landing" element={<Landing />} />
     <Route path="install" element={<Install />} />
     <Route path="dashboard" element={<Dashboard />} />
