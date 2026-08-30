@@ -1,7 +1,7 @@
 {
   "home": {
     "title": "Botvio – AI Forex Signals, Gold Trading & Trading Bots",
-    "description": "Free AI-powered forex signals, gold (XAU/USD) analysis, chart AI, and automated trading bots for Deriv, Exness, Weltrade and Binance. Trusted by traders worldwide.",
+    "description": "AI-powered forex signals, gold (XAU/USD) analysis, AI chart reading and automated trading bots for Deriv, Exness, Weltrade and Binance.",
     "keywords": "forex signals, gold trading, XAUUSD signals, AI trading bot, Deriv bot, Boom 1000, free forex signals, chart analysis"
   },
   "signals": {
@@ -11,7 +11,7 @@
   },
   "signalsHistory": {
     "title": "Signals History & Verified Track Record",
-    "description": "Verified Botvio trading signals track record. Browse past forex, gold and synthetic indices signals with WIN/LOSS results, pip outcomes, entry, SL/TP and chart screenshots.",
+    "description": "Browse Botvio's past forex, gold and synthetic indices signals with WIN/LOSS results, pip outcomes, entry, SL/TP and chart screenshots.",
     "keywords": "Botvio track record, signals history, forex signals results, gold signals win rate, verified trading signals, signal performance"
   },
   "gold": {
@@ -220,18 +220,19 @@
     "keywords": "install Botvio app, PWA trading app, mobile trading"
   },
   "us30": {
-    "title": "US30 Trading Hub – Live Dow Jones 30 Charts, Signals & Strategies",
-    "description": "Real-time US30 (Dow Jones 30) trading desk with live TradingView charts, Botvio AI scalping signals, opening-range strategies, VWAP setups and risk-managed playbooks.",
+    "title": "US30 Trading Hub – Dow Jones Charts & Signals",
+    "description": "Real-time US30 (Dow Jones 30) trading desk: live charts, Botvio AI scalping signals, opening-range and VWAP strategies.",
     "keywords": "US30 signals, Dow Jones signals, DJ30 trading, US30 strategy, US30 scalping, Dow Jones live chart, US30 trading bot, US30 forex hub"
   },
   "nas100": {
-    "title": "NAS100 Trading Hub – Live Nasdaq 100 Charts, Signals & Strategies",
-    "description": "Real-time NAS100 (Nasdaq 100 / USTEC) trading desk with live TradingView charts, Botvio AI scalping signals, VWAP and opening-range setups, plus session strategies for US tech.",
+    "title": "NAS100 Trading Hub – Nasdaq 100 Charts & Signals",
+    "description": "Real-time NAS100 (Nasdaq 100) trading desk: live charts, Botvio AI scalping signals, VWAP and opening-range setups for US tech.",
     "keywords": "NAS100 signals, Nasdaq 100 signals, USTEC trading, NAS100 strategy, NAS100 scalping, Nasdaq live chart, NAS100 bot, US tech index trading"
   },
   "ger40": {
-    "title": "GER40 Trading Hub – Live DAX 40 Charts, Signals & Strategies",
-    "description": "Real-time GER40 (DAX 40 / Germany 40) trading desk with live TradingView charts, Botvio AI scalping signals, Frankfurt-open breakouts and London/NY overlap strategies.",
+    "title": "GER40 Trading Hub – DAX 40 Charts & Signals",
+    "description": "Real-time GER40 (DAX 40) trading desk: live charts, Botvio AI scalping signals, Frankfurt-open breakouts and overlap strategies.",
     "keywords": "GER40 signals, DAX 40 signals, DE40 trading, DAX strategy, GER40 scalping, DAX live chart, GER40 bot, Frankfurt index trading"
   }
 }
+

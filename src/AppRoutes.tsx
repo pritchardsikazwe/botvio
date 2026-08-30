@@ -226,7 +226,9 @@ export const AppRoutes = () => (
     <Route path="auth/deriv/callback" element={<DerivCallback />} />
     <Route path="callback" element={<DerivCallback />} />
     <Route path="trading" element={<Paid><Trading /></Paid>} />
+    <Route path="chart" element={<Navigate to="/chart/XAUUSD" replace />} />
     <Route path="chart/:symbol" element={<Paid><ChartPage /></Paid>} />
+
     <Route path="gold" element={<Paid><GoldTradingHub /></Paid>} />
     <Route path="bitcoin" element={<Paid><BitcoinTradingHub /></Paid>} />
     <Route path="btc" element={<Paid><BitcoinTradingHub /></Paid>} />

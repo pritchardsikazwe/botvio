@@ -43,10 +43,15 @@ export const Header = () => {
       <header className="sticky top-0 z-50 glass-card border-b border-border/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div 
+            <div
+              role="link"
+              tabIndex={0}
+              aria-label="Botvio Home"
               className="flex items-center gap-3 cursor-pointer"
               onClick={() => navigate('/')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate('/'); } }}
             >
+
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-background flex items-center justify-center border border-border/50">
                 <img
                   src="/botvio-logo.png"
