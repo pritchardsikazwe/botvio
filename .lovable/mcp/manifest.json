@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://tqqkzeblmjapgbnsbtgw.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "botvio-forex-copy-trading-automated-trading-p2p",
+      "version": "0.1.0",
+      "title": "BOTVIO Forex | Copy Trading, Automated Trading & P2P"
+    },
+    "tools": [
+      {
+        "name": "list_signals",
+        "title": "List trading signals",
+        "description": "List the most recent Botvio trading signals visible to the signed-in user, newest first. Optionally filter by symbol, direction or status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "symbol": {
+              "description": "Filter by instrument, e.g. XAUUSD or R_100.",
+              "type": "string",
+              "minLength": 1
+            },
+            "direction": {
+              "description": "Filter by signal direction.",
+              "type": "string",
+              "enum": [
+                "BUY",
+                "SELL"
+              ]
+            },
+            "status": {
+              "description": "Filter by signal status, e.g. approved or pending.",
+              "type": "string",
+              "minLength": 1
+            },
+            "limit": {
+              "default": 10,
+              "description": "Number of signals to return (1-50).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_signal",
+        "title": "Get signal details",
+        "description": "Fetch one Botvio trading signal by id, including entry, stop-loss, take-profit, confidence and settlement details.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The trading signal id."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_trades",
+        "title": "List my trades",
+        "description": "List the signed-in user's own trade executions on Botvio (stake, fill price, status and P&L), newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filter by execution status, e.g. OPEN, RUNNING or CLOSED.",
+              "type": "string",
+              "minLength": 1
+            },
+            "limit": {
+              "default": 10,
+              "description": "Number of executions to return (1-50).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "my_performance",
+        "title": "My trading performance",
+        "description": "Summarise the signed-in user's Botvio trading performance over a recent window: trade count, wins, losses, win rate and net P&L.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "days": {
+              "default": 30,
+              "description": "Look-back window in days (1-365).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
