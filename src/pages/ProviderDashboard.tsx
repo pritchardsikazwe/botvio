@@ -310,10 +310,12 @@ const ProviderDashboard = () => {
         <Tabs defaultValue="trade" className="space-y-6">
           <TabsList>
             <TabsTrigger value="trade">Trade Panel</TabsTrigger>
+            <TabsTrigger value="live">Live Trades</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="history">Trade History</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="trade">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
