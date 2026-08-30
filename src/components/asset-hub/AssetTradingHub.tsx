@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  BarChart3, Signal, Lightbulb, Crosshair, Target, TrendingUp, Clock, ShieldCheck,
+  BarChart3, Signal, Crosshair, Target, TrendingUp, Clock, ShieldCheck,
   ExternalLink, Zap, Layers, Lock, Sparkles, Newspaper, LayoutDashboard, ScanSearch,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -455,10 +455,6 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
             requiredPlan="Basic"
           />
         )}
-
-        <p className="sr-only">
-          <Lightbulb className="h-3 w-3" /> {config.assetLabel} trading hub tips
-        </p>
       </main>
     </div>
   );
