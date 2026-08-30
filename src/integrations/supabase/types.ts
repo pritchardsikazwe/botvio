@@ -1461,6 +1461,86 @@ export type Database = {
           },
         ]
       }
+      copy_strategies: {
+        Row: {
+          broker_label: string | null
+          created_at: string
+          description: string | null
+          emergency_stop: boolean
+          id: string
+          markets: string[]
+          max_daily_loss_percent: number
+          max_drawdown_percent: number
+          max_risk_per_trade: number
+          name: string
+          platform: string
+          provider_id: string
+          respect_provider_sl: boolean
+          risk_model: string
+          status: string
+          stop_on_daily_loss: boolean
+          stop_on_drawdown: boolean
+          trading_style: string | null
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          broker_label?: string | null
+          created_at?: string
+          description?: string | null
+          emergency_stop?: boolean
+          id?: string
+          markets?: string[]
+          max_daily_loss_percent?: number
+          max_drawdown_percent?: number
+          max_risk_per_trade?: number
+          name: string
+          platform?: string
+          provider_id: string
+          respect_provider_sl?: boolean
+          risk_model?: string
+          status?: string
+          stop_on_daily_loss?: boolean
+          stop_on_drawdown?: boolean
+          trading_style?: string | null
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          broker_label?: string | null
+          created_at?: string
+          description?: string | null
+          emergency_stop?: boolean
+          id?: string
+          markets?: string[]
+          max_daily_loss_percent?: number
+          max_drawdown_percent?: number
+          max_risk_per_trade?: number
+          name?: string
+          platform?: string
+          provider_id?: string
+          respect_provider_sl?: boolean
+          risk_model?: string
+          status?: string
+          stop_on_daily_loss?: boolean
+          stop_on_drawdown?: boolean
+          trading_style?: string | null
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copy_strategies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copy_subscriptions: {
         Row: {
           admin_note: string | null

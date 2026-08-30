@@ -55,7 +55,7 @@ export const CopyTradingTab = () => {
             <div className="text-center py-4 space-y-2">
               <p className="text-xs text-muted-foreground">You're not following anyone yet.</p>
               <Button size="sm" variant="outline" asChild>
-                <Link to="/providers">Browse providers <ArrowRight className="h-3 w-3 ml-1" /></Link>
+                <Link to="/copy-trading">Browse providers <ArrowRight className="h-3 w-3 ml-1" /></Link>
               </Button>
             </div>
           ) : active.map((sub) => (
@@ -114,7 +114,7 @@ export const CopyTradingTab = () => {
               <p className="text-sm font-semibold">Grow your own followers</p>
               <p className="text-xs text-muted-foreground">Publish your Deriv trades and earn from copiers.</p>
             </div>
-            <Button size="sm" asChild><Link to="/providers">Apply</Link></Button>
+            <Button size="sm" asChild><Link to="/copy-trading">Apply</Link></Button>
           </CardContent>
         </Card>
       )}

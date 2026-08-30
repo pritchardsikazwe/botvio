@@ -24,6 +24,11 @@ import BridgeRequest from "./pages/BridgeRequest";
 import TradeHistory from "./pages/TradeHistory";
 import Providers from "./pages/Providers";
 import ProviderDashboard from "./pages/ProviderDashboard";
+import CopyMarketplace from "./pages/copy/CopyMarketplace";
+import CopyProviderProfile from "./pages/copy/CopyProviderProfile";
+import CopyStart from "./pages/copy/CopyStart";
+import MyCopyTrading from "./pages/copy/MyCopyTrading";
+import BecomeProvider from "./pages/copy/BecomeProvider";
 import Bots from "./pages/Bots";
 import Billing from "./pages/Billing";
 import Admin from "./pages/Admin";
@@ -165,6 +170,11 @@ export const AppRoutes = () => (
     <Route path="bridge-request" element={<BridgeRequest />} />
     <Route path="trade-history" element={<TradeHistory />} />
     <Route path="providers" element={<Providers />} />
+    <Route path="copy-trading" element={<CopyMarketplace />} />
+    <Route path="copy-trading/provider/:providerId" element={<CopyProviderProfile />} />
+    <Route path="copy-trading/start/:providerId" element={<CopyStart />} />
+    <Route path="copy-trading/my" element={<MyCopyTrading />} />
+    <Route path="copy-trading/become-provider" element={<BecomeProvider />} />
     <Route path="provider-dashboard" element={<ProviderDashboard />} />
     <Route path="bots" element={<Paid><Bots /></Paid>} />
     <Route path="billing" element={<Billing />} />

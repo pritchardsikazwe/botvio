@@ -94,9 +94,11 @@ export const PRIMARY_NAV: NavGroup[] = [
   {
     label: "Copy Trading",
     icon: Users,
-    to: "/providers",
+    to: "/copy-trading",
     items: [
-      { label: "Discover Providers", to: "/providers", icon: Users, description: "Verified traders & performance" },
+      { label: "Copy Marketplace", to: "/copy-trading", icon: Users, description: "Verified providers & performance" },
+      { label: "My Copy Trading", to: "/copy-trading/my", icon: BarChart3, description: "Active strategies & copy status" },
+      { label: "Become a Provider", to: "/copy-trading/become-provider", icon: Users },
       { label: "Provider Dashboard", to: "/provider-dashboard", icon: BarChart3 },
       { label: "My Trades", to: "/trade-history", icon: Newspaper },
       { label: "P2P Trading", to: "/p2p", icon: Users },
