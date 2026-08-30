@@ -488,15 +488,14 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                     key={type.value}
                     variant={analysisType === type.value ? "default" : "outline"}
                     size="sm"
-                    className="h-auto w-full min-w-0 py-2 flex flex-col items-start text-left whitespace-normal"
+                    className="h-auto py-2 flex flex-col items-start"
                     onClick={() => setAnalysisType(type.value)}
                   >
-                    <span className="w-full truncate font-medium">{type.label}</span>
-                    <span className="w-full text-xs leading-snug opacity-80">{type.description}</span>
+                    <span className="font-medium">{type.label}</span>
+                    <span className="text-xs text-muted-foreground">{type.description}</span>
                   </Button>
                 ))}
               </div>
-
 
               {/* Broker Selection — Admin/Signal Manager only */}
               {(isAdmin || isSuperAdmin || isSignalManager) && (

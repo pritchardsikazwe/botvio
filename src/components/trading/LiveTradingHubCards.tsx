@@ -144,17 +144,16 @@ function HubCard({ hub }: { hub: Hub }) {
       className={`cursor-pointer overflow-hidden bg-gradient-to-br ${hub.bg} ${hub.border} transition-all hover:scale-[1.02]`}
     >
       <CardContent className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <div className={`w-9 h-9 shrink-0 rounded-lg bg-background/40 flex items-center justify-center ${hub.accent}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`w-9 h-9 rounded-lg bg-background/40 flex items-center justify-center ${hub.accent}`}>
               <Icon className="h-5 w-5" />
             </div>
-            <div className="min-w-0">
-              <div className="font-bold text-sm text-foreground leading-tight truncate">{hub.label}</div>
-              <div className="text-[10px] text-muted-foreground line-clamp-2">{hub.tagline}</div>
+            <div>
+              <div className="font-bold text-sm text-foreground leading-tight">{hub.label}</div>
+              <div className="text-[10px] text-muted-foreground">{hub.tagline}</div>
             </div>
           </div>
-
           <Badge
             variant="outline"
             className={`text-[9px] px-1.5 py-0 ${connected ? "border-success/40 text-success" : "border-border text-muted-foreground"}`}
@@ -173,13 +172,13 @@ function HubCard({ hub }: { hub: Hub }) {
         </div>
 
         {/* Signal + Confidence row */}
-        <div className="flex items-center justify-between gap-1.5 rounded-md bg-background/40 border border-border/50 px-2 py-1.5 overflow-hidden">
-          <Badge variant="outline" className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 ${sigClass}`}>
+        <div className="flex items-center justify-between gap-2 rounded-md bg-background/40 border border-border/50 px-2 py-1.5">
+          <Badge variant="outline" className={`text-[10px] font-bold px-1.5 py-0.5 ${sigClass}`}>
             <SigIcon className="h-3 w-3 mr-1" />
             {sig}
           </Badge>
-          <div className="flex min-w-0 flex-col items-end leading-tight">
-            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Conf.</span>
+          <div className="flex flex-col items-center leading-tight">
+            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Confidence</span>
             <span
               className={`text-sm font-extrabold tabular-nums ${
                 conf >= 70 ? "text-success" : conf >= 50 ? "text-warning" : "text-muted-foreground"
@@ -188,11 +187,10 @@ function HubCard({ hub }: { hub: Hub }) {
               {conf}%
             </span>
           </div>
-          <div className="hidden sm:block w-10 shrink-0 text-right">
-            <span className="block truncate text-[9px] text-muted-foreground">{live.strategy?.split(" ")[0] || "—"}</span>
+          <div className="w-10 text-right">
+            <span className="text-[9px] text-muted-foreground">{live.strategy?.split(" ")[0] || "—"}</span>
           </div>
         </div>
-
 
         <Button
           variant="ghost"
