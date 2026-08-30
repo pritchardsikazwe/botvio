@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 /** Build-stamped application version, e.g. 2026.07.30.1246 */
 const now = new Date();
@@ -60,6 +61,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     botvioVersionPlugin(),
+    mcpPlugin(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["apple-touch-icon.png", "icon-192.png", "icon-512.png"],
