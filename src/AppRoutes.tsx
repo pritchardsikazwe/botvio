@@ -148,8 +148,9 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
  */
 export const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<Index />} />
+    <Route path="/" element={<HomeMockup />} />
     <Route path="home-preview" element={<HomeMockup />} />
+    <Route path="home-classic" element={<Index />} />
     <Route path="landing" element={<Landing />} />
     <Route path="install" element={<Install />} />
     <Route path="dashboard" element={<Dashboard />} />
