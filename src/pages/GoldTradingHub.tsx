@@ -13,7 +13,11 @@ import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
 import { GoldBotvioStrategy } from "@/components/gold/GoldHauzaStrategy";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart3, Signal, Lightbulb, Users, Crosshair, Target, TrendingUp, Clock, ShieldCheck } from "lucide-react";
+import { Signal, Crosshair, Target, TrendingUp, Clock, ShieldCheck, LayoutDashboard, Sparkles, Layers, Newspaper } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { SessionsPanel } from "@/components/chart/SessionsPanel";
+import { NewsEventsCard } from "@/components/chart/NewsEventsCard";
 
 const QUICK_STATS = [
   { icon: Target, label: "Key Levels", value: "S/R + Round Numbers", color: "text-primary" },
@@ -23,7 +27,7 @@ const QUICK_STATS = [
 ];
 
 const GoldTradingHub = () => {
-  const [activeTab, setActiveTab] = useState("charts");
+  const [activeTab, setActiveTab] = useState("overview");
 
   return (
     <div className="min-h-screen bg-background">
