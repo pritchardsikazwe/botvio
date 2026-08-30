@@ -11,6 +11,8 @@ import { AppRoutes } from "./AppRoutes";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SiteFooterGate } from "@/components/SiteFooterGate";
 import { UpdateNotifier } from "@/components/UpdateNotifier";
+import { MobileBottomNav } from "@/components/nav/MobileBottomNav";
+
 
 const queryClient = new QueryClient();
 
@@ -33,7 +35,9 @@ const App = () => (
               <LocalePrefixRouter>
                 <AppRoutes />
                 <SiteFooterGate />
+                <MobileBottomNav />
               </LocalePrefixRouter>
+
               <CookieConsent />
             </BrowserRouter>
           </DerivProvider>
