@@ -151,39 +151,41 @@ const Signals = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <SEOHead seoKey="signals" title="Trading Signals — Free Gold, Forex & Crypto Signals" description="Get free real-time trading signals for XAUUSD gold, EUR/USD, GBP/USD, synthetic indices & crypto. AI-powered analysis with entry price, stop loss & take profit levels updated daily." />
       <Header />
 
       <main className="container mx-auto px-4 py-6">
-        {/* Page Header */}
-        <div className="glass-card p-6 mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-primary/20 border border-primary/30">
-                <Signal className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">Trading Signals & AI Analysis</h1>
-                <p className="text-muted-foreground">Expert signals & AI-powered chart analysis</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {isPremium && (
-                <Badge className="bg-gradient-to-r from-warning to-amber-500 text-white py-2 px-4">
-                  <Crown className="h-4 w-4 mr-2" />Premium
-                </Badge>
-              )}
-              <Badge variant="outline" className="text-lg py-2 px-4">
-                <TrendingUp className="h-4 w-4 mr-2 text-success" />
-                {activeCount} Active
-              </Badge>
-              <Button variant="outline" size="icon" onClick={() => refetch()} aria-label="Refresh signals">
-                <RefreshCw className="h-4 w-4" />
+        <PageBanner
+          title="Signals"
+          accent="Center"
+          description="Every Botvio signal in one feed — forex, gold, indices, crypto, Deriv synthetic indices and Weltrade SyntX. Each card carries the entry, stop and target published by the engine that generated it."
+          crumbs={[{ label: "Botvio", to: "/" }, { label: "Signals" }]}
+          features={[
+            { icon: Signal, label: "Live feed", sub: "Realtime updates" },
+            { icon: ImageIcon, label: "AI chart analysis", sub: "Upload a chart" },
+            { icon: Filter, label: "Market filters", sub: "By broker & timeframe" },
+            { icon: Bell, label: "Alerts", sub: "Browser notifications" },
+          ]}
+          stats={[
+            { icon: TrendingUp, value: String(activeCount), label: "Active in this view" },
+            { icon: Signal, value: isLoading ? "--" : String((signals || []).length), label: "Signals loaded" },
+            { icon: Crown, value: isPremium ? "Premium" : "Free tier", label: "Your signal access" },
+            { icon: Bell, value: permission === "granted" ? "On" : "Off", label: "Signal alerts" },
+          ]}
+          action={
+            <>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <RefreshCw className="mr-2 h-4 w-4" aria-hidden />Refresh
               </Button>
-            </div>
-          </div>
-        </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/tools">Position size tools</Link>
+              </Button>
+            </>
+          }
+          className="mb-6"
+        />
+
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
