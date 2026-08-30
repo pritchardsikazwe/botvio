@@ -590,9 +590,14 @@ const ProviderDashboard = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="live">
+            <LiveStrategyTradeView providerId={myProvider?.id} />
+          </TabsContent>
+
           <TabsContent value="performance">
             <ProviderPerformancePanel providerId={myProvider?.id} />
           </TabsContent>
+
 
           <TabsContent value="history">
             <Card className="glass-card">
