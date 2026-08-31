@@ -13,7 +13,6 @@ export const lovable = {
   auth: {
     signInWithOAuth: async (provider: "google" | "apple" | "microsoft" | "lovable", opts?: SignInOptions) => {
       const result = await lovableAuth.signInWithOAuth(provider as "google" | "apple" | "microsoft", {
-
         ...opts,
         extraParams: {
           ...opts?.extraParams,
