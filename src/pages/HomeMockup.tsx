@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 
@@ -17,11 +20,11 @@ import {
    ──────────────────────────────────────────────────────────── */
 
 const NAV = [
-  { label: "Markets", to: "/global-markets" },
+  { label: "Markets", to: "/markets" },
   { label: "Signals", to: "/signals" },
-  { label: "AI Analysis", to: "/chart" },
+  { label: "AI Analysis", to: "/chart/XAUUSD" },
   { label: "Trading Hubs", to: "/gold" },
-  { label: "Copy Trading", to: "/providers" },
+  { label: "Copy Trading", to: "/copy-trading" },
   { label: "Learn", to: "/learn", badge: "New" },
   { label: "More", to: "/about" },
 ];
@@ -36,10 +39,10 @@ const TICKER = [
 ];
 
 const FEATURES = [
-  { icon: BarChart3, title: "Live Markets", desc: "Real-time prices, charts and market overview.", cta: "Explore Markets", to: "/global-markets" },
-  { icon: Sparkles, title: "AI Analysis", desc: "Upload a chart and get instant AI trading insights.", cta: "Analyze Chart", to: "/chart" },
+  { icon: BarChart3, title: "Live Markets", desc: "Real-time prices, charts and market overview.", cta: "Explore Markets", to: "/markets" },
+  { icon: Sparkles, title: "AI Analysis", desc: "Upload a chart and get instant AI trading insights.", cta: "Analyze Chart", to: "/chart/XAUUSD" },
   { icon: Bell, title: "Trading Signals", desc: "High-probability trading signals updated live.", cta: "View Signals", to: "/signals" },
-  { icon: Zap, title: "Trading Hubs", desc: "Access 50+ markets, tools and trading environments.", cta: "Explore Hubs", to: "/global-markets" },
+  { icon: Zap, title: "Trading Hubs", desc: "Access 50+ markets, tools and trading environments.", cta: "Explore Hubs", to: "/markets" },
 ];
 
 const SHORTCUTS: { label: string; to: string; icon: typeof BarChart3 }[] = [
@@ -51,7 +54,7 @@ const SHORTCUTS: { label: string; to: string; icon: typeof BarChart3 }[] = [
   { label: "Deriv AI Options", to: "/deriv-options", icon: Zap },
   { label: "Rise & Fall", to: "/rise-fall", icon: TrendingUp },
   { label: "Synthetic Hub", to: "/synthetic-hub", icon: Sparkles },
-  { label: "AI Chart Analysis", to: "/chart", icon: Upload },
+  { label: "AI Chart Analysis", to: "/chart/XAUUSD", icon: Upload },
   { label: "Live Signals", to: "/signals", icon: Bell },
 ];
 
@@ -59,7 +62,7 @@ const SHORTCUTS: { label: string; to: string; icon: typeof BarChart3 }[] = [
 const HUBS = [
   { name: "Gold", sub: "(XAU/USD)", to: "/gold", tint: "text-warning" },
   { name: "Bitcoin", sub: "(BTC/USD)", to: "/bitcoin", tint: "text-warning" },
-  { name: "EUR/USD", sub: "Forex", to: "/forex/eur-usd", tint: "text-primary" },
+  { name: "EUR/USD", sub: "Forex", to: "/eur-usd", tint: "text-primary" },
   { name: "NAS100", sub: "Index", to: "/nas100", tint: "text-success" },
   { name: "US30", sub: "Index", to: "/us30", tint: "text-primary" },
   { name: "GER40", sub: "Index", to: "/ger40", tint: "text-destructive" },
@@ -94,9 +97,9 @@ const TESTIMONIALS = [
 ];
 
 const FOOTER_COLS = [
-  { title: "Markets", links: [["Forex", "/forex/eur-usd"], ["Gold", "/gold"], ["Crypto", "/crypto"], ["Indices", "/us30"], ["Synthetic Indices", "/synthetic"], ["All Markets", "/global-markets"]] },
+  { title: "Markets", links: [["Forex", "/eur-usd"], ["Gold", "/gold"], ["Crypto", "/markets/crypto"], ["Indices", "/us30"], ["Synthetic Indices", "/synthetic"], ["All Markets", "/markets"]] },
   { title: "Signals", links: [["Live Signals", "/signals"], ["Signal History", "/signals-history"], ["Performance", "/performance-transparency"], ["VIP Signals", "/billing"]] },
-  { title: "AI Tools", links: [["AI Chart Analysis", "/chart"], ["Chart Upload", "/chart"], ["Market Scanner", "/market-analysis"], ["Economic Calendar", "/news-calendar"]] },
+  { title: "AI Tools", links: [["AI Chart Analysis", "/chart/XAUUSD"], ["Chart Upload", "/chart/XAUUSD"], ["Market Scanner", "/market-analysis"], ["Economic Calendar", "/news-calendar"]] },
   { title: "Learn", links: [["Courses", "/learn"], ["Strategy Library", "/strategies"], ["Trading Blog", "/blog"], ["Learning Paths", "/learning-paths"]] },
   { title: "Company", links: [["About Us", "/about"], ["Affiliates", "/affiliate"], ["Press", "/press"], ["Contact Us", "/contact"]] },
   { title: "Support", links: [["Help Center", "/faq"], ["Docs", "/docs"], ["Community", "/live"], ["Trust Center", "/trust"]] },
@@ -168,12 +171,17 @@ function CandleChart() {
 /* ── page ─────────────────────────────────────────────────── */
 
 const HomeMockup = () => {
+  const { user } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Botvio — AI Trading Intelligence, Live Markets & Signals"
         description="Live markets, AI chart analysis, trading signals and intelligent trading tools — built for modern traders. Explore Botvio's trading hubs, education and verified brokers."
       />
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
@@ -206,24 +214,59 @@ const HomeMockup = () => {
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
-            <Button variant="ghost" size="icon" aria-label="Search" className="hidden sm:inline-flex">
-              <Search className="h-4 w-4" />
+            <Button variant="ghost" size="icon" aria-label="Search" asChild className="hidden sm:inline-flex">
+              <Link to="/markets"><Search className="h-4 w-4" /></Link>
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Language" className="hidden sm:inline-flex">
-              <Globe className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
-              <Link to="/auth">Log in</Link>
-            </Button>
-            <Button size="sm" asChild className="font-bold">
-              <Link to="/auth">Sign Up Free</Link>
-            </Button>
-            <Button variant="ghost" size="icon" aria-label="Menu" className="lg:hidden">
+            {user ? (
+              <>
+                <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+                  <Link to="/dashboard">Dashboard</Link>
+                </Button>
+                <Button size="sm" asChild className="font-bold">
+                  <Link to="/signals">Live Signals</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setAuthOpen(true)} className="hidden sm:inline-flex">
+                  Log in
+                </Button>
+                <Button size="sm" onClick={() => setAuthOpen(true)} className="font-bold">
+                  Sign Up Free
+                </Button>
+              </>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
+              className="lg:hidden"
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
+
+        {menuOpen && (
+          <nav className="border-t border-border/60 bg-background/95 px-4 py-3 lg:hidden" aria-label="Mobile">
+            <div className="grid grid-cols-2 gap-2">
+              {NAV.map((n) => (
+                <Link
+                  key={n.label}
+                  to={n.to}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg border border-border/60 px-3 py-2 text-sm font-semibold text-foreground"
+                >
+                  {n.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        )}
       </header>
+
 
       <main>
         {/* ── Hero ── */}
@@ -243,12 +286,12 @@ const HomeMockup = () => {
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button size="lg" asChild className="font-bold">
-                  <Link to="/global-markets">
+                  <Link to="/markets">
                     Explore Live Markets <ArrowUpRight className="ml-1.5 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild className="border-border/70 font-semibold">
-                  <Link to="/chart">
+                  <Link to="/chart/XAUUSD">
                     <Sparkles className="mr-1.5 h-4 w-4 text-primary" /> Analyze a Chart
                   </Link>
                 </Button>
@@ -322,7 +365,7 @@ const HomeMockup = () => {
                         </span>
                       </div>
                     ))}
-                    <Link to="/global-markets" className="block px-1.5 pt-2 text-[10px] font-semibold text-primary hover:underline">
+                    <Link to="/markets" className="block px-1.5 pt-2 text-[10px] font-semibold text-primary hover:underline">
                       View All Markets
                     </Link>
                   </div>
@@ -426,7 +469,7 @@ const HomeMockup = () => {
               <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
                 <Flame className="h-4 w-4 text-warning" /> Quick Access
               </h2>
-              <Link to="/global-markets" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+              <Link to="/markets" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                 All markets <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -478,7 +521,7 @@ const HomeMockup = () => {
           <div className="rounded-2xl border border-border/60 bg-card/40 p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-foreground">Popular Trading Hubs</h2>
-              <Link to="/global-markets" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+              <Link to="/markets" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                 Explore all hubs <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -606,8 +649,8 @@ const HomeMockup = () => {
                 <p className="text-xs text-muted-foreground">Join thousands of traders using Botvio every day.</p>
               </div>
             </div>
-            <Button size="lg" asChild className="font-bold">
-              <Link to="/auth">Create Free Account <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Button size="lg" onClick={() => setAuthOpen(true)} className="font-bold">
+              Create Free Account <ArrowRight className="ml-1.5 h-4 w-4" />
             </Button>
           </div>
         </section>

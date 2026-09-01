@@ -287,6 +287,9 @@ export const AppRoutes = () => (
     <Route path="auto" element={<Paid><AutoTrade /></Paid>} />
     <Route path="news-calendar" element={<NewsCalendar />} />
     <Route path="markets" element={<GlobalMarkets />} />
+    <Route path="global-markets" element={<Navigate to="/markets" replace />} />
+    <Route path="crypto" element={<Navigate to="/markets/crypto" replace />} />
+    <Route path="chart" element={<Navigate to="/chart/XAUUSD" replace />} />
     <Route path="markets/us" element={<USMarket />} />
     <Route path="markets/europe" element={<EuropeMarket />} />
     <Route path="markets/middle-east" element={<MiddleEastMarket />} />
