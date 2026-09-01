@@ -31,7 +31,7 @@ export const SiteFooter = () => {
             <ul className="space-y-2 text-muted-foreground">
               <li><Link to="/signals" className="hover:text-primary">Live Signals</Link></li>
               <li><Link to="/market-analysis" className="hover:text-primary">Daily Market Analysis</Link></li>
-              <li><Link to="/chart" className="hover:text-primary">AI Chart Analyzer</Link></li>
+              <li><Link to="/chart/XAUUSD" className="hover:text-primary">AI Chart Analyzer</Link></li>
               <li><Link to="/news-calendar" className="hover:text-primary">Economic Calendar</Link></li>
               <li><Link to="/strategies" className="hover:text-primary">Strategy Library</Link></li>
             </ul>
