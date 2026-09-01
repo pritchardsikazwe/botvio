@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 
@@ -646,8 +649,8 @@ const HomeMockup = () => {
                 <p className="text-xs text-muted-foreground">Join thousands of traders using Botvio every day.</p>
               </div>
             </div>
-            <Button size="lg" asChild className="font-bold">
-              <Link to="/auth">Create Free Account <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Button size="lg" onClick={() => setAuthOpen(true)} className="font-bold">
+              Create Free Account <ArrowRight className="ml-1.5 h-4 w-4" />
             </Button>
           </div>
         </section>
