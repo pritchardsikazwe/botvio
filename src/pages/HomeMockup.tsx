@@ -168,12 +168,17 @@ function CandleChart() {
 /* ── page ─────────────────────────────────────────────────── */
 
 const HomeMockup = () => {
+  const { user } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Botvio — AI Trading Intelligence, Live Markets & Signals"
         description="Live markets, AI chart analysis, trading signals and intelligent trading tools — built for modern traders. Explore Botvio's trading hubs, education and verified brokers."
       />
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
@@ -206,24 +211,59 @@ const HomeMockup = () => {
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
-            <Button variant="ghost" size="icon" aria-label="Search" className="hidden sm:inline-flex">
-              <Search className="h-4 w-4" />
+            <Button variant="ghost" size="icon" aria-label="Search" asChild className="hidden sm:inline-flex">
+              <Link to="/markets"><Search className="h-4 w-4" /></Link>
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Language" className="hidden sm:inline-flex">
-              <Globe className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
-              <Link to="/auth">Log in</Link>
-            </Button>
-            <Button size="sm" asChild className="font-bold">
-              <Link to="/auth">Sign Up Free</Link>
-            </Button>
-            <Button variant="ghost" size="icon" aria-label="Menu" className="lg:hidden">
+            {user ? (
+              <>
+                <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+                  <Link to="/dashboard">Dashboard</Link>
+                </Button>
+                <Button size="sm" asChild className="font-bold">
+                  <Link to="/signals">Live Signals</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setAuthOpen(true)} className="hidden sm:inline-flex">
+                  Log in
+                </Button>
+                <Button size="sm" onClick={() => setAuthOpen(true)} className="font-bold">
+                  Sign Up Free
+                </Button>
+              </>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
+              className="lg:hidden"
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
+
+        {menuOpen && (
+          <nav className="border-t border-border/60 bg-background/95 px-4 py-3 lg:hidden" aria-label="Mobile">
+            <div className="grid grid-cols-2 gap-2">
+              {NAV.map((n) => (
+                <Link
+                  key={n.label}
+                  to={n.to}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg border border-border/60 px-3 py-2 text-sm font-semibold text-foreground"
+                >
+                  {n.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        )}
       </header>
+
 
       <main>
         {/* ── Hero ── */}
