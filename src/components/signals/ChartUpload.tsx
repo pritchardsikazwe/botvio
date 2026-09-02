@@ -3,6 +3,7 @@ import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { readFunctionError } from "@/lib/chartAnalysisError";
 import { ChartSendToMt5Button } from "@/components/chart/ChartSendToMt5Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -217,7 +218,11 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
         "analyze-chart", { body: { imageUrl, symbol, timeframe, analysisType } }
       );
-      if (analysisError) throw analysisError;
+      if (analysisError) {
+        const parsed = await readFunctionError(analysisError);
+        toast.error(parsed.message);
+        return;
+      }
 
       if (analysisData.error) {
         if (analysisData.error_code === "daily_limit" || analysisData.redirect || analysisData.trial_expired) {

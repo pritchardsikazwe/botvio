@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { readFunctionError } from "@/lib/chartAnalysisError";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -114,7 +115,10 @@ export const HomeChartAnalyzer = () => {
       const { data, error } = await supabase.functions.invoke("analyze-chart", {
         body: { imageUrl: urlData.publicUrl, analysisType: "full" },
       });
-      if (error) throw error;
+      if (error) {
+        const parsed = await readFunctionError(error);
+        throw new Error(parsed.message);
+      }
       if (data?.error) throw new Error(data.error);
 
       const structured: Structured = data.structured || {};
