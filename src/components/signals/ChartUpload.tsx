@@ -218,7 +218,11 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
         "analyze-chart", { body: { imageUrl, symbol, timeframe, analysisType } }
       );
-      if (analysisError) throw analysisError;
+      if (analysisError) {
+        const parsed = await readFunctionError(analysisError);
+        toast.error(parsed.message);
+        return;
+      }
 
       if (analysisData.error) {
         if (analysisData.error_code === "daily_limit" || analysisData.redirect || analysisData.trial_expired) {
