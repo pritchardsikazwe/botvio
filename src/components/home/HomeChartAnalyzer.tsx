@@ -114,7 +114,10 @@ export const HomeChartAnalyzer = () => {
       const { data, error } = await supabase.functions.invoke("analyze-chart", {
         body: { imageUrl: urlData.publicUrl, analysisType: "full" },
       });
-      if (error) throw error;
+      if (error) {
+        const parsed = await readFunctionError(error);
+        throw new Error(parsed.message);
+      }
       if (data?.error) throw new Error(data.error);
 
       const structured: Structured = data.structured || {};
