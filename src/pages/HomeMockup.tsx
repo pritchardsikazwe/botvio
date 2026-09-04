@@ -3,6 +3,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
+import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
+import { GoldSentimentGauge } from "@/components/gold/GoldSentimentGauge";
+import { GoldChartSection } from "@/components/gold/GoldChartSection";
+import { GoldSignalsSection } from "@/components/gold/GoldSignalsSection";
 
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
