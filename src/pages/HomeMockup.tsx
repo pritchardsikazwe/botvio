@@ -323,105 +323,32 @@ const HomeMockup = () => {
               </div>
             </div>
 
-            {/* Terminal */}
-            <div className="rounded-2xl border border-border/70 bg-card/70 p-3 shadow-2xl backdrop-blur-xl">
-              <div className="mb-3 flex items-center justify-between px-1">
-                <div className="flex items-center gap-2 text-xs font-bold tracking-wide text-foreground">
-                  <BarChart3 className="h-3.5 w-3.5 text-primary" /> BOTVIO TERMINAL
-                  <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[9px] font-bold text-success">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" /> LIVE
-                  </span>
-                </div>
-                <span className="text-[10px] text-muted-foreground">Last updated: 1m ago</span>
+            {/* Quick hub shortcuts */}
+            <div className="rounded-2xl border border-border/70 bg-card/70 p-5 shadow-2xl backdrop-blur-xl">
+              <div className="mb-4 flex items-center gap-2 text-xs font-bold tracking-wide text-foreground">
+                <BarChart3 className="h-3.5 w-3.5 text-primary" /> QUICK HUB ACCESS
               </div>
-
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-border/60 bg-background/60 p-3">
-                    <div className="mb-2 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-bold text-foreground">XAU/USD</p>
-                        <p className="text-[10px] text-muted-foreground">Gold / US Dollar</p>
-                      </div>
-                      <div className="flex gap-1">
-                        {["M1", "M5", "M15", "H1", "H4", "D1"].map((tf) => (
-                          <span
-                            key={tf}
-                            className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${
-                              tf === "H1" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                            }`}
-                          >
-                            {tf}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <CandleChart />
-                  </div>
-
-                  <div className="rounded-xl border border-border/60 bg-background/60 p-2">
-                    {TICKER.slice(0, 5).map((t) => (
-                      <div key={t.name} className="flex items-center justify-between border-b border-border/30 px-1.5 py-1.5 text-xs last:border-0">
-                        <span className="font-semibold text-foreground">{t.name}</span>
-                        <span className="flex items-center gap-3 font-mono">
-                          <span className="text-foreground">{t.price}</span>
-                          <span className={t.up ? "text-success" : "text-destructive"}>{t.change}</span>
-                        </span>
-                      </div>
-                    ))}
-                    <Link to="/markets" className="block px-1.5 pt-2 text-[10px] font-semibold text-primary hover:underline">
-                      View All Markets
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Synthetic Hub", sub: "Volatility & Boom/Crash", to: "/synthetic" },
+                  { label: "Bitcoin Hub", sub: "BTC/USD 24/7 desk", to: "/bitcoin" },
+                  { label: "Weltrade Hub", sub: "Weltrade instruments", to: "/weltrade" },
+                ].map((h) => (
+                  <Button
+                    key={h.to}
+                    asChild
+                    variant="outline"
+                    className="h-auto justify-start rounded-xl border-border/60 bg-background/60 p-4 hover:border-primary/60"
+                  >
+                    <Link to={h.to} className="flex flex-col items-start gap-1 text-left">
+                      <span className="text-sm font-bold text-foreground">{h.label}</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">{h.sub}</span>
                     </Link>
-                  </div>
-                </div>
-
-                {/* AI panel */}
-                <div className="space-y-3 rounded-xl border border-border/60 bg-background/60 p-3">
-                  <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    <Sparkles className="h-3 w-3 text-primary" /> AI Market Analysis
-                  </p>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground">XAU/USD • H1</p>
-                    <p className="flex items-center gap-2 text-2xl font-extrabold text-success">
-                      BULLISH <TrendingUp className="h-5 w-5" />
-                    </p>
-                  </div>
-                  <dl className="space-y-1.5 text-[11px]">
-                    {[
-                      ["Trend", "Strong"],
-                      ["Structure", "Higher Highs"],
-                      ["Key Level", "2,380.00"],
-                      ["Setup", "Buy on confirmation"],
-                    ].map(([k, v]) => (
-                      <div key={k} className="flex items-center justify-between border-b border-border/30 pb-1.5">
-                        <dt className="text-muted-foreground">{k}</dt>
-                        <dd className="font-semibold text-foreground">{v}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                  <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/70 p-2.5">
-                    <div>
-                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Analysis Score</p>
-                      <p className="text-[10px] text-muted-foreground">Strong Bias</p>
-                    </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-success/60 text-sm font-extrabold text-success">
-                      78
-                    </div>
-                  </div>
-                  <div className="rounded-lg border border-success/40 bg-success/10 p-2.5">
-                    <p className="text-sm font-extrabold text-success">BUY</p>
-                    <div className="mt-1.5 grid grid-cols-3 gap-1 text-[10px]">
-                      <span className="text-muted-foreground">Entry<br /><span className="font-mono text-foreground">2,384.00</span></span>
-                      <span className="text-muted-foreground">TP<br /><span className="font-mono text-success">2,394.00</span></span>
-                      <span className="text-muted-foreground">SL<br /><span className="font-mono text-destructive">2,372.00</span></span>
-                    </div>
-                  </div>
-                  <p className="text-[9px] leading-tight text-muted-foreground">
-                    Educational analysis only. Trading involves risk of loss.
-                  </p>
-                </div>
+                  </Button>
+                ))}
               </div>
             </div>
+
           </div>
         </section>
 
