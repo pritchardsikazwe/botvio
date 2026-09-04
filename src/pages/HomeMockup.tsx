@@ -425,6 +425,54 @@ const HomeMockup = () => {
           </div>
         </section>
 
+        {/* ── Featured Gold Trading Hub (full preview) ── */}
+        <section className="container mx-auto px-4 py-6" aria-label="Gold trading hub preview">
+          <div className="rounded-2xl border border-warning/30 bg-gradient-to-b from-card/80 to-card/40 p-5 shadow-2xl">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <Badge className="bg-warning/15 text-[10px] font-bold uppercase tracking-widest text-warning hover:bg-warning/15">
+                    🥇 Featured Hub
+                  </Badge>
+                  <Badge variant="outline" className="border-success/40 text-[10px] text-success">Live XAU/USD</Badge>
+                </div>
+                <h2 className="text-2xl font-extrabold text-foreground">
+                  Gold Trading Hub
+                </h2>
+                <p className="mt-1 max-w-xl text-xs text-muted-foreground">
+                  Real-time XAU/USD charts, AI signals, Botvio AI strategies, sentiment and risk guidance — right on your homepage.
+                </p>
+              </div>
+              <div className="flex flex-col items-start gap-2 sm:items-end">
+                <GoldPriceHeader />
+                <Button size="sm" asChild className="font-bold">
+                  <Link to="/gold">
+                    Open Full Gold Hub <ArrowRight className="ml-1.5 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <GoldSentimentGauge />
+
+            <div className="mt-4">
+              <GoldChartSection />
+            </div>
+
+            <div className="mt-6">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
+                  <Bell className="h-4 w-4 text-primary" /> Active Gold Signals
+                </h3>
+                <Link to="/gold" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                  All gold signals <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <GoldSignalsSection />
+            </div>
+          </div>
+        </section>
+
         {/* ── Ticker ── */}
         <section className="border-b border-border/40" aria-label="Live market prices">
           <div className="container mx-auto px-4 py-4">
