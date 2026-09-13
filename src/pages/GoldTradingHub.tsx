@@ -11,6 +11,7 @@ import { GoldCommunitySection } from "@/components/gold/GoldCommunitySection";
 import { GoldSentimentGauge } from "@/components/gold/GoldSentimentGauge";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
 import { GoldBotvioStrategy } from "@/components/gold/GoldHauzaStrategy";
+import { TradingFunnel } from "@/components/seo/TradingFunnel";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Signal, Crosshair, Target, TrendingUp, Clock, ShieldCheck, LayoutDashboard, Sparkles, Layers, Newspaper } from "lucide-react";
@@ -54,13 +55,10 @@ const GoldTradingHub = () => {
           stats={QUICK_STATS.map((s) => ({ icon: s.icon, value: s.value, label: s.label }))}
         />
 
-        {/* Sentiment Gauge Row */}
         <GoldSentimentGauge />
-
-        {/* Chart-dominant workspace */}
         <GoldChartSection />
+        <TradingFunnel asset="XAUUSD" />
 
-        {/* Tabbed Sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid h-auto w-full grid-cols-3 gap-1 border border-border/50 bg-card p-1 md:grid-cols-6">
             <TabsTrigger value="overview" className="gap-1.5 text-xs font-bold data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
@@ -150,7 +148,6 @@ const GoldTradingHub = () => {
             <GoldTipsSection />
           </TabsContent>
         </Tabs>
-
       </main>
     </div>
   );
