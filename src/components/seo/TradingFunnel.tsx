@@ -8,7 +8,7 @@ interface TradingFunnelProps {
   brokerPaths?: string[];
 }
 
-export function TradingFunnel({ asset, brokerPaths = ["/brokers/deriv", "/brokers/exness", "/brokers/weltrade", "/brokers/pocket-option"] }: TradingFunnelProps) {
+export function TradingFunnel({ asset, brokerPaths = ["/brokers/deriv", "/brokers/exness", "/brokers/weltrade", "/brokers/pocket-option", "/brokers/binance"] }: TradingFunnelProps) {
   return (
     <section className="space-y-4" aria-label={`${asset} trading next steps`}>
       <Card className="border-primary/20 bg-card/80">
@@ -19,8 +19,8 @@ export function TradingFunnel({ asset, brokerPaths = ["/brokers/deriv", "/broker
               <h2 className="text-lg font-bold text-foreground">Research {asset}, then choose your next action</h2>
               <p className="mt-1 text-sm text-muted-foreground">Use the market tools first. Account and broker choices come after you understand the setup.</p>
             </div>
-            <Link to="/signup">
-              <Button className="gap-2 font-bold"><UserPlus className="h-4 w-4" /> Create free account</Button>
+            <Link to="/landing">
+              <Button className="gap-2 font-bold"><UserPlus className="h-4 w-4" /> Start with Botvio</Button>
             </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
