@@ -12,21 +12,71 @@ interface Props {
 }
 
 /**
- * Blocks premium routes (trading hubs, signals, bots) unless the visitor:
- *  - is an admin/signal-manager, OR
- *  - has an active paid subscription, OR
- *  - is still within their free-trial window.
+ * Blocks premium trading routes while keeping public market/SEO content
+ * crawlable and accessible to signed-out visitors.
  *
- * Non-authenticated users are sent to `/` with a return path so they can
- * sign in and come back. Authenticated but unpaid + trial-expired users see
- * a full-page lock screen that routes them to /billing.
+ * Public market pages are informational/lead-generation surfaces. Actual
+ * premium signals, bot controls, trading and automated execution remain
+ * protected by this guard.
  */
+const PUBLIC_SEO_PATHS = new Set([
+  "/gold",
+  "/bitcoin",
+  "/btc",
+  "/silver",
+  "/xag",
+  "/gbp-usd",
+  "/eur-usd",
+  "/usd-jpy",
+  "/aud-usd",
+  "/usd-cad",
+  "/usd-chf",
+  "/eur-gbp",
+  "/eur-jpy",
+  "/nzd-usd",
+  "/usd-cny",
+  "/stocks/nvda",
+  "/stocks/tsla",
+  "/stocks/amd",
+  "/stocks/mu",
+  "/stocks/aapl",
+  "/stocks/msft",
+  "/stocks/avgo",
+  "/stocks/amzn",
+  "/stocks/meta",
+  "/stocks/googl",
+  "/us30",
+  "/dow",
+  "/dj30",
+  "/nas100",
+  "/nasdaq100",
+  "/ustec",
+  "/ger40",
+  "/dax",
+  "/de40",
+  "/weltrade",
+  "/synthetic-hub",
+  "/synthetic",
+  "/synthetics",
+]);
+
+function isPublicSeoPath(pathname: string) {
+  // AppRoutes is also mounted under locale prefixes such as /en/..., so
+  // normalize a leading locale before checking the public route allowlist.
+  const normalized = pathname.replace(/^\/[a-z]{2}(?:-[A-Z]{2})?(?=\/|$)/, "") || "/";
+  return PUBLIC_SEO_PATHS.has(normalized) || /^\/chart\/[^/]+$/.test(normalized);
+}
+
 export function PaidRouteGuard({ children }: Props) {
   const location = useLocation();
   const gate = useAccessGate();
 
   // Open-access week: anyone (including signed-out visitors) can browse.
   if (isPublicPreviewActive()) return <>{children}</>;
+
+  // Public market hubs and charts must remain accessible to search engines
+  // and signed-out visitors. Trading actions inside premium areas remain gated.
+  if (isPublicSeoPath(location.pathname)) return <>{children}</>;
 
   if (gate.isLoading) {
     return (
