@@ -4,7 +4,7 @@ import { useAccessGate } from "@/hooks/useAccessGate";
 import { isPublicPreviewActive } from "@/config/access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Crown, Sparkles } from "lucide-react";
+import { Lock, Crown, Sparkles, ArrowRight, Brain, Copy, LineChart, Bot, Users } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 
 interface Props {
@@ -20,63 +20,80 @@ interface Props {
  * protected by this guard.
  */
 const PUBLIC_SEO_PATHS = new Set([
-  "/gold",
-  "/bitcoin",
-  "/btc",
-  "/silver",
-  "/xag",
-  "/gbp-usd",
-  "/eur-usd",
-  "/usd-jpy",
-  "/aud-usd",
-  "/usd-cad",
-  "/usd-chf",
-  "/eur-gbp",
-  "/eur-jpy",
-  "/nzd-usd",
-  "/usd-cny",
-  "/stocks/nvda",
-  "/stocks/tsla",
-  "/stocks/amd",
-  "/stocks/mu",
-  "/stocks/aapl",
-  "/stocks/msft",
-  "/stocks/avgo",
-  "/stocks/amzn",
-  "/stocks/meta",
-  "/stocks/googl",
-  "/us30",
-  "/dow",
-  "/dj30",
-  "/nas100",
-  "/nasdaq100",
-  "/ustec",
-  "/ger40",
-  "/dax",
-  "/de40",
-  "/weltrade",
-  "/synthetic-hub",
-  "/synthetic",
-  "/synthetics",
+  "/gold", "/bitcoin", "/btc", "/silver", "/xag", "/gbp-usd",
+  "/eur-usd", "/usd-jpy", "/aud-usd", "/usd-cad", "/usd-chf", "/eur-gbp",
+  "/eur-jpy", "/nzd-usd", "/usd-cny", "/stocks/nvda", "/stocks/tsla",
+  "/stocks/amd", "/stocks/mu", "/stocks/aapl", "/stocks/msft", "/stocks/avgo",
+  "/stocks/amzn", "/stocks/meta", "/stocks/googl", "/us30", "/dow", "/dj30",
+  "/nas100", "/nasdaq100", "/ustec", "/ger40", "/dax", "/de40", "/weltrade",
+  "/synthetic-hub", "/synthetic", "/synthetics",
 ]);
 
 function isPublicSeoPath(pathname: string) {
-  // AppRoutes is also mounted under locale prefixes such as /en/..., so
-  // normalize a leading locale before checking the public route allowlist.
   const normalized = pathname.replace(/^\/[a-z]{2}(?:-[A-Z]{2})?(?=\/|$)/, "") || "/";
   return PUBLIC_SEO_PATHS.has(normalized) || /^\/chart\/[^/]+$/.test(normalized);
+}
+
+function PublicConversionPanel() {
+  return (
+    <section className="container mx-auto px-4 pb-8">
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
+        <CardContent className="p-5 md:p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+            <div>
+              <p className="text-xs font-semibold tracking-wider text-primary uppercase">Continue with Botvio</p>
+              <h2 className="text-xl md:text-2xl font-bold mt-1">From market research to action</h2>
+              <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                Use the public market tools first. Create a free account when you want deeper signals, AI analysis, copy trading and automated strategies.
+              </p>
+            </div>
+            <Button asChild variant="gold" size="lg" className="shrink-0">
+              <Link to="/?authRequired=1&next=/dashboard">Create free account <ArrowRight className="h-4 w-4" /></Link>
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-5">
+            <Link to="/chart/XAUUSD" className="rounded-lg border border-border p-3 hover:border-primary/50 transition-colors">
+              <LineChart className="h-4 w-4 text-primary mb-1" /><span className="text-xs font-medium">AI Charts</span>
+            </Link>
+            <Link to="/signals" className="rounded-lg border border-border p-3 hover:border-primary/50 transition-colors">
+              <Sparkles className="h-4 w-4 text-primary mb-1" /><span className="text-xs font-medium">Signals</span>
+            </Link>
+            <Link to="/copy-trading" className="rounded-lg border border-border p-3 hover:border-primary/50 transition-colors">
+              <Copy className="h-4 w-4 text-primary mb-1" /><span className="text-xs font-medium">Copy Trading</span>
+            </Link>
+            <Link to="/bots" className="rounded-lg border border-border p-3 hover:border-primary/50 transition-colors">
+              <Bot className="h-4 w-4 text-primary mb-1" /><span className="text-xs font-medium">AI Bots</span>
+            </Link>
+            <Link to="/brokers" className="rounded-lg border border-border p-3 hover:border-primary/50 transition-colors">
+              <Users className="h-4 w-4 text-primary mb-1" /><span className="text-xs font-medium">Brokers</span>
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2 mt-4 text-[11px] text-muted-foreground">
+            <Brain className="h-3.5 w-3.5 text-primary" />
+            Compare your options before depositing. Trading involves risk and availability varies by country.
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+  );
 }
 
 export function PaidRouteGuard({ children }: Props) {
   const location = useLocation();
   const gate = useAccessGate();
 
-  // Open-access week: anyone (including signed-out visitors) can browse.
   if (isPublicPreviewActive()) return <>{children}</>;
 
-  // Public market hubs and charts must remain accessible to search engines
-  // and signed-out visitors. Trading actions inside premium areas remain gated.
-  if (isPublicSeoPath(location.pathname)) return <>{children}</>;
+  if (isPublicSeoPath(location.pathname)) {
+    return (
+      <>
+        {children}
+        <PublicConversionPanel />
+      </>
+    );
+  }
 
   if (gate.isLoading) {
     return (
@@ -117,9 +134,7 @@ export function PaidRouteGuard({ children }: Props) {
                 <Link to="/contact"><Sparkles className="mr-2 h-4 w-4" /> Contact Admin</Link>
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground pt-2">
-              Admins can activate your account instantly from the admin dashboard.
-            </p>
+            <p className="text-xs text-muted-foreground pt-2">Admins can activate your account instantly from the admin dashboard.</p>
           </CardContent>
         </Card>
       </main>
