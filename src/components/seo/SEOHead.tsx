@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { languages, DEFAULT_LANGUAGE, type LanguageCode } from "@/i18n";
 import { getSeoEntry } from "@/i18n/seoRegistry";
-import { buildLocalizedPath } from "@/i18n/useLocalized";
+import { buildLocalizedPath, stripLocalePrefix } from "@/i18n/useLocalized";
 
 interface SEOHeadProps {
   title?: string;
@@ -13,7 +13,6 @@ interface SEOHeadProps {
   ogType?: string;
   noIndex?: boolean;
   jsonLd?: Record<string, unknown>;
-  /** When set, pulls translated title/description/keywords from seoRegistry. */
   seoKey?: string;
 }
 
@@ -42,52 +41,31 @@ export const SEOHead = ({
 
   const lang = (i18n.language?.split("-")[0] || DEFAULT_LANGUAGE) as LanguageCode;
   const siteName = settings?.site_name || "Botvio";
-  const baseUrl =
-    settings?.canonical_base_url || settings?.site_url || "https://botvio.live";
+  const baseUrl = settings?.canonical_base_url || settings?.site_url || "https://botvio.live";
+  const { path: canonicalPathFromUrl } = stripLocalePrefix(location.pathname);
+  const canonicalPath = canonicalPathFromUrl || "/";
 
-  // Pull translated SEO entry (with English fallback)
   const seo = seoKey ? getSeoEntry(seoKey, lang) : null;
-
   const pageTitle = title
     ? `${title} | ${siteName}`
     : seo?.title
     ? `${seo.title} | ${siteName}`
     : settings?.meta_title_default || `${siteName} – AI Trading Bots & Signals`;
-
-  const pageDescription =
-    description ||
-    seo?.description ||
-    settings?.meta_description_default ||
-    "Automate your trading with AI bots, live signals, and copy trading.";
-
+  const pageDescription = description || seo?.description || settings?.meta_description_default || "Automate your trading with AI bots, live signals, and copy trading.";
   const pageKeywords = seo?.keywords || settings?.meta_keywords || undefined;
+  const pageOgImage = toAbsoluteUrl(ogImage || settings?.og_image_url || "/botvio-og.jpg", baseUrl);
 
-  const ogImageRaw = ogImage || settings?.og_image_url || "/botvio-og.jpg";
-  const pageOgImage = toAbsoluteUrl(ogImageRaw, baseUrl);
-
-  // Canonical = localized URL for the current language
-  const canonicalPath = buildLocalizedPath(location.pathname, lang);
-  const canonicalUrl = `${baseUrl}${canonicalPath}`;
-
-  // Hreflang alternates: one per language + x-default → English
+  // Always canonicalize from the locale-stripped route. This prevents /es/es/... duplicates.
+  const canonicalUrl = `${baseUrl}${buildLocalizedPath(canonicalPath, lang)}`;
   const alternates = languages.map((l) => ({
     code: l.code,
-    href: `${baseUrl}${buildLocalizedPath(
-      // Always build alternates from the canonical English path
-      location.pathname.replace(new RegExp(`^/${lang}(/|$)`, "i"), "/"),
-      l.code as LanguageCode
-    )}`,
+    href: `${baseUrl}${buildLocalizedPath(canonicalPath, l.code as LanguageCode)}`,
   }));
-  const xDefaultHref = `${baseUrl}${location.pathname.replace(
-    new RegExp(`^/${lang}(/|$)`, "i"),
-    "/"
-  )}`;
+  const xDefaultHref = `${baseUrl}${buildLocalizedPath(canonicalPath, DEFAULT_LANGUAGE)}`;
 
   const robotsContent = noIndex
     ? "noindex, nofollow"
-    : `${settings?.robots_index !== false ? "index" : "noindex"}, ${
-        settings?.robots_follow !== false ? "follow" : "nofollow"
-      }`;
+    : `${settings?.robots_index !== false ? "index" : "noindex"}, ${settings?.robots_follow !== false ? "follow" : "nofollow"}`;
 
   const defaultJsonLd = {
     "@context": "https://schema.org",
@@ -118,16 +96,9 @@ export const SEOHead = ({
       <meta name="description" content={pageDescription} />
       <meta name="robots" content={robotsContent} />
       <link rel="canonical" href={canonicalUrl} />
-
       {pageKeywords && <meta name="keywords" content={pageKeywords} />}
-
-      {/* Hreflang alternates */}
-      {alternates.map((a) => (
-        <link key={a.code} rel="alternate" hrefLang={a.code} href={a.href} />
-      ))}
+      {alternates.map((a) => <link key={a.code} rel="alternate" hrefLang={a.code} href={a.href} />)}
       <link rel="alternate" hrefLang="x-default" href={xDefaultHref} />
-
-      {/* Open Graph */}
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
       <meta property="og:image" content={pageOgImage} />
@@ -138,22 +109,12 @@ export const SEOHead = ({
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content={siteName} />
       <meta property="og:locale" content={lang} />
-
-      {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={pageOgImage} />
-      <meta name="twitter:image:alt" content={`${siteName} — AI forex signals, gold trading & chart analysis`} />
-
-      {/* Verification */}
-      {settings?.google_verification_code && (
-        <meta name="google-site-verification" content={settings.google_verification_code} />
-      )}
-      {settings?.bing_verification_code && (
-        <meta name="msvalidate.01" content={settings.bing_verification_code} />
-      )}
-
+      {settings?.google_verification_code && <meta name="google-site-verification" content={settings.google_verification_code} />}
+      {settings?.bing_verification_code && <meta name="msvalidate.01" content={settings.bing_verification_code} />}
       <script type="application/ld+json">{JSON.stringify(jsonLd || defaultJsonLd)}</script>
     </Helmet>
   );
