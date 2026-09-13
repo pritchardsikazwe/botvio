@@ -4,7 +4,7 @@ import { useAccessGate } from "@/hooks/useAccessGate";
 import { isPublicPreviewActive } from "@/config/access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Crown, Sparkles, ArrowRight, Brain, Copy, LineChart, Bot, Users } from "lucide-react";
+import { Lock, Crown, Sparkles, ArrowRight, Brain, Copy, LineChart, Bot, Users, ExternalLink } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 
 interface Props {
@@ -34,6 +34,14 @@ function isPublicSeoPath(pathname: string) {
   return PUBLIC_SEO_PATHS.has(normalized) || /^\/chart\/[^/]+$/.test(normalized);
 }
 
+const BROKER_PATHS = [
+  { name: "Deriv", path: "/brokers/deriv", description: "Synthetic indices & options" },
+  { name: "Exness", path: "/brokers/exness", description: "Forex, gold & CFDs" },
+  { name: "Weltrade", path: "/brokers/weltrade", description: "Forex & trading tools" },
+  { name: "Binance", path: "/brokers/binance", description: "Crypto markets" },
+  { name: "Pocket Option", path: "/brokers/pocket-option", description: "Binary options" },
+];
+
 function PublicConversionPanel() {
   return (
     <section className="container mx-auto px-4 pb-8">
@@ -44,7 +52,8 @@ function PublicConversionPanel() {
               <p className="text-xs font-semibold tracking-wider text-primary uppercase">Continue with Botvio</p>
               <h2 className="text-xl md:text-2xl font-bold mt-1">From market research to action</h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                Use the public market tools first. Create a free account when you want deeper signals, AI analysis, copy trading and automated strategies.
+                Research the market first. Create a free Botvio account when you want deeper AI analysis,
+                signals, copy trading and automated strategies.
               </p>
             </div>
             <Button asChild variant="gold" size="lg" className="shrink-0">
@@ -68,6 +77,33 @@ function PublicConversionPanel() {
             <Link to="/brokers" className="rounded-lg border border-border p-3 hover:border-primary/50 transition-colors">
               <Users className="h-4 w-4 text-primary mb-1" /><span className="text-xs font-medium">Brokers</span>
             </Link>
+          </div>
+
+          <div className="mt-5 border-t border-border/50 pt-4">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Broker options</p>
+                <p className="text-sm font-semibold text-foreground">Choose a broker after reviewing the market</p>
+              </div>
+              <Link to="/brokers" className="text-xs font-semibold text-primary hover:underline">Compare all</Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {BROKER_PATHS.map((broker) => (
+                <Link
+                  key={broker.path}
+                  to={broker.path}
+                  className="rounded-lg border border-border/70 bg-background/40 p-3 hover:border-primary/50 transition-colors"
+                >
+                  <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                    {broker.name}<ExternalLink className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                  <div className="mt-1 text-[10px] text-muted-foreground">{broker.description}</div>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
+              Some broker links may be affiliate links. Review fees, terms, regulation, availability and risk before opening an account.
+            </p>
           </div>
 
           <div className="flex items-center gap-2 mt-4 text-[11px] text-muted-foreground">
