@@ -94,4 +94,4 @@ User-agent: Bytespider
 Disallow: /
 
 # Sitemap
-Sitemap: https://botvio.live/sitemap.xml
+Sitemap: https://botvio.lovable.app/sitemap.xml
