@@ -20,7 +20,9 @@ import { TradingChart } from "@/components/chart/TradingChart";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 import { computeIndicators } from "@/lib/marketData/indicators";
 import { computeSignals, summarizeSignals, type EngineSignal } from "@/lib/marketData/signalEngine";
+import { computeSyntxSignals, detectSyntxState, getSyntxProfile, type SyntxStrategyMode } from "@/lib/marketData/syntxStrategy";
 import type { Timeframe } from "@/lib/marketData/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   WELTRADE_CATEGORIES,
   WELTRADE_CATEGORY_LABEL,
@@ -58,6 +60,7 @@ function loadPrefs(): Prefs {
 export const WeltradeSignalsEngine = () => {
   const [prefs, setPrefs] = useState<Prefs>(() => loadPrefs());
   const [focusSignal, setFocusSignal] = useState<EngineSignal | null>(null);
+  const [strategyMode, setStrategyMode] = useState<SyntxStrategyMode>("trend");
 
   const instrument = useMemo<WeltradeInstrument>(
     () => WELTRADE_INSTRUMENTS.find((i) => i.key === prefs.instrument) ?? WELTRADE_INSTRUMENTS[0],
@@ -80,19 +83,36 @@ export const WeltradeSignalsEngine = () => {
   // One indicator pass shared by the chart, the signal engine and the stats.
   const indicators = useMemo(() => computeIndicators(candles), [candles]);
   const signals = useMemo(
-    () =>
-      computeSignals(
-        candles,
+    () => {
+      const options =
         {
           symbol: instrument.mt5Symbol,
           label: instrument.label,
           timeframe: prefs.timeframe,
           minConfidence: 55,
-        },
+        };
+      return instrument.syntxFamily
+        ? computeSyntxSignals(candles, { ...options, family: instrument.syntxFamily, mode: strategyMode }, indicators)
+        : computeSignals(
+        candles,
+        options,
         indicators
-      ),
-    [candles, indicators, instrument, prefs.timeframe]
+      );
+    },
+    [candles, indicators, instrument, prefs.timeframe, strategyMode]
   );
+
+  const familyProfile = useMemo(() => getSyntxProfile(instrument.syntxFamily), [instrument.syntxFamily]);
+  const familyState = useMemo(
+    () => instrument.syntxFamily ? detectSyntxState(candles, instrument.syntxFamily, indicators) : null,
+    [candles, indicators, instrument.syntxFamily]
+  );
+
+  useEffect(() => {
+    if (familyProfile && !familyProfile.modes.some((mode) => mode.value === strategyMode)) {
+      setStrategyMode(familyProfile.modes[0].value);
+    }
+  }, [familyProfile, strategyMode]);
 
   const recent = useMemo(() => [...signals].reverse(), [signals]);
   const activeSignal = useMemo(
@@ -162,7 +182,11 @@ export const WeltradeSignalsEngine = () => {
                         <span className={cn("truncate text-xs font-bold", active ? "text-primary" : "text-foreground")}>
                           {inst.label}
                         </span>
-                        {inst.bias !== "both" && (
+                        {inst.syntxFamily ? (
+                          <Badge variant="outline" className="text-[9px] font-bold">
+                            {getSyntxProfile(inst.syntxFamily)?.label}
+                          </Badge>
+                        ) : inst.bias !== "both" && (
                           <Badge
                             variant="outline"
                             className={cn(
@@ -189,6 +213,27 @@ export const WeltradeSignalsEngine = () => {
 
         {/* Chart + signals */}
         <div className="order-1 min-w-0 space-y-4 lg:order-2">
+          {familyProfile && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="grid gap-3 p-3 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-end">
+                <div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <p className="text-sm font-black text-foreground">{familyProfile.label}</p>
+                    {familyProfile.badges.map((badge) => <Badge key={badge} variant="outline" className="text-[9px]">{badge}</Badge>)}
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground"><strong className="text-foreground">How this index behaves:</strong> {familyProfile.behaviour}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground"><strong className="text-foreground">Observed chart state:</strong> {familyState?.label ?? "Data unavailable"}. {familyState?.detail}</p>
+                </div>
+                <div>
+                  <label htmlFor="syntx-strategy-mode" className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">Strategy mode</label>
+                  <Select value={strategyMode} onValueChange={(value) => setStrategyMode(value as SyntxStrategyMode)}>
+                    <SelectTrigger id="syntx-strategy-mode" className="min-h-11"><SelectValue /></SelectTrigger>
+                    <SelectContent>{familyProfile.modes.map((mode) => <SelectItem key={mode.value} value={mode.value}>{mode.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <TradingChart
             candles={candles}
             indicators={indicators}
@@ -253,7 +298,8 @@ export const WeltradeSignalsEngine = () => {
             </CardHeader>
             <CardContent className="space-y-2 p-3 pt-0">
               <p className="text-[10px] leading-relaxed text-muted-foreground">
-                Signals are computed from the exact candles shown above ({prefs.timeframe},{" "}
+                 {familyProfile ? `${familyProfile.label} signals use only its compatible ${strategyMode} framework. ` : "Signals use the standard market framework. "}
+                 Signals are computed from the exact candles shown above ({prefs.timeframe},{" "}
                 {diagnostics.candleCount} bars) and anchored to the candle that triggered them. Outcomes are resolved by
                 walking forward through the same dataset — this is historical performance on this timeframe, not a
                 predicted or guaranteed win rate.
@@ -269,8 +315,9 @@ export const WeltradeSignalsEngine = () => {
                   <Radio className="mx-auto mb-1.5 h-5 w-5 text-muted-foreground" />
                   <p className="text-xs font-bold text-foreground">No valid setup right now</p>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">
-                    The engine only publishes a signal when trend, momentum and RSI agree. Try another timeframe or
-                    instrument.
+                     {familyProfile?.modes[0]?.value === "progression"
+                       ? "This family needs tick-level progression evidence. Data unavailable means Botvio will not invent a setup."
+                       : "The selected family-compatible framework has not confirmed a setup. Try another timeframe or instrument."}
                   </p>
                 </div>
               ) : (
