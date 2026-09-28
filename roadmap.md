@@ -9,3 +9,6 @@
 - [ ] Update the Weltrade page from the supplied official sources with qualified account conditions, mobile comparison UI, verification CTA, and risk disclosure.
 - [ ] Re-test Signals, Trading, and Weltrade navigation and rendered pages on mobile and desktop.
 - [ ] Run lint, type checks, tests, production build, and inspect preview health.
+- [ ] Add a filterable, status-aware Weltrade Signals section using only existing signal fields, with chart/detail links and resilient states.
+- [ ] Upgrade shared market charts with supported symbol/timeframe/view controls, real-data indicators and signal overlays, plus mobile-safe loading/unavailable states.
+- [ ] QA Weltrade, signals/history, trading, gold, bitcoin, FX, and chart pages at phone and desktop widths.
