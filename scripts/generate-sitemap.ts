@@ -37,7 +37,7 @@ const newEntries: string[] = [];
 const blogSection: string[] = [];
 for (const slug of [...blogSlugs].sort()) {
   const loc = `${BASE}/blog/${slug}`;
-  if (!existingUrls.has(loc)) blogSection.push(url(loc, { changefreq: "weekly", priority: "0.7", lastmod: today }));
+  if (!existingUrls.has(loc)) blogSection.push(url(loc, { changefreq: "weekly", priority: "0.7" }));
 }
 if (blogSection.length) {
   newEntries.push(`\n  <!-- ═══ Blog Posts (auto-added) ═══ -->\n${blogSection.join("\n")}`);
@@ -47,7 +47,7 @@ if (blogSection.length) {
 const countrySection: string[] = [];
 for (const slug of [...countrySlugs].sort()) {
   const loc = `${BASE}/${slug}`;
-  if (!existingUrls.has(loc)) countrySection.push(url(loc, { changefreq: "weekly", priority: "0.7", lastmod: today }));
+  if (!existingUrls.has(loc)) countrySection.push(url(loc, { changefreq: "weekly", priority: "0.7" }));
 }
 if (countrySection.length) {
   newEntries.push(`\n  <!-- ═══ Country Landing Pages (auto-added) ═══ -->\n${countrySection.join("\n")}`);
