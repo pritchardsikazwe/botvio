@@ -18,9 +18,9 @@ export const SiteFooter = () => {
           <nav aria-label="Trading hubs">
             <h2 className="font-semibold mb-3 text-foreground">Trading Hubs</h2>
             <ul className="space-y-2 text-muted-foreground">
-              <li><Link to="/gold-trading-hub" className="hover:text-primary">Gold (XAUUSD)</Link></li>
+              <li><Link to="/gold" className="hover:text-primary">Gold (XAUUSD)</Link></li>
               <li><Link to="/silver" className="hover:text-primary">Silver (XAGUSD)</Link></li>
-              <li><Link to="/bitcoin-trading-hub" className="hover:text-primary">Bitcoin (BTCUSD)</Link></li>
+              <li><Link to="/bitcoin" className="hover:text-primary">Bitcoin (BTCUSD)</Link></li>
               <li><Link to="/us30" className="hover:text-primary">US30 (Dow Jones)</Link></li>
               <li><Link to="/nas100" className="hover:text-primary">NAS100 (Nasdaq)</Link></li>
               <li><Link to="/ger40" className="hover:text-primary">GER40 (DAX)</Link></li>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download, ScanSearch, TrendingUp } from "lucide-react";
 import { TradesDrawer } from "@/components/trading/TradesDrawer";
 import { Button } from "@/components/ui/button";
@@ -43,9 +43,10 @@ export const Header = () => {
       <header className="sticky top-0 z-50 glass-card border-b border-border/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div 
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => navigate('/')}
+            <Link
+              to="/"
+              className="flex items-center gap-3"
+              aria-label="Botvio home"
             >
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-background flex items-center justify-center border border-border/50">
                 <img
@@ -60,7 +61,7 @@ export const Header = () => {
                 <span className="font-bold text-lg gold-text block">BOTVIO</span>
                 <p className="text-[10px] text-muted-foreground">powered by Deriv</p>
               </div>
-            </div>
+            </Link>
 
             {/* Navigation - Desktop (Botvio information architecture) */}
             <nav className="hidden xl:flex items-center gap-0.5" aria-label="Primary navigation">
@@ -95,9 +96,11 @@ export const Header = () => {
                       <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {group.items.map((item) => (
-                        <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)}>
-                          {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
-                          <span className="flex-1">{item.label}</span>
+                        <DropdownMenuItem key={item.to} asChild>
+                          <Link to={item.to}>
+                            {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
+                            <span className="flex-1">{item.label}</span>
+                          </Link>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -118,9 +121,11 @@ export const Header = () => {
                       {gi > 0 && <DropdownMenuSeparator />}
                       <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
                       {group.items.map((item) => (
-                        <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)}>
-                          {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
-                          {item.label}
+                        <DropdownMenuItem key={item.to} asChild>
+                          <Link to={item.to}>
+                            {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
+                            {item.label}
+                          </Link>
                         </DropdownMenuItem>
                       ))}
                     </div>
@@ -164,15 +169,17 @@ export const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 glass-card max-h-[80vh] overflow-y-auto">
-                  <DropdownMenuItem onClick={() => navigate('/')}>Home</DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/">Home</Link></DropdownMenuItem>
                   {PRIMARY_NAV.map((group) => (
                     <div key={group.label}>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
                       {(group.items ?? [{ label: group.label, to: group.to!, icon: group.icon }]).map((item) => (
-                        <DropdownMenuItem key={`${group.label}-${item.to}`} onClick={() => navigate(item.to)}>
-                          {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
-                          {item.label}
+                        <DropdownMenuItem key={`${group.label}-${item.to}`} asChild>
+                          <Link to={item.to}>
+                            {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
+                            {item.label}
+                          </Link>
                         </DropdownMenuItem>
                       ))}
                     </div>
@@ -182,9 +189,11 @@ export const Header = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
                       {group.items.map((item) => (
-                        <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)}>
-                          {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
-                          {item.label}
+                        <DropdownMenuItem key={item.to} asChild>
+                          <Link to={item.to}>
+                            {item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}
+                            {item.label}
+                          </Link>
                         </DropdownMenuItem>
                       ))}
                     </div>

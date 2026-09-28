@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
-import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCircle, BarChart3 } from "lucide-react";
+import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCircle, BarChart3, Signal, CandlestickChart } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { MarketDataPanel } from "@/components/trading/MarketDataPanel";
 import { SEOHead } from "@/components/seo/SEOHead";
@@ -362,7 +362,19 @@ const Dashboard = () => {
         )}
 
         {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+            <Link to="/signals">
+              <Signal className="h-6 w-6 mb-2" />
+              <span>Live Signals</span>
+            </Link>
+          </Button>
+          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+            <Link to="/trading">
+              <CandlestickChart className="h-6 w-6 mb-2" />
+              <span>Trading Workspace</span>
+            </Link>
+          </Button>
           <Button variant="outline" className="h-auto py-4 flex-col" asChild>
             <Link to="/accounts">
               <Wallet className="h-6 w-6 mb-2" />
@@ -376,7 +388,7 @@ const Dashboard = () => {
             </Link>
           </Button>
           <Button variant="outline" className="h-auto py-4 flex-col" asChild>
-            <Link to="/providers">
+            <Link to="/copy-trading">
               <Users className="h-6 w-6 mb-2" />
               <span>Copy Traders</span>
             </Link>

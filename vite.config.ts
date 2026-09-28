@@ -110,7 +110,7 @@ export default defineConfig(({ mode }) => ({
           }
         ],
         categories: ["finance", "business", "productivity"],
-        screenshots: [],
+        screenshots: [{ src: "/botvio-og.jpg", sizes: "1200x630", type: "image/jpeg", form_factor: "wide" }],
         shortcuts: [
           {
             name: "Dashboard",
