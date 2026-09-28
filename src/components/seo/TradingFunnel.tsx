@@ -48,7 +48,7 @@ export function TradingFunnel({ asset, brokerPaths = ["/brokers/deriv", "/broker
           <div className="mt-4 border-t border-border/50 pt-4">
             <p className="mb-2 text-xs font-semibold text-muted-foreground">Compare brokers after your research</p>
             <div className="flex flex-wrap gap-2">
-              {brokerPaths.map((path) => <Link key={path} to={path}><Button variant="outline" size="sm" className="text-xs">{path.split("/").pop()?.replaceAll("-", " ")}</Button></Link>)}
+              {brokerPaths.map((path) => <Link key={path} to={path}><Button variant="outline" size="sm" className="text-xs">{path.split("/").pop()?.replace(/-/g, " ")}</Button></Link>)}
             </div>
           </div>
           <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">Trading involves risk. Market analysis is informational and does not guarantee results. Review broker terms, fees and eligibility before opening an account.</p>
