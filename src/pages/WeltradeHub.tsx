@@ -21,7 +21,7 @@ const WeltradeHub = () => {
     <div className="min-h-screen bg-background">
       <SEOHead seoKey="weltrade"
         title="Weltrade Hub – GainX, PainX, FlipX, SwitchX & FX Charts & Signals"
-        description="Live Weltrade SyntX terminal. GainX 400/600/800, PainX 400/600/800, FlipX 1-5, SwitchX 600/1200/1800, FX 20/40/80 — charts, signals & community."
+        description="Weltrade analysis hub with family-aware SyntX strategies, live MT5 bridge charts, signals, account comparisons and educational risk guidance."
         ogImage="https://botvio.lovable.app/icon-512.png"
       />
       <Header />
@@ -44,7 +44,7 @@ const WeltradeHub = () => {
                 Weltrade <span className="text-warning">Hub</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                Real-time charts and signals for GainX, PainX, FlipX, SwitchX and FX indices — streamed direct from your Weltrade MT5 via the BOTVIO Bridge EA.
+                 Family-aware SyntX charts and signals for FX Vol., SFX Vol., PainX, GainX, FlipX, SwitchX, BreakX, TrendX and progression indices.
               </p>
             </div>
             <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">

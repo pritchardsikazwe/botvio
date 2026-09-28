@@ -122,11 +122,11 @@ export function SyntxSignalsSection() {
               <p className="text-xs text-muted-foreground">Open a Weltrade account to trade SyntX indices</p>
             </div>
           </div>
-          <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
-            <Button className="bg-success hover:bg-success/90 text-success-foreground font-bold text-xs">
+          <Button asChild className="bg-success hover:bg-success/90 text-success-foreground font-bold text-xs">
+            <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open Weltrade Account
-            </Button>
-          </a>
+            </a>
+          </Button>
         </CardContent>
       </Card>
     </div>
