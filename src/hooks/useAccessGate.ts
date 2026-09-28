@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { supabase } from "@/integrations/supabase/client";
+import { OPEN_ACCESS } from "@/config/access";
 
 /**
  * Central access gate for premium/paid areas of Botvio (hubs, signals, bots).
@@ -54,14 +55,14 @@ export function useAccessGate(): AccessGate {
   const trialExpired = !!trialInfo?.expired;
 
   return {
-    isLoading: authLoading || sub.isLoading || (!!user && trialLoading),
+    isLoading: OPEN_ACCESS ? false : authLoading || sub.isLoading || (!!user && trialLoading),
     isAuthenticated: !!user,
     isAdmin: adminBypass,
     isPaid,
     isTrial,
     trialDaysLeft,
     trialExpired,
-    hasAccess: adminBypass || isPaid || isTrial,
+    hasAccess: OPEN_ACCESS || adminBypass || isPaid || isTrial,
     planCode: sub.planCode,
   };
 }
