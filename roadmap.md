@@ -12,3 +12,7 @@
 - [ ] Add a filterable, status-aware Weltrade Signals section using only existing signal fields, with chart/detail links and resilient states.
 - [ ] Upgrade shared market charts with supported symbol/timeframe/view controls, real-data indicators and signal overlays, plus mobile-safe loading/unavailable states.
 - [ ] QA Weltrade, signals/history, trading, gold, bitcoin, FX, and chart pages at phone and desktop widths.
+- [ ] Build a mobile-first SyntX Strategy Matrix covering all 13 requested families with official-source behaviour, compatible analysis, and specific risks.
+- [ ] Classify each configured SyntX instrument by family before signal analysis and expose only family-compatible strategy modes.
+- [ ] Add family/regime/spike/break/progression chart markers only when observable real candle data supports them; otherwise show Data unavailable.
+- [ ] Keep ordinary Forex/Gold/Crypto/Stocks analysis separate from SyntX-specific logic and QA SyntX pages/charts.
