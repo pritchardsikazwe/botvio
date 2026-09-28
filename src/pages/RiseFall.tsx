@@ -244,7 +244,7 @@ export default function RiseFall() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Deriv Rise/Fall Trading — Live Tick Chart & RSI Signal Bot | Botvio"
+        title="Deriv Rise/Fall Trading — Live Tick Chart & RSI Signal Bot"
         description="Trade Deriv Rise/Fall with a real-time tick chart, configurable RSI settings, a live RSI signal engine and an auto bot that picks and executes signals for you."
       />
       <Header />
