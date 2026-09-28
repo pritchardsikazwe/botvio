@@ -349,7 +349,7 @@ export default function AutoTrade() {
             <div className="rounded-lg border border-border p-3 space-y-2">
               <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /><strong>Step 4 — Install the Botvio Bridge EA on the VPS</strong></div>
               <ol className="space-y-1 text-muted-foreground text-xs list-decimal list-inside">
-                <li>Inside the VPS browser, open <a className="underline" href="https://botvio.live/BOTVIO_BridgeEA.mq5" target="_blank" rel="noopener noreferrer">botvio.live/BOTVIO_BridgeEA.mq5</a> and save the file.</li>
+                <li>Inside the VPS browser, open <a className="underline" href="https://botvio.lovable.app/BOTVIO_BridgeEA.mq5" target="_blank" rel="noopener noreferrer">botvio.live/BOTVIO_BridgeEA.mq5</a> and save the file.</li>
                 <li>In MT5: <strong>File → Open Data Folder → MQL5 → Experts</strong>. Drop <code>BOTVIO_BridgeEA.mq5</code> there.</li>
                 <li>In MT5: <strong>Tools → Options → Expert Advisors</strong> → tick "Allow Algo Trading", "Allow WebRequest", and add <code>https://tqqkzeblmjapgbnsbtgw.supabase.co</code> to the allowed URLs.</li>
                 <li>Open MetaEditor (F4) → right-click <code>BOTVIO_BridgeEA.mq5</code> → <strong>Compile</strong>. It should show 0 errors.</li>

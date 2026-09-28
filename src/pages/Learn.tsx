@@ -258,21 +258,21 @@ const Learn = () => {
                     provider: {
                       "@type": "Organization",
                       name: "Botvio",
-                      sameAs: "https://botvio.live",
+                      sameAs: "https://botvio.lovable.app",
                     },
                     inLanguage: "en",
-                    url: `https://botvio.live/learn/${activeCategory}`,
+                    url: `https://botvio.lovable.app/learn/${activeCategory}`,
                   },
                   {
                     "@type": "BreadcrumbList",
                     itemListElement: [
-                      { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
-                      { "@type": "ListItem", position: 2, name: "Learn", item: "https://botvio.live/learn" },
+                      { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
+                      { "@type": "ListItem", position: 2, name: "Learn", item: "https://botvio.lovable.app/learn" },
                       {
                         "@type": "ListItem",
                         position: 3,
                         name: activeCategoryInfo.name,
-                        item: `https://botvio.live/learn/${activeCategory}`,
+                        item: `https://botvio.lovable.app/learn/${activeCategory}`,
                       },
                     ],
                   },

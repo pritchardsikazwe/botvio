@@ -18,7 +18,7 @@ const AuthoritySignals = () => {
     "@type": "WebPage",
     name: "Botvio Authority Signals",
     description: "AI-generated and expert trading signals for Deriv synthetic indices. Real-time signals with confidence scores.",
-    url: "https://botvio.live/authority-signals",
+    url: "https://botvio.lovable.app/authority-signals",
   };
 
   return (

@@ -40,7 +40,7 @@ const BlogCategory = () => {
     );
   }
 
-  const canonical = `https://botvio.live/blog/category/${topic.slug}`;
+  const canonical = `https://botvio.lovable.app/blog/category/${topic.slug}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,8 +59,8 @@ const BlogCategory = () => {
             {
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
-                { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.live/blog" },
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
+                { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.lovable.app/blog" },
                 { "@type": "ListItem", position: 3, name: topic.label, item: canonical },
               ],
             },

@@ -120,7 +120,7 @@ export const AdminSEOTab = () => {
           </div>
           <div className="space-y-2">
             <Label>Canonical Base URL</Label>
-            <Input value={form.canonical_base_url} onChange={(e) => setForm({ ...form, canonical_base_url: e.target.value })} placeholder="https://botvio.live" />
+            <Input value={form.canonical_base_url} onChange={(e) => setForm({ ...form, canonical_base_url: e.target.value })} placeholder="https://botvio.lovable.app" />
           </div>
         </CardContent>
       </Card>

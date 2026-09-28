@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  const siteUrl = settings?.site_url || "https://botvio.live";
+  const siteUrl = settings?.site_url || "https://botvio.lovable.app";
   const allowIndex = settings?.robots_index !== false;
 
   const privateRoutes = [

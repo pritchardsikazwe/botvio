@@ -30,7 +30,7 @@ const SignalPairPage = () => {
     "@type": "WebPage",
     name: `${page.displayName} Trading Signals`,
     description: page.description,
-    url: `https://botvio.live/signals/${pair}`,
+    url: `https://botvio.lovable.app/signals/${pair}`,
   };
 
   return (

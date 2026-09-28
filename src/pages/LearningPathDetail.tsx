@@ -42,7 +42,7 @@ const LearningPathDetail = () => {
     "@type": "Course",
     name: path.title,
     description: path.tagline,
-    provider: { "@type": "Organization", name: "Botvio", url: "https://botvio.live" },
+    provider: { "@type": "Organization", name: "Botvio", url: "https://botvio.lovable.app" },
     educationalLevel: path.level,
     timeRequired: `PT${path.totalHours}H`,
     hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", courseWorkload: `PT${path.totalHours}H` },

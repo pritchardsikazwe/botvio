@@ -40,12 +40,12 @@ function jsonLd(data: BrokerReviewData) {
         publisher: {
           "@type": "Organization",
           name: "Botvio",
-          url: "https://botvio.live",
+          url: "https://botvio.lovable.app",
         },
         inLanguage: "en-US",
         datePublished: "2026-01-15",
         dateModified: "2026-07-01",
-        mainEntityOfPage: `https://botvio.live/brokers/${data.slug}`,
+        mainEntityOfPage: `https://botvio.lovable.app/brokers/${data.slug}`,
       },
       {
         "@type": "FAQPage",
@@ -58,9 +58,9 @@ function jsonLd(data: BrokerReviewData) {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
-          { "@type": "ListItem", position: 2, name: "Brokers", item: "https://botvio.live/brokers" },
-          { "@type": "ListItem", position: 3, name: data.name, item: `https://botvio.live/brokers/${data.slug}` },
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
+          { "@type": "ListItem", position: 2, name: "Brokers", item: "https://botvio.lovable.app/brokers" },
+          { "@type": "ListItem", position: 3, name: data.name, item: `https://botvio.lovable.app/brokers/${data.slug}` },
         ],
       },
     ],

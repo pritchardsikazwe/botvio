@@ -20,7 +20,7 @@ const WeltradeHub = () => {
       <SEOHead seoKey="weltrade"
         title="Weltrade Hub – GainX, PainX, FlipX, SwitchX & FX Charts & Signals"
         description="Live Weltrade SyntX terminal. GainX 400/600/800, PainX 400/600/800, FlipX 1-5, SwitchX 600/1200/1800, FX 20/40/80 — charts, signals & community."
-        ogImage="https://botvio.live/icon-512.png"
+        ogImage="https://botvio.lovable.app/icon-512.png"
       />
       <Header />
 

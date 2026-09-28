@@ -3,7 +3,7 @@
  * All production traffic must use this domain
  */
 
-export const PRODUCTION_DOMAIN = "botvio.live";
+export const PRODUCTION_DOMAIN = "botvio.lovable.app";
 export const BASE_URL = `https://${PRODUCTION_DOMAIN}`;
 
 /**
