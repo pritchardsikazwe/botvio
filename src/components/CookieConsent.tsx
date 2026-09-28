@@ -39,7 +39,7 @@ export const CookieConsent = () => {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-3xl rounded-lg border border-border bg-card/95 backdrop-blur-md shadow-2xl"
+      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-[100] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-lg border border-border bg-card/95 shadow-2xl backdrop-blur-md md:bottom-4"
     >
       <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4">
         <Cookie className="w-5 h-5 text-primary shrink-0 mt-0.5" aria-hidden />
@@ -73,13 +73,16 @@ export const CookieConsent = () => {
           >
             Accept all
           </Button>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
             aria-label="Dismiss cookie banner"
             onClick={() => persist("rejected")}
-            className="md:hidden p-1 text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 shrink-0 md:hidden"
           >
-            <X className="w-4 h-4" />
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
