@@ -42,7 +42,7 @@ const SubscriptionUpgradedEmail = ({ name, planName }: SubscriptionUpgradedProps
           Your subscription has been upgraded{planName ? ` to **${planName}**` : ''}. You now have access to premium signals, AI chart analysis, copy trading, and more.
         </Text>
 
-        <Button style={button} href="https://botvio.live/dashboard">
+        <Button style={button} href="https://botvio.lovable.app/dashboard">
           Go to Dashboard
         </Button>
 

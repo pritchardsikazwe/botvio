@@ -20,12 +20,12 @@ const Author = () => {
     description: author.bio,
     jobTitle: author.role,
     knowsAbout: author.expertise,
-    url: `https://botvio.live/authors/${author.slug}`,
+    url: `https://botvio.lovable.app/authors/${author.slug}`,
     email: author.email,
     worksFor: {
       "@type": "Organization",
       name: "Botvio",
-      url: "https://botvio.live",
+      url: "https://botvio.lovable.app",
     },
   };
 

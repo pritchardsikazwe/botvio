@@ -14,10 +14,10 @@ const jsonLd = {
     "@type": "Course",
     name: p.title,
     description: p.tagline,
-    provider: { "@type": "Organization", name: "Botvio", url: "https://botvio.live" },
+    provider: { "@type": "Organization", name: "Botvio", url: "https://botvio.lovable.app" },
     educationalLevel: p.level,
     timeRequired: `PT${p.totalHours}H`,
-    url: `https://botvio.live/learning-paths/${p.slug}`,
+    url: `https://botvio.lovable.app/learning-paths/${p.slug}`,
     hasCourseInstance: {
       "@type": "CourseInstance",
       courseMode: "online",

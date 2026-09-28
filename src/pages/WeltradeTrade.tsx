@@ -135,7 +135,7 @@ const WeltradeTrade = () => {
           name="description"
           content="Trade Weltrade proprietary synthetics (PainX 10/50/100/200, GainX, TrendX, FlipX, SwitchX, BreakX) directly to your MT5 VPS via the Botvio Bridge EA."
         />
-        <link rel="canonical" href="https://botvio.live/weltrade-trade" />
+        <link rel="canonical" href="https://botvio.lovable.app/weltrade-trade" />
       </Helmet>
       <div className="container mx-auto px-4 py-8 space-y-6">
         <header className="space-y-2">

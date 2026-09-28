@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     .eq("slug", slug)
     .maybeSingle();
 
-  const siteUrl = "https://botvio.live";
+  const siteUrl = "https://botvio.lovable.app";
   const title = strategy
     ? `${strategy.title} | Botvio Trading Strategy`
     : "Strategy Not Found | Botvio";
