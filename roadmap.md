@@ -4,4 +4,8 @@
 - [x] Fix every visible Trader/Trading navigation/card control to open the intended existing trading route.
 - [x] Check desktop and mobile click targets for overlays, stacking, and pointer-event blockers.
 - [x] Verify affected routes render without runtime errors or 404s.
-- [ ] Continue the approved production polish audit without backend, auth, or domain changes.
+- [ ] Audit representative public pages at narrow-phone and desktop sizes for clickability, overflow, obstruction, accessibility, and intentional states.
+- [ ] Fix verified shared header, footer, mobile navigation, card, table, chart, and fallback UX issues without redesigning the information architecture.
+- [ ] Update the Weltrade page from the supplied official sources with qualified account conditions, mobile comparison UI, verification CTA, and risk disclosure.
+- [ ] Re-test Signals, Trading, and Weltrade navigation and rendered pages on mobile and desktop.
+- [ ] Run lint, type checks, tests, production build, and inspect preview health.
