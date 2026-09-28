@@ -16,7 +16,6 @@ const header = headerMatch ? headerMatch[0] : `<?xml version="1.0" encoding="UTF
 const blogSlugs = new Set<string>([...Object.keys(blogContent), ...Object.keys(binanceBlogPosts)]);
 const countrySlugs = new Set<string>(Object.keys(countryData));
 
-const today = new Date().toISOString().split("T")[0];
 
 function url(loc: string, opts: { changefreq?: string; priority?: string; lastmod?: string } = {}) {
   const parts = [`  <url>`, `    <loc>${loc}</loc>`];
