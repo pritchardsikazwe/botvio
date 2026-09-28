@@ -9,6 +9,8 @@ import { WeltradeSignalsEngine } from "@/components/weltrade/WeltradeSignalsEngi
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
 import { SyntxCommunitySection } from "@/components/weltrade/SyntxCommunitySection";
 import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
+import { SyntxStrategyHub } from "@/components/weltrade/SyntxStrategyHub";
+import { WeltradeAccountGuide } from "@/components/weltrade/WeltradeAccountGuide";
 
 const WELTRADE_LINK = "https://gowt.net/ib67505";
 
@@ -53,6 +55,8 @@ const WeltradeHub = () => {
           </div>
         </div>
 
+        <WeltradeAccountGuide />
+
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-4 bg-card border border-border/50 h-12">
@@ -77,7 +81,10 @@ const WeltradeHub = () => {
             <SyntxSignalsSection />
           </TabsContent>
           <TabsContent value="strategy" className="mt-6">
-            <SyntxBotvioStrategy />
+            <div className="space-y-6">
+              <SyntxStrategyHub />
+              <SyntxBotvioStrategy />
+            </div>
           </TabsContent>
           <TabsContent value="community" className="mt-6">
             <SyntxCommunitySection />
