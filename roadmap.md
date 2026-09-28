@@ -16,3 +16,4 @@
 - [ ] Classify each configured SyntX instrument by family before signal analysis and expose only family-compatible strategy modes.
 - [ ] Add family/regime/spike/break/progression chart markers only when observable real candle data supports them; otherwise show Data unavailable.
 - [ ] Keep ordinary Forex/Gold/Crypto/Stocks analysis separate from SyntX-specific logic and QA SyntX pages/charts.
+- [ ] Implement and test the approved family-aware SyntX experience now without backend or authentication changes.
