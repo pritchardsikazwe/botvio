@@ -51,8 +51,8 @@ export function getDerivConfig(): DerivConfig {
   const dev: DerivConfig = {
     env: "dev",
     clientId: "33XSUutrVPDWusVXuDUwW",
-    redirectUrl: `${typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app"}/callback`,
-    baseDomain: typeof window !== "undefined" ? window.location.origin : "https://botvio.lovable.app",
+    redirectUrl: `${typeof window !== "undefined" ? window.location.origin : "https://botvio.live"}/callback`,
+    baseDomain: typeof window !== "undefined" ? window.location.origin : "https://botvio.live",
     authUrl: "https://auth.deriv.com/oauth2/auth",
     tokenUrl: "https://auth.deriv.com/oauth2/token",
     restApiUrl: "https://api.derivws.com",
