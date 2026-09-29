@@ -3,7 +3,7 @@ import { blogContent } from "../src/content/blogPosts";
 import { binanceBlogPosts } from "../src/content/binanceBlogPosts";
 import { countryData } from "../src/content/countryData";
 
-const BASE = "https://botvio.lovable.app";
+const BASE = "https://botvio.live";
 const xml = fs.readFileSync("public/sitemap.xml", "utf8");
 const existingUrls = new Set<string>();
 for (const m of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) existingUrls.add(m[1]);

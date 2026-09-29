@@ -1,22 +1,20 @@
+// ============= Full file contents =============
+
 /**
  * Canonical domain configuration for botvio.live
  * All production traffic must use this domain
  */
 
-export const PRODUCTION_DOMAIN = "botvio.lovable.app";
+export const PRODUCTION_DOMAIN = "botvio.live";
 export const BASE_URL = `https://${PRODUCTION_DOMAIN}`;
 
 /**
  * Check if we're on the canonical production domain
  */
-/**
- * FOR NOW the app is published at https://botvio.lovable.app — botvio.live is
- * not the active publish target. Treat every lovable.app host as canonical
- * so visitors are never redirected away from the live URL.
- */
 export function isCanonicalDomain(): boolean {
   if (typeof window === "undefined") return true;
   const host = window.location.hostname.toLowerCase();
+  // Lovable preview/publish hosts are always allowed (editor preview, staging)
   if (host.endsWith(".lovable.app")) return true;
   return host === PRODUCTION_DOMAIN || host === `www.${PRODUCTION_DOMAIN}`;
 }
@@ -33,16 +31,11 @@ export function enforceCanonicalDomain(): void {
   // Allow localhost for development
   if (host === "localhost" || host === "127.0.0.1") return;
 
-  // Allow lovable domains (current publish target: botvio.lovable.app)
+  // Allow lovable domains (editor preview and staging publish URL)
   if (host.endsWith(".lovable.app")) return;
 
-  // Check if we need to redirect
-  const nonCanonicalDomains = [
-    "botvio.lovable.app",
-    `www.${PRODUCTION_DOMAIN}` // Redirect www to non-www
-  ];
-
-  if (nonCanonicalDomains.includes(host) || (!host.includes("localhost") && host !== PRODUCTION_DOMAIN)) {
+  // Redirect www (and any other host) to the canonical non-www domain
+  if (host !== PRODUCTION_DOMAIN) {
     // Build redirect URL preserving path and query
     const redirectUrl = `${BASE_URL}${window.location.pathname}${window.location.search}${window.location.hash}`;
     window.location.replace(redirectUrl);
