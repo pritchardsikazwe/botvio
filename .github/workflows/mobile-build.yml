@@ -1,0 +1,77 @@
+name: Botvio Mobile Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - botvio-independent-sep13
+      - mobile-store-ready
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Android App Bundle
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+        env:
+          VITE_STORE_BUILD: "true"
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - run: npx cap add android
+      - run: npx cap sync android
+      - name: Set Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Build release AAB
+        working-directory: android
+        run: ./gradlew bundleRelease
+      - name: Upload unsigned AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: botvio-android-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+  ios:
+    name: iOS Archive
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+        env:
+          VITE_STORE_BUILD: "true"
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - run: npx cap add ios --packagemanager SPM
+      - run: npx cap sync ios
+      - name: Build unsigned iOS archive
+        run: |
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$RUNNER_TEMP/Botvio.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+      - name: Package archive
+        run: ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/Botvio.xcarchive" "$RUNNER_TEMP/Botvio.xcarchive.zip"
+      - name: Upload iOS archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: botvio-ios-xcarchive
+          path: ${{ runner.temp }}/Botvio.xcarchive.zip
+          if-no-files-found: error
