@@ -89,6 +89,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
   const [broker, setBroker] = useState<string>(() => localStorage.getItem("botvio_mt5_broker") || "");
   const [serverChoice, setServerChoice] = useState(() => localStorage.getItem("botvio_mt5_server") || "");
   const [serverSearch, setServerSearch] = useState("");
+  const [brokerSearch, setBrokerSearch] = useState("");
   const [customServer, setCustomServer] = useState("");
   const [label, setLabel] = useState("");
   const act = useTradeCopyAction();
@@ -196,7 +197,17 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
                 <SelectValue placeholder="Select your broker" />
               </SelectTrigger>
               <SelectContent>
-                {BROKERS.map((name) => (
+                <div className="flex items-center gap-2 border-b px-2 py-1.5">
+                  <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <input
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                    placeholder="Search brokers…"
+                    value={brokerSearch}
+                    onChange={(e) => setBrokerSearch(e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  />
+                </div>
+                {BROKERS.filter((name) => name.toLowerCase().includes(brokerSearch.toLowerCase())).map((name) => (
                   <SelectItem key={name} value={name}>{name}</SelectItem>
                 ))}
               </SelectContent>
