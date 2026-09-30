@@ -146,9 +146,9 @@ const Privacy = () => {
               <h2 className="text-xl font-semibold mb-4">7. Data Retention</h2>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                 <li><strong>Account Data:</strong> Retained while your account is active</li>
-                <li><strong>Trading History:</strong> Retained for 2 years after account closure</li>
-                <li><strong>Audit Logs:</strong> Retained for 5 years for compliance purposes</li>
-                <li><strong>Payment Records:</strong> Retained as required by tax and financial regulations</li>
+                <li><strong>Trading History:</strong> Deleted with the account unless retention is required by applicable law or regulation</li>
+                <li><strong>Audit Logs:</strong> Deleted with the account unless retention is required by applicable law or regulation</li>
+                <li><strong>Payment Records:</strong> Retained only where required by applicable tax, financial, fraud-prevention, or other legal obligations</li>
               </ul>
             </section>
 
