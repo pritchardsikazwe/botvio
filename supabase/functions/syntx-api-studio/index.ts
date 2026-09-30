@@ -120,7 +120,7 @@ async function ensureSession(admin: ReturnType<typeof createClient>, connection:
   const raw = await callApi("/ConnectEx", {
     user: String(connection.login),
     password,
-    mtClusterName: String(connection.server),
+    server: String(connection.server),
     id: sessionId,
     connectTimeoutSeconds: 60,
     connectTimeoutClusterMemberSeconds: 20,
@@ -208,16 +208,17 @@ Deno.serve(async (req) => {
     if (action === "quote") {
       const symbol = String(body?.symbol ?? "").trim();
       if (!symbol) throw new Error("Symbol is required");
-      return json({ ok: true, quote: await withConnection(admin, userId, async (session) => normalizeQuote(await callApi("/Quote", { id: session, symbol }))) });
+      return json({ ok: true, quote: await withConnection(admin, userId, async (session) => normalizeQuote(await callApi("/GetQuote", { id: session, symbol }))) });
     }
 
     if (action === "history") {
       const symbol = String(body?.symbol ?? "").trim();
       const timeframe = String(body?.timeframe ?? "QhPeriodM5");
+      const timeframeMap: Record<string, number> = { QhPeriodM1: 1, QhPeriodM5: 5, QhPeriodM15: 15, QhPeriodM30: 30, QhPeriodH1: 60, QhPeriodH4: 240, QhPeriodD1: 1440, QhPeriodW1: 10080, QhPeriodMn1: 43200 };
       const to = String(body?.to ?? new Date().toISOString());
       const from = String(body?.from ?? new Date(Date.now() - 400 * 5 * 60_000).toISOString());
       if (!symbol) throw new Error("Symbol is required");
-      return json({ ok: true, candles: await withConnection(admin, userId, async (session) => normalizeBars(await callApi("/QuoteHistory", { id: session, symbol, timeframe, fromTime: from, toTime: to }))) });
+      return json({ ok: true, candles: await withConnection(admin, userId, async (session) => normalizeBars(await callApi("/PriceHistory", { id: session, symbol, from, to, timeFrame: timeframeMap[timeframe] ?? 5 }))) });
     }
 
     if (action === "disconnect") {
