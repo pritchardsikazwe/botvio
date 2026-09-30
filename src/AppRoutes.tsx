@@ -28,6 +28,7 @@ import CopyMarketplace from "./pages/copy/CopyMarketplace";
 import CopyProviderProfile from "./pages/copy/CopyProviderProfile";
 import CopyStart from "./pages/copy/CopyStart";
 import MyCopyTrading from "./pages/copy/MyCopyTrading";
+import { FollowerDashboard, ProviderCommandCenter, BotvioRobotDashboard, CopyTradingAdmin } from "./pages/copy/CopyControlCenter";
 import BecomeProvider from "./pages/copy/BecomeProvider";
 import Bots from "./pages/Bots";
 import Billing from "./pages/Billing";
@@ -173,15 +174,17 @@ export const AppRoutes = () => (
     <Route path="copy-trading" element={<CopyMarketplace />} />
     <Route path="copy-trading/provider/:providerId" element={<CopyProviderProfile />} />
     <Route path="copy-trading/start/:providerId" element={<CopyStart />} />
-    <Route path="copy-trading/my" element={<MyCopyTrading />} />
+    <Route path="copy-trading/my" element={<FollowerDashboard />} />
     <Route path="copy-trading/become-provider" element={<BecomeProvider />} />
-    <Route path="provider-dashboard" element={<ProviderDashboard />} />
+    <Route path="provider-dashboard" element={<ProviderCommandCenter />} />
+    <Route path="botvio-robot" element={<BotvioRobotDashboard />} />
     <Route path="bots" element={<Paid><Bots /></Paid>} />
     <Route path="billing" element={<Billing />} />
 
     {/* Admin */}
     <Route path="admin/login" element={<ErrorBoundary><AdminLogin /></ErrorBoundary>} />
     <Route path="admin" element={<ErrorBoundary><RequireSuperAdmin><Admin /></RequireSuperAdmin></ErrorBoundary>} />
+    <Route path="admin/copy-trading" element={<ErrorBoundary><RequireSuperAdmin><CopyTradingAdmin /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/*" element={<ErrorBoundary><RequireSuperAdmin><Admin /></RequireSuperAdmin></ErrorBoundary>} />
 
     <Route path="p2p" element={<P2P />} />
