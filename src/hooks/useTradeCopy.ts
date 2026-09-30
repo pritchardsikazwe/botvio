@@ -19,8 +19,15 @@ export async function tradecopy<T = Record<string, unknown>>(action: string, pay
     let code: string | undefined;
     const ctx = (error as { context?: Response }).context;
     if (ctx && typeof ctx.json === "function") {
-      const b = await ctx.json().catch(() => null);
+      const b = await ctx.clone().json().catch(() => null);
       if (b?.error) { msg = b.error; code = b.code; }
+      if (!code && typeof ctx.status === "number" && ctx.status >= 400) {
+        code = `http_${ctx.status}`;
+      }
+    }
+    if (msg === "TradeCopy request failed") {
+      const detail = typeof error.message === "string" ? error.message.trim() : "";
+      if (detail && !/^non-2xx status code$/i.test(detail)) msg = detail;
     }
     throw new TradeCopyClientError(msg, code);
   }
