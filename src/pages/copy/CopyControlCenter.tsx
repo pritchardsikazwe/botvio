@@ -136,3 +136,17 @@ export const BotvioRobotDashboard = () => (
     </main>
   </div>
 );
+
+export const CopyTradingAdmin = () => (
+  <div className="min-h-screen bg-background">
+    <Header />
+    <main className="container mx-auto max-w-7xl space-y-5 px-4 py-6">
+      <h1 className="text-2xl font-bold">Copy Trading Admin</h1>
+      <ProviderTradingAccountCard robot />
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline"><Link to="/copy-trading">Marketplace</Link></Button>
+        <Button asChild variant="outline"><Link to="/botvio-robot">Botvio Robot</Link></Button>
+      </div>
+    </main>
+  </div>
+);
