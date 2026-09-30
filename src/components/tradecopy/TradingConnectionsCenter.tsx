@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
+import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,8 @@ export function TradingConnectionsCenter() {
           </div>
         </CardHeader>
       </Card>
+
+      <SyntxApiStudioConnectionCard />
 
       <Card className="glass-card border-amber-500/20 bg-amber-500/5">
         <CardContent className="flex items-start gap-3 p-4">
