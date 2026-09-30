@@ -132,6 +132,11 @@ export const CopyProviderCard = ({ data }: { data: CopyProviderCardData }) => {
           <Button size="sm" asChild>
             <Link to={`/copy-trading/start/${data.providerId}`}>Copy</Link>
           </Button>
+          <CopyInviteLinkButton
+            providerId={data.providerId}
+            className="col-span-2"
+            label="Copy invite link"
+          />
         </div>
       </CardContent>
     </Card>

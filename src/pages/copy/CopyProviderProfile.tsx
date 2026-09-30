@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProviders } from "@/hooks/useBotvio";
 import { useCopyStrategies, PLATFORM_LABEL } from "@/hooks/useCopyTrading";
+import { CopyInviteLinkButton } from "@/components/copy/CopyInviteLinkButton";
 
 const fmtPct = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `${Number(v).toFixed(1)}%`;
