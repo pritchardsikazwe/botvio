@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
+import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 
 const green = "text-emerald-400";
 const gold = "text-amber-400";
@@ -53,6 +55,8 @@ export const FollowerDashboard = () => (
         <Stat label="Total Profit" value="+26.48%" sub="+$132.40 (30d)" icon={LineChart} />
         <Stat label="Open Copied Trades" value="7" sub="+3 today" icon={Copy} />
       </div>
+
+      <FollowerTradeCopyPanel />
 
       <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
         <Card className="border-border/50">
@@ -121,6 +125,7 @@ export const ProviderCommandCenter = () => (
         <Stat label="Followers" value="1,245" sub="+18% this month" icon={Users} />
         <Stat label="Signals Sent" value="684" sub="+42 today" icon={Radio} />
       </div>
+      <ProviderTradingAccountCard />
       <div className="grid gap-5 lg:grid-cols-[1.25fr_1fr]">
         <Card className="border-border/50">
           <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-sm">Signal Engine</CardTitle><Badge className="bg-emerald-500/15 text-emerald-400"><span className="mr-1 h-2 w-2 rounded-full bg-emerald-400" /> Running</Badge></CardHeader>
@@ -164,6 +169,8 @@ export const BotvioRobotDashboard = () => (
         <Stat label="Followers" value="412" sub="+27 this week" icon={Users} />
         <Stat label="Signals Today" value="42" sub="+8 executed" icon={Zap} />
       </div>
+      <ProviderTradingAccountCard robot />
+      <p className="text-xs text-muted-foreground">Botvio Robot path: Botvio signal → TradeCopy master account → TradeCopy cloud copy → follower accounts. No Bridge EA or VPS required.</p>
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <Card className="border-border/50">
           <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Bot className="h-5 w-5 text-primary" /> AI Trading Robot</CardTitle></CardHeader>

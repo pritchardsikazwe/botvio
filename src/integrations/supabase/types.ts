@@ -1410,6 +1410,95 @@ export type Database = {
           },
         ]
       }
+      copy_execution_events: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          entry_price: number | null
+          environment: string
+          error: string | null
+          follower_account_id: string | null
+          follower_lot: number | null
+          follower_ticket: string | null
+          follower_user_id: string | null
+          id: string
+          idempotency_key: string
+          master_account_id: string | null
+          opened_at: string | null
+          profit: number | null
+          provider_id: string | null
+          relationship_id: string | null
+          side: string | null
+          source_lot: number | null
+          source_ticket: string | null
+          status: string
+          stop_loss: number | null
+          symbol: string | null
+          take_profit: number | null
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          entry_price?: number | null
+          environment?: string
+          error?: string | null
+          follower_account_id?: string | null
+          follower_lot?: number | null
+          follower_ticket?: string | null
+          follower_user_id?: string | null
+          id?: string
+          idempotency_key: string
+          master_account_id?: string | null
+          opened_at?: string | null
+          profit?: number | null
+          provider_id?: string | null
+          relationship_id?: string | null
+          side?: string | null
+          source_lot?: number | null
+          source_ticket?: string | null
+          status?: string
+          stop_loss?: number | null
+          symbol?: string | null
+          take_profit?: number | null
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          entry_price?: number | null
+          environment?: string
+          error?: string | null
+          follower_account_id?: string | null
+          follower_lot?: number | null
+          follower_ticket?: string | null
+          follower_user_id?: string | null
+          id?: string
+          idempotency_key?: string
+          master_account_id?: string | null
+          opened_at?: string | null
+          profit?: number | null
+          provider_id?: string | null
+          relationship_id?: string | null
+          side?: string | null
+          source_lot?: number | null
+          source_ticket?: string | null
+          status?: string
+          stop_loss?: number | null
+          symbol?: string | null
+          take_profit?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copy_execution_events_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: false
+            referencedRelation: "copy_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copy_links: {
         Row: {
           copy_sl_tp: boolean
@@ -1480,6 +1569,135 @@ export type Database = {
             columns: ["provider_account_id"]
             isOneToOne: false
             referencedRelation: "mt5_accounts_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      copy_relationships: {
+        Row: {
+          copy_order_type: number
+          created_at: string
+          emergency_stopped_at: string | null
+          environment: string
+          follower_account_id: string
+          follower_user_id: string
+          id: string
+          is_botvio_robot: boolean
+          last_error: string | null
+          live_confirmed_at: string | null
+          master_account_id: string | null
+          provider_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          copy_order_type?: number
+          created_at?: string
+          emergency_stopped_at?: string | null
+          environment?: string
+          follower_account_id: string
+          follower_user_id: string
+          id?: string
+          is_botvio_robot?: boolean
+          last_error?: string | null
+          live_confirmed_at?: string | null
+          master_account_id?: string | null
+          provider_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          copy_order_type?: number
+          created_at?: string
+          emergency_stopped_at?: string | null
+          environment?: string
+          follower_account_id?: string
+          follower_user_id?: string
+          id?: string
+          is_botvio_robot?: boolean
+          last_error?: string | null
+          live_confirmed_at?: string | null
+          master_account_id?: string | null
+          provider_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copy_relationships_follower_account_id_fkey"
+            columns: ["follower_account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "copy_relationships_master_account_id_fkey"
+            columns: ["master_account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "copy_relationships_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      copy_settings: {
+        Row: {
+          copy_sltp: boolean
+          created_at: string
+          id: string
+          max_lot: number | null
+          multiplier: number
+          order_control: Json
+          order_filter: number
+          relationship_id: string
+          risk_type: number
+          scalper_mode: number
+          scalper_value: number
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          copy_sltp?: boolean
+          created_at?: string
+          id?: string
+          max_lot?: number | null
+          multiplier?: number
+          order_control?: Json
+          order_filter?: number
+          relationship_id: string
+          risk_type?: number
+          scalper_mode?: number
+          scalper_value?: number
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          copy_sltp?: boolean
+          created_at?: string
+          id?: string
+          max_lot?: number | null
+          multiplier?: number
+          order_control?: Json
+          order_filter?: number
+          relationship_id?: string
+          risk_type?: number
+          scalper_mode?: number
+          scalper_value?: number
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copy_settings_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: true
+            referencedRelation: "copy_relationships"
             referencedColumns: ["id"]
           },
         ]
@@ -5762,6 +5980,47 @@ export type Database = {
         }
         Relationships: []
       }
+      symbol_mappings: {
+        Row: {
+          created_at: string
+          follow_symbol: string
+          follower_account_id: string
+          id: string
+          map_type: string
+          source_symbol: string
+          synced_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          follow_symbol: string
+          follower_account_id: string
+          id?: string
+          map_type?: string
+          source_symbol: string
+          synced_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          follow_symbol?: string
+          follower_account_id?: string
+          id?: string
+          map_type?: string
+          source_symbol?: string
+          synced_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_mappings_follower_account_id_fkey"
+            columns: ["follower_account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       top_asset_snapshots: {
         Row: {
           accuracy_today: number | null
@@ -5974,6 +6233,109 @@ export type Database = {
           },
         ]
       }
+      tradecopy_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json
+          id: string
+          mode: string
+          ok: boolean
+          trading_account_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json
+          id?: string
+          mode: string
+          ok: boolean
+          trading_account_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          mode?: string
+          ok?: boolean
+          trading_account_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tradecopy_credentials: {
+        Row: {
+          created_at: string
+          id: string
+          password_encrypted: string
+          trading_account_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_encrypted: string
+          trading_account_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_encrypted?: string
+          trading_account_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tradecopy_credentials_trading_account_id_fkey"
+            columns: ["trading_account_id"]
+            isOneToOne: true
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tradecopy_reconcile_checkpoints: {
+        Row: {
+          last_error: string | null
+          last_history_date: string | null
+          last_open_count: number | null
+          last_polled_at: string | null
+          trading_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          last_error?: string | null
+          last_history_date?: string | null
+          last_open_count?: number | null
+          last_polled_at?: string | null
+          trading_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          last_error?: string | null
+          last_history_date?: string | null
+          last_open_count?: number | null
+          last_polled_at?: string | null
+          trading_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tradecopy_reconcile_checkpoints_trading_account_id_fkey"
+            columns: ["trading_account_id"]
+            isOneToOne: true
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trader_profiles: {
         Row: {
           badge_level: string | null
@@ -6038,56 +6400,92 @@ export type Database = {
       }
       trading_accounts: {
         Row: {
+          account_role: string | null
           api_key_encrypted: string
           api_secret_encrypted: string | null
           broker: string
           connection_status: string | null
           connection_type: string | null
           created_at: string
+          credential_ref: string | null
           deriv_account_id: string | null
+          environment: string
+          execution_provider: string | null
+          external_account_id: string | null
           id: string
           is_active: boolean | null
+          is_botvio_robot: boolean
           is_virtual: boolean | null
           label: string
+          last_diagnostic: Json | null
+          last_diagnostic_at: string | null
           login_id: string | null
           permissions_json: Json | null
+          platform: string | null
+          server: string | null
           token_scopes: string[] | null
+          tradecopy_active: boolean
+          tradecopy_user_id: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          account_role?: string | null
           api_key_encrypted: string
           api_secret_encrypted?: string | null
           broker: string
           connection_status?: string | null
           connection_type?: string | null
           created_at?: string
+          credential_ref?: string | null
           deriv_account_id?: string | null
+          environment?: string
+          execution_provider?: string | null
+          external_account_id?: string | null
           id?: string
           is_active?: boolean | null
+          is_botvio_robot?: boolean
           is_virtual?: boolean | null
           label: string
+          last_diagnostic?: Json | null
+          last_diagnostic_at?: string | null
           login_id?: string | null
           permissions_json?: Json | null
+          platform?: string | null
+          server?: string | null
           token_scopes?: string[] | null
+          tradecopy_active?: boolean
+          tradecopy_user_id?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          account_role?: string | null
           api_key_encrypted?: string
           api_secret_encrypted?: string | null
           broker?: string
           connection_status?: string | null
           connection_type?: string | null
           created_at?: string
+          credential_ref?: string | null
           deriv_account_id?: string | null
+          environment?: string
+          execution_provider?: string | null
+          external_account_id?: string | null
           id?: string
           is_active?: boolean | null
+          is_botvio_robot?: boolean
           is_virtual?: boolean | null
           label?: string
+          last_diagnostic?: Json | null
+          last_diagnostic_at?: string | null
           login_id?: string | null
           permissions_json?: Json | null
+          platform?: string | null
+          server?: string | null
           token_scopes?: string[] | null
+          tradecopy_active?: boolean
+          tradecopy_user_id?: number | null
           updated_at?: string
           user_id?: string
         }
