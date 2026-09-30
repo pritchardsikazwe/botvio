@@ -15,16 +15,17 @@ const json = (body: unknown, status = 200) =>
 const Creds = z.object({
   login: z.coerce.number().int().positive(),
   password: z.string().min(4).max(128),
+  broker: z.string().trim().min(2).max(100).default("MT5"),
   server: z.string().trim().min(2).max(100),
   label: z.string().trim().max(80).optional(),
 });
 
 type Account = {
   id: string; user_id: string; account_role: AccountRole | null; tradecopy_user_id: number | null;
-  environment: Environment; is_botvio_robot: boolean; tradecopy_active: boolean; login_id: string | null; server: string | null;
+  environment: Environment; is_botvio_robot: boolean; tradecopy_active: boolean; login_id: string | null; broker: string | null; server: string | null;
 };
 
-const ACCOUNT_COLS = "id,user_id,account_role,tradecopy_user_id,environment,is_botvio_robot,tradecopy_active,login_id,server";
+const ACCOUNT_COLS = "id,user_id,account_role,tradecopy_user_id,environment,is_botvio_robot,tradecopy_active,login_id,broker,server";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -83,7 +84,7 @@ async function storeAccount(ctx: Ctx, creds: z.infer<typeof Creds>, role: Accoun
   const encKey = Deno.env.get("TOKEN_ENCRYPTION_KEY");
   if (!encKey) throw new TradeCopyError("Secure credential storage is not configured", "config", 500);
   const { data: acct, error } = await ctx.admin.from("trading_accounts").insert({
-    user_id: ctx.userId, broker: "mt5", platform: "MT5", execution_provider: "tradecopy",
+    user_id: ctx.userId, broker: creds.broker, platform: "MT5", execution_provider: "tradecopy",
     label: creds.label || `MT5 ${role === "master" ? "Master" : "Follower"} ${creds.login}`,
     login_id: String(creds.login), server: creds.server, account_role: role,
     environment: "DEMO", tradecopy_active: false, is_active: true, connection_status: "pending",
