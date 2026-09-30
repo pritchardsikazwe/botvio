@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import {
-  Activity, ArrowUpRight, Bot, CheckCircle2, ChevronRight, CircleDollarSign,
+  Activity, Bot, CheckCircle2, ChevronRight, CircleDollarSign,
   Copy, Gauge, LineChart, Pause, Play, Radio, Settings, ShieldCheck,
-  SlidersHorizontal, Sparkles, Users, Wallet, Zap
+  SlidersHorizontal, Users, Wallet, Zap
 } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
