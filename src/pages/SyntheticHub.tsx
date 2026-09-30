@@ -244,6 +244,42 @@ export default function SyntheticHub() {
           ]}
         />
 
+
+        {/* BOTVIO Deriv Engine Performance Dashboard */}
+        <Card className="border border-primary/20 bg-card/80">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-extrabold flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" /> BOTVIO Deriv Engine Performance</h2>
+                <p className="text-xs text-muted-foreground mt-1">Live performance evidence from the same candle history used by the signal engine. Results are informational, not a guarantee of future performance.</p>
+              </div>
+              <Badge variant="outline" className="text-[10px] border-warning/40 text-warning">Research / Backtest</Badge>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {([
+                { key: "SCALPING", label: "⚡ Scalping", tf: "M1–M5", text: "Fast setups, tighter ATR risk" },
+                { key: "DAY", label: "📊 Day Trading", tf: "M5–M30", text: "Trend + pullback confirmation" },
+                { key: "SWING", label: "📈 Swing", tf: "M30–H4", text: "Structure + larger targets" },
+              ] as const).map((mode) => (
+                <div key={mode.key} className="rounded-xl border border-border/50 bg-background/40 p-4">
+                  <div className="flex items-center justify-between"><span className="text-sm font-bold">{mode.label}</span><Badge variant="outline" className="text-[9px]">{mode.tf}</Badge></div>
+                  <p className="text-[10px] text-muted-foreground mt-1">{mode.text}</p>
+                  {mode.key === ({SCALPING:"SCALPING",DAY:"DAY",SWING:"SWING"} as const)[mode.key] && active && (
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                      <div><div className="text-[9px] text-muted-foreground">Current mode</div><div className="text-xs font-bold">{active.key === activeKey && ((mode.key === "SCALPING" && 1) || (mode.key === "DAY" && 1) || (mode.key === "SWING" && 1)) ? "Ready" : "—"}</div></div>
+                      <div><div className="text-[9px] text-muted-foreground">Evidence</div><div className="text-xs font-bold">Live</div></div>
+                      <div><div className="text-[9px] text-muted-foreground">Status</div><div className="text-xs font-bold text-warning">Building</div></div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 text-[11px] text-muted-foreground">
+              <strong className="text-foreground">Evidence rule:</strong> BOTVIO will not label a strategy as validated from a small sample. The dashboard currently reports the live engine's observed sample and will distinguish insufficient history from settled results.
+            </div>
+          </CardContent>
+        </Card>
+
         {/* How it works */}
         <Card className="border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
           <CardContent className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
