@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
+import { TradeCopyAccountDashboard } from "@/components/tradecopy/TradeCopyAccountDashboard";
 import { useMyCopySubscriptions, useMyCopiedTrades } from "@/hooks/useBotvio";
 
 const money = (value: number) => `${value >= 0 ? "+" : "-"}$${Math.abs(value).toFixed(2)}`;
@@ -39,6 +40,8 @@ export const FollowerDashboard = () => {
           <Card className="glass-card"><CardContent className="p-4"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Copy className="h-4 w-4 text-primary" /> Recorded copied trades</div><div className="mt-1 text-2xl font-bold">{copiedTrades?.length ?? 0}</div></CardContent></Card>
           <Card className="glass-card"><CardContent className="p-4"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Activity className="h-4 w-4 text-primary" /> Recorded P/L</div><div className={`mt-1 text-2xl font-bold ${pnl >= 0 ? "text-success" : "text-destructive"}`}>{money(pnl)}</div></CardContent></Card>
         </div>
+
+        <TradeCopyAccountDashboard role="slave" />
 
         <FollowerTradeCopyPanel />
 
@@ -86,6 +89,7 @@ export const ProviderCommandCenter = () => (
           Connect your MT5 master through TradeCopy Cloud and manage the provider account used for follower copying.
         </p>
       </section>
+      <TradeCopyAccountDashboard role="master" />
       <ProviderTradingAccountCard />
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="glass-card"><CardHeader><CardTitle className="text-sm">Marketplace</CardTitle><CardDescription>Publish and manage your provider profile.</CardDescription></CardHeader><CardContent><Button asChild variant="outline" className="w-full"><Link to="/copy-trading/become-provider"><Users className="mr-2 h-4 w-4" /> Provider settings</Link></Button></CardContent></Card>
@@ -112,6 +116,7 @@ export const BotvioRobotDashboard = () => (
           <Badge variant="outline" className="gap-2"><Cloud className="h-3.5 w-3.5" /> TradeCopy Cloud</Badge>
         </div>
       </section>
+      <TradeCopyAccountDashboard role="master" robot />
       <ProviderTradingAccountCard robot />
       <Card className="glass-card">
         <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Bot className="h-4 w-4 text-primary" /> Copy architecture</CardTitle></CardHeader>
