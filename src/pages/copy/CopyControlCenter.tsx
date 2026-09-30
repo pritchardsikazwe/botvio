@@ -145,7 +145,7 @@ export const CopyTradingAdmin = () => (
       <ProviderTradingAccountCard robot />
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline"><Link to="/copy-trading">Marketplace</Link></Button>
-        <Button asChild variant="outline"><Link to="/copy-trading/robot">Botvio Robot</Link></Button>
+        <Button asChild variant="outline"><Link to="/botvio-robot">Botvio Robot</Link></Button>
       </div>
     </main>
   </div>
