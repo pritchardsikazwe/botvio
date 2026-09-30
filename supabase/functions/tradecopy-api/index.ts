@@ -110,7 +110,7 @@ async function storeAccount(
   const encryptedPassword = await encryptSecret(creds.password, encKey);
 
   if (existing) {
-    const label = creds.label || existing.label || `MT5 ${role === "master" ? "Master" : "Follower"} ${creds.login}`;
+    const label = creds.label || `MT5 ${role === "master" ? "Master" : "Follower"} ${creds.login}`;
     const { data: updated, error: updateError } = await ctx.admin
       .from("trading_accounts")
       .update({ broker: creds.broker, label, is_active: true, ...extra })
@@ -223,10 +223,16 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
         }
       }
       if (providerId) {
-        await admin.from("provider_accounts").upsert(
-          { provider_id: providerId, trading_account_id: acct.id, status: "paused" },
-          { onConflict: "provider_id,trading_account_id" },
-        );
+        const { data: existingProviderAccount } = await admin
+          .from("provider_accounts")
+          .select("id")
+          .eq("provider_id", providerId)
+          .eq("trading_account_id", acct.id)
+          .limit(1)
+          .maybeSingle();
+        if (!existingProviderAccount) {
+          await admin.from("provider_accounts").insert({ provider_id: providerId, trading_account_id: acct.id, status: "paused" });
+        }
       }
       return { data: { accountId: acct.id, reused: acct.reused }, accountId: acct.id };
     }
