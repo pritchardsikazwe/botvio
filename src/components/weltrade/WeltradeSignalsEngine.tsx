@@ -20,7 +20,8 @@ import { TradingChart } from "@/components/chart/TradingChart";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 import { computeIndicators } from "@/lib/marketData/indicators";
 import { computeSignals, summarizeSignals, type EngineSignal } from "@/lib/marketData/signalEngine";
-import { computeSyntxSignals, detectSyntxState, getSyntxProfile, type SyntxStrategyMode } from "@/lib/marketData/syntxStrategy";
+import { getSyntxProfile, type SyntxStrategyMode } from "@/lib/marketData/syntxStrategy";
+import { computeSyntxSignalsV2, getSyntxStateV2 } from "@/lib/marketData/syntxSignalEngineV2";
 import type { Timeframe } from "@/lib/marketData/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -89,10 +90,10 @@ export const WeltradeSignalsEngine = () => {
           symbol: instrument.mt5Symbol,
           label: instrument.label,
           timeframe: prefs.timeframe,
-          minConfidence: 55,
+          minConfidence: 65,
         };
       return instrument.syntxFamily
-        ? computeSyntxSignals(candles, { ...options, family: instrument.syntxFamily, mode: strategyMode }, indicators)
+        ? computeSyntxSignalsV2(candles, { ...options, family: instrument.syntxFamily, mode: strategyMode }, indicators)
         : computeSignals(
         candles,
         options,
@@ -104,7 +105,7 @@ export const WeltradeSignalsEngine = () => {
 
   const familyProfile = useMemo(() => getSyntxProfile(instrument.syntxFamily), [instrument.syntxFamily]);
   const familyState = useMemo(
-    () => instrument.syntxFamily ? detectSyntxState(candles, instrument.syntxFamily, indicators) : null,
+    () => instrument.syntxFamily ? getSyntxStateV2(candles, instrument.syntxFamily, indicators) : null,
     [candles, indicators, instrument.syntxFamily]
   );
 
