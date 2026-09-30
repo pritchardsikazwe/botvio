@@ -126,6 +126,15 @@ export const ProviderCommandCenter = () => (
         <Stat label="Signals Sent" value="684" sub="+42 today" icon={Radio} />
       </div>
       <ProviderTradingAccountCard />
+      <Card className="border-border/50">
+        <CardHeader><CardTitle className="text-sm">Quick shortcuts</CardTitle></CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild><Link to="/copy-trading">Marketplace</Link></Button>
+          <Button variant="outline" size="sm" asChild><Link to="/copy-trading/my">Follower view</Link></Button>
+          <Button variant="outline" size="sm" asChild><Link to="/provider-dashboard">Provider dashboard</Link></Button>
+          <Button variant="outline" size="sm" asChild><Link to="/copy-trading/become-provider">Provider settings</Link></Button>
+        </CardContent>
+      </Card>
       <div className="grid gap-5 lg:grid-cols-[1.25fr_1fr]">
         <Card className="border-border/50">
           <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-sm">Signal Engine</CardTitle><Badge className="bg-emerald-500/15 text-emerald-400"><span className="mr-1 h-2 w-2 rounded-full bg-emerald-400" /> Running</Badge></CardHeader>
