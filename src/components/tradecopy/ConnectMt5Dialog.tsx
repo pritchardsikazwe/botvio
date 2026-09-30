@@ -50,7 +50,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
 
   useEffect(() => {
     if (broker) localStorage.setItem("botvio_mt5_broker", broker);
-    if (serverChoice && serverChoice !== CUSTOM_SERVER) localStorage.setItem("botvio_mt5_server", serverChoice);
+    if (serverChoice) localStorage.setItem("botvio_mt5_server", serverChoice);
   }, [broker, serverChoice]);
 
   const handleBrokerChange = (value: string) => {
