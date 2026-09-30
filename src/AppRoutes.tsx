@@ -59,7 +59,7 @@ import Tools from "./pages/Tools";
 import ResearchHub from "./pages/ResearchHub";
 import AccountClosure from "./pages/AccountClosure";
 import { StoreRestrictedRoute } from "@/components/StoreRestrictedRoute";
-import { isRestrictedOnStore } from "@/lib/mobile";
+import { isRestrictedOnStore } from "@/lib/mobile";\nimport { useLocation } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 import Author from "./pages/Author";
