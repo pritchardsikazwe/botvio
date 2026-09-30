@@ -57,6 +57,8 @@ import BlogPost from "./pages/BlogPost";
 import BlogCategory from "./pages/BlogCategory";
 import Tools from "./pages/Tools";
 import ResearchHub from "./pages/ResearchHub";
+import AccountClosure from "./pages/AccountClosure";
+import { StoreRestrictedRoute } from "@/components/StoreRestrictedRoute";
 
 import Author from "./pages/Author";
 import SlugResolver from "./pages/SlugResolver";
@@ -197,6 +199,7 @@ export const AppRoutes = () => (
     <Route path="marketplace" element={<Marketplace />} />
     <Route path="my-products" element={<MyProducts />} />
     <Route path="settings" element={<Settings />} />
+    <Route path="account/delete" element={<AccountClosure />} />
     <Route path="settings/binance" element={<BinanceSettings />} />
     <Route path="settings/deriv-otp" element={<ErrorBoundary><RequireSuperAdmin><DerivOtpTester /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="binance" element={<Paid><BinanceHub /></Paid>} />
@@ -298,14 +301,14 @@ export const AppRoutes = () => (
     <Route path="trade-modes" element={<Paid><TradeModes /></Paid>} />
     <Route path="deriv-options" element={<Paid><DerivOptions /></Paid>} />
     <Route path="deriv-app" element={<DerivApp />} />
-    <Route path="rise-fall" element={<RiseFall />} />
+    <Route path="rise-fall" element={<StoreRestrictedRoute><RiseFall /></StoreRestrictedRoute>} />
     <Route path="binary-options" element={<Paid><BinaryOptions /></Paid>} />
     <Route path="brokers" element={<BrokersIndex />} />
     <Route path="brokers/:slug" element={<BrokerPage />} />
     <Route path="live" element={<LiveFeed />} />
     <Route path="flipping-challenges" element={<FlippingChallenges />} />
     <Route path="reset-password" element={<ResetPassword />} />
-    <Route path="sports-betting" element={<SportsBetting />} />
+    <Route path="sports-betting" element={<StoreRestrictedRoute><SportsBetting /></StoreRestrictedRoute>} />
     <Route path="unsubscribe" element={<Unsubscribe />} />
     <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
