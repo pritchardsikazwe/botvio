@@ -23,9 +23,11 @@ import { normalizeDerivError } from "@/lib/derivErrors";
 interface DerivConnectionPanelProps {
   onConnected?: (balance: any) => void;
   showAccountSelection?: boolean;
+  /** Hide the legacy PAT form on the modern Broker Connections page. */
+  hideLegacyPat?: boolean;
 }
 
-export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true }: DerivConnectionPanelProps) => {
+export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true, hideLegacyPat = false }: DerivConnectionPanelProps) => {
   const { user } = useAuth();
   const { connected, authorized, balance, error, loading, connect, disconnect } = useDeriv();
   const { upsertToken: upsertDerivToken } = useDerivTokens();
@@ -348,21 +350,23 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
             )}
 
             <Tabs value={connectionMethod} onValueChange={(v) => setConnectionMethod(v as "token" | "oauth")}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="oauth" className="flex items-center gap-2">
+              <TabsList className={hideLegacyPat ? "grid w-full grid-cols-1" : "grid w-full grid-cols-2"}>
+                <TabsTrigger value="oauth" className="flex items-center justify-center gap-2">
                   <User className="h-4 w-4" />
-                  Deriv Login
+                  Continue with Deriv
                   <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
                     Recommended
                   </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="token" className="flex items-center gap-2">
-                  <Key className="h-4 w-4" />
-                  PAT
-                </TabsTrigger>
+                {!hideLegacyPat && (
+                  <TabsTrigger value="token" className="flex items-center gap-2">
+                    <Key className="h-4 w-4" />
+                    PAT
+                  </TabsTrigger>
+                )}
               </TabsList>
 
-              <TabsContent value="token" className="space-y-4 mt-4">
+              {!hideLegacyPat && <TabsContent value="token" className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <Label htmlFor="api_token">Personal Access Token (PAT)</Label>
                   <Input
@@ -460,7 +464,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                 >
                   ← Skip the PAT — sign in with your Deriv account instead
                 </button>
-              </TabsContent>
+              </TabsContent>}
 
               <TabsContent value="oauth" className="space-y-4 mt-4">
                 <div className="text-center py-4">
@@ -509,13 +513,15 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true 
                   You'll be redirected to <strong>auth.deriv.com</strong> and returned to
                   <strong> {derivConfig.redirectUrl.replace(/^https?:\/\//, "")}</strong>.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setConnectionMethod("token")}
-                  className="w-full text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-                >
-                  Prefer a Personal Access Token? Switch to PAT →
-                </button>
+                {!hideLegacyPat && (
+                  <button
+                    type="button"
+                    onClick={() => setConnectionMethod("token")}
+                    className="w-full text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                  >
+                    Prefer a Personal Access Token? Switch to PAT →
+                  </button>
+                )}
               </TabsContent>
             </Tabs>
           </div>
