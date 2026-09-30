@@ -22,6 +22,7 @@ type ServerOption = {
  * forcing users to type a server for every connection.
  */
 const SERVER_OPTIONS: ServerOption[] = [
+  // HFM
   { broker: "HFM", label: "HFM — Global Live 1", value: "HFMarketsGlobal-Live1" },
   { broker: "HFM", label: "HFM — Global Demo", value: "HFMarketsGlobal-Demo" },
   { broker: "HFM", label: "HFM — Global Live 3", value: "HFMarketsGlobal-Live3" },
@@ -32,13 +33,53 @@ const SERVER_OPTIONS: ServerOption[] = [
   { broker: "HFM", label: "HFM — Global Live 7", value: "HFMarketsGlobal-Live7" },
   { broker: "HFM", label: "HFM — Global Live 8", value: "HFMarketsGlobal-Live8" },
   { broker: "HFM", label: "HFM — Global Live 9", value: "HFMarketsGlobal-Live9" },
+  // Weltrade
   { broker: "Weltrade", label: "Weltrade — Live", value: "Weltrade-Live" },
   { broker: "Weltrade", label: "Weltrade — Demo", value: "Weltrade-Demo" },
+  // Exness
+  { broker: "Exness", label: "Exness — Real 1", value: "Exness-MT5Real" },
+  { broker: "Exness", label: "Exness — Real 2", value: "Exness-MT5Real2" },
+  { broker: "Exness", label: "Exness — Real 3", value: "Exness-MT5Real3" },
+  { broker: "Exness", label: "Exness — Trial", value: "Exness-MT5Trial" },
+  { broker: "Exness", label: "Exness — Trial 2", value: "Exness-MT5Trial2" },
+  // IC Markets
+  { broker: "IC Markets", label: "IC Markets — Live 01", value: "ICMarketsSC-MT5" },
+  { broker: "IC Markets", label: "IC Markets — Live 02", value: "ICMarketsSC-MT5-2" },
+  { broker: "IC Markets", label: "IC Markets — Live 04", value: "ICMarketsSC-MT5-4" },
+  { broker: "IC Markets", label: "IC Markets — Demo", value: "ICMarketsSC-Demo" },
+  // XM
+  { broker: "XM", label: "XM — MT5 Live 1", value: "XMGlobal-MT5" },
+  { broker: "XM", label: "XM — MT5 Live 2", value: "XMGlobal-MT5 2" },
+  { broker: "XM", label: "XM — MT5 Demo", value: "XMGlobal-MT5 Demo" },
+  // Pepperstone
+  { broker: "Pepperstone", label: "Pepperstone — Live", value: "Pepperstone-MT5-Live01" },
+  { broker: "Pepperstone", label: "Pepperstone — Live 02", value: "Pepperstone-MT5-Live02" },
+  { broker: "Pepperstone", label: "Pepperstone — Demo", value: "Pepperstone-Demo" },
+  // FBS
+  { broker: "FBS", label: "FBS — Real", value: "FBS-Real" },
+  { broker: "FBS", label: "FBS — Demo", value: "FBS-Demo" },
+  // RoboForex
+  { broker: "RoboForex", label: "RoboForex — Pro", value: "RoboForex-Pro" },
+  { broker: "RoboForex", label: "RoboForex — ECN", value: "RoboForex-ECN" },
+  { broker: "RoboForex", label: "RoboForex — Demo", value: "RoboForex-Demo" },
+  // Vantage
+  { broker: "Vantage", label: "Vantage — Live", value: "VantageInternational-Live" },
+  { broker: "Vantage", label: "Vantage — Demo", value: "VantageInternational-Demo" },
+  // FxPro
+  { broker: "FxPro", label: "FxPro — MT5 Live", value: "FxPro.com-MT5" },
+  { broker: "FxPro", label: "FxPro — MT5 Demo", value: "FxPro.com-MT5 Demo" },
+  // Deriv
+  { broker: "Deriv", label: "Deriv — Standard", value: "Deriv-Server" },
+  { broker: "Deriv", label: "Deriv — Synthetic", value: "Deriv-Server-02" },
+  { broker: "Deriv", label: "Deriv — Demo", value: "Deriv-Demo" },
+  // OctaFX
+  { broker: "OctaFX", label: "OctaFX — Real", value: "OctaFX-Real" },
+  { broker: "OctaFX", label: "OctaFX — Demo", value: "OctaFX-Demo" },
 ];
 
 const CUSTOM_SERVER = "__custom_server__";
 
-const BROKERS = ["HFM", "Weltrade", "Other"] as const;
+const BROKERS = [...new Set(SERVER_OPTIONS.map((s) => s.broker)), "Other"] as string[];
 
 /** Password lives only in this form's local state and is cleared on submit. */
 export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
@@ -48,6 +89,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
   const [broker, setBroker] = useState<string>(() => localStorage.getItem("botvio_mt5_broker") || "");
   const [serverChoice, setServerChoice] = useState(() => localStorage.getItem("botvio_mt5_server") || "");
   const [serverSearch, setServerSearch] = useState("");
+  const [brokerSearch, setBrokerSearch] = useState("");
   const [customServer, setCustomServer] = useState("");
   const [label, setLabel] = useState("");
   const act = useTradeCopyAction();
@@ -155,7 +197,17 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
                 <SelectValue placeholder="Select your broker" />
               </SelectTrigger>
               <SelectContent>
-                {BROKERS.map((name) => (
+                <div className="flex items-center gap-2 border-b px-2 py-1.5">
+                  <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <input
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                    placeholder="Search brokers…"
+                    value={brokerSearch}
+                    onChange={(e) => setBrokerSearch(e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  />
+                </div>
+                {BROKERS.filter((name) => name.toLowerCase().includes(brokerSearch.toLowerCase())).map((name) => (
                   <SelectItem key={name} value={name}>{name}</SelectItem>
                 ))}
               </SelectContent>
@@ -174,9 +226,22 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
                   <SelectValue placeholder={broker ? "Select your MT5 server" : "Select broker first"} />
                 </SelectTrigger>
                 <SelectContent>
+                  <div className="flex items-center gap-2 border-b px-2 py-1.5">
+                    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <input
+                      className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                      placeholder="Search servers…"
+                      value={serverSearch}
+                      onChange={(e) => setServerSearch(e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                    />
+                  </div>
                   {availableServers.map((option) => (
                     <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                   ))}
+                  {availableServers.length === 0 && (
+                    <div className="px-2 py-3 text-center text-xs text-muted-foreground">No matching server — use "Other server…" below.</div>
+                  )}
                   <SelectItem value={CUSTOM_SERVER}>Other server…</SelectItem>
                 </SelectContent>
               </Select>
