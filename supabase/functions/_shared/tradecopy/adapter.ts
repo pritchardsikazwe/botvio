@@ -59,7 +59,7 @@ export class TradeCopyMt5Adapter implements ExecutionAdapter {
       res = await this.fetcher(url.toString(), {
         method,
         headers: { "X-API-KEY": this.apiKey, Accept: "application/json" },
-        signal: AbortSignal.timeout(15000),
+        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(15000) : undefined,
       });
     } catch (e) {
       throw new TradeCopyError(`TradeCopy unreachable: ${(e as Error).message}`, "network", 502);
