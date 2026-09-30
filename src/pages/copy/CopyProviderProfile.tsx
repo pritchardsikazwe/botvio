@@ -65,9 +65,12 @@ const CopyProviderProfile = () => {
                       <p className="mt-1 text-sm text-muted-foreground">{provider.bio}</p>
                     )}
                   </div>
-                  <Button asChild>
-                    <Link to={`/copy-trading/start/${provider.id}`}>Copy strategy</Link>
-                  </Button>
+                  <div className="flex shrink-0 flex-col gap-2">
+                    <Button asChild>
+                      <Link to={`/copy-trading/start/${provider.id}`}>Copy strategy</Link>
+                    </Button>
+                    <CopyInviteLinkButton providerId={provider.id} label="Copy link" />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
