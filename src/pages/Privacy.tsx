@@ -11,7 +11,7 @@ const Privacy = () => {
       
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-muted-foreground mb-8">Last updated: January 2025</p>
+        <p className="text-muted-foreground mb-8">Last updated: September 2026</p>
         
         <Card className="glass-card">
           <CardContent className="py-8 prose prose-invert max-w-none">
@@ -160,12 +160,12 @@ const Privacy = () => {
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                 <li><strong>Access:</strong> Request a copy of your personal data</li>
                 <li><strong>Correction:</strong> Update or correct inaccurate information</li>
-                <li><strong>Deletion:</strong> Request deletion of your account and data</li>
+                <li><strong>Deletion:</strong> Delete your account through <a className="text-primary underline" href="/account/delete">Account Deletion</a> or request deletion through privacy@botvio.com</li>
                 <li><strong>Portability:</strong> Receive your data in a machine-readable format</li>
                 <li><strong>Objection:</strong> Object to certain processing activities</li>
               </ul>
               <p className="text-muted-foreground mt-4">
-                To exercise these rights, contact us at <span className="text-primary">privacy@botvio.com</span>. 
+                To exercise these rights, use <a className="text-primary underline" href="/account/delete">Account Deletion</a> for account closure, or contact us at <span className="text-primary">privacy@botvio.com</span>. 
                 We will respond within 30 days.
               </p>
             </section>
