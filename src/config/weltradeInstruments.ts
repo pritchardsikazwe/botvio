@@ -39,8 +39,8 @@ export const WELTRADE_CATEGORY_LABEL: Record<WeltradeCategory, string> = {
  * Weltrade instrument catalogue.
  *
  * - SyntX indices (GainX / PainX / FlipX / SwitchX / FX VOL) are proprietary to
- *   Weltrade, so their only truthful source is the BOTVIO Bridge EA streaming
- *   the user's own MT5 terminal.
+ *   Weltrade. The primary BOTVIO source is the user's connected Weltrade SyntX
+ *   MT5 DEMO through API Studio; the Bridge EA remains an available fallback.
  * - Majors (FX, metals, indices, crypto, commodities) trade the same underlying
  *   markets, streamed live from Deriv's public feed and labelled as a reference
  *   feed. No prices are ever simulated.
