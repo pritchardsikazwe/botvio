@@ -29,11 +29,11 @@ export async function tradecopy<T = Record<string, unknown>>(action: string, pay
 }
 
 export interface TcAccount {
-  id: string; label: string; login_id: string | null; server: string | null; account_role: "master" | "slave" | null;
+  id: string; label: string; login_id: string | null; broker: string | null; server: string | null; account_role: "master" | "slave" | null;
   tradecopy_user_id: number | null; environment: "DEMO" | "LIVE"; connection_status: string | null;
   tradecopy_active: boolean; is_botvio_robot: boolean; last_diagnostic: unknown; last_diagnostic_at: string | null;
 }
-const ACCOUNT_COLS = "id,label,login_id,server,account_role,tradecopy_user_id,environment,connection_status,tradecopy_active,is_botvio_robot,last_diagnostic,last_diagnostic_at";
+const ACCOUNT_COLS = "id,label,login_id,broker,server,account_role,tradecopy_user_id,environment,connection_status,tradecopy_active,is_botvio_robot,last_diagnostic,last_diagnostic_at";
 
 export function useTradeCopyStatus() {
   const { user } = useAuth();
