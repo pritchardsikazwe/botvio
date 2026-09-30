@@ -108,9 +108,15 @@ Deno.serve(async (req) => {
     }
 
     if (!derivAccessToken || !accountIdToUse) {
+      // Expected state (user hasn't linked Deriv yet) — return 200 so clients
+      // handle it gracefully instead of surfacing a runtime error.
       return new Response(
-        JSON.stringify({ ok: false, error: "No active Deriv connection or account ID found" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          ok: false,
+          code: "not_connected",
+          error: "Connect your Deriv account first to start a trading session.",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
