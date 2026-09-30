@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Link2, Loader2, ShieldCheck, Info } from "lucide-react";
+import { Link2, Loader2, ShieldCheck, Info, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useTradeCopyAction } from "@/hooks/useTradeCopy";
 
@@ -45,13 +45,14 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
   const [open, setOpen] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const [broker, setBroker] = useState<string>("");
-  const [serverChoice, setServerChoice] = useState("");
+  const [broker, setBroker] = useState<string>(() => localStorage.getItem("botvio_mt5_broker") || "");
+  const [serverChoice, setServerChoice] = useState(() => localStorage.getItem("botvio_mt5_server") || "");
+  const [serverSearch, setServerSearch] = useState("");
   const [customServer, setCustomServer] = useState("");
   const [label, setLabel] = useState("");
   const act = useTradeCopyAction();
 
-  const availableServers = SERVER_OPTIONS.filter((x) => x.broker === broker);
+  const availableServers = useMemo(() => SERVER_OPTIONS.filter((x) => x.broker === broker && `${x.label} ${x.value}`.toLowerCase().includes(serverSearch.toLowerCase())), [broker, serverSearch]);
 
   const server = serverChoice === CUSTOM_SERVER ? customServer.trim() : serverChoice;
 
@@ -64,10 +65,16 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
     setLabel("");
   };
 
+  useEffect(() => {
+    if (broker) localStorage.setItem("botvio_mt5_broker", broker);
+    if (serverChoice && serverChoice !== CUSTOM_SERVER) localStorage.setItem("botvio_mt5_server", serverChoice);
+  }, [broker, serverChoice]);
+
   const handleBrokerChange = (value: string) => {
     setBroker(value);
     setServerChoice("");
     setCustomServer("");
+    setServerSearch("");
   };
 
   const submit = async (e: React.FormEvent) => {
