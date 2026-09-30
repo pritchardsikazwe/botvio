@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 import { computeDerivSignals, type DerivMode } from "@/lib/marketData/derivSignalEngine";
-import type { NormalizedCandle } from "@/lib/marketData/types";
+import type { NormalizedCandle, Timeframe } from "@/lib/marketData/types";
 
 export type DerivSignalType = "BUY" | "SELL" | "WAIT" | "HOLD";
 
@@ -34,7 +34,7 @@ function modeForGranularity(seconds: number): DerivMode {
   return "SWING";
 }
 
-function timeframeForGranularity(seconds: number): NormalizedCandle[] extends never[] ? never : "1m" | "3m" | "5m" | "15m" | "30m" | "1H" | "4H" {
+function timeframeForGranularity(seconds: number): Timeframe {
   if (seconds === 60) return "1m";
   if (seconds === 180) return "3m";
   if (seconds === 300) return "5m";
@@ -103,7 +103,7 @@ export function useDerivLiveSignal(
 
       const signals = computeDerivSignals(candles, {
         symbol: derivSymbol,
-        timeframe: timeframe as any,
+        timeframe,
         mode,
         maxSignals: 100,
       });
