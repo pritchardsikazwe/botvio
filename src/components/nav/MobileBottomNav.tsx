@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { BarChart3, Bot, ChartCandlestick, Coins, Layers, LineChart, Menu, Signal, Users, X } from "lucide-react";
 import { BOTTOM_NAV, MORE_NAV } from "./mainNav";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,17 @@ export const MobileBottomNav = () => {
 
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`));
 
+  const tradingHubs = [
+    { label: "Trading Hubs", to: "/markets", icon: BarChart3, description: "Markets & dedicated hubs" },
+    { label: "Copy Trading", to: "/copy-trading", icon: Users, description: "Providers & strategies" },
+    { label: "AI Trading Bots", to: "/bots", icon: Bot, description: "Automated strategies" },
+    { label: "Signals Center", to: "/signals", icon: Signal, description: "Live opportunities" },
+    { label: "Deriv Synthetic", to: "/synthetic", icon: Layers, description: "Boom, Crash & Volatility" },
+    { label: "Forex & Gold", to: "/gold", icon: Coins, description: "XAU/USD & FX markets" },
+    { label: "Indices", to: "/us30", icon: LineChart, description: "US30, NAS100 & GER40" },
+    { label: "Options Trading", to: "/deriv-options", icon: ChartCandlestick, description: "Deriv options hub" },
+  ];
+
   return (
     <>
       {open && (
@@ -31,8 +42,8 @@ export const MobileBottomNav = () => {
             onClick={() => setOpen(false)}
           />
           <div className="absolute inset-x-0 bottom-14 max-h-[70vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card p-4 pb-6 shadow-2xl">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-foreground">More</p>
+            <div className="mb-4 flex items-center justify-between">
+              <div><p className="text-lg font-black text-foreground">Trading Hub</p><p className="text-[11px] text-muted-foreground">Everything you need to explore and trade</p></div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -42,7 +53,18 @@ export const MobileBottomNav = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
+              <section>
+                <div className="mb-2 flex items-center justify-between"><p className="data-label">Trading</p><span className="text-[10px] text-muted-foreground">Quick access</span></div>
+                <div className="grid grid-cols-2 gap-2">
+                  {tradingHubs.map(({ label, to, icon: Icon, description }) => (
+                    <Link key={to + label} to={to} onClick={() => setOpen(false)} className="group rounded-xl border border-border/60 bg-background/60 p-3 transition hover:border-primary/50 hover:bg-primary/5">
+                      <div className="flex items-center gap-2"><Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden /><span className="truncate text-xs font-bold text-foreground">{label}</span></div>
+                      <p className="mt-1 text-[9px] leading-3 text-muted-foreground">{description}</p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
               {MORE_NAV.map((group) => (
                 <div key={group.label}>
                   <p className="data-label mb-2">{group.label}</p>
