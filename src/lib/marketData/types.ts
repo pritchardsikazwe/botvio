@@ -107,4 +107,4 @@ export interface MarketDataAdapter {
   stop(): void;
 }
 
-export type MarketDataSource = "deriv" | "weltrade-bridge";
+export type MarketDataSource = "deriv" | "weltrade-bridge" | "weltrade-api-studio";
