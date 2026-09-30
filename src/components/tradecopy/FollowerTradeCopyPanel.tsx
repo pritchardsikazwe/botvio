@@ -22,13 +22,28 @@ import { AdapterModeNotice, EnvBadge, StatusBadge } from "./ModeBadges";
 const ROBOT = "__botvio_robot__";
 
 function LinkProvider({ accounts }: { accounts: TcAccount[] }) {
+  const { user } = useAuth();
   const act = useTradeCopyAction();
   const [acct, setAcct] = useState(accounts[0]?.id ?? "");
   const [provider, setProvider] = useState(ROBOT);
   const [copyType, setCopyType] = useState("1");
   const providers = useQuery({
-    queryKey: ["tradecopy", "providers"],
-    queryFn: async () => (await supabase.from("providers").select("id,display_name").eq("status", "approved").order("display_name")).data ?? [],
+    queryKey: ["tradecopy", "providers", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      if (!user) return [];
+
+      // Show approved providers to everyone, and also show the signed-in user's
+      // own provider record so a provider can test their connected MT5 master.
+      const { data, error } = await supabase
+        .from("providers")
+        .select("id,display_name,user_id,status")
+        .or(`status.eq.approved,user_id.eq.${user.id}`)
+        .order("display_name");
+
+      if (error) throw error;
+      return data ?? [];
+    },
   });
   useEffect(() => { if (!acct && accounts[0]) setAcct(accounts[0].id); }, [accounts, acct]);
 
@@ -53,11 +68,23 @@ function LinkProvider({ accounts }: { accounts: TcAccount[] }) {
           <SelectContent>{accounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.label} ({a.environment})</SelectItem>)}</SelectContent></Select></div>
       <div className="space-y-1.5"><Label>Copy from</Label>
         <Select value={provider} onValueChange={setProvider}><SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent><SelectItem value={ROBOT}>Botvio Robot (official)</SelectItem>{providers.data?.map((p) => <SelectItem key={p.id} value={p.id}>{p.display_name}</SelectItem>)}</SelectContent></Select></div>
+          <SelectContent>
+            <SelectItem value={ROBOT}>Botvio Robot (official)</SelectItem>
+            {providers.data?.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.display_name}{p.user_id === user?.id ? " (My provider)" : ""}
+              </SelectItem>
+            ))}
+          </SelectContent></Select></div>
       <div className="space-y-1.5"><Label>Orders to copy</Label>
         <Select value={copyType} onValueChange={setCopyType}><SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent><SelectItem value="1">New orders only</SelectItem><SelectItem value="0">Existing + new orders</SelectItem></SelectContent></Select></div>
-      <Button onClick={link} disabled={!acct || act.isPending}>Link MT5 Copy Source</Button>
+      <Button onClick={link} disabled={!acct || act.isPending || providers.isError}>Link MT5 Copy Source</Button>
+      {providers.isError && (
+        <p className="text-xs text-destructive sm:col-span-2 lg:col-span-4">
+          Provider list could not be loaded. Refresh and try again.
+        </p>
+      )}
       </div>
     </div>
   );
