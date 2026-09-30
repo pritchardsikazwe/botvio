@@ -215,9 +215,22 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
                   <SelectValue placeholder={broker ? "Select your MT5 server" : "Select broker first"} />
                 </SelectTrigger>
                 <SelectContent>
+                  <div className="flex items-center gap-2 border-b px-2 py-1.5">
+                    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <input
+                      className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                      placeholder="Search servers…"
+                      value={serverSearch}
+                      onChange={(e) => setServerSearch(e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                    />
+                  </div>
                   {availableServers.map((option) => (
                     <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                   ))}
+                  {availableServers.length === 0 && (
+                    <div className="px-2 py-3 text-center text-xs text-muted-foreground">No matching server — use "Other server…" below.</div>
+                  )}
                   <SelectItem value={CUSTOM_SERVER}>Other server…</SelectItem>
                 </SelectContent>
               </Select>
