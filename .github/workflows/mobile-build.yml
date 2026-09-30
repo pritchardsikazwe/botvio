@@ -27,7 +27,6 @@ jobs:
           VITE_STORE_BUILD: "true"
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-      - run: npx @capacitor/assets generate --android --ios || true
       - run: npx cap add android
       - run: npx cap sync android
       - name: Set Android SDK
