@@ -12,6 +12,12 @@ export const MobileBottomNav = () => {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
 
+  // Marketing pages already have their own header navigation; avoid stacking
+  // a second mobile navigation bar over the landing experience.
+  if (pathname === "/" || pathname === "/landing" || pathname === "/home-preview" || pathname === "/home-classic") {
+    return null;
+  }
+
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`));
 
   return (
