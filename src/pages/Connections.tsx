@@ -1,35 +1,33 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
 import { Header } from "@/components/trading/Header";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
-import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
 import MT5BridgeSetupWizard from "@/components/broker/MT5BridgeSetupWizard";
 import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
+import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
+import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   Wallet,
-  RefreshCw,
   Monitor,
-  Info,
   ShieldCheck,
   Zap,
-  Clock,
-  HelpCircle,
-  ExternalLink,
-  Copy,
-  Plus,
+  Cloud,
+  Users,
+  Bot,
+  ArrowRight,
+  CheckCircle2,
+  Info,
+  Wrench,
+  RefreshCw,
   Power,
   Trash2,
 } from "lucide-react";
@@ -39,11 +37,10 @@ import { toast } from "sonner";
 
 const Connections = () => {
   const { user } = useAuth();
-  const { derivTokens, switchDerivToken, removeDerivToken } = useDeriv();
+  const { derivTokens } = useDeriv();
   const [authOpen, setAuthOpen] = useState(false);
   const [busyConnId, setBusyConnId] = useState<string | null>(null);
 
-  // Fetch all connections
   const { data: connections, refetch: refetchConnections } = useQuery({
     queryKey: ["connections", user?.id],
     queryFn: async () => {
@@ -59,33 +56,6 @@ const Connections = () => {
     enabled: !!user,
   });
 
-  // Fetch MT5 accounts
-  const { data: mt5Accounts } = useQuery({
-    queryKey: ["mt5-accounts", user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from("trading_accounts")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("broker", "mt5")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const copyTerminalUid = () => {
-    const uid = `BOTVIO_${user?.id?.slice(0, 8).toUpperCase()}`;
-    navigator.clipboard.writeText(uid);
-    toast.success("Terminal UID copied", { description: uid });
-  };
-
-  const scrollToConnect = () => {
-    document.getElementById("deriv-connect")?.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
-
   const disconnectConnection = async (id: string) => {
     setBusyConnId(id);
     try {
@@ -94,7 +64,7 @@ const Connections = () => {
         .update({ is_connected: false })
         .eq("id", id);
       if (error) throw error;
-      toast.success("Connection disconnected");
+      toast.success("Deriv connection disconnected");
       refetchConnections();
     } catch (e: any) {
       toast.error("Could not disconnect", { description: e?.message });
@@ -104,7 +74,7 @@ const Connections = () => {
   };
 
   const deleteConnection = async (id: string) => {
-    if (!window.confirm("Remove this connection permanently?")) return;
+    if (!window.confirm("Remove this Deriv connection permanently?")) return;
     setBusyConnId(id);
     try {
       const { error } = await supabase.from("deriv_connections").delete().eq("id", id);
@@ -122,377 +92,232 @@ const Connections = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container mx-auto px-4 py-12 max-w-3xl">
-          <div className="text-center mb-8">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-              <Wallet className="h-7 w-7 text-primary" />
+        <main className="container mx-auto max-w-4xl px-4 py-14">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+              <ShieldCheck className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">Connect Deriv Binary Options</h1>
+            <h1 className="mb-3 text-3xl font-bold">Trading Connections</h1>
             <p className="text-muted-foreground">
-              Sign in to Botvio to link your Deriv account via OAuth and trade Rise/Fall, Digits and
-              Multipliers on Volatility, Boom and Crash indices — straight from your dashboard.
+              Connect your Deriv account for Deriv copy trading, or connect MT5 through TradeCopy Cloud
+              for MT5 copy trading.
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3 mb-8">
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {[
-              { icon: ShieldCheck, t: "Secure OAuth", d: "No passwords or tokens copied by hand." },
-              { icon: Zap, t: "One-click trading", d: "Execute signals on demo or real accounts." },
-              { icon: Clock, t: "~60 second setup", d: "Authorize once, revoke anytime." },
-            ].map((b, i) => (
-              <div key={i} className="rounded-lg border border-border bg-muted/30 p-4">
-                <b.icon className="h-5 w-5 text-primary mb-2" />
-                <p className="text-sm font-medium">{b.t}</p>
-                <p className="text-xs text-muted-foreground">{b.d}</p>
-              </div>
+              { icon: ShieldCheck, title: "Secure", text: "OAuth for Deriv and server-side MT5 credentials." },
+              { icon: Cloud, title: "Cloud copy trading", text: "MT5 TradeCopy does not require the old Bridge EA path." },
+              { icon: Zap, title: "One control center", text: "Manage connections, copying and emergency controls in Botvio." },
+            ].map((item) => (
+              <Card key={item.title} className="glass-card">
+                <CardContent className="p-4">
+                  <item.icon className="mb-2 h-5 w-5 text-primary" />
+                  <p className="text-sm font-semibold">{item.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{item.text}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
-          <Card className="glass-card">
+          <Card className="mt-6 glass-card">
             <CardHeader>
               <CardTitle className="text-base">Get started</CardTitle>
-              <CardDescription>
-                Create a free Botvio account or sign in to manage your broker connections.
-              </CardDescription>
+              <CardDescription>Sign in to connect a trading account.</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-3">
+            <CardContent>
               <Button onClick={() => setAuthOpen(true)}>Sign in / Create account</Button>
-              <Button variant="outline" onClick={() => (window.location.href = "/learn")}>
-                Learn binary options first
-              </Button>
             </CardContent>
           </Card>
-
-          <Accordion type="single" collapsible className="mt-6">
-            <AccordionItem value="what" className="border-border">
-              <AccordionTrigger className="text-sm">What can I trade once connected?</AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground space-y-2">
-                <p>• Rise/Fall and Higher/Lower contracts on Volatility 10–100 indices.</p>
-                <p>• Matches/Differs, Even/Odd and Over/Under digit contracts.</p>
-                <p>• Multipliers on Boom 500/1000 and Crash 500/1000.</p>
-                <p>• Forex, metals and stock indices where your Deriv account allows it.</p>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="safe" className="border-border">
-              <AccordionTrigger className="text-sm">Is my Deriv account safe?</AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground">
-                Botvio never sees your Deriv password. Access tokens are encrypted at rest on our
-                servers, are never exposed to your browser, and can be revoked from this page or
-                from your Deriv settings at any time.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
         </main>
         <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
       </div>
     );
   }
 
+  const activeDeriv = (connections ?? []).filter((c: any) => c.is_connected).length;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      <main className="container mx-auto px-4 py-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Broker Connections</h1>
-          <p className="text-muted-foreground">
-            Connect your Deriv or MT5 accounts to enable automated trading
-          </p>
+      <main className="container mx-auto space-y-6 px-4 py-6">
+        <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-5 sm:p-7">
+          <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="border-primary/30 text-primary">BOTVIO CONNECT</Badge>
+              <Badge variant="secondary">2 supported copy routes</Badge>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Trading Connections</h1>
+            <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
+              Choose the connection that matches your account. Deriv uses secure OAuth. MT5 copy trading
+              uses TradeCopy Cloud — the new route, without the old Bridge EA/VPS workflow.
+            </p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-background/50 p-3">
+                <div className="rounded-lg bg-primary/10 p-2"><Wallet className="h-5 w-5 text-primary" /></div>
+                <div>
+                  <p className="text-sm font-semibold">Deriv Copy Trading</p>
+                  <p className="text-xs text-muted-foreground">Connect once with Deriv OAuth, then follow Botvio providers or Botvio Robot.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-background/50 p-3">
+                <div className="rounded-lg bg-primary/10 p-2"><Monitor className="h-5 w-5 text-primary" /></div>
+                <div>
+                  <p className="text-sm font-semibold">MT5 Copy Trading · TradeCopy</p>
+                  <p className="text-xs text-muted-foreground">Connect an MT5 master or follower directly to TradeCopy Cloud. No Bridge EA required.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Card className="glass-card">
+            <CardContent className="flex items-start gap-3 p-4">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+              <div><p className="text-sm font-medium">Credentials protected</p><p className="text-xs text-muted-foreground">Secrets stay server-side.</p></div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card">
+            <CardContent className="flex items-start gap-3 p-4">
+              <Cloud className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div><p className="text-sm font-medium">TradeCopy Cloud</p><p className="text-xs text-muted-foreground">MT5 copying without the legacy bridge flow.</p></div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card">
+            <CardContent className="flex items-start gap-3 p-4">
+              <Zap className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+              <div><p className="text-sm font-medium">Pause / Stop / Emergency</p><p className="text-xs text-muted-foreground">Controls are available before live copying.</p></div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Global trust strip */}
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30">
-            <ShieldCheck className="h-5 w-5 text-success mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-medium">Tokens encrypted at rest</p>
-              <p className="text-xs text-muted-foreground">Server-side only — never exposed to your browser.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30">
-            <Zap className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-medium">Revoke anytime</p>
-              <p className="text-xs text-muted-foreground">Disconnect from this page or from your broker dashboard.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30">
-            <Clock className="h-5 w-5 text-warning mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-medium">~2 minute setup</p>
-              <p className="text-xs text-muted-foreground">Deriv via OAuth is one click. MT5 needs an EA install.</p>
-            </div>
-          </div>
-        </div>
-
-        <Tabs defaultValue="deriv" className="space-y-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-md">
-            <TabsTrigger value="deriv" className="flex items-center gap-2">
-              <Wallet className="h-4 w-4" />
-              Deriv API
+        <Tabs defaultValue="deriv" className="space-y-5">
+          <TabsList className="grid h-auto w-full max-w-2xl grid-cols-2 rounded-xl p-1">
+            <TabsTrigger value="deriv" className="gap-2 py-2.5">
+              <Wallet className="h-4 w-4" /> Deriv Copy Trading
             </TabsTrigger>
-            <TabsTrigger value="mt5" className="flex items-center gap-2">
-              <Monitor className="h-4 w-4" />
-              MT5 Bridge
+            <TabsTrigger value="mt5" className="gap-2 py-2.5">
+              <Monitor className="h-4 w-4" /> MT5 TradeCopy
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="deriv" className="space-y-6">
-            {/* Important notice — legacy PATs no longer work */}
-            <Alert className="border-warning/40 bg-warning/5">
-              <Info className="h-4 w-4 text-warning" />
-              <AlertTitle>Deriv now requires OAuth — legacy API tokens are deprecated</AlertTitle>
-              <AlertDescription className="text-sm text-muted-foreground">
-                If your old API token suddenly stopped working, that's why. Click{" "}
-                <strong>Connect with Deriv</strong> below to authorize Botvio in one step —
-                no token copying, no expiry headaches.
+          <TabsContent value="deriv" className="space-y-5">
+            <Alert className="border-primary/30 bg-primary/5">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <AlertTitle>New Deriv connection flow</AlertTitle>
+              <AlertDescription className="text-sm">
+                Use <strong>Continue with Deriv</strong> to authorize Botvio. The old token/PAT route is
+                not presented here. After connecting, use Botvio Copy Trading to follow providers or Botvio Robot.
               </AlertDescription>
             </Alert>
 
-            {/* How to connect — step by step */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <HelpCircle className="h-4 w-4 text-primary" />
-                  How to connect your Deriv account
-                </CardTitle>
-                <CardDescription>3 steps · ~60 seconds · works on demo and real</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ol className="space-y-3 text-sm">
-                  {[
-                    {
-                      t: "Click \"Connect with Deriv\"",
-                      d: "We'll send you to Deriv to log in securely. No password ever touches Botvio.",
-                    },
-                    {
-                      t: "Approve Botvio's access",
-                      d: "Deriv asks once. You can revoke from your Deriv settings at any time.",
-                    },
-                    {
-                      t: "Pick your active account",
-                      d: "All your demo & real accounts appear in the switcher above. Toggle the one Botvio should trade with.",
-                    },
-                  ].map((s, i) => (
-                    <li key={i} className="flex gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
-                        {i + 1}
-                      </span>
-                      <div>
-                        <p className="font-medium">{s.t}</p>
-                        <p className="text-muted-foreground">{s.d}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+            <DerivConnectionPanel hideLegacyPat />
 
-                <Accordion type="single" collapsible className="mt-4">
-                  <AccordionItem value="trouble" className="border-border">
-                    <AccordionTrigger className="text-sm">Having trouble connecting?</AccordionTrigger>
-                    <AccordionContent className="space-y-2 text-sm text-muted-foreground">
-                      <p>• Sign out of all Deriv tabs first, then retry — mixed sessions are the #1 cause of failures.</p>
-                      <p>• Disable popup blockers and ad-blockers for botvio.live and deriv.com.</p>
-                      <p>• If "AccountNotFound" appears, the account you picked isn't owned by the Deriv login you used. Switch login.</p>
-                      <p>
-                        Still stuck? Email{" "}
-                        <a href="mailto:info@botvio.live" className="text-primary hover:underline">
-                          info@botvio.live
-                        </a>{" "}
-                        with a screenshot.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
-
-            {/* Connections manager summary */}
-            <Card className="glass-card">
-              <CardHeader>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <CardTitle className="text-base">Connections Manager</CardTitle>
-                    <CardDescription>
-                      {derivTokens.length} linked account{derivTokens.length === 1 ? "" : "s"} ·{" "}
-                      {(connections ?? []).filter((c: any) => c.is_connected).length} active connection
-                      {(connections ?? []).filter((c: any) => c.is_connected).length === 1 ? "" : "s"}
-                    </CardDescription>
-                  </div>
-                  <Button size="sm" onClick={scrollToConnect}>
-                    <Plus className="h-4 w-4 mr-1" /> Add Deriv account
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-2 pt-0">
-                <Button size="sm" onClick={() => (window.location.href = "/rise-fall")}>
-                  <Zap className="h-4 w-4 mr-1" /> Trade Rise &amp; Fall
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => (window.location.href = "/deriv-app")}>
-                  Open Deriv workspace
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Multi-Account Switcher */}
-            {derivTokens.length > 0 && (
-              <AccountSwitcher
-                tokens={derivTokens}
-                onActivate={switchDerivToken}
-                onRemove={removeDerivToken}
-              />
-            )}
-
-            {/* Connection (OAuth or Token) */}
-            <div id="deriv-connect">
-              <DerivConnectionPanel />
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="glass-card">
+                <CardHeader className="pb-3"><CardTitle className="text-sm">Browse providers</CardTitle><CardDescription>Find Deriv copy strategies.</CardDescription></CardHeader>
+                <CardContent><Button asChild className="w-full"><Link to="/copy-trading">Open Copy Trading <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></CardContent>
+              </Card>
+              <Card className="glass-card">
+                <CardHeader className="pb-3"><CardTitle className="text-sm">My Deriv Copy</CardTitle><CardDescription>Pause, resume or stop active copies.</CardDescription></CardHeader>
+                <CardContent><Button asChild variant="outline" className="w-full"><Link to="/copy-trading/my">My Copy Trading <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></CardContent>
+              </Card>
+              <Card className="glass-card">
+                <CardHeader className="pb-3"><CardTitle className="text-sm">Botvio Robot</CardTitle><CardDescription>Use Botvio's automated signal source.</CardDescription></CardHeader>
+                <CardContent><Button asChild variant="outline" className="w-full"><Link to="/botvio-robot"><Bot className="mr-2 h-4 w-4" /> Botvio Robot</Link></Button></CardContent>
+              </Card>
             </div>
 
-            {/* Connection History */}
             <Card className="glass-card">
-              <CardHeader>
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <CardTitle>Saved Connections</CardTitle>
-                    <CardDescription>View, disconnect or remove your Deriv connections</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => refetchConnections()}>
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
+              <CardHeader className="flex flex-row items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-sm">Deriv connection history</CardTitle>
+                  <CardDescription>{derivTokens.length} linked account(s) · {activeDeriv} active connection(s)</CardDescription>
                 </div>
+                <Button variant="outline" size="sm" onClick={() => refetchConnections()}><RefreshCw className="h-4 w-4" /></Button>
               </CardHeader>
-              <CardContent>
-                {connections && connections.length > 0 ? (
-                  <div className="space-y-3">
-                    {connections.map((conn: any) => (
-                      <div
-                        key={conn.id}
-                        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-muted/30"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              conn.is_connected ? "bg-success" : "bg-muted-foreground"
-                            }`}
-                          />
-                          <div>
-                            <p className="font-medium">{conn.login_id || "Unknown"}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {conn.connection_type} • {conn.env}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={conn.is_connected ? "default" : "secondary"}>
-                            {conn.is_connected ? "Active" : "Inactive"}
-                          </Badge>
-                          {conn.is_connected && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => (window.location.href = "/rise-fall")}
-                            >
-                              <Zap className="h-3.5 w-3.5 mr-1" /> Trade Rise &amp; Fall
-                            </Button>
-                          )}
-                          {conn.is_connected && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={busyConnId === conn.id}
-                              onClick={() => disconnectConnection(conn.id)}
-                            >
-                              <Power className="h-3.5 w-3.5 mr-1" /> Disconnect
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                            disabled={busyConnId === conn.id}
-                            onClick={() => deleteConnection(conn.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+              <CardContent className="space-y-2">
+                {connections && connections.length > 0 ? connections.map((conn: any) => (
+                  <div key={conn.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+                    <div className="flex items-center gap-3">
+                      <span className={`h-2 w-2 rounded-full ${conn.is_connected ? "bg-success" : "bg-muted-foreground"}`} />
+                      <div>
+                        <p className="text-sm font-medium">{conn.login_id || "Deriv account"}</p>
+                        <p className="text-xs text-muted-foreground">{conn.connection_type} · {conn.env}</p>
                       </div>
-                    ))}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={conn.is_connected ? "default" : "secondary"}>{conn.is_connected ? "Connected" : "Disconnected"}</Badge>
+                      {conn.is_connected && (
+                        <Button size="sm" variant="outline" disabled={busyConnId === conn.id} onClick={() => disconnectConnection(conn.id)}>
+                          <Power className="mr-1 h-3.5 w-3.5" /> Disconnect
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" className="text-destructive" disabled={busyConnId === conn.id} onClick={() => deleteConnection(conn.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-8 space-y-3">
-                    <p className="text-muted-foreground">No connections yet</p>
-                    <Button size="sm" variant="outline" onClick={scrollToConnect}>
-                      <Plus className="h-4 w-4 mr-1" /> Connect your first account
-                    </Button>
-                  </div>
+                )) : (
+                  <p className="py-4 text-center text-sm text-muted-foreground">No Deriv connection saved yet.</p>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="mt5" className="space-y-6">
-            {/* How MT5 Bridge works */}
-            <Card className="glass-card">
+          <TabsContent value="mt5" className="space-y-5">
+            <Card className="glass-card border-primary/30 bg-primary/5">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <HelpCircle className="h-4 w-4 text-primary" />
-                  How the MT5 Bridge works
-                </CardTitle>
+                <CardTitle className="flex items-center gap-2 text-base"><Cloud className="h-5 w-5 text-primary" /> MT5 Copy Trading is now TradeCopy Cloud</CardTitle>
                 <CardDescription>
-                  Two routes — pick the one that matches your setup
+                  This is the new MT5 route. Connect a master or follower account, configure risk, then start copying.
+                  No BOTVIO Bridge EA, Terminal UID or personal VPS is required for TradeCopy.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-lg border border-border p-4">
-                  <Badge variant="secondary" className="mb-2">Easiest</Badge>
-                  <p className="font-medium">Managed Bridge (no VPS)</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Submit MT5 demo creds → we provision a dedicated terminal on our VPS within 24h.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border p-4">
-                  <Badge className="mb-2">Self-hosted</Badge>
-                  <p className="font-medium">Install the EA on your VPS/PC</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Download BOTVIO_BridgeEA.mq5, attach it to any chart, paste your Terminal UID.
-                  </p>
-                </div>
-
-                <div className="sm:col-span-2 flex flex-wrap items-center gap-2 pt-2 border-t border-border">
-                  <span className="text-sm text-muted-foreground">Your Terminal UID:</span>
-                  <code className="px-2 py-1 rounded bg-muted text-xs font-mono">
-                    BOTVIO_{user.id.slice(0, 8).toUpperCase()}
-                  </code>
-                  <Button variant="ghost" size="sm" onClick={copyTerminalUid}>
-                    <Copy className="h-3 w-3 mr-1" /> Copy
-                  </Button>
-                  <a
-                    href="/BOTVIO_BridgeEA.mq5"
-                    download
-                    className="ml-auto text-sm text-primary hover:underline inline-flex items-center gap-1"
-                  >
-                    Download EA <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
+              <CardContent className="grid gap-3 sm:grid-cols-3">
+                {[
+                  ["1", "Connect MT5", "Enter your MT5 account details securely."],
+                  ["2", "Choose source", "Botvio Robot or an approved provider."],
+                  ["3", "Start Copying", "Set risk controls and activate when ready."],
+                ].map(([n, t, d]) => (
+                  <div key={n} className="rounded-xl border border-border/60 bg-background/50 p-3">
+                    <div className="mb-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{n}</div>
+                    <p className="text-sm font-semibold">{t}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{d}</p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
 
-            <Card className="glass-card border-primary/40">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span>No VPS? Use our Managed Bridge</span>
-                </CardTitle>
-                <CardDescription>
-                  Skip the EA install. Submit your MT5 demo credentials and our team will provision a dedicated terminal for you on our VPS — usually within 24 hours.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={() => (window.location.href = "/bridge-request")}>
-                  Request Managed MT5 Bridge →
-                </Button>
-              </CardContent>
-            </Card>
-            <MT5BridgeSetupWizard />
-            <Mt5AutoExecuteCard />
+            <FollowerTradeCopyPanel />
+            <ProviderTradingAccountCard />
+            <ProviderTradingAccountCard robot />
+
+            <Accordion type="single" collapsible className="rounded-xl border border-border/60 px-4">
+              <AccordionItem value="legacy" className="border-0">
+                <AccordionTrigger className="py-4 text-sm">
+                  <span className="flex items-center gap-2"><Wrench className="h-4 w-4 text-muted-foreground" /> Legacy MT5 Bridge — existing users only</span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
+                  <Alert className="border-warning/30 bg-warning/5">
+                    <Info className="h-4 w-4 text-warning" />
+                    <AlertTitle>Legacy route retained for existing Bridge users</AlertTitle>
+                    <AlertDescription className="text-xs">
+                      New MT5 copy-trading setups should use TradeCopy Cloud above. The Bridge EA/VPS tools remain here only so existing installations are not stranded.
+                    </AlertDescription>
+                  </Alert>
+                  <MT5BridgeSetupWizard />
+                  <Mt5AutoExecuteCard />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            <p className="text-center text-[11px] text-muted-foreground">
+              MT5 copy trading carries real risk of loss. Test with a demo account before enabling live copying.
+            </p>
           </TabsContent>
         </Tabs>
       </main>
