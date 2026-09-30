@@ -72,18 +72,62 @@ export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean 
   const { user } = useAuth();
   const { data, isLoading, error } = useTradeCopyAccounts("master", { robot });
 
+  const title = robot ? "Botvio Robot — MT5 execution master" : "Provider — MT5 copy-trading master";
+  const description = robot
+    ? "This is Botvio's official MT5 master. Followers copy its MT5 trades through TradeCopy."
+    : "This is the provider's MT5 master account. Followers can subscribe to this account.";
+
   return (
     <Card className="border-border/50">
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-        <CardTitle className="text-sm">{robot ? "Botvio Robot master account" : "Trading account (MT5 master)"}</CardTitle>
-        {user && <ConnectMt5Dialog role="master" robot={robot} triggerLabel="Connect MT5 Master" />}
+      <CardHeader className="space-y-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle className="text-base">{title}</CardTitle>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
+          </div>
+          {user && <ConnectMt5Dialog role="master" robot={robot} triggerLabel={robot ? "Connect Botvio Robot MT5" : "Connect Provider MT5"} />}
+        </div>
+
+        <div className="grid gap-2 md:grid-cols-3">
+          <div className="rounded-lg border bg-muted/20 p-3">
+            <div className="text-xs font-semibold">1. Deriv</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Use Deriv connection for Deriv trading/signals. It is separate from the MT5 TradeCopy connection.
+            </p>
+          </div>
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+            <div className="text-xs font-semibold">2. MT5 master</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Connect the exact MT5 login, trader password, broker and server that will provide the trades.
+            </p>
+          </div>
+          <div className="rounded-lg border bg-muted/20 p-3">
+            <div className="text-xs font-semibold">3. Followers</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Followers connect their own MT5 accounts and choose this provider or Botvio Robot to copy.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Important:</span> Deriv and MT5 are different connection types.
+          Do not enter a Deriv token in the MT5 form. For MT5 copy trading, use the MT5 account number, trader password and exact MT5 server.
+        </div>
       </CardHeader>
+
       <CardContent className="space-y-3">
         <AdapterModeNotice />
-        {!user && <p className="text-sm text-muted-foreground">Sign in to connect your MT5 master account.</p>}
+        {!user && <p className="text-sm text-muted-foreground">Sign in to manage the provider MT5 master account.</p>}
         {isLoading && <Skeleton className="h-32 w-full" />}
-        {error && <p className="text-sm text-destructive">Couldn't load accounts. Please refresh.</p>}
-        {data && data.length === 0 && <p className="text-sm text-muted-foreground">No master account connected yet. Trades on your master account are copied to followers by TradeCopy — no Bridge EA or VPS needed.</p>}
+        {error && <p className="text-sm text-destructive">Couldn't load MT5 master accounts. Please refresh.</p>}
+        {data && data.length === 0 && (
+          <div className="rounded-xl border border-dashed p-6 text-center">
+            <p className="font-medium">No MT5 master connected</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {robot ? "Connect Botvio Robot's MT5 master account first. It will start inactive in DEMO mode." : "Connect the provider's MT5 master account first. It will start inactive in DEMO mode."}
+            </p>
+          </div>
+        )}
         {data?.map((a) => <MasterRow key={a.id} a={a} robot={robot} />)}
       </CardContent>
     </Card>
