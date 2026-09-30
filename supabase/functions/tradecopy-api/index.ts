@@ -96,7 +96,6 @@ async function storeAccount(
     .from("trading_accounts")
     .select(ACCOUNT_COLS)
     .eq("user_id", ctx.userId)
-    .eq("platform", "MT5")
     .eq("execution_provider", "tradecopy")
     .eq("account_role", role)
     .eq("login_id", String(creds.login))
@@ -150,7 +149,7 @@ async function storeAccount(
   }
 
   const { data: acct, error } = await ctx.admin.from("trading_accounts").insert({
-    user_id: ctx.userId, broker: creds.broker, platform: "MT5", execution_provider: "tradecopy",
+    user_id: ctx.userId, broker: creds.broker, execution_provider: "tradecopy",
     label: creds.label || `MT5 ${role === "master" ? "Master" : "Follower"} ${creds.login}`,
     login_id: String(creds.login), server: creds.server, account_role: role,
     environment: "DEMO", tradecopy_active: false, is_active: true, connection_status: "pending",
