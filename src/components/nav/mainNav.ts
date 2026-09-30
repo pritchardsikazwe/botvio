@@ -100,6 +100,7 @@ export const PRIMARY_NAV: NavGroup[] = [
       { label: "My Copy Trading", to: "/copy-trading/my", icon: BarChart3, description: "Active strategies & copy status" },
       { label: "Become a Provider", to: "/copy-trading/become-provider", icon: Users },
       { label: "Provider Dashboard", to: "/provider-dashboard", icon: BarChart3 },
+      { label: "Botvio Robot", to: "/botvio-robot", icon: Bot, description: "Official automated signal provider" },
       { label: "My Trades", to: "/trade-history", icon: Newspaper },
       { label: "P2P Trading", to: "/p2p", icon: Users },
     ],
