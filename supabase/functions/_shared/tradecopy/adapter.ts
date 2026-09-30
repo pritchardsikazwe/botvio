@@ -58,7 +58,7 @@ export class TradeCopyMt5Adapter implements ExecutionAdapter {
     try {
       res = await this.fetcher(url.toString(), {
         method,
-        headers: { "X-API-KEY": this.apiKey, Accept: "application/json" },
+        headers: { ApiKey: this.apiKey, Accept: "application/json" },
         signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(15000) : undefined,
       });
     } catch (e) {
@@ -67,7 +67,12 @@ export class TradeCopyMt5Adapter implements ExecutionAdapter {
     const text = await res.text();
     let body: unknown = text;
     try { body = JSON.parse(text); } catch { /* plain text */ }
-    if (res.status === 401 || res.status === 403) throw new TradeCopyError("TradeCopy rejected the API key", "auth", 502);
+    if (res.status === 401 || res.status === 403) {
+      const detail = typeof body === "object" && body
+        ? JSON.stringify(redact(body)).slice(0, 300)
+        : String(text).slice(0, 300);
+      throw new TradeCopyError(`TradeCopy rejected the API key (${res.status}): ${detail}`, "auth", 502);
+    }
     if (!res.ok) {
       const msg = typeof body === "object" && body ? JSON.stringify(redact(body)).slice(0, 300) : String(text).slice(0, 300);
       throw new TradeCopyError(`TradeCopy error ${res.status}: ${msg}`, "upstream", 502);
@@ -84,7 +89,17 @@ export class TradeCopyMt5Adapter implements ExecutionAdapter {
   private static extractId(raw: unknown, fallback: number): number | null {
     if (raw && typeof raw === "object") {
       const b = raw as Record<string, unknown>;
-      for (const k of ["id", "userId", "data"]) { const n = Number(b[k]); if (Number.isFinite(n) && n > 0) return n; }
+      for (const k of ["id", "userId", "data"]) {
+        const value = b[k];
+        const n = Number(value);
+        if (Number.isFinite(n) && n > 0) return n;
+        if (value && typeof value === "object") {
+          for (const nested of ["id", "userId", "userID"]) {
+            const nn = Number((value as Record<string, unknown>)[nested]);
+            if (Number.isFinite(nn) && nn > 0) return nn;
+          }
+        }
+      }
     }
     return fallback || null;
   }
