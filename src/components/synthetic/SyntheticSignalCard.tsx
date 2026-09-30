@@ -228,8 +228,20 @@ export function SyntheticSignalCard({
           </div>
         </div>
 
-        {/* Reason */}
-        <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{live.reason}</p>
+        {/* Engine performance */}
+        <div className="rounded-lg border border-border/40 bg-background/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">BOTVIO {live.mode} Engine</span>
+            <Badge variant="outline" className="text-[9px]">{live.timeframe}</Badge>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{live.reason}</p>
+          <div className="grid grid-cols-4 gap-2">
+            <div><div className="text-[9px] text-muted-foreground">Signals</div><div className="text-xs font-bold">{live.backtest.signals}</div></div>
+            <div><div className="text-[9px] text-muted-foreground">Win rate</div><div className="text-xs font-bold">{live.backtest.winRate == null ? "—" : live.backtest.winRate.toFixed(1) + "%"}</div></div>
+            <div><div className="text-[9px] text-muted-foreground">PF</div><div className="text-xs font-bold">{live.backtest.profitFactor == null ? "—" : live.backtest.profitFactor.toFixed(2)}</div></div>
+            <div><div className="text-[9px] text-muted-foreground">Expectancy</div><div className="text-xs font-bold">{live.backtest.expectancyR == null ? "—" : (live.backtest.expectancyR >= 0 ? "+" : "") + live.backtest.expectancyR.toFixed(2) + "R"}</div></div>
+          </div>
+        </div>
 
         {/* Execute buttons — user picks per-signal */}
         <div className="grid grid-cols-2 gap-2 pt-1">
