@@ -40,7 +40,14 @@ function LinkProvider({ accounts }: { accounts: TcAccount[] }) {
   };
 
   return (
-    <div className="grid gap-3 rounded-xl border border-border/50 p-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+    <div className="space-y-3 rounded-xl border border-border/50 p-4">
+      <div>
+        <div className="text-sm font-semibold">Choose what this MT5 account copies</div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Deriv connection and MT5 copy trading are separate. This screen controls the MT5 follower account only.
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
       <div className="space-y-1.5"><Label>Follower account</Label>
         <Select value={acct} onValueChange={setAcct}><SelectTrigger><SelectValue placeholder="Choose account" /></SelectTrigger>
           <SelectContent>{accounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.label} ({a.environment})</SelectItem>)}</SelectContent></Select></div>
@@ -50,7 +57,8 @@ function LinkProvider({ accounts }: { accounts: TcAccount[] }) {
       <div className="space-y-1.5"><Label>Orders to copy</Label>
         <Select value={copyType} onValueChange={setCopyType}><SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent><SelectItem value="1">New orders only</SelectItem><SelectItem value="0">Existing + new orders</SelectItem></SelectContent></Select></div>
-      <Button onClick={link} disabled={!acct || act.isPending}>Link provider</Button>
+      <Button onClick={link} disabled={!acct || act.isPending}>Link MT5 Copy Source</Button>
+      </div>
     </div>
   );
 }
