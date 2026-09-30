@@ -59,7 +59,8 @@ import Tools from "./pages/Tools";
 import ResearchHub from "./pages/ResearchHub";
 import AccountClosure from "./pages/AccountClosure";
 import { StoreRestrictedRoute } from "@/components/StoreRestrictedRoute";
-import { isRestrictedOnStore } from "@/lib/mobile";\nimport { useLocation } from "react-router-dom";
+import { isRestrictedOnStore } from "@/lib/mobile";
+import { useLocation } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 import Author from "./pages/Author";
@@ -157,7 +158,14 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
  * Locale detection on the second mount is handled by LocalePrefixRouter,
  * which sets i18next language from the URL segment.
  */
-export const AppRoutes = () => {\n  const location = useLocation();\n\n  if (isRestrictedOnStore(location.pathname)) {\n    return <Navigate to="/dashboard" replace />;\n  }\n\n  return (
+export const AppRoutes = () => {
+  const location = useLocation();
+
+  if (isRestrictedOnStore(location.pathname)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
   <Routes>
     <Route path="/" element={<HomeMockup />} />
     <Route path="home-preview" element={<HomeMockup />} />
@@ -362,4 +370,5 @@ export const AppRoutes = () => {\n  const location = useLocation();\n\n  if (isR
     <Route path=":slug" element={<SlugResolver />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
-);
+  );
+};
