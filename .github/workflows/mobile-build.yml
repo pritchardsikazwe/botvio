@@ -21,11 +21,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - run: mkdir -p resources && cp public/icon-512.png resources/icon.png
+      - run: npx vite build index.mobile.html --outDir dist --base ./
         env:
           VITE_STORE_BUILD: "true"
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - run: npx @capacitor/assets generate --android --ios || true
       - run: npx cap add android
       - run: npx cap sync android
       - name: Set Android SDK
@@ -50,7 +52,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - run: mkdir -p resources && cp public/icon-512.png resources/icon.png
+      - run: npx vite build index.mobile.html --outDir dist --base ./
         env:
           VITE_STORE_BUILD: "true"
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
