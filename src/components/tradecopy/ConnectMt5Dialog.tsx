@@ -10,21 +10,52 @@ import { useTradeCopyAction } from "@/hooks/useTradeCopy";
 
 interface Props { role: "master" | "slave"; robot?: boolean; triggerLabel: string }
 
-type BrokerSuggestion = { label: string; value: string };
+type ServerOption = { label: string; value: string; environment: "Live" | "Demo" };
 
-const BROKER_SUGGESTIONS: BrokerSuggestion[] = [
-  { label: "HFM", value: "HFM" },
-  { label: "Weltrade", value: "Weltrade" },
-  { label: "Exness", value: "Exness" },
-  { label: "IC Markets", value: "IC Markets" },
-  { label: "XM", value: "XM" },
-  { label: "Pepperstone", value: "Pepperstone" },
-  { label: "FBS", value: "FBS" },
-  { label: "RoboForex", value: "RoboForex" },
-  { label: "Vantage", value: "Vantage" },
-  { label: "FxPro", value: "FxPro" },
-  { label: "Deriv", value: "Deriv" },
-  { label: "Other", value: "Other" },
+const BROKER_SERVERS: Record<string, ServerOption[]> = {
+  HFM: [
+    { label: "HFMarketsGlobal-Live1", value: "HFMarketsGlobal-Live1", environment: "Live" },
+    { label: "HFMarketsGlobal-Demo", value: "HFMarketsGlobal-Demo", environment: "Demo" },
+    { label: "HFMarketsGlobal-Live3", value: "HFMarketsGlobal-Live3", environment: "Live" },
+    { label: "HFMarketsGlobal-Demo3", value: "HFMarketsGlobal-Demo3", environment: "Demo" },
+    { label: "HFMarketsGlobal-Live4", value: "HFMarketsGlobal-Live4", environment: "Live" },
+    { label: "HFMarketsGlobal-Demo4", value: "HFMarketsGlobal-Demo4", environment: "Demo" },
+    { label: "HFMarketsGlobal-Live5", value: "HFMarketsGlobal-Live5", environment: "Live" },
+    { label: "HFMarketsGlobal-Live7", value: "HFMarketsGlobal-Live7", environment: "Live" },
+    { label: "HFMarketsGlobal-Live8", value: "HFMarketsGlobal-Live8", environment: "Live" },
+    { label: "HFMarketsGlobal-Live9", value: "HFMarketsGlobal-Live9", environment: "Live" },
+    { label: "HFMarketsGlobal-Live10", value: "HFMarketsGlobal-Live10", environment: "Live" },
+    { label: "HFMarketsGlobal-Live11", value: "HFMarketsGlobal-Live11", environment: "Live" },
+    { label: "HFMarketsGlobal-Live12", value: "HFMarketsGlobal-Live12", environment: "Live" },
+    { label: "HFMarketsGlobal-Live13", value: "HFMarketsGlobal-Live13", environment: "Live" },
+    { label: "HFMarketsGlobal-Live14", value: "HFMarketsGlobal-Live14", environment: "Live" },
+    { label: "HFMarketsGlobal-Live15", value: "HFMarketsGlobal-Live15", environment: "Live" },
+    { label: "HFMarketsGlobal-Live16", value: "HFMarketsGlobal-Live16", environment: "Live" },
+    { label: "HFMarketsGlobal-Live17", value: "HFMarketsGlobal-Live17", environment: "Live" },
+    { label: "HFMarketsGlobal-Live18", value: "HFMarketsGlobal-Live18", environment: "Live" },
+    { label: "HFMarketsGlobal-Live19", value: "HFMarketsGlobal-Live19", environment: "Live" },
+    { label: "HFMarketsGlobal-Live20", value: "HFMarketsGlobal-Live20", environment: "Live" },
+  ],
+  Deriv: [
+    { label: "Deriv-Demo", value: "Deriv-Demo", environment: "Demo" },
+    { label: "DerivSVG-Server", value: "DerivSVG-Server", environment: "Live" },
+    { label: "DerivSVG-Server-02", value: "DerivSVG-Server-02", environment: "Live" },
+  ],
+};
+
+const BROKER_OPTIONS = [
+  "HFM",
+  "Weltrade",
+  "Exness",
+  "IC Markets",
+  "XM",
+  "Pepperstone",
+  "FBS",
+  "RoboForex",
+  "Vantage",
+  "FxPro",
+  "Deriv",
+  "Other",
 ];
 
 /** Password lives only in this form's local state and is cleared on submit. */
@@ -34,11 +65,11 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
   const [password, setPassword] = useState("");
   const [broker, setBroker] = useState<string>(() => localStorage.getItem("botvio_mt5_broker") || "");
   const [serverChoice, setServerChoice] = useState(() => localStorage.getItem("botvio_mt5_server") || "");
-  const [brokerSearch, setBrokerSearch] = useState("");
   const [label, setLabel] = useState("");
   const act = useTradeCopyAction();
 
   const server = serverChoice.trim();
+  const serverOptions = BROKER_SERVERS[broker] || [];
 
   const resetForm = () => {
     setLogin("");
@@ -56,6 +87,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
   const handleBrokerChange = (value: string) => {
     setBroker(value);
     setServerChoice("");
+    localStorage.removeItem("botvio_mt5_server");
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -132,32 +164,55 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
 
           <div className="space-y-1.5">
             <Label htmlFor="tc-broker">MT5 broker</Label>
-            <Input
-              id="tc-broker"
-              list="botvio-mt5-brokers"
-              placeholder="e.g. HFM, Exness, Weltrade"
-              required
-              value={broker}
-              onChange={(e) => setBroker(e.target.value)}
-            />
-            <datalist id="botvio-mt5-brokers">
-              {BROKER_SUGGESTIONS.map((item) => <option key={item.value} value={item.value} />)}
-            </datalist>
-            <p className="text-xs text-muted-foreground">TradeCopy states that it supports thousands of broker servers. Enter the broker exactly as shown in your MT5 account.</p>
+            <Select value={broker} onValueChange={handleBrokerChange} required>
+              <SelectTrigger id="tc-broker">
+                <SelectValue placeholder="Select your broker" />
+              </SelectTrigger>
+              <SelectContent>
+                {BROKER_OPTIONS.map((item) => (
+                  <SelectItem key={item} value={item}>{item}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Choose your broker first. BOTVIO will show verified server names where available.</p>
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="tc-server">MT5 server</Label>
-            <Input
-              id="tc-server"
-              placeholder="e.g. BrokerName-Live01"
-              required
-              value={serverChoice}
-              onChange={(e) => setServerChoice(e.target.value)}
-            />
+            {serverOptions.length > 0 ? (
+              <>
+                <Select value={serverChoice} onValueChange={setServerChoice} required>
+                  <SelectTrigger id="tc-server">
+                    <SelectValue placeholder="Select your MT5 server" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {serverOptions.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        <span className="flex items-center gap-2">
+                          <span>{item.label}</span>
+                          <span className="text-xs text-muted-foreground">({item.environment})</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Select the server name shown in your MT5 account. These server names are maintained from verified broker documentation.</p>
+              </>
+            ) : (
+              <>
+                <Input
+                  id="tc-server"
+                  placeholder="Enter exact server shown in MT5"
+                  required
+                  value={serverChoice}
+                  onChange={(e) => setServerChoice(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">BOTVIO does not yet have a verified server directory for this broker, so enter the exact MT5 server shown in your terminal.</p>
+              </>
+            )}
             <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-2 text-xs text-muted-foreground">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span>Enter the exact MT5 server shown in your terminal. We do not guess server names.</span>
+              <span>Do not guess a server name. Your MT5 account's assigned server must match.</span>
             </div>
           </div>
 
