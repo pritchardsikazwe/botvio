@@ -80,9 +80,75 @@ async function globalLiveEnabled(ctx: Ctx) {
   return (data?.value as { enabled?: boolean } | null)?.enabled === true;
 }
 
-async function storeAccount(ctx: Ctx, creds: z.infer<typeof Creds>, role: AccountRole, extra: Record<string, unknown> = {}) {
+async function storeAccount(
+  ctx: Ctx,
+  creds: z.infer<typeof Creds>,
+  role: AccountRole,
+  extra: Record<string, unknown> = {},
+): Promise<Account & { reused: boolean }> {
   const encKey = Deno.env.get("TOKEN_ENCRYPTION_KEY");
   if (!encKey) throw new TradeCopyError("Secure credential storage is not configured", "config", 500);
+
+  // Reuse an existing MT5 account instead of creating another record every time
+  // the user opens the connection dialog. This is intentionally scoped to the
+  // same user + platform + execution provider + role + login + server.
+  const { data: existing, error: findError } = await ctx.admin
+    .from("trading_accounts")
+    .select(ACCOUNT_COLS)
+    .eq("user_id", ctx.userId)
+    .eq("platform", "MT5")
+    .eq("execution_provider", "tradecopy")
+    .eq("account_role", role)
+    .eq("login_id", String(creds.login))
+    .eq("server", creds.server)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (findError) throw new TradeCopyError(findError.message, "validation");
+
+  const encryptedPassword = await encryptSecret(creds.password, encKey);
+
+  if (existing) {
+    const label = creds.label || existing.label || `MT5 ${role === "master" ? "Master" : "Follower"} ${creds.login}`;
+    const { data: updated, error: updateError } = await ctx.admin
+      .from("trading_accounts")
+      .update({ broker: creds.broker, label, is_active: true, ...extra })
+      .eq("id", existing.id)
+      .select(ACCOUNT_COLS)
+      .single();
+    if (updateError) throw new TradeCopyError(updateError.message, "validation");
+
+    const { data: existingCred } = await ctx.admin
+      .from("tradecopy_credentials")
+      .select("id")
+      .eq("trading_account_id", existing.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingCred?.id) {
+      const { error: credError } = await ctx.admin
+        .from("tradecopy_credentials")
+        .update({ password_encrypted: encryptedPassword })
+        .eq("id", existingCred.id);
+      if (credError) throw new TradeCopyError("Could not update credentials securely", "config", 500);
+    } else {
+      const { data: cred, error: credError } = await ctx.admin
+        .from("tradecopy_credentials")
+        .insert({
+          trading_account_id: existing.id,
+          user_id: ctx.userId,
+          password_encrypted: encryptedPassword,
+        })
+        .select("id")
+        .single();
+      if (credError) throw new TradeCopyError("Could not store credentials securely", "config", 500);
+      await ctx.admin.from("trading_accounts").update({ credential_ref: cred.id }).eq("id", existing.id);
+    }
+
+    return { ...(updated as Account), reused: true };
+  }
+
   const { data: acct, error } = await ctx.admin.from("trading_accounts").insert({
     user_id: ctx.userId, broker: creds.broker, platform: "MT5", execution_provider: "tradecopy",
     label: creds.label || `MT5 ${role === "master" ? "Master" : "Follower"} ${creds.login}`,
@@ -91,12 +157,13 @@ async function storeAccount(ctx: Ctx, creds: z.infer<typeof Creds>, role: Accoun
     api_key_encrypted: "", ...extra,
   }).select(ACCOUNT_COLS).single();
   if (error) throw new TradeCopyError(error.message, "validation");
+
   const { data: cred, error: ce } = await ctx.admin.from("tradecopy_credentials").insert({
-    trading_account_id: acct.id, user_id: ctx.userId, password_encrypted: await encryptSecret(creds.password, encKey),
+    trading_account_id: acct.id, user_id: ctx.userId, password_encrypted: encryptedPassword,
   }).select("id").single();
   if (ce) throw new TradeCopyError("Could not store credentials securely", "config", 500);
   await ctx.admin.from("trading_accounts").update({ credential_ref: cred.id }).eq("id", acct.id);
-  return acct as Account;
+  return { ...(acct as Account), reused: false };
 }
 
 async function getPassword(ctx: Ctx, accountId: string) {
@@ -135,22 +202,44 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
         providerId = prov.id;
       }
       const acct = await storeAccount(ctx, creds, "master", { is_botvio_robot: asRobot });
-      try {
-        const reg = await adapter.registerMaster({ login: creds.login, password: creds.password, server: creds.server, comment: asRobot ? "botvio-robot" : "botvio-provider" });
-        await admin.from("trading_accounts").update({ tradecopy_user_id: reg.tradecopyUserId, external_account_id: String(reg.tradecopyUserId ?? ""), connection_status: "connected" }).eq("id", acct.id);
-      } catch (e) {
-        await admin.from("trading_accounts").update({ connection_status: "error" }).eq("id", acct.id);
-        throw e;
+      // If the account is already registered and connected, reuse it instead of
+      // registering another TradeCopy master for the same MT5 login/server.
+      if (!acct.reused || !acct.tradecopy_user_id || acct.connection_status === "error") {
+        try {
+          const reg = await adapter.registerMaster({
+            login: creds.login,
+            password: creds.password,
+            server: creds.server,
+            comment: asRobot ? "botvio-robot" : "botvio-provider",
+          });
+          await admin.from("trading_accounts").update({
+            tradecopy_user_id: reg.tradecopyUserId,
+            external_account_id: String(reg.tradecopyUserId ?? ""),
+            connection_status: "connected",
+          }).eq("id", acct.id);
+        } catch (e) {
+          await admin.from("trading_accounts").update({ connection_status: "error" }).eq("id", acct.id);
+          throw e;
+        }
       }
-      if (providerId) await admin.from("provider_accounts").insert({ provider_id: providerId, trading_account_id: acct.id, status: "paused" });
-      return { data: { accountId: acct.id }, accountId: acct.id };
+      if (providerId) {
+        await admin.from("provider_accounts").upsert(
+          { provider_id: providerId, trading_account_id: acct.id, status: "paused" },
+          { onConflict: "provider_id,trading_account_id" },
+        );
+      }
+      return { data: { accountId: acct.id, reused: acct.reused }, accountId: acct.id };
     }
 
     case "connect_follower": {
       const creds = Creds.parse(body);
       const acct = await storeAccount(ctx, creds, "slave");
-      await admin.from("trading_accounts").update({ connection_status: "saved" }).eq("id", acct.id);
-      return { data: { accountId: acct.id }, accountId: acct.id };
+      // A reconnect updates credentials but must not downgrade an already
+      // connected follower back to "saved".
+      if (acct.connection_status !== "connected") {
+        await admin.from("trading_accounts").update({ connection_status: "saved" }).eq("id", acct.id);
+      }
+      return { data: { accountId: acct.id, reused: acct.reused }, accountId: acct.id };
     }
 
     case "link": {
