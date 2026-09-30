@@ -20,7 +20,6 @@ import BeginnerGuide from "./pages/BeginnerGuide";
 import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
 import Connections from "./pages/Connections";
-import BridgeRequest from "./pages/BridgeRequest";
 import TradeHistory from "./pages/TradeHistory";
 import Providers from "./pages/Providers";
 import CopyMarketplace from "./pages/copy/CopyMarketplace";
@@ -166,7 +165,7 @@ export const AppRoutes = () => (
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="accounts" element={<Accounts />} />
     <Route path="connections" element={<Connections />} />
-    <Route path="bridge-request" element={<BridgeRequest />} />
+    <Route path="bridge-request" element={<Navigate to="/connections" replace />} />
     <Route path="trade-history" element={<TradeHistory />} />
     <Route path="providers" element={<Providers />} />
     <Route path="copy-trading" element={<CopyMarketplace />} />
