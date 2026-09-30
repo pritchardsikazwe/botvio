@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, KeyRound, Loader2, Power, RefreshCw, ShieldCheck, Wifi } from "lucide-react";
 import { toast } from "sonner";
@@ -37,7 +38,7 @@ async function getFunctionError(error: unknown) {
 export function SyntxApiStudioConnectionCard() {
   const [login, setLogin] = useState("43304349");
   const [password, setPassword] = useState("");
-  const [server, setServer] = useState("Weltrade");
+  const [server, setServer] = useState("Weltrade-Demo");
   const [status, setStatus] = useState<Status>({ connected: false });
   const [symbols, setSymbols] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -123,8 +124,22 @@ export function SyntxApiStudioConnectionCard() {
           <form onSubmit={connect} className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
             <div className="space-y-1.5"><Label>MT5 login</Label><Input inputMode="numeric" value={login} onChange={(e) => setLogin(e.target.value.replace(/\D/g, ""))} required /></div>
             <div className="space-y-1.5"><Label>MT5 password</Label><Input type="password" autoComplete="off" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={4} /></div>
-            <div className="space-y-1.5"><Label>MT5 server / cluster</Label><Input value={server} onChange={(e) => setServer(e.target.value)} required /></div>
-            <Button type="submit" disabled={busy || !login || !password || !server}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wifi className="mr-2 h-4 w-4" />}Connect SyntX</Button>
+            <div className="space-y-1.5">
+              <Label>Weltrade MT5 server</Label>
+              <Select value={server} onValueChange={setServer}>
+                <SelectTrigger><SelectValue placeholder="Select server" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Weltrade-Demo">Weltrade-Demo</SelectItem>
+                  <SelectItem value="Weltrade-Live">Weltrade-Live</SelectItem>
+                  <SelectItem value="custom">Other / exact server name…</SelectItem>
+                </SelectContent>
+              </Select>
+              {server === "custom" && (
+                <Input className="mt-2" placeholder="Enter exact server name from Weltrade" onChange={(e) => setServer(e.target.value)} required />
+              )}
+              <p className="text-[10px] text-muted-foreground">Use the exact server assigned to this MT5 account.</p>
+            </div>
+            <Button type="submit" disabled={busy || !login || !password || !server || server === "custom"}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wifi className="mr-2 h-4 w-4" />}Connect SyntX</Button>
           </form>
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-success/20 bg-success/5 p-3">
