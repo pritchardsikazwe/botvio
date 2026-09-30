@@ -196,7 +196,6 @@ const Connections = () => {
         </div>
 
         <TradingConnectionsCenter />
- </Tabs>
       </main>
     </div>
   );
