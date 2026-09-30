@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAccessGate } from "@/hooks/useAccessGate";
 import { isPublicPreviewActive } from "@/config/access";
+import { isFreeOnStore } from "@/lib/mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, Crown, Sparkles, ArrowRight, Brain, Copy, LineChart, Bot, Users, ExternalLink } from "lucide-react";
@@ -121,6 +122,8 @@ export function PaidRouteGuard({ children }: Props) {
   const gate = useAccessGate();
 
   if (isPublicPreviewActive()) return <>{children}</>;
+
+  if (isFreeOnStore(location.pathname)) return <>{children}</>;
 
   if (isPublicSeoPath(location.pathname)) {
     return (
