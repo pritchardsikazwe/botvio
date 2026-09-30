@@ -163,7 +163,7 @@ export const AppRoutes = () => (
     <Route path="landing" element={<Landing />} />
     <Route path="install" element={<Install />} />
     <Route path="dashboard" element={<Dashboard />} />
-    <Route path="accounts" element={<Accounts />} />
+    <Route path="accounts" element={<Navigate to="/connections" replace />} />
     <Route path="connections" element={<Connections />} />
     <Route path="bridge-request" element={<Navigate to="/connections" replace />} />
     <Route path="trade-history" element={<TradeHistory />} />
