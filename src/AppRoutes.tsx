@@ -157,7 +157,7 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
  * Locale detection on the second mount is handled by LocalePrefixRouter,
  * which sets i18next language from the URL segment.
  */
-export const AppRoutes = () => (
+export const AppRoutes = () => {\n  const location = useLocation();\n\n  if (isRestrictedOnStore(location.pathname)) {\n    return <Navigate to="/dashboard" replace />;\n  }\n\n  return (
   <Routes>
     <Route path="/" element={<HomeMockup />} />
     <Route path="home-preview" element={<HomeMockup />} />
