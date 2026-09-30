@@ -63,8 +63,8 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
   const [open, setOpen] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const [broker, setBroker] = useState<string>(() => localStorage.getItem("botvio_mt5_broker") || "");
-  const [serverChoice, setServerChoice] = useState(() => localStorage.getItem("botvio_mt5_server") || "");
+  const [broker, setBroker] = useState<string>("");
+  const [serverChoice, setServerChoice] = useState("");
   const [label, setLabel] = useState("");
   const act = useTradeCopyAction();
 
@@ -79,15 +79,9 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
     setLabel("");
   };
 
-  useEffect(() => {
-    if (broker) localStorage.setItem("botvio_mt5_broker", broker);
-    if (serverChoice) localStorage.setItem("botvio_mt5_server", serverChoice);
-  }, [broker, serverChoice]);
-
   const handleBrokerChange = (value: string) => {
     setBroker(value);
     setServerChoice("");
-    localStorage.removeItem("botvio_mt5_server");
   };
 
   const submit = async (e: React.FormEvent) => {
