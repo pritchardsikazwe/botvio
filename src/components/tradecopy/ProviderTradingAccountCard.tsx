@@ -56,7 +56,7 @@ function MasterRow({ a, robot }: { a: TcAccount; robot?: boolean }) {
         <div className="rounded-lg bg-muted/30 p-2"><div className="text-muted-foreground">Open trades</div><div className="font-semibold">{orders.isLoading ? "…" : orders.data ? orders.data.orders.length : "Not available"}</div></div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant={a.tradecopy_active ? "outline" : "default"} onClick={toggle} disabled={act.isPending || !a.tradecopy_user_id || (robot === undefined && false)}>
+        <Button size="sm" variant={a.tradecopy_active ? "outline" : "default"} onClick={toggle} disabled={act.isPending || !a.tradecopy_user_id}>
           <Power className="mr-2 h-4 w-4" />{a.tradecopy_active ? "Deactivate" : "Activate"}
         </Button>
         <Button size="sm" variant="outline" onClick={switchEnv} disabled={act.isPending || a.tradecopy_active}>Switch to {a.environment === "DEMO" ? "LIVE" : "DEMO"}</Button>
