@@ -351,6 +351,44 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       return { data: { orders: orders.map(({ raw: _r, ...o }) => o) }, accountId: acct.id };
     }
 
+    case "order_history": {
+      const acct = await loadAccount(ctx, String(body.account_id), { allowAdmin: true });
+      if (!acct.tradecopy_user_id || !acct.account_role) return { data: { orders: [] } };
+      const to = new Date().toISOString();
+      const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const orders = await adapter.getOrderHistory(acct.tradecopy_user_id, acct.account_role, String(body.from ?? from), String(body.to ?? to));
+      return {
+        data: {
+          from: String(body.from ?? from),
+          to: String(body.to ?? to),
+          orders: orders.map(({ raw: _r, ...o }) => o),
+        },
+        accountId: acct.id,
+      };
+    }
+
+    case "execution_status": {
+      const acct = await loadAccount(ctx, String(body.account_id), { allowAdmin: true });
+      if (!acct.tradecopy_user_id || !acct.account_role) {
+        return { data: { connected: false, openOrders: [], recentHistory: [] } };
+      }
+      const to = new Date().toISOString();
+      const from = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [openOrders, history] = await Promise.all([
+        adapter.getOpenOrders(acct.tradecopy_user_id, acct.account_role),
+        adapter.getOrderHistory(acct.tradecopy_user_id, acct.account_role, from, to),
+      ]);
+      return {
+        data: {
+          connected: true,
+          checkedAt: to,
+          openOrders: openOrders.map(({ raw: _r, ...o }) => o),
+          recentHistory: history.map(({ raw: _r, ...o }) => o),
+        },
+        accountId: acct.id,
+      };
+    }
+
     case "set_master_active": {
       const acct = await loadAccount(ctx, String(body.account_id), { allowAdmin: true });
       if (acct.account_role !== "master" || !acct.tradecopy_user_id) throw new TradeCopyError("Not a connected master account", "validation");
