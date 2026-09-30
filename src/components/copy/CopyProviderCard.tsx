@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { BadgeCheck, Users, Activity, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PLATFORM_LABEL } from "@/hooks/useCopyTrading";
+import { CopyInviteLinkButton } from "./CopyInviteLinkButton";
 
 export interface CopyProviderCardData {
   providerId: string;
