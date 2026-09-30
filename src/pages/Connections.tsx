@@ -1,5 +1,6 @@
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 import { Header } from "@/components/trading/Header";
 import { TradingConnectionsCenter } from "@/components/tradecopy/TradingConnectionsCenter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Wallet, Monitor, ShieldCheck, Zap, Cloud } from "lucide-react";
 
 const Connections = () => {
   const { user } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
 
   if (!user) {
     return (
