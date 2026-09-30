@@ -18,7 +18,6 @@ import Learn from "./pages/Learn";
 import Lesson from "./pages/Lesson";
 import BeginnerGuide from "./pages/BeginnerGuide";
 import Dashboard from "./pages/Dashboard";
-import Accounts from "./pages/Accounts";
 import Connections from "./pages/Connections";
 import TradeHistory from "./pages/TradeHistory";
 import Providers from "./pages/Providers";
