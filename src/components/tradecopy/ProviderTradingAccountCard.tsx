@@ -12,6 +12,7 @@ import { AdapterModeNotice, EnvBadge, StatusBadge } from "./ModeBadges";
 
 function MasterRow({ a, robot }: { a: TcAccount; robot?: boolean }) {
   const act = useTradeCopyAction();
+  const removeAccount = useRemoveTradeCopyAccount();
   const followers = useFollowerCount([a.id]);
   const orders = useQuery({
     queryKey: ["tradecopy", "orders", a.id],
@@ -62,6 +63,23 @@ function MasterRow({ a, robot }: { a: TcAccount; robot?: boolean }) {
         <Button size="sm" variant="outline" onClick={switchEnv} disabled={act.isPending || a.tradecopy_active}>Switch to {a.environment === "DEMO" ? "LIVE" : "DEMO"}</Button>
         <DiagnosticButton accountId={a.id} disabled={!a.tradecopy_user_id} />
         <Button size="sm" variant="ghost" onClick={() => orders.refetch()}><RefreshCw className="mr-2 h-4 w-4" />Refresh</Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:text-destructive"
+          disabled={act.isPending || removeAccount.isPending || a.tradecopy_active}
+          onClick={async () => {
+            if (!window.confirm(`Remove MT5 account ${a.label} (${a.login_id}) from Botvio? This removes its Botvio connection and TradeCopy registration; it does not close the broker account.`)) return;
+            try {
+              await removeAccount.mutateAsync(a.id);
+              toast.success("MT5 account removed from Botvio");
+            } catch (e) {
+              toast.error((e as Error).message);
+            }
+          }}
+        >
+          Remove
+        </Button>
       </div>
     </div>
   );
