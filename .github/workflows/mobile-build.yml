@@ -1,5 +1,7 @@
 name: Botvio Native App Variants
 
+# Trigger native validation after source changes.
+
 on:
   workflow_dispatch:
   push:
