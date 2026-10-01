@@ -73,7 +73,7 @@ export const useDerivTokens = () => {
 
     console.log(`[TOKEN] Upserted & activated: ${params.loginid} is_virtual=${params.is_virtual}`);
     await fetchTokens();
-  }, [user?.id, fetchTokens]);
+  }, [user?.id, fetchTokens, tokens]);
 
   /** Switch active token (deactivate all, activate selected) */
   const switchToken = useCallback(async (tokenId: string) => {
@@ -100,12 +100,17 @@ export const useDerivTokens = () => {
   /** Remove a token */
   const removeToken = useCallback(async (tokenId: string) => {
     if (!user) return;
-    await supabase
-      .from("user_deriv_tokens" as any)
-      .delete()
-      .eq("id", tokenId)
-      .eq("user_id", user.id);
-    console.log(`[TOKEN] Removed token_id=${tokenId}`);
+    const token = tokens.find((t) => t.id === tokenId);
+    if (!token) throw new Error("Deriv account not found");
+
+    // Remove the Deriv token and the matching trading_accounts record together
+    // so the old Accounts page cannot leave a second/stale connection behind.
+    const { error } = await supabase.rpc("remove_deriv_account" as any, {
+      p_loginid: token.loginid,
+    });
+    if (error) throw error;
+
+    console.log(`[TOKEN] Removed Deriv account ${token.loginid} from Botvio`);
     await fetchTokens();
   }, [user?.id, fetchTokens]);
 
