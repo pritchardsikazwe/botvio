@@ -23,7 +23,7 @@ export default function AdminControlCenter(){
   const [users,setUsers]=useState<AdminUser[]>([]),[loading,setLoading]=useState(true),[search,setSearch]=useState("");
   const [onlineCount,setOnlineCount]=useState(0),[onlineUsers,setOnlineUsers]=useState<AdminUser[]>([]);
   const [planFilter,setPlanFilter]=useState("all"),[statusFilter,setStatusFilter]=useState("all"),[countryFilter,setCountryFilter]=useState("all");
-  const [page,setPage]=useState(1),[selected,setSelected]=useState<string[]>([]),[promotionOpen,setPromotionOpen]=useState(false),[sending,setSending]=useState(false);
+  const [page,setPage]=useState(1),[selected,setSelected]=useState<string[]>([]),[promotionOpen,setPromotionOpen]=useState(false),[sending,setSending]=useState(false),[mobileMenuOpen,setMobileMenuOpen]=useState(false);
   const [subject,setSubject]=useState("New AI Signals & Trading Update 🚀");
   const [message,setMessage]=useState("Hi {{name}},\n\nWe’ve just released new AI trading signals and market analysis on Botvio.\n\nLog in to your dashboard to see the latest updates.\n\nTrade smarter with Botvio.");
 
@@ -101,8 +101,27 @@ export default function AdminControlCenter(){
       <div className="p-4 border-t border-white/10 text-xs text-slate-400">{user?.email||"Admin"}<div className="text-slate-600">Super Admin</div></div>
     </aside>
 
+    {mobileMenuOpen&&<div className="lg:hidden fixed inset-0 z-50">
+      <button type="button" aria-label="Close admin menu" className="absolute inset-0 bg-slate-950/60" onClick={()=>setMobileMenuOpen(false)}/>
+      <aside className="relative h-full w-[280px] bg-slate-950 text-white shadow-2xl flex flex-col">
+        <div className="p-5 border-b border-white/10 flex items-center justify-between"><div><div className="text-2xl font-black">▮▮ Botvio</div><div className="text-[11px] text-amber-300 tracking-widest">ADMIN PANEL</div></div><Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={()=>setMobileMenuOpen(false)}>×</Button></div>
+        <ScrollArea className="flex-1"><nav className="p-3 space-y-1 text-sm">
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/admin")}} className="w-full text-left px-3 py-2.5 rounded-lg bg-amber-500 text-slate-950 font-semibold flex gap-3 items-center"><LayoutDashboard className="h-4 w-4"/>Dashboard</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("users-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Users className="h-4 w-4"/>Users</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("promotion-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Send className="h-4 w-4"/>Send Promotions</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("live-users-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Activity className="h-4 w-4"/>Live Users</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/billing")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><WalletCards className="h-4 w-4"/>Subscriptions</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/signals")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Signal className="h-4 w-4"/>Signals</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/bots")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Bot className="h-4 w-4"/>AI Bots</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/copy-trading")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><TrendingUp className="h-4 w-4"/>Copy Trading</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/providers")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><ShieldCheck className="h-4 w-4"/>Providers</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/blog")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><FileText className="h-4 w-4"/>Blog & Articles</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/settings")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Settings className="h-4 w-4"/>Settings</button>
+        </nav></ScrollArea>
+      </aside>
+    </div>}
     <main className="flex-1 min-w-0">
-      <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon"><Bell/></Button><Button variant="ghost" size="icon"><Settings/></Button></header>
+      <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden" onClick={()=>setMobileMenuOpen(true)} aria-label="Open admin menu"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon"><Bell/></Button><Button variant="ghost" size="icon"><Settings/></Button></header>
       <div className="p-4 lg:p-7 space-y-6 max-w-[1600px] mx-auto">
         <div className="flex justify-between items-start"><div><h1 className="text-3xl font-bold">Dashboard</h1><p className="text-muted-foreground">Manage Botvio users, promotions and platform activity.</p></div><Button variant="outline" onClick={loadUsers}><RefreshCw className="h-4 w-4 mr-2"/>Refresh</Button></div>
         <div className="grid grid-cols-2 xl:grid-cols-6 gap-4"><Stat label="Total Users" value={users.length} icon={<Users/>}/><Stat label="Active Users" value={users.filter(u=>u.status==="Active").length} icon={<UserCheck/>}/><Stat label="Online Now" value={onlineCount} icon={<Activity/>}/><Stat label="Missing WhatsApp" value={users.filter(u=>!u.whatsapp_number?.trim()).length} icon={<Phone/>}/><Stat label="Premium Users" value={users.filter(u=>u.plan.toLowerCase()!=="free").length} icon={<Sparkles/>}/><Stat label="Live Signals" value="Online" icon={<Signal/>}/><Stat label="AI Bots" value="Online" icon={<Bot/>}/><Stat label="Selected" value={selected.length} icon={<Send/>}/></div>
