@@ -1033,8 +1033,8 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                             lines.push(`📐 S1: ${metrics.support_1 ? formatPrice(Number(metrics.support_1), asset.symbol) : "—"} | R1: ${metrics.resistance_1 ? formatPrice(Number(metrics.resistance_1), asset.symbol) : "—"}`);
                           }
                           if (sig?.ai_summary) lines.push(`\n💡 ${sig.ai_summary.slice(0, 150)}`);
-                          lines.push(`\n🔗 View chart: https://botvio.lovable.app/chart/${asset.symbol.replace("/", "")}`);
-                          lines.push(`\n🖼️ https://botvio.lovable.app/botvio-logo.png`);
+                          lines.push(`\n🔗 View chart: https://botvio.live/chart/${asset.symbol.replace("/", "")}`);
+                          lines.push(`\n🖼️ https://botvio.live/botvio-logo.png`);
                           lines.push(`_Powered by Botvio — AI Trading Signals_`);
                           const text = encodeURIComponent(lines.join("\n"));
                           window.open(`https://wa.me/?text=${text}`, "_blank");

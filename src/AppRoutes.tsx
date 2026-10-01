@@ -61,7 +61,6 @@ import AccountClosure from "./pages/AccountClosure";
 import { StoreRestrictedRoute } from "@/components/StoreRestrictedRoute";
 import { isRestrictedOnStore } from "@/lib/mobile";
 import { useLocation } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 
 import Author from "./pages/Author";
 import SlugResolver from "./pages/SlugResolver";

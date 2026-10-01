@@ -97,8 +97,8 @@ export default function MarketAnalysis() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
-      { "@type": "ListItem", position: 2, name: "Market Analysis", item: "https://botvio.lovable.app/market-analysis" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+      { "@type": "ListItem", position: 2, name: "Market Analysis", item: "https://botvio.live/market-analysis" },
     ],
   };
   const faqJsonLd = {

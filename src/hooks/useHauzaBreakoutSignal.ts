@@ -3,6 +3,14 @@ import { getDerivPublicWebSocketUrl } from "@/config/derivEnv";
 import { mapToDerivSymbol } from "@/hooks/useDerivLiveTicks";
 import type { DerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 
+type CoreSignal = Omit<DerivLiveSignal, "connected" | "mode" | "timeframe" | "backtest">;
+// These engines don't backtest; report "not available" rather than inventing stats.
+const SIGNAL_EXTRAS: Pick<DerivLiveSignal, "mode" | "timeframe" | "backtest"> = {
+  mode: "SCALPING",
+  timeframe: "M5",
+  backtest: { signals: 0, wins: 0, losses: 0, winRate: null, profitFactor: null, expectancyR: null },
+};
+
 interface Candle {
   open: number;
   high: number;
@@ -42,7 +50,7 @@ function detectPivots(candles: Candle[], left = 3, right = 3) {
   return { highs, lows };
 }
 
-function buildHauzaSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
+function buildHauzaSignal(candles: Candle[]): CoreSignal {
   if (candles.length < 25) {
     return {
       signal: "WAIT",
@@ -182,7 +190,7 @@ export function useHauzaBreakoutSignal(
   displaySymbol: string | null | undefined,
   granularity: number = 300,
 ): DerivLiveSignal {
-  const [state, setState] = useState<DerivLiveSignal>({
+  const [state, setState] = useState<CoreSignal & { connected: boolean }>({
     signal: "WAIT",
     confidence: 0,
     reason: "Connecting to live chart…",
@@ -294,5 +302,5 @@ export function useHauzaBreakoutSignal(
     };
   }, [displaySymbol, granularity]);
 
-  return state;
+  return { ...SIGNAL_EXTRAS, ...state };
 }

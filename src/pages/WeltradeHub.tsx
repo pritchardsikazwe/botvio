@@ -22,7 +22,7 @@ const WeltradeHub = () => {
       <SEOHead seoKey="weltrade"
         title="Weltrade Hub – GainX, PainX, FlipX, SwitchX & FX Charts & Signals"
         description="Weltrade analysis hub with family-aware SyntX strategies, live MT5 bridge charts, signals, account comparisons and educational risk guidance."
-        ogImage="https://botvio.lovable.app/icon-512.png"
+        ogImage="https://botvio.live/icon-512.png"
       />
       <Header />
 

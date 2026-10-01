@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  const siteUrl = settings?.site_url || "https://botvio.lovable.app";
+  const siteUrl = "https://botvio.live"; // fixed canonical origin; DB value ignored
   const allowIndex = settings?.robots_index !== false;
 
   const privateRoutes = [

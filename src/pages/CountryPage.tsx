@@ -46,14 +46,14 @@ const CountryPage = () => {
     "@type": "WebPage",
     name: `Botvio AI Trading Bot in ${info.name}`,
     description: info.metaDescription,
-    url: `https://botvio.lovable.app/${country}`,
+    url: `https://botvio.live/${country}`,
     publisher: { "@type": "Organization", name: "Botvio" },
     inLanguage: "en",
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
-        { "@type": "ListItem", position: 2, name: info.name, item: `https://botvio.lovable.app/${country}` },
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+        { "@type": "ListItem", position: 2, name: info.name, item: `https://botvio.live/${country}` },
       ],
     },
   };

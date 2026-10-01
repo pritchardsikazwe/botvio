@@ -205,7 +205,7 @@ const BlogPost = () => {
   }
 
   const brokers = detectBrokers(post.title, post.content || "");
-  const canonical = `https://botvio.lovable.app/blog/${slug}`;
+  const canonical = `https://botvio.live/blog/${slug}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -218,11 +218,11 @@ const BlogPost = () => {
         dateModified: post.updatedDate || post.date,
         author: (() => {
           const a = getAuthor(post.author);
-          return { "@type": "Person", name: a.name, url: `https://botvio.lovable.app/authors/${a.slug}`, jobTitle: a.role, knowsAbout: a.expertise };
+          return { "@type": "Person", name: a.name, url: `https://botvio.live/authors/${a.slug}`, jobTitle: a.role, knowsAbout: a.expertise };
         })(),
-        publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.lovable.app", logo: { "@type": "ImageObject", url: "https://botvio.lovable.app/icon-512.png" } },
+        publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live", logo: { "@type": "ImageObject", url: "https://botvio.live/icon-512.png" } },
         mainEntityOfPage: canonical,
-        image: post.coverImage || `https://botvio.lovable.app/blog/${slug}.png`,
+        image: post.coverImage || `https://botvio.live/blog/${slug}.png`,
         articleSection: post.category,
         inLanguage: "en-US",
         keywords: Array.from(new Set([
@@ -238,9 +238,9 @@ const BlogPost = () => {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
-          { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.lovable.app/blog" },
-          ...(topic ? [{ "@type": "ListItem", position: 3, name: topic.label, item: `https://botvio.lovable.app/blog/category/${topic.slug}` }] : []),
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+          { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.live/blog" },
+          ...(topic ? [{ "@type": "ListItem", position: 3, name: topic.label, item: `https://botvio.live/blog/category/${topic.slug}` }] : []),
           { "@type": "ListItem", position: topic ? 4 : 3, name: post.title, item: canonical },
         ],
       },

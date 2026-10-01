@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet";
+import { BASE_URL } from "@/config/domain";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -41,15 +42,18 @@ export const SEOHead = ({
 
   const lang = (i18n.language?.split("-")[0] || DEFAULT_LANGUAGE) as LanguageCode;
   const siteName = settings?.site_name || "Botvio";
-  const baseUrl = settings?.canonical_base_url || settings?.site_url || "https://botvio.lovable.app";
+  // Canonical origin is fixed in src/config/domain.ts — never derive it from DB/host.
+  const baseUrl = BASE_URL;
   const { path: canonicalPathFromUrl } = stripLocalePrefix(location.pathname);
   const canonicalPath = canonicalPathFromUrl || "/";
 
   const seo = seoKey ? getSeoEntry(seoKey, lang) : null;
+  // Avoid "… | Botvio | Botvio" when the base title already ends with the brand.
+  const withBrand = (t: string) => (/\|\s*Botvio\s*$/i.test(t) || t.trim() === siteName ? t : `${t} | ${siteName}`);
   const pageTitle = title
-    ? `${title} | ${siteName}`
+    ? withBrand(title)
     : seo?.title
-    ? `${seo.title} | ${siteName}`
+    ? withBrand(seo.title)
     : settings?.meta_title_default || `${siteName} – AI Trading Bots & Signals`;
   const pageDescription = description || seo?.description || settings?.meta_description_default || "Automate your trading with AI bots, live signals, and copy trading.";
   const pageKeywords = seo?.keywords || settings?.meta_keywords || undefined;
