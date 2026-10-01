@@ -24,7 +24,8 @@ const Settings = () => {
     display_name: "",
     email: "",
     country: "",
-    language: "en"
+    language: "en",
+    whatsapp_number: ""
   });
   
   const [settings, setSettings] = useState({
@@ -57,7 +58,8 @@ const Settings = () => {
         display_name: profileData.display_name || "",
         email: profileData.email || user.email || "",
         country: profileData.country || "",
-        language: profileData.language || "en"
+        language: profileData.language || "en",
+        whatsapp_number: profileData.whatsapp_number || ""
       });
     }
 
@@ -90,6 +92,7 @@ const Settings = () => {
         display_name: profile.display_name,
         country: profile.country,
         language: profile.language,
+        whatsapp_number: profile.whatsapp_number.trim(),
         updated_at: new Date().toISOString()
       })
       .eq("user_id", user.id);
@@ -212,6 +215,18 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp_number">WhatsApp Number <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="whatsapp_number"
+                    type="tel"
+                    value={profile.whatsapp_number}
+                    onChange={(e) => setProfile({ ...profile, whatsapp_number: e.target.value })}
+                    placeholder="+260 97 1234567"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">Required for Botvio account communications and support.</p>
                 </div>
                 <Button onClick={handleSaveProfile} disabled={saving}>
                   {saving ? "Saving..." : "Save Profile"}
