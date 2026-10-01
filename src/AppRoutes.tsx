@@ -148,6 +148,7 @@ import PerformanceTransparency from "./pages/PerformanceTransparency";
 import Trust from "./pages/Trust";
 import OAuthConsent from "./pages/OAuthConsent";
 import { StandaloneAppsHub, StandaloneApp, HostStandaloneApp } from "./pages/StandaloneApps";
+import { getStandaloneAppFromEnv } from "@/config/standaloneApps";
 
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
@@ -161,6 +162,11 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
  */
 export const AppRoutes = () => {
   const location = useLocation();
+
+  // Native store variants are built from the same source but launch directly into
+  // their focused product experience at the root route.
+  const nativeApp = getStandaloneAppFromEnv();
+  if (nativeApp) return <StandaloneApp appId={nativeApp.id} />;
 
   if (isRestrictedOnStore(location.pathname)) {
     return <Navigate to="/dashboard" replace />;
