@@ -2,6 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useBridgeTicks } from "./useBridgeTicks";
 import type { DerivLiveSignal } from "./useDerivLiveSignal";
 
+type CoreSignal = Omit<DerivLiveSignal, "connected" | "mode" | "timeframe" | "backtest">;
+// These engines don't backtest; report "not available" rather than inventing stats.
+const SIGNAL_EXTRAS: Pick<DerivLiveSignal, "mode" | "timeframe" | "backtest"> = {
+  mode: "scalp" as DerivLiveSignal["mode"],
+  timeframe: "M1",
+  backtest: { signals: 0, wins: 0, losses: 0, winRate: null, profitFactor: null, expectancyR: null },
+};
+
 /**
  * Builds a Hauza-style EMA20/EMA50/RSI14 signal for a Weltrade SyntX (or any
  * MT5-only) symbol by aggregating live Bridge EA ticks into 1-minute candles.
@@ -40,7 +48,7 @@ function rsi(values: number[], period = 14): number | null {
   return 100 - 100 / (1 + avgG / avgL);
 }
 
-function buildSignal(candles: Candle[]): Omit<DerivLiveSignal, "connected"> {
+function buildSignal(candles: Candle[]): CoreSignal {
   if (candles.length < 4) {
     return {
       signal: "WAIT",
@@ -258,7 +266,7 @@ export function useBridgeLiveSignal(symbol: string | null): DerivLiveSignal {
     return Object.values(buckets).sort((a, b) => a.epoch - b.epoch).slice(-200);
   }, [ticks]);
 
-  const [state, setState] = useState<DerivLiveSignal>({
+  const [state, setState] = useState<CoreSignal & { connected: boolean }>({
     signal: "WAIT", confidence: 0, reason: "Connecting to bridge feed…",
     strategy: "Connecting", lastPrice: null, ema20: null, ema50: null, rsi14: null,
     connected: false,
@@ -273,7 +281,7 @@ export function useBridgeLiveSignal(symbol: string | null): DerivLiveSignal {
     setState({ ...sig, connected: hasFeed });
   }, [candles, hasFeed]);
 
-  return state;
+  return { ...SIGNAL_EXTRAS, ...state };
 }
 
 export { type DerivLiveSignal as BridgeLiveSignal } from "./useDerivLiveSignal";
