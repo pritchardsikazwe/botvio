@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   ORDER_FILTER_LABELS, RISK_TYPE_LABELS, SCALPER_MODE_LABELS, TcAccount, TcRelationship,
-  useExecutionEvents, useMyRelationships, useSymbolMappings, useTradeCopyAccounts, useTradeCopyAction, useTradeCopyAudit,
+  useExecutionEvents, useMyRelationships, useSymbolMappings, useTradeCopyAccounts, useTradeCopyAction, useTradeCopyAudit, useRemoveTradeCopyAccount,
 } from "@/hooks/useTradeCopy";
 import { ConnectMt5Dialog } from "./ConnectMt5Dialog";
 import { DiagnosticButton } from "./DiagnosticButton";
