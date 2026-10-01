@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
+import { StoreSubscriptionPaywall } from "@/components/billing/StoreSubscriptionPaywall";
 import { 
   Bot, GraduationCap, ShoppingCart, Check, Crown, 
   Package, Star, Zap, Lock, Upload
@@ -173,6 +174,7 @@ const Marketplace = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6">
+        <StoreSubscriptionPaywall />
         {/* Hero */}
         <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-warning/10 p-8 md:p-12 mb-8">
           <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl" />
