@@ -147,6 +147,7 @@ import Methodology from "./pages/Methodology";
 import PerformanceTransparency from "./pages/PerformanceTransparency";
 import Trust from "./pages/Trust";
 import OAuthConsent from "./pages/OAuthConsent";
+import { StandaloneAppsHub, StandaloneApp, HostStandaloneApp } from "./pages/StandaloneApps";
 
 import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages";
 
@@ -165,6 +166,9 @@ export const AppRoutes = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
+  const hostApp = HostStandaloneApp();
+  if (hostApp) return hostApp;
+
   return (
   <Routes>
     <Route path="/" element={<HomeMockup />} />
@@ -173,6 +177,12 @@ export const AppRoutes = () => {
     <Route path=".lovable/oauth/consent" element={<OAuthConsent />} />
     <Route path="landing" element={<Landing />} />
     <Route path="install" element={<Install />} />
+    <Route path="apps" element={<StandaloneAppsHub />} />
+    <Route path="apps/gold-robot" element={<StandaloneApp appId="gold-robot" />} />
+    <Route path="apps/crypto-robot" element={<StandaloneApp appId="crypto-robot" />} />
+    <Route path="apps/synthetic-robot" element={<StandaloneApp appId="synthetic-robot" />} />
+    <Route path="apps/weltrade-robot" element={<StandaloneApp appId="weltrade-robot" />} />
+    <Route path="apps/deriv-copy" element={<StandaloneApp appId="deriv-copy" />} />
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="accounts" element={<Navigate to="/connections" replace />} />
     <Route path="connections" element={<Connections />} />
