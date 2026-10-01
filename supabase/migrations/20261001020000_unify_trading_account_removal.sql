@@ -28,10 +28,7 @@ BEGIN
      AND login_id = p_loginid;
   GET DIAGNOSTICS removed_accounts = ROW_COUNT;
 
-  UPDATE public.deriv_connections
-     SET is_connected = false,
-         last_error = 'Connection removed by user',
-         last_verified_at = now()
+  DELETE FROM public.deriv_connections
    WHERE user_id = uid
      AND login_id = p_loginid;
 
