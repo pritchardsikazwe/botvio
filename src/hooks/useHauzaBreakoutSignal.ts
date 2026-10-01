@@ -6,7 +6,7 @@ import type { DerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 type CoreSignal = Omit<DerivLiveSignal, "connected" | "mode" | "timeframe" | "backtest">;
 // These engines don't backtest; report "not available" rather than inventing stats.
 const SIGNAL_EXTRAS: Pick<DerivLiveSignal, "mode" | "timeframe" | "backtest"> = {
-  mode: "scalp" as DerivLiveSignal["mode"],
+  mode: "SCALPING",
   timeframe: "M5",
   backtest: { signals: 0, wins: 0, losses: 0, winRate: null, profitFactor: null, expectancyR: null },
 };
