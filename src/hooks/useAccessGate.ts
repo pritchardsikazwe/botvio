@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { supabase } from "@/integrations/supabase/client";
 import { OPEN_ACCESS } from "@/config/access";
+import { useNativeStoreAccess } from "@/hooks/useNativeStoreAccess";
 
 /**
  * Central access gate for premium/paid areas of Botvio (hubs, signals, bots).
@@ -29,6 +30,7 @@ export interface AccessGate {
 export function useAccessGate(): AccessGate {
   const { user, isAdmin, isSuperAdmin, isSignalManager, loading: authLoading } = useAuth();
   const sub = useSubscriptionGate();
+  const nativeStore = useNativeStoreAccess();
 
   const { data: trialInfo, isLoading: trialLoading } = useQuery({
     queryKey: ["access-gate-trial", user?.id],
@@ -49,13 +51,14 @@ export function useAccessGate(): AccessGate {
   });
 
   const adminBypass = isAdmin || isSuperAdmin || isSignalManager;
-  const isPaid = sub.isPaid;
+  const isPaid = sub.isPaid || !!nativeStore.data?.isPaid;
   const isTrial = !isPaid && !!trialInfo && !trialInfo.expired;
   const trialDaysLeft = trialInfo?.daysLeft ?? 0;
   const trialExpired = !!trialInfo?.expired;
+  const nativePlanCode = nativeStore.data?.planCode ?? null;
 
   return {
-    isLoading: OPEN_ACCESS ? false : authLoading || sub.isLoading || (!!user && trialLoading),
+    isLoading: OPEN_ACCESS ? false : authLoading || sub.isLoading || nativeStore.isLoading || (!!user && trialLoading),
     isAuthenticated: !!user,
     isAdmin: adminBypass,
     isPaid,
@@ -63,6 +66,6 @@ export function useAccessGate(): AccessGate {
     trialDaysLeft,
     trialExpired,
     hasAccess: OPEN_ACCESS || adminBypass || isPaid || isTrial,
-    planCode: sub.planCode,
+    planCode: nativePlanCode ?? sub.planCode,
   };
 }
