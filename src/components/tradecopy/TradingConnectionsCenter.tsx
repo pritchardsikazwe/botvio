@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
+import { DerivAccountsManager } from "@/components/tradecopy/DerivAccountsManager";
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
@@ -141,6 +142,7 @@ export function TradingConnectionsCenter() {
           <Badge variant="outline">Separate from MT5</Badge>
         </div>
         <DerivConnectionPanel hideLegacyPat />
+        <DerivAccountsManager />
       </section>
 
       <section id="follower-mt5" className="scroll-mt-6 space-y-3">
