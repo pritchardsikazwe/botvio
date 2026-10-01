@@ -112,16 +112,13 @@ export default defineConfig(({ mode }) => ({
         categories: ["finance", "business", "productivity"],
         screenshots: [{ src: "/botvio-og.jpg", sizes: "1200x630", type: "image/jpeg", form_factor: "wide" }],
         shortcuts: [
-          {
-            name: "Dashboard",
-            url: "/dashboard",
-            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
-          },
-          {
-            name: "Signals",
-            url: "/signals",
-            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
-          }
+          { name: "Dashboard", url: "/dashboard", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Signals", url: "/signals", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Gold Robot", url: "/apps/gold-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Crypto Robot", url: "/apps/crypto-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Synthetic Robot", url: "/apps/synthetic-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Weltrade Robot", url: "/apps/weltrade-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Deriv Copy Trading", url: "/apps/deriv-copy", icons: [{ src: "/icon-192.png", sizes: "192x192" }] }
         ]
       },
       workbox: {
