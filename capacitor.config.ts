@@ -1,8 +1,11 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
+const appId = process.env.CAP_APP_ID || "live.botvio.app";
+const appName = process.env.CAP_APP_NAME || "Botvio";
+
 const config: CapacitorConfig = {
-  appId: "live.botvio.app",
-  appName: "Botvio",
+  appId,
+  appName,
   webDir: "dist",
   bundledWebRuntime: false,
   server: {
