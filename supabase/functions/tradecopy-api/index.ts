@@ -336,6 +336,56 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       return { data: { suffix: redact(suffix), special: redact(special), symbols: redact(all) }, accountId: acct.id };
     }
 
+    case "remove_account": {
+      const accountId = String(body.account_id ?? "");
+      const acct = await loadAccount(ctx, accountId);
+      if (acct.tradecopy_active) {
+        throw new TradeCopyError("Deactivate copying before removing this MT5 account", "validation");
+      }
+
+      // Stop any follower relationships first so TradeCopy is no longer using
+      // this account before the local connection record is removed.
+      const { data: rels } = await admin
+        .from("copy_relationships")
+        .select("id,follower_account_id,master_account_id,status")
+        .or(`follower_account_id.eq.${acct.id},master_account_id.eq.${acct.id}`);
+
+      for (const rel of rels ?? []) {
+        if (rel.follower_account_id === acct.id && acct.tradecopy_user_id) {
+          await adapter.deactivateFollower(acct.tradecopy_user_id).catch(() => null);
+          await adapter.unfollow(acct.tradecopy_user_id).catch(() => null);
+        }
+        if (rel.follower_account_id && rel.follower_account_id !== acct.id) {
+          const { data: follower } = await admin
+            .from("trading_accounts")
+            .select("id,tradecopy_user_id,tradecopy_active")
+            .eq("id", rel.follower_account_id)
+            .maybeSingle();
+          if (follower?.tradecopy_active && follower.tradecopy_user_id) {
+            await adapter.deactivateFollower(follower.tradecopy_user_id).catch(() => null);
+            await admin.from("trading_accounts").update({ tradecopy_active: false }).eq("id", follower.id);
+          }
+        }
+        await admin.from("copy_relationships").delete().eq("id", rel.id);
+      }
+
+      // Provider links and encrypted credentials are removed with the Botvio
+      // connection. Historical execution/audit rows remain for reporting.
+      await admin.from("provider_accounts").delete().eq("trading_account_id", acct.id);
+      await admin.from("tradecopy_credentials").delete().eq("trading_account_id", acct.id);
+      await admin.from("symbol_mappings").delete().eq("follower_account_id", acct.id);
+      await admin.from("tradecopy_reconcile_checkpoints").delete().eq("trading_account_id", acct.id);
+
+      const { error: deleteError } = await admin
+        .from("trading_accounts")
+        .delete()
+        .eq("id", acct.id)
+        .eq("user_id", ctx.userId);
+      if (deleteError) throw new TradeCopyError(deleteError.message, "validation");
+
+      return { data: { removed: true }, accountId: acct.id };
+    }
+
     case "diagnostic": {
       const acct = await loadAccount(ctx, String(body.account_id), { allowAdmin: true });
       if (!acct.tradecopy_user_id) throw new TradeCopyError("Account is not registered with TradeCopy yet", "validation");
