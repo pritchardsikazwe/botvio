@@ -1,4 +1,4 @@
-name: Botvio Mobile Build
+name: Botvio Native App Variants
 
 on:
   workflow_dispatch:
@@ -10,68 +10,155 @@ on:
 permissions:
   contents: read
 
+# One shared source generates five native products.
+# Each product gets its own Android applicationId and iOS bundle identifier.
+# Store signing/upload credentials are intentionally added later.
+
+env:
+  NODE_VERSION: "22"
+
 jobs:
   android:
-    name: Android App Bundle
+    name: Android - ${{ matrix.name }}
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: gold-robot
+            name: Botvio Gold Robot
+            app_id: live.botvio.gold
+          - id: crypto-robot
+            name: Botvio Crypto Robot
+            app_id: live.botvio.crypto
+          - id: synthetic-robot
+            name: Botvio Synthetic Robot
+            app_id: live.botvio.synthetic
+          - id: weltrade-robot
+            name: Botvio Weltrade Robot
+            app_id: live.botvio.weltrade
+          - id: deriv-copy
+            name: Botvio Deriv Copy Trading
+            app_id: live.botvio.copy
+    env:
+      CAP_APP_ID: ${{ matrix.app_id }}
+      CAP_APP_NAME: ${{ matrix.name }}
+      VITE_STANDALONE_APP_ID: ${{ matrix.id }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
+
       - run: npm install --no-audit --no-fund
+
       - run: mkdir -p resources && cp public/icon-512.png resources/icon.png
-      - run: cp index.mobile.html index.store.html && cp index.mobile.html index.html && npx vite build --outDir dist --base ./ && rm -f index.store.html
+
+      - name: Build focused web app
+        run: |
+          cp index.mobile.html index.store.html
+          cp index.mobile.html index.html
+          npx vite build --outDir dist --base ./
+          rm -f index.store.html
         env:
           VITE_STORE_BUILD: "true"
+          VITE_STANDALONE_APP_ID: ${{ matrix.id }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-      - run: npx cap add android
+
+      - name: Create Capacitor Android project
+        run: npx cap add android
+
       - run: npx cap sync android
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
           packages: 'platform-tools'
+
       - name: Install Android 16 SDK packages
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+
       - name: Verify Java
         run: java -version
+
       - name: Prepare Gradle wrapper
         run: chmod +x android/gradlew
-      - name: Build release AAB
+
+      - name: Build unsigned Android App Bundle
         working-directory: android
         run: ./gradlew bundleRelease
-      - name: Upload unsigned AAB
+
+      - name: Upload Android AAB
         uses: actions/upload-artifact@v4
         with:
-          name: botvio-android-aab
+          name: ${{ matrix.id }}-android-aab-unsigned
           path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
 
   ios:
-    name: iOS Archive
+    name: iOS - ${{ matrix.name }}
     runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: gold-robot
+            name: Botvio Gold Robot
+            app_id: live.botvio.gold
+          - id: crypto-robot
+            name: Botvio Crypto Robot
+            app_id: live.botvio.crypto
+          - id: synthetic-robot
+            name: Botvio Synthetic Robot
+            app_id: live.botvio.synthetic
+          - id: weltrade-robot
+            name: Botvio Weltrade Robot
+            app_id: live.botvio.weltrade
+          - id: deriv-copy
+            name: Botvio Deriv Copy Trading
+            app_id: live.botvio.copy
+    env:
+      CAP_APP_ID: ${{ matrix.app_id }}
+      CAP_APP_NAME: ${{ matrix.name }}
+      VITE_STANDALONE_APP_ID: ${{ matrix.id }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
+
       - run: npm install --no-audit --no-fund
+
       - run: mkdir -p resources && cp public/icon-512.png resources/icon.png
-      - run: cp index.mobile.html index.store.html && cp index.mobile.html index.html && npx vite build --outDir dist --base ./ && rm -f index.store.html
+
+      - name: Build focused web app
+        run: |
+          cp index.mobile.html index.store.html
+          cp index.mobile.html index.html
+          npx vite build --outDir dist --base ./
+          rm -f index.store.html
         env:
           VITE_STORE_BUILD: "true"
+          VITE_STANDALONE_APP_ID: ${{ matrix.id }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-      - run: npx cap add ios --packagemanager SPM
+
+      - name: Create Capacitor iOS project
+        run: npx cap add ios --packagemanager SPM
+
       - run: npx cap sync ios
+
       - name: Build unsigned iOS archive
         run: |
           xcodebuild archive \
@@ -79,14 +166,19 @@ jobs:
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath "$RUNNER_TEMP/Botvio.xcarchive" \
+            -archivePath "$RUNNER_TEMP/${{ matrix.id }}.xcarchive" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
-      - name: Package archive
-        run: ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/Botvio.xcarchive" "$RUNNER_TEMP/Botvio.xcarchive.zip"
+
+      - name: Package iOS archive
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$RUNNER_TEMP/${{ matrix.id }}.xcarchive" \
+            "$RUNNER_TEMP/${{ matrix.id }}-ios-xcarchive.zip"
+
       - name: Upload iOS archive
         uses: actions/upload-artifact@v4
         with:
-          name: botvio-ios-xcarchive
-          path: ${{ runner.temp }}/Botvio.xcarchive.zip
+          name: ${{ matrix.id }}-ios-xcarchive-unsigned
+          path: ${{ runner.temp }}/${{ matrix.id }}-ios-xcarchive.zip
           if-no-files-found: error
