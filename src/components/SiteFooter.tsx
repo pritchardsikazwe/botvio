@@ -34,6 +34,9 @@ export const SiteFooter = () => {
               <li><Link to="/chart/XAUUSD" className="hover:text-primary">AI Chart Analyzer</Link></li>
               <li><Link to="/news-calendar" className="hover:text-primary">Economic Calendar</Link></li>
               <li><Link to="/strategies" className="hover:text-primary">Strategy Library</Link></li>
+              <li><Link to="/synthetic-hub" className="hover:text-primary">Synthetic Indices Hub</Link></li>
+              <li><Link to="/copy-trading" className="hover:text-primary">Copy Trading</Link></li>
+              <li><Link to="/bots" className="hover:text-primary">Trading Bots</Link></li>
             </ul>
           </nav>
           <nav aria-label="Learn">
@@ -55,6 +58,7 @@ export const SiteFooter = () => {
               <li><Link to="/press" className="hover:text-primary">Press</Link></li>
               <li><Link to="/affiliate" className="hover:text-primary">Affiliate</Link></li>
               <li><Link to="/marketplace" className="hover:text-primary">Marketplace</Link></li>
+              <li><Link to="/brokers" className="hover:text-primary">Broker Hub</Link></li>
             </ul>
           </nav>
           <nav aria-label="Trust and legal">
