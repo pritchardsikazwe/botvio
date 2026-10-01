@@ -142,3 +142,17 @@ export function useTradeCopyAction() {
     onSettled: () => qc.invalidateQueries({ queryKey: ["tradecopy"] }),
   });
 }
+
+export function useRemoveTradeCopyAccount() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      const result = await tradecopy("remove_account", { account_id: accountId });
+      return result;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tradecopy"] });
+      qc.invalidateQueries({ queryKey: ["trading_accounts"] });
+    },
+  });
+}
