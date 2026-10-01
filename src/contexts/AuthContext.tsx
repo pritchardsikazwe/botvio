@@ -312,6 +312,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Keep a lightweight heartbeat for authenticated users so Admin can distinguish
+  // registered users who are actually connected from users who merely have an account.
+  const presenceUserId = user?.id;
+  useEffect(() => {
+    if (!presenceUserId) return;
+
+    let cancelled = false;
+    const getDeviceType = () => {
+      const ua = navigator.userAgent.toLowerCase();
+      if (/tablet|ipad|playbook|silk/.test(ua) || (navigator.maxTouchPoints > 1 && /macintosh/.test(ua))) return "tablet";
+      if (/mobile|android|iphone|ipod|windows phone/.test(ua)) return "mobile";
+      return "desktop";
+    };
+
+    const touchPresence = async () => {
+      if (cancelled || document.visibilityState === "hidden") return;
+      const { error } = await (supabase as any).rpc("touch_user_presence", {
+        p_current_path: window.location.pathname,
+        p_device_type: getDeviceType(),
+      });
+      if (error && !cancelled) console.debug("Presence heartbeat unavailable", error.message);
+    };
+
+    touchPresence();
+    const interval = window.setInterval(touchPresence, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") touchPresence();
+    };
+    window.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [presenceUserId]);
+
   return (
     <AuthContext.Provider
       value={{
