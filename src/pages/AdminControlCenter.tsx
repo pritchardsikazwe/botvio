@@ -12,9 +12,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Globe2, LayoutDashboard, Mail, Menu, MoreVertical, RefreshCw, Search, Send, Settings, ShieldCheck, Signal, Sparkles, TrendingUp, UserCheck, Users, WalletCards } from "lucide-react";
+import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Globe2, LayoutDashboard, Mail, Menu, MoreVertical, RefreshCw, Search, Send, Settings, ShieldCheck, Signal, Sparkles, TrendingUp, UserCheck, Users, WalletCards, Phone } from "lucide-react";
 
-type AdminUser = { user_id:string; email:string|null; display_name:string|null; country:string|null; created_at:string|null; plan:string; status:"Active"|"Inactive"; online:boolean; last_seen_at:string|null; current_path:string|null; device_type:string|null };
+type AdminUser = { user_id:string; email:string|null; display_name:string|null; country:string|null; whatsapp_number:string|null; created_at:string|null; plan:string; status:"Active"|"Inactive"; online:boolean; last_seen_at:string|null; current_path:string|null; device_type:string|null };
 const PAGE_SIZE=10;
 
 export default function AdminControlCenter(){
@@ -51,12 +51,12 @@ export default function AdminControlCenter(){
   const loadUsers=async()=>{
     setLoading(true);
     try{
-      const {data:profiles,error}=await supabase.from("profiles").select("user_id,email,display_name,country,created_at").order("created_at",{ascending:false});
+      const {data:profiles,error}=await supabase.from("profiles").select("user_id,email,display_name,country,whatsapp_number,created_at").order("created_at",{ascending:false});
       if(error) throw error;
       const ids=(profiles||[]).map(p=>p.user_id); let subs:any[]=[];
       if(ids.length){const {data}=await supabase.from("user_plan_subscriptions").select("user_id,status,pricing_plans(name,code)").in("user_id",ids); subs=data||[];}
       const byUser=new Map(subs.map(s=>[s.user_id,s]));
-      setUsers((profiles||[]).map(p=>{const s=byUser.get(p.user_id);return {user_id:p.user_id,email:p.email,display_name:p.display_name,country:p.country,created_at:p.created_at,plan:s?.pricing_plans?.name||s?.pricing_plans?.code||"Free",status:s?.status&&s.status!=="active"?"Inactive":"Active",online:false,last_seen_at:null,current_path:null,device_type:null}}));
+      setUsers((profiles||[]).map(p=>{const s=byUser.get(p.user_id);return {user_id:p.user_id,email:p.email,display_name:p.display_name,country:p.country,whatsapp_number:p.whatsapp_number||null,created_at:p.created_at,plan:s?.pricing_plans?.name||s?.pricing_plans?.code||"Free",status:s?.status&&s.status!=="active"?"Inactive":"Active",online:false,last_seen_at:null,current_path:null,device_type:null}}));
     }catch(e:any){toast.error(e?.message||"Could not load users");}finally{setLoading(false);}
   };
   useEffect(()=>{loadUsers()},[]);
@@ -105,7 +105,7 @@ export default function AdminControlCenter(){
       <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon"><Bell/></Button><Button variant="ghost" size="icon"><Settings/></Button></header>
       <div className="p-4 lg:p-7 space-y-6 max-w-[1600px] mx-auto">
         <div className="flex justify-between items-start"><div><h1 className="text-3xl font-bold">Dashboard</h1><p className="text-muted-foreground">Manage Botvio users, promotions and platform activity.</p></div><Button variant="outline" onClick={loadUsers}><RefreshCw className="h-4 w-4 mr-2"/>Refresh</Button></div>
-        <div className="grid grid-cols-2 xl:grid-cols-6 gap-4"><Stat label="Total Users" value={users.length} icon={<Users/>}/><Stat label="Active Users" value={users.filter(u=>u.status==="Active").length} icon={<UserCheck/>}/><Stat label="Online Now" value={onlineCount} icon={<Activity/>}/><Stat label="Premium Users" value={users.filter(u=>u.plan.toLowerCase()!=="free").length} icon={<Sparkles/>}/><Stat label="Live Signals" value="Online" icon={<Signal/>}/><Stat label="AI Bots" value="Online" icon={<Bot/>}/><Stat label="Selected" value={selected.length} icon={<Send/>}/></div>
+        <div className="grid grid-cols-2 xl:grid-cols-6 gap-4"><Stat label="Total Users" value={users.length} icon={<Users/>}/><Stat label="Active Users" value={users.filter(u=>u.status==="Active").length} icon={<UserCheck/>}/><Stat label="Online Now" value={onlineCount} icon={<Activity/>}/><Stat label="Missing WhatsApp" value={users.filter(u=>!u.whatsapp_number?.trim()).length} icon={<Phone/>}/><Stat label="Premium Users" value={users.filter(u=>u.plan.toLowerCase()!=="free").length} icon={<Sparkles/>}/><Stat label="Live Signals" value="Online" icon={<Signal/>}/><Stat label="AI Bots" value="Online" icon={<Bot/>}/><Stat label="Selected" value={selected.length} icon={<Send/>}/></div>
 
         <div className="grid xl:grid-cols-[1fr_360px] gap-6 items-start">
           <Card id="users-panel" className="overflow-hidden"><div className="p-5 border-b flex flex-wrap justify-between gap-3"><div><h2 className="text-lg font-semibold">Users</h2><p className="text-sm text-muted-foreground">Search, filter and select users for promotions. Online status updates every 15 seconds.</p></div><Button className="bg-amber-500 hover:bg-amber-600 text-slate-950" onClick={()=>setPromotionOpen(true)} disabled={!selected.length}><Send className="h-4 w-4 mr-2"/>Send Promotion ({selected.length})</Button></div>
