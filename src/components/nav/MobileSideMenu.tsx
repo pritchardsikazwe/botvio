@@ -35,7 +35,7 @@ const primary: Item[] = [
   { label: "Markets", to: "/markets", icon: BarChart3 },
   { label: "Signals", to: "/signals", icon: Signal, live: true },
   { label: "Copy Trading", to: "/copy-trading", icon: Copy },
-  { label: "AI Trading Bots", to: "/bots", icon: Bot },
+  { label: "Botvio AI Robot", to: "/botvio-robot", icon: Bot },
   { label: "Trading Hub", to: "/gold", icon: Coins },
 ];
 
@@ -44,7 +44,9 @@ const trading: Item[] = [
   { label: "Provider Dashboard", to: "/provider-dashboard", icon: LineChart },
   { label: "Deriv Accounts", to: "/connections", icon: WalletCards },
   { label: "AI Chart Analysis", to: "/chart/XAUUSD", icon: Sparkles },
-  { label: "Learn", to: "/learn", icon: GraduationCap },
+  { label: "Trading Tools", to: "/tools", icon: Sparkles },
+  { label: "Education", to: "/learn", icon: GraduationCap },
+  { label: "Products & Plans", to: "/marketplace", icon: Coins },
 ];
 
 export const MobileSideMenu = ({ className, trigger }: { className?: string; trigger?: ReactNode }) => {
