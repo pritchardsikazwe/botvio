@@ -1,0 +1,108 @@
+name: Botvio Android APK Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - botvio-independent-sep13
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Android APK diagnostic
+    runs-on: ubuntu-24.04
+    env:
+      CAP_APP_ID: live.botvio.gold
+      CAP_APP_NAME: Botvio Gold Robot
+      VITE_STANDALONE_APP_ID: gold-robot
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check repository
+        run: |
+          node --version || true
+          npm --version || true
+          test -f package.json
+          test -f index.mobile.html
+          test -f public/icon-512.png
+          echo "Repository files OK"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --verbose
+
+      - name: Prepare icon
+        run: |
+          mkdir -p resources
+          cp public/icon-512.png resources/icon.png
+
+      - name: Build web app
+        env:
+          VITE_STORE_BUILD: "true"
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          cp index.mobile.html index.store.html
+          cp index.mobile.html index.html
+          npx vite build --outDir dist --base ./
+          rm -f index.store.html
+
+      - name: Verify web build
+        run: |
+          test -f dist/index.html
+          du -sh dist
+          ls -la dist | head -30
+
+      - name: Add Capacitor Android
+        run: npx cap add android --no-interactive
+
+      - name: Verify Capacitor project
+        run: |
+          test -f android/settings.gradle
+          test -f android/gradlew
+          test -f android/app/build.gradle
+          grep -R "live.botvio.gold" android || true
+          ls -la android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Verify Java and Gradle
+        run: |
+          java -version
+          chmod +x android/gradlew
+          cd android
+          ./gradlew --version
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace --info
+
+      - name: Upload diagnostic APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: botvio-gold-robot-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
