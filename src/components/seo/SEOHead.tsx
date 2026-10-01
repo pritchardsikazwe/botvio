@@ -48,10 +48,12 @@ export const SEOHead = ({
   const canonicalPath = canonicalPathFromUrl || "/";
 
   const seo = seoKey ? getSeoEntry(seoKey, lang) : null;
+  // Avoid "… | Botvio | Botvio" when the base title already ends with the brand.
+  const withBrand = (t: string) => (/\|\s*Botvio\s*$/i.test(t) || t.trim() === siteName ? t : `${t} | ${siteName}`);
   const pageTitle = title
-    ? `${title} | ${siteName}`
+    ? withBrand(title)
     : seo?.title
-    ? `${seo.title} | ${siteName}`
+    ? withBrand(seo.title)
     : settings?.meta_title_default || `${siteName} – AI Trading Bots & Signals`;
   const pageDescription = description || seo?.description || settings?.meta_description_default || "Automate your trading with AI bots, live signals, and copy trading.";
   const pageKeywords = seo?.keywords || settings?.meta_keywords || undefined;
