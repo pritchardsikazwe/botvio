@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDerivTokens, DerivTokenRow } from "@/hooks/useDerivTokens";
-import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +23,7 @@ export function DerivAccountsManager({ onAddAccount }: Props) {
     try {
       await switchToken(id);
       toast.success("Deriv account selected");
-      window.dispatchEvent(new CustomEvent("deriv:token-updated"));
+      window.location.reload();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not switch Deriv account");
     } finally {
