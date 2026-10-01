@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -47,7 +47,7 @@ const trading: Item[] = [
   { label: "Learn", to: "/learn", icon: GraduationCap },
 ];
 
-export const MobileSideMenu = ({ className }: { className?: string }) => {
+export const MobileSideMenu = ({ className, trigger }: { className?: string; trigger?: ReactNode }) => {
   const { pathname } = useLocation();
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
@@ -90,18 +90,20 @@ export const MobileSideMenu = ({ className }: { className?: string }) => {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Open Botvio menu"
-        aria-expanded={open}
-        className={cn(
-          "inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-card/80 text-foreground shadow-sm backdrop-blur-xl transition hover:border-primary/40 hover:text-primary",
-          className
-        )}
-      >
-        <Menu className="h-5 w-5" />
-      </button>
+      {trigger ?? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Open Botvio menu"
+          aria-expanded={open}
+          className={cn(
+            "inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-card/80 text-foreground shadow-sm backdrop-blur-xl transition hover:border-primary/40 hover:text-primary",
+            className
+          )}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-[100] lg:hidden">
