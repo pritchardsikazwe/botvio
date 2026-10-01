@@ -66,7 +66,7 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all",
           isActive(to)
-            ? "bg-primary/12 text-primary ring-1 ring-primary/25"
+            ? "bg-primary/10 text-primary ring-1 ring-primary/25"
             : "text-foreground/80 hover:bg-secondary hover:text-foreground"
         )}
       >
