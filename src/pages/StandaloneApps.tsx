@@ -11,6 +11,7 @@ import BinanceHub from "@/pages/BinanceHub";
 import SyntheticHub from "@/pages/SyntheticHub";
 import WeltradeHub from "@/pages/WeltradeHub";
 import CopyMarketplace from "@/pages/copy/CopyMarketplace";
+import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 
 export function StandaloneAppsHub() {
   return (
@@ -98,10 +99,19 @@ export function StandaloneApp({ appId }: { appId: StandaloneAppId }) {
     "deriv-copy": CopyMarketplace,
   } as const;
   const Page = pages[appId];
+  const AI_CONTEXT: Record<StandaloneAppId, { marketFocus: string; description: string }> = {
+    "gold-robot": { marketFocus: "XAU/USD and gold markets", description: "AI gold analysis, signal setups and risk-aware MT5 automation for the Gold Robot." },
+    "crypto-robot": { marketFocus: "crypto markets", description: "AI crypto market analysis, signal setups and supported exchange automation workflows for the Crypto Robot." },
+    "synthetic-robot": { marketFocus: "Deriv synthetic indices", description: "AI analysis for Boom, Crash, Volatility and Step markets with synthetic-focused signal and execution workflows." },
+    "weltrade-robot": { marketFocus: "Weltrade and SyntX markets", description: "AI analysis for Weltrade/SyntX markets with signal setups, MT5 Bridge delivery and risk controls." },
+    "deriv-copy": { marketFocus: "Deriv copy-trading providers and accounts", description: "AI-assisted provider and copy-trading workflows with risk controls, signal context and follower execution tools." },
+  };
+  const ai = AI_CONTEXT[appId];
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title={`${app.name} | Botvio`}
+        title={`${app.name} | Botvio`
         description={`${app.name}: ${app.description}`}
       />
       <Header />
@@ -139,6 +149,10 @@ export function StandaloneApp({ appId }: { appId: StandaloneAppId }) {
             </CardContent>
           </Card>
         </section>
+
+        <div className="container mx-auto px-4 pb-5">
+          <BotvioRobotPromo compact productName={app.shortName} marketFocus={ai.marketFocus} description={ai.description} />
+        </div>
 
         <Page />
       </main>
