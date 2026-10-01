@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Bitcoin, Check, ArrowRight, Wallet, Copy, Upload, Phone, Smartphone, MessageCircle } from "lucide-react";
+import { Bitcoin, Check, ArrowRight, Wallet, Copy, Upload, MessageCircle, Mail } from "lucide-react";
 
 const CRYPTO_WALLETS = [
   { key: "bitcoin", label: "Bitcoin (BTC)", network: "Bitcoin", address: "bc1q7r2ahssecmldf960gc4dklapfe5nkph2fh5etx", icon: "₿" },
@@ -41,7 +41,7 @@ export const PaymentMethodSelector = ({
   };
 
   const handleCompleteOrder = () => {
-    if (!selectedMethod) return toast.error("Please select a payment method");
+    if (!selectedMethod) return toast.error("Please select Bitcoin or USDT");
     if (!proofFile) return toast.error("Please attach your payment confirmation screenshot");
     onOfflinePayment?.(selectedMethod, proofFile);
     toast.success("Payment submitted. Botvio will verify it before activation.");
@@ -69,16 +69,7 @@ export const PaymentMethodSelector = ({
               </div>
             </button>
           ))}
-          <button type="button" onClick={() => selectMethod("google_pay")}
-            className={`p-4 rounded-xl border-2 transition-all text-left ${selectedMethod === "google_pay" ? "border-emerald-500 bg-emerald-500/10" : "border-border hover:border-emerald-500/50"}`}>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center"><Smartphone className="h-5 w-5" /></div>
-                <div><span className="font-semibold text-sm block">Google Pay</span><span className="text-xs text-muted-foreground">Digital payment</span></div>
-              </div>
-              {selectedMethod === "google_pay" && <Check className="h-4 w-4 text-emerald-600" />}
-            </div>
-          </button>
+
         </div>
 
         {activeWallet && (
@@ -94,13 +85,7 @@ export const PaymentMethodSelector = ({
           </div>
         )}
 
-        {selectedMethod === "google_pay" && (
-          <div className="space-y-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
-            <h4 className="text-sm font-bold flex items-center gap-2"><Smartphone className="h-4 w-4 text-emerald-600" />Google Pay</h4>
-            <p className="text-sm text-muted-foreground">Complete your Google Pay payment using the Botvio merchant/payment details provided at checkout, then attach the confirmation.</p>
-            <div className="rounded-lg border bg-background p-3 text-xs text-muted-foreground">Google Pay requires a configured merchant/payment gateway. No merchant account is fabricated here.</div>
-          </div>
-        )}
+
 
         {selectedMethod && (
           <div className="space-y-2">
