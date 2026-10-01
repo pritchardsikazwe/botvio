@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { cloneElement, isValidElement, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -90,7 +90,7 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
 
   return (
     <>
-      {trigger ?? (
+      {trigger && isValidElement(trigger) ? cloneElement(trigger, { onClick: () => setOpen(true), "aria-expanded": open }) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
