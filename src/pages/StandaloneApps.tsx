@@ -111,7 +111,7 @@ export function StandaloneApp({ appId }: { appId: StandaloneAppId }) {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title={`${app.name} | Botvio`
+        title={`${app.name} | Botvio`}
         description={`${app.name}: ${app.description}`}
       />
       <Header />
