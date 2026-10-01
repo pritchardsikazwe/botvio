@@ -73,7 +73,7 @@ export const useDerivTokens = () => {
 
     console.log(`[TOKEN] Upserted & activated: ${params.loginid} is_virtual=${params.is_virtual}`);
     await fetchTokens();
-  }, [user?.id, fetchTokens, tokens]);
+  }, [user?.id, fetchTokens]);
 
   /** Switch active token (deactivate all, activate selected) */
   const switchToken = useCallback(async (tokenId: string) => {
@@ -112,7 +112,7 @@ export const useDerivTokens = () => {
 
     console.log(`[TOKEN] Removed Deriv account ${token.loginid} from Botvio`);
     await fetchTokens();
-  }, [user?.id, fetchTokens]);
+  }, [user?.id, fetchTokens, tokens]);
 
   return {
     tokens,
