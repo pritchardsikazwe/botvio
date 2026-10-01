@@ -36,10 +36,13 @@ export default function AdminControlCenter(){
         const lastSeen=p?.last_seen_at ? new Date(p.last_seen_at).getTime() : 0;
         return {...u,online:lastSeen>=cutoff,last_seen_at:p?.last_seen_at||null,current_path:p?.current_path||null,device_type:p?.device_type||null};
       });
-      const online=merge(users).filter(u=>u.online);
-      setOnlineUsers(online);
-      setOnlineCount(online.length);
-      setUsers(prev=>merge(prev));
+      setUsers(prev=>{
+        const merged=merge(prev);
+        const online=merged.filter(u=>u.online);
+        setOnlineUsers(online);
+        setOnlineCount(online.length);
+        return merged;
+      });
     }catch(e:any){console.debug("Could not load online presence",e?.message||e);}
   };
 
