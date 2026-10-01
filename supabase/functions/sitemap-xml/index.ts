@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  const siteUrl = settings?.site_url || "https://botvio.live";
+  const siteUrl = "https://botvio.live"; // fixed canonical origin; DB value ignored
   const now = new Date().toISOString().split("T")[0];
 
   const buildAlternates = (canonicalPath: string) =>

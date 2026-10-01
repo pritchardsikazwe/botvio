@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet";
+import { BASE_URL } from "@/config/domain";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -41,7 +42,8 @@ export const SEOHead = ({
 
   const lang = (i18n.language?.split("-")[0] || DEFAULT_LANGUAGE) as LanguageCode;
   const siteName = settings?.site_name || "Botvio";
-  const baseUrl = settings?.canonical_base_url || settings?.site_url || "https://botvio.live";
+  // Canonical origin is fixed in src/config/domain.ts — never derive it from DB/host.
+  const baseUrl = BASE_URL;
   const { path: canonicalPathFromUrl } = stripLocalePrefix(location.pathname);
   const canonicalPath = canonicalPathFromUrl || "/";
 
