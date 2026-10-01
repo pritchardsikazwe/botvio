@@ -29,8 +29,14 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - run: npx cap add android
       - run: npx cap sync android
-      - name: Set Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+      - name: Install Android 16 SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Prepare Gradle wrapper
+        run: chmod +x android/gradlew
       - name: Build release AAB
         working-directory: android
         run: ./gradlew bundleRelease
