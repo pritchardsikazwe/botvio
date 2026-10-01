@@ -54,8 +54,42 @@ export function StandaloneAppsHub() {
   );
 }
 
+const PRODUCT_FEATURES: Record<StandaloneAppId, { eyebrow: string; headline: string; features: string[]; tools: string[] }> = {
+  "gold-robot": {
+    eyebrow: "XAU/USD FOCUSED",
+    headline: "Gold analysis, signals and MT5 workflow",
+    features: ["XAU/USD market dashboard", "Gold-specific signal context", "MT5 robot connection and risk controls"],
+    tools: ["Gold chart", "Gold signals", "MT5 automation"],
+  },
+  "crypto-robot": {
+    eyebrow: "CRYPTO FOCUSED",
+    headline: "Crypto markets and automation in one app",
+    features: ["Crypto market dashboard", "Crypto bot monitoring", "Exchange connection and automation controls"],
+    tools: ["Crypto markets", "Bot management", "Performance view"],
+  },
+  "synthetic-robot": {
+    eyebrow: "DERIV SYNTHETICS FOCUSED",
+    headline: "Boom, Crash, Volatility and Step tools",
+    features: ["Synthetic-index market hub", "Synthetic signal workflows", "Deriv account and execution controls"],
+    tools: ["Boom & Crash", "Volatility", "Step indices"],
+  },
+  "weltrade-robot": {
+    eyebrow: "WELTRADE FOCUSED",
+    headline: "Weltrade markets with MT5 automation",
+    features: ["Weltrade/SyntX market workspace", "Broker-specific trading workflow", "MT5 Bridge connection and risk controls"],
+    tools: ["Weltrade hub", "SyntX markets", "MT5 Bridge"],
+  },
+  "deriv-copy": {
+    eyebrow: "COPY TRADING FOCUSED",
+    headline: "Providers, followers and Deriv copy controls",
+    features: ["Provider discovery and profiles", "Follower account controls", "Copy risk, multiplier and emergency-stop controls"],
+    tools: ["Provider marketplace", "My copy trading", "Copy history"],
+  },
+};
+
 export function StandaloneApp({ appId }: { appId: StandaloneAppId }) {
   const app = getStandaloneApp(appId)!;
+  const product = PRODUCT_FEATURES[appId];
   const pages = {
     "gold-robot": GoldTradingHub,
     "crypto-robot": BinanceHub,
@@ -64,7 +98,52 @@ export function StandaloneApp({ appId }: { appId: StandaloneAppId }) {
     "deriv-copy": CopyMarketplace,
   } as const;
   const Page = pages[appId];
-  return <Page />;
+  return (
+    <div className="min-h-screen bg-background">
+      <SEOHead
+        title={`${app.name} | Botvio`}
+        description={`${app.name}: ${app.description}`}
+      />
+      <Header />
+      <main>
+        <section className="border-b border-border/50 bg-card/30">
+          <div className="container mx-auto px-4 py-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <Badge className="mb-2 gap-2 bg-primary/10 text-primary hover:bg-primary/10">
+                  <Radio className="h-3.5 w-3.5" /> {product.eyebrow}
+                </Badge>
+                <h1 className="text-2xl font-black sm:text-3xl">{product.headline}</h1>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{app.description}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {product.tools.map((tool) => (
+                  <Badge key={tool} variant="outline" className="gap-1.5 px-3 py-1.5">
+                    <CheckCircle2 className="h-3 w-3 text-success" /> {tool}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="container mx-auto px-4 py-5">
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="grid gap-4 p-5 md:grid-cols-3">
+              {product.features.map((feature) => (
+                <div key={feature} className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-xs leading-5 text-muted-foreground">{feature}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+
+        <Page />
+      </main>
+    </div>
+  );
 }
 
 export function HostStandaloneApp() {
