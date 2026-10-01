@@ -33,7 +33,6 @@ const STATIC_PAGES = [
   { loc: "/blog",                 priority: "0.9", changefreq: "daily" },
   { loc: "/faq",                  priority: "0.6", changefreq: "monthly" },
   { loc: "/affiliate",            priority: "0.5", changefreq: "monthly" },
-  { loc: "/install",              priority: "0.5", changefreq: "monthly" },
   { loc: "/testimonials",         priority: "0.5", changefreq: "monthly" },
   { loc: "/p2p",                  priority: "0.6", changefreq: "daily" },
   { loc: "/terms",                priority: "0.3", changefreq: "yearly" },
