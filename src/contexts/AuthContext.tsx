@@ -8,6 +8,7 @@ interface Profile {
   email: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  whatsapp_number?: string | null;
 }
 
 interface UserSettings {
@@ -196,6 +197,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, country?: string, whatsapp?: string, planCode?: string, displayName?: string) => {
+    if (!whatsapp?.trim()) {
+      return { error: new Error("WhatsApp number is required to create a Botvio account.") };
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
