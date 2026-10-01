@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import { BASE_URL } from "@/config/domain";
+import { BASE_URL, PRODUCTION_DOMAIN } from "@/config/domain";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -46,6 +46,9 @@ export const SEOHead = ({
   const baseUrl = BASE_URL;
   const { path: canonicalPathFromUrl } = stripLocalePrefix(location.pathname);
   const canonicalPath = canonicalPathFromUrl || "/";
+  // Canonical origin is fixed in src/config/domain.ts — never derive it from DB/host.
+  const hostIsCanonical =
+    typeof window === "undefined" || window.location.hostname.toLowerCase() === PRODUCTION_DOMAIN;
 
   const seo = seoKey ? getSeoEntry(seoKey, lang) : null;
   // Avoid "… | Botvio | Botvio" when the base title already ends with the brand.
@@ -60,18 +63,14 @@ export const SEOHead = ({
   const pageOgImage = toAbsoluteUrl(ogImage || settings?.og_image_url || "/botvio-og.jpg", baseUrl);
 
   // Always canonicalize from the locale-stripped route. This prevents /es/es/... duplicates.
-  const canonicalUrl = `${baseUrl}${buildLocalizedPath(canonicalPath, lang)}`;
+  const canonicalUrl = `${baseUrl}${canonicalPath}`;
   const alternates = languages.map((l) => ({
     code: l.code,
     href: `${baseUrl}${buildLocalizedPath(canonicalPath, l.code as LanguageCode)}`,
   }));
   const xDefaultHref = `${baseUrl}${buildLocalizedPath(canonicalPath, DEFAULT_LANGUAGE)}`;
 
-  const robotsContent = noIndex
-    ? "noindex, nofollow"
-    : `${settings?.robots_index !== false ? "index" : "noindex"}, ${settings?.robots_follow !== false ? "follow" : "nofollow"}`;
-
-  const defaultJsonLd = {
+  // Lovable preview/staging hosts must not become searchable duplicate copies.\n  const robotsContent = !hostIsCanonical || noIndex\n    ? "noindex, nofollow"\n    : `${settings?.robots_index !== false ? "index" : "noindex"}, ${settings?.robots_follow !== false ? "follow" : "nofollow"}`;\n\n  const defaultJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
@@ -85,11 +84,6 @@ export const SEOHead = ({
         name: siteName,
         url: baseUrl,
         inLanguage: lang,
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${baseUrl}/marketplace?q={search_term_string}`,
-          "query-input": "required name=search_term_string",
-        },
       },
     ],
   };
@@ -112,7 +106,7 @@ export const SEOHead = ({
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content={siteName} />
-      <meta property="og:locale" content={lang} />
+      <meta property="og:locale" content={lang === "en" ? "en_US" : lang} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={pageDescription} />
