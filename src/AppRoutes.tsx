@@ -29,6 +29,7 @@ import BecomeProvider from "./pages/copy/BecomeProvider";
 import Bots from "./pages/Bots";
 import Billing from "./pages/Billing";
 import Admin from "./pages/Admin";
+import AdminControlCenter from "./pages/AdminControlCenter";
 import P2P from "./pages/P2P";
 import Affiliate from "./pages/Affiliate";
 import Strategies from "./pages/Strategies";
@@ -190,9 +191,10 @@ export const AppRoutes = () => {
 
     {/* Admin */}
     <Route path="admin/login" element={<ErrorBoundary><AdminLogin /></ErrorBoundary>} />
-    <Route path="admin" element={<ErrorBoundary><RequireSuperAdmin><Admin /></RequireSuperAdmin></ErrorBoundary>} />
+    <Route path="admin" element={<ErrorBoundary><RequireSuperAdmin><AdminControlCenter /></RequireSuperAdmin></ErrorBoundary>} />
+    <Route path="admin/legacy" element={<ErrorBoundary><RequireSuperAdmin><Admin /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/copy-trading" element={<ErrorBoundary><RequireSuperAdmin><CopyTradingAdmin /></RequireSuperAdmin></ErrorBoundary>} />
-    <Route path="admin/*" element={<ErrorBoundary><RequireSuperAdmin><Admin /></RequireSuperAdmin></ErrorBoundary>} />
+    <Route path="admin/*" element={<ErrorBoundary><RequireSuperAdmin><AdminControlCenter /></RequireSuperAdmin></ErrorBoundary>} />
 
     <Route path="p2p" element={<P2P />} />
     <Route path="affiliate" element={<Affiliate />} />
