@@ -200,6 +200,7 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
 export function FollowerTradeCopyPanel() {
   const { user } = useAuth();
   const accounts = useTradeCopyAccounts("slave");
+  const removeAccount = useRemoveTradeCopyAccount();
   const rels = useMyRelationships();
   const events = useExecutionEvents();
   const errors = useTradeCopyAudit();
@@ -217,7 +218,26 @@ export function FollowerTradeCopyPanel() {
         {accounts.data?.map((a) => (
           <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/30 px-3 py-2 text-xs">
             <span className="font-medium">{a.label} · {a.login_id} · {a.server}</span>
-            <span className="flex gap-1.5"><EnvBadge env={a.environment} /><StatusBadge status={a.connection_status} /></span>
+            <span className="flex items-center gap-2">
+              <span className="flex gap-1.5"><EnvBadge env={a.environment} /><StatusBadge status={a.connection_status} /></span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-destructive hover:text-destructive"
+                disabled={removeAccount.isPending || a.tradecopy_active}
+                onClick={async () => {
+                  if (!window.confirm(`Remove MT5 account ${a.label} (${a.login_id}) from Botvio? This removes its Botvio connection and TradeCopy registration; it does not close the broker account.`)) return;
+                  try {
+                    await removeAccount.mutateAsync(a.id);
+                    toast.success("MT5 account removed from Botvio");
+                  } catch (e) {
+                    toast.error((e as Error).message);
+                  }
+                }}
+              >
+                Remove
+              </Button>
+            </span>
           </div>
         ))}
         {accounts.data && accounts.data.length > 0 && <LinkProvider accounts={accounts.data} />}
