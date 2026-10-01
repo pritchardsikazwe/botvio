@@ -13,8 +13,7 @@ import { useMarketSession } from "@/hooks/useMarketSession";
 import { Button } from "@/components/ui/button";
 import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 import { STANDALONE_APPS } from "@/config/standaloneApps";
-import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ShieldCheck, Sparkles, Users } from "lucide-react";
 
