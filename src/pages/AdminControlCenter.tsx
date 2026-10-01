@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,7 +52,7 @@ export default function AdminControlCenter(){
     try{const {data,error}=await supabase.functions.invoke("send-admin-promotion",{body:{subject:subject.trim(),message:message.trim(),recipients}});if(error)throw error;toast.success(`Promotion queued for ${data?.queued??recipients.length} users`);setSelected([]);setPromotionOpen(false)}catch(e:any){toast.error(e?.message||"Promotion could not be queued")}finally{setSending(false)}
   };
 
-  const Stat=({label,value,icon}:{label:string;value:string|number;icon:React.ReactNode})=><Card><CardContent className="p-4 flex justify-between items-center"><div><p className="text-xs text-muted-foreground">{label}</p><p className="text-2xl font-bold mt-1">{value}</p></div><div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">{icon}</div></CardContent></Card>;
+  const Stat=({label,value,icon}:{label:string;value:string|number;icon:ReactNode})=><Card><CardContent className="p-4 flex justify-between items-center"><div><p className="text-xs text-muted-foreground">{label}</p><p className="text-2xl font-bold mt-1">{value}</p></div><div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">{icon}</div></CardContent></Card>;
 
   return <div className="min-h-screen bg-slate-50 text-slate-900 flex">
     <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0">
@@ -60,7 +60,6 @@ export default function AdminControlCenter(){
       <ScrollArea className="flex-1"><nav className="p-3 space-y-1 text-sm">
         <div className="px-3 py-2.5 rounded-lg bg-amber-500 text-slate-950 font-semibold flex gap-3"><LayoutDashboard className="h-4 w-4"/>Dashboard</div>
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Users & Community</p>
-        {[Users,"Users",UserCheck,"User Segments",Send,"Send Promotions",WalletCards,"Subscriptions",Activity,"Activity Logs"].reduce<any[]>((a,v,i)=>{if(i%2===0)a.push([v,arguments]);return a},[]).map(()=>null)}
         {[[Users,"Users"],[UserCheck,"User Segments"],[Send,"Send Promotions"],[WalletCards,"Subscriptions"],[Activity,"Activity Logs"]].map(([I,l])=><div key={l as string} className="px-3 py-2.5 rounded-lg flex gap-3 text-slate-300"><I className="h-4 w-4"/>{l}</div>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Trading Intelligence</p>
         {[[Signal,"Signals"],[Bot,"AI Bots"],[TrendingUp,"Copy Trading"],[ShieldCheck,"Providers"]].map(([I,l])=><div key={l as string} className="px-3 py-2.5 rounded-lg flex gap-3 text-slate-300"><I className="h-4 w-4"/>{l}</div>)}
