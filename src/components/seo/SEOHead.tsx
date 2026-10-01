@@ -41,7 +41,7 @@ export const SEOHead = ({
 
   const lang = (i18n.language?.split("-")[0] || DEFAULT_LANGUAGE) as LanguageCode;
   const siteName = settings?.site_name || "Botvio";
-  const baseUrl = settings?.canonical_base_url || settings?.site_url || "https://botvio.lovable.app";
+  const baseUrl = settings?.canonical_base_url || settings?.site_url || "https://botvio.live";
   const { path: canonicalPathFromUrl } = stripLocalePrefix(location.pathname);
   const canonicalPath = canonicalPathFromUrl || "/";
 

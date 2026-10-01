@@ -126,16 +126,16 @@ const Blog = () => {
       {
         "@type": "Blog",
         name: "Botvio Trading Research & Intelligence",
-        url: "https://botvio.lovable.app/blog",
+        url: "https://botvio.live/blog",
         description:
           "Market analysis, synthetic indices research, trading strategies, broker insights, education and practical tools from the Botvio trading ecosystem.",
-        publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.lovable.app" },
+        publisher: { "@type": "Organization", name: "Botvio", url: "https://botvio.live" },
       },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
-          { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.lovable.app/blog" },
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+          { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.live/blog" },
         ],
       },
     ],

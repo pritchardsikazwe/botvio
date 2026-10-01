@@ -68,7 +68,7 @@ const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
           💰 Gold Hub — dedicated XAU/USD analysis
         </Text>
 
-        <Button style={button} href="https://botvio.lovable.app">
+        <Button style={button} href="https://botvio.live">
           Explore Botvio Now
         </Button>
 

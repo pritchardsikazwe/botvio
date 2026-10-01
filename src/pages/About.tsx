@@ -8,8 +8,8 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Botvio",
-  url: "https://botvio.lovable.app",
-  logo: "https://botvio.lovable.app/icon-512.png",
+  url: "https://botvio.live",
+  logo: "https://botvio.live/icon-512.png",
   description:
     "Independent financial education, market analysis and trading technology platform.",
   sameAs: [

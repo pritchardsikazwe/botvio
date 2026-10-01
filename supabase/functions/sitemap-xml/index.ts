@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  const siteUrl = settings?.site_url || "https://botvio.lovable.app";
+  const siteUrl = settings?.site_url || "https://botvio.live";
   const now = new Date().toISOString().split("T")[0];
 
   const buildAlternates = (canonicalPath: string) =>

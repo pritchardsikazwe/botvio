@@ -25,7 +25,7 @@ export default function BrokersIndex() {
     hasPart: brokers.map((b) => ({
       "@type": "Review",
       itemReviewed: { "@type": "FinancialService", name: b.name },
-      url: `https://botvio.lovable.app/brokers/${b.slug}`,
+      url: `https://botvio.live/brokers/${b.slug}`,
     })),
   };
   return (

@@ -179,7 +179,7 @@ const ResearchHub = () => {
 
   const markets = config.markets.map(findMarket).filter(Boolean) as ResearchMarket[];
   const activeMarket = selected || markets[0] || null;
-  const canonical = `https://botvio.lovable.app/research/${config.slug}`;
+  const canonical = `https://botvio.live/research/${config.slug}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -193,8 +193,8 @@ const ResearchHub = () => {
             {
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.lovable.app/" },
-                { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.lovable.app/blog" },
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://botvio.live/" },
+                { "@type": "ListItem", position: 2, name: "Research", item: "https://botvio.live/blog" },
                 { "@type": "ListItem", position: 3, name: config.title, item: canonical },
               ],
             },
