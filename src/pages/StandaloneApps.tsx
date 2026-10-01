@@ -10,7 +10,7 @@ import GoldTradingHub from "@/pages/GoldTradingHub";
 import BinanceHub from "@/pages/BinanceHub";
 import SyntheticHub from "@/pages/SyntheticHub";
 import WeltradeHub from "@/pages/WeltradeHub";
-import { CopyMarketplace } from "@/pages/copy/CopyMarketplace";
+import CopyMarketplace from "@/pages/copy/CopyMarketplace";
 
 export function StandaloneAppsHub() {
   return (
