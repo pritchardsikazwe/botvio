@@ -8,15 +8,15 @@ I have an app already for signals create a prompt to add some of the strategy on
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://botvio.lovable.app
+**Live app**: https://botvio.live
 
 ## Build with Lovable
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/84ba16cb-a18f-4b57-a90e-cf3d3e3e1e37).
+The production site is deployed at **https://botvio.live**. GitHub is the source of truth for the independent deployment.
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `botvio-independent-sep13` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- **Source of truth**: production code is maintained in this GitHub repository on `botvio-independent-sep13`.
+- **Full ownership**: the Botvio application can be built and deployed independently of Lovable.
 
 ## Development
 
