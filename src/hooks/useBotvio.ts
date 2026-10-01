@@ -75,11 +75,27 @@ export function useDeleteTradingAccount() {
   
   return useMutation({
     mutationFn: async (accountId: string) => {
+      const { data: account, error: loadError } = await supabase
+        .from("trading_accounts")
+        .select("id, broker, login_id")
+        .eq("id", accountId)
+        .single();
+
+      if (loadError) throw loadError;
+
+      if (account?.broker === "deriv" && account.login_id) {
+        const { error } = await supabase.rpc("remove_deriv_account" as any, {
+          p_loginid: account.login_id,
+        });
+        if (error) throw error;
+        return;
+      }
+
       const { error } = await supabase
         .from("trading_accounts")
         .delete()
         .eq("id", accountId);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
