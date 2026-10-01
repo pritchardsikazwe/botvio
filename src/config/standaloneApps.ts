@@ -47,7 +47,7 @@ export const STANDALONE_APPS: StandaloneAppDefinition[] = [
     shortName: "Synthetic Robot",
     description: "Deriv Boom, Crash, Volatility and Step automation.",
     path: "/apps/synthetic-robot",
-    hostnames: ["synthetic.botvio.live"],
+    hostnames: ["syntheticbotvio.live"],
     accent: "text-success",
     icon: "⚡",
     destination: "/synthetic-hub",
