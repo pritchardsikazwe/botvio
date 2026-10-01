@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Power, RefreshCw, Server } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { tradecopy, useFollowerCount, useTradeCopyAccounts, useTradeCopyAction, TcAccount } from "@/hooks/useTradeCopy";
+import { tradecopy, useFollowerCount, useTradeCopyAccounts, useTradeCopyAction, useRemoveTradeCopyAccount, TcAccount } from "@/hooks/useTradeCopy";
 import { ConnectMt5Dialog } from "./ConnectMt5Dialog";
 import { DiagnosticButton } from "./DiagnosticButton";
 import { AdapterModeNotice, EnvBadge, StatusBadge } from "./ModeBadges";
