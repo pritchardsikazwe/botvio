@@ -52,7 +52,7 @@ jobs:
           cache: npm
       - run: npm install --no-audit --no-fund
       - run: mkdir -p resources && cp public/icon-512.png resources/icon.png
-      - run: npx vite build index.mobile.html --outDir dist --base ./
+      - run: cp index.mobile.html index.store.html && cp index.mobile.html index.html && npx vite build --outDir dist --base ./ && rm -f index.store.html
         env:
           VITE_STORE_BUILD: "true"
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
