@@ -12,6 +12,7 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { SiteFooterGate } from "@/components/SiteFooterGate";
 import { UpdateNotifier } from "@/components/UpdateNotifier";
 import { MobileBottomNav } from "@/components/nav/MobileBottomNav";
+import { WhatsAppProfileNotice } from "@/components/auth/WhatsAppProfileNotice";
 
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
               </LocalePrefixRouter>
 
               <CookieConsent />
+              <WhatsAppProfileNotice />
             </BrowserRouter>
           </DerivProvider>
         </AuthProvider>
