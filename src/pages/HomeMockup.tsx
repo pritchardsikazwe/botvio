@@ -6,6 +6,9 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
+import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
+import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
+import { useMarketSession } from "@/hooks/useMarketSession";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, Menu, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -39,7 +42,28 @@ const brokers = [
 const HomeMockup = () => {
   const { user } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);\n  const [activeTab, setActiveTab] = useState<"signals" | "analysis" | "copy" | "bots">("signals");\n  const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});\n\n  useEffect(() => {\n    const sections = document.querySelectorAll("[data-reveal]");\n    const observer = new IntersectionObserver(entries => {\n      entries.forEach(entry => { if (entry.isIntersecting) setVisibleSections(v => ({ ...v, [entry.target.getAttribute("data-reveal") || ""]: true })); });\n    }, { threshold: 0.12 });\n    sections.forEach(section => observer.observe(section));\n    return () => observer.disconnect();\n  }, []);\n\n  useEffect(() => {\n    const tabs = ["signals", "analysis", "copy", "bots"] as const;\n    const timer = window.setInterval(() => {\n      setActiveTab(current => tabs[(tabs.indexOf(current) + 1) % tabs.length]);\n    }, 6500);\n    return () => window.clearInterval(timer);\n  }, []);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"signals" | "analysis" | "copy" | "bots">("signals");
+  const goldLive = useDerivLiveSignal("XAU/USD", 300);
+  const { isMarketOpen } = useMarketSession("XAUUSD");
+  const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const sections = document.querySelectorAll("[data-reveal]");
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => { if (entry.isIntersecting) setVisibleSections(v => ({ ...v, [entry.target.getAttribute("data-reveal") || ""]: true })); });
+    }, { threshold: 0.12 });
+    sections.forEach(section => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const tabs = ["signals", "analysis", "copy", "bots"] as const;
+    const timer = window.setInterval(() => {
+      setActiveTab(current => tabs[(tabs.indexOf(current) + 1) % tabs.length]);
+    }, 6500);
+    return () => window.clearInterval(timer);
+  }, []);
   const start = () => setAuthOpen(true);
 
   return (
@@ -75,19 +99,54 @@ const HomeMockup = () => {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button size="lg" onClick={start} className="h-12 px-7 font-bold">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Button><Button size="lg" variant="outline" asChild className="h-12 px-7 font-semibold"><Link to="/markets">Explore Live Markets</Link></Button></div>
               <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">{['Market research','AI analysis','Signals','Copy trading','Trading bots'].map(x => <span key={x} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" />{x}</span>)}</div>
             </div>
-            <div className="relative rounded-3xl border border-border/70 bg-card/80 p-4 shadow-2xl backdrop-blur-xl sm:p-5 animate-in fade-in slide-in-from-right-4 duration-700">
-              <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/20 blur-2xl animate-pulse" />
-              <div className="mb-4 flex items-center justify-between relative"><div><p className="text-[10px] font-bold uppercase tracking-widest text-primary">Botvio trading desk</p><h2 className="mt-1 text-xl font-black">XAU/USD</h2></div><Badge className="gap-1.5 bg-success/15 text-success hover:bg-success/15"><span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Live</Badge></div>
-              <div className="mb-4 grid grid-cols-4 gap-1 rounded-xl bg-secondary/60 p-1">
-                {[["signals","Signals"],["analysis","AI Analysis"],["copy","Copy Trading"],["bots","AI Bots"]].map(([id,label]) => <button key={id} type="button" onClick={() => setActiveTab(id as typeof activeTab)} className={`rounded-lg px-2 py-2 text-[10px] font-bold transition-all duration-300 ${activeTab===id?"bg-background text-primary shadow-sm scale-[1.02]":"text-muted-foreground hover:text-foreground"}`}>{label}</button>)}
+            <div className="relative rounded-3xl border border-border/70 bg-card/90 p-3 shadow-2xl backdrop-blur-xl sm:p-4 animate-in fade-in slide-in-from-right-4 duration-700">
+              <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-primary/20 blur-3xl animate-pulse" />
+              <div className="relative">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Real Gold Trading Hub</p>
+                    <h2 className="mt-0.5 text-lg font-black">XAU/USD · Deriv Live</h2>
+                  </div>
+                  <Badge className="gap-1.5 bg-success/15 text-success hover:bg-success/15">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                    {isMarketOpen ? "Live" : "Closed"}
+                  </Badge>
+                </div>
+
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <GoldPriceHeader />
+                  <div className="hidden sm:flex items-center gap-1 rounded-lg border border-border/60 bg-secondary/50 p-1">
+                    {["1m","5m","15m","1H","4H"].map((tf) => (
+                      <span key={tf} className={`rounded-md px-2 py-1 text-[9px] font-bold ${tf === "5m" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{tf}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/70">
+                  <DerivLiveChart displaySymbol="XAU/USD" height={275} defaultGranularity={300} showHauza />
+                </div>
+
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="rounded-xl border border-border/50 bg-secondary/50 p-2.5">
+                    <p className="text-[9px] text-muted-foreground">Signal</p>
+                    <p className={`mt-0.5 text-xs font-black ${goldLive.signal === "BUY" ? "text-success" : goldLive.signal === "SELL" ? "text-destructive" : "text-warning"}`}>{goldLive.signal}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/50 bg-secondary/50 p-2.5">
+                    <p className="text-[9px] text-muted-foreground">Confidence</p>
+                    <p className="mt-0.5 text-xs font-black">{goldLive.confidence}%</p>
+                  </div>
+                  <div className="rounded-xl border border-border/50 bg-secondary/50 p-2.5">
+                    <p className="text-[9px] text-muted-foreground">Strategy</p>
+                    <p className="mt-0.5 truncate text-xs font-black">{goldLive.strategy || "Live analysis"}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <Link to="/gold" className="rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-center text-[10px] font-bold text-primary transition hover:bg-primary/20">Open Gold Hub</Link>
+                  <Link to="/signals" className="rounded-xl border border-border/60 bg-secondary/50 px-3 py-2 text-center text-[10px] font-bold transition hover:border-primary/40">Live Signals</Link>
+                  <Link to="/chart/XAUUSD" className="rounded-xl border border-border/60 bg-secondary/50 px-3 py-2 text-center text-[10px] font-bold transition hover:border-primary/40">AI Analysis</Link>
+                </div>
               </div>
-              <div className="rounded-2xl border border-border/60 bg-background/60 p-4 transition-all duration-500">
-                {activeTab==="signals" && <div className="animate-in fade-in zoom-in-95 duration-500"><div className="mb-3 flex items-center justify-between"><div><p className="text-[10px] text-muted-foreground">LATEST SIGNAL</p><p className="text-lg font-black">XAU/USD BUY</p></div><Badge className="bg-success/15 text-success hover:bg-success/15">Research</Badge></div><div className="grid grid-cols-3 gap-2 text-center text-[10px]"><div className="rounded-lg bg-secondary/60 p-2"><span className="block text-muted-foreground">Entry</span><strong>Market</strong></div><div className="rounded-lg bg-secondary/60 p-2"><span className="block text-muted-foreground">Target</span><strong>+1R</strong></div><div className="rounded-lg bg-secondary/60 p-2"><span className="block text-muted-foreground">Risk</span><strong>Defined</strong></div></div><Link to="/signals" className="mt-4 inline-flex text-xs font-bold text-primary">View signals <ArrowRight className="ml-1 h-3 w-3"/></Link></div>}
-                {activeTab==="analysis" && <div className="animate-in fade-in zoom-in-95 duration-500"><GoldPriceHeader /><div className="mt-4 relative h-24 overflow-hidden rounded-lg bg-secondary/40"><svg viewBox="0 0 500 120" className="h-full w-full" preserveAspectRatio="none"><polyline points="0,90 45,78 80,82 120,62 165,70 205,45 245,53 290,31 335,42 375,22 420,35 455,15 500,24" fill="none" className="stroke-primary" strokeWidth="3" /></svg></div><div className="mt-3 grid grid-cols-3 gap-2 text-center text-[10px]"><div className="rounded-lg bg-secondary/60 p-2"><span className="block text-muted-foreground">Trend</span><strong className="text-success">Bullish</strong></div><div className="rounded-lg bg-secondary/60 p-2"><span className="block text-muted-foreground">Momentum</span><strong>Strong</strong></div><div className="rounded-lg bg-secondary/60 p-2"><span className="block text-muted-foreground">Risk</span><strong>Manage</strong></div></div><Link to="/chart/XAUUSD" className="mt-4 inline-flex text-xs font-bold text-primary">Open AI analysis <ArrowRight className="ml-1 h-3 w-3"/></Link></div>}
-                {activeTab==="copy" && <div className="animate-in fade-in zoom-in-95 duration-500"><p className="text-[10px] font-bold uppercase tracking-widest text-primary">COPY MARKETPLACE</p><h3 className="mt-1 text-lg font-black">Follow a trading provider</h3><div className="mt-4 flex items-center justify-between rounded-xl bg-secondary/60 p-3"><div><p className="text-sm font-bold">Botvio Robot</p><p className="text-[10px] text-muted-foreground">Automated signals · Risk controls</p></div><Badge>Active</Badge></div><Link to="/copy-trading" className="mt-4 inline-flex text-xs font-bold text-primary">Explore providers <ArrowRight className="ml-1 h-3 w-3"/></Link></div>}
-                {activeTab==="bots" && <div className="animate-in fade-in zoom-in-95 duration-500"><p className="text-[10px] font-bold uppercase tracking-widest text-primary">AUTOMATION</p><h3 className="mt-1 text-lg font-black">AI trading workflows</h3><div className="mt-4 space-y-2">{["Signal generation","Risk controls","Execution workflow"].map((x,i)=><div key={x} className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3 text-xs"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{i+1}</span>{x}<Check className="ml-auto h-3.5 w-3.5 text-success"/></div>)}</div><Link to="/bots" className="mt-4 inline-flex text-xs font-bold text-primary">Explore AI bots <ArrowRight className="ml-1 h-3 w-3"/></Link></div>}
-              </div>
-              <div className="mt-4 flex items-center justify-center gap-1.5">{[["signals","Signals"],["analysis","AI"],["copy","Copy"],["bots","Bots"]].map(([id])=><button key={id} type="button" aria-label={id} onClick={()=>setActiveTab(id as typeof activeTab)} className={`h-1.5 rounded-full transition-all duration-300 ${activeTab===id?"w-6 bg-primary":"w-1.5 bg-muted-foreground/30"}`}/>)}</div>
             </div>
           </div>
         </section>
