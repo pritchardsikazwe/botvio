@@ -43,7 +43,6 @@ const HomeMockup = () => {
   const { user } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"signals" | "analysis" | "copy" | "bots">("signals");
   const goldLive = useDerivLiveSignal("XAU/USD", 300);
   const { isMarketOpen } = useMarketSession("XAUUSD");
   const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
@@ -57,13 +56,6 @@ const HomeMockup = () => {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const tabs = ["signals", "analysis", "copy", "bots"] as const;
-    const timer = window.setInterval(() => {
-      setActiveTab(current => tabs[(tabs.indexOf(current) + 1) % tabs.length]);
-    }, 6500);
-    return () => window.clearInterval(timer);
-  }, []);
   const start = () => setAuthOpen(true);
 
   return (
