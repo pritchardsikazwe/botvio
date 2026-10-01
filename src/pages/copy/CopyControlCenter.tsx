@@ -8,6 +8,7 @@ import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopy
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { TradeCopyAccountDashboard } from "@/components/tradecopy/TradeCopyAccountDashboard";
 import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
+import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { useMyCopySubscriptions, useMyCopiedTrades } from "@/hooks/useBotvio";
 
 const money = (value: number) => `${value >= 0 ? "+" : "-"}$${Math.abs(value).toFixed(2)}`;
@@ -118,6 +119,7 @@ export const BotvioRobotDashboard = () => (
       </section>
       <TradeCopyAccountDashboard role="master" robot />
       <ProviderTradingAccountCard robot />
+      <Mt5AutoExecuteCard />
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm"><Bot className="h-4 w-4 text-primary" /> How automatic MT5 delivery works</CardTitle>
