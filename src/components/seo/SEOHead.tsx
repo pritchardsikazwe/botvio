@@ -70,7 +70,12 @@ export const SEOHead = ({
   }));
   const xDefaultHref = `${baseUrl}${buildLocalizedPath(canonicalPath, DEFAULT_LANGUAGE)}`;
 
-  // Lovable preview/staging hosts must not become searchable duplicate copies.\n  const robotsContent = !hostIsCanonical || noIndex\n    ? "noindex, nofollow"\n    : `${settings?.robots_index !== false ? "index" : "noindex"}, ${settings?.robots_follow !== false ? "follow" : "nofollow"}`;\n\n  const defaultJsonLd = {
+  // Lovable preview/staging hosts must not become searchable duplicate copies.
+  const robotsContent = !hostIsCanonical || noIndex
+    ? "noindex, nofollow"
+    : `${settings?.robots_index !== false ? "index" : "noindex"}, ${settings?.robots_follow !== false ? "follow" : "nofollow"}`;
+
+  const defaultJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
