@@ -1,0 +1,21 @@
+name: Botvio Actions Runner Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - botvio-independent-sep13
+
+permissions:
+  contents: read
+
+jobs:
+  runner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Runner check
+        run: |
+          echo "GitHub Actions runner is alive"
+          uname -a
+          node --version
+          npm --version
