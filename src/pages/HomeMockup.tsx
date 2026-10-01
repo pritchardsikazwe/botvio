@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { MobileSideMenu } from "@/components/nav/MobileSideMenu";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
@@ -11,7 +12,7 @@ import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 import { useMarketSession } from "@/hooks/useMarketSession";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, Menu, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ShieldCheck, Sparkles, Users } from "lucide-react";
 
 const markets = [
   { name: "Gold", symbol: "XAU/USD", to: "/gold", tag: "Popular" },
@@ -74,10 +75,9 @@ const HomeMockup = () => {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             {user ? <Button size="sm" asChild className="font-bold"><Link to="/dashboard">Dashboard</Link></Button> : <><Button variant="ghost" size="sm" onClick={start} className="hidden sm:inline-flex">Log in</Button><Button size="sm" onClick={start} className="font-bold">Start Free</Button></>}
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(v => !v)} aria-label="Open menu" aria-expanded={mobileOpen}><Menu className="h-5 w-5" /></Button>
+            <MobileSideMenu className="lg:hidden" />
           </div>
         </div>
-        {mobileOpen && <nav className="border-t border-border/60 bg-background px-4 py-3 lg:hidden"><div className="grid grid-cols-2 gap-2">{[['Markets','/markets'],['AI Analysis','/chart/XAUUSD'],['Signals','/signals'],['Copy Trading','/copy-trading'],['Bots','/bots'],['Brokers','/brokers'],['Learn','/learn']].map(([label,to]) => <Link key={to} onClick={() => setMobileOpen(false)} to={to} className="rounded-lg border border-border/60 px-3 py-3 text-sm font-semibold">{label}</Link>)}</div></nav>}
       </header>
 
       <main>
