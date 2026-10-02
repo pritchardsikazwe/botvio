@@ -220,7 +220,7 @@ export function FollowerTradeCopyPanel() {
           <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/30 px-3 py-2 text-xs">
             <span className="font-medium">{a.label} · {a.login_id} · {a.server}</span>
             <span className="flex items-center gap-2">
-              <Button
+              {a.broker?.toLowerCase() === "weltrade" && <Button
                 size="sm"
                 variant="outline"
                 className="h-7 px-2"
@@ -236,7 +236,7 @@ export function FollowerTradeCopyPanel() {
                 }}
               >
                 <Radio className="mr-1 h-3.5 w-3.5" /> Feed
-              </Button>
+              </Button>}
               <span className="flex gap-1.5"><EnvBadge env={a.environment} /><StatusBadge status={a.connection_status} /></span>
               <Button
                 size="sm"
