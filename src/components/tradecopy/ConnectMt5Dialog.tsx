@@ -8,7 +8,7 @@ import { Link2, Loader2, ShieldCheck, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useTradeCopyAction } from "@/hooks/useTradeCopy";
 
-interface Props { role: "master" | "slave"; robot?: boolean; triggerLabel: string }
+interface Props { role: "master" | "slave"; robot?: boolean; triggerLabel: string; disabled?: boolean }
 
 type ServerOption = { label: string; value: string; environment: "Live" | "Demo" };
 
@@ -59,7 +59,7 @@ const BROKER_OPTIONS = [
 ];
 
 /** Password lives only in this form's local state and is cleared on submit. */
-export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
+export function ConnectMt5Dialog({ role, robot, triggerLabel, disabled = false }: Props) {
   const [open, setOpen] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -116,7 +116,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button><Link2 className="mr-2 h-4 w-4" />{triggerLabel}</Button>
+        <Button disabled={disabled}><Link2 className="mr-2 h-4 w-4" />{triggerLabel}</Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-md">
