@@ -15,6 +15,7 @@ export default function ArabicDubaiBlogPost() {
   }
 
   const canonical = `https://botvio.live/ar/blog/${slug}`;
+  const englishCanonical = `https://botvio.live/blog/${slug}`;
   const wordCount = post.content.replace(/<[^>]+>/g, " ").trim().split(/\s+/).length;
   const jsonLd = {
     "@context": "https://schema.org",
@@ -33,7 +34,7 @@ export default function ArabicDubaiBlogPost() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-background">
-      <SEOHead title={post.metaTitle} description={post.metaDescription} ogType="article" canonicalUrlOverride={canonical} jsonLd={jsonLd} />
+      <SEOHead title={post.metaTitle} description={post.metaDescription} ogType="article" canonicalUrlOverride={canonical} alternateLocales={[{ code: "ar-AE", href: canonical }, { code: "en", href: englishCanonical }]} jsonLd={jsonLd} />
       <Header />
       <main className="container mx-auto px-4 py-6 sm:py-10">
         <nav className="mb-6 text-sm text-muted-foreground">
