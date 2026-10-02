@@ -47,6 +47,7 @@ const CATEGORIES = [
   { value: "nasdaq", label: "Indices" },
   { value: "crypto", label: "Crypto" },
   { value: "forex", label: "Forex" },
+  { value: "options", label: "Options" },
 ];
 
 const BROKERS = [
