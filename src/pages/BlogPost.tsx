@@ -17,6 +17,7 @@ import {
 import { blogContent } from "@/content/blogPosts";
 import { binanceBlogPosts } from "@/content/binanceBlogPosts";
 import { dubaiBlogPosts } from "@/content/dubaiBlogPosts";
+import { DUBAI_ARTICLE_SUPPLEMENTS } from "@/content/dubaiArticleSupplements";
 import { detectRegionalContext } from "@/content/regionalEditorial";
 import { RegionalContextCard } from "@/components/research/RegionalContextCard";
 import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
@@ -358,6 +359,12 @@ const BlogPost = () => {
             {post.youtubeUrl && <YouTubeEmbed url={post.youtubeUrl} />}
 
             <ArticleContent html={contentHtml} market={market} isMobile={!!isMobile} />
+
+            {DUBAI_ARTICLE_SUPPLEMENTS[slug] && (
+              <section className="prose prose-sm sm:prose-base dark:prose-invert mt-8 max-w-none rounded-2xl border border-border/60 bg-card/40 p-5 sm:p-7" aria-label="Dubai-specific research supplement">
+                <div dangerouslySetInnerHTML={{ __html: DUBAI_ARTICLE_SUPPLEMENTS[slug] }} />
+              </section>
+            )}
 
             {/* Related Trading Hub */}
             {market && (
