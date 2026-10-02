@@ -15,6 +15,7 @@ import {
   Settings,
   Signal,
   Sparkles,
+  Radio,
   UserRound,
   Users,
   WalletCards,
@@ -37,6 +38,7 @@ const primary: Item[] = [
   { label: "Copy Trading", to: "/copy-trading", icon: Copy },
   { label: "Botvio AI Robot", to: "/botvio-robot", icon: Bot },
   { label: "Trading Hub", to: "/gold", icon: Coins },
+  { label: "News Trader Hub", to: "/news-trader-hub", icon: Radio, live: true },
 ];
 
 const trading: Item[] = [
