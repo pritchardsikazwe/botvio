@@ -28,6 +28,7 @@ const markets = [
 
 const capabilities = [
   { icon: LineChart, title: "Live Markets", text: "Research forex, gold, crypto, indices and synthetic markets in one place.", to: "/markets" },
+  { icon: ScanSearch, title: "News Trader Hub", text: "Scan high-impact events with pre-news, live-news and post-news market context.", to: "/news-trader-hub" },
   { icon: Sparkles, title: "AI Chart Analysis", text: "Turn a chart into a structured market read with trend, levels and risk context.", to: "/chart/XAUUSD" },
   { icon: Bell, title: "Trading Signals", text: "Discover live opportunities and review signal history before taking action.", to: "/signals" },
   { icon: Users, title: "Copy Trading", text: "Explore providers and strategies designed for traders who want automation.", to: "/copy-trading" },
@@ -147,6 +148,25 @@ const HomeMockup = () => {
         </section>
 
         <section className="border-b border-border/50 bg-card/20"><div className="container mx-auto px-4 py-5"><div className="mb-3 flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Explore markets</p><Link to="/markets" className="text-xs font-semibold text-primary">All markets <ChevronRight className="inline h-3 w-3" /></Link></div><div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">{markets.map((m,i) => <Link key={m.to} to={m.to} className="group rounded-xl border border-border/60 bg-card/70 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${i*70}ms` }}><div className="flex items-center justify-between"><span className="text-sm font-bold">{m.name}</span><Badge variant="outline" className="text-[8px]">{m.tag}</Badge></div><p className="mt-1 truncate text-[10px] text-muted-foreground">{m.symbol}</p><div className="mt-3 flex items-center gap-1 text-[10px] font-semibold text-primary">Open hub <ArrowRight className="h-3 w-3" /></div></Link>)}</div></div></section>
+
+        <section className="border-b border-border/50 bg-card/10">
+          <div className="container mx-auto px-4 py-4">
+            <Link to="/news-trader-hub" className="group flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 transition hover:border-primary/60 hover:bg-primary/10 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary"><ScanSearch className="h-5 w-5" /></div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">NEW · MARKET & NEWS</p>
+                    <Badge variant="outline" className="border-success/30 bg-success/10 text-[8px] text-success">LIVE CALENDAR</Badge>
+                  </div>
+                  <h2 className="mt-1 text-sm font-black sm:text-base">News Trader Hub</h2>
+                  <p className="mt-0.5 text-[11px] leading-5 text-muted-foreground">High-impact news calendar · trading sessions · XAU/USD live chart · AI setup context</p>
+                </div>
+              </div>
+              <span className="inline-flex items-center text-xs font-black text-primary">Open News Trader Hub <ArrowRight className="ml-1 h-4 w-4 transition group-hover:translate-x-1" /></span>
+            </Link>
+          </div>
+        </section>
 
         <section data-reveal="capabilities" className={`container mx-auto px-4 py-12 sm:py-16 transition-all duration-700 ${visibleSections.capabilities ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}><div className="mx-auto max-w-2xl text-center"><Badge variant="outline" className="mb-3 border-primary/30 text-primary">ONE WORKFLOW</Badge><h2 className="text-3xl font-black sm:text-4xl">From market research to action</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">Start with information. Validate the setup. Then choose the trading workflow that fits you.</p></div><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{capabilities.map(({icon: Icon,title,text,to}) => <Link key={title} to={to} className="group rounded-2xl border border-border/60 bg-card/60 p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"><div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div><h3 className="text-base font-bold">{title}</h3><p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">{text}</p><span className="mt-4 inline-flex items-center text-xs font-bold text-primary">Explore <ArrowRight className="ml-1 h-3 w-3 transition group-hover:translate-x-1" /></span></Link>)}</div></section>
 
