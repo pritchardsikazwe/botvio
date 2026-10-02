@@ -7,7 +7,6 @@ import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGu
 import { DUBAI_BLOG_INDEX } from "@/content/dubaiBlogIndex";
 import { DUBAI_EXPANDED_INDEX } from "@/content/dubaiExpandedIndex";
 import { DUBAI_FINAL_INDEX } from "@/content/dubaiFinalPosts";
-import { DUBAI_ARABIC_INDEX } from "@/content/dubaiArabicPosts";
 
 const topics = [...DUBAI_BLOG_INDEX, ...DUBAI_EXPANDED_INDEX, ...DUBAI_FINAL_INDEX].map(({ slug, title, excerpt }) => [slug, title, excerpt] as const);
 
