@@ -85,3 +85,6 @@ project_id = "tqqkzeblmjapgbnsbtgw"
     verify_jwt = false
   [functions.evaluate-live-signals]
     verify_jwt = false
+
+  [functions.news-intelligence-worker]
+    verify_jwt = false
