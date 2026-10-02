@@ -98,7 +98,7 @@ export default function AdminControlCenter(){
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Content & SEO</p>
         {[[FileText,"Blog & Articles","/blog"],[Globe2,"Pages","/"],[Sparkles,"SEO Settings","/admin"]].map(([I,l,path])=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">System</p>
-        {[[BarChart3,"Analytics",()=>document.getElementById("analytics-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Settings,"Settings",()=>navigate("/settings")]].map(([I,l,path])=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        {[[BarChart3,"Analytics",()=>document.getElementById("analytics-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Settings,"Settings",()=>navigate("/settings")]].map(([I,l,action])=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
       </nav></ScrollArea>
       <div className="p-4 border-t border-white/10 text-xs text-slate-400">{user?.email||"Admin"}<div className="text-slate-600">Super Admin</div></div>
     </aside>
