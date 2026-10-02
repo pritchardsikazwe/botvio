@@ -15,6 +15,8 @@ interface SEOHeadProps {
   noIndex?: boolean;
   jsonLd?: Record<string, unknown>;
   seoKey?: string;
+  canonicalUrlOverride?: string;
+  alternateLocales?: Array<{ code: string; href: string }>;
 }
 
 function isAbsoluteUrl(url: string) {
@@ -35,6 +37,8 @@ export const SEOHead = ({
   noIndex = false,
   jsonLd,
   seoKey,
+  canonicalUrlOverride,
+  alternateLocales,
 }: SEOHeadProps) => {
   const { data: settings } = useSiteSettings();
   const location = useLocation();
