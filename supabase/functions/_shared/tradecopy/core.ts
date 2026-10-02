@@ -261,8 +261,12 @@ export function validateRelationship(r: RelationshipCheck): void {
   if (r.masterUserId && r.masterUserId === r.followerUserId) {
     // allowed only when both roles differ (already ensured) — but block self-copy of same account
   }
-  if (r.masterEnvironment !== r.followerEnvironment) {
-    throw new TradeCopyError("Demo and live accounts cannot be linked together", "validation");
+  // A DEMO source may feed either a DEMO or LIVE follower. This is the
+  // intentional "demo signal source -> live execution account" model.
+  // LIVE sources may not be linked to DEMO followers because that would
+  // mix a live source into a demo execution environment.
+  if (r.masterEnvironment === "LIVE" && r.followerEnvironment === "DEMO") {
+    throw new TradeCopyError("A live master cannot be linked to a demo follower", "validation");
   }
 }
 
