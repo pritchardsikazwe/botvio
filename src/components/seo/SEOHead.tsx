@@ -63,7 +63,7 @@ export const SEOHead = ({
   const pageOgImage = toAbsoluteUrl(ogImage || settings?.og_image_url || "/botvio-og.jpg", baseUrl);
 
   // Always canonicalize from the locale-stripped route. This prevents /es/es/... duplicates.
-  const canonicalUrl = `${baseUrl}${canonicalPath}`;
+  const canonicalUrl = canonicalUrlOverride || `${baseUrl}${canonicalPath}`;
   const alternates = languages.map((l) => ({
     code: l.code,
     href: `${baseUrl}${buildLocalizedPath(canonicalPath, l.code as LanguageCode)}`,
