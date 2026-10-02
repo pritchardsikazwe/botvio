@@ -114,10 +114,21 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get user from auth token
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      throw new Error('Unauthorized');
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    const internalUserId = req.headers.get('x-internal-user-id')?.trim() || null;
+    const isTrustedInternalCall = token === supabaseKey && !!internalUserId;
+
+    let userId: string;
+    if (isTrustedInternalCall) {
+      // Cloud workers use the service-role key plus an explicit user id.
+      // The user id is still verified below against the requested connection.
+      userId = internalUserId!;
+    } else {
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !user) {
+        throw new Error('Unauthorized');
+      }
+      userId = user.id;
     }
 
     const body = await req.json();
@@ -148,7 +159,7 @@ Deno.serve(async (req) => {
     const { data: existingIntent } = await supabase
       .from('trade_intents')
       .select('id, status')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('idempotency_key', idempotency_key)
       .single();
 
@@ -169,7 +180,7 @@ Deno.serve(async (req) => {
       .from('deriv_connections')
       .select('*')
       .eq('id', connection_id)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (connError || !connection) {
@@ -191,7 +202,7 @@ Deno.serve(async (req) => {
     const { data: tradeIntent, error: intentError } = await supabase
       .from('trade_intents')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         strategy_id: strategy_id || null,
         connection_id: connection_id,
         intent: payload,
