@@ -18,6 +18,7 @@ import { blogContent } from "@/content/blogPosts";
 import { binanceBlogPosts } from "@/content/binanceBlogPosts";
 import { dubaiBlogPosts } from "@/content/dubaiBlogPosts";
 import { DUBAI_ARTICLE_SUPPLEMENTS } from "@/content/dubaiArticleSupplements";
+import { DUBAI_EXPANDED_POSTS } from "@/content/dubaiExpandedPosts";
 import { detectRegionalContext } from "@/content/regionalEditorial";
 import { RegionalContextCard } from "@/components/research/RegionalContextCard";
 import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
@@ -148,7 +149,7 @@ const BlogPost = () => {
     enabled: !!slug,
   });
 
-  const staticPost = blogContent[slug || ""] || binanceBlogPosts[slug || ""] || dubaiBlogPosts[slug || ""];
+  const staticPost = blogContent[slug || ""] || binanceBlogPosts[slug || ""] || dubaiBlogPosts[slug || ""] || DUBAI_EXPANDED_POSTS[slug || ""];
   const post = dbPost
     ? {
         title: dbPost.title,
