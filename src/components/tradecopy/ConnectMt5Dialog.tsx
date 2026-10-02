@@ -8,7 +8,7 @@ import { Link2, Loader2, ShieldCheck, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useTradeCopyAction } from "@/hooks/useTradeCopy";
 
-interface Props { role: "master" | "slave"; robot?: boolean; triggerLabel: string; disabled?: boolean }
+interface Props { role: "master" | "slave"; robot?: boolean; triggerLabel: string; existingMasters?: Array<{ login_id: string; server: string }> }
 
 type ServerOption = { label: string; value: string; environment: "Live" | "Demo" };
 
@@ -59,7 +59,7 @@ const BROKER_OPTIONS = [
 ];
 
 /** Password lives only in this form's local state and is cleared on submit. */
-export function ConnectMt5Dialog({ role, robot, triggerLabel, disabled = false }: Props) {
+export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = [] }: Props) {
   const [open, setOpen] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -91,6 +91,12 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, disabled = false }
       return;
     }
 
+    const duplicate = robot && role === "master" && existingMasters.some((a) => a.login_id === login && a.server === server);
+    if (duplicate) {
+      toast.error("This MT5 account is already registered as a Provider master. Use the existing Provider master instead of registering it again as Botvio Robot.");
+      setPassword("");
+      return;
+    }
     const pw = password;
     setPassword("");
     try {
@@ -116,7 +122,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, disabled = false }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button disabled={disabled}><Link2 className="mr-2 h-4 w-4" />{triggerLabel}</Button>
+        <Button><Link2 className="mr-2 h-4 w-4" />{triggerLabel}</Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-md">
