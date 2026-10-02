@@ -89,6 +89,9 @@ import LocalizedMarketPage from "./pages/LocalizedMarketPage";
 import OptionsTradingHub from "./pages/OptionsTradingHub";
 import DubaiTradingTools from "./pages/DubaiTradingTools";
 import SyntheticIndicesGuideHub from "./pages/SyntheticIndicesGuideHub";
+import SaudiTradingGuide from "./pages/SaudiTradingGuide";
+import SaudiArabicTradingGuide from "./pages/SaudiArabicTradingGuide";
+import SaudiArabicBlogPost from "./pages/SaudiArabicBlogPost";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -365,7 +368,10 @@ export const AppRoutes = () => {
     <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
     <Route path="ar/dubai" element={<ArabicDubaiTradingGuide />} />
+    <Route path="ar/saudi-arabia" element={<SaudiArabicTradingGuide />} />
+    <Route path="ar/saudi-blog/:slug" element={<SaudiArabicBlogPost />} />
     <Route path="ar/blog/:slug" element={<ArabicDubaiBlogPost />} />
+    <Route path="markets/saudi-arabia" element={<SaudiTradingGuide />} />
     <Route path="markets/:country" element={<LocalizedMarketPage />} />
     <Route path="dubai" element={<DubaiTradingGuide />} />
     <Route path="dubai/tools" element={<DubaiTradingTools />} />
