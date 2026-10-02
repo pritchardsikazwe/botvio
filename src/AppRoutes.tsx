@@ -329,7 +329,7 @@ export const AppRoutes = () => {
     <Route path="high-impact-news" element={<NewsSEOPage />} />
     <Route path="news-trader-hub/:slug" element={<NewsSEOPage />} />
     <Route path="markets" element={<GlobalMarkets />} />
-    <Route path="global-markets" element={<Navigate to="/markets" replace />} />
+    <Route path="global-markets" element={<GlobalMarkets />} />
     <Route path="crypto" element={<Navigate to="/markets/crypto" replace />} />
     <Route path="chart" element={<Navigate to="/chart/XAUUSD" replace />} />
     <Route path="markets/us" element={<USMarket />} />
