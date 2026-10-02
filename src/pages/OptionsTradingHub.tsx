@@ -125,11 +125,29 @@ const OptionsTradingHub = () => (
             <h2 className="text-2xl font-black">Auto-generated options signals</h2>
             <p className="text-sm text-muted-foreground">Signals are generated from live public ticks. WAIT is a valid signal.</p>
           </div>
-          <Button variant="outline" asChild><Link to="/signals">More signals <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+          <Button variant="outline" asChild><Link to="/signals?market=options&broker=deriv">Options signals <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {WATCHLIST.map((item) => <SignalPreview key={item.symbol} {...item} />)}
         </div>
+      </section>
+
+      <section>
+        <Card className="glass-card border-primary/20">
+          <CardContent className="p-5 md:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div>
+              <Badge variant="outline">EXISTING BOTVIO SIGNALS</Badge>
+              <h2 className="mt-2 text-xl font-black">Options Signals Center</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Your existing signal feed remains the main source for published options signals, history, filters and alerts. The new hub simply gives visitors a clearer route into it.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild><Link to="/signals?market=options&broker=deriv">Open Options Signals</Link></Button>
+              <Button variant="outline" asChild><Link to="/signals/history">Signal History</Link></Button>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
