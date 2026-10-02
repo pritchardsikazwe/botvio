@@ -12,6 +12,7 @@ import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 import { cn } from "@/lib/utils";
 import { eventCurrency, eventDateInCat, eventTimeInCat, useEconomicCalendar } from "@/hooks/useEconomicCalendar";
+import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
 
 type ScanPhase = "pre" | "live" | "post";
 
@@ -216,7 +217,7 @@ const NewsTraderHub = () => {
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/50 bg-card/60 p-4">
           <div><p className="font-bold">Need deeper chart analysis?</p><p className="text-xs text-muted-foreground">Open Botvio AI Chart Analysis for structure, support/resistance and trade-plan analysis.</p></div>
-          <div className="flex gap-2"><Button variant="outline" asChild><Link to="/news-calendar"><CalendarDays className="mr-2 h-4 w-4" />Full News Calendar</Link></Button><Button asChild><Link to="/chart/XAUUSD"><Sparkles className="mr-2 h-4 w-4" />AI Chart Analysis</Link></Button></div>
+          <div className="flex gap-2"><Button variant="outline" asChild><Link to="/news-calendar" onClick={() => trackBotvioEvent("news_event_open", { source: "news_hub_calendar" })}><CalendarDays className="mr-2 h-4 w-4" />Full News Calendar</Link></Button><Button asChild><Link to="/chart/XAUUSD"><Sparkles className="mr-2 h-4 w-4" />AI Chart Analysis</Link></Button></div>
         </div>
       </main>
     </div>
