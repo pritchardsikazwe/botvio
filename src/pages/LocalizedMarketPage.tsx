@@ -5,6 +5,7 @@ import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { LOCALIZED_MARKETS, type LocalizedMarket } from "@/content/localizedMarkets";
 import { countryToLanguage } from "@/i18n";
+import { LOCALIZED_DEEP_INDEX, LOCALIZED_DEEP_POSTS } from "@/content/localizedDeepPosts";
 
 const languageCopy: Record<string, {
   intro: (m: string) => string;
@@ -131,6 +132,20 @@ export default function LocalizedMarketPage() {
                   {copy.intro(market.countryName)}
                 </p>
                 <p className="mt-4 text-xs font-medium text-primary">{copy.start} →</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold">Localized research articles</h2>
+          <p className="mt-2 text-sm text-muted-foreground">20 market-specific guides with local search intent and risk-first context.</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {LOCALIZED_DEEP_INDEX.filter(([, , , , , meta]: any) => true).filter((entry: any) => LOCALIZED_DEEP_POSTS[entry[0]]?.country === market.countryName).map(([slug,title,excerpt]) => (
+              <article key={slug} className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="text-lg font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">{excerpt}</p>
+                <Link to={"/blog/"+slug} className="mt-4 inline-block text-sm font-semibold text-primary">Read guide →</Link>
               </article>
             ))}
           </div>
