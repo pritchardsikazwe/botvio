@@ -123,6 +123,7 @@ export const PRIMARY_NAV: NavGroup[] = [
     items: [
       { label: "All Trading Tools", to: "/tools", icon: Wrench, description: "Calculators, sessions & calendar" },
       { label: "Economic Calendar", to: "/news-calendar", icon: Newspaper },
+      { label: "Market & News Trader Hub", to: "/news-trader-hub", icon: ScanSearch, description: "Pre-news, live-news and post-news market scanner" },
       { label: "Trade Modes", to: "/trade-modes", icon: Calculator },
       { label: "Flipping Challenges", to: "/flipping-challenges", icon: Zap },
       { label: "Marketplace", to: "/marketplace", icon: Layers },
