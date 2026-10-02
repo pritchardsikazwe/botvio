@@ -80,6 +80,7 @@ import GoldTradingHub from "./pages/GoldTradingHub";
 import BitcoinTradingHub from "./pages/BitcoinTradingHub";
 import SilverTradingHub from "./pages/SilverTradingHub";
 import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
+import NewsTraderHub from "./pages/NewsTraderHub";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -257,6 +258,8 @@ export const AppRoutes = () => {
     <Route path="trading" element={<Paid><Trading /></Paid>} />
     <Route path="chart/:symbol" element={<Paid><ChartPage /></Paid>} />
     <Route path="gold" element={<Paid><GoldTradingHub /></Paid>} />
+    <Route path="news-trader-hub" element={<Paid><NewsTraderHub /></Paid>} />
+    <Route path="trader-hub" element={<Navigate to="/news-trader-hub" replace />} />
     <Route path="bitcoin" element={<Paid><BitcoinTradingHub /></Paid>} />
     <Route path="btc" element={<Paid><BitcoinTradingHub /></Paid>} />
     <Route path="silver" element={<Paid><SilverTradingHub /></Paid>} />
