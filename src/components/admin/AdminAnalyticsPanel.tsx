@@ -1,0 +1,29 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RefreshCw, Users, Eye, Clock3, MousePointerClick, TrendingUp, Smartphone, Globe2, Funnel } from "lucide-react";
+
+type Summary={visitors:number;sessions:number;page_views:number;avg_pages_per_session:number;top_pages:{path:string;visits:number}[];sources:{source:string;visits:number}[];devices:{device:string;visits:number}[];funnel:Record<string,number>};
+
+const labels:Record<string,string>={market_open:"Market opens",signal_view:"Signal views",ai_analysis_open:"AI analysis",signup_started:"Signup started",signup_completed:"Signups",connection_started:"Connections started",connection_connected:"Accounts connected",copy_started:"Copy starts",pricing_view:"Pricing views",payment_submitted:"Payments",subscription_activated:"Paid subscriptions"};
+
+export function AdminAnalyticsPanel(){
+ const [days,setDays]=useState(30); const [data,setData]=useState<Summary|null>(null); const [loading,setLoading]=useState(true);
+ const load=async()=>{setLoading(true); const {data,error}=await (supabase as any).rpc("admin_analytics_summary",{p_days:days}); if(!error)setData(data as Summary); setLoading(false);};
+ useEffect(()=>{load()},[days]);
+ const Stat=({title,value,icon:Icon,sub}:{title:string;value:string|number;icon:any;sub?:string})=><Card><CardContent className="p-4 flex items-center justify-between"><div><p className="text-xs text-muted-foreground">{title}</p><p className="mt-1 text-2xl font-black">{value}</p>{sub&&<p className="mt-1 text-[10px] text-muted-foreground">{sub}</p>}</div><Icon className="h-5 w-5 text-primary"/></CardContent></Card>;
+ return <section id="analytics-panel" className="space-y-4">
+  <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-black">Analytics</h2><p className="text-sm text-muted-foreground">First-party Botvio traffic, engagement and conversion funnel.</p></div><div className="flex gap-2"><div className="flex rounded-lg border bg-white p-1">{[7,30,90].map(n=><Button key={n} size="sm" variant={days===n?"default":"ghost"} onClick={()=>setDays(n)}>{n}d</Button>)}</div><Button variant="outline" size="icon" onClick={load}><RefreshCw className={loading?"h-4 w-4 animate-spin":"h-4 w-4"}/></Button></div></div>
+  <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">{[
+   ["Visitors",data?.visitors||0,Users],["Sessions",data?.sessions||0,MousePointerClick],["Page Views",data?.page_views||0,Eye],["Views / Session",data?.avg_pages_per_session||0,TrendingUp]
+  ].map(([t,v,I])=><Stat key={t as string} title={t as string} value={v as any} icon={I as any}/>)}</div>
+  <div className="grid xl:grid-cols-3 gap-4">
+   <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><Globe2 className="h-4 w-4 text-primary"/>Top landing / visited pages</CardTitle></CardHeader><CardContent className="space-y-2">{(data?.top_pages||[]).slice(0,8).map((x,i)=><div key={x.path} className="flex justify-between text-xs"><span className="truncate max-w-[75%]"><Badge variant="outline" className="mr-2 text-[9px]">{i+1}</Badge>{x.path}</span><b>{x.visits}</b></div>)}</CardContent></Card>
+   <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><TrendingUp className="h-4 w-4 text-primary"/>Traffic sources</CardTitle></CardHeader><CardContent className="space-y-2">{(data?.sources||[]).slice(0,8).map(x=><div key={x.source} className="flex justify-between text-xs"><span>{x.source}</span><b>{x.visits}</b></div>)}</CardContent></Card>
+   <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><Smartphone className="h-4 w-4 text-primary"/>Devices</CardTitle></CardHeader><CardContent className="space-y-2">{(data?.devices||[]).map(x=><div key={x.device} className="flex justify-between text-xs"><span className="capitalize">{x.device}</span><b>{x.visits}</b></div>)}<div className="pt-2 text-[10px] text-muted-foreground">Country reporting remains available from registered-user profiles; anonymous visitor country requires edge/IP enrichment.</div></CardContent></Card>
+  </div>
+  <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><Funnel className="h-4 w-4 text-primary"/>Conversion funnel</CardTitle></CardHeader><CardContent><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">{Object.entries(data?.funnel||{}).map(([key,value])=><div key={key} className="rounded-xl border bg-slate-50 p-3"><p className="text-[10px] text-muted-foreground">{labels[key]||key}</p><p className="text-lg font-black">{value}</p></div>)}</div></CardContent></Card>
+ </section>;
+}
