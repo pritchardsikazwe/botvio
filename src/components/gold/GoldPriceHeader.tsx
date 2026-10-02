@@ -1,30 +1,21 @@
 import { useEffect, useState } from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Radio } from "lucide-react";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
-
-interface QuoteData {
-  price: number;
-  change_percent_24h: number;
-}
 
 /**
  * Live XAU/USD quote from Deriv's public market feed.
- * This intentionally avoids the legacy market_quotes table, which is not
- * required for the homepage/header and previously caused invalid-column errors.
+ * No database quote table is required for this header.
  */
 export function GoldPriceHeader() {
   const { tick, connected } = useDerivLiveTicks("XAU/USD");
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
 
   useEffect(() => {
-    if (tick?.price && previousPrice == null) setPreviousPrice(tick.price);
+    if (tick?.price && tick.price !== previousPrice) setPreviousPrice(tick.price);
   }, [tick?.price, previousPrice]);
 
   const price = tick?.price ?? 0;
-  const change = previousPrice && previousPrice > 0
-    ? ((price - previousPrice) / previousPrice) * 100
-    : 0;
-  const isUp = change >= 0;
+  const tickDirection = previousPrice != null && price >= previousPrice ? "up" : "down";
 
   return (
     <div className="flex items-center gap-4 bg-card/80 border border-border/50 rounded-xl px-5 py-3">
@@ -35,9 +26,10 @@ export function GoldPriceHeader() {
         </p>
       </div>
       {price > 0 && (
-        <div className={`flex items-center gap-1 text-sm font-bold ${isUp ? "text-success" : "text-destructive"}`}>
-          {isUp ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-          {connected ? `${isUp ? "+" : ""}${change.toFixed(2)}%` : "Connecting…"}
+        <div className={`flex items-center gap-1 text-sm font-bold ${tickDirection === "up" ? "text-success" : "text-destructive"}`}>
+          {tickDirection === "up" ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+          <Radio className="h-3 w-3" />
+          {connected ? "LIVE" : "RECONNECTING"}
         </div>
       )}
     </div>
