@@ -23,3 +23,12 @@ create policy "news intelligence is readable" on public.news_intelligence_events
 create or replace function public.touch_news_intelligence_events_updated_at() returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end; $$;
 drop trigger if exists news_intelligence_events_touch on public.news_intelligence_events;
 create trigger news_intelligence_events_touch before update on public.news_intelligence_events for each row execute function public.touch_news_intelligence_events_updated_at();
+
+-- Background refresh: keep News Intelligence state current every 5 minutes.
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+do $$ begin
+  perform cron.unschedule('botvio-news-intelligence');
+exception when others then null;
+end $$;
+select cron.schedule('botvio-news-intelligence','*/5 * * * *', $$ select net.http_post(url := 'https://bkygpojmlxcikhbuqgmv.supabase.co/functions/v1/news-intelligence-worker', headers := jsonb_build_object('Content-Type','application/json'), body := jsonb_build_object('mode','refresh','source','supabase-cron')) as request_id; $$);
