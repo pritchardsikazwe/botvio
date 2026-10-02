@@ -25,6 +25,12 @@ export const LocalePrefixRouter = ({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (!segment || !LANG_CODES.has(segment)) return;
 
+    const keepArabicDubaiUrl = segment === "ar" && (location.pathname === "/ar/dubai" || location.pathname.startsWith("/ar/blog/"));
+    if (keepArabicDubaiUrl) {
+      if (i18n.language !== segment) i18n.changeLanguage(segment as LanguageCode);
+      return;
+    }
+
     const rest = location.pathname.replace(/^\/[a-z]{2}(\/|$)/i, "/");
     const fullRest = rest + location.search + location.hash;
 
