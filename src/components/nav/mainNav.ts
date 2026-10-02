@@ -1,7 +1,7 @@
 /** Botvio 2026 customer-facing information architecture. Keep underlying routes and engines intact; expose simple product entry points. */
 import {
   BarChart3, Bot, BookOpen, ChartCandlestick, Coins, GraduationCap, Layers,
-  LineChart, Newspaper, ScanSearch, Shield, Signal, Sparkles, Users, Wrench,
+  LineChart, Newspaper, ScanSearch, Shield, Signal, Sparkles, Users,
   Zap, type LucideIcon,
 } from "lucide-react";
 
