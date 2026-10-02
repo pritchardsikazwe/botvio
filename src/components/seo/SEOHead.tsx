@@ -68,7 +68,7 @@ export const SEOHead = ({
     code: l.code,
     href: `${baseUrl}${buildLocalizedPath(canonicalPath, l.code as LanguageCode)}`,
   }));
-  const xDefaultHref = `${baseUrl}${buildLocalizedPath(canonicalPath, DEFAULT_LANGUAGE)}`;
+  const xDefaultHref = `${baseUrl}${buildLocalizedPath(canonicalPath, DEFAULT_LANGUAGE)}`;\n  const renderedAlternates = alternateLocales || alternates;
 
   // Lovable preview/staging hosts must not become searchable duplicate copies.
   const robotsContent = !hostIsCanonical || noIndex
@@ -100,7 +100,7 @@ export const SEOHead = ({
       <meta name="robots" content={robotsContent} />
       <link rel="canonical" href={canonicalUrl} />
       {pageKeywords && <meta name="keywords" content={pageKeywords} />}
-      {alternates.map((a) => <link key={a.code} rel="alternate" hrefLang={a.code} href={a.href} />)}
+      {renderedAlternates.map((a) => <link key={a.code} rel="alternate" hrefLang={a.code} href={a.href} />)}
       <link rel="alternate" hrefLang="x-default" href={xDefaultHref} />
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
