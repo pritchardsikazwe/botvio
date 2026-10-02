@@ -1527,4 +1527,12 @@
   <url><loc>https://botvio.live/fomc-trading</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/usd-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/high-impact-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub/xauusd</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub/eurusd</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub/gold-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub/usd-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub/fed</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub/cpi</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/news-trader-hub/nfp</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
 </urlset>
