@@ -13,6 +13,10 @@ interface Props { role: "master" | "slave"; robot?: boolean; triggerLabel: strin
 type ServerOption = { label: string; value: string; environment: "Live" | "Demo" };
 
 const BROKER_SERVERS: Record<string, ServerOption[]> = {
+  Weltrade: [
+    { label: "Weltrade-Live", value: "Weltrade-Live", environment: "Live" },
+    { label: "Weltrade-Demo", value: "Weltrade-Demo", environment: "Demo" },
+  ],
   HFM: [
     { label: "HFMarketsGlobal-Live1", value: "HFMarketsGlobal-Live1", environment: "Live" },
     { label: "HFMarketsGlobal-Demo", value: "HFMarketsGlobal-Demo", environment: "Demo" },
@@ -111,7 +115,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
           botvio_robot: robot === true,
         },
       });
-      toast.success(role === "master" ? "Master account connected in DEMO mode (inactive)" : "Follower account saved in DEMO mode");
+      toast.success(role === "master" ? "Master account connected (inactive)" : "MT5 follower account saved (inactive)");
       setOpen(false);
       resetForm();
     } catch (err) {
@@ -129,7 +133,7 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
         <DialogHeader>
           <DialogTitle>{triggerLabel}</DialogTitle>
           <DialogDescription>
-            Add your MT5 account in three steps. New connections start in DEMO mode and inactive.
+            Add your MT5 account in three steps. New connections start inactive. Demo and live accounts are supported; live copying still requires explicit activation.
           </DialogDescription>
         </DialogHeader>
 
