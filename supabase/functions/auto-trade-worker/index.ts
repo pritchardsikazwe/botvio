@@ -14,7 +14,23 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const DERIV_WS = `wss://api.derivws.com/trading/v1/options/ws/public`;
+const DERIV_WS = "wss://api.derivws.com/trading/v1/options/ws/public";
+
+const DERIV_SYMBOL_MAP: Record<string, string> = {
+  "XAU/USD": "frxXAUUSD", XAUUSD: "frxXAUUSD",
+  "GBP/USD": "frxGBPUSD", GBPUSD: "frxGBPUSD",
+  "BTC/USD": "cryBTCUSD", BTCUSD: "cryBTCUSD",
+  "NAS100": "OTC_NDX", "NASDAQ": "OTC_NDX",
+  "US30": "OTC_DJI", "SPX500": "OTC_SPC", "GER40": "OTC_GDAXI",
+};
+
+function toDerivSymbol(symbol: string): string {
+  const key = String(symbol || "").trim().toUpperCase();
+  if (DERIV_SYMBOL_MAP[key]) return DERIV_SYMBOL_MAP[key];
+  if (key.startsWith("FRX") || key.startsWith("CRY") || key.startsWith("OTC_") || key.includes("_")) return symbol;
+  if (/^[A-Z]{6}$/.test(key)) return `frx${key}`;
+  return symbol;
+}
 
 interface Candle { epoch: number; open: number; high: number; low: number; close: number; }
 
@@ -164,7 +180,7 @@ serve(async (req) => {
             skipped++; continue;
           }
 
-          const candles = await fetchCandles(inst.display_symbol, 60, 60);
+          const candles = await fetchCandles(toDerivSymbol(inst.display_symbol), 60, 60);
           const sig = buildSignal(candles);
           if (sig.signal === "WAIT" || sig.confidence < (inst.min_confidence ?? 70)) {
             skipped++; continue;
