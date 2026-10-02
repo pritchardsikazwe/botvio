@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (Object.keys(updates).length > 0) {
         supabase
           .from("profiles")
-          .update(updates)
+          .update(updates as never)
           .eq("user_id", data.user.id)
           .then(() => {});
       }

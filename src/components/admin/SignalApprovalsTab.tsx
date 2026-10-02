@@ -128,7 +128,7 @@ export const SignalApprovalsTab = () => {
 
       const { error: updateError } = await supabase
         .from("trading_signals")
-        .update(updateData)
+        .update(updateData as never)
         .eq("id", signalId);
 
       if (updateError) throw updateError;

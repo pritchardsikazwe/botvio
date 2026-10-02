@@ -155,7 +155,7 @@ export const useUpdateStrategy = () => {
       
       const { data, error } = await supabase
         .from("strategies")
-        .update(updateData)
+        .update(updateData as never)
         .eq("id", id)
         .select()
         .single();
