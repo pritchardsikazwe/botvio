@@ -428,7 +428,7 @@ export default function RiseFall() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center justify-between">
               <span className="flex items-center gap-2"><Bot className="h-4 w-4 text-primary" /> Auto Bot</span>
-              <Switch checked={botOn} onCheckedChange={(v) => { setBotOn(v); if (v) { setBotTrades(0); addLog("Auto bot started", "info"); } else addLog("Auto bot stopped", "info"); }} disabled={!isDerivConnected} />
+              <Switch checked={botOn} onCheckedChange={(v) => { setBotOn(v); if (v) { setBotTrades(0); addLog("Auto bot started", "info"); } else addLog("Auto bot stopped", "info"); }} disabled={!isDerivConnected || mode !== "auto"} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
