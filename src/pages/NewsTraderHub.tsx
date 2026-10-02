@@ -12,7 +12,7 @@ import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 import { cn } from "@/lib/utils";
 import { eventCurrency, eventDateInCat, eventTimeInCat, useEconomicCalendar } from "@/hooks/useEconomicCalendar";
-import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
+import { trackBotvioEvent } from "@/components/analytics/analytics";
 
 type ScanPhase = "pre" | "live" | "post";
 
