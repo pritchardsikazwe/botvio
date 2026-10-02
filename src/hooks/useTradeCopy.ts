@@ -13,7 +13,19 @@ export class TradeCopyClientError extends Error {
 
 /** Calls the secure tradecopy-api function. The API key never reaches the browser. */
 export async function tradecopy<T = Record<string, unknown>>(action: string, payload: Record<string, unknown> = {}): Promise<T & { mode: "mock" | "live" }> {
-  const { data, error } = await supabase.functions.invoke("tradecopy-api", { body: { action, ...payload } });
+  // TradeCopy is a user-authenticated Edge Function. Pass the current user JWT
+  // explicitly so the request cannot accidentally fall back to an API key or
+  // stale/implicit auth state.
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) {
+    throw new TradeCopyClientError("Your Botvio session has expired. Please sign in again.", "auth_required");
+  }
+
+  const { data, error } = await supabase.functions.invoke("tradecopy-api", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: { action, ...payload },
+  });
   if (error) {
     let msg = "TradeCopy request failed";
     let code: string | undefined;
