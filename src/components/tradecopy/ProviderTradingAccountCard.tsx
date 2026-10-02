@@ -89,6 +89,7 @@ function MasterRow({ a, robot }: { a: TcAccount; robot?: boolean }) {
 export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean }) {
   const { user } = useAuth();
   const { data, isLoading, error } = useTradeCopyAccounts("master", { robot });
+  const { data: providerMasters } = useTradeCopyAccounts("master", { robot: false });
 
   const title = robot ? "Botvio Robot — MT5 execution master" : "Provider — MT5 copy-trading master";
   const description = robot
