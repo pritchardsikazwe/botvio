@@ -84,6 +84,8 @@ import NewsTraderHub from "./pages/NewsTraderHub";
 import NewsSEOPage from "./pages/NewsSEOPage";
 import DubaiTradingGuide from "./pages/DubaiTradingGuide";
 import OptionsTradingHub from "./pages/OptionsTradingHub";
+import DubaiTradingTools from "./pages/DubaiTradingTools";
+import SyntheticIndicesGuideHub from "./pages/SyntheticIndicesGuideHub";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -360,6 +362,9 @@ export const AppRoutes = () => {
     <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
     <Route path="dubai" element={<DubaiTradingGuide />} />
+    <Route path="dubai/tools" element={<DubaiTradingTools />} />
+    <Route path="synthetic-indices" element={<SyntheticIndicesGuideHub />} />
+    <Route path="synthetic-indices-guide" element={<SyntheticIndicesGuideHub />} />
     <Route path="blog/category/:slug" element={<BlogCategory />} />
     <Route path="research/:slug" element={<ResearchHub />} />
     <Route path="tools" element={<Tools />} />
