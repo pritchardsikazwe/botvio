@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 import { brokerReviews } from "@/data/brokerReviews";
+import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
 import { rsi, riseFallEngine } from "@/lib/signalEngines";
 
 const DERIV_SIGNUP = brokerReviews.deriv.affiliateUrl || "https://t.deriv.link?t=8U3QNKP9UA9G";
@@ -181,6 +182,10 @@ const OptionsTradingHub = () => (
             ].map((x) => <div key={x} className="flex gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-success mt-0.5" /><span className="text-muted-foreground">{x}</span></div>)}
           </CardContent>
         </Card>
+      </section>
+
+      <section>
+        <AffiliateAccountGuide broker="deriv" affiliateUrl={DERIV_SIGNUP} />
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
