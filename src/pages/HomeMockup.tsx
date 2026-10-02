@@ -16,7 +16,7 @@ import { STANDALONE_APPS } from "@/config/standaloneApps";
 import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
 
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, ShieldCheck, Sparkles, Users } from "lucide-react";
 
 const markets = [
   { name: "Gold", symbol: "XAU/USD", to: "/gold", tag: "Popular" },
