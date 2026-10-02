@@ -33,7 +33,7 @@ export default function ArabicDubaiBlogPost() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-background">
-      <SEOHead title={post.metaTitle} description={post.metaDescription} ogType="article" jsonLd={jsonLd} />
+      <SEOHead title={post.metaTitle} description={post.metaDescription} ogType="article" canonicalUrlOverride={canonical} jsonLd={jsonLd} />
       <Header />
       <main className="container mx-auto px-4 py-6 sm:py-10">
         <nav className="mb-6 text-sm text-muted-foreground">
