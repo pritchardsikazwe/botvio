@@ -30,7 +30,6 @@ export default function CopyTradingOnboarding() {
   const [step, setStep] = useState(1);
   const [source, setSource] = useState(ROBOT);
   const [plan, setPlan] = useState("monthly");
-  const [paid, setPaid] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState("");
   const [risk, setRisk] = useState("balanced");
   const [copySltp, setCopySltp] = useState(true);
