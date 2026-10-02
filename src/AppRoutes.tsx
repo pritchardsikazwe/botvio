@@ -327,6 +327,13 @@ export const AppRoutes = () => {
     <Route path="fomc-trading" element={<NewsSEOPage />} />
     <Route path="usd-news" element={<NewsSEOPage />} />
     <Route path="high-impact-news" element={<NewsSEOPage />} />
+    <Route path="news-trader-hub/xauusd" element={<NewsSEOPage />} />
+    <Route path="news-trader-hub/eurusd" element={<NewsSEOPage />} />
+    <Route path="news-trader-hub/gold-news" element={<NewsSEOPage />} />
+    <Route path="news-trader-hub/usd-news" element={<NewsSEOPage />} />
+    <Route path="news-trader-hub/fed" element={<NewsSEOPage />} />
+    <Route path="news-trader-hub/cpi" element={<NewsSEOPage />} />
+    <Route path="news-trader-hub/nfp" element={<NewsSEOPage />} />
     <Route path="markets" element={<GlobalMarkets />} />
     <Route path="global-markets" element={<Navigate to="/markets" replace />} />
     <Route path="crypto" element={<Navigate to="/markets/crypto" replace />} />
