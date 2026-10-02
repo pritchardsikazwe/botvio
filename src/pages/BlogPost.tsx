@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { blogContent } from "@/content/blogPosts";
 import { binanceBlogPosts } from "@/content/binanceBlogPosts";
+import { dubaiBlogPosts } from "@/content/dubaiBlogPosts";
+import { detectRegionalContext } from "@/content/regionalEditorial";
+import { RegionalContextCard } from "@/components/research/RegionalContextCard";
 import { supabase } from "@/integrations/supabase/client";
 import { ArticleMeta } from "@/components/ArticleMeta";
 import { getAuthor } from "@/content/authors";
@@ -143,7 +146,7 @@ const BlogPost = () => {
     enabled: !!slug,
   });
 
-  const staticPost = blogContent[slug || ""] || binanceBlogPosts[slug || ""];
+  const staticPost = blogContent[slug || ""] || binanceBlogPosts[slug || ""] || dubaiBlogPosts[slug || ""];
   const post = dbPost
     ? {
         title: dbPost.title,
@@ -163,6 +166,7 @@ const BlogPost = () => {
       ? { ...staticPost, updatedDate: undefined, coverImage: undefined, author: "Botvio Team", metaTitle: undefined, metaDescription: undefined, youtubeUrl: null }
       : null;
 
+  const regionalContext = useMemo(() => (post ? detectRegionalContext(post.title, post.excerpt, post.category) : null), [post?.title, post?.excerpt, post?.category]);
   const market = useMemo(
     () => (post ? detectMarket(post.title, post.category, post.excerpt) : null),
     [post?.title, post?.category, post?.excerpt],
@@ -313,7 +317,7 @@ const BlogPost = () => {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          {regionalContext && <RegionalContextCard context={regionalContext} />}\n\n          <div className="flex flex-wrap items-center gap-3">
             <SocialShareButtons title={post.title} description={post.excerpt} label="Share research" />
             <p className="text-xs text-muted-foreground">{ARTICLE_TYPE_NOTE[articleType]}</p>
           </div>
