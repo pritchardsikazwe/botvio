@@ -20,6 +20,7 @@ import { dubaiBlogPosts } from "@/content/dubaiBlogPosts";
 import { DUBAI_ARTICLE_SUPPLEMENTS } from "@/content/dubaiArticleSupplements";
 import { DUBAI_EXPANDED_POSTS } from "@/content/dubaiExpandedPosts";
 import { DUBAI_FINAL_POSTS } from "@/content/dubaiFinalPosts";
+import { DUBAI_ARABIC_POSTS } from "@/content/dubaiArabicPosts";
 import { detectRegionalContext } from "@/content/regionalEditorial";
 import { RegionalContextCard } from "@/components/research/RegionalContextCard";
 import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
@@ -214,6 +215,7 @@ const BlogPost = () => {
 
   const brokers = detectBrokers(post.title, post.content || "");
   const canonical = `https://botvio.live/blog/${slug}`;
+  const arabicCanonical = slug && DUBAI_ARABIC_POSTS[slug] ? `https://botvio.live/ar/blog/${slug}` : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -276,6 +278,7 @@ const BlogPost = () => {
         description={post.metaDescription || post.excerpt}
         ogImage={post.coverImage || `/blog/${slug}.png`}
         ogType="article"
+        alternateLocales={arabicCanonical ? [{ code: "en", href: canonical }, { code: "ar-AE", href: arabicCanonical }] : undefined}
         jsonLd={jsonLd}
       />
       <Header />
