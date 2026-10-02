@@ -113,6 +113,7 @@ import Ger40Hub from "./pages/index-hubs/Ger40Hub";
 
 import WeltradeHub from "./pages/WeltradeHub";
 import WeltradeTrade from "./pages/WeltradeTrade";
+import WeltradeSyntheticHub from "./pages/WeltradeSyntheticHub";
 import SyntheticHub from "./pages/SyntheticHub";
 import AutoTrade from "./pages/AutoTrade";
 import RiseFall from "./pages/RiseFall";
@@ -311,6 +312,8 @@ export const AppRoutes = () => {
     <Route path="de40" element={<Paid><Ger40Hub /></Paid>} />
 
     <Route path="weltrade" element={<Paid><WeltradeHub /></Paid>} />
+    <Route path="weltrade/synthetic" element={<Paid><WeltradeSyntheticHub /></Paid>} />
+    <Route path="weltrade-synthetic" element={<Paid><WeltradeSyntheticHub /></Paid>} />
     <Route path="weltrade-trade" element={<Paid><WeltradeTrade /></Paid>} />
     <Route path="synthetic-hub" element={<Paid><SyntheticHub /></Paid>} />
     <Route path="synthetic" element={<Paid><SyntheticHub /></Paid>} />
