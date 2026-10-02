@@ -81,6 +81,7 @@ import BitcoinTradingHub from "./pages/BitcoinTradingHub";
 import SilverTradingHub from "./pages/SilverTradingHub";
 import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
 import NewsTraderHub from "./pages/NewsTraderHub";
+import NewsSEOPage from "./pages/NewsSEOPage";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -318,6 +319,14 @@ export const AppRoutes = () => {
     <Route path="auto-trade" element={<Paid><AutoTrade /></Paid>} />
     <Route path="auto" element={<Paid><AutoTrade /></Paid>} />
     <Route path="news-calendar" element={<NewsCalendar />} />
+    <Route path="economic-calendar" element={<NewsSEOPage />} />
+    <Route path="gold-news" element={<NewsSEOPage />} />
+    <Route path="forex-news" element={<NewsSEOPage />} />
+    <Route path="nfp-trading" element={<NewsSEOPage />} />
+    <Route path="cpi-trading" element={<NewsSEOPage />} />
+    <Route path="fomc-trading" element={<NewsSEOPage />} />
+    <Route path="usd-news" element={<NewsSEOPage />} />
+    <Route path="high-impact-news" element={<NewsSEOPage />} />
     <Route path="markets" element={<GlobalMarkets />} />
     <Route path="global-markets" element={<Navigate to="/markets" replace />} />
     <Route path="crypto" element={<Navigate to="/markets/crypto" replace />} />
