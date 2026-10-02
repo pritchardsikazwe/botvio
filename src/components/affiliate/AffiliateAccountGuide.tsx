@@ -64,6 +64,7 @@ export function AffiliateAccountGuide({ broker, affiliateUrl, compact = false }:
           <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Read the broker's terms and risk disclosures.</span>
           <span className="inline-flex items-center gap-1"><UserPlus className="h-3 w-3" /> Referral/affiliate relationship disclosed.</span>
           <span className="inline-flex items-center gap-1"><WalletCards className="h-3 w-3" /> Only fund an account after understanding the risks.</span>
+        <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-xs leading-5 text-muted-foreground"><strong className="text-foreground">Deriv risk warning:</strong> The products offered on the trade.deriv.com website include Options, Contracts for Difference (“CFDs”), and other complex derivatives. Trading Options may not be suitable for everyone. Trading CFDs carries a high level of risk since leverage can work both to your advantage and disadvantage. You may lose all of your invested capital. Never invest money you cannot afford to lose or trade with borrowed money.</div>
         </div>
       </CardContent>
     </Card>
