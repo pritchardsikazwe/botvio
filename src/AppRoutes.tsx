@@ -82,6 +82,7 @@ import SilverTradingHub from "./pages/SilverTradingHub";
 import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
 import NewsTraderHub from "./pages/NewsTraderHub";
 import NewsSEOPage from "./pages/NewsSEOPage";
+import DubaiTradingGuide from "./pages/DubaiTradingGuide";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -354,6 +355,7 @@ export const AppRoutes = () => {
     <Route path="unsubscribe" element={<Unsubscribe />} />
     <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
+    <Route path="dubai" element={<DubaiTradingGuide />} />
     <Route path="blog/category/:slug" element={<BlogCategory />} />
     <Route path="research/:slug" element={<ResearchHub />} />
     <Route path="tools" element={<Tools />} />
