@@ -194,6 +194,31 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       const creds = Creds.parse(body);
       const asRobot = body.botvio_robot === true;
       if (asRobot && !ctx.isAdmin) throw new TradeCopyError("Only admins can connect the Botvio Robot master", "auth", 403);
+
+      // One MT5 login/server can only belong to one master role in Botvio.
+      // This server-side check prevents a client from registering the same
+      // account as both the official Botvio Robot master and a provider master.
+      const { data: conflictingMasters } = await admin
+        .from("trading_accounts")
+        .select("id,is_botvio_robot,user_id,login_id,server")
+        .eq("execution_provider", "tradecopy")
+        .eq("account_role", "master")
+        .eq("login_id", String(creds.login))
+        .eq("server", creds.server);
+
+      const conflict = (conflictingMasters ?? []).find((m: any) =>
+        asRobot ? m.is_botvio_robot !== true : m.is_botvio_robot === true
+      );
+      if (conflict) {
+        throw new TradeCopyError(
+          asRobot
+            ? "This MT5 account is already registered as a provider master and cannot also be the Botvio Robot master."
+            : "This MT5 account is already registered as the Botvio Robot master and cannot also be a provider master.",
+          "validation",
+          409,
+        );
+      }
+
       let providerId: string | null = null;
       if (!asRobot) {
         const { data: prov } = await admin.from("providers").select("id").eq("user_id", ctx.userId).limit(1).maybeSingle();
