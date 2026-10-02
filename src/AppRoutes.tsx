@@ -83,6 +83,8 @@ import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
 import NewsTraderHub from "./pages/NewsTraderHub";
 import NewsSEOPage from "./pages/NewsSEOPage";
 import DubaiTradingGuide from "./pages/DubaiTradingGuide";
+import ArabicDubaiTradingGuide from "./pages/ArabicDubaiTradingGuide";
+import ArabicDubaiBlogPost from "./pages/ArabicDubaiBlogPost";
 import OptionsTradingHub from "./pages/OptionsTradingHub";
 import DubaiTradingTools from "./pages/DubaiTradingTools";
 import SyntheticIndicesGuideHub from "./pages/SyntheticIndicesGuideHub";
@@ -361,6 +363,8 @@ export const AppRoutes = () => {
     <Route path="unsubscribe" element={<Unsubscribe />} />
     <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
+    <Route path="ar/dubai" element={<ArabicDubaiTradingGuide />} />
+    <Route path="ar/blog/:slug" element={<ArabicDubaiBlogPost />} />
     <Route path="dubai" element={<DubaiTradingGuide />} />
     <Route path="dubai/tools" element={<DubaiTradingTools />} />
     <Route path="synthetic-indices" element={<SyntheticIndicesGuideHub />} />
