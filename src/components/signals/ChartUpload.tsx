@@ -44,6 +44,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { trackBotvioEvent } from "@/components/analytics/analytics";
 import { useChartUsageGate, getGuestUploadCount, incrementGuestUploadCount, GUEST_DAILY_LIMIT, isDeviceLockedToOtherEmail, lockDeviceToEmail } from "@/hooks/useChartAnalysis";
 
 const CHART_BROKERS = [
@@ -200,6 +201,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
     if (!checkLimits()) return;
 
     try {
+      trackBotvioEvent("ai_analysis_started", { symbol, timeframe, analysis_type: analysisType, authenticated: Boolean(user) });
       setIsUploading(true);
       const userId = user?.id || "guest";
       const fileExt = selectedFile.name.split(".").pop();
@@ -242,6 +244,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
 
       setAnalysisResult(analysisData.analysis);
       setStructuredResult(analysisData.structured);
+      trackBotvioEvent("ai_analysis_completed", { symbol, timeframe, analysis_type: analysisType, authenticated: Boolean(user), recommendation: analysisData.structured?.recommendation || "WAIT" });
       toast.success("Chart analyzed successfully!");
 
       if (!user) {
