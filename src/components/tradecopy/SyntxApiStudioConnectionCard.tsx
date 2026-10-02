@@ -39,9 +39,11 @@ export function SyntxApiStudioConnectionCard() {
   const [login, setLogin] = useState("43304349");
   const [password, setPassword] = useState("");
   const [server, setServer] = useState("Weltrade-Demo");
+  const [customServer, setCustomServer] = useState("");
   const [status, setStatus] = useState<Status>({ connected: false });
   const [symbols, setSymbols] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const resolvedServer = server === "custom" ? customServer.trim() : server;
 
   const call = async <T,>(action: string, payload: Record<string, unknown> = {}) => {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -76,10 +78,10 @@ export function SyntxApiStudioConnectionCard() {
     e.preventDefault();
     setBusy(true);
     try {
-      const result = await call<{ connected: boolean; symbols: string[] }>("connect", { login, password, broker: "Weltrade", server });
+      const result = await call<{ connected: boolean; symbols: string[] }>("connect", { login, password, broker: "Weltrade", server: resolvedServer });
       setPassword("");
       setSymbols(result.symbols ?? []);
-      setStatus({ connected: result.connected, account: { login, broker: "Weltrade", server, environment: "DEMO" }, lastConnectedAt: new Date().toISOString() });
+      setStatus({ connected: result.connected, account: { login, broker: "Weltrade", server: resolvedServer, environment: "DEMO" }, lastConnectedAt: new Date().toISOString() });
       toast.success("Weltrade SyntX API Studio connected");
     } catch (e) {
       toast.error((e as Error).message);
@@ -135,11 +137,11 @@ export function SyntxApiStudioConnectionCard() {
                 </SelectContent>
               </Select>
               {server === "custom" && (
-                <Input className="mt-2" placeholder="Enter exact server name from Weltrade" onChange={(e) => setServer(e.target.value)} required />
+                <Input className="mt-2" placeholder="Enter exact server name from Weltrade" value={customServer} onChange={(e) => setCustomServer(e.target.value)} required />
               )}
               <p className="text-[10px] text-muted-foreground">Use the exact server assigned to this MT5 account.</p>
             </div>
-            <Button type="submit" disabled={busy || !login || !password || !server || server === "custom"}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wifi className="mr-2 h-4 w-4" />}Connect SyntX</Button>
+            <Button type="submit" disabled={busy || !login || !password || !resolvedServer}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wifi className="mr-2 h-4 w-4" />}Connect SyntX</Button>
           </form>
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-success/20 bg-success/5 p-3">
