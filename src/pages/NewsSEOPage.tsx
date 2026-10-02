@@ -1,0 +1,32 @@
+import { Link, useParams } from "react-router-dom";
+import { CalendarDays, ArrowRight, BarChart3, Globe2, Newspaper, ShieldAlert } from "lucide-react";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { Header } from "@/components/trading/Header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const CONTENT:Record<string,{title:string;description:string;heading:string;intro:string;keywords:string[]}> = {
+ "economic-calendar":{title:"Economic Calendar & High Impact Forex News | Botvio",description:"Track high-impact economic events, market sessions and trading context with Botvio's economic calendar and News Trader Hub.",heading:"Economic Calendar & Market News",intro:"Use the Botvio economic calendar to research scheduled high-impact releases and connect them with live market context.",keywords:["economic calendar","forex news","high impact news"]},
+ "gold-news":{title:"Gold News & XAUUSD Market Events | Botvio",description:"Research major economic events affecting gold and XAU/USD with live charts and Botvio's News Trader Hub.",heading:"Gold News & XAU/USD Events",intro:"Gold can react sharply to inflation, rates, central-bank decisions and US economic releases. Use the News Trader Hub to research the event calendar alongside XAU/USD.",keywords:["gold news","XAUUSD news","gold economic calendar"]},
+ "forex-news":{title:"Forex News & Economic Calendar | Botvio",description:"Research high-impact forex news, currencies and market sessions with Botvio's live News Trader Hub.",heading:"Forex News & Economic Calendar",intro:"Follow major releases and currency events while reviewing live market structure. Botvio provides research tools rather than guaranteed trading outcomes.",keywords:["forex news","forex calendar","currency news"]},
+ "nfp-trading":{title:"NFP Trading Calendar & Market Research | Botvio",description:"Understand the Nonfarm Payrolls event, timing and market-research workflow with Botvio's News Trader Hub.",heading:"NFP Trading Research",intro:"Nonfarm Payrolls is a major US employment release. Use the calendar to identify timing, then review price action and risk context instead of relying on a headline alone.",keywords:["NFP trading","nonfarm payrolls","NFP calendar"]},
+ "cpi-trading":{title:"CPI Trading Calendar & Inflation News | Botvio",description:"Track CPI releases and review gold, forex and index market context with Botvio.",heading:"CPI & Inflation News",intro:"Consumer-price inflation data can affect expectations around interest rates. Botvio's calendar and live charts help organize your market research around scheduled releases.",keywords:["CPI trading","inflation news","CPI calendar"]},
+ "fomc-trading":{title:"FOMC Trading Calendar & Federal Reserve News | Botvio",description:"Track FOMC events and review market context for gold, forex and indices with Botvio.",heading:"FOMC & Federal Reserve Events",intro:"FOMC decisions and communication can move rates, currencies, gold and indices. Check the event schedule and review price action before making decisions.",keywords:["FOMC calendar","Federal Reserve news","Fed trading"]},
+ "usd-news":{title:"USD News & US Economic Calendar | Botvio",description:"Track major US economic releases and USD market context with Botvio's News Trader Hub.",heading:"USD News & US Economic Calendar",intro:"US data can affect USD pairs, gold and indices. Use the calendar to organize the timing of major releases and the live chart to review market reaction.",keywords:["USD news","US economic calendar","dollar news"]},
+ "high-impact-news":{title:"High Impact Forex News Calendar | Botvio",description:"Find high-impact economic events and research market reaction with Botvio's live News Trader Hub.",heading:"High Impact News Calendar",intro:"High-impact releases deserve careful attention because volatility, spreads and slippage can change quickly. Botvio combines the calendar with market-session and chart context.",keywords:["high impact news","forex news calendar","market news"]},
+};
+export default function NewsSEOPage(){
+ const {slug}=useParams(); const c=CONTENT[slug||"economic-calendar"]||CONTENT["economic-calendar"];
+ return <div className="min-h-screen bg-background text-foreground"><SEOHead title={c.title} description={c.description}/><Header/><main className="container mx-auto max-w-5xl px-4 py-10">
+  <Badge className="bg-primary/10 text-primary hover:bg-primary/10"><Newspaper className="mr-1 h-3 w-3"/> BOTVIO MARKET INTELLIGENCE</Badge>
+  <h1 className="mt-5 text-4xl font-black tracking-tight sm:text-5xl">{c.heading}</h1>
+  <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground">{c.intro}</p>
+  <div className="mt-8 grid gap-4 md:grid-cols-3">{[
+   [CalendarDays,"Live Economic Calendar","See upcoming high-impact events and timing.","/news-calendar"],
+   [BarChart3,"News Trader Hub","Combine events, sessions and live market context.","/news-trader-hub"],
+   [Globe2,"Live Markets","Review price action across Botvio markets.","/markets"]
+  ].map(([I,t,d,to])=><Link key={t as string} to={to as string} className="rounded-2xl border border-border/60 bg-card p-5 hover:border-primary/50"><I className="h-5 w-5 text-primary"/><h2 className="mt-3 font-bold">{t as string}</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">{d as string}</p><span className="mt-4 inline-flex text-xs font-bold text-primary">Open <ArrowRight className="ml-1 h-3 w-3"/></span></Link>)}</div>
+  <section className="mt-10 rounded-2xl border border-border/60 bg-card p-6"><h2 className="text-xl font-black">Research checklist</h2><ul className="mt-4 space-y-3 text-sm text-muted-foreground">{["Check the scheduled event time and currency.","Review the affected market and current session.","Compare price structure before the release.","Define invalidation and risk before acting.","Treat live-news moves as volatile and avoid assuming an outcome."].map(x=><li key={x} className="flex gap-2"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-primary"/>{x}</li>)}</ul><Button asChild className="mt-6 font-bold"><Link to="/news-trader-hub">Open News Trader Hub <ArrowRight className="ml-2 h-4 w-4"/></Link></Button></section>
+  <div className="mt-8 flex flex-wrap gap-2">{c.keywords.map(k=><Badge key={k} variant="outline">{k}</Badge>)}</div>
+ </main></div>;
+}
