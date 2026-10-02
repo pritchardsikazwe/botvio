@@ -210,6 +210,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     });
 
+    if (!error && data?.user) {
+      trackBotvioEvent("signup_completed", { selected_plan: planCode || "free" });
+    }
+
     // Update profile with country, whatsapp, and display name if provided
     if (!error && data?.user) {
       const updates: Record<string, string> = {};
