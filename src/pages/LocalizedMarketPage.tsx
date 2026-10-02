@@ -94,17 +94,20 @@ function getMarket(countryCode: string): LocalizedMarket | undefined {
 
 export default function LocalizedMarketPage() {
   const { country } = useParams<{ country: string }>();
+  const location = useLocation();
   const market = country ? getMarket(country) : undefined;
   if (!market) return <div className="min-h-screen bg-background"><Header /><main className="container mx-auto px-4 py-12 text-center"><h1 className="text-2xl font-bold">Market guide not found</h1><Link to="/"><Button className="mt-5">Home</Button></Link></main></div>;
 
   const copy = languageCopy[market.lang] || languageCopy.en;
   const rtl = market.lang === "ar" || market.lang === "ur";
-  const canonical = `https://botvio.live/markets/${market.slug}`;
+  const isArabicMarketUrl = location.pathname.startsWith("/ar/markets/") && market.lang === "ar";
+  const canonical = isArabicMarketUrl ? `https://botvio.live/ar/markets/${market.slug}` : `https://botvio.live/markets/${market.slug}`;
+  const englishCanonical = `https://botvio.live/markets/${market.slug}`;
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="min-h-screen bg-background">
       <SEOHead title={market.title} description={market.description} canonicalUrlOverride={canonical}
-        alternateLocales={[{ code: market.hreflang, href: canonical }]}
+        alternateLocales={market.lang === "ar" ? [{ code: market.hreflang, href: canonical }, { code: "en", href: englishCanonical }] : [{ code: "en", href: canonical }]}
         jsonLd={{"@context":"https://schema.org","@type":"CollectionPage",name:market.title,description:market.description,url:canonical,inLanguage:market.lang}} />
       <Header />
       <main className="container mx-auto px-4 py-8">
