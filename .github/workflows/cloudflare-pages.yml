@@ -28,9 +28,20 @@ jobs:
 
       - name: Build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_URL: https://bkygpojmlxcikhbuqgmv.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
+
+      - name: Verify production Supabase target
+        run: |
+          if ! grep -R "bkygpojmlxcikhbuqgmv.supabase.co" dist/assets >/dev/null; then
+            echo "ERROR: production bundle does not contain the required Supabase project URL."
+            exit 1
+          fi
+          if grep -R "tqqkzeblmjapgbnsbtgw.supabase.co" dist/assets >/dev/null; then
+            echo "ERROR: old Supabase project URL detected in production bundle."
+            exit 1
+          fi
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v4
