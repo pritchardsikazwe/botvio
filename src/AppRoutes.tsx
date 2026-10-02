@@ -83,6 +83,7 @@ import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
 import NewsTraderHub from "./pages/NewsTraderHub";
 import NewsSEOPage from "./pages/NewsSEOPage";
 import DubaiTradingGuide from "./pages/DubaiTradingGuide";
+import OptionsTradingHub from "./pages/OptionsTradingHub";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -345,7 +346,10 @@ export const AppRoutes = () => {
     <Route path="deriv-options" element={<Navigate to="/rise-fall" replace />} />
     <Route path="deriv-app" element={<Navigate to="/rise-fall" replace />} />
     <Route path="rise-fall" element={<StoreRestrictedRoute><RiseFall /></StoreRestrictedRoute>} />
-    <Route path="binary-options" element={<Paid><BinaryOptions /></Paid>} />
+    <Route path="options" element={<OptionsTradingHub />} />
+    <Route path="options-trading" element={<OptionsTradingHub />} />
+    <Route path="options-trading-hub" element={<OptionsTradingHub />} />
+    <Route path="binary-options" element={<OptionsTradingHub />} />
     <Route path="brokers" element={<BrokersIndex />} />
     <Route path="brokers/:slug" element={<BrokerPage />} />
     <Route path="live" element={<LiveFeed />} />
