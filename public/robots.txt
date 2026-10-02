@@ -117,3 +117,4 @@ User-agent: LinkedInBot
 Allow: /
 
 Sitemap: https://botvio.live/sitemap.xml
+Sitemap: https://botvio.live/sitemap-dubai.xml
