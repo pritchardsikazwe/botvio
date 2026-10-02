@@ -89,6 +89,8 @@ function MasterRow({ a, robot }: { a: TcAccount; robot?: boolean }) {
 export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean }) {
   const { user } = useAuth();
   const { data, isLoading, error } = useTradeCopyAccounts("master", { robot });
+  const { data: providerMasters } = useTradeCopyAccounts("master", { robot: false });
+  const hasDuplicateProviderMaster = robot && (providerMasters ?? []).some((a) => !!a.login_id && !!a.server);
 
   const title = robot ? "Botvio Robot — MT5 execution master" : "Provider — MT5 copy-trading master";
   const description = robot
@@ -103,7 +105,7 @@ export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean 
             <CardTitle className="text-base">{title}</CardTitle>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
           </div>
-          {user && <ConnectMt5Dialog role="master" robot={robot} triggerLabel={robot ? "Connect Botvio Robot MT5" : "Connect Provider MT5"} />}
+          {user && <ConnectMt5Dialog role="master" robot={robot} disabled={!!hasDuplicateProviderMaster} triggerLabel={robot ? "Connect Botvio Robot MT5" : "Connect Provider MT5"} />}
         </div>
 
         <div className="grid gap-2 md:grid-cols-3">
@@ -142,7 +144,7 @@ export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean 
           <div className="rounded-xl border border-dashed p-6 text-center">
             <p className="font-medium">No MT5 master connected</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {robot ? "Connect Botvio Robot's MT5 master account first. It will start inactive in DEMO mode." : "Connect the provider's MT5 master account first. It will start inactive in DEMO mode."}
+              {robot ? (hasDuplicateProviderMaster ? "This MT5 account is already registered as a Provider master. Use that existing master instead of registering the same account again." : "Connect Botvio Robot's MT5 master account first. It will start inactive in DEMO mode.") : "Connect the provider's MT5 master account first. It will start inactive in DEMO mode."}
             </p>
           </div>
         )}
