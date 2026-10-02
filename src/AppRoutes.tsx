@@ -85,6 +85,7 @@ import NewsSEOPage from "./pages/NewsSEOPage";
 import DubaiTradingGuide from "./pages/DubaiTradingGuide";
 import ArabicDubaiTradingGuide from "./pages/ArabicDubaiTradingGuide";
 import ArabicDubaiBlogPost from "./pages/ArabicDubaiBlogPost";
+import LocalizedMarketPage from "./pages/LocalizedMarketPage";
 import OptionsTradingHub from "./pages/OptionsTradingHub";
 import DubaiTradingTools from "./pages/DubaiTradingTools";
 import SyntheticIndicesGuideHub from "./pages/SyntheticIndicesGuideHub";
@@ -365,6 +366,7 @@ export const AppRoutes = () => {
     <Route path="blog" element={<Blog />} />
     <Route path="ar/dubai" element={<ArabicDubaiTradingGuide />} />
     <Route path="ar/blog/:slug" element={<ArabicDubaiBlogPost />} />
+    <Route path="markets/:country" element={<LocalizedMarketPage />} />
     <Route path="dubai" element={<DubaiTradingGuide />} />
     <Route path="dubai/tools" element={<DubaiTradingTools />} />
     <Route path="synthetic-indices" element={<SyntheticIndicesGuideHub />} />
