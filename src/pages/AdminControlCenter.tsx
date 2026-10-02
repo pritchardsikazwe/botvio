@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { PaymentRequestsPanel } from "@/components/admin/PaymentRequestsPanel";
+import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
 import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Globe2, LayoutDashboard, Mail, Menu, MoreVertical, RefreshCw, Search, Send, Settings, ShieldCheck, Signal, Sparkles, TrendingUp, UserCheck, Users, WalletCards, Phone } from "lucide-react";
 
 type AdminUser = { user_id:string; email:string|null; display_name:string|null; country:string|null; whatsapp_number:string|null; created_at:string|null; plan:string; status:"Active"|"Inactive"; online:boolean; last_seen_at:string|null; current_path:string|null; device_type:string|null };
@@ -97,7 +98,7 @@ export default function AdminControlCenter(){
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Content & SEO</p>
         {[[FileText,"Blog & Articles","/blog"],[Globe2,"Pages","/"],[Sparkles,"SEO Settings","/admin"]].map(([I,l,path])=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">System</p>
-        {[[BarChart3,"Analytics","/admin"],[Settings,"Settings","/settings"]].map(([I,l,path])=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        {[[BarChart3,"Analytics",()=>document.getElementById("analytics-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Settings,"Settings",()=>navigate("/settings")]].map(([I,l,path])=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
       </nav></ScrollArea>
       <div className="p-4 border-t border-white/10 text-xs text-slate-400">{user?.email||"Admin"}<div className="text-slate-600">Super Admin</div></div>
     </aside>
@@ -123,7 +124,7 @@ export default function AdminControlCenter(){
     </div>}
     <main className="flex-1 min-w-0">
       <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden" onClick={()=>setMobileMenuOpen(true)} aria-label="Open admin menu"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon"><Bell/></Button><Button variant="ghost" size="icon"><Settings/></Button></header>
-      <div className="p-4 lg:p-7 space-y-6 max-w-[1600px] mx-auto">
+      <div className="p-4 lg:p-7 space-y-6 max-w-[1600px] mx-auto">\n        <AdminAnalyticsPanel />
         <div className="flex justify-between items-start"><div><h1 className="text-3xl font-bold">Dashboard</h1><p className="text-muted-foreground">Manage Botvio users, promotions and platform activity.</p></div><Button variant="outline" onClick={loadUsers}><RefreshCw className="h-4 w-4 mr-2"/>Refresh</Button></div>
         <div className="grid grid-cols-2 xl:grid-cols-6 gap-4"><Stat label="Total Users" value={users.length} icon={<Users/>}/><Stat label="Active Users" value={users.filter(u=>u.status==="Active").length} icon={<UserCheck/>}/><Stat label="Online Now" value={onlineCount} icon={<Activity/>}/><Stat label="Missing WhatsApp" value={users.filter(u=>!u.whatsapp_number?.trim()).length} icon={<Phone/>}/><Stat label="Premium Users" value={users.filter(u=>u.plan.toLowerCase()!=="free").length} icon={<Sparkles/>}/><Stat label="Live Signals" value="Online" icon={<Signal/>}/><Stat label="AI Bots" value="Online" icon={<Bot/>}/><Stat label="Selected" value={selected.length} icon={<Send/>}/></div>
 
