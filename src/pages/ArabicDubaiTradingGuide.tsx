@@ -13,6 +13,7 @@ export default function ArabicDubaiTradingGuide() {
       <SEOHead
         title="التداول في دبي | المؤشرات الاصطناعية وDeriv وMT5 والفوركس والذهب"
         description="دليل Botvio العربي لمتداولي دبي والإمارات: المؤشرات الاصطناعية، مؤشرات Derived، Volatility، Boom وCrash، Deriv MT5، الفوركس والذهب وإدارة المخاطر."\n        canonicalUrlOverride={canonical}
+        alternateLocales={[{ code: "ar-AE", href: canonical }, { code: "en", href: "https://botvio.live/dubai" }]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
