@@ -353,9 +353,7 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
     }
 
     case "attach_market_feed": {
-      const p = z.object({
-        account_id: z.string().uuid(),
-      }).parse(body);
+      const p = z.object({ account_id: z.string().uuid() }).parse(body);
       const acct = await loadAccount(ctx, p.account_id);
       if (String(acct.broker ?? "").trim().toLowerCase() !== "weltrade") {
         throw new TradeCopyError("Market feed attachment is currently enabled for Weltrade MT5 accounts only", "validation");
@@ -364,28 +362,97 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
         throw new TradeCopyError("Connect the Weltrade MT5 follower to TradeCopy before attaching its market feed", "validation");
       }
 
-      // Keep the Weltrade feed completely separate from the existing Deriv tick
-      // engine. TradeCopy is the broker data boundary for this account.
-      const symbols = await adapter.getAllSymbols(acct.tradecopy_user_id);
-      const safeSymbols = redact(symbols);
-      const { data: feed, error } = await admin.from("broker_market_feeds").upsert({
+      // Weltrade data is deliberately separated from the existing Deriv tick
+      // engine. TradeCopy remains the execution/copy layer; the existing
+      // SyntX API Studio remains the native Weltrade MT5 quote/history layer.
+      const password = await getPassword(ctx, acct.id);
+      const apiKey = Deno.env.get("MT5_API_STUDIO_API_KEY") || Deno.env.get("TRADECOPY_API_KEY");
+      const base = (Deno.env.get("MT5_API_STUDIO_BASE_URL") || "https://mt5full3.mtapi.io").replace(/\/+$/, "");
+      if (!apiKey) throw new TradeCopyError("Weltrade market-data API is not configured", "config", 503);
+
+      const { data: existingFeed } = await admin.from("syntx_api_connections")
+        .select("id,session_id")
+        .eq("user_id", ctx.userId)
+        .eq("login", String(acct.login_id))
+        .eq("server", String(acct.server))
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      let session = existingFeed?.session_id ? String(existingFeed.session_id) : crypto.randomUUID();
+      const callStudio = async (path: string, query: Record<string, string | number | undefined>) => {
+        const url = new URL(base + path);
+        for (const [key, value] of Object.entries(query)) if (value !== undefined) url.searchParams.set(key, String(value));
+        const res = await fetch(url, {
+          headers: { ApiKey: apiKey, Accept: "application/json, text/plain" },
+          signal: AbortSignal.timeout(20000),
+        });
+        const raw = await res.text();
+        let data: unknown = raw;
+        try { data = JSON.parse(raw); } catch { /* plain text */ }
+        if (!res.ok) throw new TradeCopyError(`Weltrade market-data API ${res.status}`, "upstream", 502);
+        return data;
+      };
+
+      if (!existingFeed?.session_id) {
+        const connected = await callStudio("/ConnectEx", {
+          user: String(acct.login_id),
+          password,
+          server: String(acct.server),
+          id: session,
+          connectTimeoutSeconds: 60,
+          connectTimeoutClusterMemberSeconds: 20,
+        });
+        session = typeof connected === "string" ? connected.replace(/"/g, "") : session;
+      }
+
+      const rawSymbols = await callStudio("/Symbols", { id: session });
+      const raw = rawSymbols && typeof rawSymbols === "object" ? (rawSymbols as Record<string, unknown>) : rawSymbols;
+      const symbolsValue = raw && typeof raw === "object" && Array.isArray((raw as Record<string, unknown>).data)
+        ? (raw as Record<string, unknown>).data
+        : raw;
+      const symbols = Array.isArray(symbolsValue)
+        ? symbolsValue.map((x) => typeof x === "string" ? x : String((x as Record<string, unknown>)?.symbol ?? (x as Record<string, unknown>)?.name ?? "")).filter(Boolean)
+        : [];
+
+      const encKey = Deno.env.get("TOKEN_ENCRYPTION_KEY");
+      if (!encKey) throw new TradeCopyError("Secure credential storage is not configured", "config", 500);
+      const encrypted = await encryptSecret(password, encKey);
+      const { error: connError } = await admin.from("syntx_api_connections").upsert({
+        user_id: ctx.userId,
+        login: String(acct.login_id),
+        broker: "Weltrade",
+        server: String(acct.server),
+        environment: acct.environment,
+        password_encrypted: encrypted,
+        session_id: session,
+        connection_status: "connected",
+        last_error: null,
+        last_connected_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id,login,server" });
+      if (connError) throw new TradeCopyError(connError.message, "validation");
+
+      const { data: feed, error: feedError } = await admin.from("broker_market_feeds").upsert({
         user_id: ctx.userId,
         trading_account_id: acct.id,
         broker: "Weltrade",
         platform: "MT5",
-        feed_provider: "tradecopy_api",
+        feed_provider: "syntx_api_studio",
         status: "attached",
-        symbols: safeSymbols as never,
+        symbols: symbols as never,
         metadata: {
-          source: "Weltrade MT5 account via TradeCopy API",
-          purpose: "Weltrade-native data/tick source for Botvio broker-aware strategies",
+          source: "Weltrade SyntX MT5 via existing SyntX API Studio",
+          execution: "TradeCopy API",
+          quotes: "/GetQuote",
+          history: "/PriceHistory",
           deriv_engine_untouched: true,
-          quotes_endpoint: "pending_tradecopy_market_data_adapter",
         },
         updated_at: new Date().toISOString(),
       }, { onConflict: "trading_account_id" }).select("id,status,symbols,metadata,last_quote_at,updated_at").single();
-      if (error) throw new TradeCopyError(error.message, "validation");
-      return { data: { feed }, accountId: acct.id };
+      if (feedError) throw new TradeCopyError(feedError.message, "validation");
+
+      return { data: { feed, connected: true, symbolCount: symbols.length }, accountId: acct.id };
     }
 
     case "discover_symbols": {
