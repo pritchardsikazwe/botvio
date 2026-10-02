@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBots, useBotInstances, useTradingAccounts, useCreateBotInstance, useUpdateBotInstance } from "@/hooks/useBotvio";
-import { useHasProductType, useEntitlements } from "@/hooks/useEntitlements";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,13 +34,12 @@ const RISK: Record<Risk, { label: string; description: string; risk: number; los
 const Bots = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: bots, isLoading: botsLoading } = useBots();
+  const { data: bots } = useBots();
   const { data: instances, isLoading: instancesLoading } = useBotInstances();
   const { data: accounts } = useTradingAccounts();
   const createInstance = useCreateBotInstance();
   const updateInstance = useUpdateBotInstance();
   const { data: entitlements } = useEntitlements();
-  useHasProductType("bot");
 
   const [step, setStep] = useState(1);
   const [market, setMarket] = useState<Market>("synthetic");
