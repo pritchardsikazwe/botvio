@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Activity, Bell, CalendarDays, Globe2, Radio, ScanSearch, Settings2, ShieldAlert, Sparkles, Target, Timer, TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
@@ -75,6 +76,15 @@ const NewsTraderHub = () => {
   const selectedDisplaySymbol = selected.name;
   const sessionSignal = useDerivLiveSignal(selectedDisplaySymbol, 300);
   const liveNewsSignal = useDerivLiveSignal(selectedDisplaySymbol, 60);
+  // Keep the hub connected to the same live Deriv signal engine for every market shown below.
+  const liveXau = useDerivLiveSignal("XAU/USD", 300);
+  const liveEur = useDerivLiveSignal("EUR/USD", 300);
+  const liveGbp = useDerivLiveSignal("GBP/USD", 300);
+  const liveJpy = useDerivLiveSignal("USD/JPY", 300);
+  const liveUs500 = useDerivLiveSignal("US500", 300);
+  const liveNas = useDerivLiveSignal("NAS100", 300);
+  const liveVol75 = useDerivLiveSignal("Vol75", 300);
+  const liveBoom500 = useDerivLiveSignal("Boom500", 300);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -92,8 +102,12 @@ const NewsTraderHub = () => {
   const recentNews = timedEvents.find(({ ms }) => ms < -15 * 60 * 1000 && ms >= -30 * 60 * 1000)?.event;
   const nearestEvent = timedEvents.filter(({ ms }) => ms >= -30 * 60 * 1000).sort((a,b) => Math.abs(a.ms)-Math.abs(b.ms))[0]?.event;
   const automaticPhase: ScanPhase = activeNews ? (new Date(activeNews.time_utc!).getTime() <= now ? "live" : "pre") : upcomingWithin3h ? "pre" : recentNews ? "post" : "pre";
-  const nextEvent = upcomingEvents[0];
-  const nextEventMinutes = nextEvent?.time_utc ? Math.max(0, Math.round((new Date(nextEvent.time_utc).getTime() - now) / 60000)) : null;
+  const nextEvent = timedEvents
+    .filter(({ ms }) => ms >= 0)
+    .sort((a, b) => a.ms - b.ms)[0]?.event ?? upcomingEvents[0];
+  const nextEventMinutes = nextEvent?.time_utc
+    ? Math.max(0, Math.round((new Date(nextEvent.time_utc).getTime() - now) / 60000))
+    : null;
   const scanLabel = phase === "pre" ? "PRE-NEWS SCAN" : phase === "live" ? "LIVE NEWS SCAN" : "POST-NEWS SCAN";
   const scanDescription = phase === "pre" ? "Scanning 30–180 minutes before major releases for levels and setups." : phase === "live" ? "Fast reaction mode: monitoring breakout, rejection and momentum changes." : "Scanning for continuation, pullback and reversal after the first move.";
   useEffect(() => {
@@ -109,7 +123,20 @@ const NewsTraderHub = () => {
   const setupSl = price && liveDirection === "BUY" ? price - distance : price && liveDirection === "SELL" ? price + distance : null;
   const setupTp1 = price && liveDirection === "BUY" ? price + distance : price && liveDirection === "SELL" ? price - distance : null;
   const setupTp2 = price && liveDirection === "BUY" ? price + distance * 2 : price && liveDirection === "SELL" ? price - distance * 2 : null;
-  const fmt = (v: number | null) => v == null ? "Waiting for price" : v.toLocaleString(undefined, { maximumFractionDigits: selectedMarket === "XAUUSD" ? 2 : 5 });
+  const fmt = (v: number | null, symbol = selectedMarket) => v == null ? "Waiting for price" : v.toLocaleString(undefined, { maximumFractionDigits: symbol === "XAUUSD" ? 2 : 5 });
+  const liveSignalRows = [
+    ["XAUUSD", liveXau], ["EURUSD", liveEur], ["GBPUSD", liveGbp], ["USDJPY", liveJpy],
+    ["US500", liveUs500], ["NAS100", liveNas], ["Vol75", liveVol75], ["Boom500", liveBoom500],
+  ].map(([market, signal]) => {
+    const s = signal as ReturnType<typeof useDerivLiveSignal>;
+    const direction = s.signal === "BUY" || s.signal === "SELL" ? s.signal : "WAIT";
+    const p = s.lastPrice;
+    const d = market === "XAUUSD" ? Math.max((p ?? 0) * 0.0008, 0.8) : String(market).includes("USD") ? Math.max((p ?? 0) * 0.0007, 0.0005) : Math.max((p ?? 0) * 0.002, 5);
+    const sl = direction === "BUY" && p != null ? p - d : direction === "SELL" && p != null ? p + d : null;
+    const tp1 = direction === "BUY" && p != null ? p + d : direction === "SELL" && p != null ? p - d : null;
+    const tp2 = direction === "BUY" && p != null ? p + d * 2 : direction === "SELL" && p != null ? p - d * 2 : null;
+    return { market, signal: s, direction, entry: p, sl, tp1, tp2 };
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -207,7 +234,7 @@ const NewsTraderHub = () => {
 
         <section className="grid gap-5 lg:grid-cols-[1fr_1.3fr]">
           <Card className="border-border/50 bg-card/80"><CardHeader><CardTitle className="flex items-center gap-2 text-base"><ScanSearch className="h-4 w-4 text-success" /> AI Opportunity Scanner</CardTitle></CardHeader><CardContent className="overflow-x-auto p-0"><table className="w-full text-xs"><thead><tr className="border-b border-border/40 text-left text-muted-foreground"><th className="px-4 py-3">Market</th><th>Pre-News Bias</th><th>Session Bias</th><th>Setup</th><th>Strength</th></tr></thead><tbody>{MARKETS.map(m => <tr key={m.symbol} className="border-b border-border/30"><td className="px-4 py-3 font-bold">{m.name}</td><td className={m.bias === "Bearish" ? "text-destructive" : "text-success"}>{m.bias}</td><td className="text-success">Bullish</td><td><span className="mr-2 inline-block h-2 w-2 rounded-full bg-success" />{m.status}</td><td className="font-mono text-primary">{"★".repeat(Math.round(m.strength / 20))}{"☆".repeat(5 - Math.round(m.strength / 20))}</td></tr>)}</tbody></table></CardContent></Card>
-          <Card className="border-border/50 bg-card/80"><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Zap className="h-4 w-4 text-primary" /> Live Trade Signals</CardTitle></CardHeader><CardContent className="overflow-x-auto p-0"><table className="w-full text-xs"><thead><tr className="border-b border-border/40 text-left text-muted-foreground"><th className="px-4 py-3">Time</th><th>Market</th><th>Direction</th><th>Entry</th><th>TP1</th><th>TP2</th><th>SL</th><th>Phase</th><th>Conf.</th></tr></thead><tbody>{SIGNALS.map(s => <tr key={s.time+s.market} className="border-b border-border/30"><td className="px-4 py-3 font-mono">{s.time}</td><td className="font-bold">{s.market}</td><td className={s.direction === "BUY" ? "font-black text-success" : "font-black text-destructive"}>{s.direction === "BUY" ? <TrendingUp className="mr-1 inline h-3 w-3" /> : <TrendingDown className="mr-1 inline h-3 w-3" />}{s.direction}</td><td className="font-mono">{s.entry}</td><td className="font-mono text-success">{s.tp1}</td><td className="font-mono text-success">{s.tp2}</td><td className="font-mono text-destructive">{s.sl}</td><td><Badge variant="outline" className="text-[9px]">{s.phase}</Badge></td><td className="font-mono">{s.confidence}%</td></tr>)}</tbody></table></CardContent></Card>
+          <Card className="border-border/50 bg-card/80"><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Zap className="h-4 w-4 text-primary" /> Live Trade Signals</CardTitle></CardHeader><CardContent className="overflow-x-auto p-0"><table className="w-full text-xs"><thead><tr className="border-b border-border/40 text-left text-muted-foreground"><th className="px-4 py-3">Time</th><th>Market</th><th>Direction</th><th>Entry</th><th>TP1</th><th>TP2</th><th>SL</th><th>Phase</th><th>Conf.</th></tr></thead><tbody>{liveSignalRows.map(s => <tr key={s.market} className="border-b border-border/30"><td className="px-4 py-3 font-mono">{cat}</td><td className="font-bold">{s.market}</td><td className={s.direction === "BUY" ? "font-black text-success" : s.direction === "SELL" ? "font-black text-destructive" : "font-black text-muted-foreground"}>{s.direction === "BUY" ? <TrendingUp className="mr-1 inline h-3 w-3" /> : s.direction === "SELL" ? <TrendingDown className="mr-1 inline h-3 w-3" /> : null}{s.direction}</td><td className="font-mono">{fmt(s.entry, s.market)}</td><td className="font-mono text-success">{fmt(s.tp1, s.market)}</td><td className="font-mono text-success">{fmt(s.tp2, s.market)}</td><td className="font-mono text-destructive">{fmt(s.sl, s.market)}</td><td><Badge variant="outline" className="text-[9px]">{s.signal.connected ? (phase === "live" ? "Live News" : "Live") : "Waiting"}</Badge></td><td className="font-mono">{s.signal.connected && s.direction !== "WAIT" ? s.signal.confidence + "%" : "—"}</td></tr>)}</tbody></table></CardContent></Card>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
