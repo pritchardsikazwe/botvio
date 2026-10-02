@@ -16,6 +16,16 @@ const topics = [
   ["deriv-mt5-dubai-guide","How to Set Up Deriv MT5 in Dubai","A step-by-step guide to MT5 setup, account selection, charts and risk controls."],
   ["forex-trading-dubai-guide","Forex Trading in Dubai: Beginner's Guide","Learn the basics of majors, sessions, spreads, leverage and a practical trading routine."],
   ["gold-trading-dubai-guide","Gold XAUUSD Trading in Dubai: Beginner's Guide","A Dubai-time guide to XAUUSD sessions, volatility, macro events and risk management."],
+  ["volatility-25-trading-dubai","Volatility 25 Trading in Dubai","Research guide to Volatility 25, instrument selection, demo practice and risk planning."],
+  ["volatility-50-trading-dubai","Volatility 50 Trading in Dubai","A UAE research guide to disciplined Volatility 50 analysis and risk controls."],
+  ["volatility-100-trading-dubai","Volatility 100 Trading in Dubai","Understand Volatility 100 research, platform checks and position-risk planning."],
+  ["boom-500-trading-dubai","Boom 500 Trading in Dubai","Research spike behaviour, testing rules and risk controls."],
+  ["boom-1000-trading-dubai","Boom 1000 Trading in Dubai","Study spike research and disciplined execution without prediction claims."],
+  ["crash-500-trading-dubai","Crash 500 Trading in Dubai","Research downside-move frameworks, execution and risk."],
+  ["crash-1000-trading-dubai","Crash 1000 Trading in Dubai","A Dubai research guide to downside-move analysis and risk management."],
+  ["step-index-trading-dubai","Step Index Trading in Dubai","Learn a structured approach to Step Index research and demo practice."],
+  ["range-breakout-synthetic-dubai","Synthetic Indices Range Breakout Strategy in Dubai","An educational breakout framework with testing and risk rules."],
+  ["synthetic-indices-trend-following-dubai","Synthetic Indices Trend-Following Strategy in Dubai","A research framework for studying trend-following on synthetic markets."],
 ];
 
 export default function DubaiTradingGuide() {
