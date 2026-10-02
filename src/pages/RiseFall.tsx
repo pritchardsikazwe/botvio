@@ -59,6 +59,7 @@ export default function RiseFall() {
 
   // Bot
   const [botOn, setBotOn] = useState(false);
+  const [mode, setMode] = useState<"signals" | "auto">("signals");
   const [maxTrades, setMaxTrades] = useState(10);
   const [botTrades, setBotTrades] = useState(0);
   const [feedback, setFeedback] = useState<TradeFeedback>({ phase: "idle" });
@@ -280,7 +281,31 @@ export default function RiseFall() {
           </CardContent>
         </Card>
 
-        <h1 className="text-xl font-black tracking-tight">Deriv Rise / Fall</h1>
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-background to-success/5 overflow-hidden">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <Badge className="mb-2"><Sparkles className="mr-1 h-3 w-3" /> BOTVIO DERIV OPTIONS</Badge>
+                <h1 className="text-2xl md:text-3xl font-black tracking-tight">Rise / Fall</h1>
+                <p className="mt-1 text-xs text-muted-foreground">One simple workspace for your Deriv account: live signals, manual trading and automated execution.</p>
+              </div>
+              <Badge variant="outline" className={cn(isDerivConnected ? "border-success/40 text-success" : "border-warning/40 text-warning")}>{isDerivConnected ? "Connected" : "Connect account"}</Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[["1","Connect Deriv"],["2","Choose market"],["3","Trade or automate"]].map(([n,label]) => (
+                <div key={n} className="rounded-xl border bg-background/40 p-2 text-center">
+                  <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">{n}</span>
+                  <p className="mt-1 text-[10px] font-semibold">{label}</p>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant={mode === "signals" ? "default" : "outline"} onClick={() => { setMode("signals"); setBotOn(false); }} className="h-10 text-xs"><Sparkles className="mr-1 h-4 w-4" /> Signals</Button>
+              <Button variant={mode === "auto" ? "default" : "outline"} onClick={() => setMode("auto")} className="h-10 text-xs"><Bot className="mr-1 h-4 w-4" /> Automated</Button>
+            </div>
+            {!isDerivConnected && <Button asChild className="w-full"><Link to="/connections">Connect Deriv account</Link></Button>}
+          </CardContent>
+        </Card>
 
         {/* Symbol + price + chart */}
         <Card className="glass-card">
