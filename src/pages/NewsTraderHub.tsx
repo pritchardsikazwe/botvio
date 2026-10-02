@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Activity, Bell, CalendarDays, Globe2, Radio, ScanSearch, Settings2, ShieldAlert, Sparkles, Target, Timer, TrendingDown, TrendingUp, Zap } from "lucide-react";
@@ -30,13 +29,6 @@ const MARKETS = [
 
 
 
-const SIGNALS = [
-  { time: "07:28", market: "XAUUSD", direction: "BUY", entry: "2,346.20", tp1: "2,350.50", tp2: "2,354.00", sl: "2,344.00", phase: "Session", confidence: 82 },
-  { time: "07:25", market: "GBPUSD", direction: "SELL", entry: "1.2510", tp1: "1.2470", tp2: "1.2450", sl: "1.2535", phase: "Pre-News", confidence: 78 },
-  { time: "07:21", market: "EURUSD", direction: "BUY", entry: "1.0726", tp1: "1.0708", tp2: "1.0690", sl: "1.0738", phase: "Session", confidence: 75 },
-  { time: "07:18", market: "US500", direction: "BUY", entry: "5,482.0", tp1: "5,500.0", tp2: "5,512.0", sl: "5,470.0", phase: "Pre-News", confidence: 80 },
-  { time: "07:15", market: "BTCUSD", direction: "SELL", entry: "62,450", tp1: "61,800", tp2: "61,200", sl: "63,150", phase: "Session", confidence: 72 },
-];
 
 const sessions = [
   { name: "Sydney", time: "07:00–16:00", state: "Closed" },
