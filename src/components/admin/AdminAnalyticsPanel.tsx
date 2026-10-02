@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Users, Eye, Clock3, MousePointerClick, TrendingUp, Smartphone, Globe2, Funnel } from "lucide-react";
 
-type Summary={visitors:number;sessions:number;page_views:number;avg_pages_per_session:number;top_pages:{path:string;visits:number}[];sources:{source:string;visits:number}[];devices:{device:string;visits:number}[];funnel:Record<string,number>};
+type Summary={visitors:number;sessions:number;page_views:number;avg_pages_per_session:number;avg_session_seconds:number;top_pages:{path:string;visits:number}[];sources:{source:string;visits:number}[];devices:{device:string;visits:number}[];funnel:Record<string,number>};
 
 const labels:Record<string,string>={market_open:"Market opens",signal_view:"Signal views",ai_analysis_open:"AI analysis",signup_started:"Signup started",signup_completed:"Signups",connection_started:"Connections started",connection_connected:"Accounts connected",copy_started:"Copy starts",pricing_view:"Pricing views",payment_submitted:"Payments",subscription_activated:"Paid subscriptions"};
 
@@ -17,7 +17,7 @@ export function AdminAnalyticsPanel(){
  return <section id="analytics-panel" className="space-y-4">
   <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-black">Analytics</h2><p className="text-sm text-muted-foreground">First-party Botvio traffic, engagement and conversion funnel.</p></div><div className="flex gap-2"><div className="flex rounded-lg border bg-white p-1">{[7,30,90].map(n=><Button key={n} size="sm" variant={days===n?"default":"ghost"} onClick={()=>setDays(n)}>{n}d</Button>)}</div><Button variant="outline" size="icon" onClick={load}><RefreshCw className={loading?"h-4 w-4 animate-spin":"h-4 w-4"}/></Button></div></div>
   <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">{[
-   ["Visitors",data?.visitors||0,Users],["Sessions",data?.sessions||0,MousePointerClick],["Page Views",data?.page_views||0,Eye],["Views / Session",data?.avg_pages_per_session||0,TrendingUp]
+   ["Visitors",data?.visitors||0,Users],["Sessions",data?.sessions||0,MousePointerClick],["Page Views",data?.page_views||0,Eye],["Views / Session",data?.avg_pages_per_session||0,TrendingUp],["Avg Session",data?.avg_session_seconds?Math.round(data.avg_session_seconds/60)+"m":"0m",Clock3]
   ].map(([t,v,I])=><Stat key={t as string} title={t as string} value={v as any} icon={I as any}/>)}</div>
   <div className="grid xl:grid-cols-3 gap-4">
    <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><Globe2 className="h-4 w-4 text-primary"/>Top landing / visited pages</CardTitle></CardHeader><CardContent className="space-y-2">{(data?.top_pages||[]).slice(0,8).map((x,i)=><div key={x.path} className="flex justify-between text-xs"><span className="truncate max-w-[75%]"><Badge variant="outline" className="mr-2 text-[9px]">{i+1}</Badge>{x.path}</span><b>{x.visits}</b></div>)}</CardContent></Card>
