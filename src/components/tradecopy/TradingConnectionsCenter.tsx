@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Activity,
   ArrowRight,
   Bot,
   CheckCircle2,
@@ -69,7 +70,7 @@ export function TradingConnectionsCenter() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-4">
+      <div className="grid gap-4 lg:grid-cols-5">
         <Card className="glass-card border-primary/20">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
@@ -118,6 +119,21 @@ export function TradingConnectionsCenter() {
         <Card className="glass-card border-primary/20 bg-primary/5">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              <CardTitle className="text-sm">Weltrade SyntX Data</CardTitle>
+            </div>
+            <CardDescription>MT5 SyntX quotes and candles for Botvio charts and signals.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline" className="w-full">
+              <a href="#weltrade-syntx-data">Weltrade SyntX data <ArrowRight className="ml-2 h-4 w-4" /></a>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary" />
               <CardTitle className="text-sm">Botvio Robot</CardTitle>
             </div>
@@ -146,7 +162,7 @@ export function TradingConnectionsCenter() {
       <section id="follower-mt5" className="scroll-mt-6 space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-lg font-semibold">2. MT5 follower</h2>
+            <h2 className="text-lg font-semibold">3. MT5 follower</h2>
             <p className="text-sm text-muted-foreground">Connect the follower account, then choose Provider or Botvio Robot.</p>
           </div>
           <Badge variant="outline">TradeCopy Cloud</Badge>
@@ -157,7 +173,7 @@ export function TradingConnectionsCenter() {
       <section id="provider-mt5" className="scroll-mt-6 space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-lg font-semibold">3. MT5 provider master</h2>
+            <h2 className="text-lg font-semibold">4. MT5 provider master</h2>
             <p className="text-sm text-muted-foreground">Connect the exact MT5 account whose trades should be published to followers.</p>
           </div>
           <Badge variant="outline">Master</Badge>
@@ -169,7 +185,7 @@ export function TradingConnectionsCenter() {
         <section className="scroll-mt-6 space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
-              <h2 className="text-lg font-semibold">4. Botvio Robot master</h2>
+              <h2 className="text-lg font-semibold">5. Botvio Robot master</h2>
               <p className="text-sm text-muted-foreground">Admin-only control of the official Botvio MT5 execution source.</p>
             </div>
             <Badge variant="outline" className="border-primary/30 text-primary">ADMIN</Badge>
