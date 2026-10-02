@@ -1,28 +1,35 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  useBots, 
-  useBotInstances, 
-  useTradingAccounts, 
-  useCreateBotInstance, 
-  useUpdateBotInstance,
-} from "@/hooks/useBotvio";
+import { useBots, useBotInstances, useTradingAccounts, useCreateBotInstance, useUpdateBotInstance } from "@/hooks/useBotvio";
 import { useHasProductType, useEntitlements } from "@/hooks/useEntitlements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/trading/Header";
 import { useNavigate, Link } from "react-router-dom";
-import { Bot, Play, Pause, Square, Settings, Plus, Lock, Zap, TrendingUp, Shield } from "lucide-react";
+import { Bot, Play, Pause, Square, Settings2, ArrowRight, ShieldCheck, Sparkles, Zap, Bell, Eye, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
-import type { Bot as BotType } from "@/types/botvio";
 import { SEOHead } from "@/components/seo/SEOHead";
+
+type Mode = "auto" | "signals" | "watch";
+type Risk = "conservative" | "balanced" | "aggressive";
+type Market = "gold" | "forex" | "indices" | "crypto" | "synthetic";
+
+const MARKETS: { id: Market; label: string; sub: string }[] = [
+  { id: "gold", label: "Gold / XAUUSD", sub: "MT5" },
+  { id: "forex", label: "Forex", sub: "MT5" },
+  { id: "indices", label: "Indices", sub: "MT5" },
+  { id: "crypto", label: "Crypto", sub: "Broker / exchange" },
+  { id: "synthetic", label: "Synthetic Indices", sub: "Deriv" },
+];
+
+const RISK: Record<Risk, { label: string; description: string; risk: number; loss: number; trades: number }> = {
+  conservative: { label: "Conservative", description: "Lower exposure and tighter limits", risk: 0.5, loss: 2, trades: 2 },
+  balanced: { label: "Balanced", description: "Moderate exposure and limits", risk: 1, loss: 5, trades: 3 },
+  aggressive: { label: "Aggressive", description: "Higher exposure and limits", risk: 2, loss: 8, trades: 5 },
+};
 
 const Bots = () => {
   const { user } = useAuth();
@@ -33,476 +40,107 @@ const Bots = () => {
   const createInstance = useCreateBotInstance();
   const updateInstance = useUpdateBotInstance();
   const { data: entitlements } = useEntitlements();
-  const ownsAnyBot = useHasProductType("bot");
+  useHasProductType("bot");
 
-  const [selectedBot, setSelectedBot] = useState<BotType | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [activateForm, setActivateForm] = useState({
-    name: "",
-    trading_account_id: "",
-    markets: [] as string[],
-    risk_per_trade_percent: 1,
-    max_daily_loss_percent: 5,
-    max_open_trades: 3,
-    max_stake: 10,
-  });
+  const [step, setStep] = useState(1);
+  const [market, setMarket] = useState<Market>("synthetic");
+  const [mode, setMode] = useState<Mode>("signals");
+  const [risk, setRisk] = useState<Risk>("balanced");
+  const [accountId, setAccountId] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // No artificial limit — gate by product entitlement, not subscription tier
-  const currentInstanceCount = instances?.length || 0;
+  const selectedBot = useMemo(() => bots?.find((b: any) => b.code === "botvio") ?? bots?.[0] ?? null, [bots]);
+  const currentRisk = RISK[risk];
+  const demoAccounts = useMemo(() => (accounts ?? []).filter((a: any) => a.broker === "deriv"), [accounts]);
+  const selectedAccount = demoAccounts.find((a: any) => a.id === accountId) ?? demoAccounts[0];
 
-  // Check if user owns a specific bot product by matching bot code to product slug
-  const userOwnsBotProduct = (botCode: string): boolean => {
+  const userOwnsBotProduct = () => {
     if (!entitlements) return false;
-    return entitlements.some(e => e.products?.type === "bot" && e.status === "active");
+    return entitlements.some((e: any) => e.products?.type === "bot" && e.status === "active");
   };
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-2xl font-bold mb-4">Please sign in to view bots</h1>
-          <Button onClick={() => navigate("/")}>Go to Home</Button>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-background"><Header /><div className="container mx-auto px-4 py-16 text-center space-y-4"><Bot className="mx-auto h-14 w-14 text-primary" /><h1 className="text-2xl font-bold">Sign in to create an AI Bot</h1><Button onClick={() => navigate("/")}>Go to Home</Button></div></div>;
   }
 
-  const handleActivateBot = (bot: BotType) => {
-    if (bot.is_premium && !userOwnsBotProduct(bot.code)) {
-      toast.error("You need to purchase this bot first. Visit the Marketplace.");
-      navigate("/marketplace");
+  const finish = async () => {
+    if (!selectedBot) {
+      toast.error("Botvio AI is not available yet. Please try again shortly.");
       return;
     }
-
-    if (!accounts || accounts.length === 0) {
-      toast.error("Please connect a trading account first");
-      navigate("/accounts");
+    if (selectedBot.is_premium && !userOwnsBotProduct()) {
+      toast.error("Activate the required Botvio plan first.");
+      navigate("/billing");
       return;
     }
-
-    setSelectedBot(bot);
-    setActivateForm({
-      name: `${bot.name} Instance`,
-      trading_account_id: accounts[0]?.id || "",
-      markets: bot.default_markets || [],
-      risk_per_trade_percent: 1,
-      max_daily_loss_percent: 5,
-      max_open_trades: 3,
-      max_stake: 10,
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmitActivation = async () => {
-    if (!selectedBot || !activateForm.name || !activateForm.trading_account_id) {
-      toast.error("Please fill in all required fields");
+    if (!selectedAccount) {
+      toast.error("Connect a Deriv account first. MT5/CFD accounts are handled from normal MT5 connections.");
+      navigate("/connections");
       return;
     }
-
     try {
-      await createInstance.mutateAsync({
+      const created: any = await createInstance.mutateAsync({
         bot_id: selectedBot.id,
-        trading_account_id: activateForm.trading_account_id,
-        name: activateForm.name,
-        markets: activateForm.markets,
-        risk_per_trade_percent: activateForm.risk_per_trade_percent,
-        max_daily_loss_percent: activateForm.max_daily_loss_percent,
-        max_open_trades: activateForm.max_open_trades,
-        max_stake: activateForm.max_stake,
+        trading_account_id: selectedAccount.id,
+        name: "Botvio AI · " + (MARKETS.find((m) => m.id === market)?.label ?? "Trading"),
+        markets: market === "synthetic" ? ["Volatility 75 Index", "Boom/Crash"] : [MARKETS.find((m) => m.id === market)?.label ?? market],
+        risk_per_trade_percent: currentRisk.risk,
+        max_daily_loss_percent: currentRisk.loss,
+        max_open_trades: currentRisk.trades,
+        max_stake: 10,
+        config_json: {
+          onboarding_version: "2026",
+          mode,
+          risk_profile: risk,
+          market,
+          demo_first: true,
+          advanced_hidden_by_default: true,
+        },
       });
-
-      toast.success(`${selectedBot.name} activated successfully!`);
-      setIsDialogOpen(false);
-      setSelectedBot(null);
+      if (created?.id) await updateInstance.mutateAsync({ id: created.id, status: "paused" });
+      toast.success("AI Bot created in paused/demo-first mode.");
+      setStep(1);
+      setMode("signals");
+      setRisk("balanced");
+      setShowAdvanced(false);
     } catch (error: any) {
-      toast.error(error.message || "Failed to activate bot");
-    }
-  };
-
-  const handleToggleInstance = async (instanceId: string, currentStatus: string) => {
-    const newStatus = currentStatus === "active" ? "paused" : "active";
-    
-    try {
-      await updateInstance.mutateAsync({
-        id: instanceId,
-        status: newStatus,
-      });
-      toast.success(`Bot ${newStatus === "active" ? "started" : "paused"}`);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update bot");
-    }
-  };
-
-  const handleStopInstance = async (instanceId: string) => {
-    try {
-      await updateInstance.mutateAsync({
-        id: instanceId,
-        status: "stopped",
-      });
-      toast.success("Bot stopped");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to stop bot");
-    }
-  };
-
-  const getBotIcon = (code: string) => {
-    switch (code) {
-      case "botvio":
-        return <Zap className="h-6 w-6" />;
-      case "boom_crash_sniper":
-        return <TrendingUp className="h-6 w-6" />;
-      case "risk_guard":
-        return <Shield className="h-6 w-6" />;
-      default:
-        return <Bot className="h-6 w-6" />;
+      toast.error(error?.message || "Could not create the bot");
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead seoKey="bots"
-        title="AI Trading Bots – Automate Deriv & Binance Strategies"
-        description="Deploy AI-powered trading bots on Deriv and Binance. Automate Boom/Crash, Volatility indices, Digits, and crypto strategies with risk management and 24/7 execution."
-      />
+      <SEOHead seoKey="bots" title="Botvio AI Bots — Simple Automated Trading" description="Create one Botvio AI Bot and choose your market, trading mode and risk. Advanced strategy controls stay hidden until you need them." />
       <Header />
-      
-      <main className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">AI Trading Bots</h1>
-            <p className="text-muted-foreground">
-              Automated trading strategies for Deriv synthetic indices, forex & Binance crypto markets
-            </p>
+      <main className="container mx-auto max-w-5xl px-4 py-6 space-y-5">
+        <section className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-success/5 p-6 md:p-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <Badge className="mb-3"><Sparkles className="mr-1 h-3 w-3" /> BOTVIO AI</Badge>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight">AI BOTS</h1>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">One simple bot experience. Choose what you trade, how Botvio should work, and your risk. The underlying engines stay in place — Botvio selects the right one for you.</p>
+            </div>
+            <div className="rounded-2xl border bg-background/60 p-4 text-sm">
+              <div className="flex items-center gap-2 text-success font-semibold"><ShieldCheck className="h-4 w-4" /> Demo-first</div>
+              <p className="mt-1 text-xs text-muted-foreground">New bots are created paused. Start them only when you're ready.</p>
+            </div>
           </div>
-          <div className="text-right text-sm text-muted-foreground">
-            <p>{currentInstanceCount} bot instances active</p>
-          </div>
-        </div>
+          <div className="mt-6 grid grid-cols-4 gap-2">{["Market", "Mode", "Risk", "Review"].map((label, i) => <div key={label} className={"h-1.5 rounded-full transition-all " + (step > i ? "bg-primary" : "bg-muted")} />)}</div>
+          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">{["Market", "Mode", "Risk", "Review"].map((x) => <span key={x}>{x}</span>)}</div>
+        </section>
 
-        <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="marketplace">Bot Marketplace</TabsTrigger>
-            <TabsTrigger value="instances">My Bots ({instances?.length || 0})</TabsTrigger>
-          </TabsList>
+        {step === 1 && <Card className="glass-card"><CardHeader><CardTitle>1. What do you want to trade?</CardTitle><CardDescription>Botvio chooses the appropriate engine automatically.</CardDescription></CardHeader><CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">{MARKETS.map((m) => <button key={m.id} type="button" onClick={() => { setMarket(m.id); setStep(2); }} className={"rounded-2xl border p-4 text-left transition-all hover:border-primary/50 hover:-translate-y-0.5 " + (market === m.id ? "border-primary bg-primary/10" : "bg-background/40")}><div className="flex items-center justify-between"><span className="font-bold">{m.label}</span><Badge variant="outline">{m.sub}</Badge></div><p className="mt-2 text-xs text-muted-foreground">{m.id === "synthetic" ? "Volatility, Boom, Crash and other Deriv markets." : "Botvio manages the strategy layer; account connection stays simple."}</p></button>)}</CardContent></Card>}
 
-          <TabsContent value="marketplace">
-            {botsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Skeleton className="h-64" />
-                <Skeleton className="h-64" />
-                <Skeleton className="h-64" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {bots?.map((bot) => (
-                  <Card key={bot.id} className="glass-card hover:border-primary/50 transition-colors">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                            {getBotIcon(bot.code)}
-                          </div>
-                          <div>
-                            <CardTitle className="flex items-center gap-2">
-                              {bot.name}
-                              {bot.is_premium && (
-                                <Lock className="h-4 w-4 text-warning" />
-                              )}
-                            </CardTitle>
-                            <CardDescription>
-                              {bot.supported_brokers.join(" • ")}
-                            </CardDescription>
-                          </div>
-                        </div>
-                        {bot.is_premium && (
-                          <Badge variant="secondary" className="bg-warning/10 text-warning">
-                            Premium
-                          </Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {bot.short_description}
-                      </p>
+        {step === 2 && <Card className="glass-card"><CardHeader><CardTitle>2. How should Botvio work?</CardTitle><CardDescription>Keep it simple. You can change this later.</CardDescription></CardHeader><CardContent className="grid gap-3 md:grid-cols-3">{([["auto","Auto Trade","Botvio executes eligible trades.",Zap],["signals","Signals","Get Botvio's trade ideas without execution.",Bell],["watch","Watch","Analyse markets without placing trades.",Eye]] as const).map(([id,label,desc,Icon]) => <button key={id} type="button" onClick={() => { setMode(id); setStep(3); }} className={"rounded-2xl border p-5 text-left hover:border-primary/50 transition-all " + (mode === id ? "border-primary bg-primary/10" : "")}><Icon className="h-6 w-6 text-primary" /><h3 className="mt-3 font-bold">{label}</h3><p className="mt-1 text-xs text-muted-foreground">{desc}</p></button>)}</CardContent></Card>}
 
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {bot.default_markets.slice(0, 3).map((market) => (
-                          <Badge key={market} variant="outline" className="text-xs">
-                            {market}
-                          </Badge>
-                        ))}
-                        {bot.default_markets.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{bot.default_markets.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
+        {step === 3 && <Card className="glass-card"><CardHeader><CardTitle>3. Choose your risk</CardTitle><CardDescription>These are starting limits, not promises of performance.</CardDescription></CardHeader><CardContent className="space-y-4"><div className="grid gap-3 md:grid-cols-3">{(Object.keys(RISK) as Risk[]).map((id) => <button key={id} type="button" onClick={() => setRisk(id)} className={"rounded-2xl border p-5 text-left transition-all hover:border-primary/50 " + (risk === id ? "border-primary bg-primary/10" : "")}><div className="flex items-center justify-between"><span className="font-bold">{RISK[id].label}</span><TrendingUp className="h-4 w-4 text-primary" /></div><p className="mt-1 text-xs text-muted-foreground">{RISK[id].description}</p><p className="mt-3 text-xs">Risk/trade <b>{RISK[id].risk}%</b> · Daily limit <b>{RISK[id].loss}%</b></p></button>)}</div><div className="flex justify-between"><Button variant="ghost" onClick={() => setStep(2)}>Back</Button><Button onClick={() => setStep(4)}>Continue <ArrowRight className="ml-1 h-4 w-4" /></Button></div></CardContent></Card>}
 
-                      <Button
-                        className="w-full"
-                        onClick={() => handleActivateBot(bot)}
-                        disabled={bot.is_premium && !userOwnsBotProduct(bot.code)}
-                      >
-                        {bot.is_premium && !userOwnsBotProduct(bot.code) ? (
-                          <>
-                            <Lock className="mr-2 h-4 w-4" />
-                            Buy in Marketplace
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Activate Bot
-                          </>
-                        )}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+        {step === 4 && <Card className="glass-card"><CardHeader><CardTitle>4. Review & connect</CardTitle><CardDescription>We'll keep the new bot paused until you start it.</CardDescription></CardHeader><CardContent className="space-y-5"><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Market</p><p className="font-bold">{MARKETS.find((m) => m.id === market)?.label}</p></div><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Mode</p><p className="font-bold">{mode === "auto" ? "Auto Trade" : mode === "signals" ? "Signals" : "Watch"}</p></div><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Risk</p><p className="font-bold">{currentRisk.label}</p></div><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Account</p><p className="font-bold">{selectedAccount ? selectedAccount.label : "Not connected"}</p></div></div><div className="rounded-2xl border border-warning/30 bg-warning/5 p-4 text-xs text-muted-foreground">For Deriv Synthetic markets, connect your Deriv account below. Forex/Gold/Indices/CFD execution continues through normal MT5 account onboarding.</div><Select value={accountId || selectedAccount?.id || ""} onValueChange={setAccountId}><SelectTrigger><SelectValue placeholder="Select Deriv account" /></SelectTrigger><SelectContent>{demoAccounts.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.label}{a.login_id ? " · " + a.login_id : ""}</SelectItem>)}</SelectContent></Select><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => navigate("/connections")}>Connect account</Button><Button onClick={finish} disabled={createInstance.isPending}>{createInstance.isPending ? "Creating…" : "Create Demo Bot"}</Button></div><button type="button" className="text-xs text-muted-foreground underline" onClick={() => setShowAdvanced((v) => !v)}><Settings2 className="inline h-3 w-3 mr-1" /> {showAdvanced ? "Hide" : "Show"} advanced settings</button>{showAdvanced && <div className="rounded-2xl border bg-muted/20 p-4 text-xs text-muted-foreground space-y-1"><p>Advanced controls remain available through the bot instance settings.</p><p>Strategy engine, sessions, max trades, stop loss/take profit and symbol mapping are intentionally hidden from first-time setup.</p></div>}<div className="flex justify-between"><Button variant="ghost" onClick={() => setStep(3)}>Back</Button></div></CardContent></Card>}
 
-                {/* Affiliate CTA in Bot Marketplace */}
-                <Card className="glass-card border-dashed border-2 border-primary/30">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-warning/20 flex items-center justify-center mx-auto mb-4">
-                      <Zap className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Need a Trading Account?</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Create a Deriv account to trade with our automated bots. Get access to Volatility Indices, Boom/Crash, and more!
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      <a
-                        href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full"
-                      >
-                        <Button variant="gold" className="w-full">
-                          Open Deriv Account
-                        </Button>
-                      </a>
-                      <a
-                        href="https://one.exnesstrack.org/a/up2tpvqknx"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full"
-                      >
-                        <Button variant="outline" className="w-full">
-                          Open Exness Account
-                        </Button>
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </TabsContent>
+        <Card className="border-primary/10"><CardHeader><CardTitle className="text-sm">My Bots</CardTitle><CardDescription>Existing bot instances and their status.</CardDescription></CardHeader><CardContent>{instancesLoading ? <div className="space-y-2"><Skeleton className="h-16" /><Skeleton className="h-16" /></div> : instances && instances.length ? <div className="space-y-3">{instances.map((instance: any) => <div key={instance.id} className="rounded-2xl border p-4 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><div className={"h-2.5 w-2.5 rounded-full " + (instance.status === "active" ? "bg-success animate-pulse" : instance.status === "paused" ? "bg-warning" : "bg-muted-foreground")} /><div><p className="font-semibold">{instance.name}</p><p className="text-xs text-muted-foreground">{instance.bot?.name} · {instance.markets?.join(", ")}</p></div></div><div className="flex items-center gap-2"><Badge variant="outline">{instance.status}</Badge><Button variant="outline" size="icon" onClick={() => updateInstance.mutate({id: instance.id, status: instance.status === "active" ? "paused" : "active"})}>{instance.status === "active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}</Button><Button variant="outline" size="icon" onClick={() => updateInstance.mutate({id: instance.id, status: "stopped"})}><Square className="h-4 w-4" /></Button></div></div>)}</div> : <div className="py-8 text-center text-sm text-muted-foreground"><Bot className="mx-auto mb-3 h-10 w-10" />No bots yet. Start the 4-step setup above.</div>}</CardContent></Card>
 
-          <TabsContent value="instances">
-            {instancesLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-24" />
-                <Skeleton className="h-24" />
-              </div>
-            ) : instances && instances.length > 0 ? (
-              <div className="space-y-4">
-                {instances.map((instance) => (
-                  <Card key={instance.id} className="glass-card">
-                    <CardContent className="py-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-3 h-3 rounded-full ${
-                            instance.status === "active" ? "bg-success animate-pulse" :
-                            instance.status === "paused" ? "bg-warning" :
-                            "bg-muted-foreground"
-                          }`} />
-                          <div>
-                            <h3 className="font-semibold">{instance.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {instance.bot?.name} • {instance.markets?.join(", ")}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                          <div className="text-right text-sm">
-                            <p className="text-muted-foreground">Risk: {instance.risk_per_trade_percent}%</p>
-                            <p className="text-muted-foreground">Max Stake: ${instance.max_stake}</p>
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleToggleInstance(instance.id, instance.status)}
-                            >
-                              {instance.status === "active" ? (
-                                <Pause className="h-4 w-4" />
-                              ) : (
-                                <Play className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleStopInstance(instance.id)}
-                              disabled={instance.status === "stopped"}
-                            >
-                              <Square className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon">
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="glass-card">
-                <CardContent className="py-12 text-center">
-                  <Bot className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No bots activated</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Browse the marketplace and activate your first trading bot
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                    <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">
-                      <Button variant="gold">
-                        Create Deriv Account First
-                      </Button>
-                    </a>
-                    <Link to="/accounts">
-                      <Button variant="outline">
-                        Connect Existing Account
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+        <div className="flex flex-wrap gap-2"><Button variant="outline" asChild><Link to="/copy-trading"><span className="mr-2">👥</span> Copy Trading</Link></Button><Button variant="outline" asChild><Link to="/rise-fall"><Zap className="mr-2 h-4 w-4" /> Deriv Options</Link></Button></div>
       </main>
-
-      {/* Activate Bot Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Activate {selectedBot?.name}</DialogTitle>
-            <DialogDescription>
-              Configure your bot instance settings
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Instance Name</Label>
-              <Input
-                id="name"
-                value={activateForm.name}
-                onChange={(e) => setActivateForm({ ...activateForm, name: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Trading Account</Label>
-              <Select
-                value={activateForm.trading_account_id}
-                onValueChange={(v) => setActivateForm({ ...activateForm, trading_account_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accounts?.filter(a => 
-                    selectedBot?.supported_brokers.includes(a.broker)
-                  ).map((account) => (
-                    <SelectItem key={account.id} value={account.id}>
-                      {account.label} ({account.broker})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="risk">Risk per Trade (%)</Label>
-                <Input
-                  id="risk"
-                  type="number"
-                  min="0.1"
-                  max="10"
-                  step="0.1"
-                  value={activateForm.risk_per_trade_percent}
-                  onChange={(e) => setActivateForm({ 
-                    ...activateForm, 
-                    risk_per_trade_percent: parseFloat(e.target.value) || 1 
-                  })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="maxLoss">Max Daily Loss (%)</Label>
-                <Input
-                  id="maxLoss"
-                  type="number"
-                  min="1"
-                  max="50"
-                  value={activateForm.max_daily_loss_percent}
-                  onChange={(e) => setActivateForm({ 
-                    ...activateForm, 
-                    max_daily_loss_percent: parseFloat(e.target.value) || 5 
-                  })}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="maxTrades">Max Open Trades</Label>
-                <Input
-                  id="maxTrades"
-                  type="number"
-                  min="1"
-                  max="20"
-                  value={activateForm.max_open_trades}
-                  onChange={(e) => setActivateForm({ 
-                    ...activateForm, 
-                    max_open_trades: parseInt(e.target.value) || 3 
-                  })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="maxStake">Max Stake ($)</Label>
-                <Input
-                  id="maxStake"
-                  type="number"
-                  min="0.35"
-                  step="0.01"
-                  value={activateForm.max_stake}
-                  onChange={(e) => setActivateForm({ 
-                    ...activateForm, 
-                    max_stake: parseFloat(e.target.value) || 10 
-                  })}
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmitActivation} disabled={createInstance.isPending}>
-              {createInstance.isPending ? "Activating..." : "Activate Bot"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
