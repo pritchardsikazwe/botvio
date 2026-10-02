@@ -24,6 +24,7 @@ import Providers from "./pages/Providers";
 import CopyMarketplace from "./pages/copy/CopyMarketplace";
 import CopyProviderProfile from "./pages/copy/CopyProviderProfile";
 import CopyStart from "./pages/copy/CopyStart";
+import CopyTradingOnboarding from "./pages/copy/CopyTradingOnboarding";
 import { FollowerDashboard, ProviderCommandCenter, BotvioRobotDashboard, CopyTradingAdmin } from "./pages/copy/CopyControlCenter";
 import BecomeProvider from "./pages/copy/BecomeProvider";
 import Bots from "./pages/Bots";
@@ -200,6 +201,7 @@ export const AppRoutes = () => {
     <Route path="copy-trading" element={<CopyMarketplace />} />
     <Route path="copy-trading/provider/:providerId" element={<CopyProviderProfile />} />
     <Route path="copy-trading/start/:providerId" element={<CopyStart />} />
+    <Route path="copy-trading/onboarding" element={<CopyTradingOnboarding />} />
     <Route path="copy-trading/my" element={<FollowerDashboard />} />
     <Route path="copy-trading/become-provider" element={<BecomeProvider />} />
     <Route path="provider-dashboard" element={<ProviderCommandCenter />} />
