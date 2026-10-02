@@ -13,6 +13,7 @@ import { SiteFooterGate } from "@/components/SiteFooterGate";
 import { UpdateNotifier } from "@/components/UpdateNotifier";
 import { MobileBottomNav } from "@/components/nav/MobileBottomNav";
 import { WhatsAppProfileNotice } from "@/components/auth/WhatsAppProfileNotice";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 
 
 const queryClient = new QueryClient();
