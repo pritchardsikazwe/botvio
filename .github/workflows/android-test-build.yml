@@ -15,7 +15,7 @@ env:
 jobs:
   android:
     name: Android Test - ${{ matrix.name }}
-    runs-on: ubuntu-24.04
+    runs-on: windows-2025
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -56,16 +56,18 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Prepare app icon
+        shell: pwsh
         run: |
-          mkdir -p resources
-          cp public/icon-512.png resources/icon.png
+          New-Item -ItemType Directory -Force -Path resources | Out-Null
+          Copy-Item public/icon-512.png resources/icon.png -Force
 
       - name: Build focused web app
+        shell: pwsh
         run: |
-          cp index.mobile.html index.store.html
-          cp index.mobile.html index.html
+          Copy-Item index.mobile.html index.store.html -Force
+          Copy-Item index.mobile.html index.html -Force
           npx vite build --outDir dist --base ./
-          rm -f index.store.html
+          Remove-Item index.store.html -Force -ErrorAction SilentlyContinue
         env:
           VITE_STORE_BUILD: "true"
           VITE_STANDALONE_APP_ID: ${{ matrix.id }}
@@ -84,9 +86,10 @@ jobs:
           packages: 'platform-tools'
 
       - name: Install Android SDK 36
+        shell: pwsh
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          & sdkmanager --licenses
+          & sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
@@ -95,15 +98,21 @@ jobs:
           java-version: "21"
 
       - name: Prepare Gradle
-        run: chmod +x android/gradlew
+        shell: pwsh
+        run: |
+          if (Test-Path android/gradlew.bat) {
+            Write-Host "Gradle wrapper ready"
+          } else {
+            throw "android/gradlew.bat was not generated"
+          }
 
       - name: Build debug APK for phone testing
         working-directory: android
-        run: ./gradlew assembleDebug --stacktrace
+        run: .\gradlew.bat assembleDebug --stacktrace
 
       - name: Build release AAB
         working-directory: android
-        run: ./gradlew bundleRelease --stacktrace
+        run: .\gradlew.bat bundleRelease --stacktrace
 
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
