@@ -1,0 +1,13 @@
+import type { BlogIndexEntry } from "./blogIndex";
+export const DUBAI_EXPANDED_INDEX: BlogIndexEntry[] = [
+["volatility-25-trading-dubai","Volatility 25 Trading in Dubai: Research Guide for UAE Traders","A Dubai-focused research guide to Volatility 25, market selection, chart routines, risk planning and demo practice.","Dubai Trading","10 min"],
+["volatility-50-trading-dubai","Volatility 50 Trading in Dubai: UAE Research Guide","A practical Dubai guide to Volatility 50, disciplined sessions and strategy testing.","Dubai Trading","10 min"],
+["volatility-100-trading-dubai","Volatility 100 Trading in Dubai: Research and Risk Guide","A Dubai research guide to Volatility 100 covering market understanding, platform checks and risk controls.","Dubai Trading","10 min"],
+["boom-500-trading-dubai","Boom 500 Trading in Dubai: Research Guide and Risk Framework","An educational Dubai guide to Boom 500, spike research, risk planning and disciplined execution.","Dubai Trading","10 min"],
+["boom-1000-trading-dubai","Boom 1000 Trading in Dubai: Spike Research and Risk Guide","An educational Dubai guide to Boom 1000, spike research, execution discipline and risk controls.","Dubai Trading","10 min"],
+["crash-500-trading-dubai","Crash 500 Trading in Dubai: Research Guide for UAE Traders","A practical Dubai guide to Crash 500 covering downside-move research, risk controls and disciplined testing.","Dubai Trading","10 min"],
+["crash-1000-trading-dubai","Crash 1000 Trading in Dubai: Research and Risk Guide","A Dubai-focused Crash 1000 guide covering market understanding, downside-move research and risk management.","Dubai Trading","10 min"],
+["step-index-trading-dubai","Step Index Trading in Dubai: Beginner Research Guide","A Dubai guide to researching Step Index markets, building a chart routine and managing position risk.","Dubai Trading","9 min"],
+["range-breakout-synthetic-dubai","Synthetic Indices Range Breakout Strategy in Dubai: Research Framework","An educational range-breakout framework for Dubai synthetic-index traders, with testing rules and risk controls.","Dubai Trading","10 min"],
+["synthetic-indices-trend-following-dubai","Synthetic Indices Trend-Following Strategy in Dubai: Research Framework","A Dubai-focused educational framework for studying trend-following on synthetic indices.","Dubai Trading","10 min"],
+].map(([slug,title,excerpt,category,readTime],i)=>({slug,title,excerpt,category,readTime,date:"2026-10-02",featured:i<3,image:"🇦🇪"}));
