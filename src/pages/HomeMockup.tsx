@@ -13,7 +13,7 @@ import { useMarketSession } from "@/hooks/useMarketSession";
 import { Button } from "@/components/ui/button";
 import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 import { STANDALONE_APPS } from "@/config/standaloneApps";
-import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
+import { trackBotvioEvent } from "@/components/analytics/analytics";
 
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, ShieldCheck, Sparkles, Users } from "lucide-react";
