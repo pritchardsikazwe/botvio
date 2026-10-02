@@ -119,7 +119,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "best-boom-1000-strategy-using-botvio",
-    title: "Best Boom 1000 Strategy Using Botvio",
+    title: "Boom 1000 Trading Research Guide Using Botvio",
     excerpt: "Discover the most effective Boom 1000 strategy powered by Botvio's spike detection engine.",
     category: "Strategy",
     readTime: "12 min",
@@ -202,7 +202,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "best-gold-brokers-xauusd-trading",
-    title: "Best Gold Brokers for XAUUSD Trading in 2026",
+    title: "XAUUSD Broker Comparison for Gold Traders in 2026",
     excerpt: "Compare top gold brokers including Exness, Deriv & Weltrade. Find the best spreads and conditions for XAUUSD trading.",
     category: "Gold",
     readTime: "10 min",
@@ -386,7 +386,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "best-websites-to-make-money-online",
-    title: "Best Websites to Make Money Online in 2026 (Real & Trusted)",
+    title: "Online Trading Education & Platform Guide for 2026",
     excerpt: "The legit websites people are actually getting paid on in 2026 — trading, freelancing, micro-tasks, affiliate, and creator platforms.",
     category: "Earn Online",
     readTime: "12 min",
@@ -432,7 +432,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
 
   // ══════ SEO EXPANSION BATCH 2 — 19 new long-form articles ══════
-  { slug: "boom-500-strategy-botvio", title: "Best Boom 500 Strategy with Botvio (Spike Hunter Setup)", excerpt: "Trade Boom 500 like a pro using Botvio's spike-drought engine, tick filters and disciplined risk rules.", category: "Strategy", readTime: "10 min", date: "2026-06-10", image: "💥" },
+  { slug: "boom-500-strategy-botvio", title: "Boom 500 Trading Strategy with Botvio — Spike Research Framework", excerpt: "Trade Boom 500 like a pro using Botvio's spike-drought engine, tick filters and disciplined risk rules.", category: "Strategy", readTime: "10 min", date: "2026-06-10", image: "💥" },
   { slug: "crash-500-strategy-deep-dive", title: "Crash 500 Strategy Deep Dive — Catching the Drop", excerpt: "How to trade Crash 500 with Botvio: spike timing, lot sizing, and how to avoid the most common scalper traps.", category: "Strategy", readTime: "10 min", date: "2026-06-09", image: "📉" },
   { slug: "crash-1000-strategy-botvio", title: "Crash 1000 Strategy with Botvio — Patience Pays", excerpt: "A patience-first Crash 1000 strategy using Botvio's spike forecasting, stake control and structured exits.", category: "Strategy", readTime: "10 min", date: "2026-06-08", image: "💣" },
   { slug: "volatility-75-trading-strategy", title: "Volatility 75 (V75) Trading Strategy for 2026", excerpt: "Trend-trade V75 with EMA stacks, ATR-based stops and the Botvio risk filter that keeps drawdowns in check.", category: "Synthetic Indices", readTime: "11 min", date: "2026-06-07", image: "🌪️" },
@@ -518,7 +518,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "boom-1000-strategy-2026",
-    title: "Best Boom 1000 Strategy in 2026 — Proven Spike Detection",
+    title: "Boom 1000 Trading Strategy Research in 2026 — Spike Detection Explained",
     excerpt: "The most reliable Boom 1000 strategy in 2026: spike drought detection, entry rules, stake sizing and exit triggers used by Botvio.",
     category: "Strategy",
     readTime: "10 min",
@@ -528,7 +528,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "crash-500-strategy-2026",
-    title: "Best Crash 500 Strategy in 2026 — Spike Drought Mastery",
+    title: "Crash 500 Trading Strategy Research in 2026 — Understanding Spike Droughts",
     excerpt: "Crash 500 strategy that works: drought thresholds, multiplier sizing, when to fade vs trade with the spike.",
     category: "Strategy",
     readTime: "10 min",
@@ -538,7 +538,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "forex-signals-telegram-channel",
-    title: "Forex Signals on Telegram — Best Channels & How Botvio Delivers",
+    title: "Forex Signals on Telegram — How to Evaluate Channels & How Botvio Works",
     excerpt: "How forex signals work on Telegram, what to look for in a channel, and how Botvio pushes verified signals to your chat in real time.",
     category: "Signals",
     readTime: "8 min",
@@ -558,7 +558,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "best-forex-broker-zambia",
-    title: "Best Forex Broker in Zambia 2026 — Local Deposits, Mobile Money",
+    title: "Forex Broker Comparison in Zambia 2026 — Deposits, Mobile Money & Key Checks",
     excerpt: "Top forex brokers Zambian traders use in 2026 — comparing Exness, Deriv, Weltrade, FBS on mobile money deposits, ZMW conversion, support.",
     category: "Reviews",
     readTime: "9 min",
@@ -578,7 +578,7 @@ export const BLOG_INDEX: BlogIndexEntry[] = [
   },
   {
     slug: "ai-forex-trading-tools-2026",
-    title: "Best AI Forex Trading Tools in 2026",
+    title: "AI Forex Trading Tools in 2026 — Features, Limits & Evaluation Guide",
     excerpt: "Top AI tools for forex traders in 2026 — chart analysis, signal generation, copy trading, sentiment analysis. How Botvio compares.",
     category: "Tools",
     readTime: "9 min",
