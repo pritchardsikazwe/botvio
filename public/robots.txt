@@ -120,3 +120,5 @@ Sitemap: https://botvio.live/sitemap.xml
 Sitemap: https://botvio.live/sitemap-dubai.xml
 Sitemap: https://botvio.live/sitemap-saudi.xml
 Sitemap: https://botvio.live/sitemap-high-value.xml
+
+Sitemap: https://botvio.live/sitemap-localized-deep.xml
