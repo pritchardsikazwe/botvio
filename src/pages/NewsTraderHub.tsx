@@ -66,6 +66,7 @@ function nextLondonOpenCountdown() {
 const NewsTraderHub = () => {
   const [phase, setPhase] = useState<ScanPhase>("pre");
   const [autoScan, setAutoScan] = useState(true);
+  useEffect(() => { trackBotvioEvent("news_hub_open"); }, []);
   const [selectedMarket, setSelectedMarket] = useState("XAUUSD");
   const [cat, setCat] = useState(catTime());
   const [countdown, setCountdown] = useState(nextLondonOpenCountdown());
