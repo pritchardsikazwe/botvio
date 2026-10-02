@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowRight, BookOpen, Clock3, ShieldCheck } from "lucide-react";
+import { BookOpen, Clock3, ShieldCheck } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
@@ -79,9 +79,9 @@ export default function LocalizedMarketPage() {
                 <p className="text-xs font-semibold text-primary">{i + 1}</p>
                 <h3 className="mt-2 text-lg font-semibold">{topic}</h3>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                  {market.countryName}: {topic}. استخدم هذه الصفحة كمدخل تعليمي محلي، ثم راجع مواصفات المنتج والشروط الحالية قبل اتخاذ أي قرار.
+                  {copy.intro(market.countryName)}
                 </p>
-                <Button variant="outline" size="sm" className="mt-4 gap-1.5">{copy.start} <ArrowRight className="h-4 w-4" /></Button>
+                <p className="mt-4 text-xs font-medium text-primary">{copy.start} →</p>
               </article>
             ))}
           </div>
