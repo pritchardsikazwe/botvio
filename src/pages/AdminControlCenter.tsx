@@ -34,7 +34,7 @@ export default function AdminControlCenter(){
       const {data,error}=await (supabase as any).from("user_presence").select("user_id,last_seen_at,current_path,device_type");
       if(error) throw error;
       const cutoff=Date.now()-90000;
-      const presenceByUser=new Map((data||[]).map((p:any)=>[p.user_id,p]));
+      const presenceByUser=new Map<string, any>((data||[]).map((p:any)=>[p.user_id,p]));
       const merge=(list:AdminUser[])=>list.map(u=>{
         const p=presenceByUser.get(u.user_id);
         const lastSeen=p?.last_seen_at ? new Date(p.last_seen_at).getTime() : 0;
