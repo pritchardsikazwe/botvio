@@ -1519,4 +1519,12 @@
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
       </url>
+  <url><loc>https://botvio.live/economic-calendar</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/gold-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/forex-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/nfp-trading</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/cpi-trading</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/fomc-trading</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/usd-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/high-impact-news</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
 </urlset>
