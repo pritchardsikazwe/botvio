@@ -38,6 +38,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
 import { trackBotvioEvent } from "@/components/analytics/analytics";
+import { trackBotvioEvent } from "@/components/analytics/analytics";
 
 const CATEGORIES = [
   { value: "all", label: "All Markets" },
@@ -123,6 +124,8 @@ const Signals = () => {
 
   const isPremium = useHasProductType("signal_pack");
   const { permission, requestPermission } = usePushNotifications();
+
+  useEffect(() => { trackBotvioEvent("signals_open", { category, broker, tab: activeTab }); }, []);
 
   useEffect(() => {
     const channel = supabase
