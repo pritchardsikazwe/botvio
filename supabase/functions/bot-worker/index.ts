@@ -13,7 +13,24 @@ const corsHeaders = {
 // WebSocket via the standard `authorize` message, same as the REST Bearer flow
 // used by deriv-verify-token / deriv-get-otp.
 const DERIV_APP_ID = "33XSUutrVPDWusVXuDUwW";
-const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
+const DERIV_WS_URL = "wss://api.derivws.com/trading/v1/options/ws/public";
+
+const DERIV_SYMBOL_MAP: Record<string, string> = {
+  XAUUSD: "frxXAUUSD", "XAU/USD": "frxXAUUSD",
+  GBPUSD: "frxGBPUSD", "GBP/USD": "frxGBPUSD",
+  BTCUSD: "cryBTCUSD", "BTC/USD": "cryBTCUSD",
+  NAS100: "OTC_NDX", NASDAQ: "OTC_NDX",
+  US30: "OTC_DJI", SPX500: "OTC_SPC", GER40: "OTC_GDAXI",
+};
+
+function toDerivSymbol(symbol: string): string {
+  const raw = String(symbol || "").trim();
+  const key = raw.toUpperCase();
+  if (DERIV_SYMBOL_MAP[key]) return DERIV_SYMBOL_MAP[key];
+  if (raw.startsWith("frx") || raw.startsWith("cry") || raw.startsWith("OTC_") || raw.includes("_")) return raw;
+  if (/^[A-Z]{6}$/.test(key)) return `frx${key}`;
+  return raw;
+}
 
 interface TradingSignal {
   symbol: string;
@@ -78,7 +95,7 @@ async function fetchTickHistory(
       ws.onopen = () => {
         console.log(`[MarketData] Fetching ${count} ticks for ${symbol}`);
         ws.send(JSON.stringify({
-          ticks_history: symbol,
+          ticks_history: toDerivSymbol(symbol),
           adjust_start_time: 1,
           count: count,
           end: "latest",
@@ -152,7 +169,7 @@ async function fetchLiveTicks(
 
       ws.onopen = () => {
         ws.send(JSON.stringify({
-          ticks: symbol,
+          ticks: toDerivSymbol(symbol),
           subscribe: 1,
         }));
       };
