@@ -53,7 +53,6 @@ import DerivCallback from "./pages/DerivCallback";
 import StyleTrade from "./pages/StyleTrade";
 import Trading from "./pages/Trading";
 import ChartPage from "./pages/ChartPage";
-import TradeModes from "./pages/TradeModes";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogCategory from "./pages/BlogCategory";
@@ -116,8 +115,6 @@ import WeltradeHub from "./pages/WeltradeHub";
 import WeltradeTrade from "./pages/WeltradeTrade";
 import SyntheticHub from "./pages/SyntheticHub";
 import AutoTrade from "./pages/AutoTrade";
-import DerivOptions from "./pages/DerivOptions";
-import DerivApp from "./pages/DerivApp";
 import RiseFall from "./pages/RiseFall";
 import NewsCalendar from "./pages/NewsCalendar";
 import GlobalMarkets from "./pages/markets/GlobalMarkets";
@@ -340,9 +337,9 @@ export const AppRoutes = () => {
     <Route path="markets/asia" element={<AsiaMarket />} />
     <Route path="markets/crypto" element={<CryptoMarket />} />
     <Route path="markets/africa" element={<AfricaMarket />} />
-    <Route path="trade-modes" element={<Paid><TradeModes /></Paid>} />
-    <Route path="deriv-options" element={<Paid><DerivOptions /></Paid>} />
-    <Route path="deriv-app" element={<DerivApp />} />
+    <Route path="trade-modes" element={<Navigate to="/rise-fall" replace />} />
+    <Route path="deriv-options" element={<Navigate to="/rise-fall" replace />} />
+    <Route path="deriv-app" element={<Navigate to="/rise-fall" replace />} />
     <Route path="rise-fall" element={<StoreRestrictedRoute><RiseFall /></StoreRestrictedRoute>} />
     <Route path="binary-options" element={<Paid><BinaryOptions /></Paid>} />
     <Route path="brokers" element={<BrokersIndex />} />
