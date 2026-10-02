@@ -13,6 +13,7 @@ import { useMarketSession } from "@/hooks/useMarketSession";
 import { Button } from "@/components/ui/button";
 import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 import { STANDALONE_APPS } from "@/config/standaloneApps";
+import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
 
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -61,7 +62,7 @@ const HomeMockup = () => {
     return () => observer.disconnect();
   }, []);
 
-  const start = () => setAuthOpen(true);
+  const start = () => { trackBotvioEvent("signup_started", { source: "landing_cta" }); setAuthOpen(true); };
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -151,7 +152,7 @@ const HomeMockup = () => {
 
         <section className="border-b border-border/50 bg-card/10">
           <div className="container mx-auto px-4 py-4">
-            <Link to="/news-trader-hub" className="group flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 transition hover:border-primary/60 hover:bg-primary/10 sm:flex-row sm:items-center sm:justify-between">
+            <Link to="/news-trader-hub" onClick={() => trackBotvioEvent("news_hub_open")} className="group flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 transition hover:border-primary/60 hover:bg-primary/10 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary"><ScanSearch className="h-5 w-5" /></div>
                 <div>
