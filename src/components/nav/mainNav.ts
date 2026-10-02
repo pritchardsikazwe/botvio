@@ -2,7 +2,7 @@
 import {
   BarChart3, Bot, BookOpen, ChartCandlestick, Coins, GraduationCap, Layers,
   LineChart, Newspaper, ScanSearch, Shield, Signal, Sparkles, Users,
-  Zap, type LucideIcon,
+  Zap, Wrench, type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem {
@@ -39,7 +39,7 @@ export const PRIMARY_NAV: NavGroup[] = [
       { label: "Signals Center", to: "/signals", icon: Signal },
       { label: "Forex & CFD Signals", to: "/signals?market=forex", icon: LineChart },
       { label: "Synthetic Signals", to: "/signals?market=synthetics", icon: Layers },
-      { label: "Options Signals", to: "/rise-fall", icon: ChartCandlestick },
+      { label: "Options Hub & Signals", to: "/options", icon: ChartCandlestick },
       { label: "Signal History", to: "/signals/history", icon: Newspaper },
     ],
   },
@@ -62,9 +62,9 @@ export const PRIMARY_NAV: NavGroup[] = [
     ],
   },
   {
-    label: "DERIV", icon: Zap, to: "/rise-fall",
+    label: "DERIV", icon: Zap, to: "/options",
     items: [
-      { label: "Options", to: "/rise-fall", icon: ChartCandlestick, description: "Rise/Fall signals and automation" },
+      { label: "Options Hub", to: "/options", icon: ChartCandlestick, description: "Learn, signals and Deriv onboarding" },
       { label: "MT5 / CFDs", to: "/connections", icon: LineChart, description: "Normal MT5 account onboarding" },
       { label: "Synthetic Markets", to: "/synthetic", icon: Layers },
       { label: "Connect Deriv", to: "/connections", icon: Shield },
@@ -127,6 +127,6 @@ export const BOTTOM_NAV: NavItem[] = [
   { label: "Markets", to: "/markets", icon: ChartCandlestick },
   { label: "Signals", to: "/signals", icon: Signal },
   { label: "AI Bots", to: "/bots", icon: Bot },
-  { label: "DERIV", to: "/rise-fall", icon: Zap },
+  { label: "Options", to: "/options", icon: Zap },
   { label: "Learn", to: "/learn", icon: GraduationCap },
 ];
