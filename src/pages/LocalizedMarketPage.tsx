@@ -103,6 +103,7 @@ export default function LocalizedMarketPage() {
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="min-h-screen bg-background">
       <SEOHead title={market.title} description={market.description} canonicalUrlOverride={canonical}
+        alternateLocales={[{ code: market.hreflang, href: canonical }]}
         jsonLd={{"@context":"https://schema.org","@type":"CollectionPage",name:market.title,description:market.description,url:canonical,inLanguage:market.lang}} />
       <Header />
       <main className="container mx-auto px-4 py-8">
