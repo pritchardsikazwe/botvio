@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
 
 interface Profile {
   id: string;
@@ -278,7 +279,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    trackBotvioEvent("logout");\n    await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setProfile(null);
