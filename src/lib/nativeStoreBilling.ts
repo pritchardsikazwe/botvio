@@ -34,7 +34,7 @@ export async function configureNativeStoreBilling(userId?: string): Promise<bool
     });
   } else if (userId) {
     const current = await Purchases.getAppUserID();
-    if (current !== userId) {
+    if (current.appUserID !== userId) {
       await Purchases.logIn({ appUserID: userId });
     }
   }
