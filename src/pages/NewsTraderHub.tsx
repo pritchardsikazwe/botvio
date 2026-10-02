@@ -69,10 +69,10 @@ const NewsTraderHub = () => {
   const [cat, setCat] = useState(catTime());
   const [countdown, setCountdown] = useState(nextLondonOpenCountdown());
   const { events, loading: calendarLoading, error: calendarError, lastUpdated } = useEconomicCalendar(7);
+  const selected = MARKETS.find(m => m.symbol === selectedMarket) ?? MARKETS[0];
   const selectedDisplaySymbol = selected.name;
   const sessionSignal = useDerivLiveSignal(selectedDisplaySymbol, 300);
   const liveNewsSignal = useDerivLiveSignal(selectedDisplaySymbol, 60);
-  const selected = MARKETS.find(m => m.symbol === selectedMarket) ?? MARKETS[0];
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -86,8 +86,10 @@ const NewsTraderHub = () => {
   const upcomingEvents = events.filter(event => !event.time_utc || new Date(event.time_utc).getTime() >= now);
   const timedEvents = events.filter(event => event.time_utc).map(event => ({ event, ms: new Date(event.time_utc!).getTime() - now }));
   const activeNews = timedEvents.find(({ ms }) => ms <= 15 * 60 * 1000 && ms >= -30 * 60 * 1000)?.event;
+  const upcomingWithin3h = timedEvents.find(({ ms }) => ms > 15 * 60 * 1000 && ms <= 180 * 60 * 1000)?.event;
+  const recentNews = timedEvents.find(({ ms }) => ms < -15 * 60 * 1000 && ms >= -30 * 60 * 1000)?.event;
   const nearestEvent = timedEvents.filter(({ ms }) => ms >= -30 * 60 * 1000).sort((a,b) => Math.abs(a.ms)-Math.abs(b.ms))[0]?.event;
-  const automaticPhase: ScanPhase = activeNews ? (new Date(activeNews.time_utc!).getTime() <= now ? "live" : "pre") : "post";
+  const automaticPhase: ScanPhase = activeNews ? (new Date(activeNews.time_utc!).getTime() <= now ? "live" : "pre") : upcomingWithin3h ? "pre" : recentNews ? "post" : "pre";
   const nextEvent = upcomingEvents[0];
   const nextEventMinutes = nextEvent?.time_utc ? Math.max(0, Math.round((new Date(nextEvent.time_utc).getTime() - now) / 60000)) : null;
   const scanLabel = phase === "pre" ? "PRE-NEWS SCAN" : phase === "live" ? "LIVE NEWS SCAN" : "POST-NEWS SCAN";
