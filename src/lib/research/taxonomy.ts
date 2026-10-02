@@ -24,6 +24,14 @@ export interface ResearchTopic {
 
 export const RESEARCH_TOPICS: ResearchTopic[] = [
   {
+    slug: "dubai",
+    label: "Dubai & UAE",
+    categories: ["Dubai Trading", "Regional Guide"],
+    keywords: ["dubai", "uae", "united arab emirates", "abu dhabi", "gulf"],
+    description: "Dubai and UAE-focused trading research covering synthetic indices, Deriv, MT5, forex, gold and risk management.",
+    primary: true,
+  },
+  {
     slug: "forex",
     label: "Forex",
     categories: ["Forex", "Regional Guide"],
