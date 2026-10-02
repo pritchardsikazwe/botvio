@@ -7,11 +7,12 @@ import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGu
 import { DUBAI_BLOG_INDEX } from "@/content/dubaiBlogIndex";
 import { DUBAI_EXPANDED_INDEX } from "@/content/dubaiExpandedIndex";
 import { DUBAI_FINAL_INDEX } from "@/content/dubaiFinalPosts";
+import { DUBAI_ARABIC_INDEX } from "@/content/dubaiArabicPosts";
 
 const topics = [...DUBAI_BLOG_INDEX, ...DUBAI_EXPANDED_INDEX, ...DUBAI_FINAL_INDEX].map(({ slug, title, excerpt }) => [slug, title, excerpt] as const);
 
 export default function DubaiTradingGuide() {
-  return <div className="min-h-screen bg-background"><SEOHead title="Dubai Trading Guide — Synthetic Indices, Forex, Gold & MT5 | Botvio" description="Botvio's Dubai and UAE trading research hub: synthetic indices, Deriv, MT5, forex, gold, risk management and Arabic-ready educational content." jsonLd={{"@context":"https://schema.org","@type":"CollectionPage","name":"Dubai Trading Guide","url":"https://botvio.live/dubai","inLanguage":["en","ar"]}} /><Header /><main className="container mx-auto px-4 py-8">
+  return <div className="min-h-screen bg-background"><SEOHead title="Dubai Trading Guide — Synthetic Indices, Forex, Gold & MT5 | Botvio" alternateLocales={[{ code: "en", href: "https://botvio.live/dubai" }, { code: "ar-AE", href: "https://botvio.live/ar/dubai" }]} description="Botvio's Dubai and UAE trading research hub: synthetic indices, Deriv, MT5, forex, gold, risk management and Arabic-ready educational content." jsonLd={{"@context":"https://schema.org","@type":"CollectionPage","name":"Dubai Trading Guide","url":"https://botvio.live/dubai","inLanguage":["en","ar"]}} /><Header /><main className="container mx-auto px-4 py-8">
     <section className="rounded-3xl border border-border bg-card p-6 sm:p-10">
       <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary"><MapPinned className="h-4 w-4" /> Dubai & UAE research hub</div>
       <h1 className="mt-3 max-w-4xl text-3xl font-extrabold tracking-tight sm:text-5xl">Trading in Dubai: Synthetic Indices, Forex, Gold & MT5</h1>
