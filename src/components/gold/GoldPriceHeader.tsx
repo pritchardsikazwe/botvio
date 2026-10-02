@@ -1,33 +1,29 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 
 interface QuoteData {
   price: number;
   change_percent_24h: number;
 }
 
-async function fetchGoldQuote(): Promise<QuoteData | null> {
-  const { data, error } = await (supabase
-    .from("market_quotes") as any)
-    .select("price, change_percent_24h")
-    .eq("symbol", "XAUUSD")
-    .order("fetched_at", { ascending: false })
-    .limit(1)
-    .single();
-  if (error || !data) return null;
-  return data as QuoteData;
-}
-
+/**
+ * Live XAU/USD quote from Deriv's public market feed.
+ * This intentionally avoids the legacy market_quotes table, which is not
+ * required for the homepage/header and previously caused invalid-column errors.
+ */
 export function GoldPriceHeader() {
-  const { data: quote } = useQuery<QuoteData | null>({
-    queryKey: ["gold-hub-quote"],
-    queryFn: fetchGoldQuote,
-    refetchInterval: 15000,
-  });
+  const { tick, connected } = useDerivLiveTicks("XAU/USD");
+  const [previousPrice, setPreviousPrice] = useState<number | null>(null);
 
-  const price = quote?.price ?? 0;
-  const change = quote?.change_percent_24h ?? 0;
+  useEffect(() => {
+    if (tick?.price && previousPrice == null) setPreviousPrice(tick.price);
+  }, [tick?.price, previousPrice]);
+
+  const price = tick?.price ?? 0;
+  const change = previousPrice && previousPrice > 0
+    ? ((price - previousPrice) / previousPrice) * 100
+    : 0;
   const isUp = change >= 0;
 
   return (
@@ -41,7 +37,7 @@ export function GoldPriceHeader() {
       {price > 0 && (
         <div className={`flex items-center gap-1 text-sm font-bold ${isUp ? "text-success" : "text-destructive"}`}>
           {isUp ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-          {isUp ? "+" : ""}{change.toFixed(2)}%
+          {connected ? `${isUp ? "+" : ""}${change.toFixed(2)}%` : "Connecting…"}
         </div>
       )}
     </div>
