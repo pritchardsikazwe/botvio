@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
+import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
 
 const CATEGORIES = [
   { value: "all", label: "All Markets" },
