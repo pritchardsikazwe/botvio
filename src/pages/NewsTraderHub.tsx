@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 import { cn } from "@/lib/utils";
+import { eventCurrency, eventDateInCat, eventTimeInCat, useEconomicCalendar } from "@/hooks/useEconomicCalendar";
 
 type ScanPhase = "pre" | "live" | "post";
 
@@ -25,15 +26,7 @@ const MARKETS = [
   { symbol: "Boom500", name: "Boom 500", bias: "Bullish", status: "Watch", strength: 73 },
 ];
 
-const NEWS = [
-  { time: "10:00", currency: "GBP", event: "London Session Open", impact: "session", note: "Session scan starts" },
-  { time: "11:30", currency: "GBP", event: "Manufacturing PMI", impact: "high", note: "Momentum check" },
-  { time: "12:00", currency: "EUR", event: "CPI (YoY)", impact: "high", note: "Euro volatility" },
-  { time: "13:30", currency: "USD", event: "Non-Farm Payrolls (NFP)", impact: "high", note: "Fast-news mode" },
-  { time: "13:30", currency: "USD", event: "Unemployment Rate", impact: "high", note: "Confirm release" },
-  { time: "15:00", currency: "USD", event: "ISM Services PMI", impact: "medium", note: "Continuation scan" },
-  { time: "19:00", currency: "USD", event: "FOMC Member Speech", impact: "high", note: "Headline risk" },
-];
+
 
 const SIGNALS = [
   { time: "07:28", market: "XAUUSD", direction: "BUY", entry: "2,346.20", tp1: "2,350.50", tp2: "2,354.00", sl: "2,344.00", phase: "Session", confidence: 82 },
@@ -75,6 +68,7 @@ const NewsTraderHub = () => {
   const [selectedMarket, setSelectedMarket] = useState("XAUUSD");
   const [cat, setCat] = useState(catTime());
   const [countdown, setCountdown] = useState(nextLondonOpenCountdown());
+  const { events, loading: calendarLoading, error: calendarError, lastUpdated } = useEconomicCalendar(7);
   const gold = useDerivLiveSignal("XAU/USD", 300);
   const selected = MARKETS.find(m => m.symbol === selectedMarket) ?? MARKETS[0];
 
@@ -86,6 +80,10 @@ const NewsTraderHub = () => {
     return () => window.clearInterval(timer);
   }, []);
 
+  const now = Date.now();
+  const upcomingEvents = events.filter(event => !event.time_utc || new Date(event.time_utc).getTime() >= now);
+  const nextEvent = upcomingEvents[0];
+  const nextEventMinutes = nextEvent?.time_utc ? Math.max(0, Math.round((new Date(nextEvent.time_utc).getTime() - now) / 60000)) : null;
   const scanLabel = phase === "pre" ? "PRE-NEWS SCAN" : phase === "live" ? "LIVE NEWS SCAN" : "POST-NEWS SCAN";
   const scanDescription = phase === "pre" ? "Scanning 30–180 minutes before major releases for levels and setups." : phase === "live" ? "Fast reaction mode: monitoring breakout, rejection and momentum changes." : "Scanning for continuation, pullback and reversal after the first move.";
   const liveDirection = gold.signal === "BUY" || gold.signal === "SELL" ? gold.signal : "WAIT";
@@ -115,8 +113,15 @@ const NewsTraderHub = () => {
           <Card className="border-primary/20 bg-card/80">
             <CardContent className="flex h-full items-center gap-4 p-5">
               <div className="rounded-xl bg-primary/10 p-3 text-primary"><Zap className="h-7 w-7" /></div>
-              <div className="min-w-0 flex-1"><p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Next High Impact Event</p><h2 className="mt-1 truncate font-black">U.S. Non-Farm Payrolls (NFP)</h2><p className="text-xs text-muted-foreground">USD • High Impact • 13:30 CAT</p></div>
-              <div className="grid grid-cols-3 gap-1 text-center"><div className="rounded-lg border border-border/50 px-2 py-1"><b className="font-mono text-lg">02</b><span className="block text-[8px] text-muted-foreground">DAYS</span></div><div className="rounded-lg border border-border/50 px-2 py-1"><b className="font-mono text-lg">15</b><span className="block text-[8px] text-muted-foreground">HRS</span></div><div className="rounded-lg border border-border/50 px-2 py-1"><b className="font-mono text-lg">32</b><span className="block text-[8px] text-muted-foreground">MIN</span></div></div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Next High Impact Event</p>
+                <h2 className="mt-1 truncate font-black">{calendarLoading ? "Loading live calendar…" : nextEvent?.title || nextEvent?.name || "No high-impact event found"}</h2>
+                <p className="text-xs text-muted-foreground">{nextEvent ? eventCurrency(nextEvent) + " • HIGH IMPACT • " + eventTimeInCat(nextEvent) : calendarError || "Calendar is clear"}</p>
+              </div>
+              <div className="rounded-xl border border-border/50 bg-background/40 px-4 py-3 text-center">
+                <b className="font-mono text-xl text-primary">{nextEventMinutes != null ? nextEventMinutes + "m" : "—"}</b>
+                <span className="block text-[8px] uppercase text-muted-foreground">to event</span>
+              </div>
             </CardContent>
           </Card>
         </section>
@@ -134,12 +139,30 @@ const NewsTraderHub = () => {
           <Card className="border-success/30 bg-success/5"><CardContent className="flex h-full items-center justify-between gap-3 p-4"><div><p className="text-xs font-black">SESSION SCAN MODE</p><p className="mt-1 text-[11px] text-muted-foreground">Next: London Open at 10:00 CAT</p></div><Switch checked={autoScan} onCheckedChange={setAutoScan} /></CardContent></Card>
         </section>
 
-        <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm"><div className="flex flex-wrap items-center gap-3"><Radio className="h-4 w-4 text-primary" /><b>{scanLabel}</b><span className="text-muted-foreground">{scanDescription}</span><Badge variant="outline" className="ml-auto">{autoScan ? "Auto Scan ON" : "Manual Scan"}</Badge></div></div>
+        <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm"><div className="flex flex-wrap items-center gap-3"><Radio className="h-4 w-4 text-primary" /><b>{scanLabel}</b><span className="text-muted-foreground">{scanDescription}</span><Badge variant="outline" className="ml-auto">{autoScan ? "Auto Scan ON" : "Manual Scan"}</Badge><Badge variant="outline" className={calendarError ? "border-destructive/30 text-destructive" : "border-success/30 text-success"}>{calendarError ? "Calendar Offline" : calendarLoading ? "Calendar Loading" : "Live Calendar"}</Badge></div></div>
 
         <section className="grid gap-5 xl:grid-cols-[1fr_1.55fr_350px]">
           <Card className="border-border/50 bg-card/80">
             <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><CalendarDays className="h-4 w-4 text-primary" /> High Impact News Calendar</CardTitle></CardHeader>
-            <CardContent className="p-0"><div className="max-h-[510px] overflow-auto">{NEWS.map(n => <div key={n.time + n.event} className="border-t border-border/40 px-4 py-3 hover:bg-secondary/40"><div className="flex items-center gap-3"><span className="w-11 font-mono text-xs font-black">{n.time}</span><Badge variant="outline" className="w-12 justify-center text-[10px]">{n.currency}</Badge><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{n.event}</p><p className="text-[10px] text-muted-foreground">{n.note}</p></div><span className={cn("h-2.5 w-2.5 rounded-full", n.impact === "high" ? "bg-destructive" : n.impact === "medium" ? "bg-warning" : "bg-primary")} /></div></div>)}</div></CardContent>
+            <CardContent className="p-0">
+              <div className="max-h-[510px] overflow-auto">
+                {calendarLoading ? <div className="p-6 text-center text-xs text-muted-foreground">Loading live economic events…</div> :
+                  calendarError ? <div className="p-6 text-center text-xs text-destructive">{calendarError}</div> :
+                  upcomingEvents.length === 0 ? <div className="p-6 text-center text-xs text-muted-foreground">No upcoming high-impact events in the next 7 days.</div> :
+                  upcomingEvents.map((n, i) => <div key={(n.time_utc || n.date || "") + (n.title || n.name || "") + i} className="border-t border-border/40 px-4 py-3 hover:bg-secondary/40">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14"><span className="block font-mono text-xs font-black">{eventTimeInCat(n).replace(" CAT","")}</span><span className="text-[9px] text-muted-foreground">{eventDateInCat(n)}</span></div>
+                      <Badge variant="outline" className="w-12 justify-center text-[10px]">{eventCurrency(n)}</Badge>
+                      <div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{n.title || n.name}</p><p className="text-[10px] text-muted-foreground">{n.consensus ? "Forecast: " + n.consensus : "High-impact release"}{n.prior ? " • Prior: " + n.prior : ""}</p></div>
+                      <span className="h-2.5 w-2.5 rounded-full bg-destructive" />
+                    </div>
+                  </div>)
+                }
+              </div>
+              <div className="border-t border-border/40 px-4 py-2 text-[9px] text-muted-foreground">
+                Live economic calendar by <a className="text-primary hover:underline" href="https://www.financecalendar.com" target="_blank" rel="noreferrer">financecalendar.com</a>{lastUpdated ? " • refreshed " + lastUpdated.toLocaleTimeString() : ""}
+              </div>
+            </CardContent>
           </Card>
 
           <Card className="overflow-hidden border-border/50 bg-card/80">
