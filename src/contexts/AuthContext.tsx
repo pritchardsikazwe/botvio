@@ -281,7 +281,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    trackBotvioEvent("logout");\n    await supabase.auth.signOut();
+    trackBotvioEvent("logout");
+    await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setProfile(null);
