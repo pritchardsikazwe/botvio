@@ -3,7 +3,8 @@ import { BookOpen, Clock3, ShieldCheck } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
-import { LOCALIZED_MARKETS } from "@/content/localizedMarkets";
+import { LOCALIZED_MARKETS, type LocalizedMarket } from "@/content/localizedMarkets";
+import { countryToLanguage } from "@/i18n";
 
 const languageCopy: Record<string, {
   intro: (m: string) => string;
@@ -43,9 +44,56 @@ const languageCopy: Record<string, {
   en:{intro:m=>`This hub is written for traders in ${m}. Search terms, examples, timezone and market context are localized for the local audience rather than simply translated from the English site.`,education:"Learn first",risk:"Risk management",local:"Local context",start:"Start the guide",disclaimer:"Educational content only. Trading involves risk of loss. Check the provider's current terms and product availability before trading."},
 };
 
+
+
+const FALLBACK_LOCALIZED_TEXT: Record<string, { title:(country:string)=>string; description:(country:string)=>string; topics:string[] }> = {
+  en:{title:c=>`Trading in ${c}: Forex, Synthetic Indices, MT5 and Gold`,description:c=>`Localized trading education for traders in ${c}: forex, synthetic indices, MT5, gold XAUUSD and risk management.`,topics:["How to start trading","Synthetic indices guide","MT5 trading guide","Gold XAUUSD guide","Risk management"]},
+  pt:{title:c=>`Trading em ${c}: Forex, índices sintéticos, MT5 e ouro`,description:c=>`Guias de trading para ${c} sobre forex, índices sintéticos, MT5, ouro XAUUSD e gestão de risco.`,topics:["Como começar no trading","Guia de índices sintéticos","Guia de MT5","Guia de ouro XAUUSD","Gestão de risco"]},
+  es:{title:c=>`Trading en ${c}: Forex, índices sintéticos, MT5 y oro`,description:c=>`Guías de trading para ${c} sobre forex, índices sintéticos, MT5, oro XAUUSD y gestión de riesgo.`,topics:["Cómo empezar a hacer trading","Guía de índices sintéticos","Guía de MT5","Guía de oro XAUUSD","Gestión del riesgo"]},
+  fr:{title:c=>`Trading en ${c} : Forex, indices synthétiques, MT5 et or`,description:c=>`Guides de trading pour ${c} sur le forex, les indices synthétiques, MT5, l'or XAUUSD et la gestion du risque.`,topics:["Comment débuter le trading","Guide des indices synthétiques","Guide MT5","Guide de l'or XAUUSD","Gestion du risque"]},
+  de:{title:c=>`Trading in ${c}: Forex, synthetische Indizes, MT5 und Gold`,description:c=>`Trading-Guides für ${c} zu Forex, synthetischen Indizes, MT5, Gold XAUUSD und Risikomanagement.`,topics:["Trading starten","Guide zu synthetischen Indizes","MT5 Guide","Gold-XAUUSD Guide","Risikomanagement"]},
+  it:{title:c=>`Trading in ${c}: Forex, indici sintetici, MT5 e oro`,description:c=>`Guide di trading per ${c} su forex, indici sintetici, MT5, oro XAUUSD e gestione del rischio.`,topics:["Come iniziare a fare trading","Guida agli indici sintetici","Guida MT5","Guida all'oro XAUUSD","Gestione del rischio"]},
+  tr:{title:c=>`${c} Trading: Forex, sentetik endeksler, MT5 ve altın`,description:c=>`${c} için Forex, sentetik endeksler, MT5, XAUUSD ve risk yönetimi rehberleri.`,topics:["Tradinge nasıl başlanır","Sentetik endeksler rehberi","MT5 rehberi","XAUUSD altın rehberi","Risk yönetimi"]},
+  ar:{title:c=>`التداول في ${c}: الفوركس والمؤشرات الاصطناعية وMT5 والذهب`,description:c=>`دليل تداول عربي للمتداولين في ${c} حول الفوركس والمؤشرات الاصطناعية وMT5 والذهب XAUUSD وإدارة المخاطر.`,topics:["كيفية البدء في التداول","دليل المؤشرات الاصطناعية","دليل MT5","دليل الذهب XAUUSD","إدارة المخاطر"]},
+  hi:{title:c=>`${c} में ट्रेडिंग: Forex, Synthetic Indices, MT5 और Gold`,description:c=>`${c} के ट्रेडर्स के लिए Forex, Synthetic Indices, MT5, XAUUSD Gold और risk management की गाइड।`,topics:["ट्रेडिंग कैसे शुरू करें","Synthetic Indices गाइड","MT5 गाइड","XAUUSD Gold गाइड","जोखिम प्रबंधन"]},
+  ur:{title:c=>`${c} میں ٹریڈنگ: Forex، Synthetic Indices، MT5 اور Gold`,description:c=>`${c} کے ٹریڈرز کے لیے Forex، Synthetic Indices، MT5، XAUUSD اور رسک مینجمنٹ کی اردو گائیڈ۔`,topics:["ٹریڈنگ کیسے شروع کریں","Synthetic Indices گائیڈ","MT5 گائیڈ","XAUUSD Gold گائیڈ","رسک مینجمنٹ"]},
+  id:{title:c=>`Trading di ${c}: Forex, indeks sintetis, MT5 dan emas`,description:c=>`Panduan trading untuk ${c} tentang forex, indeks sintetis, MT5, emas XAUUSD dan manajemen risiko.`,topics:["Cara mulai trading","Panduan indeks sintetis","Panduan MT5","Panduan emas XAUUSD","Manajemen risiko"]},
+  ms:{title:c=>`Trading di ${c}: Forex, indeks sintetik, MT5 dan emas`,description:c=>`Panduan trading untuk ${c} tentang forex, indeks sintetik, MT5, emas XAUUSD dan pengurusan risiko.`,topics:["Cara mula trading","Panduan indeks sintetik","Panduan MT5","Panduan emas XAUUSD","Pengurusan risiko"]},
+  tl:{title:c=>`Trading sa ${c}: Forex, synthetic indices, MT5 at Gold`,description:c=>`Gabay para sa traders sa ${c} tungkol sa forex, synthetic indices, MT5, XAUUSD at risk management.`,topics:["Paano magsimula sa trading","Synthetic indices guide","MT5 guide","XAUUSD Gold guide","Risk management"]},
+  vi:{title:c=>`Giao dịch tại ${c}: Forex, chỉ số tổng hợp, MT5 và vàng`,description:c=>`Hướng dẫn cho nhà giao dịch tại ${c} về forex, chỉ số tổng hợp, MT5, vàng XAUUSD và quản lý rủi ro.`,topics:["Cách bắt đầu giao dịch","Hướng dẫn chỉ số tổng hợp","Hướng dẫn MT5","Hướng dẫn vàng XAUUSD","Quản lý rủi ro"]},
+  th:{title:c=>`เทรดใน${c}: Forex, Synthetic Indices, MT5 และทองคำ`,description:c=>`คู่มือสำหรับเทรดเดอร์ใน${c} เกี่ยวกับ Forex, Synthetic Indices, MT5, ทองคำ XAUUSD และการจัดการความเสี่ยง`,topics:["เริ่มเทรดอย่างไร","คู่มือ Synthetic Indices","คู่มือ MT5","คู่มือทอง XAUUSD","การจัดการความเสี่ยง"]},
+  ja:{title:c=>`${c}のトレード：FX、合成指数、MT5、金`,description:c=>`${c}のトレーダー向けに、FX、合成指数、MT5、XAUUSD（金）、リスク管理を解説します。`,topics:["トレードの始め方","合成指数ガイド","MT5ガイド","XAUUSD金ガイド","リスク管理"]},
+  ko:{title:c=>`${c} 트레이딩: Forex, 합성지수, MT5와 금`,description:c=>`${c} 트레이더를 위한 Forex, 합성지수, MT5, XAUUSD 금 및 리스크 관리 가이드입니다.`,topics:["트레이딩 시작하기","합성지수 가이드","MT5 가이드","XAUUSD 금 가이드","리스크 관리"]},
+  sw:{title:c=>`Trading ${c}: Forex, synthetic indices, MT5 na Gold`,description:c=>`Mwongozo wa traders wa ${c} kuhusu forex, synthetic indices, MT5, Gold XAUUSD na usimamizi wa hatari.`,topics:["Jinsi ya kuanza trading","Mwongozo wa synthetic indices","Mwongozo wa MT5","Mwongozo wa Gold XAUUSD","Usimamizi wa hatari"]},
+  bn:{title:c=>`${c}-এ ট্রেডিং: Forex, Synthetic Indices, MT5 ও Gold`,description:c=>`${c}-এর ট্রেডারদের জন্য Forex, Synthetic Indices, MT5, XAUUSD Gold ও risk management গাইড।`,topics:["ট্রেডিং শুরু করার উপায়","Synthetic Indices গাইড","MT5 গাইড","XAUUSD Gold গাইড","ঝুঁকি ব্যবস্থাপনা"]},
+  zh:{title:c=>`${c}交易指南：Forex、合成指数、MT5与黄金`,description:c=>`面向${c}交易者的Forex、合成指数、MT5、XAUUSD黄金和风险管理指南。`,topics:["如何开始交易","合成指数指南","MT5指南","XAUUSD黄金指南","风险管理"]},
+  ru:{title:c=>`Трейдинг в регионе ${c}: Forex, синтетические индексы, MT5 и золото`,description:c=>`Гид для трейдеров в регионе ${c}: Forex, синтетические индексы, MT5, золото XAUUSD и управление рисками.`,topics:["Как начать торговать","Гид по синтетическим индексам","Гид MT5","Гид по золоту XAUUSD","Управление рисками"]},
+};
+
+function getMarket(countryCode: string): LocalizedMarket | undefined {
+  const code = countryCode.toUpperCase();
+  if (LOCALIZED_MARKETS[code]) return LOCALIZED_MARKETS[code];
+  const lang = countryToLanguage[code] || "en";
+  const text = FALLBACK_LOCALIZED_TEXT[lang] || FALLBACK_LOCALIZED_TEXT.en;
+  const countryName = new Intl.DisplayNames([lang], { type: "region" }).of(code) || code;
+  return {
+    country: code,
+    countryName,
+    lang,
+    hreflang: `${lang}-${code}`,
+    slug: countryName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || code.toLowerCase(),
+    nativeMarketName: countryName,
+    title: text.title(countryName),
+    description: text.description(countryName),
+    searchTerms: [text.title(countryName), ...text.topics.slice(0, 3)],
+    localContext: [countryName, `Language: ${lang}`, `Region: ${code}`],
+    articleTopics: text.topics,
+  };
+}
+
 export default function LocalizedMarketPage() {
   const { country } = useParams<{ country: string }>();
-  const market = country ? LOCALIZED_MARKETS[country.toUpperCase()] : undefined;
+  const market = country ? getMarket(country) : undefined;
   if (!market) return <div className="min-h-screen bg-background"><Header /><main className="container mx-auto px-4 py-12 text-center"><h1 className="text-2xl font-bold">Market guide not found</h1><Link to="/"><Button className="mt-5">Home</Button></Link></main></div>;
 
   const copy = languageCopy[market.lang] || languageCopy.en;
