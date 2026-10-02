@@ -29,7 +29,7 @@ export function mapToDerivSymbol(displaySymbol: string): string | null {
     "ETH/USD": "cryETHUSD", "ETHUSD": "cryETHUSD", "ETH": "cryETHUSD",
     // Indices (Deriv cash CFDs)
     "US30": "OTC_DJI", "DOW": "OTC_DJI", "DJI": "OTC_DJI",
-    "SPX500": "OTC_SPC", "SPX": "OTC_SPC", "SP500": "OTC_SPC",
+    "SPX500": "OTC_SPC", "US500": "OTC_SPC", "SPX": "OTC_SPC", "SP500": "OTC_SPC",
     "NAS100": "OTC_NDX", "NDX": "OTC_NDX", "NASDAQ": "OTC_NDX",
     "GER40": "OTC_GDAXI", "DAX": "OTC_GDAXI",
     "UK100": "OTC_FTSE", "FTSE": "OTC_FTSE",
