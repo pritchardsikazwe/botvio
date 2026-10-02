@@ -67,7 +67,7 @@ export const AdminBridgeRequestsTab = () => {
     if (terminalUid) payload.terminal_uid = terminalUid;
     const { error } = await supabase
       .from("bridge_connection_requests")
-      .update(payload)
+      .update(payload as never)
       .eq("id", active.id);
     if (error) {
       toast.error(error.message);

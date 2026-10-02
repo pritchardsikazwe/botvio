@@ -222,7 +222,7 @@ export function useUpdateP2POffer() {
     }: Partial<P2POffer> & { id: string }) => {
       const { data, error } = await supabase
         .from("p2p_offers")
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({ ...updates, updated_at: new Date().toISOString() } as never)
         .eq("id", id)
         .select()
         .single();

@@ -58,7 +58,7 @@ export class TradeCopyMt5Adapter implements ExecutionAdapter {
     try {
       res = await this.fetcher(url.toString(), {
         method,
-        headers: { ApiKey: this.apiKey, Accept: "application/json" },
+        headers: { "X-API-KEY": this.apiKey, ApiKey: this.apiKey, Accept: "application/json" },
         signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(15000) : undefined,
       });
     } catch (e) {

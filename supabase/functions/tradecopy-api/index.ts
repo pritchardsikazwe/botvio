@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     const err = e instanceof TradeCopyError ? e : new TradeCopyError((e as Error).message ?? "Unexpected error", "upstream", 500);
     console.error("[tradecopy-api]", action, err.code, err.message);
-    await audit(false, { error: err.message, code: err.code }).catch(() => {});
+    try { await audit(false, { error: err.message, code: err.code }); } catch { /* ignore audit failure */ }
     return json({ ok: false, error: err.message, code: err.code }, err.status);
   }
 });

@@ -754,7 +754,7 @@ const Admin = () => {
 
     const { error } = await supabase
       .from("payout_requests")
-      .update(updates)
+      .update(updates as never)
       .eq("id", payoutDialog.payout.id);
 
     if (error) {
