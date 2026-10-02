@@ -267,6 +267,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }).catch(() => {});
     }
 
+    if (!error) trackBotvioEvent("signup_completed", { selected_plan: planCode || "free", country: country || "unknown" });
     return { error };
   };
 
@@ -275,6 +276,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       password,
     });
+    if (!error) trackBotvioEvent("login");
     return { error };
   };
 
