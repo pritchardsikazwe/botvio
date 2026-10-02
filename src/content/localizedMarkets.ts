@@ -235,6 +235,79 @@ export const LOCALIZED_MARKETS: Record<string, LocalizedMarket> = {
     localContext:["Zambian English","Central Africa Time (CAT)","Zambian kwacha (ZMW)","Zambian traders"],
     articleTopics:["How to start trading in Zambia","Synthetic indices in Zambia","Deriv MT5 Zambia","Gold XAUUSD in Zambia","Risk management for Zambian traders"]
   },
+
+  US: {
+    country:"US", countryName:"United States", lang:"en", hreflang:"en-US", slug:"united-states",
+    nativeMarketName:"US market", title:"Trading in the United States: Forex, Gold, MT5 and Market Research",
+    description:"US-focused trading education covering forex, gold XAUUSD, MT5, market research and risk management.",
+    searchTerms:["trading United States","forex USA","gold XAUUSD USA","MT5 USA","trading risk management"],
+    localContext:["US English","US market hours","US dollar (USD)","US traders"],
+    articleTopics:["How to start trading in the United States","Forex market sessions in the USA","Gold XAUUSD research","MT5 trading guide","Risk management"]
+  },
+  GB: {
+    country:"GB", countryName:"United Kingdom", lang:"en", hreflang:"en-GB", slug:"united-kingdom",
+    nativeMarketName:"UK market", title:"Trading in the United Kingdom: Forex, Gold, MT5 and Risk",
+    description:"UK-focused trading education for forex, gold XAUUSD, MT5, market sessions and risk management.",
+    searchTerms:["trading UK","forex UK","gold XAUUSD UK","MT5 UK","trading risk"],
+    localContext:["UK English","London time","pound sterling (GBP)","UK traders"],
+    articleTopics:["How to start trading in the UK","London session trading guide","Gold XAUUSD in the UK","MT5 trading guide","Risk management"]
+  },
+  CA: {
+    country:"CA", countryName:"Canada", lang:"en", hreflang:"en-CA", slug:"canada",
+    nativeMarketName:"Canadian market", title:"Trading in Canada: Forex, Gold, MT5 and Risk Management",
+    description:"Canada-focused trading education covering forex, gold XAUUSD, MT5 and practical risk management.",
+    searchTerms:["trading Canada","forex Canada","gold XAUUSD Canada","MT5 Canada","risk management"],
+    localContext:["Canadian English","Canadian time zones","Canadian dollar (CAD)","Canadian traders"],
+    articleTopics:["How to start trading in Canada","Forex sessions in Canada","Gold XAUUSD research","MT5 Canada guide","Risk management"]
+  },
+  AU: {
+    country:"AU", countryName:"Australia", lang:"en", hreflang:"en-AU", slug:"australia",
+    nativeMarketName:"Australian market", title:"Trading in Australia: Forex, Gold, MT5 and Risk Management",
+    description:"Australia-focused trading education for forex, gold XAUUSD, MT5 and disciplined risk management.",
+    searchTerms:["trading Australia","forex Australia","gold XAUUSD Australia","MT5 Australia","risk management"],
+    localContext:["Australian English","Australian market hours","Australian dollar (AUD)","Australian traders"],
+    articleTopics:["How to start trading in Australia","Sydney session trading guide","Gold XAUUSD Australia","MT5 trading guide","Risk management"]
+  },
+  SG: {
+    country:"SG", countryName:"Singapore", lang:"en", hreflang:"en-SG", slug:"singapore",
+    nativeMarketName:"Singapore market", title:"Trading in Singapore: Forex, Gold, MT5 and Risk Management",
+    description:"Singapore-focused trading education covering forex, gold XAUUSD, MT5, market sessions and risk management.",
+    searchTerms:["trading Singapore","forex Singapore","gold XAUUSD Singapore","MT5 Singapore","risk management"],
+    localContext:["Singapore English","Singapore Time (SGT)","Singapore dollar (SGD)","Singapore traders"],
+    articleTopics:["How to start trading in Singapore","Asian session trading guide","Gold XAUUSD Singapore","MT5 Singapore guide","Risk management"]
+  },
+  QA: {
+    country:"QA", countryName:"قطر", lang:"ar", hreflang:"ar-QA", slug:"qatar",
+    nativeMarketName:"السوق القطري", title:"التداول في قطر: الفوركس والذهب وMT5 وإدارة المخاطر",
+    description:"دليل عربي للمتداولين في قطر حول الفوركس والذهب XAUUSD وMT5 وإدارة المخاطر وسياق السوق المحلي.",
+    searchTerms:["التداول في قطر","الفوركس قطر","الذهب XAUUSD قطر","MT5 قطر","إدارة المخاطر"],
+    localContext:["العربية","توقيت الدوحة (UTC+3)","الريال القطري (QAR)","المتداولون في قطر"],
+    articleTopics:["كيفية البدء في التداول في قطر","جلسات الفوركس بتوقيت الدوحة","تداول الذهب XAUUSD في قطر","دليل MT5 في قطر","إدارة المخاطر"]
+  },
+  KW: {
+    country:"KW", countryName:"الكويت", lang:"ar", hreflang:"ar-KW", slug:"kuwait",
+    nativeMarketName:"السوق الكويتي", title:"التداول في الكويت: الفوركس والذهب وMT5 وإدارة المخاطر",
+    description:"دليل عربي للمتداولين في الكويت حول الفوركس والذهب XAUUSD وMT5 وإدارة المخاطر.",
+    searchTerms:["التداول في الكويت","الفوركس الكويت","الذهب XAUUSD الكويت","MT5 الكويت","إدارة المخاطر"],
+    localContext:["العربية","توقيت الكويت (UTC+3)","الدينار الكويتي (KWD)","المتداولون في الكويت"],
+    articleTopics:["كيفية البدء في التداول في الكويت","جلسات الفوركس بتوقيت الكويت","تداول الذهب XAUUSD","دليل MT5","إدارة المخاطر"]
+  },
+  BH: {
+    country:"BH", countryName:"البحرين", lang:"ar", hreflang:"ar-BH", slug:"bahrain",
+    nativeMarketName:"السوق البحريني", title:"التداول في البحرين: الفوركس والذهب وMT5 وإدارة المخاطر",
+    description:"دليل عربي للمتداولين في البحرين حول الفوركس والذهب XAUUSD وMT5 وإدارة المخاطر.",
+    searchTerms:["التداول في البحرين","الفوركس البحرين","الذهب XAUUSD البحرين","MT5 البحرين","إدارة المخاطر"],
+    localContext:["العربية","توقيت البحرين (UTC+3)","الدينار البحريني (BHD)","المتداولون في البحرين"],
+    articleTopics:["كيفية البدء في التداول في البحرين","جلسات الفوركس بتوقيت البحرين","تداول الذهب XAUUSD","دليل MT5","إدارة المخاطر"]
+  },
+  OM: {
+    country:"OM", countryName:"عُمان", lang:"ar", hreflang:"ar-OM", slug:"oman",
+    nativeMarketName:"السوق العُماني", title:"التداول في عُمان: الفوركس والذهب وMT5 وإدارة المخاطر",
+    description:"دليل عربي للمتداولين في عُمان حول الفوركس والذهب XAUUSD وMT5 وإدارة المخاطر.",
+    searchTerms:["التداول في عمان","الفوركس عمان","الذهب XAUUSD عمان","MT5 عمان","إدارة المخاطر"],
+    localContext:["العربية","توقيت عُمان (UTC+4)","الريال العُماني (OMR)","المتداولون في عُمان"],
+    articleTopics:["كيفية البدء في التداول في عُمان","جلسات الفوركس بتوقيت مسقط","تداول الذهب XAUUSD","دليل MT5","إدارة المخاطر"]
+  },
 };
 
 export const LOCALIZED_MARKET_LIST = Object.values(LOCALIZED_MARKETS);
