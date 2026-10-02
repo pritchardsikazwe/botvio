@@ -20,6 +20,8 @@ const SYMBOL_MAP: Record<string, string> = {
   "USD/JPY": "frxUSDJPY",
   "AUD/USD": "frxAUDUSD",
   "BTC/USD": "cryBTCUSD",
+  "NAS100": "OTC_NDX",
+  "NASDAQ": "OTC_NDX",
 };
 
 interface Candle { epoch: number; open: number; high: number; low: number; close: number; }
