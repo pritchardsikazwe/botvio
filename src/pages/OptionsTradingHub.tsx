@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
+import { brokerReviews } from "@/data/brokerReviews";
 import { rsi, riseFallEngine } from "@/lib/signalEngines";
 
-const DERIV_SIGNUP = "https://t.deriv.link?t=8U3QNKP9UA9G";
+const DERIV_SIGNUP = brokerReviews.deriv.affiliateUrl || "https://t.deriv.link?t=8U3QNKP9UA9G";
+const EXNESS_SIGNUP = brokerReviews.exness.affiliateUrl || "https://www.exness.com/";
 
 const WATCHLIST = [
   { symbol: "1HZ100V", name: "Volatility 100 (1s)" },
@@ -159,6 +161,35 @@ const OptionsTradingHub = () => (
               "BOTVIO returns RISE, FALL or WAIT rather than forcing a trade.",
               "Users can review the setup before choosing whether to connect and trade.",
             ].map((x) => <div key={x} className="flex gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-success mt-0.5" /><span className="text-muted-foreground">{x}</span></div>)}
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        <Card className="glass-card border-primary/20">
+          <CardContent className="p-6">
+            <Badge variant="outline">OPTIONS PATH</Badge>
+            <h2 className="mt-3 text-xl font-black">Deriv Digital Options</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Deriv currently offers Digital Options across forex, stock indices, commodities and Derived Indices, with contract types including Rise/Fall, Higher/Lower and Touch/No Touch.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild><a href={DERIV_SIGNUP} target="_blank" rel="sponsored noopener noreferrer">Open Deriv <ExternalLink className="ml-2 h-4 w-4" /></a></Button>
+              <Button variant="outline" asChild><Link to="/brokers/deriv">Read Deriv review</Link></Button>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="glass-card border-warning/20">
+          <CardContent className="p-6">
+            <Badge variant="outline">FOREX / CFD PATH</Badge>
+            <h2 className="mt-3 text-xl font-black">Exness for Forex & Gold</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              If a visitor came for forex, gold or MT5 rather than Digital Options, route them to the separate forex/CFD path instead of forcing an options workflow.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild><a href={EXNESS_SIGNUP} target="_blank" rel="sponsored noopener noreferrer">Open Exness <ExternalLink className="ml-2 h-4 w-4" /></a></Button>
+              <Button variant="outline" asChild><Link to="/brokers/exness">Read Exness review</Link></Button>
+            </div>
           </CardContent>
         </Card>
       </section>
