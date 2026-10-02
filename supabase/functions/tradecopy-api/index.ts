@@ -352,6 +352,42 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       return { data: {} };
     }
 
+    case "attach_market_feed": {
+      const p = z.object({
+        account_id: z.string().uuid(),
+      }).parse(body);
+      const acct = await loadAccount(ctx, p.account_id);
+      if (String(acct.broker ?? "").trim().toLowerCase() !== "weltrade") {
+        throw new TradeCopyError("Market feed attachment is currently enabled for Weltrade MT5 accounts only", "validation");
+      }
+      if (acct.account_role !== "slave" || !acct.tradecopy_user_id) {
+        throw new TradeCopyError("Connect the Weltrade MT5 follower to TradeCopy before attaching its market feed", "validation");
+      }
+
+      // Keep the Weltrade feed completely separate from the existing Deriv tick
+      // engine. TradeCopy is the broker data boundary for this account.
+      const symbols = await adapter.getAllSymbols(acct.tradecopy_user_id);
+      const safeSymbols = redact(symbols);
+      const { data: feed, error } = await admin.from("broker_market_feeds").upsert({
+        user_id: ctx.userId,
+        trading_account_id: acct.id,
+        broker: "Weltrade",
+        platform: "MT5",
+        feed_provider: "tradecopy_api",
+        status: "attached",
+        symbols: safeSymbols as never,
+        metadata: {
+          source: "Weltrade MT5 account via TradeCopy API",
+          purpose: "Weltrade-native data/tick source for Botvio broker-aware strategies",
+          deriv_engine_untouched: true,
+          quotes_endpoint: "pending_tradecopy_market_data_adapter",
+        },
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "trading_account_id" }).select("id,status,symbols,metadata,last_quote_at,updated_at").single();
+      if (error) throw new TradeCopyError(error.message, "validation");
+      return { data: { feed }, accountId: acct.id };
+    }
+
     case "discover_symbols": {
       const acct = await loadAccount(ctx, String(body.account_id), { allowAdmin: true });
       if (!acct.tradecopy_user_id) throw new TradeCopyError("Account is not registered with TradeCopy yet", "validation");
