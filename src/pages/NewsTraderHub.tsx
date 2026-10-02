@@ -69,7 +69,9 @@ const NewsTraderHub = () => {
   const [cat, setCat] = useState(catTime());
   const [countdown, setCountdown] = useState(nextLondonOpenCountdown());
   const { events, loading: calendarLoading, error: calendarError, lastUpdated } = useEconomicCalendar(7);
-  const gold = useDerivLiveSignal("XAU/USD", 300);
+  const selectedDisplaySymbol = selected.name;
+  const sessionSignal = useDerivLiveSignal(selectedDisplaySymbol, 300);
+  const liveNewsSignal = useDerivLiveSignal(selectedDisplaySymbol, 60);
   const selected = MARKETS.find(m => m.symbol === selectedMarket) ?? MARKETS[0];
 
   useEffect(() => {
@@ -82,11 +84,28 @@ const NewsTraderHub = () => {
 
   const now = Date.now();
   const upcomingEvents = events.filter(event => !event.time_utc || new Date(event.time_utc).getTime() >= now);
+  const timedEvents = events.filter(event => event.time_utc).map(event => ({ event, ms: new Date(event.time_utc!).getTime() - now }));
+  const activeNews = timedEvents.find(({ ms }) => ms <= 15 * 60 * 1000 && ms >= -30 * 60 * 1000)?.event;
+  const nearestEvent = timedEvents.filter(({ ms }) => ms >= -30 * 60 * 1000).sort((a,b) => Math.abs(a.ms)-Math.abs(b.ms))[0]?.event;
+  const automaticPhase: ScanPhase = activeNews ? (new Date(activeNews.time_utc!).getTime() <= now ? "live" : "pre") : "post";
   const nextEvent = upcomingEvents[0];
   const nextEventMinutes = nextEvent?.time_utc ? Math.max(0, Math.round((new Date(nextEvent.time_utc).getTime() - now) / 60000)) : null;
   const scanLabel = phase === "pre" ? "PRE-NEWS SCAN" : phase === "live" ? "LIVE NEWS SCAN" : "POST-NEWS SCAN";
   const scanDescription = phase === "pre" ? "Scanning 30–180 minutes before major releases for levels and setups." : phase === "live" ? "Fast reaction mode: monitoring breakout, rejection and momentum changes." : "Scanning for continuation, pullback and reversal after the first move.";
-  const liveDirection = gold.signal === "BUY" || gold.signal === "SELL" ? gold.signal : "WAIT";
+  useEffect(() => {
+    if (!autoScan) return;
+    setPhase(automaticPhase);
+  }, [autoScan, automaticPhase]);
+
+  const activeSignal = phase === "live" ? liveNewsSignal : sessionSignal;
+  const liveDirection = activeSignal.signal === "BUY" || activeSignal.signal === "SELL" ? activeSignal.signal : "WAIT";
+  const price = activeSignal.lastPrice;
+  const distance = selectedMarket === "XAUUSD" ? Math.max((price ?? 0) * 0.0008, 0.8) : selectedMarket.includes("USD") ? Math.max((price ?? 0) * 0.0007, 0.0005) : Math.max((price ?? 0) * 0.002, 5);
+  const setupEntry = price;
+  const setupSl = price && liveDirection === "BUY" ? price - distance : price && liveDirection === "SELL" ? price + distance : null;
+  const setupTp1 = price && liveDirection === "BUY" ? price + distance : price && liveDirection === "SELL" ? price - distance : null;
+  const setupTp2 = price && liveDirection === "BUY" ? price + distance * 2 : price && liveDirection === "SELL" ? price - distance * 2 : null;
+  const fmt = (v: number | null) => v == null ? "Waiting for price" : v.toLocaleString(undefined, { maximumFractionDigits: selectedMarket === "XAUUSD" ? 2 : 5 });
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,7 +155,7 @@ const NewsTraderHub = () => {
             ["live", "2", "LIVE NEWS SCAN", "Fast reaction during release", Zap, "Rapid entry confirmation"],
             ["post", "3", "POST-NEWS SCAN", "After the first move", TrendingUp, "Continuation or reversal"],
           ].map(([key, num, title, subtitle, Icon, detail]) => <button key={String(key)} type="button" onClick={() => setPhase(key as ScanPhase)} className={cn("rounded-2xl border p-4 text-left transition-all", phase === key ? "border-primary/50 bg-primary/10" : "border-border/50 bg-card/70 hover:border-primary/30")}><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 font-black text-primary">{num}</span><Icon className="h-5 w-5 text-primary" /><div><p className="font-black">{title}</p><p className="text-[11px] text-muted-foreground">{subtitle}</p></div></div><p className="mt-3 text-xs text-muted-foreground">{detail}</p></button>)}
-          <Card className="border-success/30 bg-success/5"><CardContent className="flex h-full items-center justify-between gap-3 p-4"><div><p className="text-xs font-black">SESSION SCAN MODE</p><p className="mt-1 text-[11px] text-muted-foreground">Next: London Open at 10:00 CAT</p></div><Switch checked={autoScan} onCheckedChange={setAutoScan} /></CardContent></Card>
+          <Card className="border-success/30 bg-success/5"><CardContent className="flex h-full items-center justify-between gap-3 p-4"><div><p className="text-xs font-black">SESSION SCAN MODE</p><p className="mt-1 text-[11px] text-muted-foreground">{activeNews ? "LIVE: " + (activeNews.title || activeNews.name) : nearestEvent ? "Next: " + (nearestEvent.title || nearestEvent.name) : "Next: London Open at 10:00 CAT"}</p></div><Switch checked={autoScan} onCheckedChange={setAutoScan} /></CardContent></Card>
         </section>
 
         <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm"><div className="flex flex-wrap items-center gap-3"><Radio className="h-4 w-4 text-primary" /><b>{scanLabel}</b><span className="text-muted-foreground">{scanDescription}</span><Badge variant="outline" className="ml-auto">{autoScan ? "Auto Scan ON" : "Manual Scan"}</Badge><Badge variant="outline" className={calendarError ? "border-destructive/30 text-destructive" : "border-success/30 text-success"}>{calendarError ? "Calendar Offline" : calendarLoading ? "Calendar Loading" : "Live Calendar"}</Badge></div></div>
@@ -167,15 +186,15 @@ const NewsTraderHub = () => {
 
           <Card className="overflow-hidden border-border/50 bg-card/80">
             <CardHeader className="flex-row items-center justify-between space-y-0 pb-2"><div><CardTitle className="flex items-center gap-2 text-base"><Activity className="h-4 w-4 text-success" /> {selected.name} Session & News Analysis</CardTitle><p className="mt-1 text-[10px] text-muted-foreground">London Open 10:00 CAT • {scanLabel}</p></div><Select value={selectedMarket} onValueChange={setSelectedMarket}><SelectTrigger className="w-[125px]"><SelectValue /></SelectTrigger><SelectContent>{MARKETS.map(m => <SelectItem key={m.symbol} value={m.symbol}>{m.name}</SelectItem>)}</SelectContent></Select></CardHeader>
-            <CardContent className="p-3">{selectedMarket === "XAUUSD" ? <DerivLiveChart displaySymbol="XAU/USD" height={430} defaultGranularity={300} showHauza signalMarker={liveDirection === "WAIT" ? null : { direction: liveDirection as "BUY" | "SELL", confidence: gold.confidence }} /> : <div className="chart-grid flex h-[430px] items-center justify-center rounded-xl border border-border/40 bg-background/40"><div className="text-center"><Activity className="mx-auto h-10 w-10 text-primary" /><p className="mt-3 font-bold">{selected.name} analysis workspace</p><p className="text-xs text-muted-foreground">Market scanner selected. Connect the relevant live feed for this symbol.</p></div></div>}</CardContent>
+            <CardContent className="p-3">{selectedMarket === "XAUUSD" ? <DerivLiveChart displaySymbol="XAU/USD" height={430} defaultGranularity={300} showHauza signalMarker={liveDirection === "WAIT" ? null : { direction: liveDirection as "BUY" | "SELL", confidence: activeSignal.confidence }} /> : <div className="chart-grid flex h-[430px] items-center justify-center rounded-xl border border-border/40 bg-background/40"><div className="text-center"><Activity className="mx-auto h-10 w-10 text-primary" /><p className="mt-3 font-bold">{selected.name} analysis workspace</p><p className="text-xs text-muted-foreground">Market scanner selected. Connect the relevant live feed for this symbol.</p></div></div>}</CardContent>
           </Card>
 
           <Card className="border-border/50 bg-card/80">
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Target className="h-4 w-4 text-primary" /> Trade Setup</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between"><Badge className={liveDirection === "SELL" ? "bg-destructive/15 text-destructive" : "bg-success/15 text-success"}>{liveDirection}</Badge><Badge variant="outline">{phase === "pre" ? "Pre-News" : phase === "live" ? "News" : "Post-News"}</Badge></div>
-              <div className="grid grid-cols-2 gap-2 text-xs">{[["Entry Zone","2,346.20–2,347.80"],["Stop Loss","2,344.00"],["TP1","2,350.50"],["TP2","2,354.00"]].map(([label,value]) => <div key={label} className="rounded-lg border border-border/50 p-3"><span className="text-muted-foreground">{label}</span><b className={cn("mt-1 block font-mono", label === "Stop Loss" ? "text-destructive" : label.startsWith("TP") ? "text-success" : "text-foreground")}>{value}</b></div>)}</div>
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs"><div className="flex justify-between"><span>Invalidation</span><b className="font-mono">2,343.50</b></div><div className="mt-2 flex justify-between"><span>Risk : Reward</span><b>1 : 2.1</b></div><div className="mt-2 flex justify-between"><span>Signal confidence</span><b>{gold.confidence ? gold.confidence + "%" : "Building..."}</b></div></div>
+              <div className="grid grid-cols-2 gap-2 text-xs">{[["Entry","" + fmt(setupEntry)],["Stop Loss",fmt(setupSl)],["TP1",fmt(setupTp1)],["TP2",fmt(setupTp2)]].map(([label,value]) => <div key={label} className="rounded-lg border border-border/50 p-3"><span className="text-muted-foreground">{label}</span><b className={cn("mt-1 block font-mono", label === "Stop Loss" ? "text-destructive" : label.startsWith("TP") ? "text-success" : "text-foreground")}>{value}</b></div>)}</div>
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs"><div className="flex justify-between"><span>Invalidation</span><b className="font-mono">{fmt(setupSl)}</b></div><div className="mt-2 flex justify-between"><span>Risk : Reward</span><b>1 : 2.0</b></div><div className="mt-2 flex justify-between"><span>Signal confidence</span><b>{activeSignal.confidence ? activeSignal.confidence + "%" : "Building..."}</b></div></div>
               <Button className="w-full font-black"><Zap className="mr-2 h-4 w-4" /> Send Setup to MT5</Button>
               <p className="flex gap-2 text-[10px] text-warning"><ShieldAlert className="h-3 w-3 shrink-0" /> News volatility can cause spread expansion and slippage. Setups are not guaranteed.</p>
             </CardContent>
