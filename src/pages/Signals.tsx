@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
-import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
+import { trackBotvioEvent } from "@/components/analytics/analytics";
 
 const CATEGORIES = [
   { value: "all", label: "All Markets" },
@@ -142,6 +142,10 @@ const Signals = () => {
 
   const activeCount = filteredSignals.filter(s => s.status === "ACTIVE").length;
   const hasActiveFilters = category !== "all" || broker !== "all" || status !== "ACTIVE" || direction !== "all" || timeframe !== "all" || search !== "";
+
+  useEffect(() => {
+    trackBotvioEvent("signals_open", { category, broker, status, direction, timeframe });
+  }, []);
 
   const clearFilters = () => {
     setCategory("all");
