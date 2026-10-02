@@ -35,6 +35,7 @@ const App = () => (
                 matches. Unknown prefixes pass through unchanged.
               */}
               <LocalePrefixRouter>
+                <AnalyticsTracker />
                 <AppRoutes />
                 <SiteFooterGate />
                 <MobileBottomNav />
