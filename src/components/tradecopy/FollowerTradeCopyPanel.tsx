@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2 } from "lucide-react";
+import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2, Radio } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -201,6 +201,7 @@ export function FollowerTradeCopyPanel() {
   const { user } = useAuth();
   const accounts = useTradeCopyAccounts("slave");
   const removeAccount = useRemoveTradeCopyAccount();
+  const actAttach = useTradeCopyAction();
   const rels = useMyRelationships();
   const events = useExecutionEvents();
   const errors = useTradeCopyAudit();
@@ -219,6 +220,23 @@ export function FollowerTradeCopyPanel() {
           <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/30 px-3 py-2 text-xs">
             <span className="font-medium">{a.label} · {a.login_id} · {a.server}</span>
             <span className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 px-2"
+                disabled={!a.tradecopy_user_id || actAttach.isPending}
+                onClick={async () => {
+                  try {
+                    const result = await actAttach.mutateAsync({ action: "attach_market_feed", payload: { account_id: a.id } });
+                    const count = Array.isArray((result as any)?.feed?.symbols) ? (result as any).feed.symbols.length : 0;
+                    toast.success(`Weltrade feed attached · ${count} symbols detected`);
+                  } catch (e) {
+                    toast.error((e as Error).message);
+                  }
+                }}
+              >
+                <Radio className="mr-1 h-3.5 w-3.5" /> Feed
+              </Button>
               <span className="flex gap-1.5"><EnvBadge env={a.environment} /><StatusBadge status={a.connection_status} /></span>
               <Button
                 size="sm"
