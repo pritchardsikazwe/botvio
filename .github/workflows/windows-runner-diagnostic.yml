@@ -1,0 +1,58 @@
+name: Botvio Windows Runner Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - botvio-independent-sep13
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    name: Windows runner diagnostic
+    runs-on: windows-2025
+    steps:
+      - name: Runner environment
+        shell: pwsh
+        run: |
+          Write-Host "=== WINDOWS RUNNER ==="
+          $PSVersionTable
+          Write-Host "RUNNER_OS=$env:RUNNER_OS"
+          Write-Host "RUNNER_ARCH=$env:RUNNER_ARCH"
+          Write-Host "RUNNER_NAME=$env:RUNNER_NAME"
+          Write-Host "RUNNER_TEMP=$env:RUNNER_TEMP"
+
+      - name: Node and npm
+        shell: pwsh
+        run: |
+          node --version
+          npm --version
+
+      - name: Java
+        shell: pwsh
+        run: |
+          java -version
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Repository check
+        shell: pwsh
+        run: |
+          Write-Host "Repository checkout successful"
+          git status --short
+          if (-not (Test-Path package.json)) {
+            throw "package.json not found"
+          }
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          npm install --no-audit --no-fund
+
+      - name: Vite build test
+        shell: pwsh
+        run: |
+          npm run build
