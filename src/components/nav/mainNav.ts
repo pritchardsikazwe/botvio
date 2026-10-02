@@ -47,7 +47,7 @@ export const PRIMARY_NAV: NavGroup[] = [
     items: [
       { label: "Create AI Bot", to: "/bots", icon: Sparkles, description: "One simple guided bot setup" },
       { label: "My Bots", to: "/bots", icon: Bot },
-      { label: "Advanced Bot Details", to: "/bot-detail", icon: Wrench },
+      { label: "Advanced Bot Details", to: "/bots", icon: Wrench },
     ],
   },
   {
