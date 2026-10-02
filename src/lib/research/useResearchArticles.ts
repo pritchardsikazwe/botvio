@@ -16,6 +16,7 @@ import { DUBAI_BLOG_INDEX } from "@/content/dubaiBlogIndex";
 import { DUBAI_EXPANDED_INDEX } from "@/content/dubaiExpandedIndex";
 import { DUBAI_FINAL_INDEX } from "@/content/dubaiFinalPosts";
 import { SAUDI_INDEX } from "@/content/saudiPosts";
+import { LOCALIZED_DEEP_INDEX } from "@/content/localizedDeepPosts";
 import {
   detectArticleType,
   detectMarket,
@@ -50,7 +51,7 @@ const decorate = (entry: BlogIndexEntry & { coverImage?: string | null; source: 
   readMinutes: parseMinutes(entry.readTime),
 });
 
-export const STATIC_ARTICLES: ResearchArticle[] = [...BLOG_INDEX, ...DUBAI_BLOG_INDEX, ...DUBAI_EXPANDED_INDEX, ...DUBAI_FINAL_INDEX, ...SAUDI_INDEX].map((p) =>
+export const STATIC_ARTICLES: ResearchArticle[] = [...BLOG_INDEX, ...DUBAI_BLOG_INDEX, ...DUBAI_EXPANDED_INDEX, ...DUBAI_FINAL_INDEX, ...SAUDI_INDEX, ...LOCALIZED_DEEP_INDEX].map((p) =>
   decorate({ ...p, source: "static" }),
 );
 
