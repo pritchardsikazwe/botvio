@@ -4,6 +4,7 @@ import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { DerivAccountsManager } from "@/components/tradecopy/DerivAccountsManager";
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
+import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -157,6 +158,17 @@ export function TradingConnectionsCenter() {
         </div>
         <DerivConnectionPanel hideLegacyPat />
         <DerivAccountsManager />
+      </section>
+
+      <section id="weltrade-syntx-data" className="scroll-mt-6 space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-semibold">2. Weltrade SyntX market-data feed</h2>
+            <p className="text-sm text-muted-foreground">Connect your Weltrade MT5 SyntX account for quotes, ticks and historical candles only.</p>
+          </div>
+          <Badge variant="outline" className="border-success/30 text-success">DATA ONLY</Badge>
+        </div>
+        <SyntxApiStudioConnectionCard />
       </section>
 
       <section id="follower-mt5" className="scroll-mt-6 space-y-3">
