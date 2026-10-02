@@ -164,13 +164,13 @@ const BlogPost = () => {
         updatedDate: dbPost.updated_at ? new Date(dbPost.updated_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : undefined,
         content: dbPost.content_html,
         coverImage: dbPost.cover_image,
-        author: dbPost.author || "Botvio Team",
+        author: dbPost.author || "Botvio Editorial Team",
         metaTitle: dbPost.meta_title,
         metaDescription: dbPost.meta_description,
         youtubeUrl: (dbPost as any).youtube_url as string | null,
       }
     : staticPost
-      ? { ...staticPost, updatedDate: undefined, coverImage: undefined, author: "Botvio Team", metaTitle: undefined, metaDescription: undefined, youtubeUrl: null }
+      ? { ...staticPost, updatedDate: undefined, coverImage: undefined, author: "Botvio Editorial Team", metaTitle: undefined, metaDescription: undefined, youtubeUrl: null }
       : null;
 
   const regionalContext = useMemo(() => (post ? detectRegionalContext(post.title, post.excerpt, post.category) : null), [post?.title, post?.excerpt, post?.category]);
