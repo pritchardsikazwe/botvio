@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { trackBotvioEvent } from "@/components/analytics/AnalyticsTracker";
+import { trackBotvioEvent } from "@/components/analytics/analytics";
 
 interface Profile {
   id: string;
