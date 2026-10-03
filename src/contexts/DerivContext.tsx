@@ -95,7 +95,21 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
   const [initializing, setInitializing] = React.useState(true);
   const { runningTrades, runningProfit, addTrade, handleContractUpdate } = useRunningTrades();
   const { activeToken, setToken, validateConnection } = useActiveToken();
-  const { tokens: derivTokens, activeToken: activeDerivToken, upsertToken, switchToken: switchDerivToken, removeToken: removeDerivToken } = useDerivTokens();
+  const { tokens: derivTokens, activeToken: activeDerivToken, upsertToken, switchToken, removeToken: removeDerivToken } = useDerivTokens();
+
+  // Account switching is a real session switch: select the saved token, then
+  // re-authorize the WebSocket so Demo/Real changes immediately affect trading.
+  const switchDerivToken = useCallback(async (tokenId: string) => {
+    const selected = await switchToken(tokenId);
+    setInitializing(true);
+    try {
+      await derivAPI.connect(selected.token_encrypted);
+      localStorage.setItem("deriv_pat_token", selected.token_encrypted);
+      localStorage.removeItem("deriv_oauth_token");
+    } finally {
+      setInitializing(false);
+    }
+  }, [switchToken, derivAPI.connect]);
   const derivTrades = useDerivTrades();
 
   /**
