@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Target, Clock, ExternalLink, ArrowUpRight, ArrowDownRight, Shield, RefreshCw, AlertTriangle } from "lucide-react";
+import { Target, Clock, ExternalLink, ArrowUpRight, ArrowDownRight, Shield, RefreshCw, AlertTriangle, Activity } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -37,6 +37,31 @@ export function SyntxSignalsSection() {
     },
     refetchInterval: 30000,
   });
+  const chartSymbol = useMemo(() => {
+    const requested = symbol !== "all" ? symbol : signals?.[0]?.symbol;
+    const inst = WELTRADE_INSTRUMENTS.find((i) => i.mt5Symbol === requested || i.feedSymbol === requested || i.label === requested);
+    return inst ?? WELTRADE_INSTRUMENTS.find((i) => i.category === "syntx") ?? WELTRADE_INSTRUMENTS[0];
+  }, [symbol, signals]);
+
+  const { data: chartTicks = [] } = useQuery({
+    queryKey: ["weltrade-short-chart", chartSymbol?.feedSymbol],
+    enabled: !!chartSymbol?.feedSymbol,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bridge_ticks")
+        .select("last_price,bid,ask,ts")
+        .eq("symbol", chartSymbol.feedSymbol)
+        .order("ts", { ascending: false })
+        .limit(120);
+      if (error) throw error;
+      return (data ?? [])
+        .reverse()
+        .map((row: any) => Number(row.last_price ?? (row.bid != null && row.ask != null ? (row.bid + row.ask) / 2 : row.bid ?? row.ask)))
+        .filter((v: number) => Number.isFinite(v));
+    },
+    refetchInterval: 15000,
+  });
+
   const symbols = useMemo(() => [...new Set((signals ?? []).map((item) => item.symbol).filter(Boolean))].sort(), [signals]);
   const timeframes = useMemo(() => [...new Set((signals ?? []).map((item) => item.timeframe).filter(Boolean))].sort(), [signals]);
   const filtered = useMemo(() => (signals ?? []).filter((item) =>
@@ -50,6 +75,45 @@ export function SyntxSignalsSection() {
     <div className="space-y-6">
       <div>
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="flex items-center gap-2 text-sm font-bold text-foreground"><Target className="h-4 w-4 text-primary" /> Weltrade Signals</h3><p className="mt-1 text-xs text-muted-foreground">Last refreshed {dataUpdatedAt ? formatDistanceToNow(new Date(dataUpdatedAt), { addSuffix: true }) : "Not available"}</p></div><Button variant="outline" className="min-h-11" onClick={() => refetch()} disabled={isFetching}><RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />Refresh</Button></div>
+        <Card className="mb-4 border-primary/20 bg-primary/5">
+          <CardContent className="p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-xs font-black">Weltrade Live Chart</p>
+                  <p className="text-[10px] text-muted-foreground">{chartSymbol?.label ?? "SyntX"} · {chartTicks.length} ticks</p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-[9px]">MT5 FEED</Badge>
+            </div>
+            <div className="h-24 overflow-hidden rounded-lg border border-border/50 bg-background/50">
+              {chartTicks.length > 1 ? (
+                <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-full w-full" aria-label="Short Weltrade price chart">
+                  <polyline
+                    points={chartTicks.map((v: number, i: number) => {
+                      const min = Math.min(...chartTicks);
+                      const max = Math.max(...chartTicks);
+                      const span = max - min || 1;
+                      const x = (i / (chartTicks.length - 1)) * 100;
+                      const y = 28 - ((v - min) / span) * 24;
+                      return `${x.toFixed(2)},${y.toFixed(2)}`;
+                    }).join(" ")}
+                    fill="none"
+                    className="stroke-primary"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </svg>
+              ) : (
+                <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground">
+                  Waiting for live Weltrade MT5 ticks…
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
           <Select value={symbol} onValueChange={setSymbol}><SelectTrigger aria-label="Filter by symbol" className="min-h-11"><SelectValue placeholder="Symbol" /></SelectTrigger><SelectContent><SelectItem value="all">All symbols</SelectItem>{symbols.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
           <Select value={timeframe} onValueChange={setTimeframe}><SelectTrigger aria-label="Filter by timeframe" className="min-h-11"><SelectValue placeholder="Timeframe" /></SelectTrigger><SelectContent><SelectItem value="all">All timeframes</SelectItem>{timeframes.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
