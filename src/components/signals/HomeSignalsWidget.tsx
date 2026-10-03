@@ -97,8 +97,13 @@ function timeframeToMs(timeframe: string): number {
   return map[timeframe] || 300_000;
 }
 
-function isSignalExpired(signal: { created_at: string; expires_at?: string | null; timeframe?: string }): boolean {
+// Weltrade SyntX chart signals stay live until TP/SL resolves them (max 60 min).
+const SYNTX_LIVE_MS = 60 * 60 * 1000;
+function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
+
+function isSignalExpired(signal: { created_at: string; expires_at?: string | null; timeframe?: string; category?: string }): boolean {
   const now = new Date();
+  if (isSyntx(signal) && !signal.expires_at) return new Date(signal.created_at).getTime() + SYNTX_LIVE_MS < now.getTime();
   if (signal.expires_at) return new Date(signal.expires_at) < now;
   const createdAt = new Date(signal.created_at);
   return new Date(createdAt.getTime() + timeframeToMs(signal.timeframe || "M5")) < now;
@@ -120,6 +125,8 @@ function getTimeRemaining(signal: { created_at: string; expires_at?: string | nu
   let expiresAt: Date;
   if (signal.expires_at) {
     expiresAt = new Date(signal.expires_at);
+  } else if (isSyntx(signal)) {
+    expiresAt = new Date(new Date(signal.created_at).getTime() + SYNTX_LIVE_MS);
   } else {
     const createdAt = new Date(signal.created_at);
     expiresAt = new Date(createdAt.getTime() + timeframeToMs(signal.timeframe || "M5"));
@@ -161,7 +168,18 @@ export const HomeSignalsWidget = () => {
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
-      return (data || []) as ManualSignal[];
+      // Weltrade SyntX signals are fetched separately so the high-volume
+      // automated feeds never crowd them out of the 100-row window.
+      const { data: wt } = await supabase
+        .from("trading_signals")
+        .select("*")
+        .eq("category", "syntx")
+        .eq("status", "ACTIVE")
+        .gte("created_at", new Date(now.getTime() - SYNTX_LIVE_MS).toISOString())
+        .order("created_at", { ascending: false })
+        .limit(10);
+      const ids = new Set((data || []).map((d: any) => d.id));
+      return [...(wt || []).filter((d: any) => !ids.has(d.id)), ...(data || [])] as ManualSignal[];
     },
     refetchInterval: 30000,
   });
@@ -251,7 +269,10 @@ export const HomeSignalsWidget = () => {
       .filter(s => (s.timeframe || "").toUpperCase() === timeframeFilter)
       .slice(0, 6);
   } else {
-    displaySignals = selectHomeSignalsByHorizon(displaySignals, 6);
+    // Reserve up to 2 slots for live Weltrade SyntX signals.
+    const wt = displaySignals.filter(isSyntx).slice(0, 2);
+    const rest = selectHomeSignalsByHorizon(displaySignals.filter(s => !isSyntx(s)), 6 - wt.length);
+    displaySignals = [...wt, ...rest];
   }
 
   if (displaySignals.length === 0) {
