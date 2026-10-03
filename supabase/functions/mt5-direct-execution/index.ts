@@ -116,9 +116,11 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action ?? "");
 
-    // Scheduler path: service-role caller runs delivery for all enabled accounts.
-    if (token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
-      return json({ ok: true, mode: LIVE_MODE ? "live" : "simulated", ...(await deliver(admin)) });
+    // Wake path (new-signal database trigger or service role). It takes no input and only
+    // processes server-side ACTIVE signals for opted-in accounts; every send is deduplicated.
+    if (action === "wake" || (token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"))) {
+      const r = await deliver(admin);
+      return json({ ok: true, executed: r.executed });
     }
 
     if (!token) throw new Err("Sign in required", 401);
