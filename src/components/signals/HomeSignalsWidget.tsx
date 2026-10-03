@@ -25,6 +25,56 @@ const BROKER_FILTERS = [
   { value: "binomo", label: "Binomo" },
 ];
 
+const TIMEFRAME_FILTERS = [
+  { value: "all", label: "All Horizons" },
+  { value: "M1", label: "1M · Scalping" },
+  { value: "M15", label: "15M · Intraday" },
+  { value: "H1", label: "1H · Swing" },
+  { value: "D1", label: "1D · Position" },
+];
+
+function timeframeLabel(timeframe?: string | null): string {
+  switch ((timeframe || "").toUpperCase()) {
+    case "M1": return "1M · SCALPING";
+    case "M15": return "15M · INTRADAY";
+    case "H1": return "1H · SWING";
+    case "D1": return "1D · POSITION";
+    default: return (timeframe || "M5").toUpperCase();
+  }
+}
+
+function selectHomeSignalsByHorizon(items: ManualSignal[], limit = 6): ManualSignal[] {
+  const horizons = ["M1", "M15", "H1", "D1"];
+  const buckets = new Map<string, ManualSignal[]>(
+    horizons.map(tf => [tf, items.filter(signal => (signal.timeframe || "").toUpperCase() === tf)])
+  );
+  const selected: ManualSignal[] = [];
+  let index = 0;
+
+  while (selected.length < limit && index < limit) {
+    for (const tf of horizons) {
+      const bucket = buckets.get(tf) || [];
+      if (bucket[index]) selected.push(bucket[index]);
+      if (selected.length >= limit) break;
+    }
+    index += 1;
+  }
+
+  // If a horizon has no currently valid signal, fill remaining slots with
+  // the newest signals from any horizon rather than inventing data.
+  if (selected.length < limit) {
+    const selectedIds = new Set(selected.map(signal => signal.id));
+    for (const signal of items) {
+      if (!selectedIds.has(signal.id)) {
+        selected.push(signal);
+        if (selected.length >= limit) break;
+      }
+    }
+  }
+
+  return selected.slice(0, limit);
+}
+
 function getBrokerForSymbol(symbol: string): { name: string; link: string; color: string } {
   const s = (symbol || "").toUpperCase();
   if (/^(R_|1HZ|BOOM|CRASH|STEP|JUMP|RANGE|VOL)/i.test(s)) {
@@ -94,6 +144,7 @@ function isWinShowcaseActive(signal: ManualSignal): boolean {
 
 export const HomeSignalsWidget = () => {
   const [brokerFilter, setBrokerFilter] = useState("all");
+  const [timeframeFilter, setTimeframeFilter] = useState("all");
   const { user } = useAuth();
   const { isBasicOrAbove } = useSubscriptionGate();
 
@@ -101,14 +152,14 @@ export const HomeSignalsWidget = () => {
     queryKey: ["home-signals-with-wins"],
     queryFn: async () => {
       const now = new Date();
-      const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+      const fourDaysAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000);
       const { data, error } = await supabase
         .from("trading_signals")
         .select("*")
         .or(`status.eq.ACTIVE,outcome.eq.win`)
-        .gte("created_at", twoDaysAgo.toISOString())
+        .gte("created_at", fourDaysAgo.toISOString())
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(100);
       if (error) throw error;
       return (data || []) as ManualSignal[];
     },
@@ -130,18 +181,33 @@ export const HomeSignalsWidget = () => {
   );
 
   const brokerTabs = (
-    <div className="flex flex-wrap gap-1.5 mb-4">
-      {BROKER_FILTERS.map(b => (
-        <Button
-          key={b.value}
-          variant={brokerFilter === b.value ? "default" : "outline"}
-          size="sm"
-          className="h-7 text-xs px-3"
-          onClick={() => setBrokerFilter(b.value)}
-        >
-          {b.label}
-        </Button>
-      ))}
+    <div className="space-y-2 mb-4">
+      <div className="flex flex-wrap gap-1.5">
+        {TIMEFRAME_FILTERS.map(t => (
+          <Button
+            key={t.value}
+            variant={timeframeFilter === t.value ? "default" : "outline"}
+            size="sm"
+            className="h-7 text-[11px] px-3 font-bold"
+            onClick={() => setTimeframeFilter(t.value)}
+          >
+            {t.label}
+          </Button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {BROKER_FILTERS.map(b => (
+          <Button
+            key={b.value}
+            variant={brokerFilter === b.value ? "default" : "outline"}
+            size="sm"
+            className="h-7 text-xs px-3"
+            onClick={() => setBrokerFilter(b.value)}
+          >
+            {b.label}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 
@@ -178,7 +244,15 @@ export const HomeSignalsWidget = () => {
     });
   }
 
-  displaySignals = displaySignals.slice(0, 6);
+  // The ALL view deliberately rotates through the four engine horizons so
+  // frequent M1 scalps do not crowd out 15M / 1H / 1D setups.
+  if (timeframeFilter !== "all") {
+    displaySignals = displaySignals
+      .filter(s => (s.timeframe || "").toUpperCase() === timeframeFilter)
+      .slice(0, 6);
+  } else {
+    displaySignals = selectHomeSignalsByHorizon(displaySignals, 6);
+  }
 
   if (displaySignals.length === 0) {
     return (
@@ -271,7 +345,9 @@ export const HomeSignalsWidget = () => {
                         LOSS
                       </Badge>
                     )}
-                    <Badge variant="outline">{signal.timeframe}</Badge>
+                    <Badge variant="outline" className="text-[9px] font-bold">
+                      {timeframeLabel(signal.timeframe)}
+                    </Badge>
                   </div>
                 </div>
                 {/* Broker tags */}
