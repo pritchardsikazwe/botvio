@@ -510,6 +510,7 @@ export const useDerivAPI = () => {
     unsubscribeTicks,
     getProposal,
     buyContract,
+    sellContract,
     placeTrade,
     subscribeContract,
     onContractUpdate,
