@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDeriv } from "@/contexts/DerivContext";
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
-import { getStyleById, type ContractTypeConfig } from "@/config/tradingStyles";
+import { getStyleById } from "@/config/tradingStyles";
 import { runEngine, rsi, type EngineType, type SignalResult } from "@/lib/signalEngines";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { TickChart } from "@/components/deriv-app/TickChart";
 import { useDerivSymbols } from "@/hooks/useDerivSymbols";
 import { toast } from "sonner";
-import { Activity, ArrowDownRight, ArrowUpRight, Gauge, Loader2, Sparkles, UserCircle2, Bot, UserRound, RefreshCw } from "lucide-react";
+import { Activity, ArrowDownRight, ArrowUpRight, Loader2, Sparkles, UserCircle2, Bot, UserRound, RefreshCw } from "lucide-react";
 
 interface DerivTradePanelProps {
   styleId: string;
@@ -82,6 +82,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const maximumStake = primarySpec?.maxStake ?? undefined;
   const minimumDuration = primarySpec?.minDuration ?? undefined;
   const maximumDuration = primarySpec?.maxDuration ?? undefined;
+  const durationUnitsKey = allowedDurationUnits.join("|");
 
   const addLog = useCallback((message: string, tone: TradeLog["tone"] = "info") => {
     logId.current += 1;
@@ -99,6 +100,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     setActiveContract(null);
     setDurationUnit(contractType?.tickDuration ? "t" : styleId === "turbo" ? "s" : "m");
   }, [contractId, styleId, contractType?.tickDuration]);
+
+  useEffect(() => {
+    if (!allowedDurationUnits.includes(durationUnit)) {
+      setDurationUnit(allowedDurationUnits[0] ?? "t");
+    }
+  }, [durationUnitsKey, durationUnit]);
 
   useEffect(() => {
     if (!authorized || !symbol) return;
