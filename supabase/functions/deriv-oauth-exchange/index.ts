@@ -106,17 +106,27 @@ Deno.serve(async (req) => {
     let accountBalance: number | null = null;
     let accountCurrency: string | null = null;
     let isVirtual = false;
+    let accounts: Array<any> = [];
 
     if (accountsResponse.ok) {
       const accountsData = await accountsResponse.json();
-      // Get the first account (or find demo/real)
-      const accounts = accountsData.data || accountsData.accounts || [];
-      if (accounts.length > 0) {
-        const account = accounts[0];
-        loginId = account.account_id || account.loginid || null;
-        accountBalance = account.balance ?? null;
-        accountCurrency = account.currency || null;
-        isVirtual = account.account_type === "demo" || !!account.is_virtual;
+      const rawAccounts = accountsData.data || accountsData.accounts || [];
+      accounts = Array.isArray(rawAccounts) ? rawAccounts.map((account: any) => ({
+        loginid: account.account_id || account.loginid || account.login_id || null,
+        balance: account.balance ?? null,
+        currency: account.currency || null,
+        is_virtual: account.account_type === "demo" || account.account_type === "virtual" || !!account.is_virtual,
+        account_type: account.account_type || (account.is_virtual ? "demo" : "real"),
+        status: account.status || null,
+      })).filter((account: any) => !!account.loginid) : [];
+
+      // Keep the first account as the connection summary for backwards compatibility.
+      const account = accounts[0];
+      if (account) {
+        loginId = account.loginid;
+        accountBalance = account.balance;
+        accountCurrency = account.currency;
+        isVirtual = !!account.is_virtual;
       }
     } else {
       console.warn("Failed to fetch accounts:", accountsResponse.status);
