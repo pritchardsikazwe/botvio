@@ -92,10 +92,42 @@ export default function DerivCallbackPage() {
           return;
         }
 
-        // Store the access token locally for WebSocket usage
+        // Store the access token locally for WebSocket usage.
         if (data.token) {
           setDerivOAuthToken(data.token);
         }
+
+        // Save every Options account returned by Deriv, not only the first one.
+        // This lets Botvio show Demo + Real together and switch between them
+        // without sending the user back to Trading Connections.
+        const preferredType = sessionStorage.getItem("deriv_preferred_account_type");
+        const accounts = Array.isArray(data.accounts) ? data.accounts : [];
+        if (user && data.token && accounts.length > 0) {
+          await supabase
+            .from("user_deriv_tokens" as any)
+            .update({ is_active: false } as any)
+            .eq("user_id", user.id)
+            .eq("is_active", true);
+
+          const preferred = accounts.find((a: any) =>
+            preferredType === "demo" ? !!a.is_virtual : preferredType === "real" ? !a.is_virtual : !!a.is_virtual
+          ) || accounts[0];
+
+          for (const account of accounts) {
+            await supabase
+              .from("user_deriv_tokens" as any)
+              .upsert({
+                user_id: user.id,
+                loginid: account.loginid,
+                is_virtual: !!account.is_virtual,
+                currency: account.currency || "USD",
+                token_encrypted: data.token,
+                label: account.is_virtual ? "Demo" : "Real",
+                is_active: account.loginid === preferred.loginid,
+              } as any, { onConflict: "user_id,loginid" });
+          }
+        }
+        sessionStorage.removeItem("deriv_preferred_account_type");
 
         setStatus("success");
         setMessage("Connected to Deriv successfully!");
@@ -106,7 +138,7 @@ export default function DerivCallbackPage() {
         localStorage.removeItem(OAUTH_COOLDOWN_KEY);
 
         setTimeout(() => {
-          navigate("/accounts?oauth=complete");
+          navigate("/deriv-app?oauth=complete");
         }, 2000);
       } catch (err: any) {
         clearPKCEStorage();
