@@ -224,18 +224,18 @@ export function FollowerTradeCopyPanel() {
                 size="sm"
                 variant="outline"
                 className="h-7 px-2"
-                disabled={!a.tradecopy_user_id || actAttach.isPending}
+                disabled={actAttach.isPending}
                 onClick={async () => {
                   try {
                     const result = await actAttach.mutateAsync({ action: "attach_market_feed", payload: { account_id: a.id } });
                     const count = Array.isArray((result as any)?.feed?.symbols) ? (result as any).feed.symbols.length : 0;
-                    toast.success(`Weltrade DATA FEED attached · ${count} symbols detected`);
+                    toast.success(`Weltrade DATA FEED active · ${count} symbols detected`);
                   } catch (e) {
                     toast.error((e as Error).message);
                   }
                 }}
               >
-                <Database className="mr-1 h-3.5 w-3.5" /> DATA FEED
+                <Database className="mr-1 h-3.5 w-3.5" /> ATTACH DATA FEED
               </Button>}
               <span className="flex gap-1.5"><EnvBadge env={a.environment} /><StatusBadge status={a.connection_status} /></span>
               <Button
