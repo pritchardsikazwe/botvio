@@ -232,8 +232,8 @@ export async function getAssetAvailability(
   if (cap.unverified) {
     return {
       ...shared,
-      status: "limited",
-      reason: "Availability could not be confirmed with Deriv right now.",
+      status: "unavailable",
+      reason: "Deriv availability could not be verified, so this symbol is blocked.",
       technical: cap.error,
     };
   }
@@ -242,6 +242,9 @@ export async function getAssetAvailability(
   }
   if (!cap.isOpen) {
     return { ...shared, status: "unavailable", reason: `${displayName} market is currently closed.` };
+  }
+  if (Object.keys(cap.contracts).length === 0) {
+    return { ...shared, status: "unavailable", reason: `${displayName} has no currently available contract types.` };
   }
   if (!supportsContract(cap, contractTypes)) {
     return {
