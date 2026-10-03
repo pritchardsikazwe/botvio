@@ -15,10 +15,10 @@ export function mapToDerivSymbol(displaySymbol: string): string | null {
     s.startsWith("frx") ||
     s.startsWith("cry") ||
     s.includes("_") ||
-    /^JD\\d+$/.test(s) ||
-    /^BOOM\\d+N?$/.test(s) ||
-    /^CRASH\\d+N?$/.test(s) ||
-    /^1HZ\\d+V?$/.test(s) ||
+    /^JD\d+$/.test(s) ||
+    /^BOOM\d+N?$/.test(s) ||
+    /^CRASH\d+N?$/.test(s) ||
+    /^1HZ\d+V?$/.test(s) ||
     s === "stpRNG" ||
     /^RDBULL$|^RDBEAR$/.test(s)
   ) return s;
