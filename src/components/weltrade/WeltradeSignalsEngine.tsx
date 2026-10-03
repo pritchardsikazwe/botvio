@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { TradingChart } from "@/components/chart/TradingChart";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
+import { supabase } from "@/integrations/supabase/client";
 import { computeIndicators } from "@/lib/marketData/indicators";
 import { computeSignals, summarizeSignals, type EngineSignal } from "@/lib/marketData/signalEngine";
 import { getSyntxProfile, type SyntxStrategyMode } from "@/lib/marketData/syntxStrategy";
@@ -121,6 +122,27 @@ export const WeltradeSignalsEngine = () => {
     [recent]
   );
   const stats = useMemo(() => summarizeSignals(signals), [signals]);
+
+  // Save real-candle SyntX signals (and their WIN/LOSS results) to the Signals tab.
+  useEffect(() => {
+    if (!instrument.syntxFamily || candles.length < 50 || !signals.length) return;
+    const recentSigs = signals.slice(-20).map((s) => ({
+      symbol: instrument.mt5Symbol, timeframe: s.timeframe, direction: s.direction,
+      strategy: s.strategy, strategyId: s.strategyId, confidence: s.confidence,
+      entry: s.entry, stopLoss: s.stopLoss, takeProfit: s.takeProfit,
+      time: s.time, result: s.result, reason: s.reason?.slice(0, 500), family: instrument.syntxFamily,
+    }));
+    const key = JSON.stringify(recentSigs.map((s) => [s.time, s.result]));
+    const t = setTimeout(async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) return;
+      const cacheKey = `botvio.syntx.sync.${instrument.mt5Symbol}.${prefs.timeframe}`;
+      if (sessionStorage.getItem(cacheKey) === key) return;
+      const { data } = await supabase.functions.invoke("record-syntx-signals", { body: { signals: recentSigs } });
+      if (data?.ok) sessionStorage.setItem(cacheKey, key);
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [signals, candles.length, instrument, prefs.timeframe]);
 
   const categoryInstruments = useMemo(
     () => WELTRADE_INSTRUMENTS.filter((i) => i.category === prefs.category),
