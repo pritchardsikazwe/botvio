@@ -255,6 +255,10 @@ Deno.serve(async (req) => {
 
     throw new Error("Unknown action");
   } catch (error) {
-    return json({ ok: false, error: safeError(error) }, 400);
+    // Expected conditions (signed out, no feed connected, upstream down) reply 200
+    // with ok:false so the page shows a message instead of breaking.
+    const message = safeError(error);
+    const code = /sign in required/i.test(message) ? "auth" : /no weltrade syntx api connection/i.test(message) ? "not_connected" : "error";
+    return json({ ok: false, error: message, code });
   }
 });

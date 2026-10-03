@@ -15,6 +15,8 @@ const TF_API: Record<string, string> = {
 };
 
 async function invoke<T>(action: string, payload: Record<string, unknown> = {}): Promise<T> {
+  const { data: sess } = await supabase.auth.getSession();
+  if (!sess.session) throw new Error("Sign in and connect your Weltrade feed to see live Weltrade data");
   const { data, error } = await supabase.functions.invoke("syntx-api-studio", {
     body: { action, ...payload },
   });
