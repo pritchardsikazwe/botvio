@@ -172,6 +172,60 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
  * Locale detection on the second mount is handled by LocalePrefixRouter,
  * which sets i18next language from the URL segment.
  */
+type ChartHubResolverProps = { symbol?: string };
+
+const ChartHubResolver = ({ symbol }: ChartHubResolverProps) => {
+  const normalized = (symbol || "").replace(/[\\/_-]/g, "").toUpperCase();
+
+  const forexHubs: Record<string, React.ReactNode> = {
+    EURUSD: <EurUsdHub />,
+    GBPUSD: <GbpUsdTradingHub />,
+    USDJPY: <UsdJpyHub />,
+    AUDUSD: <AudUsdHub />,
+    USDCAD: <UsdCadHub />,
+    USDCHF: <UsdChfHub />,
+    EURGBP: <EurGbpHub />,
+    EURJPY: <EurJpyHub />,
+    NZDUSD: <NzdUsdHub />,
+    USDCNY: <UsdCnyHub />,
+  };
+
+  const stockHubs: Record<string, React.ReactNode> = {
+    NVDA: <NvidiaHub />,
+    TSLA: <TeslaHub />,
+    AMD: <AmdHub />,
+    MU: <MicronHub />,
+    AAPL: <AppleHub />,
+    MSFT: <MicrosoftHub />,
+    AVGO: <BroadcomHub />,
+    AMZN: <AmazonHub />,
+    META: <MetaHub />,
+    GOOGL: <AlphabetHub />,
+  };
+
+  if (normalized === "XAUUSD" || normalized === "GOLD") return <GoldTradingHub />;
+  if (normalized === "XAGUSD" || normalized === "SILVER") return <SilverTradingHub />;
+  if (normalized === "BTCUSD" || normalized === "BITCOIN" || normalized === "BTC") return <BitcoinTradingHub />;
+  if (forexHubs[normalized]) return forexHubs[normalized];
+  if (stockHubs[normalized]) return stockHubs[normalized];
+
+  if (["US30", "DJ30", "DOW", "DJI"].includes(normalized)) return <Us30Hub />;
+  if (["NAS100", "NASDAQ100", "USTEC", "NAS100USD"].includes(normalized)) return <Nas100Hub />;
+  if (["GER40", "DE40", "DAX", "GER40USD"].includes(normalized)) return <Ger40Hub />;
+
+  // Deriv synthetic indices already have a dedicated synthetic workspace.
+  if (
+    /^(?:R_|1HZ|BOOM|CRASH|STEP|VOLATILITY|VOL|DRIFT|JUMP|RANGE|DEX|DSI)/.test(
+      (symbol || "").toUpperCase()
+    )
+  ) {
+    return <SyntheticHub />;
+  }
+
+  // Keep a safe fallback for symbols that do not yet have a specialized hub.
+  return <ChartPage />;
+};
+
 export const AppRoutes = () => {
   const location = useLocation();
 
@@ -275,7 +329,7 @@ export const AppRoutes = () => {
     <Route path="chart/xau-usd" element={<Navigate to="/chart/XAUUSD" replace />} />
     <Route path="xauusd" element={<Navigate to="/gold" replace />} />
     <Route path="xau-usd" element={<Navigate to="/gold" replace />} />
-    <Route path="chart/:symbol" element={<Paid><ChartPage /></Paid>} />
+    <Route path="chart/:symbol" element={<Paid><ChartHubResolver />} />
     <Route path="gold" element={<Paid><GoldTradingHub /></Paid>} />
     <Route path="news-trader-hub" element={<Paid><NewsTraderHub /></Paid>} />
     <Route path="trader-hub" element={<Navigate to="/news-trader-hub" replace />} />
