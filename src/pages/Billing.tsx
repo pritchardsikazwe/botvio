@@ -1,7 +1,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { usePricingPlans, useMySubscription } from "@/hooks/useBotvio";
-import { useTrialStatus, useActivateTrial, usePaymentRequests, useCreatePaymentRequest, useUploadPaymentProof } from "@/hooks/useBilling";
+import { useTrialStatus, useActivateTrial, usePaymentRequests } from "@/hooks/useBilling";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,6 @@ import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useNavigate, Link } from "react-router-dom";
 import { Check, Crown, Clock, Users, Bot, Copy, Star, Gift, Sparkles, Shield, Zap, BarChart3 } from "lucide-react";
-import { toast } from "sonner";
 
 const Billing = () => {
   const { user, isAdmin } = useAuth();
@@ -22,8 +21,6 @@ const Billing = () => {
   const { data: trialStatus } = useTrialStatus();
   const { data: paymentRequests } = usePaymentRequests();
   const activateTrial = useActivateTrial();
-  const createPaymentRequest = useCreatePaymentRequest();
-  const uploadProof = useUploadPaymentProof();
   
 
   const currentPlanCode = mySubscription?.pricing_plan?.code || "trial";
