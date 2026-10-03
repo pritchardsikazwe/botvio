@@ -2226,6 +2226,77 @@ export type Database = {
           },
         ]
       }
+      direct_executions: {
+        Row: {
+          created_at: string
+          direction: string
+          entry_price: number | null
+          environment: string
+          error: string | null
+          id: string
+          mode: string
+          mt5_symbol: string
+          signal_id: string
+          status: string
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          ticket: string | null
+          trading_account_id: string
+          updated_at: string
+          user_id: string
+          volume: number
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          entry_price?: number | null
+          environment?: string
+          error?: string | null
+          id?: string
+          mode?: string
+          mt5_symbol: string
+          signal_id: string
+          status?: string
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          ticket?: string | null
+          trading_account_id: string
+          updated_at?: string
+          user_id: string
+          volume: number
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          entry_price?: number | null
+          environment?: string
+          error?: string | null
+          id?: string
+          mode?: string
+          mt5_symbol?: string
+          signal_id?: string
+          status?: string
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          ticket?: string | null
+          trading_account_id?: string
+          updated_at?: string
+          user_id?: string
+          volume?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_executions_trading_account_id_fkey"
+            columns: ["trading_account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ea_tokens: {
         Row: {
           account_id: string
@@ -6510,6 +6581,12 @@ export type Database = {
           created_at: string
           credential_ref: string | null
           deriv_account_id: string | null
+          direct_live_confirmed_at: string | null
+          direct_lot: number
+          direct_min_confidence: number
+          direct_signal_enabled: boolean
+          direct_signal_status: string
+          direct_symbol_map: Json
           environment: string
           execution_provider: string | null
           external_account_id: string | null
@@ -6520,6 +6597,9 @@ export type Database = {
           label: string
           last_diagnostic: Json | null
           last_diagnostic_at: string | null
+          last_direct_error: string | null
+          last_direct_execution_at: string | null
+          last_direct_signal_at: string | null
           login_id: string | null
           permissions_json: Json | null
           platform: string | null
@@ -6540,6 +6620,12 @@ export type Database = {
           created_at?: string
           credential_ref?: string | null
           deriv_account_id?: string | null
+          direct_live_confirmed_at?: string | null
+          direct_lot?: number
+          direct_min_confidence?: number
+          direct_signal_enabled?: boolean
+          direct_signal_status?: string
+          direct_symbol_map?: Json
           environment?: string
           execution_provider?: string | null
           external_account_id?: string | null
@@ -6550,6 +6636,9 @@ export type Database = {
           label: string
           last_diagnostic?: Json | null
           last_diagnostic_at?: string | null
+          last_direct_error?: string | null
+          last_direct_execution_at?: string | null
+          last_direct_signal_at?: string | null
           login_id?: string | null
           permissions_json?: Json | null
           platform?: string | null
@@ -6570,6 +6659,12 @@ export type Database = {
           created_at?: string
           credential_ref?: string | null
           deriv_account_id?: string | null
+          direct_live_confirmed_at?: string | null
+          direct_lot?: number
+          direct_min_confidence?: number
+          direct_signal_enabled?: boolean
+          direct_signal_status?: string
+          direct_symbol_map?: Json
           environment?: string
           execution_provider?: string | null
           external_account_id?: string | null
@@ -6580,6 +6675,9 @@ export type Database = {
           label?: string
           last_diagnostic?: Json | null
           last_diagnostic_at?: string | null
+          last_direct_error?: string | null
+          last_direct_execution_at?: string | null
+          last_direct_signal_at?: string | null
           login_id?: string | null
           permissions_json?: Json | null
           platform?: string | null
