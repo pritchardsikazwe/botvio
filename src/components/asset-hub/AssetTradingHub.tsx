@@ -271,7 +271,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
           {/* AI Analysis */}
           <TabsContent value="ai" className="mt-6 space-y-4">
             {config.chartProvider !== "tradingview" && (
-              <BotvioScalpRobot displaySymbol={config.displaySymbol} assetLabel={config.assetLabel} includeWeltrade={config.includeWeltradeSignals} />
+              <BotvioScalpRobot displaySymbol={config.displaySymbol} assetLabel={config.assetLabel} />
             )}
 
             {config.siblingScalp && (
