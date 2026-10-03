@@ -77,21 +77,133 @@ async function fetchCandles(symbol: string, granularity = 60, count = 60): Promi
   });
 }
 
-function buildSignal(candles: Candle[]): { signal: "BUY" | "SELL" | "WAIT"; confidence: number; reason: string } {
-  if (candles.length < 25) return { signal: "WAIT", confidence: 0, reason: "Not enough candles" };
-  const closes = candles.map((c) => c.close);
-  const e20 = ema(closes, 20);
-  const e50 = ema(closes, 50) ?? ema(closes, Math.min(50, closes.length - 1));
+type StrategyProfile = {
+  id: string;
+  label: string;
+  minConfidence: number;
+  atrStop: number;
+  atrTarget: number;
+  maxExtensionAtr: number;
+};
+
+function strategyFor(symbol: string): StrategyProfile {
+  const s = String(symbol || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (s === "XAUUSD" || s === "GOLD") return { id: "GOLD_STRUCTURE", label: "Gold Structure + Liquidity", minConfidence: 76, atrStop: 1.35, atrTarget: 2.45, maxExtensionAtr: 1.25 };
+  if (s === "BTCUSD" || s === "BTCUSDT") return { id: "BTC_MOMENTUM", label: "Bitcoin Momentum Breakout", minConfidence: 77, atrStop: 1.55, atrTarget: 2.8, maxExtensionAtr: 1.5 };
+  if (s === "NAS100" || s === "NASDAQ" || s === "NDX") return { id: "NAS100_BREAKOUT", label: "NAS100 Breakout + Retest", minConfidence: 77, atrStop: 1.4, atrTarget: 2.6, maxExtensionAtr: 1.35 };
+  if (s === "GBPUSD") return { id: "GBP_PULLBACK", label: "GBP Momentum Pullback", minConfidence: 75, atrStop: 1.2, atrTarget: 2.15, maxExtensionAtr: 1.15 };
+  if (/^[A-Z]{6}$/.test(s)) return { id: "FX_TREND_PULLBACK", label: "FX Trend + Pullback", minConfidence: 74, atrStop: 1.25, atrTarget: 2.2, maxExtensionAtr: 1.2 };
+  return { id: "GENERIC_TREND", label: "Adaptive Trend + Pullback", minConfidence: 72, atrStop: 1.3, atrTarget: 2.25, maxExtensionAtr: 1.25 };
+}
+
+function atr14(candles: Candle[]): number | null {
+  if (candles.length < 16) return null;
+  let sum = 0;
+  for (let i = candles.length - 14; i < candles.length; i++) {
+    const c = candles[i], p = candles[i - 1];
+    sum += Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close));
+  }
+  return sum / 14;
+}
+
+function buildSignal(candles: Candle[], symbol: string): {
+  signal: "BUY" | "SELL" | "WAIT";
+  confidence: number;
+  reason: string;
+  strategy: StrategyProfile;
+  entry?: number;
+  stopLoss?: number;
+  takeProfit?: number;
+} {
+  const strategy = strategyFor(symbol);
+  if (candles.length < 60) return { signal: "WAIT", confidence: 0, reason: "Not enough candles", strategy };
+
+  const closes = candles.map(c => c.close);
+  const e9 = ema(closes, 9), e21 = ema(closes, 21), e50 = ema(closes, 50);
   const r = rsi(closes, 14);
-  const last = closes[closes.length - 1];
-  if (e20 == null || e50 == null || r == null) return { signal: "WAIT", confidence: 0, reason: "Indicators warming up" };
-  const trendUp = e20 > e50 && last > e20;
-  const trendDown = e20 < e50 && last < e20;
+  const a = atr14(candles);
+  if (a == null || r == null) return { signal: "WAIT", confidence: 0, reason: "Indicators warming up", strategy };
+
+  const last = candles[candles.length - 1];
+  const prev = candles[candles.length - 2];
+  const trendUp = e9 > e21 && e21 > e50 && last.close > e50;
+  const trendDown = e9 < e21 && e21 < e50 && last.close < e50;
+  const body = Math.abs(last.close - last.open);
+  const lowerWick = Math.min(last.open, last.close) - last.low;
+  const upperWick = last.high - Math.max(last.open, last.close);
+  const bullReject = last.close > last.open && lowerWick > Math.max(body * 0.8, a * 0.2);
+  const bearReject = last.close < last.open && upperWick > Math.max(body * 0.8, a * 0.2);
+  const range = last.high - last.low;
+  const expansion = range >= a * 1.15;
+  const overExtendedUp = (last.close - e9) / a > strategy.maxExtensionAtr;
+  const overExtendedDown = (e9 - last.close) / a > strategy.maxExtensionAtr;
+  const lookback = candles.slice(-22, -2);
+  const hi = Math.max(...lookback.map(x => x.high));
+  const lo = Math.min(...lookback.map(x => x.low));
+  const breakoutUp = last.close > hi && prev.close <= hi;
+  const breakoutDown = last.close < lo && prev.close >= lo;
+
   let signal: "BUY" | "SELL" | "WAIT" = "WAIT";
-  let conf = 50;
-  if (trendUp && r > 50 && r < 75) { signal = "BUY"; conf = 60 + Math.min(20, Math.round(r - 50)); }
-  else if (trendDown && r < 50 && r > 25) { signal = "SELL"; conf = 60 + Math.min(20, Math.round(50 - r)); }
-  return { signal, confidence: conf, reason: `EMA20 ${e20.toFixed(2)} / EMA50 ${e50.toFixed(2)} / RSI ${r.toFixed(1)}` };
+  let confidence = 0;
+  const reasons: string[] = [];
+
+  if (strategy.id === "GOLD_STRUCTURE" || strategy.id === "FX_TREND_PULLBACK" || strategy.id === "GBP_PULLBACK") {
+    if (trendUp && e9 > e21 && bullReject && r >= 48 && r <= 70 && !overExtendedUp) {
+      signal = "BUY"; confidence = strategy.minConfidence - 7;
+      reasons.push("trend structure", "pullback rejection", "momentum-safe RSI");
+    } else if (trendDown && e9 < e21 && bearReject && r >= 30 && r <= 52 && !overExtendedDown) {
+      signal = "SELL"; confidence = strategy.minConfidence - 7;
+      reasons.push("trend structure", "pullback rejection", "momentum-safe RSI");
+    }
+    if (breakoutUp && !overExtendedUp && range < a * 2.2) {
+      signal = "BUY"; confidence = Math.max(confidence, strategy.minConfidence);
+      reasons.push("confirmed range breakout");
+    } else if (breakoutDown && !overExtendedDown && range < a * 2.2) {
+      signal = "SELL"; confidence = Math.max(confidence, strategy.minConfidence);
+      reasons.push("confirmed range breakdown");
+    }
+  } else if (strategy.id === "BTC_MOMENTUM" || strategy.id === "NAS100_BREAKOUT") {
+    if (breakoutUp && expansion && !overExtendedUp) {
+      signal = "BUY"; confidence = strategy.minConfidence;
+      reasons.push("breakout", "volatility expansion", "anti-chase filter passed");
+    } else if (breakoutDown && expansion && !overExtendedDown) {
+      signal = "SELL"; confidence = strategy.minConfidence;
+      reasons.push("breakdown", "volatility expansion", "anti-chase filter passed");
+    } else if (trendUp && bullReject && r >= 50 && r <= 72 && !overExtendedUp) {
+      signal = "BUY"; confidence = strategy.minConfidence - 5;
+      reasons.push("trend continuation", "pullback confirmation");
+    } else if (trendDown && bearReject && r >= 28 && r <= 50 && !overExtendedDown) {
+      signal = "SELL"; confidence = strategy.minConfidence - 5;
+      reasons.push("trend continuation", "pullback confirmation");
+    }
+  } else if (trendUp && bullReject && r >= 48 && r <= 70 && !overExtendedUp) {
+    signal = "BUY"; confidence = strategy.minConfidence;
+    reasons.push("adaptive trend", "pullback confirmation");
+  } else if (trendDown && bearReject && r >= 30 && r <= 52 && !overExtendedDown) {
+    signal = "SELL"; confidence = strategy.minConfidence;
+    reasons.push("adaptive trend", "pullback confirmation");
+  }
+
+  if (range >= a * 2.4) {
+    signal = "WAIT";
+    reasons.push("abnormal volatility candle");
+  }
+  if ((signal === "BUY" && (r > 78 || overExtendedUp)) || (signal === "SELL" && (r < 22 || overExtendedDown))) {
+    signal = "WAIT";
+    reasons.push("late-entry filter");
+  }
+  if (signal === "WAIT" || confidence < strategy.minConfidence) {
+    return { signal: "WAIT", confidence, reason: reasons.join(" · ") || "No confirmed setup", strategy };
+  }
+
+  const entry = last.close;
+  const sl = signal === "BUY" ? entry - a * strategy.atrStop : entry + a * strategy.atrStop;
+  const tp = signal === "BUY" ? entry + a * strategy.atrTarget : entry - a * strategy.atrTarget;
+  return {
+    signal, confidence: Math.min(96, confidence),
+    reason: reasons.join(" · "),
+    strategy, entry, stopLoss: sl, takeProfit: tp,
+  };
 }
 
 serve(async (req) => {
@@ -180,9 +292,9 @@ serve(async (req) => {
             skipped++; continue;
           }
 
-          const candles = await fetchCandles(toDerivSymbol(inst.display_symbol), 60, 60);
-          const sig = buildSignal(candles);
-          if (sig.signal === "WAIT" || sig.confidence < (inst.min_confidence ?? 70)) {
+          const candles = await fetchCandles(toDerivSymbol(inst.display_symbol), 60, 80);
+          const sig = buildSignal(candles, inst.display_symbol);
+          if (sig.signal === "WAIT" || sig.confidence < Math.max(inst.min_confidence ?? 70, sig.strategy.minConfidence)) {
             skipped++; continue;
           }
 
@@ -193,20 +305,17 @@ serve(async (req) => {
             try {
               const lastClose = candles[candles.length - 1]?.close ?? 0;
               const isBuy = sig.signal === "BUY";
-              // Tight scalp brackets: ~0.25% SL, ~0.5% TP
-              const slPct = 0.0025;
-              const tpPct = 0.005;
-              const sl = isBuy ? lastClose * (1 - slPct) : lastClose * (1 + slPct);
-              const tp = isBuy ? lastClose * (1 + tpPct) : lastClose * (1 - tpPct);
+              const sl = sig.stopLoss ?? lastClose;
+              const tp = sig.takeProfit ?? lastClose;
               await admin.from("trading_signals").insert({
-                strategy_name: "Botvio AI Strategy",
+                strategy_name: sig.strategy.label,
                 symbol: inst.display_symbol,
                 timeframe: "M1",
                 direction: sig.signal,
                 entry_price: Number(lastClose.toFixed(5)),
                 stop_loss: Number(sl.toFixed(5)),
                 take_profit: Number(tp.toFixed(5)),
-                reason: `Cloud worker · ${sig.reason}`,
+                reason: `Cloud worker · ${sig.strategy.id} · ${sig.reason}`,
                 confidence: sig.confidence,
                 status: "ACTIVE",
                 category: inst.category || "synthetic",
@@ -253,13 +362,9 @@ serve(async (req) => {
               .limit(1)
               .maybeSingle();
             if (!terminal) { skipped++; continue; }
-            // Derive SL/TP from latest close (same brackets as auto-post)
-            const lastClose = candles[candles.length - 1]?.close ?? 0;
-            const isBuy = sig.signal === "BUY";
-            const slPct = 0.0025;
-            const tpPct = 0.005;
-            const slPx = lastClose > 0 ? Number((isBuy ? lastClose * (1 - slPct) : lastClose * (1 + slPct)).toFixed(5)) : undefined;
-            const tpPx = lastClose > 0 ? Number((isBuy ? lastClose * (1 + tpPct) : lastClose * (1 - tpPct)).toFixed(5)) : undefined;
+            // Use the symbol-specific ATR bracket generated by the strategy.
+            const slPx = sig.stopLoss != null ? Number(sig.stopLoss.toFixed(5)) : undefined;
+            const tpPx = sig.takeProfit != null ? Number(sig.takeProfit.toFixed(5)) : undefined;
             const command: Record<string, unknown> = {
               action: "OPEN",
               symbol: inst.display_symbol, // synthetic-hub already passes broker MT5 symbol
