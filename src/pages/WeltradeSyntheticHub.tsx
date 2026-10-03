@@ -1,103 +1,200 @@
+import { useState } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
+import { PageBanner } from "@/components/layout/PageBanner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart3, Signal, Sparkles, Activity } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Signal,
+  Sparkles,
+  Crosshair,
+  LayoutDashboard,
+  Layers,
+  Newspaper,
+  ShieldCheck,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
 import { WeltradeSignalsEngine } from "@/components/weltrade/WeltradeSignalsEngine";
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
 import { SyntxStrategyHub } from "@/components/weltrade/SyntxStrategyHub";
 import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
 
+const QUICK_STATS = [
+  { icon: BarChart3, label: "Live Source", value: "Weltrade MT5 / API Studio" },
+  { icon: Clock, label: "Market", value: "24/7 Synthetic" },
+  { icon: TrendingUp, label: "Analysis", value: "BOTVIO SyntX Engine" },
+  { icon: ShieldCheck, label: "Feed Rule", value: "Real data only" },
+];
+
 export default function WeltradeSyntheticHub() {
+  const [activeTab, setActiveTab] = useState("overview");
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Weltrade SyntX Hub – Live Charts, Signals & Strategies"
-        description="BOTVIO Weltrade SyntX hub with live MT5 API Studio charts, signal cards and family-aware synthetic strategies."
+        seoKey="weltrade-syntx"
+        title="Weltrade SyntX Trading Hub – Live Charts, Signals & Strategies"
+        description="Live Weltrade SyntX charts powered by a connected MT5 API Studio data feed, with BOTVIO signals, family-aware strategies and technical analysis."
       />
       <Header />
 
       <main className="container mx-auto space-y-6 px-4 py-6">
-        <section className="relative overflow-hidden rounded-2xl border border-warning/20 bg-gradient-to-br from-warning/10 via-card to-card p-6 md:p-8">
-          <div className="absolute right-0 top-0 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full bg-warning/5 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-48 w-48 -translate-x-1/2 translate-y-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="relative z-10">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+        <PageBanner
+          title="Weltrade SyntX"
+          accent="Trading Hub"
+          description="A dedicated synthetic-indices workspace using live Weltrade MT5/API Studio prices — with the same chart-first experience used across BOTVIO's specialist trading hubs."
+          crumbs={[
+            { label: "Home", to: "/" },
+            { label: "Trading Hubs", to: "/markets" },
+            { label: "Weltrade SyntX" },
+          ]}
+          action={
+            <>
               <Badge className="border-warning/30 bg-warning/20 font-mono text-xs text-warning">WELTRADE SYNTX</Badge>
-              <Badge variant="outline" className="border-success/40 text-xs text-success">24/7 Synthetic Market</Badge>
+              <Badge variant="outline" className="border-success/40 text-xs text-success">
+                <Activity className="mr-1 h-3 w-3" /> LIVE MT5 FEED
+              </Badge>
               <Badge variant="outline" className="border-primary/30 text-xs">
-                <Activity className="mr-1 h-3 w-3" /> MT5 API Studio Feed
+                <Sparkles className="mr-1 h-3 w-3" /> BOTVIO AI
               </Badge>
-              <Badge variant="outline" className="border-warning/30 text-xs text-warning">
-                <Sparkles className="mr-1 h-3 w-3" /> BOTVIO AI Analysis
-              </Badge>
-            </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">
-              Weltrade SyntX <span className="text-warning">Trading Hub</span>
-            </h1>
-            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-              Live Weltrade synthetic charts, signal cards and family-specific strategy analysis in one workspace.
-              The feed comes from your connected Weltrade MT5 account through API Studio — no bridge ticks and no
-              Deriv feed replacement.
-            </p>
-          </div>
-        </section>
+            </>
+          }
+          stats={QUICK_STATS.map((s) => ({ icon: s.icon, value: s.value, label: s.label }))}
+        />
 
         <Card className="border border-warning/20 bg-card/70">
           <CardContent className="grid gap-3 p-4 sm:grid-cols-3">
             <div className="flex items-center gap-3">
               <BarChart3 className="h-5 w-5 text-warning" />
-              <div><p className="text-xs font-bold">Live chart</p><p className="text-[10px] text-muted-foreground">Weltrade SyntX MT5 quotes + history</p></div>
+              <div>
+                <p className="text-xs font-bold">Live chart</p>
+                <p className="text-[10px] text-muted-foreground">Real Weltrade MT5 quotes + history</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Signal className="h-5 w-5 text-primary" />
-              <div><p className="text-xs font-bold">Signal cards</p><p className="text-[10px] text-muted-foreground">BUY/SELL, entry, SL, TP and confidence</p></div>
+              <div>
+                <p className="text-xs font-bold">Chart signals</p>
+                <p className="text-[10px] text-muted-foreground">Entry, SL, TP and confidence from the same candles</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-success" />
-              <div><p className="text-xs font-bold">Strategy layer</p><p className="text-[10px] text-muted-foreground">Family-aware SyntX strategy modes</p></div>
+              <Layers className="h-5 w-5 text-success" />
+              <div>
+                <p className="text-xs font-bold">SyntX families</p>
+                <p className="text-[10px] text-muted-foreground">GainX, PainX, FlipX, SwitchX, BreakX and more</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <section aria-labelledby="weltrade-live-chart">
-          <div className="mb-3">
-            <h2 id="weltrade-live-chart" className="flex items-center gap-2 text-lg font-black">
-              <BarChart3 className="h-5 w-5 text-warning" /> Live SyntX Chart & Engine
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground">Select a Weltrade synthetic instrument and timeframe. Signals are calculated from the same candles displayed by the chart.</p>
-          </div>
-          <WeltradeSignalsEngine />
-        </section>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 border border-border/50 bg-card p-1 md:grid-cols-5">
+            <TabsTrigger value="overview" className="gap-1.5 text-xs font-bold data-[state=active]:bg-warning/10 data-[state=active]:text-warning">
+              <LayoutDashboard className="h-4 w-4" /> Overview
+            </TabsTrigger>
+            <TabsTrigger value="signals" className="gap-1.5 text-xs font-bold data-[state=active]:bg-warning/10 data-[state=active]:text-warning">
+              <Signal className="h-4 w-4" /> Signals
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="gap-1.5 text-xs font-bold data-[state=active]:bg-warning/10 data-[state=active]:text-warning">
+              <Crosshair className="h-4 w-4" /> Strategy
+            </TabsTrigger>
+            <TabsTrigger value="families" className="gap-1.5 text-xs font-bold data-[state=active]:bg-warning/10 data-[state=active]:text-warning">
+              <Layers className="h-4 w-4" /> Families
+            </TabsTrigger>
+            <TabsTrigger value="feed" className="gap-1.5 text-xs font-bold data-[state=active]:bg-warning/10 data-[state=active]:text-warning">
+              <Activity className="h-4 w-4" /> Live Feed
+            </TabsTrigger>
+          </TabsList>
 
-        <section aria-labelledby="weltrade-signal-cards">
-          <div className="mb-3">
-            <h2 id="weltrade-signal-cards" className="flex items-center gap-2 text-lg font-black">
-              <Signal className="h-5 w-5 text-primary" /> Weltrade Signal Cards
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground">Published Weltrade signals with symbol, direction, entry, stop, target, timeframe and strategy.</p>
-          </div>
-          <SyntxSignalsSection />
-        </section>
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            <section aria-labelledby="weltrade-live-chart">
+              <div className="mb-3">
+                <h2 id="weltrade-live-chart" className="flex items-center gap-2 text-lg font-black">
+                  <BarChart3 className="h-5 w-5 text-warning" /> Live SyntX Chart & BOTVIO Engine
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Choose the Weltrade synthetic instrument and timeframe. The chart, indicators and signals all use the same live MT5/API Studio candle stream.
+                </p>
+              </div>
+              <WeltradeSignalsEngine />
+            </section>
 
-        <section aria-labelledby="weltrade-strategies">
-          <div className="mb-3">
-            <h2 id="weltrade-strategies" className="flex items-center gap-2 text-lg font-black">
-              <Sparkles className="h-5 w-5 text-success" /> Weltrade SyntX Strategies
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground">Strategy selection follows the behaviour of each SyntX family rather than treating every synthetic instrument as the same market.</p>
-          </div>
-          <div className="space-y-6">
+            <Card className="border-primary/20 bg-card">
+              <CardContent className="grid gap-4 p-5 md:grid-cols-3">
+                <div>
+                  <p className="text-sm font-bold text-foreground">Real market data</p>
+                  <p className="mt-1 text-xs text-muted-foreground">No synthetic replacement from Deriv is used for this hub.</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Family-aware signals</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Signal logic follows the selected Weltrade SyntX family.</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Chart-first workflow</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Select an instrument, inspect the chart, then review the matching signal and strategy.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="signals" className="mt-6">
+            <SyntxSignalsSection />
+          </TabsContent>
+
+          <TabsContent value="strategy" className="mt-6 space-y-6">
             <SyntxStrategyHub />
             <SyntxBotvioStrategy />
-          </div>
-        </section>
+          </TabsContent>
 
-        <div className="rounded-xl border border-warning/20 bg-warning/5 p-3 text-[11px] leading-relaxed text-muted-foreground">
-          <strong className="text-foreground">Feed separation:</strong> Weltrade SyntX uses the connected Weltrade MT5
-          account through API Studio. Existing Deriv synthetic WebSocket ticks and the Deriv Synthetic Hub remain
-          unchanged.
-        </div>
+          <TabsContent value="families" className="mt-6 space-y-4">
+            <Card className="border-warning/20 bg-card">
+              <CardContent className="space-y-3 p-5">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-warning" />
+                  <h2 className="text-base font-black">Weltrade SyntX Families</h2>
+                </div>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  Use the instrument selector inside the live chart to move between the available Weltrade families. Each family keeps its own strategy profile and signal framework rather than being treated like a Deriv synthetic symbol.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {["FX Vol.", "SFX Vol.", "GainX", "PainX", "FlipX", "SwitchX", "BreakX", "TrendX", "Progression"].map((name) => (
+                    <Badge key={name} variant="outline" className="border-warning/30 text-xs">
+                      {name}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <WeltradeSignalsEngine />
+          </TabsContent>
+
+          <TabsContent value="feed" className="mt-6 space-y-4">
+            <Card className="border-success/20 bg-card">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <Activity className="mt-0.5 h-5 w-5 text-success" />
+                  <div>
+                    <h2 className="text-sm font-black">Weltrade Live Data Feed</h2>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      This workspace uses the connected Weltrade MT5 account through API Studio for quotes and historical candles. It is a data source for analysis and signals, separate from TradeCopy execution.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Badge variant="outline" className="border-success/40 text-success">LIVE MT5 DATA</Badge>
+                      <Badge variant="outline">API STUDIO</Badge>
+                      <Badge variant="outline">TRADECOPY INDEPENDENT</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <WeltradeSignalsEngine />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
