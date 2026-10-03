@@ -258,11 +258,20 @@ Deno.serve(async (req) => {
           break;
           
         case 'RISEFALL':
+        case 'HIGHER_LOWER':
+        case 'TOUCH_NO_TOUCH':
           proposalRequest.contract_type = payload.contract_type;
           proposalRequest.duration = payload.duration;
-          proposalRequest.duration_unit = payload.duration_unit || 't';
+          proposalRequest.duration_unit = payload.duration_unit || 'm';
+          if (payload.barrier !== undefined) proposalRequest.barrier = String(payload.barrier);
           break;
-          
+        case 'ACCU':
+          proposalRequest.contract_type = 'ACCU';
+          proposalRequest.duration = payload.duration;
+          proposalRequest.duration_unit = payload.duration_unit || 'm';
+          proposalRequest.growth_rate = payload.growth_rate ?? 2;
+          if (payload.limit_order) proposalRequest.limit_order = payload.limit_order;
+          break;
         default:
           throw new Error(`Unsupported contract family: ${contract_family}`);
       }
@@ -339,7 +348,7 @@ Deno.serve(async (req) => {
       const { data: execution } = await supabase
         .from('executions')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           trade_intent_id: tradeIntent.id,
           broker_ref: contractId.toString(),
           fill_price: buyResponse.buy.buy_price,
