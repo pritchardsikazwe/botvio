@@ -230,7 +230,18 @@ function TradingChartBase({
       sma200: mkLine("#94a3b8", "SMA 200"),
     };
 
+    const hauzaTrend = chart.addSeries(LineSeries, {
+      color: "hsl(var(--primary))",
+      lineWidth: 1,
+      lineStyle: LineStyle.Solid,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      visible: false,
+      title: "Hauza Trend",
+    });
+
     chartRef.current = chart;
+    hauzaTrendRef.current = hauzaTrend;
     priceSeriesRef.current = priceSeries;
     markersRef.current = createSeriesMarkers(priceSeries, []);
 
@@ -545,6 +556,17 @@ function TradingChartBase({
         </div>
         <div className="mx-1 hidden h-4 w-px bg-border sm:block" />
         <div className="flex flex-wrap items-center gap-1">
+          {showHauza && (
+            <Button
+              size="sm"
+              variant={hauzaOn ? "default" : "ghost"}
+              className={cn("h-6 px-2 text-[10px] font-bold", hauzaOn && "bg-primary/90 hover:bg-primary")}
+              onClick={() => setHauzaOn((v) => !v)}
+              title="Toggle Hauza support, resistance and trend overlay"
+            >
+              Hauza
+            </Button>
+          )}
           {([
             ["signals", "Signals"],
             ["levels", "Entry/SL/TP"],
