@@ -25,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { computeIndicators } from "@/lib/marketData/indicators";
 import { computeSignals, summarizeSignals, type EngineSignal } from "@/lib/marketData/signalEngine";
 import { getSyntxProfile, type SyntxStrategyMode } from "@/lib/marketData/syntxStrategy";
