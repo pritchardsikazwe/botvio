@@ -17,6 +17,8 @@ import {
   Target,
 } from "lucide-react";
 import { TradingChart } from "@/components/chart/TradingChart";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 import { supabase } from "@/integrations/supabase/client";
 import { computeIndicators } from "@/lib/marketData/indicators";
@@ -75,7 +77,11 @@ export const WeltradeSignalsEngine = () => {
     } catch { /* storage unavailable — non-fatal */ }
   }, [prefs]);
 
+  const { user, loading: authLoading } = useAuth() as any;
+  const [authOpen, setAuthOpen] = useState(false);
+  const needsSignIn = instrument.source === "weltrade-api-studio" && !user;
   const { candles, price, lastTick, status, diagnostics } = useMarketFeed({
+    enabled: !(instrument.source === "weltrade-api-studio" && (authLoading || !user)),
     source: instrument.source,
     feedSymbol: instrument.feedSymbol,
     timeframe: prefs.timeframe,
@@ -256,6 +262,13 @@ export const WeltradeSignalsEngine = () => {
                 </div>
               </CardContent>
             </Card>
+          )}
+          {needsSignIn && !authLoading && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/10 p-3">
+              <p className="text-xs text-foreground">Sign in to see live Weltrade prices, charts and signals from your connected Weltrade feed.</p>
+              <Button size="sm" onClick={() => setAuthOpen(true)}>Sign in</Button>
+              <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
+            </div>
           )}
           <TradingChart
             candles={candles}
