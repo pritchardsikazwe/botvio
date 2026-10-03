@@ -7,7 +7,6 @@ import { WeltradeSignalsEngine } from "@/components/weltrade/WeltradeSignalsEngi
 import { SyntxSignalsSection } from "@/components/weltrade/SyntxSignalsSection";
 import { SyntxStrategyHub } from "@/components/weltrade/SyntxStrategyHub";
 import { SyntxBotvioStrategy } from "@/components/weltrade/SyntxHauzaStrategy";
-import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
 
 export default function WeltradeSyntheticHub() {
   return (
@@ -42,14 +41,6 @@ export default function WeltradeSyntheticHub() {
               Deriv feed replacement.
             </p>
           </div>
-        </section>
-
-        <section aria-labelledby="weltrade-feed-connection">
-          <div className="mb-3">
-            <h2 id="weltrade-feed-connection" className="text-lg font-black">Weltrade Market Feed Connection</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Connect the Weltrade MT5 account used as Botvio's SyntX market-data source. Credentials stay in the secure Supabase function and are stored encrypted.</p>
-          </div>
-          <SyntxApiStudioConnectionCard />
         </section>
 
         <Card className="border border-warning/20 bg-card/70">
