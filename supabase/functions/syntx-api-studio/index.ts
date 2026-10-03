@@ -98,7 +98,8 @@ function normalizeBars(body: unknown) {
 }
 
 async function getUser(req: Request) {
-  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\\s+/i, "");
+  const authorization = req.headers.get("Authorization") ?? "";
+  const token = authorization.replace(/^Bearer\s+/i, "").trim();
   if (!token) throw new Error("Sign in required");
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { data, error } = await admin.auth.getUser(token);
@@ -165,7 +166,7 @@ Deno.serve(async (req) => {
       const password = String(body?.password ?? "");
       const broker = String(body?.broker ?? "Weltrade").trim();
       const server = String(body?.server ?? "Weltrade").trim();
-      if (!/^\\d+$/.test(login)) throw new Error("Enter a valid MT5 account number");
+      if (!/^\d+$/.test(login)) throw new Error("Enter a valid MT5 account number");
       if (password.length < 4) throw new Error("Enter the MT5 trader password");
       if (!server) throw new Error("Enter the exact MT5 server/cluster name");
 
