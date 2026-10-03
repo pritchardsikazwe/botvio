@@ -17,6 +17,11 @@ export type DerivContract = {
   longcode: string;
 };
 
+export type DerivSellResult = {
+  sold_for: number;
+  balance_after?: number;
+};
+
 export type DerivConnectionStatus = "disconnected" | "connecting" | "connected" | "error";
 
 interface DerivAPIState {
@@ -392,6 +397,21 @@ export const useDerivAPI = () => {
       };
     },
     [service],
+  );
+
+  const sellContract = useCallback(
+    async (contractId: number, price = 0): Promise<DerivSellResult> => {
+      if (!state.authorized || !service.socketOpen) throw new Error("Deriv account is not connected");
+      const response = await service.send<any>({ sell: contractId, price });
+      if (response?.error) throw new Error(response.error.message || "Unable to sell contract");
+      const sold = response?.sell;
+      if (!sold) throw new Error("Deriv returned no sell result");
+      return {
+        sold_for: Number(sold.sold_for ?? sold.sell_price ?? 0),
+        balance_after: sold.balance_after != null ? Number(sold.balance_after) : undefined,
+      };
+    },
+    [service, state.authorized],
   );
 
   // Subscribe to proposal_open_contract for settlement tracking
