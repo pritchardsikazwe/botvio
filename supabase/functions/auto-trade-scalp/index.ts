@@ -22,6 +22,14 @@ const SYMBOL_MAP: Record<string, string> = {
   "ETH/USD": "cryETHUSD",
   "NAS100": "OTC_NDX",
   "NASDAQ": "OTC_NDX",
+  "US30": "OTC_DJI",
+  "DJ30": "OTC_DJI",
+  "US500": "OTC_SPX",
+  "SP500": "OTC_SPX",
+  "GER40": "OTC_DAX",
+  "UK100": "OTC_FTSE",
+  "USOIL": "OTC_OIL",
+  "XBRUSD": "OTC_BRENT",
 };
 
 interface Candle { epoch:number; open:number; high:number; low:number; close:number; }
@@ -43,6 +51,14 @@ const STRATEGIES: Record<string, StrategyProfile> = {
   "EUR/USD": {id:"FX_PULLBACK",label:"EUR Trend + Pullback",minConfidence:79,stop:1.0,target:2.0,lookback1m:18,lookback5m:16,maxExtension:1.2,rsiBuyMin:48,rsiBuyMax:70,rsiSellMin:30,rsiSellMax:52},
   "USD/JPY": {id:"FX_PULLBACK",label:"JPY Trend + Pullback",minConfidence:79,stop:1.0,target:2.0,lookback1m:18,lookback5m:16,maxExtension:1.2,rsiBuyMin:48,rsiBuyMax:70,rsiSellMin:30,rsiSellMax:52},
   "AUD/USD": {id:"FX_PULLBACK",label:"AUD Trend + Pullback",minConfidence:78,stop:1.0,target:2.0,lookback1m:18,lookback5m:16,maxExtension:1.2,rsiBuyMin:48,rsiBuyMax:70,rsiSellMin:30,rsiSellMax:52},
+  "US30": {id:"US_INDEX_BREAKOUT",label:"US30 Breakout + Retest",minConfidence:81,stop:1.35,target:2.6,lookback1m:18,lookback5m:16,maxExtension:1.3,rsiBuyMin:48,rsiBuyMax:72,rsiSellMin:28,rsiSellMax:52},
+  "DJ30": {id:"US_INDEX_BREAKOUT",label:"Dow Breakout + Retest",minConfidence:81,stop:1.35,target:2.6,lookback1m:18,lookback5m:16,maxExtension:1.3,rsiBuyMin:48,rsiBuyMax:72,rsiSellMin:28,rsiSellMax:52},
+  "US500": {id:"US_INDEX_BREAKOUT",label:"US500 Breakout + Retest",minConfidence:80,stop:1.3,target:2.55,lookback1m:18,lookback5m:16,maxExtension:1.3,rsiBuyMin:48,rsiBuyMax:72,rsiSellMin:28,rsiSellMax:52},
+  "SP500": {id:"US_INDEX_BREAKOUT",label:"S&P 500 Breakout + Retest",minConfidence:80,stop:1.3,target:2.55,lookback1m:18,lookback5m:16,maxExtension:1.3,rsiBuyMin:48,rsiBuyMax:72,rsiSellMin:28,rsiSellMax:52},
+  "GER40": {id:"EU_INDEX_BREAKOUT",label:"GER40 Breakout + Retest",minConfidence:79,stop:1.3,target:2.5,lookback1m:18,lookback5m:16,maxExtension:1.3,rsiBuyMin:48,rsiBuyMax:72,rsiSellMin:28,rsiSellMax:52},
+  "UK100": {id:"EU_INDEX_BREAKOUT",label:"UK100 Breakout + Retest",minConfidence:79,stop:1.3,target:2.5,lookback1m:18,lookback5m:16,maxExtension:1.3,rsiBuyMin:48,rsiBuyMax:72,rsiSellMin:28,rsiSellMax:52},
+  "USOIL": {id:"OIL_MOMENTUM",label:"US Oil Momentum + Pullback",minConfidence:80,stop:1.4,target:2.65,lookback1m:18,lookback5m:16,maxExtension:1.4,rsiBuyMin:48,rsiBuyMax:73,rsiSellMin:27,rsiSellMax:52},
+  "XBRUSD": {id:"OIL_MOMENTUM",label:"Brent Momentum + Pullback",minConfidence:80,stop:1.4,target:2.65,lookback1m:18,lookback5m:16,maxExtension:1.4,rsiBuyMin:48,rsiBuyMax:73,rsiSellMin:27,rsiSellMax:52},
 };
 
 function strategyFor(symbol:string):StrategyProfile {
@@ -157,15 +173,26 @@ async function runForUser(supabase:any,settings:any){
     if(hasOpen===true){results.push({displaySymbol,skipped:"already_open"});continue;}
 
     const profile=strategyFor(displaySymbol);
-    const [c1m,c5m]=await Promise.all([fetchCandles(derivSymbol,60,90),fetchCandles(derivSymbol,300,90)]);
+    const [c1m,c5m,c15m,c1h,c1d]=await Promise.all([
+      fetchCandles(derivSymbol,60,120),fetchCandles(derivSymbol,300,120),
+      fetchCandles(derivSymbol,900,120),fetchCandles(derivSymbol,3600,120),
+      fetchCandles(derivSymbol,86400,120)
+    ]);
     const s5=detectScalpSignal(c5m,"5m",profile),s1=detectScalpSignal(c1m,"1m",profile);
-    const sig=s5??s1;
+    const s15=detectScalpSignal(c15m,"5m",profile),s1h=detectScalpSignal(c1h,"5m",profile),s1d=detectScalpSignal(c1d,"5m",profile);
+    const candidates=[s5,s1,s15,s1h,s1d].filter(Boolean) as ScalpSignal[];
+    const sig=candidates.sort((a,b)=>b.confidence-a.confidence)[0]??null;
     if(!sig){results.push({displaySymbol,skipped:"no_strategy_setup",strategy:profile.id});continue;}
     if(sig.confidence<Math.max(settings.min_confidence??0,profile.minConfidence)){results.push({displaySymbol,skipped:"confidence_gate",confidence:sig.confidence,strategy:profile.id});continue;}
 
-    // Require 1m confirmation when a 5m setup is used: same directional structure,
-    // but do not require a second breakout because that causes late entries.
-    if(sig.tf==="5m"&&s1&&s1.side!==sig.side){results.push({displaySymbol,skipped:"lower_tf_conflict",strategy:profile.id});continue;}
+    // Multi-timeframe confirmation: 1m entries must respect 15m/1H direction;
+    // 15m/5m entries should respect 1H when available. Daily is a macro filter.
+    const htf = [s15,s1h,s1d].filter(Boolean) as ScalpSignal[];
+    const conflicts = htf.filter(x=>x.side!==sig.side).length;
+    if(conflicts >= 2){results.push({displaySymbol,skipped:"higher_tf_conflict",strategy:profile.id});continue;}
+    const agreement = htf.filter(x=>x.side===sig.side).length;
+    const requiredAgreement = sig.tf==="5m" ? (s1h ? 1 : 0) : 0;
+    if(agreement < requiredAgreement){results.push({displaySymbol,skipped:"higher_tf_not_confirmed",strategy:profile.id});continue;}
 
     const {data:recent}=await supabase.from("auto_trade_executions").select("id").eq("user_id",userId).eq("display_symbol",displaySymbol).in("status",["pending","filled"]).gte("created_at",new Date(Date.now()-5*60*1000).toISOString()).limit(1);
     if(recent?.length){results.push({displaySymbol,skipped:"cooldown"});continue;}
