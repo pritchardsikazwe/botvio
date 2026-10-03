@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { TickChart } from "@/components/deriv-app/TickChart";
 import { useDerivSymbols } from "@/hooks/useDerivSymbols";
 import { toast } from "sonner";
 import { Activity, ArrowDownRight, ArrowUpRight, Gauge, Loader2, Sparkles, UserCircle2, Bot, UserRound, RefreshCw } from "lucide-react";
@@ -52,6 +53,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const [quote, setQuote] = useState<PriceQuote | null>(null);
   const [signal, setSignal] = useState<SignalResult | null>(null);
   const [rsiValue, setRsiValue] = useState<number | null>(null);
+  const [chartTicks, setChartTicks] = useState<number[]>([]);
   const [activeContract, setActiveContract] = useState<{ id: number; buy: number; payout: number; profit: number; validToSell: boolean; status: string } | null>(null);
   const [logs, setLogs] = useState<TradeLog[]>([]);
   const [tradeMode, setTradeMode] = useState<"manual" | "auto">("manual");
@@ -101,6 +103,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   useEffect(() => {
     if (!authorized || !symbol) return;
     ticks.current = [];
+    setChartTicks([]);
     setSignal(null);
     setRsiValue(null);
     subscribeTicks(symbol).catch(() => addLog(`Could not stream ${symbol}`, "error"));
@@ -110,6 +113,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   useEffect(() => {
     if (!lastTick?.quote) return;
     ticks.current = [...ticks.current, lastTick.quote].slice(-200);
+    setChartTicks([...ticks.current]);
     if (ticks.current.length >= 15) { try { setRsiValue(rsi(ticks.current, 14)); } catch {} }
     if (ticks.current.length >= 30) { try { setSignal(runEngine(engine, ticks.current)); } catch {} }
   }, [lastTick, engine]);
@@ -239,6 +243,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   };
 
   const directionTone = signal?.signal === "RISE" || signal?.signal === "UP" ? "text-success" : signal?.signal === "FALL" || signal?.signal === "DOWN" ? "text-destructive" : "text-muted-foreground";
+  const firstChartTick = chartTicks[0];
+  const latestChartTick = chartTicks[chartTicks.length - 1];
+  const chartChange = firstChartTick && latestChartTick ? ((latestChartTick - firstChartTick) / firstChartTick) * 100 : 0;
+  const signalDirection = signal?.signal ?? "WAIT";
+  const signalLabel = signalDirection === "RISE" || signalDirection === "UP" ? "RISE" : signalDirection === "FALL" || signalDirection === "DOWN" ? "FALL" : "WAIT";
+  const autoStatus = !isRiseFall ? "Available for Rise / Fall" : isAutoMode ? (autoBusy ? "Executing signal…" : "Monitoring RSI") : "Manual mode";
 
   return (
     <div className="space-y-4">
@@ -270,21 +280,104 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
         {isDerivConnected && connectedAccounts.length === 0 && <p className="text-[11px] text-muted-foreground">Only the currently connected Deriv account is saved. Connect another Demo or Real account from the Deriv account manager to make it switchable here.</p>}
       </CardContent></Card>
 
-      <Card className="glass-card"><CardContent className="p-4 flex items-center justify-between">
-        <div><p className="text-xs text-muted-foreground">{symbolLabel}</p><p className="text-2xl font-bold tabular-nums">{lastTick?.quote ?? "—"}</p></div>
-        <Badge variant="outline" className={cn("text-xs", isDerivConnected ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground")}><Activity className="h-3 w-3 mr-1" />{isDerivConnected ? "Live" : "Offline"}</Badge>
-      </CardContent></Card>
-
-      <Card className="glass-card"><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Botvio AI Signal</CardTitle></CardHeader><CardContent className="pt-0"><p className={cn("text-2xl font-black", directionTone)}>{signal?.signal ?? "WAITING"}</p><p className="text-xs text-muted-foreground">{signal ? `${signal.confidence}% confidence — ${signal.reasons?.[0] ?? "Live market read"}` : "Collecting live ticks..."}</p></CardContent></Card>
-
-      <Card className="glass-card"><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Gauge className="h-4 w-4 text-warning" /> RSI (14) — Rise/Fall signal</CardTitle></CardHeader><CardContent className="pt-0 space-y-3">
-        <div className="flex items-end justify-between"><div><p className="text-2xl font-black">{rsiValue != null ? rsiValue.toFixed(1) : "—"}</p><p className="text-[10px] text-muted-foreground">30 Oversold · 50 Neutral · 70 Overbought</p></div><Badge variant="outline" className={cn(rsiValue != null && rsiValue <= 30 ? "text-success border-success/30" : rsiValue != null && rsiValue >= 70 ? "text-destructive border-destructive/30" : "")}>{rsiValue == null ? "Warming up" : rsiValue >= 70 ? "OVERBOUGHT → Fall watch" : rsiValue <= 30 ? "OVERSOLD → Rise watch" : "Neutral"}</Badge></div>
-        {isRiseFall && <div className="grid grid-cols-2 gap-2">
-          <Button variant={tradeMode === "manual" ? "default" : "outline"} onClick={() => setTradeMode("manual")}><UserRound className="h-4 w-4 mr-1" /> Manual</Button>
-          <Button variant={tradeMode === "auto" ? "default" : "outline"} onClick={() => setTradeMode("auto")}><Bot className="h-4 w-4 mr-1" /> RSI Auto</Button>
-        </div>}
-        {isAutoMode && <p className="text-[11px] text-muted-foreground">Auto mode watches live RSI: ≤30 can trigger Rise, ≥70 can trigger Fall. One open contract at a time and a 30-second cooldown prevent repeated entries.</p>}
-      </CardContent></Card>
+      <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 shadow-lg shadow-black/5">
+        <CardContent className="p-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="rounded-xl bg-primary/10 p-2 text-primary"><Activity className="h-5 w-5" /></div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-bold truncate">{symbolLabel}</p>
+                  <Badge variant="outline" className="text-[9px]">{contractType?.label ?? "Options"}</Badge>
+                </div>
+                <p className="text-[10px] text-muted-foreground font-mono">{symbol} · {chartTicks.length} live ticks</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Live price</p>
+                <p className="text-lg font-black tabular-nums">{latestChartTick != null ? latestChartTick : "—"}</p>
+              </div>
+              <Badge variant="outline" className={cn("text-[10px]", isDerivConnected ? "bg-success/10 text-success border-success/30" : "bg-muted text-muted-foreground")}>
+                <span className={cn("mr-1.5 h-1.5 w-1.5 rounded-full inline-block", isDerivConnected ? "bg-success animate-pulse" : "bg-muted-foreground")} />
+                {isDerivConnected ? "LIVE" : "OFFLINE"}
+              </Badge>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="min-w-0 p-3 lg:p-4">
+              <div className="mb-2 flex items-center justify-between text-[10px] text-muted-foreground">
+                <span>Live price action</span>
+                <span className={cn("font-semibold", chartChange >= 0 ? "text-success" : "text-destructive")}>
+                  {chartChange >= 0 ? "+" : ""}{chartChange.toFixed(3)}%
+                </span>
+              </div>
+              <TickChart
+                ticks={chartTicks}
+                height={320}
+                prediction={signal ? {
+                  direction: signalLabel === "RISE" ? "RISE" : signalLabel === "FALL" ? "FALL" : "NEUTRAL",
+                  confidence: signal.confidence,
+                  label: "BOTVIO LIVE SIGNAL",
+                } : null}
+              />
+            </div>
+            <div className="border-t border-border/60 bg-muted/10 p-4 lg:border-l lg:border-t-0">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold">Signals & automation</p>
+                  <p className="text-[10px] text-muted-foreground">{autoStatus}</p>
+                </div>
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/60 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Botvio signal</span>
+                  <Badge variant="outline" className={cn("text-[10px]", signalLabel === "RISE" ? "text-success border-success/30" : signalLabel === "FALL" ? "text-destructive border-destructive/30" : "")}>{signalLabel}</Badge>
+                </div>
+                <div className="mt-2 flex items-end justify-between">
+                  <p className={cn("text-3xl font-black tracking-tight", directionTone)}>{signal?.signal ?? "WAIT"}</p>
+                  <p className="text-sm font-bold tabular-nums">{signal?.confidence ?? 0}%</p>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                  <div className={cn("h-full transition-all", signalLabel === "RISE" ? "bg-success" : signalLabel === "FALL" ? "bg-destructive" : "bg-primary")} style={{ width: (signal?.confidence ?? 0) + "%" }} />
+                </div>
+                <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
+                  {signal?.reasons?.[0] ?? "Collecting enough live ticks for the signal engine…"}
+                </p>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="rounded-lg border border-border/60 p-2.5">
+                  <p className="text-[9px] uppercase text-muted-foreground">RSI 14</p>
+                  <p className="mt-1 text-lg font-black tabular-nums">{rsiValue != null ? rsiValue.toFixed(1) : "—"}</p>
+                  <p className="text-[9px] text-muted-foreground">{rsiValue == null ? "Warming up" : rsiValue <= 30 ? "Oversold" : rsiValue >= 70 ? "Overbought" : "Neutral"}</p>
+                </div>
+                <div className="rounded-lg border border-border/60 p-2.5">
+                  <p className="text-[9px] uppercase text-muted-foreground">Validity</p>
+                  <p className="mt-1 text-lg font-black">{signal?.validFor ?? "—"}</p>
+                  <p className="text-[9px] text-muted-foreground">{signal?.timing ?? "Live timing"}</p>
+                </div>
+              </div>
+              {isRiseFall && (
+                <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-2.5">
+                  <div className="grid grid-cols-2 gap-1 rounded-lg bg-background/70 p-1">
+                    <Button size="sm" variant={tradeMode === "manual" ? "default" : "ghost"} onClick={() => setTradeMode("manual")} className="h-8 text-[10px]"><UserRound className="mr-1 h-3.5 w-3.5" /> Manual</Button>
+                    <Button size="sm" variant={tradeMode === "auto" ? "default" : "ghost"} onClick={() => setTradeMode("auto")} className="h-8 text-[10px]"><Bot className="mr-1 h-3.5 w-3.5" /> Auto</Button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[10px]">
+                    <span className="text-muted-foreground">RSI trigger</span>
+                    <span className="font-semibold">≤30 Rise · ≥70 Fall</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-[10px]">
+                    <span className="text-muted-foreground">Protection</span>
+                    <span className="font-semibold">1 open · 30s cooldown</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="glass-card"><CardContent className="p-4 space-y-3">
         {contractTypes.length > 1 && <div className="space-y-1.5"><Label className="text-xs">Options type</Label><Select value={contractId} onValueChange={setContractId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50">{contractTypes.map(c => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}</SelectContent></Select></div>}
