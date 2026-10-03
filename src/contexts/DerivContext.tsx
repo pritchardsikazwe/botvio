@@ -71,6 +71,7 @@ interface DerivContextType {
     limit_order?: Record<string, number>;
   }) => Promise<DerivProposal>;
   buyContract: (proposalId: string, price: number) => Promise<DerivContract>;
+  sellContract: (contractId: number, price?: number) => Promise<{ sold_for: number; balance_after?: number }>;
   placeTrade: (params: {
     symbol: string;
     contract_type: string;
