@@ -1,6 +1,6 @@
 import type { BlogIndexEntry } from "./blogIndex";
 
-type SaudiArabicPost = { title:string; excerpt:string; category:string; readTime:string; metaTitle:string; metaDescription:string; keywords:string[]; content:string; };
+type SaudiArabicPost = { title:string; excerpt:string; category:string; readTime:string; metaTitle:string; metaDescription:string; keywords:string[]; content:string; date?:string; };
 
 const p=(x:string)=>`<p>${x}</p>`; const h=(x:string)=>`<h2>${x}</h2>`;
 const make=(title:string,excerpt:string,sections:[string,string][])=>({

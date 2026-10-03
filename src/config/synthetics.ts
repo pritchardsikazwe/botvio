@@ -27,6 +27,8 @@ export interface SyntheticInstrument {
   bias: "buy" | "sell" | "both";
   /** Short tagline for the card */
   blurb: string;
+  /** Optional chart symbol used when no live Deriv feed exists */
+  chartProxy?: string | null;
 }
 
 export const SYNTHETICS: SyntheticInstrument[] = [
