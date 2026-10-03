@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface EconomicEvent {
   date?: string;
@@ -20,8 +21,6 @@ export interface EconomicEvent {
 interface CalendarResponse {
   events?: EconomicEvent[];
 }
-
-const API = "https://www.financecalendar.com/wp-json/fc/v1/calendar";
 
 function dateString(offsetDays = 0) {
   const d = new Date();
@@ -45,15 +44,35 @@ export function useEconomicCalendar(days = 7) {
   const refresh = useCallback(async () => {
     try {
       setError(null);
-      const from = dateString(0);
-      const to = dateString(Math.min(days, 30));
-      const response = await fetch(
-        API + "?from=" + from + "&to=" + to + "&impact=high&limit=100",
-        { headers: { Accept: "application/json" } },
-      );
-      if (!response.ok) throw new Error("Economic calendar returned HTTP " + response.status);
-      const payload = await response.json() as CalendarResponse | EconomicEvent[];
-      setEvents(normaliseEvents(payload));
+      const { data, error: invokeError } = await supabase.functions.invoke("news-intelligence-worker", {
+        body: { mode: "refresh" },
+      });
+      if (invokeError) throw invokeError;
+      const raw = Array.isArray(data?.events) ? data.events : [];
+      const now = Date.now();
+      const horizon = now + Math.min(days, 30) * 24 * 60 * 60 * 1000;
+      const liveEvents = raw
+        .filter((event: any) => event?.time && !Number.isNaN(new Date(event.time).getTime()))
+        .filter((event: any) => {
+          const t = new Date(event.time).getTime();
+          return t >= now - 30 * 60 * 1000 && t <= horizon;
+        })
+        .map((event: any) => ({
+          time_utc: event.time,
+          date: event.time?.slice(0, 10),
+          title: event.event,
+          name: event.event,
+          impact: String(event.impact || "medium").toLowerCase(),
+          consensus: event.estimate ?? null,
+          prior: event.prev ?? null,
+          actual: event.actual ?? null,
+          currency: event.currency ?? null,
+          country: event.country ?? null,
+        }))
+        .sort((a: EconomicEvent, b: EconomicEvent) =>
+          new Date(a.time_utc || a.date || 0).getTime() - new Date(b.time_utc || b.date || 0).getTime()
+        );
+      setEvents(liveEvents);
       setLastUpdated(new Date());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load economic calendar");
