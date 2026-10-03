@@ -5,9 +5,10 @@ type Sig={direction:"BUY"|"SELL";score:number;entry:number;sl:number;tp:number};
 
 const PLAN=[
  {tf:"1m",type:"SCALPING",g:60,count:220,expiry:300,backup:600,boost:2,confirm:["15m","1H"]},
- {tf:"15m",type:"INTRADAY",g:900,count:140,expiry:3600,backup:5400,boost:3,confirm:["1H","1D"]},
- {tf:"1H",type:"SWING",g:3600,count:120,expiry:14400,backup:21600,boost:5,confirm:["1D"]},
- {tf:"1D",type:"POSITION",g:86400,count:120,expiry:259200,backup:432000,boost:7,confirm:[]}
+ {tf:"15m",type:"INTRADAY",g:900,count:180,expiry:3600,backup:5400,boost:1,confirm:["1H"]},
+ {tf:"1H",type:"SWING",g:3600,count:160,expiry:14400,backup:21600,boost:2,confirm:["1D"]},
+ {tf:"1D",type:"POSITION",g:86400,count:180,expiry:259200,backup:432000,boost:4,confirm:[]},
+ {tf:"3D",type:"POSITION",g:86400,count:300,expiry:777600,backup:1209600,boost:3,confirm:["1D"]}
 ];
 
 function ema(a:number[],p:number){if(a.length<p)return null;let e=a.slice(0,p).reduce((x,y)=>x+y,0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e+=(a[i]-e)*k;return e}
@@ -97,7 +98,7 @@ async function getContracts(ws:WebSocket,symbol:string){
  const x=await request(ws,{contracts_for:symbol});
  return new Set<string>((x.contracts_for?.available??[]).map((v:any)=>String(v.contract_type)).filter(Boolean));
 }
-async function getCandles(ws:WebSocket,symbol:string,p:{g:number;count:number}){const x=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity:p.g,count:p.count,subscribe:0,adjust_start_time:1});return(x.candles??[]).map((v:any)=>({epoch:+v.epoch,open:+v.open,high:+v.high,low:+v.low,close:+v.close})).filter((v:Candle)=>[v.epoch,v.open,v.high,v.low,v.close].every(Number.isFinite))}
+async function getCandles(ws:WebSocket,symbol:string,p:{g:number;count:number;tf?:string}){const x=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity:p.g,count:p.count,subscribe:0,adjust_start_time:1});const raw=(x.candles??[]).map((v:any)=>({epoch:+v.epoch,open:+v.open,high:+v.high,low:+v.low,close:+v.close})).filter((v:Candle)=>[v.epoch,v.open,v.high,v.low,v.close].every(Number.isFinite));if(p.tf!=="3D")return raw;const buckets=new Map<number,Candle>();for(const v of raw){const key=Math.floor(v.epoch/259200)*259200;const prev=buckets.get(key);if(!prev)buckets.set(key,{epoch:key,open:v.open,high:v.high,low:v.low,close:v.close});else{prev.high=Math.max(prev.high,v.high);prev.low=Math.min(prev.low,v.low);prev.close=v.close}}return[...buckets.values()].sort((a,b)=>a.epoch-b.epoch)}
 
 Deno.serve(async(req)=>{
  if(req.method!=="POST")return new Response("POST required",{status:405});
@@ -121,11 +122,11 @@ Deno.serve(async(req)=>{
    const directional=["CALL","PUT","HIGHER","LOWER","UPORDOWN","MULTUP","MULTDOWN","ACCU"].some(x=>contracts.has(x));
    if(!directional)continue;
    const strategy=classifyStrategy(s.name,s.code);
-   const frames=new Map<string,Candle[]>();await Promise.all(PLAN.map(async p=>{try{frames.set(p.tf,await getCandles(ws,s.code,p))}catch{frames.set(p.tf,[])}}));
+   const frames=new Map<string,Candle[]>();await Promise.all(PLAN.map(async p=>{try{frames.set(p.tf,await getCandles(ws,s.code,{...p,tf:p.tf}))}catch{frames.set(p.tf,[])}}));
    const sigs=new Map<string,Sig|null>();for(const p of PLAN)sigs.set(p.tf,strategySignal(frames.get(p.tf)??[],strategy));
    for(const p of PLAN){
     const setup=sigs.get(p.tf);if(!setup)continue;const conf=p.confirm.map(x=>sigs.get(x)).filter(Boolean) as Sig[];
-    if(conf.some(x=>x.direction!==setup.direction)||conf.filter(x=>x.direction===setup.direction).length<(p.confirm.length?1:0)||setup.score<76+p.boost)continue;
+    if(conf.some(x=>x.direction!==setup.direction)||conf.filter(x=>x.direction===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost)continue;
     const type=p.type,strategyName=`${strategy.family} · ${strategy.label} · ${type} ${p.tf}`,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",s.name).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-(p.tf==="1m"?5:p.tf==="15m"?30:120)*60000).toISOString()).limit(1);
     if(recent?.length)continue;
