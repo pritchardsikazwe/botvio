@@ -88,3 +88,13 @@ project_id = "tqqkzeblmjapgbnsbtgw"
 
   [functions.news-intelligence-worker]
     verify_jwt = false
+
+  # Server-side signal automation is authenticated with a Supabase secret key.
+  [functions.generate-cfd-signals]
+    verify_jwt = false
+  [functions.generate-syntx-signals]
+    verify_jwt = false
+  [functions.generate-deriv-synthetic-signals]
+    verify_jwt = false
+  [functions.mt5-direct-execution]
+    verify_jwt = false
