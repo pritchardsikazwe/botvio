@@ -15,6 +15,13 @@
       "when": 1790745174824,
       "tag": "0001_tradecopy_execution_layer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791034674273,
+      "tag": "0002_relax_trading_accounts_broker_check",
+      "breakpoints": true
     }
   ]
 }
