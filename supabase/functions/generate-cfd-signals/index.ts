@@ -50,6 +50,16 @@ function signal(c:Candle[],profile:typeof SYMBOLS[number]):Sig|null{
  return{direction,score,entry:last.close,sl:direction==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:direction==="BUY"?last.close+a*profile.target:last.close-a*profile.target};
 }
 
+function isForexMarketOpen(now = new Date()): boolean {
+  // Standard FX market: opens Sunday 22:00 UTC and closes Friday 22:00 UTC.
+  const day = now.getUTCDay();
+  const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  if (day === 6) return false; // Saturday
+  if (day === 0) return minutes >= 22 * 60;
+  if (day === 5) return minutes < 22 * 60;
+  return true;
+}
+
 function request(ws:WebSocket,payload:Record<string,unknown>,timeout=15000){
  return new Promise<any>((resolve,reject)=>{
    const req_id=Math.floor(Math.random()*1e9);
@@ -84,6 +94,10 @@ Deno.serve(async(req)=>{
   const profiles=wanted?SYMBOLS.filter(x=>x.symbol===wanted):SYMBOLS;
 
   for(const profile of profiles){
+   if(profile.category==="forex" && !isForexMarketOpen()){
+    skipped.push({symbol:profile.symbol,reason:"forex market closed"});
+    continue;
+   }
    if(!activeSet.has(profile.symbol)){skipped.push({symbol:profile.symbol,reason:"not active on Deriv"});continue}
    const frames=new Map<string,Candle[]>();
    await Promise.all(PLANS.map(async p=>{try{frames.set(p.tf,await candles(ws,profile.symbol,p.minutes*60,p.count))}catch{frames.set(p.tf,[])}}));
