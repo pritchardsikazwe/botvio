@@ -39,10 +39,12 @@ async function liveGlobal(admin: SupabaseClient) {
   return enabled("tradecopy_live_enabled") || enabled("direct_live_enabled");
 }
 
-function assertLiveReady(environment: string, confirmedAt: string | null, globalLive: boolean) {
+function assertLiveReady(environment: string, confirmedAt: string | null, globalLive: boolean, adminSelectedMaster = false) {
   if (environment !== "LIVE") return;
   if (adapter.mode !== "live") throw new Err("TradeCopy live mode is not configured on the server", 403);
-  if (!confirmedAt || !globalLive) throw new Err("LIVE TradeCopy execution is locked until it is confirmed and enabled globally", 403);
+  if ((!confirmedAt && !adminSelectedMaster) || !globalLive) {
+    throw new Err("LIVE TradeCopy execution is locked until it is confirmed and enabled globally", 403);
+  }
 }
 
 const normalizeDirection = (value: unknown): "BUY" | "SELL" | null => {
@@ -80,7 +82,7 @@ async function executeForAccount(
   }
 
   try {
-    assertLiveReady(String(account.environment ?? "DEMO"), account.direct_live_confirmed_at, globalLive);
+    assertLiveReady(String(account.environment ?? "DEMO"), account.direct_live_confirmed_at, globalLive, role === "master");
   } catch (e) {
     const reason = String((e as Error).message);
     await admin.from("trading_accounts").update({ last_direct_error: reason, direct_signal_status: "blocked_live" }).eq("id", account.id);
