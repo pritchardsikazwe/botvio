@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  assertAutomationKey(req);
+  if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } });
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
