@@ -35,8 +35,7 @@ export default function SyntheticHub() {
   useEffect(() => { let cancelled=false; (async()=>{ try { const rows=await fetchActiveSymbols(true); const candidates=Object.values(rows).filter((r:any)=>/synthetic|volatility|boom|crash|range break|step|jump/i.test(`${r.display_name??""} ${r.market??""} ${r.submarket??""}`)); const checked=await Promise.all(candidates.map(async(r:any)=>{try{const capability=await getSymbolCapability(r.symbol,true);return {symbol:r.symbol,name:r.display_name??r.symbol,capability};}catch{return null;}})); if(!cancelled)setLiveSymbols(checked.filter((x:any)=>x&&!x.capability.unverified&&!x.capability.isSuspended&&x.capability.isOpen&&Object.keys(x.capability.contracts).length>0) as any);}catch{if(!cancelled)setLiveSymbols([]);}})(); return()=>{cancelled=true}; }, []);
 
   const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
-  const chartSymbol = active.derivSymbol ?? active.chartProxy ?? null;
-  const isProxy = !active.derivSymbol && !!active.chartProxy;
+  const chartSymbol = active.derivSymbol ?? null;
 
   const liveKeys = useMemo(() => new Set(liveSymbols.map((x) => x.symbol)), [liveSymbols]);
   const filtered = useMemo(() => {
@@ -88,22 +87,9 @@ export default function SyntheticHub() {
           <div className="lg:col-span-3">
             {chartSymbol ? (
               <div className="space-y-2">
-                {isProxy && (
-                  <div className="flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2">
-                    <Badge variant="outline" className="text-[10px] border-warning/40 text-warning font-mono">
-                      REFERENCE CHART
-                    </Badge>
-                    <p className="text-[11px] text-muted-foreground leading-tight">
-                      <strong className="text-foreground">{active.label}</strong> doesn't stream on Deriv's
-                      public feed. Signals are computed from the closest streamable proxy
-                      (<span className="font-mono text-warning">{active.chartProxy}</span>) — execute on
-                      your MT5 terminal via <strong className="text-foreground">Send to MT5</strong>.
-                    </p>
-                  </div>
-                )}
                 <DerivLiveChart
                   displaySymbol={chartSymbol}
-                  height={isProxy ? 420 : 460}
+                  height={460}
                   defaultGranularity={300}
                   showHauza
                   signalMarker={chartMarker}
