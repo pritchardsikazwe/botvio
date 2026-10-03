@@ -18,22 +18,6 @@ export interface EconomicEvent {
   url?: string | null;
 }
 
-interface CalendarResponse {
-  events?: EconomicEvent[];
-}
-
-function dateString(offsetDays = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
-}
-
-function normaliseEvents(payload: CalendarResponse | EconomicEvent[]): EconomicEvent[] {
-  const events = Array.isArray(payload) ? payload : payload?.events ?? [];
-  return events
-    .filter((event) => event && (event.time_utc || event.date))
-    .sort((a, b) => new Date(a.time_utc || a.date || 0).getTime() - new Date(b.time_utc || b.date || 0).getTime());
-}
 
 export function useEconomicCalendar(days = 7) {
   const [events, setEvents] = useState<EconomicEvent[]>([]);
