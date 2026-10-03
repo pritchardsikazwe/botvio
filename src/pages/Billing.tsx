@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { usePricingPlans, useMySubscription } from "@/hooks/useBotvio";
 import { useTrialStatus, useActivateTrial, usePaymentRequests, useCreatePaymentRequest, useUploadPaymentProof } from "@/hooks/useBilling";
@@ -6,16 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
-import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
 import { useNavigate, Link } from "react-router-dom";
-import { Check, Crown, Clock, Users, Bot, Copy, Star, Upload, Gift, AlertTriangle, Sparkles, Shield, Zap, BarChart3 } from "lucide-react";
+import { Check, Crown, Clock, Users, Bot, Copy, Star, Gift, Sparkles, Shield, Zap, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
 const Billing = () => {
@@ -29,12 +25,6 @@ const Billing = () => {
   const createPaymentRequest = useCreatePaymentRequest();
   const uploadProof = useUploadPaymentProof();
   
-  const [selectedPlan, setSelectedPlan] = useState<any>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showOfflineModal, setShowOfflineModal] = useState(false);
-  const [offlineMethod, setOfflineMethod] = useState<string>("");
-  const [proofFile, setProofFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const currentPlanCode = mySubscription?.pricing_plan?.code || "trial";
 
@@ -71,43 +61,7 @@ const Billing = () => {
   };
 
   const handleUpgradeToVIP = (plan: any) => {
-    setSelectedPlan(plan);
-    setShowPaymentModal(true);
-  };
-
-  const handlePaymentInitiated = (_method: string, _details: any) => {
-    // Method selected — keep modal open so user can see wallet details and upload proof
-  };
-
-  const handleSubmitOfflinePayment = async () => {
-    if (!offlineMethod) {
-      toast.error("Please select a payment method");
-      return;
-    }
-    
-    setUploading(true);
-    let proofUrl = undefined;
-    
-    try {
-      if (proofFile) {
-        proofUrl = await uploadProof.mutateAsync(proofFile);
-      }
-      
-      await createPaymentRequest.mutateAsync({
-        plan_id: selectedPlan.id,
-        amount_usd: selectedPlan.price_usd,
-        method: offlineMethod,
-        proof_upload_url: proofUrl
-      });
-      
-      setShowOfflineModal(false);
-      setOfflineMethod("");
-      setProofFile(null);
-    } catch (error) {
-      // Error handled by mutation
-    } finally {
-      setUploading(false);
-    }
+    navigate("/payment?plan=" + encodeURIComponent(plan.code));
   };
 
   // Show all active plans sorted by price
@@ -425,88 +379,9 @@ const Billing = () => {
         </Tabs>
       </main>
 
-      {/* Payment Modal */}
-      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Upgrade to {selectedPlan?.name}</DialogTitle>
-            <DialogDescription>
-              Choose your preferred payment method, send payment, and attach proof.
-            </DialogDescription>
-          </DialogHeader>
-          <PaymentMethodSelector
-            amount={selectedPlan?.price_usd || 0}
-            planCode={selectedPlan?.code || "vip"}
-            planName={selectedPlan?.name || "VIP"}
-            onPaymentInitiated={handlePaymentInitiated}
-            onOfflinePayment={async (method: string, proofFile?: File) => {
-              if (!selectedPlan) return;
-              setUploading(true);
-              try {
-                let proofUrl: string | undefined;
-                if (proofFile) {
-                  proofUrl = await uploadProof.mutateAsync(proofFile);
-                }
-                await createPaymentRequest.mutateAsync({
-                  plan_id: selectedPlan.id,
-                  amount_usd: selectedPlan.price_usd,
-                  method,
-                  proof_upload_url: proofUrl,
-                });
-                setShowPaymentModal(false);
-              } catch (err) {
-                // handled by mutation
-              } finally {
-                setUploading(false);
-              }
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Offline Payment Modal */}
-      <Dialog open={showOfflineModal} onOpenChange={setShowOfflineModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Offline Payment</DialogTitle>
-            <DialogDescription>
-              Submit your payment proof for manual verification
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Payment Method</Label>
-              <select 
-                className="w-full p-2 border rounded mt-1"
-                value={offlineMethod}
-                onChange={(e) => setOfflineMethod(e.target.value)}
-              >
-                <option value="">Select method...</option>
-                <option value="mobile_money">Airtel Money</option>
-                <option value="mobile_money">MTN Money</option>
-                <option value="bank_transfer">Bank Transfer</option>
-                <option value="crypto">USDT (Crypto)</option>
-              </select>
-            </div>
-            <div>
-              <Label>Upload Proof (optional)</Label>
-              <Input 
-                type="file" 
-                accept="image/*,.pdf"
-                onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowOfflineModal(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmitOfflinePayment} disabled={uploading}>
-              {uploading ? "Submitting..." : "Submit Payment"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div className="mt-8 text-center text-sm text-muted-foreground">
+        Secure payment is handled on a dedicated checkout page. Payment proof is reviewed before plan activation.
+      </div>
     </div>
   );
 };
