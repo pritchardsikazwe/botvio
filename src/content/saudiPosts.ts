@@ -150,4 +150,4 @@ export const SAUDI_POSTS: Record<string, SaudiPost> = {
 ]),
 };
 
-export const SAUDI_INDEX: BlogIndexEntry[] = Object.entries(SAUDI_POSTS).map(([slug,p],i)=>[slug,p.title,p.excerpt,p.category,p.readTime,{featured:i<4,image:"🇸🇦"}] as any);
+export const SAUDI_INDEX: BlogIndexEntry[] = Object.entries(SAUDI_POSTS).map(([slug,p],i)=>({slug,title:p.title,excerpt:p.excerpt,category:p.category,readTime:p.readTime,date:p.date,featured:i<4,image:"🇸🇦"}));

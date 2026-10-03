@@ -251,7 +251,6 @@ export default function CopyTradingOnboarding() {
                       <Button size="lg" onClick={continuePayment}>Continue to secure payment <ArrowRight className="ml-2 h-4 w-4" /></Button>
                       <Button variant="ghost" onClick={back}><ArrowLeft className="mr-2 h-4 w-4" />Back</Button>
                     </div>
-                    {paid && <p className="mt-3 text-xs text-emerald-600">Payment status detected for this onboarding session.</p>}
                   </div>
                 )}
 

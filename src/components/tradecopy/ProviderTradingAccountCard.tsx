@@ -143,7 +143,7 @@ export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean 
           <div className="rounded-xl border border-dashed p-6 text-center">
             <p className="font-medium">No MT5 master connected</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {robot ? (hasDuplicateProviderMaster ? "This MT5 account is already registered as a Provider master. Use that existing master instead of registering the same account again." : "Connect Botvio Robot's MT5 master account first. It will start inactive in DEMO mode.") : "Connect the provider's MT5 master account first. It will start inactive in DEMO mode."}
+              {robot ? "Connect Botvio Robot's MT5 master account first. It will start inactive in DEMO mode." : "Connect the provider's MT5 master account first. It will start inactive in DEMO mode."}
             </p>
           </div>
         )}
