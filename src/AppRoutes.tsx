@@ -29,6 +29,8 @@ import { FollowerDashboard, ProviderCommandCenter, BotvioRobotDashboard, CopyTra
 import BecomeProvider from "./pages/copy/BecomeProvider";
 import Bots from "./pages/Bots";
 import Billing from "./pages/Billing";
+import Signup from "./pages/Signup";
+import Payment from "./pages/Payment";
 import Admin from "./pages/Admin";
 import AdminControlCenter from "./pages/AdminControlCenter";
 import P2P from "./pages/P2P";
@@ -270,6 +272,8 @@ export const AppRoutes = () => {
     <Route path="botvio-robot" element={<BotvioRobotDashboard />} />
     <Route path="bots" element={<Paid><Bots /></Paid>} />
     <Route path="billing" element={<Billing />} />
+    <Route path="signup" element={<Signup />} />
+    <Route path="payment" element={<Payment />} />
 
     {/* Admin */}
     <Route path="admin/login" element={<ErrorBoundary><AdminLogin /></ErrorBoundary>} />
