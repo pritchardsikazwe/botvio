@@ -1,4 +1,5 @@
 import { computeIndicators, type IndicatorSet } from "./indicators";
+import { getSymbolStrategy } from "./symbolStrategies";
 import type { NormalizedCandle, Timeframe } from "./types";
 
 export type SignalDirection = "BUY" | "SELL";
@@ -21,6 +22,7 @@ export interface EngineSignal {
   index: number;
   result: SignalResultState;
   reason: string;
+  strategyId?: string;
 }
 
 export interface SignalEngineOptions {
@@ -51,74 +53,107 @@ export function computeSignals(
   opts: SignalEngineOptions,
   indicators?: IndicatorSet
 ): EngineSignal[] {
-  const {
-    symbol,
-    label,
-    timeframe,
-    minConfidence = 55,
-    atrStop = 1.5,
-    atrTarget = 2.5,
-    maxSignals = 40,
-  } = opts;
+  const profile = getSymbolStrategy(opts.symbol);
+  const timeframeAllowed = profile.timeframes.includes(opts.timeframe);
+  if (!timeframeAllowed || candles.length < 80) return [];
 
-  if (candles.length < 60) return [];
+  const minConfidence = opts.minConfidence ?? profile.minConfidence;
+  const atrStop = opts.atrStop ?? profile.atrStop;
+  const atrTarget = opts.atrTarget ?? profile.atrTarget;
+  const maxSignals = opts.maxSignals ?? 40;
   const ind = indicators ?? computeIndicators(candles);
-  const step = priceStep(candles);
   const signals: EngineSignal[] = [];
 
-  for (let i = 30; i < candles.length; i++) {
+  for (let i = 60; i < candles.length; i++) {
     const c = candles[i];
-    const ema9 = ind.ema9[i];
-    const ema9p = ind.ema9[i - 1];
-    const ema21 = ind.ema21[i];
-    const ema21p = ind.ema21[i - 1];
-    const ema50 = ind.ema50[i];
-    const rsi = ind.rsi14[i];
-    const atr = ind.atr14[i] ?? Math.max(c.high - c.low, step * 10);
-    const macd = ind.macd[i];
-    if (ema9 == null || ema21 == null || ema9p == null || ema21p == null || rsi == null) continue;
+    const p = candles[i - 1];
+    const e9 = ind.ema9[i], e21 = ind.ema21[i], e50 = ind.ema50[i];
+    const rsi = ind.rsi14[i], atr = ind.atr14[i], macd = ind.macd[i];
+    if (e9 == null || e21 == null || e50 == null || rsi == null || atr == null || atr <= 0) continue;
 
-    const crossedUp = ema9p <= ema21p && ema9 > ema21;
-    const crossedDown = ema9p >= ema21p && ema9 < ema21;
-    if (!crossedUp && !crossedDown) continue;
-
-    const direction: SignalDirection = crossedUp ? "BUY" : "SELL";
-    const trendAligned = ema50 == null ? false : direction === "BUY" ? c.close > ema50 : c.close < ema50;
-    const momentumAligned =
-      macd?.histogram == null ? false : direction === "BUY" ? macd.histogram > 0 : macd.histogram < 0;
-    const rsiOk = direction === "BUY" ? rsi > 45 && rsi < 78 : rsi < 55 && rsi > 22;
-
-    let confidence = 48;
-    const reasons: string[] = [`EMA 9/21 ${direction === "BUY" ? "bullish" : "bearish"} cross`];
-    if (trendAligned) {
-      confidence += 14;
-      reasons.push("price on the trend side of EMA 50");
-    }
-    if (momentumAligned) {
-      confidence += 12;
-      reasons.push("MACD histogram confirms");
-    }
-    if (rsiOk) {
-      confidence += 10;
-      reasons.push(`RSI ${rsi.toFixed(1)} in the healthy band`);
-    } else {
-      confidence -= 8;
-      reasons.push(`RSI ${rsi.toFixed(1)} stretched`);
-    }
+    const range = c.high - c.low;
     const body = Math.abs(c.close - c.open);
-    if (body > atr * 0.6) {
-      confidence += 6;
-      reasons.push("expansion candle");
+    const upperWick = c.high - Math.max(c.open, c.close);
+    const lowerWick = Math.min(c.open, c.close) - c.low;
+    const bullReject = c.close > c.open && lowerWick > Math.max(body * 0.8, atr * 0.2);
+    const bearReject = c.close < c.open && upperWick > Math.max(body * 0.8, atr * 0.2);
+    const expansion = range >= atr * 1.15;
+    const tooExtendedUp = (c.close - e9) / atr > profile.maxExtensionAtr;
+    const tooExtendedDown = (e9 - c.close) / atr > profile.maxExtensionAtr;
+
+    const trendUp = e9 > e21 && e21 > e50 && c.close > e50;
+    const trendDown = e9 < e21 && e21 < e50 && c.close < e50;
+    const momentumUp = macd?.histogram != null && macd.histogram > 0;
+    const momentumDown = macd?.histogram != null && macd.histogram < 0;
+
+    // Recent range used for breakout/retest strategies.
+    const lookback = candles.slice(Math.max(0, i - 20), i);
+    const rangeHigh = Math.max(...lookback.map(v => v.high));
+    const rangeLow = Math.min(...lookback.map(v => v.low));
+    const breakoutUp = c.close > rangeHigh && p.close <= rangeHigh;
+    const breakoutDown = c.close < rangeLow && p.close >= rangeLow;
+
+    let direction: SignalDirection | null = null;
+    let confidence = 0;
+    const reasons: string[] = [];
+
+    if (profile.id === "GOLD_STRUCTURE") {
+      if (trendUp && momentumUp && !tooExtendedUp && (bullReject || c.close > p.high)) {
+        direction = "BUY"; confidence = 67; reasons.push("Gold bullish structure", "momentum confirmation", "controlled pullback/liquidity reaction");
+      } else if (trendDown && momentumDown && !tooExtendedDown && (bearReject || c.close < p.low)) {
+        direction = "SELL"; confidence = 67; reasons.push("Gold bearish structure", "momentum confirmation", "controlled pullback/liquidity reaction");
+      }
+      if (breakoutUp && momentumUp) { direction = "BUY"; confidence = Math.max(confidence, 73); reasons.push("range breakout confirmed"); }
+      if (breakoutDown && momentumDown) { direction = "SELL"; confidence = Math.max(confidence, 73); reasons.push("range breakdown confirmed"); }
+    } else if (profile.id === "BTC_MOMENTUM" || profile.id === "CRYPTO_MOMENTUM") {
+      if (breakoutUp && momentumUp && expansion && !tooExtendedUp) {
+        direction = "BUY"; confidence = 75; reasons.push("crypto breakout", "positive momentum", "volatility expansion");
+      } else if (breakoutDown && momentumDown && expansion && !tooExtendedDown) {
+        direction = "SELL"; confidence = 75; reasons.push("crypto breakdown", "negative momentum", "volatility expansion");
+      } else if (trendUp && momentumUp && bullReject && !tooExtendedUp) {
+        direction = "BUY"; confidence = 68; reasons.push("trend continuation", "pullback confirmation");
+      } else if (trendDown && momentumDown && bearReject && !tooExtendedDown) {
+        direction = "SELL"; confidence = 68; reasons.push("trend continuation", "pullback confirmation");
+      }
+    } else if (profile.id === "NAS100_BREAKOUT") {
+      if (breakoutUp && momentumUp && !tooExtendedUp) {
+        direction = "BUY"; confidence = 76; reasons.push("NAS100 range breakout", "momentum confirmation");
+      } else if (breakoutDown && momentumDown && !tooExtendedDown) {
+        direction = "SELL"; confidence = 76; reasons.push("NAS100 range breakdown", "momentum confirmation");
+      } else if (trendUp && bullReject && momentumUp) {
+        direction = "BUY"; confidence = 70; reasons.push("NAS100 pullback to trend", "bullish rejection");
+      } else if (trendDown && bearReject && momentumDown) {
+        direction = "SELL"; confidence = 70; reasons.push("NAS100 pullback to trend", "bearish rejection");
+      }
+    } else {
+      if (trendUp && momentumUp && rsi >= 48 && rsi <= 70 && bullReject && !tooExtendedUp) {
+        direction = "BUY"; confidence = 68; reasons.push("trend alignment", "momentum confirmation", "pullback rejection");
+      } else if (trendDown && momentumDown && rsi >= 30 && rsi <= 52 && bearReject && !tooExtendedDown) {
+        direction = "SELL"; confidence = 68; reasons.push("trend alignment", "momentum confirmation", "pullback rejection");
+      }
+      if (profile.id === "GBP_PULLBACK" && expansion) {
+        confidence -= 5;
+        reasons.push("high-range candle penalty");
+      }
     }
-    confidence = Math.max(0, Math.min(96, confidence));
+
+    if (!direction) continue;
+
+    // Avoid late entries and abnormal volatility spikes.
+    if ((direction === "BUY" && (rsi > 78 || tooExtendedUp)) ||
+        (direction === "SELL" && (rsi < 22 || tooExtendedDown))) continue;
+    if (range >= atr * 2.4) continue;
+
+    if (direction === "BUY" && rsi >= 50) confidence += 4;
+    if (direction === "SELL" && rsi <= 50) confidence += 4;
+    if (expansion && range < atr * 2.0) confidence += 3;
+    confidence = Math.min(96, Math.max(0, confidence));
     if (confidence < minConfidence) continue;
 
     const entry = c.close;
     const stopLoss = direction === "BUY" ? entry - atr * atrStop : entry + atr * atrStop;
     const takeProfit = direction === "BUY" ? entry + atr * atrTarget : entry - atr * atrTarget;
 
-    // Forward-walk the same dataset to resolve the outcome (no look-ahead bias:
-    // only candles AFTER the entry candle are inspected).
     let result: SignalResultState = "OPEN";
     for (let j = i + 1; j < candles.length; j++) {
       const f = candles[j];
@@ -133,18 +168,12 @@ export function computeSignals(
 
     signals.push({
       id: `${symbol}-${timeframe}-${c.time}-${direction}`,
-      symbol,
-      label,
-      timeframe,
-      direction,
-      strategy: "Botvio EMA/RSI Momentum",
+      symbol, label, timeframe, direction,
+      strategy: profile.label,
+      strategyId: profile.id,
       confidence,
-      entry,
-      stopLoss,
-      takeProfit,
-      time: c.time,
-      index: i,
-      result,
+      entry, stopLoss, takeProfit,
+      time: c.time, index: i, result,
       reason: reasons.join(" · "),
     });
   }
