@@ -6,7 +6,7 @@ import { Power, RefreshCw, Server } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { tradecopy, useFollowerCount, useTradeCopyAccounts, useTradeCopyAction, useRemoveTradeCopyAccount, TcAccount } from "@/hooks/useTradeCopy";
-import { ConnectMt5Dialog } from "./ConnectMt5Dialog";
+import { ConnectMt5Form } from "./ConnectMt5Dialog";
 import { DiagnosticButton } from "./DiagnosticButton";
 import { AdapterModeNotice, EnvBadge, StatusBadge } from "./ModeBadges";
 
@@ -104,7 +104,11 @@ export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean 
             <CardTitle className="text-base">{title}</CardTitle>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
           </div>
-          {user && <ConnectMt5Dialog role="master" robot={robot} existingMasters={robot ? (providerMasters ?? []) : []} triggerLabel={robot ? "Connect Botvio Robot MT5" : "Connect Provider MT5"} />}
+          {user && (
+            <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
+              MT5 connection
+            </span>
+          )}
         </div>
 
         <div className="grid gap-2 md:grid-cols-3">
@@ -135,6 +139,20 @@ export function ProviderTradingAccountCard({ robot = false }: { robot?: boolean 
       </CardHeader>
 
       <CardContent className="space-y-3">
+        {user && (
+          <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">{robot ? "Connect Botvio Robot MT5" : "Connect Provider MT5"}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Add the MT5 login, trader password, broker and exact server here. The connection is saved inactive first; you activate copying separately after testing.
+                </p>
+              </div>
+              <Badge variant="outline" className="border-primary/25 text-primary">DEMO FIRST</Badge>
+            </div>
+            <ConnectMt5Form role="master" robot={robot} existingMasters={robot ? (providerMasters ?? []) : []} />
+          </div>
+        )}
         <AdapterModeNotice />
         {!user && <p className="text-sm text-muted-foreground">Sign in to manage the provider MT5 master account.</p>}
         {isLoading && <Skeleton className="h-32 w-full" />}
