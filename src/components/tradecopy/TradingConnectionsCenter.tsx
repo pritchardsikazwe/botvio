@@ -5,6 +5,7 @@ import { DerivAccountsManager } from "@/components/tradecopy/DerivAccountsManage
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
+import { Mt5ConnectionsPanel } from "@/components/tradecopy/Mt5ConnectionsPanel";
 import { RoleEntryCards } from "@/components/tradecopy/CopyTradingRoleGuide";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -203,6 +204,17 @@ export function TradingConnectionsCenter() {
           <Badge variant="outline" className="border-success/30 text-success">DATA ONLY</Badge>
         </div>
         <SyntxApiStudioConnectionCard />
+      </section>
+
+      <section id="mt5-connections" className="scroll-mt-6 space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-semibold">MT5 Connections</h2>
+            <p className="text-sm text-muted-foreground">Your own MT5 accounts. Send Botvio signals directly, or choose to copy a provider or Botvio Robot.</p>
+          </div>
+          <Badge variant="outline">Direct Botvio Signals</Badge>
+        </div>
+        <Mt5ConnectionsPanel />
       </section>
 
       <section id="follower-mt5" className="scroll-mt-6 space-y-3">
