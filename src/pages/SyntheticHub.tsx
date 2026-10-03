@@ -38,10 +38,11 @@ export default function SyntheticHub() {
   const chartSymbol = active.derivSymbol ?? active.chartProxy ?? null;
   const isProxy = !active.derivSymbol && !!active.chartProxy;
 
-  const filtered = useMemo(
-    () => (filter === "all" ? SYNTHETICS : SYNTHETICS.filter((s) => s.category === filter)),
-    [filter],
-  );
+  const liveKeys = useMemo(() => new Set(liveSymbols.map((x) => x.symbol)), [liveSymbols]);
+  const filtered = useMemo(() => {
+    const verified = SYNTHETICS.filter((s) => s.derivSymbol && liveKeys.has(s.derivSymbol));
+    return filter === "all" ? verified : verified.filter((s) => s.category === filter);
+  }, [filter, liveKeys]);
 
   return (
     <div className="min-h-screen bg-background">
