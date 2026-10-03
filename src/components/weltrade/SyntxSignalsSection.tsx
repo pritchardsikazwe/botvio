@@ -111,7 +111,7 @@ export function SyntxSignalsSection() {
             <CardContent className="p-8 text-center">
               <Target className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                <p className="text-sm font-bold text-foreground">No matching Weltrade signals</p>
-               <p className="text-xs text-muted-foreground mt-1">Adjust the filters or check back after new real-data analysis is published.</p>
+               <p className="text-xs text-muted-foreground mt-1">No saved SyntX signals yet. Open the Charts tab — live signals are calculated there from your connected Weltrade feed.</p>
             </CardContent>
           </Card>
         )}
