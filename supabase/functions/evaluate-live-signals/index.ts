@@ -1,4 +1,5 @@
 // Evaluates ACTIVE auto-posted live signals every minute.
+import { assertAutomationKey } from "../_shared/automationAuth.ts";
 // For each signal, fetches latest Deriv tick to determine if TP/SL was hit.
 // - Hit TP → status=CLOSED, outcome=win, signals_history.result=WIN
 // - Hit SL → status=CLOSED, outcome=loss, signals_history.result=LOSS
@@ -82,6 +83,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  assertAutomationKey(req);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
