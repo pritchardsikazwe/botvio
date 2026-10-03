@@ -44,6 +44,19 @@ interface DerivAPIState {
 type DerivOtpResponse = { ok?: boolean; ws_url?: string; error?: string };
 type DerivProposalResponse = { proposal: { id: string; ask_price: number; payout: number; longcode: string } };
 type DerivBuyResponse = { buy: { contract_id: number; buy_price: number; payout: number; longcode: string } };
+export type DerivProfitTransaction = {
+  contract_id?: number;
+  transaction_id?: number;
+  buy_price: number;
+  payout: number;
+  purchase_time: number;
+  sell_price: number;
+  profit?: number;
+  contract_type?: string;
+  underlying?: string;
+  symbol?: string;
+  status?: string;
+};
 
 export const useDerivAPI = () => {
   const [state, setState] = useState<DerivAPIState>({
@@ -438,6 +451,22 @@ export const useDerivAPI = () => {
     [service],
   );
 
+  // Fetch closed trade history from the currently authenticated Demo/Real account.
+  // Deriv's current profit_table endpoint is account-scoped; do not send loginid.
+  const getTradeHistory = useCallback(async (limit = 50): Promise<DerivProfitTransaction[]> => {
+    if (!state.authorized || !service.socketOpen) {
+      throw new Error("Deriv account is not connected");
+    }
+    const safeLimit = Math.max(1, Math.min(500, Math.floor(limit)));
+    const response = await service.send<any>({
+      profit_table: 1,
+      limit: safeLimit,
+      sort: "DESC",
+    }, 15000);
+    const transactions = response?.profit_table?.transactions;
+    return Array.isArray(transactions) ? transactions as DerivProfitTransaction[] : [];
+  }, [service, state.authorized]);
+
   // Refresh balance from Deriv (truth source)
   const refreshBalance = useCallback(async () => {
     try {
@@ -515,6 +544,7 @@ export const useDerivAPI = () => {
     subscribeContract,
     onContractUpdate,
     refreshBalance,
+    getTradeHistory,
   };
 };
 
