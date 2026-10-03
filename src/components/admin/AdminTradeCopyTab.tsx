@@ -28,6 +28,7 @@ const ROLE_STYLE: Record<Mt5Role, string> = {
   "DIRECT EXECUTION": "border-success/30 text-success",
   "PROVIDER MASTER": "border-primary/30 text-primary",
   "BOTVIO ROBOT MASTER": "border-warning/40 text-warning",
+  "BOTVIO SIGNAL MASTER": "border-emerald-500/30 text-emerald-500",
   FOLLOWER: "border-muted-foreground/30 text-muted-foreground",
 };
 const mask = (login: string | null) => (login ? (login.length > 4 ? `••••${login.slice(-4)}` : login) : "—");
@@ -95,12 +96,19 @@ export const AdminTradeCopyTab = () => {
     { label: "Data Feeds", value: count("DATA FEED"), icon: Radio },
     { label: "Provider Masters", value: count("PROVIDER MASTER"), icon: Crown },
     { label: "Botvio Robot Master", value: count("BOTVIO ROBOT MASTER"), icon: Bot },
+    { label: "Botvio Signal Master", value: count("BOTVIO SIGNAL MASTER"), icon: Send },
     { label: "Copying accounts", value: (data?.relations ?? []).filter((r) => r.status === "active").length, icon: Users },
     { label: "Errors", value: rows.filter((r) => r.last_direct_error || r.connection_status === "error").length, icon: AlertTriangle },
   ];
 
   const toggleDirect = (r: Row) => act.mutate(() => directAction("admin_set", { account_id: r.id, enabled: !r.direct_signal_enabled }));
   const toggleMaster = (r: Row) => act.mutate(() => tradecopy("set_master_active", { account_id: r.id, active: !r.tradecopy_active }));
+  const toggleSignalMaster = (r: Row) => act.mutate(() => tradecopy("set_signal_master", {
+    account_id: r.id,
+    enabled: !r.botvio_signal_master_enabled,
+    lot: r.botvio_signal_master_lot || 0.01,
+    min_confidence: r.botvio_signal_min_confidence || 70,
+  }));
   const testConn = (r: Row) => act.mutate(() => r.tradecopy_user_id ? tradecopy("diagnostic", { account_id: r.id }) : directAction("test_connection", { account_id: r.id }));
   const setProvider = (r: Row, s: "approved" | "suspended") => act.mutate(async () => {
     if (!r.provider) throw new Error("No provider profile");
@@ -119,7 +127,7 @@ export const AdminTradeCopyTab = () => {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2"><Server className="h-5 w-5" /> MT5 Connections & TradeCopy</CardTitle>
-            <CardDescription>Every MT5 account by role. Direct Execution and Data Feed never use a TradeCopy registration. Passwords are never shown.</CardDescription>
+            <CardDescription>Every MT5 account by role. Botvio signals enter the configured provider master through TradeCopy; user Direct Signals also execute through TradeCopy. Passwords are never shown.</CardDescription>
           </div>
           <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />Refresh</Button>
         </CardHeader>
@@ -137,7 +145,7 @@ export const AdminTradeCopyTab = () => {
           <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
             <Select value={role} onValueChange={setRole}><SelectTrigger aria-label="Role" className="min-h-11"><SelectValue /></SelectTrigger><SelectContent>
               <SelectItem value="all">All roles</SelectItem>
-              {(["DATA FEED", "DIRECT EXECUTION", "PROVIDER MASTER", "BOTVIO ROBOT MASTER", "FOLLOWER"] as Mt5Role[]).map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+              {(["DATA FEED", "DIRECT EXECUTION", "PROVIDER MASTER", "BOTVIO ROBOT MASTER", "BOTVIO SIGNAL MASTER", "FOLLOWER"] as Mt5Role[]).map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
               <SelectItem value="NONE">Connected, no role</SelectItem>
             </SelectContent></Select>
             <Select value={broker} onValueChange={setBroker}><SelectTrigger aria-label="Broker" className="min-h-11"><SelectValue /></SelectTrigger><SelectContent>
@@ -184,9 +192,16 @@ export const AdminTradeCopyTab = () => {
                           </Button>
                         )}
                         {r.account_role === "master" && r.tradecopy_user_id && (
-                          <Button size="sm" variant={r.tradecopy_active ? "outline" : "default"} disabled={act.isPending} onClick={() => toggleMaster(r)}>
-                            <Power className="mr-1 h-4 w-4" />{r.tradecopy_active ? "Deactivate Master" : "Activate Master"}
-                          </Button>
+                          <>
+                            <Button size="sm" variant={r.tradecopy_active ? "outline" : "default"} disabled={act.isPending} onClick={() => toggleMaster(r)}>
+                              <Power className="mr-1 h-4 w-4" />{r.tradecopy_active ? "Deactivate Master" : "Activate Master"}
+                            </Button>
+                            {!r.is_botvio_robot && (
+                              <Button size="sm" variant={r.botvio_signal_master_enabled ? "outline" : "default"} disabled={act.isPending || !r.tradecopy_active} onClick={() => toggleSignalMaster(r)}>
+                                <Send className="mr-1 h-4 w-4" />{r.botvio_signal_master_enabled ? "Stop Botvio Signals" : "Receive Botvio Signals"}
+                              </Button>
+                            )}
+                          </>
                         )}
                       </div></TableCell>
                     </TableRow>
@@ -208,6 +223,7 @@ export const AdminTradeCopyTab = () => {
               onTest={() => testConn(selected)}
               onToggleDirect={() => toggleDirect(selected)}
               onToggleMaster={() => toggleMaster(selected)}
+              onToggleSignalMaster={() => toggleSignalMaster(selected)}
               onProvider={(s) => setProvider(selected, s)}
               onEmergency={emergency}
               onForceDemo={() => forceDemo(selected)}
@@ -220,7 +236,7 @@ export const AdminTradeCopyTab = () => {
 };
 
 function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMaster, onProvider, onEmergency, onForceDemo }: {
-  r: Row; relations: Rel[]; busy: boolean; onTest: () => void; onToggleDirect: () => void; onToggleMaster: () => void;
+  r: Row; relations: Rel[]; busy: boolean; onTest: () => void; onToggleDirect: () => void; onToggleMaster: () => void; onToggleSignalMaster: () => void;
   onProvider: (s: "approved" | "suspended") => void; onEmergency: (id: string) => void; onForceDemo: () => void;
 }) {
   const { data: execs } = useQuery({
@@ -233,7 +249,8 @@ function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMas
   });
 
   const paths: string[] = [];
-  if (r.roles.includes("DIRECT EXECUTION")) paths.push("Botvio signal → Direct Execution → this MT5 account (no TradeCopy)");
+  if (r.roles.includes("DIRECT EXECUTION")) paths.push("Botvio signal → TradeCopy → this follower MT5 account");
+  if (r.roles.includes("BOTVIO SIGNAL MASTER")) paths.push("Botvio signal → this Deriv/provider TradeCopy master → TradeCopy followers");
   if (r.roles.includes("BOTVIO ROBOT MASTER")) paths.push("Botvio signal → Botvio Robot Master → TradeCopy → followers");
   if (r.roles.includes("PROVIDER MASTER")) paths.push("Provider's executed MT5 trades → TradeCopy → followers");
   if (r.roles.includes("FOLLOWER")) paths.push("Master trades → TradeCopy → this account");
@@ -249,6 +266,7 @@ function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMas
         <Badge variant={r.environment === "LIVE" ? "destructive" : "secondary"}>{r.environment || "DEMO"}</Badge>
         {r.roles.map((x) => <Badge key={x} variant="outline" className={ROLE_STYLE[x]}>{x}</Badge>)}
         <Badge variant="outline">{usesTradeCopySlot(r) ? `TradeCopy ID ${r.tradecopy_user_id}` : "No TradeCopy registration"}</Badge>
+        {r.botvio_signal_master_enabled && <Badge variant="outline" className="border-emerald-500/30 text-emerald-500">BOTVIO SIGNAL DESTINATION · {r.botvio_signal_master_lot} lot · ≥{r.botvio_signal_min_confidence}%</Badge>}
         {r.provider && <Badge variant="outline">Provider: {r.provider.status}</Badge>}
       </div>
 
@@ -262,6 +280,7 @@ function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMas
         <Button size="sm" variant="outline" disabled={busy} onClick={onTest}>Test Connection</Button>
         {!r.is_botvio_robot && r.account_role !== "master" && <Button size="sm" variant="outline" disabled={busy} onClick={onToggleDirect}>{r.direct_signal_enabled ? "Disable Direct Signals" : "Enable Direct Signals"}</Button>}
         {r.account_role === "master" && r.tradecopy_user_id && <Button size="sm" variant="outline" disabled={busy} onClick={onToggleMaster}>{r.tradecopy_active ? "Deactivate Master" : "Activate Master"}</Button>}
+        {r.account_role === "master" && r.tradecopy_user_id && !r.is_botvio_robot && <Button size="sm" variant="outline" disabled={busy || !r.tradecopy_active} onClick={onToggleSignalMaster}>{r.botvio_signal_master_enabled ? "Stop Botvio Signals" : "Receive Botvio Signals"}</Button>}
         {r.provider && r.provider.status !== "approved" && <Button size="sm" disabled={busy} onClick={() => onProvider("approved")}>Approve Provider</Button>}
         {r.provider && r.provider.status === "approved" && <Button size="sm" variant="outline" disabled={busy} onClick={() => onProvider("suspended")}>Suspend Provider</Button>}
         {r.environment === "LIVE" && <Button size="sm" variant="destructive" disabled={busy} onClick={onForceDemo}><ShieldAlert className="mr-1 h-4 w-4" />Force Demo</Button>}
