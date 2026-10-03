@@ -9,8 +9,9 @@ export function assertAutomationKey(req: Request): boolean {
   if (!valid) {
     try {
       const raw = Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}";
-      const keys = Object.values(JSON.parse(raw) as Record<string, unknown>).filter((v): v is string => typeof v === "string");
-      valid = keys.includes(presented);
+      const keys = JSON.parse(raw) as Record<string, unknown>;
+      const automationKey = typeof keys["botvio_automation"] === "string" ? keys["botvio_automation"] : "";
+      valid = !!automationKey && presented === automationKey;
     } catch {
       valid = false;
     }
