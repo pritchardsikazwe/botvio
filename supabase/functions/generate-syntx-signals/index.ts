@@ -41,6 +41,25 @@ function aggregateDays(c:Candle[],days:number):Candle[]{
 function ema(a:number[],p:number){if(a.length<p)return null;let e=a.slice(0,p).reduce((x,y)=>x+y,0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e=(a[i]-e)*k+e;return e}
 function atr(c:Candle[],p=14){if(c.length<=p)return null;const tr=c.slice(1).map((x,i)=>Math.max(x.high-x.low,Math.abs(x.high-c[i].close),Math.abs(x.low-c[i].close)));return tr.slice(-p).reduce((a,b)=>a+b,0)/Math.min(p,tr.length)}
 function rsi(c:Candle[],p=14){if(c.length<=p)return null;let g=0,l=0;for(let i=c.length-p;i<c.length;i++){const d=c[i].close-c[i-1].close;if(d>0)g+=d;else l-=d}if(l===0)return 100;return 100-100/(1+(g/p)/(l/p))}
+function directionalBias(c:Candle[]):"BUY"|"SELL"|null{
+ if(c.length<60)return null;
+ const closes=c.map(x=>x.close),last=c.at(-1)!;
+ const e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),rs=rsi(c);
+ if(e9==null||e21==null||e50==null||rs==null)return null;
+ if(e9>e21&&last.close>e50&&rs>=45&&rs<=75)return "BUY";
+ if(e9<e21&&last.close<e50&&rs>=25&&rs<=55)return "SELL";
+ return null;
+}
+function candleQuality(c:Candle[]):number{
+ const last=c.at(-1)!;const a=atr(c)??0;const range=last.high-last.low;
+ if(!a||range<=0)return 0;
+ const body=Math.abs(last.close-last.open),ratio=body/range;
+ if(range>a*2.0)return -6;
+ if(ratio>=0.55&&range>=a*0.6)return 4;
+ if(ratio>=0.35)return 2;
+ return 0;
+}
+
 function frameSignal(c:Candle[],bias:string,profile:{min:number;stop:number;target:number;label:string}){if(c.length<60)return null;const closes=c.map(x=>x.close),e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),a=atr(c),rs=rsi(c),last=c.at(-1)!;if(e9==null||e21==null||a==null||a<=0||rs==null)return null;const up=e9>e21&&(e50==null||last.close>e50),down=e9<e21&&(e50==null||last.close<e50),expanded=last.high-last.low>a*1.8;let d:null|"BUY"|"SELL"=null;if(bias==="BUY"&&up&&!expanded)d="BUY";if(bias==="SELL"&&down&&!expanded)d="SELL";if(bias==="BOTH"){const hi=Math.max(...c.slice(-20,-1).map(x=>x.high)),lo=Math.min(...c.slice(-20,-1).map(x=>x.low));if(rs<32&&last.close<lo+a*.5)d="BUY";else if(rs>68&&last.close>hi-a*.5)d="SELL";else if(up&&!expanded)d="BUY";else if(down&&!expanded)d="SELL"}if(!d)return null;const score=Math.min(96,60+(up||down?8:0)+(d==="BUY"&&rs>50&&rs<75?6:d==="SELL"&&rs<50&&rs>25?6:0)+(expanded?5:0));if(score<profile.min)return null;return{direction:d,score,entry:last.close,sl:d==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:d==="BUY"?last.close+a*profile.target:last.close-a*profile.target}}
 function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
  const a=atr(c)??0;
