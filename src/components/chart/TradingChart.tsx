@@ -56,6 +56,8 @@ export interface TradingChartProps {
   height?: number;
   unavailableMessage?: string;
   errorDetail?: string | null;
+  /** Hauza-style pivot support/resistance overlay. */
+  showHauza?: boolean;
 }
 
 const STATUS_META: Record<FeedStatus, { label: string; className: string }> = {
@@ -91,6 +93,7 @@ function TradingChartBase({
   height = 460,
   unavailableMessage = "Market data unavailable",
   errorDetail = null,
+  showHauza = false,
 }: TradingChartProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -112,6 +115,49 @@ function TradingChartBase({
     rsi: true,
   });
   const [fullscreen, setFullscreen] = useState(false);
+  const [hauzaOn, setHauzaOn] = useState(showHauza);
+  const hauzaTrendRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const hauzaLinesRef = useRef<IPriceLine[]>([]);
+
+  useEffect(() => setHauzaOn(showHauza), [showHauza]);
+
+  const hauza = useMemo(() => {
+    if (!hauzaOn || candles.length < 20) return null;
+    const visible = candles.slice(-120);
+    const left = 3;
+    const right = 3;
+    const supports: number[] = [];
+    const resistances: number[] = [];
+    for (let i = left; i < visible.length - right; i++) {
+      const c = visible[i];
+      let high = true;
+      let low = true;
+      for (let k = 1; k <= left; k++) {
+        if (visible[i - k].high >= c.high) high = false;
+        if (visible[i - k].low <= c.low) low = false;
+      }
+      for (let k = 1; k <= right; k++) {
+        if (visible[i + k].high >= c.high) high = false;
+        if (visible[i + k].low <= c.low) low = false;
+      }
+      if (high) resistances.push(c.high);
+      if (low) supports.push(c.low);
+    }
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    visible.forEach((c, i) => {
+      sumX += i; sumY += c.close; sumXY += i * c.close; sumXX += i * i;
+    });
+    const denom = visible.length * sumXX - sumX * sumX;
+    const slope = denom ? (visible.length * sumXY - sumX * sumY) / denom : 0;
+    const intercept = (sumY - slope * sumX) / visible.length;
+    return {
+      s1: supports.at(-1) ?? null,
+      s2: supports.at(-2) ?? null,
+      r1: resistances.at(-1) ?? null,
+      r2: resistances.at(-2) ?? null,
+      trend: visible.map((c, i) => ({ time: c.time as UTCTimestamp, value: intercept + slope * i })),
+    };
+  }, [candles, hauzaOn]);
 
   const ind = useMemo(() => indicators ?? computeIndicators(candles), [indicators, candles]);
   const statusMeta = STATUS_META[status];
@@ -200,6 +246,8 @@ function TradingChartBase({
       window.removeEventListener("resize", resize);
       ro?.disconnect();
       priceLinesRef.current = [];
+      hauzaLinesRef.current = [];
+      hauzaTrendRef.current = null;
       markersRef.current = null;
       priceSeriesRef.current = null;
       emaRefs.current = {};
@@ -314,6 +362,42 @@ function TradingChartBase({
       );
     }
   }, [candles, ind, chartType, overlays.indicators]);
+
+  // ── Hauza trend line + support/resistance levels ────────────────────────
+  useEffect(() => {
+    const trend = hauzaTrendRef.current;
+    if (trend) {
+      trend.applyOptions({ visible: !!hauzaOn && !!hauza });
+      trend.setData(hauza?.trend ?? []);
+    }
+
+    const series = priceSeriesRef.current;
+    if (!series) return;
+    hauzaLinesRef.current.forEach((line) => {
+      try { series.removePriceLine(line); } catch { /* noop */ }
+    });
+    hauzaLinesRef.current = [];
+    if (!hauzaOn || !hauza) return;
+
+    const add = (price: number | null, color: string, title: string) => {
+      if (price == null || !Number.isFinite(price)) return null;
+      return series.createPriceLine({
+        price,
+        color,
+        lineWidth: 1,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title,
+      });
+    };
+    const lines = [
+      add(hauza.r2, "hsl(var(--destructive))", "R2"),
+      add(hauza.r1, "hsl(var(--destructive))", "R1"),
+      add(hauza.s1, "hsl(var(--success))", "S1"),
+      add(hauza.s2, "hsl(var(--success))", "S2"),
+    ].filter((line): line is IPriceLine => !!line);
+    hauzaLinesRef.current = lines;
+  }, [hauza, hauzaOn, chartType]);
 
   // ── Signal markers anchored to their own candle ─────────────────────────
   useEffect(() => {
