@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
 import { fetchActiveSymbols, getSymbolCapability, type SymbolCapability } from "@/services/deriv/derivSymbols";
+import { TradingHubSignalHorizons } from "@/components/signals/TradingHubSignalHorizons";
 
 const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Rocket; tone: string }> = {
   boom: { label: "Boom", icon: Rocket, tone: "text-emerald-400 border-emerald-500/40" },
@@ -74,6 +75,17 @@ export default function SyntheticHub() {
             </p>
           </div>
         </div>
+
+        <TradingHubSignalHorizons
+          symbol={active.derivSymbol ?? active.mt5Symbol ?? active.label}
+          strategyNames={
+            /boom|crash/i.test(active.label)
+              ? { SCALPING: "Spike Continuation + Pullback", INTRADAY: "Spike Trend + Confirmation", SWING: "Structure + Momentum", POSITION: "Daily Synthetic Trend" }
+              : /step/i.test(active.label)
+                ? { SCALPING: "Step Trend + Mean Reversion", INTRADAY: "Step Trend + Pullback", SWING: "Structure + Momentum", POSITION: "Daily Step Trend" }
+                : { SCALPING: "Volatility Trend + Breakout", INTRADAY: "Volatility Breakout + Retest", SWING: "Structure + Momentum", POSITION: "Daily Volatility Trend" }
+          }
+        />
 
         {/* Active chart + signal */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
