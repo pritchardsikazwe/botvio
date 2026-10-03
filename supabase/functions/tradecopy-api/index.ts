@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     const friendly = err.code === "network"
       ? "TradeCopy's server isn't responding right now. Your accounts and settings are safe — please try again in a few minutes."
       : err.message;
-    const status = err.code === "network" || err.code === "upstream" ? 200 : err.status;
+    const status = err.code === "network" || err.code === "upstream" || err.code === "validation" ? 200 : err.status;
     return json({ ok: false, error: friendly, code: err.code }, status);
   }
 });
