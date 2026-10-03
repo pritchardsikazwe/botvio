@@ -33,8 +33,21 @@ const TIMEFRAME_FILTERS = [
   { value: "D1", label: "1D · Position" },
 ];
 
+function normTf(timeframe?: string | null): string {
+  const t = (timeframe || "").toUpperCase().trim();
+  const m = t.match(/^(\d+)\s*([MHD])$/);
+  return m ? `${m[2]}${m[1]}` : t;
+}
+
+function fmtPrice(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(Number(v))) return "-";
+  const n = Number(v);
+  const d = Math.abs(n) >= 1000 ? 2 : Math.abs(n) >= 10 ? 3 : 5;
+  return n.toLocaleString(undefined, { maximumFractionDigits: d });
+}
+
 function timeframeLabel(timeframe?: string | null): string {
-  switch ((timeframe || "").toUpperCase()) {
+  switch (normTf(timeframe)) {
     case "M1": return "1M · SCALPING";
     case "M15": return "15M · INTRADAY";
     case "H1": return "1H · SWING";
@@ -46,7 +59,7 @@ function timeframeLabel(timeframe?: string | null): string {
 function selectHomeSignalsByHorizon(items: ManualSignal[], limit = 6): ManualSignal[] {
   const horizons = ["M1", "M15", "H1", "D1"];
   const buckets = new Map<string, ManualSignal[]>(
-    horizons.map(tf => [tf, items.filter(signal => (signal.timeframe || "").toUpperCase() === tf)])
+    horizons.map(tf => [tf, items.filter(signal => normTf(signal.timeframe) === tf)])
   );
   const selected: ManualSignal[] = [];
   let index = 0;
@@ -266,7 +279,7 @@ export const HomeSignalsWidget = () => {
   // frequent M1 scalps do not crowd out 15M / 1H / 1D setups.
   if (timeframeFilter !== "all") {
     displaySignals = displaySignals
-      .filter(s => (s.timeframe || "").toUpperCase() === timeframeFilter)
+      .filter(s => normTf(s.timeframe) === timeframeFilter)
       .slice(0, 6);
   } else {
     // Reserve up to 2 slots for live Weltrade SyntX signals.
@@ -324,7 +337,7 @@ export const HomeSignalsWidget = () => {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {displaySignals.map((signal) => {
           const isWin = signal.outcome === "win";
           const isLoss = signal.outcome === "loss";
@@ -338,9 +351,9 @@ export const HomeSignalsWidget = () => {
               }`}
             >
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-lg">{signal.symbol}</CardTitle>
+                <div className="flex items-start justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                    <CardTitle className="text-lg truncate">{signal.symbol}</CardTitle>
                     <Badge
                       variant={signal.direction === "BUY" ? "default" : "destructive"}
                       className={signal.direction === "BUY" ? "bg-success text-success-foreground" : ""}
@@ -383,18 +396,18 @@ export const HomeSignalsWidget = () => {
                 )}
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="grid grid-cols-3 gap-2 text-sm">
+                <div className="grid grid-cols-3 gap-2 text-sm min-w-0 [&>div]:min-w-0">
                   <div>
                     <p className="text-muted-foreground text-xs">Entry</p>
-                    <p className="font-mono font-medium">{signal.entry_price}</p>
+                    <p className="font-mono font-medium text-xs sm:text-sm truncate">{fmtPrice(signal.entry_price)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">TP</p>
-                    <p className="font-mono text-success">{signal.take_profit || "-"}</p>
+                    <p className="font-mono text-success text-xs sm:text-sm truncate">{fmtPrice(signal.take_profit)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">SL</p>
-                    <p className="font-mono text-destructive">{signal.stop_loss || "-"}</p>
+                    <p className="font-mono text-destructive text-xs sm:text-sm truncate">{fmtPrice(signal.stop_loss)}</p>
                   </div>
                 </div>
 
@@ -404,7 +417,7 @@ export const HomeSignalsWidget = () => {
                   </p>
                 )}
 
-                <div className="flex items-center justify-between pt-2 border-t border-border">
+                <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-border">
                   <div className="flex items-center gap-1 text-xs">
                     {isWin ? (
                       <>

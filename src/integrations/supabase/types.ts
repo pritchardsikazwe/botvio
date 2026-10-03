@@ -7289,6 +7289,7 @@ export type Database = {
           win_count: number
         }[]
       }
+      get_botvio_automation_secret: { Args: never; Returns: string }
       get_bridge_investor_password: {
         Args: { _request_id: string }
         Returns: string
