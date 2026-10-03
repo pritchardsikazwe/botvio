@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 const STEPS = [
-  { id: 1, title: "Account", icon: UserRound },
+  { id: 1, title: "Welcome", icon: UserRound },
   { id: 2, title: "Source", icon: Sparkles },
   { id: 3, title: "Plan", icon: CreditCard },
   { id: 4, title: "MT5", icon: MonitorSmartphone },
@@ -165,7 +165,22 @@ export default function CopyTradingOnboarding() {
                     <Badge variant="outline" className="mb-3">STEP 1</Badge>
                     <h2 className="text-2xl font-bold">Welcome to Botvio Copy Trading</h2>
                     <p className="mt-2 max-w-2xl text-muted-foreground">First create or sign in to your Botvio account. Your account will keep your subscription, MT5 connection and copy settings together.</p>
-                    <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                                        <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+                      <p className="text-sm font-semibold">How Botvio works</p>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                        {[
+                          ["1", "Choose a source", "Botvio Robot or an approved Provider."],
+                          ["2", "Use your account", "Your MT5 account receives the copied trades."],
+                          ["3", "Control the risk", "You choose the limits and can pause or stop."],
+                        ].map(([n, title, text]) => (
+                          <div key={n} className="rounded-xl border border-border/60 bg-background/70 p-3">
+                            <div className="text-xs font-bold text-primary">{n}</div>
+                            <p className="mt-1 text-sm font-semibold">{title}</p>
+                            <p className="mt-1 text-xs leading-5 text-muted-foreground">{text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>\n<div className="mt-8 grid gap-4 sm:grid-cols-3">
                       {[
                         ["Account", "One Botvio login"],
                         ["Security", "Encrypted MT5 credentials"],
