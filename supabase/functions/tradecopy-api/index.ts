@@ -23,9 +23,10 @@ const Creds = z.object({
 type Account = {
   id: string; user_id: string; account_role: AccountRole | null; tradecopy_user_id: number | null;
   environment: Environment; is_botvio_robot: boolean; tradecopy_active: boolean; login_id: string | null; broker: string | null; server: string | null;
+  botvio_signal_master_enabled: boolean; botvio_signal_master_lot: number; botvio_signal_min_confidence: number;
 };
 
-const ACCOUNT_COLS = "id,user_id,account_role,tradecopy_user_id,environment,is_botvio_robot,tradecopy_active,login_id,broker,server";
+const ACCOUNT_COLS = "id,user_id,account_role,tradecopy_user_id,environment,is_botvio_robot,tradecopy_active,login_id,broker,server,botvio_signal_master_enabled,botvio_signal_master_lot,botvio_signal_min_confidence";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -572,6 +573,43 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
           openOrders: openOrders.map(({ raw: _r, ...o }) => o),
           recentHistory: history.map(({ raw: _r, ...o }) => o),
         },
+        accountId: acct.id,
+      };
+    }
+
+    case "set_signal_master": {
+      if (!ctx.isAdmin) throw new TradeCopyError("Admins only", "auth", 403);
+      const accountId = String(body.account_id ?? "");
+      const enabled = body.enabled !== false;
+      const acct = await loadAccount(ctx, accountId, { allowAdmin: true });
+      if (acct.account_role !== "master" || !acct.tradecopy_user_id) {
+        throw new TradeCopyError("Signal destination must be a connected TradeCopy MT5 master", "validation");
+      }
+      if (acct.is_botvio_robot) {
+        throw new TradeCopyError("Use a provider MT5 master for the Deriv signal destination", "validation");
+      }
+      if (enabled && !acct.tradecopy_active) {
+        throw new TradeCopyError("Activate the TradeCopy master before making it the Botvio signal destination", "validation");
+      }
+      const lot = Number(body.lot ?? acct.botvio_signal_master_lot ?? 0.01);
+      const minConfidence = Number(body.min_confidence ?? acct.botvio_signal_min_confidence ?? 70);
+      if (!Number.isFinite(lot) || lot <= 0 || lot > 50) throw new TradeCopyError("Signal master lot must be between 0.01 and 50", "validation");
+      if (!Number.isInteger(minConfidence) || minConfidence < 50 || minConfidence > 99) throw new TradeCopyError("Signal confidence must be between 50 and 99", "validation");
+
+      if (enabled) {
+        await admin.from("trading_accounts")
+          .update({ botvio_signal_master_enabled: false })
+          .eq("botvio_signal_master_enabled", true);
+      }
+      await admin.from("trading_accounts")
+        .update({
+          botvio_signal_master_enabled: enabled,
+          botvio_signal_master_lot: lot,
+          botvio_signal_min_confidence: minConfidence,
+        })
+        .eq("id", acct.id);
+      return {
+        data: { enabled, account_id: acct.id, lot, min_confidence: minConfidence },
         accountId: acct.id,
       };
     }
