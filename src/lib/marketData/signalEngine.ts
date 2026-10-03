@@ -167,8 +167,8 @@ export function computeSignals(
     }
 
     signals.push({
-      id: `${symbol}-${timeframe}-${c.time}-${direction}`,
-      symbol, label, timeframe, direction,
+      id: `${opts.symbol}-${opts.timeframe}-${c.time}-${direction}`,
+      symbol: opts.symbol, label: opts.label ?? opts.symbol, timeframe: opts.timeframe, direction,
       strategy: profile.label,
       strategyId: profile.id,
       confidence,
