@@ -275,7 +275,7 @@ export const AppRoutes = () => {
     <Route path="chart/xau-usd" element={<Navigate to="/chart/XAUUSD" replace />} />
     <Route path="xauusd" element={<Navigate to="/gold" replace />} />
     <Route path="xau-usd" element={<Navigate to="/gold" replace />} />
-    <Route path="chart/:symbol" element={<ChartPage />} />
+    <Route path="chart/:symbol" element={<Paid><ChartPage /></Paid>} />
     <Route path="gold" element={<Paid><GoldTradingHub /></Paid>} />
     <Route path="news-trader-hub" element={<Paid><NewsTraderHub /></Paid>} />
     <Route path="trader-hub" element={<Navigate to="/news-trader-hub" replace />} />
