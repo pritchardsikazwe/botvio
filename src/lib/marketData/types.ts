@@ -8,7 +8,7 @@
  * about broker specific payloads (Deriv WS, MT5 bridge ticks, …).
  */
 
-export type Timeframe = "1m" | "3m" | "5m" | "15m" | "30m" | "1H" | "4H" | "1D";
+export type Timeframe = "1m" | "3m" | "5m" | "15m" | "30m" | "1H" | "4H" | "1D" | "3D";
 
 export const TIMEFRAMES: { label: string; value: Timeframe; seconds: number }[] = [
   { label: "1m", value: "1m", seconds: 60 },
@@ -19,6 +19,7 @@ export const TIMEFRAMES: { label: string; value: Timeframe; seconds: number }[] 
   { label: "1H", value: "1H", seconds: 3600 },
   { label: "4H", value: "4H", seconds: 14400 },
   { label: "1D", value: "1D", seconds: 86400 },
+  { label: "3D", value: "3D", seconds: 259200 },
 ];
 
 export function timeframeSeconds(tf: Timeframe): number {
