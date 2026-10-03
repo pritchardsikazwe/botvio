@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,8 +63,8 @@ const BROKER_OPTIONS = [
 ];
 
 /** Password lives only in this form's local state and is cleared on submit. */
-export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = [] }: Props) {
-  const [open, setOpen] = useState(false);
+export function ConnectMt5Form({ role, robot, existingMasters = [] }: Omit<Props, "triggerLabel">) {
+  const formId = useId().replace(/:/g, "");
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [broker, setBroker] = useState<string>("");
@@ -116,7 +116,6 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
         },
       });
       toast.success(role === "master" ? "Master account connected (inactive)" : "MT5 follower account saved (inactive)");
-      setOpen(false);
       resetForm();
     } catch (err) {
       toast.error((err as Error).message);
@@ -124,25 +123,12 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button><Link2 className="mr-2 h-4 w-4" />{triggerLabel}</Button>
-      </DialogTrigger>
-
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{triggerLabel}</DialogTitle>
-          <DialogDescription>
-            Add your MT5 account in three steps. New connections start inactive. Demo and live accounts are supported; live copying still requires explicit activation.
-          </DialogDescription>
-        </DialogHeader>
-
         <form onSubmit={submit} className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="tc-login">MT5 login</Label>
+              <Label htmlFor={`${formId}-login`}>MT5 login</Label>
               <Input
-                id="tc-login"
+                id={`${formId}-login`}
                 inputMode="numeric"
                 placeholder="Account number"
                 required
@@ -152,9 +138,9 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="tc-pass">MT5 password</Label>
+              <Label htmlFor={`${formId}-pass`}>MT5 password</Label>
               <Input
-                id="tc-pass"
+                id={`${formId}-pass`}
                 type="password"
                 autoComplete="off"
                 placeholder="Trader password"
@@ -167,9 +153,9 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="tc-broker">MT5 broker</Label>
+            <Label htmlFor={`${formId}-broker`}>MT5 broker</Label>
             <Select value={broker} onValueChange={handleBrokerChange} required>
-              <SelectTrigger id="tc-broker">
+              <SelectTrigger id={`${formId}-broker`}>
                 <SelectValue placeholder="Select your broker" />
               </SelectTrigger>
               <SelectContent>
@@ -182,11 +168,11 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="tc-server">MT5 server</Label>
+            <Label htmlFor={`${formId}-server`}>MT5 server</Label>
             {serverOptions.length > 0 ? (
               <>
                 <Select value={serverChoice} onValueChange={setServerChoice} required>
-                  <SelectTrigger id="tc-server">
+                  <SelectTrigger id={`${formId}-server`}>
                     <SelectValue placeholder="Select your MT5 server" />
                   </SelectTrigger>
                   <SelectContent>
@@ -221,8 +207,8 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="tc-label">Nickname <span className="text-muted-foreground">(optional)</span></Label>
-            <Input id="tc-label" placeholder={role === "master" ? "e.g. Main provider account" : "e.g. My trading account"} value={label} onChange={(e) => setLabel(e.target.value)} />
+            <Label htmlFor={`${formId}-label`}>Nickname <span className="text-muted-foreground">(optional)</span></Label>
+            <Input id={`${formId}-label`} placeholder={role === "master" ? "e.g. Main provider account" : "e.g. My trading account"} value={label} onChange={(e) => setLabel(e.target.value)} />
           </div>
 
           <p className="flex items-start gap-2 rounded-lg bg-muted/40 p-2 text-xs text-muted-foreground">
@@ -230,13 +216,29 @@ export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = 
             Your password is encrypted on our server and is never shown again.
           </p>
 
-          <DialogFooter>
+          <div className="pt-1">
             <Button type="submit" disabled={act.isPending || !login || !password || !server} className="w-full">
               {act.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Connect MT5 Account
             </Button>
-          </DialogFooter>
+          </div>
         </form>
+  );
+}
+
+export function ConnectMt5Dialog({ role, robot, triggerLabel, existingMasters = [] }: Props) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button><Link2 className="mr-2 h-4 w-4" />{triggerLabel}</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{triggerLabel}</DialogTitle>
+          <DialogDescription>Add your MT5 account. New connections start inactive.</DialogDescription>
+        </DialogHeader>
+        <ConnectMt5Form role={role} robot={robot} existingMasters={existingMasters} />
       </DialogContent>
     </Dialog>
   );
