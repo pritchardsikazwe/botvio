@@ -1176,6 +1176,59 @@ export type Database = {
           },
         ]
       }
+      broker_market_feeds: {
+        Row: {
+          broker: string
+          created_at: string
+          feed_provider: string
+          id: string
+          last_quote_at: string | null
+          metadata: Json
+          platform: string
+          status: string
+          symbols: Json
+          trading_account_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          broker: string
+          created_at?: string
+          feed_provider?: string
+          id?: string
+          last_quote_at?: string | null
+          metadata?: Json
+          platform?: string
+          status?: string
+          symbols?: Json
+          trading_account_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          broker?: string
+          created_at?: string
+          feed_provider?: string
+          id?: string
+          last_quote_at?: string | null
+          metadata?: Json
+          platform?: string
+          status?: string
+          symbols?: Json
+          trading_account_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_market_feeds_trading_account_id_fkey"
+            columns: ["trading_account_id"]
+            isOneToOne: true
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broker_tokens: {
         Row: {
           broker_name: string
@@ -6020,6 +6073,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      syntx_api_connections: {
+        Row: {
+          broker: string
+          connection_status: string
+          created_at: string
+          environment: string
+          id: string
+          last_connected_at: string | null
+          last_error: string | null
+          login: string
+          password_encrypted: string
+          server: string
+          session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          broker?: string
+          connection_status?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          last_connected_at?: string | null
+          last_error?: string | null
+          login: string
+          password_encrypted: string
+          server: string
+          session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          broker?: string
+          connection_status?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          last_connected_at?: string | null
+          last_error?: string | null
+          login?: string
+          password_encrypted?: string
+          server?: string
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       top_asset_snapshots: {
         Row: {
