@@ -119,7 +119,8 @@ const NewsTraderHub = () => {
   const liveSignalRows = [
     ["XAUUSD", liveXau], ["EURUSD", liveEur], ["GBPUSD", liveGbp], ["USDJPY", liveJpy],
     ["US500", liveUs500], ["NAS100", liveNas], ["Vol75", liveVol75], ["Boom500", liveBoom500],
-  ].map(([market, signal]) => {
+  ].map(([rawMarket, signal]) => {
+    const market = String(rawMarket);
     const s = signal as ReturnType<typeof useDerivLiveSignal>;
     const direction = s.signal === "BUY" || s.signal === "SELL" ? s.signal : "WAIT";
     const p = s.lastPrice;

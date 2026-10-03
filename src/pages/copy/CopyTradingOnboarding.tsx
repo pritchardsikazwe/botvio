@@ -251,7 +251,6 @@ export default function CopyTradingOnboarding() {
                       <Button size="lg" onClick={continuePayment}>Continue to secure payment <ArrowRight className="ml-2 h-4 w-4" /></Button>
                       <Button variant="ghost" onClick={back}><ArrowLeft className="mr-2 h-4 w-4" />Back</Button>
                     </div>
-                    {paid && <p className="mt-3 text-xs text-emerald-600">Payment status detected for this onboarding session.</p>}
                   </div>
                 )}
 
@@ -303,7 +302,7 @@ export default function CopyTradingOnboarding() {
                         <p className="mt-2 text-muted-foreground">Review the source and basic risk controls before starting. You can change detailed settings later.</p>
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
                           <Card className="border-primary/20 bg-primary/5"><CardContent className="p-5"><div className="text-xs text-muted-foreground">COPY SOURCE</div><div className="mt-1 text-xl font-bold">{sourceName}</div><div className="mt-1 text-xs text-muted-foreground">{activeAccount ? `${activeAccount.login_id} · ${activeAccount.server}` : "Choose an MT5 account"}</div></CardContent></Card>
-                          <Card><CardContent className="p-5"><div className="text-xs text-muted-foreground">RISK MODE</div><div className="mt-3 flex gap-2">{["conservative","balanced","aggressive"].map((item) => <button key={item} onClick={() => setRisk(item)} className={`rounded-lg border px-3 py-2 text-xs capitalize transition-all ${risk === item ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{item}</button>)}</div><label className="mt-4 flex items-center gap-2 text-xs"><input type="checkbox" checked={copySltp} onChange={(e) => setCopySltp(e.target.checked)} /> Copy source SL/TP</label></Card>
+                          <Card><CardContent className="p-5"><div className="text-xs text-muted-foreground">RISK MODE</div><div className="mt-3 flex gap-2">{["conservative","balanced","aggressive"].map((item) => <button key={item} onClick={() => setRisk(item)} className={`rounded-lg border px-3 py-2 text-xs capitalize transition-all ${risk === item ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{item}</button>)}</div><label className="mt-4 flex items-center gap-2 text-xs"><input type="checkbox" checked={copySltp} onChange={(e) => setCopySltp(e.target.checked)} /> Copy source SL/TP</label></CardContent></Card>
                         </div>
                         <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 shrink-0 text-amber-500" /><span>Copy trading involves risk. Start with a DEMO account while testing the connection and settings.</span></div>
                         <div className="mt-7 flex flex-wrap gap-3">

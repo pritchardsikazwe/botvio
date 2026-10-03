@@ -24,7 +24,7 @@ export default function SaudiArabicTradingGuide(){
    <section className="mt-10">
     <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-2xl font-bold">أدلة التداول في السعودية</h2><p className="mt-2 text-sm text-muted-foreground">20 دليلاً عربياً مع نسخ إنجليزية مقابلة.</p></div><Link to="/markets/saudi-arabia"><Button variant="outline">English</Button></Link></div>
     <div className="mt-5 grid gap-4 md:grid-cols-2">
-     {SAUDI_ARABIC_INDEX.map(([slug,title,excerpt])=><article key={slug} className="rounded-2xl border bg-card p-5"><h3 className="text-lg font-semibold">{title}</h3><p className="mt-2 text-sm leading-7 text-muted-foreground">{excerpt}</p><Link to={"/ar/blog/"+slug} className="mt-4 inline-block text-sm font-semibold text-primary">اقرأ الدليل ←</Link></article>)}
+     {SAUDI_ARABIC_INDEX.map(({slug,title,excerpt})=><article key={slug} className="rounded-2xl border bg-card p-5"><h3 className="text-lg font-semibold">{title}</h3><p className="mt-2 text-sm leading-7 text-muted-foreground">{excerpt}</p><Link to={"/ar/blog/"+slug} className="mt-4 inline-block text-sm font-semibold text-primary">اقرأ الدليل ←</Link></article>)}
     </div>
    </section>
    <p className="mt-8 rounded-2xl border border-border/60 bg-card/50 p-5 text-sm leading-7 text-muted-foreground">محتوى تعليمي فقط. قد تتغير المنتجات والأهلية والرسوم والقواعد والتنظيم. تحقق دائماً من المصادر الرسمية الحالية قبل اتخاذ قرار مالي.</p>

@@ -219,7 +219,8 @@ const BlogPost = () => {
 
   const brokers = detectBrokers(post.title, post.content || "");
   const canonical = `https://botvio.live/blog/${slug}`;
-  const localizedMarket = slug ? Object.values(LOCALIZED_MARKETS).find((m) => slug.endsWith(`-${m.country.toLowerCase()}`) && !!LOCALIZED_NATIVE_POSTS[slug]) : null;\n  const arabicCanonical = slug && DUBAI_ARABIC_POSTS[slug] ? `https://botvio.live/ar/blog/${slug}` : slug && SAUDI_POSTS[slug] ? `https://botvio.live/ar/saudi-blog/${slug}` : localizedMarket?.lang === "ar" ? `https://botvio.live/ar/markets/${localizedMarket.slug}/blog/${slug}` : null;
+  const localizedMarket = slug ? Object.values(LOCALIZED_MARKETS).find((m) => slug.endsWith(`-${m.country.toLowerCase()}`) && !!LOCALIZED_NATIVE_POSTS[slug]) : null;
+  const arabicCanonical = slug && DUBAI_ARABIC_POSTS[slug] ? `https://botvio.live/ar/blog/${slug}` : slug && SAUDI_POSTS[slug] ? `https://botvio.live/ar/saudi-blog/${slug}` : localizedMarket?.lang === "ar" ? `https://botvio.live/ar/markets/${localizedMarket.slug}/blog/${slug}` : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
