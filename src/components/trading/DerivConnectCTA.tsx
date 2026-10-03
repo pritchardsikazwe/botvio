@@ -34,8 +34,8 @@ export const DerivConnectCTA = ({ message }: DerivConnectCTAProps) => {
             </p>
           </div>
           <Button variant="gold" asChild>
-            <Link to="/connections">
-              Connect Now <ArrowRight className="h-4 w-4 ml-2" />
+            <Link to="/deriv-app">
+              Connect Deriv & Trade <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>
