@@ -268,9 +268,14 @@ export const AppRoutes = () => {
     <Route path="auth/deriv/callback" element={<DerivCallback />} />
     <Route path="callback" element={<DerivCallback />} />
     <Route path="trading" element={<Paid><Trading /></Paid>} />
-    {/* XAUUSD has a dedicated gold terminal; keep the generic chart route for other symbols. */}
+    {/* Gold uses the dedicated gold terminal everywhere, matching /gold. */}
     <Route path="chart/XAUUSD" element={<Paid><GoldTradingHub /></Paid>} />
-    <Route path="chart/:symbol" element={<Paid><ChartPage /></Paid>} />
+    <Route path="chart/xauusd" element={<Navigate to="/chart/XAUUSD" replace />} />
+    <Route path="chart/XAU-USD" element={<Navigate to="/chart/XAUUSD" replace />} />
+    <Route path="chart/xau-usd" element={<Navigate to="/chart/XAUUSD" replace />} />
+    <Route path="xauusd" element={<Navigate to="/gold" replace />} />
+    <Route path="xau-usd" element={<Navigate to="/gold" replace />} />
+    <Route path="chart/:symbol" element={<ChartPage />} />
     <Route path="gold" element={<Paid><GoldTradingHub /></Paid>} />
     <Route path="news-trader-hub" element={<Paid><NewsTraderHub /></Paid>} />
     <Route path="trader-hub" element={<Navigate to="/news-trader-hub" replace />} />
