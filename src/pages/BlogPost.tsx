@@ -23,6 +23,8 @@ import { DUBAI_FINAL_POSTS } from "@/content/dubaiFinalPosts";
 import { DUBAI_ARABIC_POSTS } from "@/content/dubaiArabicPosts";
 import { SAUDI_POSTS } from "@/content/saudiPosts";
 import { LOCALIZED_DEEP_POSTS } from "@/content/localizedDeepPosts";
+import { LOCALIZED_NATIVE_POSTS } from "@/content/localizedNativePosts";
+import { LOCALIZED_MARKETS } from "@/content/localizedMarkets";
 import { detectRegionalContext } from "@/content/regionalEditorial";
 import { RegionalContextCard } from "@/components/research/RegionalContextCard";
 import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
@@ -217,7 +219,7 @@ const BlogPost = () => {
 
   const brokers = detectBrokers(post.title, post.content || "");
   const canonical = `https://botvio.live/blog/${slug}`;
-  const arabicCanonical = slug && DUBAI_ARABIC_POSTS[slug] ? `https://botvio.live/ar/blog/${slug}` : slug && SAUDI_POSTS[slug] ? `https://botvio.live/ar/saudi-blog/${slug}` : null;
+  const localizedMarket = slug ? Object.values(LOCALIZED_MARKETS).find((m) => slug.endsWith(`-${m.country.toLowerCase()}`) && !!LOCALIZED_NATIVE_POSTS[slug]) : null;\n  const arabicCanonical = slug && DUBAI_ARABIC_POSTS[slug] ? `https://botvio.live/ar/blog/${slug}` : slug && SAUDI_POSTS[slug] ? `https://botvio.live/ar/saudi-blog/${slug}` : localizedMarket?.lang === "ar" ? `https://botvio.live/ar/markets/${localizedMarket.slug}/blog/${slug}` : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
