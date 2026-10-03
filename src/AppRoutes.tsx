@@ -386,7 +386,7 @@ export const AppRoutes = () => {
     <Route path="dax" element={<Paid><Ger40Hub /></Paid>} />
     <Route path="de40" element={<Paid><Ger40Hub /></Paid>} />
 
-    <Route path="weltrade" element={<Paid><WeltradeHub /></Paid>} />
+    <Route path="weltrade" element={<Paid><WeltradeSyntheticHub /></Paid>} />
     <Route path="weltrade/synthetic" element={<Paid><WeltradeSyntheticHub /></Paid>} />
     <Route path="weltrade-synthetic" element={<Paid><WeltradeSyntheticHub /></Paid>} />
     <Route path="weltrade-trade" element={<Paid><WeltradeTrade /></Paid>} />
