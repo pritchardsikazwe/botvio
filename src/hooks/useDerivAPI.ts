@@ -141,7 +141,19 @@ export const useDerivAPI = () => {
   const toDerivSymbol = useCallback((symbol: string) => {
     const s = symbol.trim();
     if (!s) return s;
-    if (s.includes("_") || s.startsWith("frx") || s.startsWith("cry")) return s;
+    // Deriv synthetic indices already use their native symbols. Never prefix them
+    // with frx — doing so turns JD100 into the invalid symbol frxJD100.
+    if (
+      s.includes("_") ||
+      s.startsWith("frx") ||
+      s.startsWith("cry") ||
+      /^JD\\d+$/.test(s) ||
+      /^BOOM\\d+N?$/.test(s) ||
+      /^CRASH\\d+N?$/.test(s) ||
+      /^1HZ\\d+V?$/.test(s) ||
+      s === "stpRNG" ||
+      /^RDBULL$|^RDBEAR$/.test(s)
+    ) return s;
     if (s === "XAUUSD") return "frxXAUUSD";
     if (s === "BTCUSD") return "cryBTCUSD";
     if (s === "ETHUSD") return "cryETHUSD";
