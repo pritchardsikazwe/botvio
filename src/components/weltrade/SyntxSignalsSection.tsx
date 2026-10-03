@@ -1,3 +1,4 @@
+import { WELTRADE_INSTRUMENTS } from "@/config/weltradeInstruments";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +27,13 @@ export function SyntxSignalsSection() {
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
-      return data ?? [];
+      // Only real Weltrade SyntX instruments — Deriv Boom/Crash rows tagged with
+      // the weltrade broker are not Weltrade markets.
+      const norm = (v: string) => v.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const allowed = new Set(
+        WELTRADE_INSTRUMENTS.filter((i) => i.category === "syntx").flatMap((i) => [norm(i.feedSymbol), norm(i.mt5Symbol), norm(i.label)])
+      );
+      return (data ?? []).filter((row) => allowed.has(norm(String(row.symbol ?? ""))));
     },
     refetchInterval: 30000,
   });
