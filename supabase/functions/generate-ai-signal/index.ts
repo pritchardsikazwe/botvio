@@ -152,6 +152,15 @@ Generate the trading analysis now.`;
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("AI Gateway error:", aiResponse.status, errorText);
+      if (aiResponse.status === 402 || aiResponse.status === 429) {
+        const msg = aiResponse.status === 402
+          ? "AI signals are temporarily unavailable (AI credits exhausted)."
+          : "AI signals are rate limited. Please try again shortly.";
+        return new Response(
+          JSON.stringify({ ok: false, error: msg, code: aiResponse.status === 402 ? "credits_exhausted" : "rate_limited" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       return new Response(
         JSON.stringify({ error: "AI analysis failed", details: errorText }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
