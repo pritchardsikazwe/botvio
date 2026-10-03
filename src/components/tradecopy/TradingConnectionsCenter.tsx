@@ -185,7 +185,7 @@ export function TradingConnectionsCenter() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-lg font-semibold">1. Deriv connection</h2>
-            <p className="text-sm text-muted-foreground">Use this only for your Deriv account and Deriv trading workflows.</p>
+            <p className="text-sm text-muted-foreground">Demo and Real Deriv accounts can be managed here. This connection is separate from the MT5 Provider/Follower connection.</p>
           </div>
           <Badge variant="outline">Separate from MT5</Badge>
         </div>
@@ -219,11 +219,24 @@ export function TradingConnectionsCenter() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-lg font-semibold">4. MT5 provider master</h2>
-            <p className="text-sm text-muted-foreground">Connect the exact MT5 account whose trades should be published to followers.</p>
+            <p className="text-sm text-muted-foreground">Connect the exact MT5 login whose trades should be published. It may belong to the same Deriv ownership as your Deriv Demo, but it remains a separate MT5 connection.</p>
           </div>
           <Badge variant="outline">Master</Badge>
         </div>
         <ProviderTradingAccountCard />
+        <Card className="glass-card border-primary/15 bg-primary/5">
+          <CardContent className="flex items-start gap-3 p-4">
+            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div className="text-xs leading-5">
+              <p className="font-semibold text-sm">Provider safety rule</p>
+              <p className="mt-1 text-muted-foreground">
+                One MT5 login should have one clear role. Use a dedicated Demo master for provider testing.
+                Do not use the same MT5 login as both the Provider master and its own Follower, and do not
+                create duplicate master routes for the same account.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       {isAdmin && (
