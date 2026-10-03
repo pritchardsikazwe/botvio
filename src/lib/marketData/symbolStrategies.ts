@@ -7,6 +7,10 @@ export type SymbolStrategyId =
   | "GBP_PULLBACK"
   | "FX_TREND_PULLBACK"
   | "CRYPTO_MOMENTUM"
+  | "US_INDEX_BREAKOUT"
+  | "EU_INDEX_BREAKOUT"
+  | "OIL_MOMENTUM"
+  | "SILVER_STRUCTURE"
   | "GENERIC_TREND";
 
 export interface SymbolStrategyProfile {
@@ -24,7 +28,7 @@ const PROFILES: Record<SymbolStrategyId, SymbolStrategyProfile> = {
   GOLD_STRUCTURE: {
     id: "GOLD_STRUCTURE",
     label: "Gold Structure + Liquidity",
-    timeframes: ["5m", "15m", "30m", "1H"],
+    timeframes: ["1m", "5m", "15m", "30m", "1H", "4H", "1D"],
     minConfidence: 76,
     atrStop: 1.35,
     atrTarget: 2.45,
@@ -81,6 +85,31 @@ const PROFILES: Record<SymbolStrategyId, SymbolStrategyProfile> = {
     maxExtensionAtr: 1.45,
     description: "Momentum continuation with volatility expansion and anti-chase filter.",
   },
+
+  US_INDEX_BREAKOUT: {
+    id: "US_INDEX_BREAKOUT", label: "US Index Breakout + Retest",
+    timeframes: ["1m","5m","15m","30m","1H","4H","1D"], minConfidence: 76,
+    atrStop: 1.4, atrTarget: 2.7, maxExtensionAtr: 1.35,
+    description: "Index session breakout, retest and momentum confirmation.",
+  },
+  EU_INDEX_BREAKOUT: {
+    id: "EU_INDEX_BREAKOUT", label: "European Index Breakout + Retest",
+    timeframes: ["1m","5m","15m","30m","1H","4H","1D"], minConfidence: 75,
+    atrStop: 1.35, atrTarget: 2.5, maxExtensionAtr: 1.3,
+    description: "European index structure and session breakout confirmation.",
+  },
+  OIL_MOMENTUM: {
+    id: "OIL_MOMENTUM", label: "Crude Oil Momentum + Pullback",
+    timeframes: ["1m","5m","15m","30m","1H","4H","1D"], minConfidence: 76,
+    atrStop: 1.45, atrTarget: 2.7, maxExtensionAtr: 1.4,
+    description: "Energy momentum, breakout and controlled pullback.",
+  },
+  SILVER_STRUCTURE: {
+    id: "SILVER_STRUCTURE", label: "Silver Structure + Momentum",
+    timeframes: ["1m","5m","15m","30m","1H","4H","1D"], minConfidence: 75,
+    atrStop: 1.35, atrTarget: 2.5, maxExtensionAtr: 1.3,
+    description: "Silver structure, liquidity reaction and momentum confirmation.",
+  },
   GENERIC_TREND: {
     id: "GENERIC_TREND",
     label: "Adaptive Trend + Pullback",
@@ -96,6 +125,10 @@ const PROFILES: Record<SymbolStrategyId, SymbolStrategyProfile> = {
 export function getSymbolStrategy(symbol: string): SymbolStrategyProfile {
   const s = symbol.toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (s === "XAUUSD" || s === "GOLD") return PROFILES.GOLD_STRUCTURE;
+  if (s === "XAGUSD" || s === "SILVER") return PROFILES.SILVER_STRUCTURE;
+  if (["US30","DJ30","DJI","DOWJONES","US500","SPX500","SP500","SPX"].includes(s)) return PROFILES.US_INDEX_BREAKOUT;
+  if (["GER40","DAX40","DE40","UK100","FTSE100","EU50","STOXX50","FRA40","CAC40"].includes(s)) return PROFILES.EU_INDEX_BREAKOUT;
+  if (["USOIL","WTI","XTIUSD","UKOIL","BRENT","XBRUSD"].includes(s)) return PROFILES.OIL_MOMENTUM;
   if (s === "BTCUSD" || s === "BTCUSDT") return PROFILES.BTC_MOMENTUM;
   if (s === "NAS100" || s === "NASDAQ" || s === "NDX") return PROFILES.NAS100_BREAKOUT;
   if (s === "GBPUSD") return PROFILES.GBP_PULLBACK;
