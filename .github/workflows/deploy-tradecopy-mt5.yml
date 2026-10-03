@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       deploy_signal_functions:
-        description: "Also deploy Botvio signal generators"
+        description: "Also deploy Botvio signal generators and automation endpoints"
         required: true
-        default: false
+        default: true
         type: boolean
 
 jobs:
