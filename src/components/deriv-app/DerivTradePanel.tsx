@@ -76,6 +76,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const connectedAccounts = derivTokens ?? [];
   const currency = balance?.currency ?? accountInfo?.currency ?? "USD";
   const allowedDurationUnits = primarySpec?.durationUnits?.length ? primarySpec.durationUnits : ["t", "s", "m", "h", "d"];
+  const minimumStake = primarySpec?.minStake ?? 0;
+  const maximumStake = primarySpec?.maxStake ?? undefined;
+  const minimumDuration = primarySpec?.minDuration ?? undefined;
+  const maximumDuration = primarySpec?.maxDuration ?? undefined;
 
   const addLog = useCallback((message: string, tone: TradeLog["tone"] = "info") => {
     logId.current += 1;
@@ -287,9 +291,32 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
         <div className="space-y-1.5"><Label className="text-xs">Market</Label><Select value={symbol} onValueChange={setSymbol}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50 max-h-72">{tradableInstruments.map(i => <SelectItem key={i.symbol} value={i.symbol}>{i.displayName}</SelectItem>)}</SelectContent></Select></div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5"><Label className="text-xs">Stake ({currency})</Label><Input inputMode="decimal" value={stake} onChange={e => { setStake(e.target.value); setQuote(null); }} /></div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Stake ({currency})</Label>
+            <Input inputMode="decimal" type="number" min={minimumStake || undefined} max={maximumStake} step="0.01" value={stake} onChange={e => { setStake(e.target.value); setQuote(null); }} placeholder={minimumStake ? "Minimum " + minimumStake : "Enter stake"} />
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>{minimumStake ? "Minimum: " + minimumStake + " " + currency : "Minimum determined by Deriv"}</span>
+              {maximumStake != null && <span>Max: {maximumStake}</span>}
+            </div>
+          </div>
           {isMultipliers ? <div className="space-y-1.5"><Label className="text-xs">Multiplier</Label><Select value={multiplier} onValueChange={setMultiplier}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50">{["10","20","30","50","100","200","400"].map(m => <SelectItem key={m} value={m}>{m}x</SelectItem>)}</SelectContent></Select></div>
-          : <div className="space-y-1.5"><Label className="text-xs">Duration</Label><div className="flex gap-2"><Input className="min-w-0" inputMode="numeric" value={duration} min={primarySpec?.minDuration ?? undefined} max={primarySpec?.maxDuration ?? undefined} onChange={e => { setDuration(e.target.value); setQuote(null); }} /><Select value={allowedDurationUnits.includes(durationUnit) ? durationUnit : allowedDurationUnits[0]} onValueChange={v => { setDurationUnit(v); setQuote(null); }}><SelectTrigger className="w-28"><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50">{allowedDurationUnits.map(v => <SelectItem key={v} value={v}>{UNIT_LABELS[v] ?? v}</SelectItem>)}</SelectContent></Select></div></div>}
+          : <div className="space-y-1.5">
+              <Label className="text-xs">Duration</Label>
+              <div className="flex gap-2">
+                <Input className="min-w-0" type="number" inputMode="numeric" value={duration} min={minimumDuration} max={maximumDuration} onChange={e => { setDuration(e.target.value); setQuote(null); }} placeholder={minimumDuration != null ? String(minimumDuration) : "Duration"} />
+                <Select value={allowedDurationUnits.includes(durationUnit) ? durationUnit : allowedDurationUnits[0]} onValueChange={v => { setDurationUnit(v); setQuote(null); }}>
+                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-popover z-50">{allowedDurationUnits.map(v => <SelectItem key={v} value={v}>{UNIT_LABELS[v] ?? v}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {allowedDurationUnits.map(v => <Button key={v} type="button" size="sm" variant={durationUnit === v ? "secondary" : "outline"} className="h-7 px-2 text-[10px]" onClick={() => { setDurationUnit(v); setQuote(null); }}>{UNIT_LABELS[v] ?? v}</Button>)}
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                {minimumDuration != null ? "Minimum " + minimumDuration + " " + (UNIT_LABELS[durationUnit] ?? durationUnit) : "Deriv duration limits apply"}
+                {maximumDuration != null ? " · Maximum " + maximumDuration + " " + (UNIT_LABELS[durationUnit] ?? durationUnit) : ""}
+              </p>
+            </div>}
         </div>
 
         {needsBarrier && <div className="space-y-1.5"><Label className="text-xs">{contractType?.needsDigit ? "Barrier / last digit (0–9)" : "Barrier"}</Label><Input inputMode="decimal" value={barrier} onChange={e => { setBarrier(e.target.value); setQuote(null); }} placeholder={contractType?.needsDigit ? "0 to 9" : "e.g. +0.50"} /></div>}
@@ -304,7 +331,14 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
         {liveSymbols.error && <p className="text-xs text-warning">Live Deriv capability validation is unavailable; markets remain blocked until verified.</p>}
         {!liveSymbols.loading && !tradableInstruments.length && <p className="text-xs text-destructive">No supported live Deriv markets are available for this contract type.</p>}
 
-        <div className="grid grid-cols-2 gap-3 pt-1">{buyButtons.map(btn => <Button key={btn.contractType} size="lg" disabled={busy || autoBusy || isAutoMode || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length || !contractSpecs[btn.contractType]} onClick={() => handleBuy(btn.contractType, btn.label)} className={cn("h-14 text-base font-bold", btn.variant === "destructive" ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : btn.variant === "success" ? "bg-success hover:bg-success/90 text-success-foreground" : "")}><span className="flex flex-col items-center leading-tight"><span className="flex items-center">{btn.variant === "destructive" ? <ArrowDownRight className="h-5 w-5 mr-1" /> : <ArrowUpRight className="h-5 w-5 mr-1" />}{btn.label}</span><span className="text-[10px] opacity-80">{symbolLabel}</span></span></Button>)}</div>
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          {buyButtons.map(btn => <Button key={btn.contractType} size="lg" disabled={busy || autoBusy || isAutoMode || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length || !contractSpecs[btn.contractType]} onClick={() => handleBuy(btn.contractType, btn.label)} className={cn("h-16 text-base font-bold", btn.variant === "destructive" ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : btn.variant === "success" ? "bg-success hover:bg-success/90 text-success-foreground" : "")}>
+            <span className="flex flex-col items-center leading-tight">
+              <span className="flex items-center gap-1.5">{btn.variant === "destructive" ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}<span>{btn.label} {symbolLabel}</span></span>
+              <span className="text-[10px] opacity-80">{currency} {stake} · {duration} {UNIT_LABELS[durationUnit] ?? durationUnit}</span>
+            </span>
+          </Button>)}
+        </div>
 
         {activeContract && <div className="rounded-xl border p-3 space-y-2"><div className="flex justify-between text-sm"><span>Open #{activeContract.id}</span><Badge variant="outline">{activeContract.status}</Badge></div><div className="flex justify-between text-sm"><span>Live P/L</span><strong className={activeContract.profit >= 0 ? "text-success" : "text-destructive"}>{activeContract.profit.toFixed(2)}</strong></div><Button variant="destructive" className="w-full" disabled={busy || !activeContract.validToSell} onClick={handleSell}>{activeContract.validToSell ? "Sell Early at Market" : "Early Sell Unavailable"}</Button></div>}
 
