@@ -5,6 +5,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
+import { HomeMarketCharts } from "@/components/home/HomeMarketCharts";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -165,6 +166,8 @@ const HomePage = () => {
             </div>
           </div>
         </section>
+
+        <HomeMarketCharts />
 
         <section className="container mx-auto px-4 py-12 sm:py-16">
           <div className="mx-auto max-w-2xl text-center"><Badge variant="outline" className="mb-3 border-primary/30 text-primary">One workflow</Badge><h2 className="text-3xl font-black sm:text-4xl">From market research to action</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">Start with information. Validate the setup. Then choose the trading workflow that fits you.</p></div>
