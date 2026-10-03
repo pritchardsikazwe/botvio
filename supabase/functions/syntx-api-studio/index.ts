@@ -88,14 +88,14 @@ function normalizeBars(body: unknown) {
     const timeRaw = b.time ?? b.Time ?? b.timestamp ?? b.Timestamp ?? b.date ?? b.Date;
     const time = typeof timeRaw === "number"
       ? (timeRaw > 10_000_000_000 ? Math.floor(timeRaw / 1000) : timeRaw)
-      : Math.floor(new Date(String(timeRaw)).getTime() / 1000);
+      : Math.floor(new Date(String(timeRaw).replace(/(T\d{2}:\d{2}(:\d{2})?(\.\d+)?)$/, "$1Z")).getTime() / 1000);
     return {
       time,
-      open: Number(b.open ?? b.Open),
-      high: Number(b.high ?? b.High),
-      low: Number(b.low ?? b.Low),
-      close: Number(b.close ?? b.Close),
-      volume: Number(b.volume ?? b.Volume ?? 0),
+      open: Number(b.open ?? b.Open ?? b.openPrice),
+      high: Number(b.high ?? b.High ?? b.highPrice),
+      low: Number(b.low ?? b.Low ?? b.lowPrice),
+      close: Number(b.close ?? b.Close ?? b.closePrice),
+      volume: Number(b.volume ?? b.Volume ?? b.tickVolume ?? 0),
     };
   }).filter((b) => Number.isFinite(b.time) && [b.open,b.high,b.low,b.close].every(Number.isFinite));
 }
@@ -224,8 +224,20 @@ Deno.serve(async (req) => {
       if (!symbol) throw new Error("Symbol is required");
       let rawSample = "";
       const candles = await withConnection(admin, userId, async (session) => {
-        const raw = await callApi("/PriceHistory", { id: session, symbol, from, to, timeFrame: timeframeMap[timeframe] ?? 5 });
-        const bars = normalizeBars(raw);
+        // MT5 servers report times in broker-server local time (no zone). Derive
+        // the offset from a live quote so candles line up with real UTC time.
+        let offsetSec = 0;
+        try {
+          const q = unwrap(await callApi("/GetQuote", { id: session, symbol })) as Record<string, unknown>;
+          const qt = q?.time ?? q?.Time;
+          if (qt) {
+            const diff = new Date(String(qt).replace(/Z?$/, "Z")).getTime() - Date.now();
+            offsetSec = Math.round(diff / 1_800_000) * 1800;
+          }
+        } catch { /* fall back to no offset */ }
+        const shift = (iso: string) => new Date(new Date(iso).getTime() + offsetSec * 1000).toISOString().slice(0, 19);
+        const raw = await callApi("/PriceHistory", { id: session, symbol, from: shift(from), to: shift(to), timeFrame: timeframeMap[timeframe] ?? 5 });
+        const bars = normalizeBars(raw).map((b) => ({ ...b, time: b.time - offsetSec }));
         if (!bars.length) rawSample = (typeof raw === "string" ? raw : JSON.stringify(raw)).slice(0, 400);
         return bars;
       });
