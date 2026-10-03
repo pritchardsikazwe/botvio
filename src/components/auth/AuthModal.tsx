@@ -4,40 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, Globe, Phone, Crown, Zap, Star, Gift } from "lucide-react";
+import { Loader2, Mail, Lock, User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { lovable } from "@/integrations/lovable/index";
-
-const PLANS = [
-  { code: "free", name: "Free Trial", price: "$0/mo", icon: Gift, description: "5 chart analyses/day" },
-  { code: "basic", name: "Basic", price: "$10/mo", icon: Star, description: "50 analyses/week + signals" },
-  { code: "standard", name: "Standard", price: "$25/mo", icon: Zap, description: "100 analyses/month + copy trade" },
-  { code: "vip", name: "VIP", price: "$49/mo", icon: Crown, description: "Unlimited + all strategies" },
-];
-
-const COUNTRIES = [
-  { code: "ZM", name: "Zambia" }, { code: "KE", name: "Kenya" }, { code: "NG", name: "Nigeria" },
-  { code: "ZA", name: "South Africa" }, { code: "GH", name: "Ghana" }, { code: "TZ", name: "Tanzania" },
-  { code: "UG", name: "Uganda" }, { code: "RW", name: "Rwanda" }, { code: "MW", name: "Malawi" },
-  { code: "ZW", name: "Zimbabwe" }, { code: "BW", name: "Botswana" }, { code: "MZ", name: "Mozambique" },
-  { code: "ET", name: "Ethiopia" }, { code: "CD", name: "DR Congo" }, { code: "CM", name: "Cameroon" },
-  { code: "SN", name: "Senegal" }, { code: "CI", name: "Côte d'Ivoire" },
-  { code: "US", name: "United States" }, { code: "GB", name: "United Kingdom" },
-  { code: "CA", name: "Canada" }, { code: "AU", name: "Australia" },
-  { code: "IN", name: "India" }, { code: "PK", name: "Pakistan" }, { code: "BD", name: "Bangladesh" },
-  { code: "MY", name: "Malaysia" }, { code: "ID", name: "Indonesia" }, { code: "PH", name: "Philippines" },
-  { code: "AE", name: "UAE" }, { code: "SA", name: "Saudi Arabia" },
-  { code: "BR", name: "Brazil" }, { code: "MX", name: "Mexico" }, { code: "CO", name: "Colombia" },
-  { code: "FR", name: "France" }, { code: "DE", name: "Germany" }, { code: "IT", name: "Italy" },
-  { code: "ES", name: "Spain" }, { code: "PT", name: "Portugal" }, { code: "NL", name: "Netherlands" },
-  { code: "JP", name: "Japan" }, { code: "CN", name: "China" }, { code: "RU", name: "Russia" },
-].sort((a, b) => a.name.localeCompare(b.name));
 
 interface AuthModalProps {
   open: boolean;
@@ -45,16 +18,12 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [country, setCountry] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState("free");
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -83,28 +52,6 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       onOpenChange(false);
       setEmail(""); setPassword("");
       navigate("/deriv-app");
-    }
-    setLoading(false);
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!displayName.trim()) {
-      toast({ title: "Name required", description: "Please enter your full name.", variant: "destructive" });
-      return;
-    }
-    if (!whatsapp.trim()) {
-      toast({ title: "WhatsApp required", description: "Please enter your WhatsApp number.", variant: "destructive" });
-      return;
-    }
-    setLoading(true);
-    const { error } = await signUp(email, password, country, whatsapp, selectedPlan, displayName.trim());
-    if (error) {
-      toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Account created!", description: "Please check your email to verify your account." });
-      onOpenChange(false);
-      setEmail(""); setPassword(""); setCountry(""); setWhatsapp(""); setDisplayName("");
     }
     setLoading(false);
   };
