@@ -13,11 +13,11 @@ function OrdersCount({ account }: { account: TcAccount }) {
     queryKey: ["tradecopy", "dashboard-orders", account.id],
     enabled: !!account.tradecopy_user_id,
     queryFn: () => tradecopy<{ orders: unknown[] }>("open_orders", { account_id: account.id }),
-    refetchInterval: 10_000,
+    refetchInterval: (q) => (q.state.error ? false : 10_000),
     staleTime: 5_000,
     retry: false,
   });
-  return <>{q.isLoading ? "…" : q.data?.orders?.length ?? 0}</>;
+  return <>{q.isLoading ? "…" : q.isError ? "—" : q.data?.orders?.length ?? 0}</>;
 }
 
 function AccountRow({ account }: { account: TcAccount }) {
