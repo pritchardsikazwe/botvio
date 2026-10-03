@@ -51,6 +51,13 @@ function signal(c:Candle[],profile:typeof SYMBOLS[number]):Sig|null{
  return{direction,score,entry:last.close,sl:direction==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:direction==="BUY"?last.close+a*profile.target:last.close-a*profile.target};
 }
 
+function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
+ const a=atr(c)??0;
+ const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
+ const entry=c.at(-1)!.close;
+ return {sl:direction==="BUY"?entry-a*m.sl:entry+a*m.sl,tp:direction==="BUY"?entry+a*m.tp:entry-a*m.tp};
+}
+
 function isForexMarketOpen(now = new Date()): boolean {
   // Standard FX market: opens Sunday 22:00 UTC and closes Friday 22:00 UTC.
   const day = now.getUTCDay();
