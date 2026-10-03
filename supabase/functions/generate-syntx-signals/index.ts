@@ -41,10 +41,10 @@ const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;fo
 const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
 const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), scalp=get("M1");
 const setups=[
-  {tf:"1m",label:"SCALP 1M",setup:scalp,confirm:[bias15,biasH1],min:Math.max(profile.min,78)},
-  {tf:"15m",label:"INTRADAY 15M",setup:bias15,confirm:[biasH1,biasD1],min:Math.max(profile.min,profile.min+1)},
-  {tf:"1H",label:"SWING 1H",setup:biasH1,confirm:[biasD1],min:Math.max(profile.min,profile.min+3)},
-  {tf:"1D",label:"POSITION 1D",setup:biasD1,confirm:[],min:Math.max(profile.min,profile.min+5)}
+  {tf:"1m",label:"SCALPING 1M",type:"SCALPING",setup:scalp,confirm:[bias15,biasH1],min:Math.max(profile.min,78),expiry:300,backup:600},
+  {tf:"15m",label:"INTRADAY 15M",type:"INTRADAY",setup:bias15,confirm:[biasH1,biasD1],min:Math.max(profile.min,profile.min+1),expiry:3600,backup:5400},
+  {tf:"1H",label:"SWING 1H",type:"SWING",setup:biasH1,confirm:[biasD1],min:Math.max(profile.min,profile.min+3),expiry:14400,backup:21600},
+  {tf:"1D",label:"POSITION 1D",type:"POSITION",setup:biasD1,confirm:[],min:Math.max(profile.min,profile.min+5),expiry:259200,backup:432000}
 ];
 
 for(const plan of setups){
@@ -57,15 +57,16 @@ for(const plan of setups){
   if(same<required || plan.setup.score<plan.min) continue;
   const entry=plan.setup.entry, sl=plan.setup.sl, tp=plan.setup.tp;
   const strategyLabel=`${profile.label} · ${plan.label}`;
+  const expiresAt=new Date(Date.now()+plan.expiry*1000).toISOString();
   const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",symbol).eq("strategy_name",strategyLabel).eq("direction",plan.setup.direction).gte("created_at",new Date(Date.now()-Math.max(10,plan.tf==="1m"?5:plan.tf==="15m"?30:120)*60000).toISOString()).limit(1);
   if(recent?.length) continue;
   const {data:row,error:ins}=await db.from("trading_signals").insert({
     symbol,direction:plan.setup.direction,entry_price:entry,stop_loss:sl,take_profit:tp,timeframe:plan.tf,
-    strategy_name:strategyLabel,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
-    status:"ACTIVE",is_manual:false,
+    strategy_name:strategyLabel,signal_type:plan.type,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
+    status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,best_expiry:plan.expiry,backup_expiry:plan.backup,expires_at:expiresAt,
     reason:`${f.family} ${plan.label}: entry confirmed with ${same}/${confirmations.length} higher-timeframe confirmations`,
     explanation_json:{
-      engine:"SyntX MTF Engine v4",strategy_id:profile.label,source:"Weltrade SyntX API Studio",
+      engine:"SyntX MTF Engine v5",strategy_id:profile.label,source:"Weltrade SyntX API Studio",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
       entry_style:plan.label,timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"])),
       higher_timeframe_confirmation:same,confirmation_count:confirmations.length
     }
