@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { PaymentRequestsPanel } from "@/components/admin/PaymentRequestsPanel";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
+import { AdminTradeCopyTab } from "@/components/admin/AdminTradeCopyTab";
 import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Globe2, LayoutDashboard, Mail, Menu, MoreVertical, RefreshCw, Search, Send, Settings, ShieldCheck, Signal, Sparkles, TrendingUp, UserCheck, Users, WalletCards, Phone } from "lucide-react";
 
 type AdminUser = { user_id:string; email:string|null; display_name:string|null; country:string|null; whatsapp_number:string|null; created_at:string|null; plan:string; status:"Active"|"Inactive"; online:boolean; last_seen_at:string|null; current_path:string|null; device_type:string|null };
@@ -95,6 +96,7 @@ export default function AdminControlCenter(){
         {[[Users,"Users",()=>document.getElementById("users-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[UserCheck,"User Segments",()=>document.getElementById("users-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Send,"Send Promotions",()=>document.getElementById("promotion-panel")?.scrollIntoView({behavior:"smooth",block:"center"})],[WalletCards,"Subscriptions",()=>document.getElementById("payment-requests-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Activity,"Activity Logs",()=>document.getElementById("live-users-panel")?.scrollIntoView({behavior:"smooth",block:"center"})]].map(([I,l,action]: any)=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Trading Intelligence</p>
         {[[Signal,"Signals","/signals"],[Bot,"AI Bots","/bots"],[TrendingUp,"Copy Trading","/copy-trading"],[ShieldCheck,"Providers","/providers"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        <button type="button" onClick={()=>document.getElementById("tradecopy-panel")?.scrollIntoView({behavior:"smooth",block:"start"})} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Content & SEO</p>
         {[[FileText,"Blog & Articles","/blog"],[Globe2,"Pages","/"],[Sparkles,"SEO Settings","/admin"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">System</p>
@@ -117,6 +119,7 @@ export default function AdminControlCenter(){
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/bots")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Bot className="h-4 w-4"/>AI Bots</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/copy-trading")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><TrendingUp className="h-4 w-4"/>Copy Trading</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/providers")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><ShieldCheck className="h-4 w-4"/>Providers</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("tradecopy-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/blog")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><FileText className="h-4 w-4"/>Blog & Articles</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/settings")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Settings className="h-4 w-4"/>Settings</button>
         </nav></ScrollArea>
@@ -129,6 +132,8 @@ export default function AdminControlCenter(){
         <div className="grid grid-cols-2 xl:grid-cols-6 gap-4"><Stat label="Total Users" value={users.length} icon={<Users/>}/><Stat label="Active Users" value={users.filter(u=>u.status==="Active").length} icon={<UserCheck/>}/><Stat label="Online Now" value={onlineCount} icon={<Activity/>}/><Stat label="Missing WhatsApp" value={users.filter(u=>!u.whatsapp_number?.trim()).length} icon={<Phone/>}/><Stat label="Premium Users" value={users.filter(u=>u.plan.toLowerCase()!=="free").length} icon={<Sparkles/>}/><Stat label="Live Signals" value="Online" icon={<Signal/>}/><Stat label="AI Bots" value="Online" icon={<Bot/>}/><Stat label="Selected" value={selected.length} icon={<Send/>}/></div>
 
         <PaymentRequestsPanel />
+
+        <div id="tradecopy-panel"><AdminTradeCopyTab /></div>
 
         <div className="grid xl:grid-cols-[1fr_360px] gap-6 items-start">
           <Card id="users-panel" className="overflow-hidden"><div className="p-5 border-b flex flex-wrap justify-between gap-3"><div><h2 className="text-lg font-semibold">Users</h2><p className="text-sm text-muted-foreground">Search, filter and select users for promotions. Online status updates every 15 seconds.</p></div><Button className="bg-amber-500 hover:bg-amber-600 text-slate-950" onClick={()=>setPromotionOpen(true)} disabled={!selected.length}><Send className="h-4 w-4 mr-2"/>Send Promotion ({selected.length})</Button></div>
