@@ -236,7 +236,7 @@ function Countdown({ targetTime }: { targetTime: string }) {
 function SessionBlock({ metrics }: { metrics: CardMetrics }) {
   if (!metrics.current_session) return null;
   return (
-    <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-2">
+    <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-2.5 py-1.5">
       <span className="text-foreground/70 flex items-center gap-1.5 font-medium">
         <Clock className="h-3.5 w-3.5 text-primary" /> Session
       </span>
@@ -257,7 +257,7 @@ function SessionBlock({ metrics }: { metrics: CardMetrics }) {
 function NewsBlock({ metrics }: { metrics: CardMetrics }) {
   if (!metrics.next_high_impact_event) return null;
   return (
-    <div className="bg-destructive/10 border border-destructive/25 rounded-lg px-3 py-2">
+    <div className="bg-destructive/10 border border-destructive/25 rounded-lg px-2.5 py-1.5">
       <div className="flex items-center gap-1.5 mb-1">
         <Newspaper className="h-3.5 w-3.5 text-destructive" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">
@@ -285,19 +285,19 @@ function DayRangeBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: stri
 
   return (
     <div className="grid grid-cols-3 gap-1.5 text-[11px]">
-      <div className="bg-success/10 border border-success/20 rounded-lg px-2 py-1.5 text-center">
+      <div className="bg-success/10 border border-success/20 rounded-lg px-1.5 py-1 text-center">
         <div className="text-foreground/50 flex items-center justify-center gap-0.5 text-[9px] font-semibold uppercase">
           <ArrowDown className="h-2.5 w-2.5 text-success" /> Low
         </div>
         <div className="font-bold text-success mt-0.5">{formatPrice(metrics.day_low ? Number(metrics.day_low) : null, symbol)}</div>
       </div>
-      <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-2 py-1.5 text-center">
+      <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-1.5 py-1 text-center">
         <div className="text-foreground/50 flex items-center justify-center gap-0.5 text-[9px] font-semibold uppercase">
           <ArrowUp className="h-2.5 w-2.5 text-destructive" /> High
         </div>
         <div className="font-bold text-destructive mt-0.5">{formatPrice(metrics.day_high ? Number(metrics.day_high) : null, symbol)}</div>
       </div>
-      <div className="bg-muted/50 border border-border/30 rounded-lg px-2 py-1.5 text-center">
+      <div className="bg-muted/50 border border-border/30 rounded-lg px-1.5 py-1 text-center">
         <div className="text-foreground/50 text-[9px] font-semibold uppercase">Range</div>
         <div className="font-bold text-foreground mt-0.5">{range != null ? formatPrice(range, symbol) : "—"}</div>
       </div>
@@ -308,7 +308,7 @@ function DayRangeBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: stri
 function H4Block({ metrics, symbol }: { metrics: CardMetrics; symbol: string }) {
   if (!metrics.current_4h_block) return null;
   return (
-    <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-2">
+    <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-2.5 py-1.5">
       <span className="text-foreground/70 flex items-center gap-1.5 font-medium">
         <BarChart3 className="h-3.5 w-3.5 text-primary" /> 4H Block
       </span>
@@ -330,7 +330,7 @@ function LevelsBlock({ metrics, symbol }: { metrics: CardMetrics; symbol: string
   if (!hasLevels) return null;
 
   return (
-    <div className="space-y-1.5 bg-muted/20 rounded-lg px-3 py-2 border border-border/30">
+    <div className="space-y-1.5 bg-muted/20 rounded-lg px-2.5 py-1.5 border border-border/30">
       <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-foreground/60">
         <Shield className="h-3.5 w-3.5 text-primary" /> Key Levels
       </div>
@@ -360,7 +360,7 @@ function TipBlock({ tip, breakoutPrice, symbol }: { tip: string | null; breakout
   if (!tip) return null;
   const isBreakout = tip.toLowerCase().includes("breakout");
   return (
-    <div className={`border rounded-lg px-3 py-2 ${isBreakout ? "bg-warning/10 border-warning/30" : "bg-primary/8 border-primary/25"}`}>
+    <div className={`border rounded-lg px-2.5 py-1.5 ${isBreakout ? "bg-warning/10 border-warning/30" : "bg-primary/8 border-primary/25"}`}>
       <div className="flex items-start gap-2">
         <Lightbulb className={`h-4 w-4 mt-0.5 shrink-0 ${isBreakout ? "text-warning" : "text-primary"}`} />
         <div className="flex-1">
@@ -419,7 +419,7 @@ function BotvioStrategiesBlock({ assetType, symbol }: { assetType: string; symbo
   if (!strategies.length) return null;
 
   return (
-    <div className="space-y-1.5 bg-accent/30 rounded-lg px-3 py-2 border border-accent/50">
+    <div className="space-y-1.5 bg-accent/30 rounded-lg px-2.5 py-1.5 border border-accent/50">
       <div className="flex items-center gap-1.5">
         <Crosshair className="h-3.5 w-3.5 text-primary" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -741,14 +741,14 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
 
   if (assetsLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-bold">Live Market Intelligence</h2>
+          <h2 className="text-lg font-bold">Live Market Intelligence</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-            <Skeleton key={i} className="h-96 rounded-xl" />
+            <Skeleton key={i} className="h-72 rounded-xl" />
           ))}
         </div>
       </div>
@@ -758,11 +758,11 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
   if (!assets?.length) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center gap-2">
         <Activity className="h-5 w-5 text-primary" />
-        <h2 className="text-xl font-bold text-foreground">Live Market Intelligence</h2>
+        <h2 className="text-lg font-bold text-foreground">Live Market Intelligence</h2>
       </div>
 
       {/* Pre-Trade Checklist */}
@@ -820,14 +820,14 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           return (
             <Card
               key={asset.id}
-              className={`bg-card hover:border-primary/50 transition-all overflow-hidden rounded-xl ${glowClass} ${marketClosed ? "opacity-90" : ""}`}
+              className={`bg-card hover:border-primary/50 transition-all overflow-hidden rounded-lg ${glowClass} ${marketClosed ? "opacity-90" : ""}`}
             >
-              <CardHeader className="pb-2 px-4 pt-4">
+              <CardHeader className="pb-1.5 px-3 pt-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">{ASSET_ICONS[asset.symbol] || "📊"}</span>
+                    <span className="text-xl">{ASSET_ICONS[asset.symbol] || "📊"}</span>
                     <div>
-                      <CardTitle className="text-base font-bold text-foreground">{asset.symbol}</CardTitle>
+                      <CardTitle className="text-sm font-bold text-foreground">{asset.symbol}</CardTitle>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
                         {asset.asset_type}
                       </span>
@@ -859,10 +859,10 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-2.5 pt-0 px-4 pb-4">
+              <CardContent className="space-y-1.5 pt-0 px-3 pb-3">
                 {/* Market Closed Banner */}
                 {marketClosed && (
-                  <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2">
+                  <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-2.5 py-1.5">
                     <Pause className="h-4 w-4 text-warning shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-[11px] font-bold text-warning uppercase tracking-wider">Market Closed — Weekend</p>
@@ -876,7 +876,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 {/* Price + Confidence */}
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <span className="text-2xl font-extrabold tabular-nums text-foreground">
+                    <span className="text-xl font-extrabold tabular-nums text-foreground">
                       {quote ? formatPrice(quote.price, asset.symbol) : "—"}
                     </span>
                     {quote?.change_percent_24h != null && (
@@ -897,7 +897,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
 
                 {/* RSI */}
                 {ind?.rsi_14 != null && (
-                  <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-1.5">
+                  <div className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-2.5 py-1">
                     <span className="text-foreground/60 font-medium">RSI (14)</span>
                     <span className={`font-mono font-bold ${
                       Number(ind.rsi_14) > 70 ? "text-destructive" : Number(ind.rsi_14) < 30 ? "text-success" : "text-foreground"
@@ -919,7 +919,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                 {!marketClosed && <BotvioSignalButton sig={effectiveSig} symbol={asset.symbol} navigate={navigate} />}
 
                 {effectiveSig && !marketClosed && (effectiveSig.signal === "buy" || effectiveSig.signal === "sell") && (
-                  <div className="border-t border-border/40 pt-2 space-y-1.5">
+                  <div className="border-t border-border/40 pt-1.5 space-y-1">
                     <div className="flex items-center gap-1.5">
                       <Crosshair className="h-3.5 w-3.5 text-primary" />
                       <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -932,15 +932,15 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                       )}
                     </div>
                     <div className="grid grid-cols-3 gap-1.5 text-[11px]">
-                      <div className="bg-primary/10 border border-primary/20 rounded-lg px-2 py-1.5 text-center">
+                      <div className="bg-primary/10 border border-primary/20 rounded-lg px-1.5 py-1 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">Entry</div>
                         <div className="font-bold text-foreground">{effectiveSig.entry_price ? formatPrice(Number(effectiveSig.entry_price), asset.symbol) : "—"}</div>
                       </div>
-                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-2 py-1.5 text-center">
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-1.5 py-1 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">SL</div>
                         <div className="font-bold text-destructive">{effectiveSig.stop_loss ? formatPrice(Number(effectiveSig.stop_loss), asset.symbol) : "—"}</div>
                       </div>
-                      <div className="bg-success/10 border border-success/20 rounded-lg px-2 py-1.5 text-center">
+                      <div className="bg-success/10 border border-success/20 rounded-lg px-1.5 py-1 text-center">
                         <div className="text-foreground/50 text-[9px] font-semibold uppercase">TP1</div>
                         <div className="font-bold text-success">{effectiveSig.take_profit_1 ? formatPrice(Number(effectiveSig.take_profit_1), asset.symbol) : "—"}</div>
                       </div>
@@ -964,7 +964,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                     href={exnessLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-2 rounded-lg bg-accent/10 border border-accent/30 text-accent-foreground hover:bg-accent/20 transition-all"
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-1.5 rounded-lg bg-accent/10 border border-accent/30 text-accent-foreground hover:bg-accent/20 transition-all"
                   >
                     🏦 Open Forex Account — Best Broker
                   </a>
@@ -976,7 +976,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                     href={binanceLink || `https://www.binance.com/en/trade/${BINANCE_SYMBOL_MAP[asset.symbol]}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-2 rounded-lg bg-[hsl(45,100%,51%)]/10 border border-[hsl(45,100%,51%)]/30 text-[hsl(45,100%,41%)] hover:bg-[hsl(45,100%,51%)]/20 transition-all"
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-bold py-1.5 rounded-lg bg-[hsl(45,100%,51%)]/10 border border-[hsl(45,100%,51%)]/30 text-[hsl(45,100%,41%)] hover:bg-[hsl(45,100%,51%)]/20 transition-all"
                   >
                     🔶 Trade {BINANCE_SYMBOL_MAP[asset.symbol]} on Binance — Best Exchange
                   </a>
@@ -1003,15 +1003,15 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                   const chartLabel = hubRoute ? "🚀 Trading Hub" : "📈 Chart";
 
                   return (
-                    <div className={`grid gap-1.5 pt-1 border-t border-border/30 ${hasBinance ? "grid-cols-4" : "grid-cols-3"}`}>
+                    <div className={`grid gap-1 pt-1 border-t border-border/30 ${hasBinance ? "grid-cols-4" : "grid-cols-3"}`}>
                       <button
                         onClick={() => navigate(chartRoute)}
-                        className="text-[10px] font-bold py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
+                        className="text-[9px] font-bold py-1 rounded-lg bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-all"
                       >
                         {chartLabel}
                       </button>
                       <button
-                        className="text-[10px] font-bold py-1.5 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                        className="text-[9px] font-bold py-1 rounded-lg bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                       >
                         🔔 Alert
                       </button>
@@ -1039,7 +1039,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                           const text = encodeURIComponent(lines.join("\n"));
                           window.open(`https://wa.me/?text=${text}`, "_blank");
                         }}
-                        className="text-[10px] font-bold py-1.5 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
+                        className="text-[9px] font-bold py-1 rounded-lg bg-success/10 border border-success/25 text-success hover:bg-success/20 transition-all"
                       >
                         💬 Share
                       </button>
@@ -1077,7 +1077,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const freePreview = isBasicOrAbove ? orderedAssets : orderedAssets.slice(0, 6);
           return (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {freePreview.map(renderCard)}
               </div>
               {!isBasicOrAbove && !gateLoading && (
@@ -1091,7 +1091,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
           const preview = limitedNonBinance.slice(0, 2);
           return (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {preview.map(renderCard)}
               </div>
               <UpgradePrompt feature="Full Market Intelligence" requiredPlan="Basic" className="mt-4" />
@@ -1101,7 +1101,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
 
         return (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {limitedNonBinance.map(renderCard)}
             </div>
             {limitedBinance.length > 0 && (
@@ -1110,7 +1110,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
                   <span className="text-xl">🔶</span>
                   <h3 className="text-lg font-bold text-foreground">Binance Markets</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {limitedBinance.map(renderCard)}
                 </div>
               </div>
