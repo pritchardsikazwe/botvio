@@ -98,7 +98,11 @@ const Signals = () => {
     const d = initialParams?.get("direction")?.toUpperCase();
     return d === "BUY" || d === "SELL" ? d : "all";
   })();
-  const initialTimeframe = (() => {\n    const t = initialParams?.get("timeframe")?.toUpperCase();\n    return t && TIMEFRAME_OPTIONS.some((x) => x.value === t) ? t : "all";\n  })();\n  const initialBroker = (() => {
+  const initialTimeframe = (() => {
+    const t = initialParams?.get("timeframe")?.toUpperCase();
+    return t && TIMEFRAME_OPTIONS.some((x) => x.value === t) ? t : "all";
+  })();
+  const initialBroker = (() => {
     const b = initialParams?.get("broker");
     return b && BROKERS.some((x) => x.value === b) ? b : "all";
   })();
