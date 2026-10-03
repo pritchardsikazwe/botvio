@@ -203,6 +203,9 @@ serve(async(req)=>{
   if(req.method==="OPTIONS")return new Response("ok",{headers:corsHeaders});
   try{
     const supabase=createClient(SUPABASE_URL,SERVICE_KEY);
+    const trigger=req.headers.get("x-botvio-automation-secret")??"";
+    const {data:expectedSecret,error:secretError}=await supabase.rpc("get_botvio_automation_secret");
+    if(secretError||!expectedSecret||trigger!==expectedSecret)return new Response(JSON.stringify({ok:false,error:"Unauthorized automation trigger"}),{status:401,headers:{...corsHeaders,"Content-Type":"application/json"}});
     const {data:settingsList,error}=await supabase.from("auto_trade_settings").select("*").eq("enabled",true);
     if(error)throw error;
     const all=[]; for(const s of settingsList||[]){if(!s.enabled_assets?.length)continue;try{all.push(await runForUser(supabase,s))}catch(e:any){all.push({user:s.user_id,error:e?.message})}}
