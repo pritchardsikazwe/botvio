@@ -49,7 +49,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-2xl font-bold mb-4">Please sign in to access your dashboard</h1>
+          <h1 className="text-xl font-bold mb-4">Please sign in to access your dashboard</h1>
           <Button onClick={() => navigate("/")}>Go to Home</Button>
         </div>
       </div>
@@ -61,27 +61,27 @@ const Dashboard = () => {
       <SEOHead title="Trading Dashboard" description="Monitor your active trading bots, copy trading subscriptions, and portfolio performance across Deriv and Binance in real time." noIndex />
       <Header />
       
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-3 py-4 md:px-4">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Trading Dashboard</h1>
+        <div className="mb-4">
+          <h1 className="text-xl font-bold mb-1">Trading Dashboard</h1>
           <p className="text-muted-foreground">
             Manage your trading bots and copy trading subscriptions
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Active Bots</CardTitle>
               <Bot className="h-4 w-4 text-primary" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-1 pb-3">
               {botsLoading ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                <div className="text-2xl font-bold">{activeBots}</div>
+                <div className="text-xl font-bold">{activeBots}</div>
               )}
               <p className="text-xs text-muted-foreground">
                 of {botInstances?.length || 0} total instances
@@ -90,12 +90,12 @@ const Dashboard = () => {
           </Card>
 
           <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Today's P&L</CardTitle>
               <TrendingUp className="h-4 w-4 text-success" />
             </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${todayPnL >= 0 ? "text-success" : "text-destructive"}`}>
+            <CardContent className="pt-1 pb-3">
+              <div className={`text-xl font-bold ${todayPnL >= 0 ? "text-success" : "text-destructive"}`}>
                 {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
               </div>
               <p className="text-xs text-muted-foreground">
@@ -105,15 +105,15 @@ const Dashboard = () => {
           </Card>
 
           <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Connected Accounts</CardTitle>
               <Wallet className="h-4 w-4 text-primary" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-1 pb-3">
               {accountsLoading ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                <div className="text-2xl font-bold">{connectedAccounts}</div>
+                <div className="text-xl font-bold">{connectedAccounts}</div>
               )}
               <p className="text-xs text-muted-foreground">
                 Deriv & Binance
@@ -122,15 +122,15 @@ const Dashboard = () => {
           </Card>
 
           <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Copy Trading</CardTitle>
               <Users className="h-4 w-4 text-primary" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-1 pb-3">
               {subsLoading ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                <div className="text-2xl font-bold">{activeSubscriptions}</div>
+                <div className="text-xl font-bold">{activeSubscriptions}</div>
               )}
               <p className="text-xs text-muted-foreground">
                 active subscriptions
@@ -140,7 +140,7 @@ const Dashboard = () => {
         </div>
 
         {/* Current Plan */}
-        <Card className="glass-card mb-8">
+        <Card className="glass-card mb-4">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -152,12 +152,12 @@ const Dashboard = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-1 pb-3">
             {planLoading ? (
               <Skeleton className="h-12 w-full" />
             ) : (
               <div className="flex items-center gap-4">
-                <Badge variant="secondary" className="text-lg px-4 py-2">
+                <Badge variant="secondary" className="text-sm px-3 py-1.5">
                   {myPlan?.pricing_plan?.name || "Starter"}
                 </Badge>
                 <div className="text-sm text-muted-foreground">
@@ -173,11 +173,11 @@ const Dashboard = () => {
         </Card>
 
         {/* Live Market Data Panel */}
-        <div className="mb-8">
+        <div className="mb-4">
           <MarketDataPanel />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Bot Instances */}
           <Card className="glass-card">
             <CardHeader>
@@ -193,18 +193,18 @@ const Dashboard = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-1 pb-3">
               {botsLoading ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Skeleton className="h-16 w-full" />
                   <Skeleton className="h-16 w-full" />
                 </div>
               ) : botInstances && botInstances.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {botInstances.slice(0, 3).map((instance) => (
                     <div
                       key={instance.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                      className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${
@@ -233,7 +233,7 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-5">
                   <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                   <p className="text-muted-foreground mb-4">No bots configured yet</p>
                   <Button asChild>
@@ -261,13 +261,13 @@ const Dashboard = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-1 pb-3">
               {notifications && notifications.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {notifications.slice(0, 5).map((notif) => (
                     <div
                       key={notif.id}
-                      className={`flex items-start gap-3 p-3 rounded-lg ${
+                      className={`flex items-start gap-3 p-2.5 rounded-lg ${
                         notif.is_read ? "bg-muted/30" : "bg-muted/50"
                       }`}
                     >
@@ -297,7 +297,7 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-5">
                   <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                   <p className="text-muted-foreground">No notifications yet</p>
                 </div>
@@ -308,9 +308,9 @@ const Dashboard = () => {
 
         {/* Affiliate Broker Section */}
         {connectedAccounts === 0 && (
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
             <Card className="glass-card border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-primary" />
@@ -335,7 +335,7 @@ const Dashboard = () => {
             </Card>
 
             <Card className="glass-card border-success/30 bg-gradient-to-br from-success/5 to-transparent">
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
                     <Wallet className="h-6 w-6 text-success" />
@@ -362,38 +362,38 @@ const Dashboard = () => {
         )}
 
         {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
             <Link to="/signals">
               <Signal className="h-6 w-6 mb-2" />
               <span>Live Signals</span>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
             <Link to="/trading">
               <CandlestickChart className="h-6 w-6 mb-2" />
               <span>Trading Workspace</span>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
             <Link to="/accounts">
               <Wallet className="h-6 w-6 mb-2" />
               <span>Connect Account</span>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
             <Link to="/bots">
               <Bot className="h-6 w-6 mb-2" />
               <span>Activate Bot</span>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
             <Link to="/copy-trading">
               <Users className="h-6 w-6 mb-2" />
               <span>Copy Traders</span>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex-col" asChild>
+          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
             <Link to="/provider-dashboard">
               <TrendingUp className="h-6 w-6 mb-2" />
               <span>Provider Panel</span>
