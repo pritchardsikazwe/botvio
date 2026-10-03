@@ -158,7 +158,7 @@ const DerivApp = () => {
 
       {/* App-style bottom tab bar */}
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur">
-        <div className="container mx-auto max-w-3xl grid grid-cols-5">
+        <div className="container mx-auto max-w-3xl grid grid-cols-6">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
