@@ -78,6 +78,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   ) as Record<string, typeof capability extends null ? never : any>;
   const primarySpec = contractSpecs[buyButtons[0]?.contractType];
   const isRiseFall = styleId === "rise-fall-scalping" && contractId === "rise_fall";
+  const supportsAllowEquals = !!capability?.contracts?.PUTE && !!capability?.contracts?.CALLE;
   const isAutoMode = tradeMode === "auto" && isRiseFall;
   const connectedAccounts = derivTokens ?? [];
   const currency = balance?.currency ?? accountInfo?.currency ?? "USD";
@@ -151,6 +152,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     setActiveContract(null);
     setDurationUnit(contractType?.tickDuration ? "t" : styleId === "turbo" ? "s" : "m");
   }, [contractId, styleId, contractType?.tickDuration]);
+
+  useEffect(() => {
+    if (!supportsAllowEquals && allowEquals) setAllowEquals(false);
+  }, [supportsAllowEquals, allowEquals]);
 
   useEffect(() => {
     if (isDigitalOptions && allowedDurationUnits.includes("t") && durationUnit !== "t") {
@@ -527,13 +532,14 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
             <div className="mt-3 flex items-center justify-between rounded-lg border border-border/60 bg-background/60 px-3 py-2">
               <div>
                 <p className="text-[10px] font-semibold">Allow equals</p>
-                <p className="text-[9px] text-muted-foreground">Rise/Fall can settle at the entry spot when Deriv offers this contract.</p>
+                <p className="text-[9px] text-muted-foreground">{supportsAllowEquals ? "Rise/Fall can settle at the entry spot when this Deriv contract is available." : "Not offered for this symbol right now."}</p>
               </div>
               <input
                 type="checkbox"
                 checked={allowEquals}
+                disabled={!supportsAllowEquals}
                 onChange={e => setAllowEquals(e.target.checked)}
-                className="h-4 w-4 accent-primary"
+                className="h-4 w-4 accent-primary disabled:opacity-40"
                 aria-label="Allow equals for Rise/Fall"
               />
             </div>
