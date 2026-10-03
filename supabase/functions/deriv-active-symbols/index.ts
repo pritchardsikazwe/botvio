@@ -6,7 +6,24 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-function normalizeSymbol(sym: Record<string, unknown>) {
+type SymbolRow = {
+  symbol: string;
+  display_name: string;
+  market: unknown;
+  submarket: unknown;
+  pip: unknown;
+  is_trading_suspended: unknown;
+  exchange_is_open: unknown;
+};
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function normalizeSymbol(sym: Record<string, unknown>): SymbolRow {
   const symbol = String(sym.underlying_symbol ?? sym.symbol ?? "");
   return {
     symbol,
@@ -21,50 +38,87 @@ function normalizeSymbol(sym: Record<string, unknown>) {
 
 async function requestDeriv(payload: Record<string, unknown>) {
   const ws = new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
-  return await new Promise<any>((resolve, reject) => {
+
+  return await new Promise<Record<string, unknown>>((resolve, reject) => {
     let settled = false;
-    const finish = (fn: (v: any) => void, value: any) => {
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      try { ws.close(); } catch {}
+      reject(new Error("Deriv market-data request timed out"));
+    }, 15000);
+
+    const finish = (handler: (value: any) => void, value: any) => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
       try { ws.close(); } catch {}
-      fn(value);
+      handler(value);
     };
-    const timer = setTimeout(() => finish(reject, new Error("Deriv market-data request timed out")), 15000);
-    ws.onopen = () => ws.send(JSON.stringify(payload));
-    ws.onmessage = (event) => {
+
+    ws.onopen = () => {
       try {
-        const data = JSON.parse(String(event.data));
-        if (data?.error) finish(reject, new Error(data.error.message || "Deriv request failed"));
-        else finish(resolve, data);
-      } catch (e) {
-        finish(reject, e instanceof Error ? e : new Error("Invalid Deriv response"));
+        ws.send(JSON.stringify(payload));
+      } catch (error) {
+        finish(reject, error instanceof Error ? error : new Error("Unable to send Deriv request"));
       }
     };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(String(event.data)) as Record<string, unknown>;
+        if (data?.error) {
+          const error = data.error as Record<string, unknown>;
+          finish(reject, new Error(String(error.message ?? "Deriv request failed")));
+          return;
+        }
+        finish(resolve, data);
+      } catch (error) {
+        finish(reject, error instanceof Error ? error : new Error("Invalid Deriv response"));
+      }
+    };
+
     ws.onerror = () => finish(reject, new Error("Deriv public WebSocket connection failed"));
   });
 }
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+
   try {
     const data = await requestDeriv({ active_symbols: "brief" });
     const rows = Array.isArray(data?.active_symbols) ? data.active_symbols : [];
-    const grouped: Record<string, any[]> = {};
+
+    const grouped: Record<string, SymbolRow[]> = {};
     for (const raw of rows) {
-      const row = normalizeSymbol(raw);
+      if (!raw || typeof raw !== "object") continue;
+      const row = normalizeSymbol(raw as Record<string, unknown>);
       if (!row.symbol) continue;
       const key = String(row.market ?? "Other");
       (grouped[key] ??= []).push(row);
     }
-    return new Response(JSON.stringify({ symbols: grouped, cached: false, total: rows.length, api_version: "deriv-current" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+    return json({
+      symbols: grouped,
+      cached: false,
+      degraded: false,
+      total: rows.length,
+      api_version: "deriv-current",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Active symbols lookup failed";
     console.error("[deriv-active-symbols]", message);
-    return new Response(JSON.stringify({ error: message }), {
-      status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+    // Keep the application usable when Deriv market data is temporarily unavailable.
+    // The caller can retry without treating the function failure as a fatal page error.
+    return json({
+      symbols: {},
+      cached: false,
+      degraded: true,
+      total: 0,
+      api_version: "deriv-current",
+      error: message,
     });
   }
 });
