@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { assertAutomationKey } from "../_shared/automationAuth.ts";
 
 type Candle={epoch:number;open:number;high:number;low:number;close:number};
 type Sig={direction:"BUY"|"SELL";score:number;entry:number;sl:number;tp:number};
@@ -101,9 +102,7 @@ Deno.serve(async(req)=>{
  if(req.method!=="POST")return new Response("POST required",{status:405});
  const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
  try{
-  const secret=req.headers.get("x-botvio-automation-secret")??"";
-  const {data:expected}=await db.rpc("get_botvio_automation_secret");
-  if(!expected||secret!==expected)return new Response(JSON.stringify({success:false,error:"Unauthorized automation trigger"}),{status:401});
+  assertAutomationKey(req);
   await db.from("trading_signals").update({status:"EXPIRED"}).eq("status","ACTIVE").lt("expires_at",new Date().toISOString());
 
   const ws=new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
