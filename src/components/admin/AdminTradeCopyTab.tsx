@@ -46,11 +46,21 @@ export const AdminTradeCopyTab = () => {
       const { data, error } = await supabase
         .from("trading_accounts")
         .select(
-          "id, user_id, label, broker, server, login_id, platform, account_role, environment, connection_status, tradecopy_active, is_active, is_botvio_robot, tradecopy_user_id, created_at, profile:profiles!trading_accounts_user_id_fkey(email, display_name)"
+          "id, user_id, label, broker, server, login_id, platform, account_role, environment, connection_status, tradecopy_active, is_active, is_botvio_robot, tradecopy_user_id, created_at"
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as AccountRow[];
+      const rows = data as unknown as AccountRow[];
+      const userIds = [...new Set(rows.map((r) => r.user_id))];
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, email, display_name")
+          .in("user_id", userIds);
+        const byUser = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+        rows.forEach((r) => { r.profile = byUser.get(r.user_id) ?? null; });
+      }
+      return rows;
     },
   });
 
