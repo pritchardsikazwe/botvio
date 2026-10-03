@@ -11,8 +11,10 @@ interface TickChartProps {
 
 /** Real-time Deriv tick line chart (SVG, no deps) */
 export const TickChart = ({ ticks, height = 220, prediction, onDismissPrediction }: TickChartProps) => {
-  const W = 600;
+  const W = 720;
   const H = height;
+  const chartRight = W - 72;
+  const chartBottom = H - 26;
   const data = ticks.slice(-120);
 
   const { path, area, lastX, lastY, min, max } = useMemo(() => {
@@ -22,21 +24,21 @@ export const TickChart = ({ ticks, height = 220, prediction, onDismissPrediction
     const span = hi - lo || 1;
     const pad = 18;
     const pts = data.map((v, i) => {
-      const x = (i / (data.length - 1)) * (W - 70);
-      const y = pad + (1 - (v - lo) / span) * (H - pad * 2);
+      const x = (i / (data.length - 1)) * chartRight;
+      const y = pad + (1 - (v - lo) / span) * (chartBottom - pad);
       return [x, y] as const;
     });
     const d = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
     const last = pts[pts.length - 1];
     return {
       path: d,
-      area: `${d} L${last[0].toFixed(2)},${H} L0,${H} Z`,
+      area: `${d} L${last[0].toFixed(2)},${chartBottom} L0,${chartBottom} Z`,
       lastX: last[0],
       lastY: last[1],
       min: lo,
       max: hi,
     };
-  }, [data, H]);
+  }, [data, H, chartRight, chartBottom]);
 
   const rising = data.length > 1 && data[data.length - 1] >= data[0];
   const stroke = rising ? "hsl(var(--success))" : "hsl(var(--destructive))";
@@ -51,14 +53,15 @@ export const TickChart = ({ ticks, height = 220, prediction, onDismissPrediction
             <stop offset="100%" stopColor={stroke} stopOpacity="0" />
           </linearGradient>
         </defs>
-        {[0.25, 0.5, 0.75].map((f) => (
-          <line key={f} x1="0" x2={W} y1={H * f} y2={H * f} stroke="hsl(var(--border))" strokeOpacity="0.4" strokeWidth="1" />
+        {[0.2, 0.4, 0.6, 0.8].map((f) => (
+          <line key={f} x1="0" x2={chartRight} y1={chartBottom * f} y2={chartBottom * f} stroke="hsl(var(--border))" strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 4" />
         ))}
         {path && <path d={area} fill="url(#tickFill)" />}
-        {path && <path d={path} fill="none" stroke={stroke} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />}
+        <line x1={chartRight} x2={chartRight} y1="0" y2={chartBottom} stroke="hsl(var(--border))" strokeOpacity="0.5" />
+        {path && <path d={path} fill="none" stroke={stroke} strokeWidth="2.25" strokeLinejoin="round" strokeLinecap="round" />}
         {path && (
           <>
-            <line x1={lastX} x2={W} y1={lastY} y2={lastY} stroke={stroke} strokeDasharray="4 4" strokeWidth="1" />
+            <line x1={lastX} x2={chartRight} y1={lastY} y2={lastY} stroke={stroke} strokeDasharray="4 4" strokeWidth="1" />
             <circle cx={lastX} cy={lastY} r="5" fill="hsl(var(--background))" stroke={stroke} strokeWidth="3" />
           </>
         )}
@@ -107,10 +110,15 @@ export const TickChart = ({ ticks, height = 220, prediction, onDismissPrediction
         </div>
       )}
 
+      <div className="absolute right-1 top-2 bottom-8 flex flex-col justify-between text-[9px] text-muted-foreground tabular-nums">
+        <span>{max || "—"}</span>
+        <span>{data.length > 1 ? ((max + min) / 2).toFixed(3) : "—"}</span>
+        <span>{min || "—"}</span>
+      </div>
       <div className="flex items-center justify-between px-3 py-1.5 border-t border-border/50 text-[10px] text-muted-foreground tabular-nums">
-        <span>Low {min || "—"}</span>
-        <span>{data.length} ticks</span>
-        <span>High {max || "—"}</span>
+        <span>Live ticks · {data.length}</span>
+        <span>Latest {last != null ? last : "—"}</span>
+        <span>LIVE</span>
       </div>
     </div>
   );
