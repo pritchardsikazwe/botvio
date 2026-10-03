@@ -256,6 +256,39 @@ Deno.serve(async (req) => {
         }
       }
 
+      case "send_order": {
+        const p = z.object({
+          account_id: z.string().uuid(),
+          symbol: z.string().min(1).max(32),
+          direction: z.enum(["BUY", "SELL"]),
+          volume: z.number().min(0.01).max(50),
+          stop_loss: z.number().positive().optional(),
+          take_profit: z.number().positive().optional(),
+        }).parse(body);
+        const a = await loadOwn(p.account_id);
+        if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this MT5 account as a TradeCopy follower first");
+        if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this follower first");
+        const globalLive = await liveGlobal(admin);
+        assertLiveReady(String(a.environment ?? "DEMO"), a.direct_live_confirmed_at, globalLive);
+        const order = normalizeMarketOrder({
+          symbol: p.symbol,
+          side: p.direction,
+          lots: p.volume,
+          stopLoss: p.stop_loss,
+          takeProfit: p.take_profit,
+        });
+        const result = await adapter.createMarketOrder(a.tradecopy_user_id, "slave", order);
+        await admin.from("tradecopy_audit_log").insert({
+          user_id: userId,
+          trading_account_id: a.id,
+          action: "direct_manual_order",
+          mode: adapter.mode,
+          ok: true,
+          details: { symbol: p.symbol, direction: p.direction, volume: p.volume, execution: "TradeCopy" },
+        });
+        return json({ ok: true, execution: "TradeCopy", adapterMode: adapter.mode, result: redact(result) });
+      }
+
       case "deliver_now": {
         const p = z.object({ account_id: z.string().uuid().optional() }).parse(body);
         if (p.account_id) await loadOwn(p.account_id); else if (!isAdmin) throw new Err("Admins only", 403);
