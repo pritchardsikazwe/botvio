@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { encryptSecret, decryptSecret } from "./crypto.ts";
+import { encryptSecret, decryptSecret } from "../_shared/tradecopy/crypto.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
