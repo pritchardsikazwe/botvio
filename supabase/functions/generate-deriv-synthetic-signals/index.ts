@@ -126,7 +126,7 @@ Deno.serve(async(req)=>{
    for(const p of PLAN){
     const setup=sigs.get(p.tf);if(!setup)continue;const conf=p.confirm.map(x=>sigs.get(x)).filter(Boolean) as Sig[];
     if(conf.some(x=>x.direction!==setup.direction)||conf.filter(x=>x.direction===setup.direction).length<(p.confirm.length?1:0)||setup.score<76+p.boost)continue;
-    const type=p.type,strategy=`Deriv Synthetic MTF · ${type} ${p.tf}`,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
+    const type=p.type,strategyName=`${strategy.family} · ${strategy.label} · ${type} ${p.tf}`,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",s.name).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-(p.tf==="1m"?5:p.tf==="15m"?30:120)*60000).toISOString()).limit(1);
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
@@ -134,7 +134,7 @@ Deno.serve(async(req)=>{
       strategy_name:strategyName,confidence:Math.round(setup.score),broker:["deriv"],category:"synthetic",status:"ACTIVE",is_manual:false,
       expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,expires_at:expiresAt,
       reason:`${s.name} · ${strategy.label} · ${type}: ${conf.filter(x=>x.direction===setup.direction).length}/${conf.length} higher-timeframe confirmations`,
-      explanation_json:{engine:"Botvio Deriv Synthetic Strategy Engine v2",strategy_family:strategy.family,strategy_label:strategy.label,,signal_type:type,timeframe:p.tf,expiry_seconds:p.expiry,expires_at:expiresAt,source:"Deriv active_symbols + ticks_history"}
+      explanation_json:{engine:"Botvio Deriv Synthetic Strategy Engine v2",strategy_family:strategy.family,strategy_label:strategy.label,signal_type:type,timeframe:p.tf,expiry_seconds:p.expiry,expires_at:expiresAt,source:"Deriv active_symbols + ticks_history"}
     }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
     if(!error&&row)published.push(row);
    }
