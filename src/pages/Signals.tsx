@@ -38,6 +38,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
 import { trackBotvioEvent } from "@/components/analytics/analytics";
+import { SignalModesGuide } from "@/components/signals/SignalModesGuide";
 
 const CATEGORIES = [
   { value: "all", label: "All Markets" },
@@ -194,7 +195,7 @@ const Signals = () => {
         />
 
 
-        {/* Main Tabs */}
+        <SignalModesGuide compact />\n\n        {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className="grid grid-cols-3 w-full max-w-lg">
             <TabsTrigger value="signals" className="flex items-center gap-2">
