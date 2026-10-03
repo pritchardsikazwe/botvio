@@ -190,13 +190,51 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     bias: "both",
     blurb: "Predictable, low-noise movement — ideal for clean execution.",
   },
-];
-
-  { key:"v-15-1s", label:"Volatility 15 (1s) Index", category:"volatility", derivSymbol:"1HZ15V", mt5Symbol:"Volatility 15 (1s) Index", bias:"both", blurb:"New 1-second volatility market — live availability is verified before use." },
-  { key:"v-30-1s", label:"Volatility 30 (1s) Index", category:"volatility", derivSymbol:"1HZ30V", mt5Symbol:"Volatility 30 (1s) Index", bias:"both", blurb:"New 1-second volatility market — live availability is verified before use." },
-  { key:"v-90-1s", label:"Volatility 90 (1s) Index", category:"volatility", derivSymbol:"1HZ90V", mt5Symbol:"Volatility 90 (1s) Index", bias:"both", blurb:"New 1-second volatility market — live availability is verified before use." },
-  { key:"range-break-100", label:"Range Break 100 Index", category:"volatility", derivSymbol:"RDB100", mt5Symbol:"Range Break 100 Index", bias:"both", blurb:"New range-break market — live availability is verified before use." },
-  { key:"range-break-200", label:"Range Break 200 Index", category:"volatility", derivSymbol:"RDB200", mt5Symbol:"Range Break 200 Index", bias:"both", blurb:"New range-break market — live availability is verified before use." },
+  {
+    key: "v-15-1s",
+    label: "Volatility 15 (1s) Index",
+    category: "volatility",
+    derivSymbol: "1HZ15V",
+    mt5Symbol: "Volatility 15 (1s) Index",
+    bias: "both",
+    blurb: "New 1-second volatility market — live availability is verified before use.",
+  },
+  {
+    key: "v-30-1s",
+    label: "Volatility 30 (1s) Index",
+    category: "volatility",
+    derivSymbol: "1HZ30V",
+    mt5Symbol: "Volatility 30 (1s) Index",
+    bias: "both",
+    blurb: "New 1-second volatility market — live availability is verified before use.",
+  },
+  {
+    key: "v-90-1s",
+    label: "Volatility 90 (1s) Index",
+    category: "volatility",
+    derivSymbol: "1HZ90V",
+    mt5Symbol: "Volatility 90 (1s) Index",
+    bias: "both",
+    blurb: "New 1-second volatility market — live availability is verified before use.",
+  },
+  {
+    key: "range-break-100",
+    label: "Range Break 100 Index",
+    category: "volatility",
+    derivSymbol: "RDB100",
+    mt5Symbol: "Range Break 100 Index",
+    bias: "both",
+    blurb: "New range-break market — live availability is verified before use.",
+  },
+  {
+    key: "range-break-200",
+    label: "Range Break 200 Index",
+    category: "volatility",
+    derivSymbol: "RDB200",
+    mt5Symbol: "Range Break 200 Index",
+    bias: "both",
+    blurb: "New range-break market — live availability is verified before use.",
+  },
 ];
 
 export function findSynthetic(key: string): SyntheticInstrument | undefined {
