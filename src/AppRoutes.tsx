@@ -177,7 +177,7 @@ type ChartHubResolverProps = { symbol?: string };
 const ChartHubResolver = ({ symbol }: ChartHubResolverProps) => {
   const normalized = (symbol || "").replace(/[\\/_-]/g, "").toUpperCase();
 
-  const forexHubs: Record<string, React.ReactNode> = {
+  const forexHubs: Record<string, ReactNode> = {
     EURUSD: <EurUsdHub />,
     GBPUSD: <GbpUsdTradingHub />,
     USDJPY: <UsdJpyHub />,
