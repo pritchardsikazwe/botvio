@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
+import { fetchActiveSymbols, getSymbolCapability, type SymbolCapability } from "@/services/deriv/derivSymbols";
 
 const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Rocket; tone: string }> = {
   boom: { label: "Boom", icon: Rocket, tone: "text-emerald-400 border-emerald-500/40" },
@@ -30,6 +31,8 @@ export default function SyntheticHub() {
   const { isPaid, isLoading: gateLoading } = useSubscriptionGate();
   const { isAdmin, isSuperAdmin } = useAuth();
   const locked = !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
+  const [liveSymbols, setLiveSymbols] = useState<{ symbol:string; name:string; capability:SymbolCapability }[]>([]);
+  useEffect(() => { let cancelled=false; (async()=>{ try { const rows=await fetchActiveSymbols(true); const candidates=Object.values(rows).filter((r:any)=>/synthetic|volatility|boom|crash|range break|step|jump/i.test(`${r.display_name??""} ${r.market??""} ${r.submarket??""}`)); const checked=await Promise.all(candidates.map(async(r:any)=>{try{const capability=await getSymbolCapability(r.symbol,true);return {symbol:r.symbol,name:r.display_name??r.symbol,capability};}catch{return null;}})); if(!cancelled)setLiveSymbols(checked.filter((x:any)=>x&&!x.capability.unverified&&!x.capability.isSuspended&&x.capability.isOpen&&Object.keys(x.capability.contracts).length>0) as any);}catch{if(!cancelled)setLiveSymbols([]);}})(); return()=>{cancelled=true}; }, []);
 
   const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
   const chartSymbol = active.derivSymbol ?? active.chartProxy ?? null;
@@ -148,6 +151,9 @@ export default function SyntheticHub() {
             <TabsTrigger value="step" className="text-xs gap-1.5"><Zap className="h-3.5 w-3.5" /> Step</TabsTrigger>
           </TabsList>
         </Tabs>
+
+        {/* Live Deriv catalogue — only verified symbols */}
+        <Card className="border-success/20 bg-card/80"><CardContent className="p-4"><div className="flex items-center justify-between gap-3 mb-3"><div><h2 className="text-sm font-extrabold flex items-center gap-2"><Radio className="h-4 w-4 text-success" /> Live Deriv Synthetic Catalogue</h2><p className="text-[11px] text-muted-foreground">Only symbols currently active, not suspended, and confirmed to have trading contracts are shown.</p></div><Badge variant="outline" className="border-success/40 text-success text-[10px]">{liveSymbols.length} verified</Badge></div><div className="flex flex-wrap gap-2">{liveSymbols.map((x)=><Badge key={x.symbol} variant="outline" className="border-success/30 text-foreground font-mono text-[10px]">{x.name} · {x.symbol}</Badge>)}{liveSymbols.length===0&&<span className="text-xs text-muted-foreground">Checking Deriv live availability…</span>}</div></CardContent></Card>
 
         {/* Instrument grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
