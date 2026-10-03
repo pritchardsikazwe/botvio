@@ -133,13 +133,14 @@ Deno.serve(async(req)=>{
     const conflict=confirmations.some(x=>x.direction!==setup.direction);
     const required=p.tf==="15m"||p.tf==="1H"||p.tf==="3D"?1:(p.confirm.length?1:0);
     if(conflict||same<required)continue;
+    const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const strategyName=`${profile.strategy} · ${p.type} ${p.tf}`;
     const cooldown=p.tf==="1m"?5:p.tf==="15m"?30:120;
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",profile.symbol).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-cooldown*60000).toISOString()).limit(1);
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
-      symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:setup.sl,take_profit:setup.tp,
+      symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
       timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(setup.score),broker:["deriv"],
       category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
       expires_at:expiresAt,reason:`${profile.name} ${p.type} entry: ${same}/${confirmations.length} higher-timeframe confirmations`,
