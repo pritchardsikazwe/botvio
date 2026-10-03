@@ -4,7 +4,9 @@ import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Us
 import { TradesDrawer } from "@/components/trading/TradesDrawer";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { useDeriv } from "@/contexts/DerivContext";
+import { useState } from "react";
 
 import { NotificationBell } from "@/components/trading/NotificationBell";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -25,6 +27,7 @@ export const Header = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
   const { isDerivConnected, accountInfo, balance, equity, runningTrades } = useDeriv();
   const navigate = useNavigate();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const location = useLocation();
 
   const getInitials = () => {
@@ -292,15 +295,18 @@ export const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button variant="gold" size="sm" onClick={() => navigate("/signup")}>
-                <User className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setShowAuthModal(true)}>Sign In</Button>
+                <Button variant="gold" size="sm" onClick={() => navigate("/signup")}>
+                  <User className="w-4 h-4 mr-2" /> Sign Up
+                </Button>
+              </div>
             )}
           </div>
         </div>
       </header>
 
+    <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </>
   );
 };
