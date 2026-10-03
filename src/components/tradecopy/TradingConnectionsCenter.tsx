@@ -5,6 +5,7 @@ import { DerivAccountsManager } from "@/components/tradecopy/DerivAccountsManage
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
+import { RoleEntryCards } from "@/components/tradecopy/CopyTradingRoleGuide";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
