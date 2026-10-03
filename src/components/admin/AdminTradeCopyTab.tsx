@@ -66,7 +66,7 @@ export const AdminTradeCopyTab = () => {
   });
 
   const updateAccount = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
+    mutationFn: async ({ id, patch }: { id: string; patch: { tradecopy_active?: boolean; environment?: string; is_active?: boolean } }) => {
       const { error } = await supabase.from("trading_accounts").update(patch).eq("id", id);
       if (error) throw error;
     },
