@@ -1,3 +1,4 @@
+import { WELTRADE_INSTRUMENTS } from "@/config/weltradeInstruments";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +27,13 @@ export function SyntxSignalsSection() {
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
-      return data ?? [];
+      // Only real Weltrade SyntX instruments — Deriv Boom/Crash rows tagged with
+      // the weltrade broker are not Weltrade markets.
+      const norm = (v: string) => v.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const allowed = new Set(
+        WELTRADE_INSTRUMENTS.filter((i) => i.category === "syntx").flatMap((i) => [norm(i.feedSymbol), norm(i.mt5Symbol), norm(i.label)])
+      );
+      return (data ?? []).filter((row) => allowed.has(norm(String(row.symbol ?? ""))));
     },
     refetchInterval: 30000,
   });
@@ -104,7 +111,7 @@ export function SyntxSignalsSection() {
             <CardContent className="p-8 text-center">
               <Target className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                <p className="text-sm font-bold text-foreground">No matching Weltrade signals</p>
-               <p className="text-xs text-muted-foreground mt-1">Adjust the filters or check back after new real-data analysis is published.</p>
+               <p className="text-xs text-muted-foreground mt-1">No saved SyntX signals yet. Open the Charts tab — live signals are calculated there from your connected Weltrade feed.</p>
             </CardContent>
           </Card>
         )}
