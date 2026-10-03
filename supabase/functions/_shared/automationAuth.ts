@@ -4,7 +4,7 @@
 export function assertAutomationKey(req: Request): boolean {
   const presented = req.headers.get("apikey") ?? "";
   const legacy = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  let valid = legacy && presented === legacy;
+  let valid = !!legacy && presented === legacy;
 
   if (!valid) {
     try {
