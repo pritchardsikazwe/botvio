@@ -23,6 +23,7 @@ interface ManualSignalCardProps {
     stop_loss: number | null;
     take_profit: number | null;
     timeframe: string;
+    signal_type?: string | null;
     category: string;
     broker: string[];
     confidence: number | null;
@@ -32,6 +33,7 @@ interface ManualSignalCardProps {
     ai_win_probability?: number | null;
     explanation_json?: Record<string, unknown> | null;
     expiry_seconds?: number | null;
+    expires_at?: string | null;
     best_expiry?: number | null;
     backup_expiry?: number | null;
     quality_score?: number | null;
@@ -53,6 +55,10 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
   const timeAgo = formatDistanceToNow(postedDate, { addSuffix: true });
   const postedTime = postedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const postedDay = postedDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  const expiryDate = signal.expires_at ? new Date(signal.expires_at) : null;
+  const remainingSeconds = expiryDate ? Math.max(0, Math.floor((expiryDate.getTime() - Date.now()) / 1000)) : null;
+  const formatRemaining = (seconds: number) => seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.floor(seconds / 60)}m ${seconds % 60}s` : `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+  const signalTypeLabel = signal.signal_type || (signal.timeframe === "1m" || signal.timeframe === "M1" ? "SCALPING" : signal.timeframe === "15m" || signal.timeframe === "M15" ? "INTRADAY" : signal.timeframe === "1H" || signal.timeframe === "H1" ? "SWING" : signal.timeframe === "1D" || signal.timeframe === "D1" ? "POSITION" : "SIGNAL");
   const { data: brokers } = useSignalBrokers();
 
   const getCategoryColor = (category: string) => {
@@ -150,7 +156,7 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
                 {signal.direction.toUpperCase()}
                 {(signal.best_expiry || signal.expiry_seconds) && (
                   <span className="text-muted-foreground font-normal ml-2">
-                    · Best: {formatExpiryLabel(signal.best_expiry || signal.expiry_seconds || 60)}
+                    · {signalTypeLabel} · Best: {formatExpiryLabel(signal.best_expiry || signal.expiry_seconds || 60)}
                     {signal.backup_expiry && (
                       <span className="text-muted-foreground/60"> / Backup: {formatExpiryLabel(signal.backup_expiry)}</span>
                     )}
@@ -213,7 +219,7 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{signal.timeframe}</span>
+              <span className="text-sm font-medium">{signalTypeLabel} · {signal.timeframe}</span>
             </div>
             {signal.confidence && (
               <div className={`flex items-center gap-1.5 ${getConfidenceColor(signal.confidence)}`}>
@@ -228,7 +234,7 @@ export const ManualSignalCard = ({ signal, compact = false, showBrokerButtons = 
               </div>
             )}
           </div>
-          <span className="text-xs text-muted-foreground">{postedDay} {postedTime} · {timeAgo}</span>
+          <div className="text-xs text-muted-foreground text-right">{postedDay} {postedTime} · {timeAgo}{remainingSeconds !== null && <div className="text-primary mt-0.5">{remainingSeconds > 0 ? `Expires in ${formatRemaining(remainingSeconds)}` : "Expired"}</div>}</div>
         </div>
 
         {/* Reason/Analysis */}
