@@ -109,52 +109,173 @@ export const ProviderCommandCenter = () => (
   </div>
 );
 
-export const BotvioRobotDashboard = () => (
-  <div className="min-h-screen bg-background">
-    <Header />
-    <main className="container mx-auto max-w-7xl space-y-5 px-4 py-6 pb-20">
-      <BotvioRobotPromo compact />
-      <section className="grid gap-3 sm:grid-cols-4">
-        {[
-          ["Robot", "Server-side AI", "text-success"],
-          ["Signals", "Auto generated", "text-primary"],
-          ["Delivery", "MT5 Bridge", "text-primary"],
-          ["Safety", "User controlled", "text-success"],
-        ].map(([label, value, cls]) => (
-          <Card key={label} className="glass-card"><CardContent className="p-4"><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p><p className={`mt-1 text-sm font-bold ${cls}`}>{value}</p></CardContent></Card>
-        ))}
-      </section>
-      <TradeCopyAccountDashboard role="master" robot />
-      <ProviderTradingAccountCard robot />
-      <Mt5AutoExecuteCard />
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm"><Bot className="h-4 w-4 text-primary" /> How automatic MT5 delivery works</CardTitle>
-          <CardDescription>Connect your MT5 Bridge EA and turn on Auto-Execute. The server-side robot can continue scanning without keeping the app open.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-3">
-          {[
-            ["1", "AI market scan", "The Botvio server scans enabled markets and evaluates the current setup."],
-            ["2", "Signal + risk", "A qualifying setup produces BUY/SELL with entry, stop-loss and take-profit levels."],
-            ["3", "MT5 execution", "The signal is queued to your enabled MT5 terminal and the Bridge EA picks it up."],
-          ].map(([n, title, description]) => (
-            <div key={n} className="rounded-xl border border-border/60 p-4">
-              <div className="mb-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{n}</div>
-              <p className="text-sm font-semibold">{title}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-      <div className="flex flex-wrap gap-2">
-        <Button asChild><Link to="/connections">Connect MT5</Link></Button>
-        <Button asChild variant="outline"><Link to="/bots">AI Bots</Link></Button>
-        <Button asChild variant="outline"><Link to="/copy-trading/my">My Copy Trading</Link></Button>
-      </div>
-    </main>
-  </div>
-);
+export const BotvioRobotDashboard = () => {
+  const metrics = [
+    { label: "Robot", value: "Server-side AI", tone: "text-success", icon: Bot },
+    { label: "Signals", value: "Auto generated", tone: "text-primary", icon: Activity },
+    { label: "Execution", value: "MT5 Bridge", tone: "text-primary", icon: Cloud },
+    { label: "Safety", value: "User controlled", tone: "text-success", icon: ShieldCheck },
+  ];
 
+  return (
+    <div className="min-h-screen bg-[#f7f8fa] text-foreground">
+      <Header />
+      <main className="container mx-auto max-w-7xl space-y-6 px-4 py-6 pb-20">
+        <section className="relative overflow-hidden rounded-3xl border border-emerald-500/15 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-950 p-6 text-white shadow-xl sm:p-8">
+          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
+          <div className="relative grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+            <div>
+              <Badge className="mb-3 border-white/15 bg-white/10 text-emerald-200 hover:bg-white/10">BOTVIO AI ROBOT</Badge>
+              <h1 className="max-w-2xl text-3xl font-black tracking-tight sm:text-4xl">
+                AI trading intelligence, connected to your MT5.
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
+                Botvio scans supported markets, builds structured BUY/SELL setups and routes eligible signals through your configured MT5 Bridge.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Button asChild className="bg-white text-emerald-950 hover:bg-white/90">
+                  <Link to="/connections">Connect MT5 <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+                <Button asChild variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10">
+                  <Link to="/bots">Open AI Bots</Link>
+                </Button>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Robot status</p>
+                  <p className="mt-1 text-lg font-bold">AI engine ready</p>
+                </div>
+                <span className="flex h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,.8)]" />
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                {metrics.map(({ label, value, tone }) => (
+                  <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-white/45">{label}</p>
+                    <p className={`mt-1 text-xs font-semibold ${tone}`}>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {metrics.map(({ label, value, icon: Icon, tone }) => (
+            <Card key={label} className="border-border/60 bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="rounded-xl bg-muted p-2"><Icon className={`h-4 w-4 ${tone}`} /></div>
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                </div>
+                <p className="mt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+                <p className={`mt-1 text-sm font-bold ${tone}`}>{value}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+
+        <section className="grid gap-5 xl:grid-cols-[1.4fr_.8fr]">
+          <div className="space-y-5">
+            <Card className="border-border/60 bg-white shadow-sm">
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Badge variant="outline" className="mb-2">EXECUTION MASTER</Badge>
+                    <CardTitle className="text-lg">Botvio Robot MT5</CardTitle>
+                    <CardDescription>Official Botvio master account used for MT5 copy execution.</CardDescription>
+                  </div>
+                  <Bot className="h-7 w-7 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent><TradeCopyAccountDashboard role="master" robot /></CardContent>
+            </Card>
+
+            <Card className="border-border/60 bg-white shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">MT5 Auto-Execute</CardTitle>
+                <CardDescription>Connect a Bridge EA and route qualifying signals to the selected MT5 terminal.</CardDescription>
+              </CardHeader>
+              <CardContent><Mt5AutoExecuteCard /></CardContent>
+            </Card>
+
+            <Card className="border-border/60 bg-white shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">How a signal reaches MT5</CardTitle>
+                <CardDescription>Four clear stages instead of a long technical explanation.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-4">
+                  {[
+                    ["01", "Scan", "AI evaluates supported markets."],
+                    ["02", "Setup", "BUY/SELL with entry, SL and TP."],
+                    ["03", "Queue", "Eligible signal enters the MT5 route."],
+                    ["04", "Execute", "Bridge EA sends the order to MT5."],
+                  ].map(([n, title, description]) => (
+                    <div key={n} className="rounded-2xl border border-border/60 bg-muted/30 p-4">
+                      <span className="text-[10px] font-bold text-primary">{n}</span>
+                      <p className="mt-2 text-sm font-bold">{title}</p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <aside className="space-y-5">
+            <Card className="border-border/60 bg-white shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">Robot connection</CardTitle>
+                <CardDescription>Keep Deriv and MT5 connections clearly separated.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="rounded-2xl border border-border/60 p-4">
+                  <div className="flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">Deriv</p></div>
+                  <p className="mt-1 text-xs text-muted-foreground">Used for Deriv trading and market/signals connections.</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 p-4">
+                  <div className="flex items-center gap-2"><Cloud className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">MT5 Master</p></div>
+                  <p className="mt-1 text-xs text-muted-foreground">Uses MT5 login, trader password and exact broker server.</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-amber-50 p-4">
+                  <p className="text-xs font-semibold text-amber-900">Important</p>
+                  <p className="mt-1 text-xs leading-5 text-amber-800">Do not enter a Deriv token into an MT5 connection. They are separate connection types.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60 bg-white shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">Robot controls</CardTitle>
+                <CardDescription>Quick access to the operational areas.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-2">
+                <Button asChild className="justify-between"><Link to="/connections">Trading Connections <ArrowRight className="h-4 w-4" /></Link></Button>
+                <Button asChild variant="outline" className="justify-between"><Link to="/bots">AI Bots <ArrowRight className="h-4 w-4" /></Link></Button>
+                <Button asChild variant="outline" className="justify-between"><Link to="/copy-trading/my">My Copy Trading <ArrowRight className="h-4 w-4" /></Link></Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-emerald-500/20 bg-emerald-50/60 shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-bold text-emerald-950">User-controlled risk</p>
+                    <p className="mt-1 text-xs leading-5 text-emerald-900/70">You control sizing, confidence thresholds, stop-loss, take-profit and whether MT5 Auto-Execute is enabled.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
+        </section>
+      </main>
+    </div>
+  );
+};
 export const CopyTradingAdmin = () => {
   const providers = useQuery({
     queryKey: ["admin", "copy-trading", "providers"],
