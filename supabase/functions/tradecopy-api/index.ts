@@ -364,10 +364,13 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       if (String(acct.broker ?? "").trim().toLowerCase() !== "weltrade") {
         throw new TradeCopyError("Market feed attachment is currently enabled for Weltrade MT5 accounts only", "validation");
       }
-      if (acct.account_role !== "slave" || !acct.tradecopy_user_id) {
-        throw new TradeCopyError("Connect the Weltrade MT5 follower to TradeCopy before attaching its market feed", "validation");
+      if (acct.account_role !== "slave") {
+        throw new TradeCopyError("Only an MT5 follower account can be used as a DATA FEED", "validation");
       }
 
+      // DATA FEED mode is deliberately independent from TradeCopy execution.
+      // The follower account only supplies authenticated Weltrade MT5 market
+      // data; no copy relationship or TradeCopy follower registration is required.
       // Weltrade data is deliberately separated from the existing Deriv tick
       // engine. TradeCopy remains the execution/copy layer; the existing
       // SyntX API Studio remains the native Weltrade MT5 quote/history layer.
