@@ -1,11 +1,11 @@
-import { useState } from "react";
+
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Bot, Settings, User, LogOut, GraduationCap, LayoutDashboard, Wallet, Users, CreditCard, Shield, ArrowLeftRight, Gift, MessageCircle, Send, Signal, ChevronDown, BarChart3, Menu, Zap, ShoppingCart, Package, Download, ScanSearch, TrendingUp } from "lucide-react";
 import { TradesDrawer } from "@/components/trading/TradesDrawer";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeriv } from "@/contexts/DerivContext";
-import { AuthModal } from "@/components/auth/AuthModal";
+
 import { NotificationBell } from "@/components/trading/NotificationBell";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
@@ -24,7 +24,6 @@ import { PRIMARY_NAV, MORE_NAV } from "@/components/nav/mainNav";
 export const Header = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
   const { isDerivConnected, accountInfo, balance, equity, runningTrades } = useDeriv();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -293,7 +292,7 @@ export const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button variant="gold" size="sm" onClick={() => setShowAuthModal(true)}>
+              <Button variant="gold" size="sm" onClick={() => navigate("/signup")}>
                 <User className="w-4 h-4 mr-2" />
                 Sign In
               </Button>
@@ -302,7 +301,6 @@ export const Header = () => {
         </div>
       </header>
 
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </>
   );
 };
