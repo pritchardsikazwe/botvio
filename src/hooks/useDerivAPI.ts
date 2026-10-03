@@ -147,10 +147,10 @@ export const useDerivAPI = () => {
       s.includes("_") ||
       s.startsWith("frx") ||
       s.startsWith("cry") ||
-      /^JD\\d+$/.test(s) ||
-      /^BOOM\\d+N?$/.test(s) ||
-      /^CRASH\\d+N?$/.test(s) ||
-      /^1HZ\\d+V?$/.test(s) ||
+      /^JD\d+$/.test(s) ||
+      /^BOOM\d+N?$/.test(s) ||
+      /^CRASH\d+N?$/.test(s) ||
+      /^1HZ\d+V?$/.test(s) ||
       s === "stpRNG" ||
       /^RDBULL$|^RDBEAR$/.test(s)
     ) return s;
