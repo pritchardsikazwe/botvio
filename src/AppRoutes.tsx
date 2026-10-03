@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useParams } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RequireSuperAdmin } from "@/components/admin/RequireSuperAdmin";
@@ -172,9 +172,8 @@ import { seoTrafficPages, countryTrafficSlugs } from "@/content/seoTrafficPages"
  * Locale detection on the second mount is handled by LocalePrefixRouter,
  * which sets i18next language from the URL segment.
  */
-type ChartHubResolverProps = { symbol?: string };
-
-const ChartHubResolver = ({ symbol }: ChartHubResolverProps) => {
+const ChartHubResolver = () => {
+  const { symbol } = useParams<{ symbol: string }>();
   const normalized = (symbol || "").replace(/[\\/_-]/g, "").toUpperCase();
 
   const forexHubs: Record<string, ReactNode> = {
