@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { decryptSecret } from "../_shared/tradecopy/crypto.ts";
+async function decryptSecret(enc:string,secret:string):Promise<string>{const bytes=Uint8Array.from(atob(enc.replace(/^v1:/,"")),(c)=>c.charCodeAt(0));const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:bytes.slice(0,12)},k,bytes.slice(12));return new TextDecoder().decode(pt)}
 type Candle={time:number;open:number;high:number;low:number;close:number};
 const FAMILIES=[
 {symbols:["Boom 300 Index","Boom 500 Index","Boom 600 Index","Boom 900 Index","Boom 1000 Index"],family:"Boom",bias:"BUY"},
