@@ -1,7 +1,7 @@
 // Authentication helper for server-side scheduled/automation Edge Functions.
 // Supabase Cron/pg_net should send a project secret key in the apikey header.
 // Legacy service_role is retained only for backwards compatibility.
-export function assertAutomationKey(req: Request): void {
+export function assertAutomationKey(req: Request): boolean {
   const presented = req.headers.get("apikey") ?? "";
   const legacy = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   let valid = legacy && presented === legacy;
@@ -16,10 +16,5 @@ export function assertAutomationKey(req: Request): void {
     }
   }
 
-  if (!valid) {
-    throw new Response(
-      JSON.stringify({ success: false, error: "Unauthorized automation trigger" }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
-    );
-  }
+  return valid;
 }
