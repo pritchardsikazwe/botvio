@@ -77,7 +77,17 @@ export const useDerivTokens = () => {
 
   /** Switch active token (deactivate all, activate selected) */
   const switchToken = useCallback(async (tokenId: string) => {
-    if (!user) return;
+    if (!user) throw new Error("You must be signed in to switch Deriv accounts.");
+
+    const { data: selectedRows, error: selectedError } = await supabase
+      .from("user_deriv_tokens" as any)
+      .select("id, loginid, is_virtual, currency, label, is_active, created_at, token_encrypted")
+      .eq("id", tokenId)
+      .eq("user_id", user.id)
+      .limit(1);
+    if (selectedError) throw selectedError;
+    const selected = (selectedRows as any[] | null)?.[0];
+    if (!selected?.token_encrypted) throw new Error("This Deriv account has no saved connection token. Reconnect it.");
 
     // Deactivate all
     await supabase
@@ -93,8 +103,16 @@ export const useDerivTokens = () => {
       .eq("id", tokenId)
       .eq("user_id", user.id);
 
-    console.log(`[TOKEN] Switched active to token_id=${tokenId}`);
+    console.log(`[TOKEN] Switched active to token_id=${tokenId} loginid=${selected.loginid}`);
     await fetchTokens();
+    return {
+      id: selected.id,
+      loginid: selected.loginid,
+      is_virtual: !!selected.is_virtual,
+      currency: selected.currency,
+      label: selected.label,
+      token_encrypted: selected.token_encrypted as string,
+    };
   }, [user?.id, fetchTokens]);
 
   /** Remove a token */
