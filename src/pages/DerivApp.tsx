@@ -13,15 +13,16 @@ import { AccountSwitcher } from "@/components/trading/AccountSwitcher";
 import { DerivTradePanel } from "@/components/deriv-app/DerivTradePanel";
 import { SignalEngineTab } from "@/components/deriv-app/SignalEngineTab";
 import { CopyTradingTab } from "@/components/deriv-app/CopyTradingTab";
+import { DerivTradeHistory } from "@/components/deriv-app/DerivTradeHistory";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
-  Wifi, TrendingUp, Layers, Radar, Users, Wallet, ShieldCheck, ArrowRight,
+  Wifi, TrendingUp, Layers, Radar, Users, Wallet, ShieldCheck, ArrowRight, History as HistoryIcon,
 } from "lucide-react";
 
-type TabId = "account" | "rise-fall" | "multipliers" | "signals" | "copy";
+type TabId = "account" | "rise-fall" | "multipliers" | "signals" | "copy" | "history";
 
 const TABS: { id: TabId; label: string; icon: typeof Wifi }[] = [
   { id: "account", label: "Account", icon: Wifi },
@@ -29,6 +30,7 @@ const TABS: { id: TabId; label: string; icon: typeof Wifi }[] = [
   { id: "multipliers", label: "Multipliers", icon: Layers },
   { id: "signals", label: "Signals", icon: Radar },
   { id: "copy", label: "Copy", icon: Users },
+  { id: "history", label: "History", icon: HistoryIcon },
 ];
 
 const DerivApp = () => {
@@ -150,6 +152,7 @@ const DerivApp = () => {
         {tab === "multipliers" && <DerivTradePanel styleId="multipliers" engine="multipliers" />}
         {tab === "signals" && <SignalEngineTab />}
         {tab === "copy" && <CopyTradingTab />}
+        {tab === "history" && <DerivTradeHistory />}
         </ErrorBoundary>
       </main>
 
