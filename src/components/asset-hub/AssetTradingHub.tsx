@@ -36,6 +36,8 @@ export interface AssetTradingHubConfig {
   persistSymbol: string;
   category: string;
   symbolPatterns: string[];
+  /** Also list live Weltrade SyntX signals in the signals section */
+  includeWeltradeSignals?: boolean;
   alwaysOpen?: boolean;
   tagline: string;
   quickStats?: { label: string; value: string }[];
@@ -236,7 +238,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
               {locked ? (
                 <UpgradePrompt feature={`${config.assetLabel} live signals`} requiredPlan="Basic" />
               ) : (
-                <AssetSignalsList symbolPatterns={config.symbolPatterns} assetLabel={config.assetLabel} />
+                <AssetSignalsList symbolPatterns={config.symbolPatterns} assetLabel={config.assetLabel} includeWeltrade={config.includeWeltradeSignals} />
               )}
             </div>
 
@@ -269,7 +271,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
           {/* AI Analysis */}
           <TabsContent value="ai" className="mt-6 space-y-4">
             {config.chartProvider !== "tradingview" && (
-              <BotvioScalpRobot displaySymbol={config.displaySymbol} assetLabel={config.assetLabel} />
+              <BotvioScalpRobot displaySymbol={config.displaySymbol} assetLabel={config.assetLabel} includeWeltrade={config.includeWeltradeSignals} />
             )}
 
             {config.siblingScalp && (
@@ -300,7 +302,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
 
           {/* Signals */}
           <TabsContent value="signals" className="mt-6">
-            <AssetSignalsList symbolPatterns={config.symbolPatterns} assetLabel={config.assetLabel} />
+            <AssetSignalsList symbolPatterns={config.symbolPatterns} assetLabel={config.assetLabel} includeWeltrade={config.includeWeltradeSignals} />
           </TabsContent>
 
           {/* Strategy */}

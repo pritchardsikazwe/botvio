@@ -11,14 +11,16 @@ interface Props {
   symbolPatterns: string[];
   /** Friendly asset label for empty/CTA copy */
   assetLabel: string;
+  /** Also show live Weltrade SyntX signals alongside this asset */
+  includeWeltrade?: boolean;
 }
 
-export function AssetSignalsList({ symbolPatterns, assetLabel }: Props) {
+export function AssetSignalsList({ symbolPatterns, assetLabel, includeWeltrade }: Props) {
   const { data: signals, isLoading } = useQuery({
-    queryKey: ["asset-hub-signals", symbolPatterns.join(",")],
+    queryKey: ["asset-hub-signals", symbolPatterns.join(","), !!includeWeltrade],
     queryFn: async () => {
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const orFilter = symbolPatterns.map((p) => `symbol.ilike.%${p}%`).join(",");
+      const orFilter = symbolPatterns.map((p) => `symbol.ilike.%${p}%`).join(",") + (includeWeltrade ? ",category.eq.syntx" : "");
       const { data } = await supabase
         .from("trading_signals")
         .select("*")
@@ -28,7 +30,9 @@ export function AssetSignalsList({ symbolPatterns, assetLabel }: Props) {
         .order("created_at", { ascending: false })
         .limit(6);
       const now = Date.now();
-      return (data ?? []).filter((s: any) => !s.expires_at || new Date(s.expires_at).getTime() > now);
+      return (data ?? []).filter((s: any) => s.category === "syntx"
+        ? new Date(s.created_at).getTime() > now - 60 * 60 * 1000
+        : !s.expires_at || new Date(s.expires_at).getTime() > now);
     },
     refetchInterval: 30000,
   });
@@ -36,7 +40,7 @@ export function AssetSignalsList({ symbolPatterns, assetLabel }: Props) {
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-        <Target className="h-4 w-4 text-primary" /> Active {assetLabel} Signals
+        <Target className="h-4 w-4 text-primary" /> Active {assetLabel}{includeWeltrade ? " & Weltrade" : ""} Signals
       </h3>
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
