@@ -11,6 +11,7 @@ import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCir
 import { Header } from "@/components/trading/Header";
 import { MarketDataPanel } from "@/components/trading/MarketDataPanel";
 import { SEOHead } from "@/components/seo/SEOHead";
+import { BotvioRobotSignalShortcut } from "@/components/dashboard/BotvioRobotSignalShortcut";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -69,6 +70,9 @@ const Dashboard = () => {
             Manage your trading bots and copy trading subscriptions
           </p>
         </div>
+
+        {/* One-click MT5 connection + automatic Botvio Robot signal delivery */}
+        <BotvioRobotSignalShortcut />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
