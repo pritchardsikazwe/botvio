@@ -24,13 +24,6 @@ function Countdown({ targetTime }: { targetTime: string }) {
   return <span className="font-mono text-xs font-bold text-primary">{remaining}</span>;
 }
 
-const SAMPLE_EVENTS = [
-  { name: "Non-Farm Payrolls (NFP)", currency: "USD", impact: "High", time: null },
-  { name: "CPI (Consumer Price Index)", currency: "USD", impact: "High", time: null },
-  { name: "Interest Rate Decision", currency: "EUR", impact: "High", time: null },
-  { name: "FOMC Meeting Minutes", currency: "USD", impact: "Medium", time: null },
-];
-
 const IMPACT_COLORS: Record<string, string> = {
   High: "bg-destructive/20 text-destructive border-destructive/30",
   Medium: "bg-warning/20 text-warning border-warning/30",
@@ -83,20 +76,7 @@ export function NewsEventsCard({ metrics }: NewsEventsCardProps) {
           </div>
         )}
 
-        {/* Sample upcoming events */}
-        <div className="space-y-1.5">
-          {SAMPLE_EVENTS.map((evt, i) => (
-            <div key={i} className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-muted/20">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className={`text-[8px] py-0 px-1.5 ${IMPACT_COLORS[evt.impact]}`}>
-                  {evt.impact}
-                </Badge>
-                <span className="text-[10px] text-foreground font-medium">{evt.currency} — {evt.name}</span>
-              </div>
-              <span className="text-[10px] text-muted-foreground">—</span>
-            </div>
-          ))}
-        </div>
+
       </CardContent>
     </Card>
   );
