@@ -84,6 +84,53 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const maximumDuration = primarySpec?.maxDuration ?? undefined;
   const durationUnitsKey = allowedDurationUnits.join("|");
 
+  // Deriv exposes the exact contract limits through contracts_for. These
+  // presets are filtered against those live limits instead of assuming a
+  // fixed duration range.
+  const durationPresets = useMemo(() => {
+    const candidates: Record<string, number[]> = {
+      t: [1, 2, 3, 5, 7, 10],
+      s: [5, 10, 15, 30, 60, 120, 300],
+      m: [1, 2, 3, 5, 10, 15, 30],
+      h: [1, 2, 4, 8, 12, 24],
+      d: [1, 2, 3, 7],
+    };
+    const min = minimumDuration ?? 0;
+    const max = maximumDuration ?? Number.POSITIVE_INFINITY;
+    return (candidates[durationUnit] ?? []).filter(v => v >= min && v <= max);
+  }, [durationUnit, minimumDuration, maximumDuration]);
+
+  const recommendedDuration = useMemo(() => {
+    const defaults: Record<string, number> = { t: 5, s: 30, m: 5, h: 1, d: 1 };
+    const min = minimumDuration ?? 0;
+    const max = maximumDuration ?? Number.POSITIVE_INFINITY;
+    const raw = defaults[durationUnit] ?? 5;
+    return Math.min(max, Math.max(min, raw));
+  }, [durationUnit, minimumDuration, maximumDuration]);
+
+  const recommendedStake = useMemo(() => {
+    const min = minimumStake || 0;
+    const max = maximumStake ?? Number.POSITIVE_INFINITY;
+    const available = Number(balance?.balance ?? 0);
+    if (!Number.isFinite(available) || available <= 0) return min || 1;
+    // Botvio's conservative guide: about 1% of available balance, bounded by
+    // Deriv's live contract limits and a small absolute cap.
+    const guided = Math.max(min, Math.min(available * 0.01, 10));
+    return Math.min(max, Math.max(min || 0.01, guided));
+  }, [balance?.balance, minimumStake, maximumStake]);
+
+  const stakePresets = useMemo(() => {
+    const min = minimumStake || 0.01;
+    const max = maximumStake ?? Number.POSITIVE_INFINITY;
+    const base = [min, 1, 2, 5, 10, 20];
+    return Array.from(new Set(base.map(v => Number(v.toFixed(2)))))
+      .filter(v => v >= min && v <= max)
+      .slice(0, 6);
+  }, [minimumStake, maximumStake]);
+
+  const isDigitalOptions = ["rise-fall-scalping", "higher-lower", "digit-contracts", "turbo", "ticks"].includes(styleId);
+
+
   const addLog = useCallback((message: string, tone: TradeLog["tone"] = "info") => {
     logId.current += 1;
     setLogs(prev => [{ id: logId.current, time: new Date().toLocaleTimeString(), message, tone }, ...prev].slice(0, 25));
@@ -102,6 +149,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   }, [contractId, styleId, contractType?.tickDuration]);
 
   useEffect(() => {
+    if (isDigitalOptions && allowedDurationUnits.includes("t") && durationUnit !== "t") {
+      setDurationUnit("t");
+      return;
+    }
     if (!allowedDurationUnits.includes(durationUnit)) {
       setDurationUnit(allowedDurationUnits[0] ?? "t");
     }
@@ -379,6 +430,21 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
                     <span className="text-muted-foreground">Protection</span>
                     <span className="font-semibold">1 open · 30s cooldown</span>
                   </div>
+                  {tradeMode === "auto" && (
+                    <div className="mt-2 rounded-lg border border-primary/15 bg-background/60 p-2">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-muted-foreground">Auto stake</span>
+                        <span className="font-bold">{currency} {recommendedStake.toFixed(2)}</span>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between text-[10px]">
+                        <span className="text-muted-foreground">Auto duration</span>
+                        <span className="font-bold">{recommendedDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</span>
+                      </div>
+                      <p className="mt-1.5 text-[9px] leading-relaxed text-muted-foreground">
+                        Auto mode uses the live Deriv contract limits and the current Botvio RSI signal. It does not promise a winning trade.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -417,6 +483,68 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
                 {maximumDuration != null ? " · Maximum " + maximumDuration + " " + (UNIT_LABELS[durationUnit] ?? durationUnit) : ""}
               </p>
             </div>}
+        </div>
+
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-xs font-bold flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-primary" /> Botvio trade guide</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
+                Live Deriv limits are applied first. The suggested stake is a conservative Botvio guide, not a Deriv guarantee.
+              </p>
+            </div>
+            <Badge variant="outline" className="text-[9px] border-primary/30">LIVE RULES</Badge>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button type="button" className="rounded-lg border border-border/60 bg-background/70 p-2 text-left hover:border-primary/40"
+              onClick={() => { setStake(String(Number(recommendedStake.toFixed(2)))); setQuote(null); }}>
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Suggested stake</p>
+              <p className="mt-1 text-sm font-black">{currency} {recommendedStake.toFixed(2)}</p>
+              <p className="text-[9px] text-muted-foreground">≈ 1% balance · tap to use</p>
+            </button>
+            <button type="button" className="rounded-lg border border-border/60 bg-background/70 p-2 text-left hover:border-primary/40"
+              onClick={() => { setDuration(String(recommendedDuration)); setQuote(null); }}>
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Suggested duration</p>
+              <p className="mt-1 text-sm font-black">{recommendedDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</p>
+              <p className="text-[9px] text-muted-foreground">based on this contract</p>
+            </button>
+          </div>
+
+          {durationPresets.length > 0 && !isMultipliers && (
+            <div className="mt-3">
+              <p className="mb-1.5 text-[9px] uppercase tracking-wider text-muted-foreground">Quick duration</p>
+              <div className="flex flex-wrap gap-1.5">
+                {durationPresets.map(v => (
+                  <Button key={v} type="button" size="sm" variant={Number(duration) === v ? "secondary" : "outline"}
+                    className="h-7 min-w-10 px-2 text-[10px]"
+                    onClick={() => { setDuration(String(v)); setQuote(null); }}>
+                    {v}{UNIT_LABELS[durationUnit] === "ticks" ? "t" : UNIT_LABELS[durationUnit] === "seconds" ? "s" : UNIT_LABELS[durationUnit] === "minutes" ? "m" : UNIT_LABELS[durationUnit] === "hours" ? "h" : "d"}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-3">
+            <p className="mb-1.5 text-[9px] uppercase tracking-wider text-muted-foreground">Stake presets</p>
+            <div className="flex flex-wrap gap-1.5">
+              {stakePresets.map(v => (
+                <Button key={v} type="button" size="sm" variant={Number(stake) === v ? "secondary" : "outline"}
+                  className="h-7 px-2 text-[10px]"
+                  onClick={() => { setStake(String(v)); setQuote(null); }}>
+                  {currency} {v}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-2 flex flex-wrap gap-1.5 text-[9px] text-muted-foreground">
+            {minimumStake != null && minimumStake > 0 && <Badge variant="outline">Deriv min {currency} {minimumStake}</Badge>}
+            {maximumStake != null && <Badge variant="outline">Deriv max {currency} {maximumStake}</Badge>}
+            {minimumDuration != null && <Badge variant="outline">Min {minimumDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</Badge>}
+            {maximumDuration != null && <Badge variant="outline">Max {maximumDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</Badge>}
+          </div>
         </div>
 
         {needsBarrier && <div className="space-y-1.5"><Label className="text-xs">{contractType?.needsDigit ? "Barrier / last digit (0–9)" : "Barrier"}</Label><Input inputMode="decimal" value={barrier} onChange={e => { setBarrier(e.target.value); setQuote(null); }} placeholder={contractType?.needsDigit ? "0 to 9" : "e.g. +0.50"} /></div>}
