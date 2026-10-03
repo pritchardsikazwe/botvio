@@ -60,7 +60,13 @@ Deno.serve(async (req) => {
     const err = e instanceof TradeCopyError ? e : new TradeCopyError((e as Error).message ?? "Unexpected error", "upstream", 500);
     console.error("[tradecopy-api]", action, err.code, err.message);
     try { await audit(false, { error: err.message, code: err.code }); } catch { /* ignore audit failure */ }
-    return json({ ok: false, error: err.message, code: err.code }, err.status);
+    // Upstream outages (TradeCopy server down/slow) are expected conditions, not
+    // crashes: reply 200 with ok:false so the page shows a message instead of breaking.
+    const friendly = err.code === "network"
+      ? "TradeCopy's server isn't responding right now. Your accounts and settings are safe — please try again in a few minutes."
+      : err.message;
+    const status = err.code === "network" || err.code === "upstream" ? 200 : err.status;
+    return json({ ok: false, error: friendly, code: err.code }, status);
   }
 });
 
