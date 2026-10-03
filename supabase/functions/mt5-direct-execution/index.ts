@@ -1,4 +1,5 @@
 // Botvio generated signals -> the existing TradeCopy MT5 infrastructure.
+import { assertAutomationKey } from "../_shared/automationAuth.ts";
 // No Bridge EA, VPS terminal, or direct MT5 API is used for signal execution.
 // 1) Botvio signals can open on the configured Deriv/provider TradeCopy master.
 // 2) Users who enable Direct Signals receive the same signals on their own
@@ -175,7 +176,13 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action ?? "");
 
-    if (action === "wake" || (token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"))) {
+    if (action === "wake") {
+      assertAutomationKey(req);
+      const r = await deliver(admin);
+      return json({ ok: true, adapterMode: adapter.mode, ...r });
+    }
+
+    if (token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
       const r = await deliver(admin);
       return json({ ok: true, adapterMode: adapter.mode, ...r });
     }
