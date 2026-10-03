@@ -3,6 +3,7 @@ import { DerivTokenRow } from "@/hooks/useDerivTokens";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface AccountSwitcherProps {
   tokens: DerivTokenRow[];
@@ -42,7 +43,14 @@ export const AccountSwitcher = ({ tokens, onActivate, onRemove }: AccountSwitche
             onClick={async () => {
               if (t.is_active || busyId) return;
               setBusyId(t.id);
-              try { await onActivate(t.id); } finally { setBusyId(null); }
+              try {
+                await onActivate(t.id);
+                toast.success(`Switched to ${t.is_virtual ? "Demo" : "Real"} account ${t.loginid}`);
+              } catch (error: any) {
+                toast.error(error?.message || "Unable to switch Deriv account");
+              } finally {
+                setBusyId(null);
+              }
             }}
           >
             <div className="min-w-0 flex-1">
