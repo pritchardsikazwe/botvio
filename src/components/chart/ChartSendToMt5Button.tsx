@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { directAction, useMyMt5Accounts } from "@/hooks/useDirectExecution";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
@@ -17,13 +17,15 @@ interface Props {
 }
 
 /**
- * Dispatches the AI-Chart Analysis recommendation to the user's MT5 Bridge EA
- * via the queue-hub-trade edge function. Symbol is sent verbatim — the edge
- * function handles broker-specific normalisation and minimum-lot clamping.
+ * Dispatches the AI-Chart Analysis recommendation to the user's connected
+ * TradeCopy MT5 follower. No Bridge EA or VPS terminal is involved.
  */
 export function ChartSendToMt5Button({ symbol, recommendation, stopLoss, takeProfit }: Props) {
   const { user } = useAuth();
+  const { data: accounts } = useMyMt5Accounts();
   const [busy, setBusy] = useState(false);
+  const account = (accounts ?? []).find((a) => a.account_role === "slave" && a.tradecopy_active && a.tradecopy_user_id);
+
 
   const direction = (recommendation ?? "").toUpperCase() === "SELL" ? "SELL"
     : (recommendation ?? "").toUpperCase() === "BUY" ? "BUY"
@@ -39,36 +41,25 @@ export function ChartSendToMt5Button({ symbol, recommendation, stopLoss, takePro
     if (!symbol || !direction) return;
     setBusy(true);
     try {
+      if (!account) throw new Error("Connect and activate an MT5 follower through TradeCopy first");
       const sl = typeof stopLoss === "number" && Number.isFinite(stopLoss) && stopLoss > 0 ? stopLoss : undefined;
       const tp = typeof takeProfit === "number" && Number.isFinite(takeProfit) && takeProfit > 0 ? takeProfit : undefined;
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      if (!accessToken) throw new Error("No active session");
-      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/queue-hub-trade`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          symbol,
-          direction,
-          sl,
-          tp,
-          source: "ai-chart-analysis",
-        }),
+      const result = await directAction<{ result?: { ticket?: string } }>("send_order", {
+        account_id: account.id,
+        symbol,
+        direction,
+        volume: Number(account.direct_lot ?? 0.01),
+        stop_loss: sl,
+        take_profit: tp,
       });
-      const json = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(json?.error ?? "MT5 queue failed");
       toast({
-        title: `MT5 ${direction} queued`,
-        description: `${symbol} • Volume ${json.volume} • SL ${json.sl ?? sl ?? "—"} / TP ${json.tp ?? tp ?? "—"} • Terminal ${json.terminal_uid?.slice(0, 8)}…`,
+        title: `MT5 ${direction} sent via TradeCopy`,
+        description: `${symbol} • Volume ${account.direct_lot ?? 0.01} • SL ${sl ?? "—"} / TP ${tp ?? "—"}`,
       });
     } catch (e: any) {
       toast({
         title: "MT5 queue failed",
-        description: e?.message ?? "Add your Bridge EA terminal under Connections.",
+        description: e?.message ?? "Connect and activate an MT5 TradeCopy follower under Connections.",
         variant: "destructive",
       });
     } finally {
