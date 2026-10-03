@@ -5,10 +5,10 @@
  * `mt5Symbol` is the symbol the MT5 Bridge EA will trade on broker terminals
  * (Deriv MT5, Weltrade, etc. — most use these exact tickers).
  *
- * Some "Crash 150 / 300 / 600 / 900" variants are NOT exposed on the public
- * Deriv WS feed (`derivSupported: false`) — they remain MT5-only. The hub
- * still lists them and lets users route trades to MT5, but the live chart &
- * signal preview falls back to the closest streamable proxy (Crash 500).
+ * Every instrument uses its own Deriv symbol when that symbol is live.
+ * The Synthetic Hub separately validates the symbol against Deriv active_symbols
+ * and contracts_for before showing it, so unavailable symbols are hidden rather
+ * than silently redirected to another instrument.
  */
 
 export type SyntheticCategory = "boom" | "crash" | "volatility" | "step";
@@ -27,8 +27,6 @@ export interface SyntheticInstrument {
   bias: "buy" | "sell" | "both";
   /** Short tagline for the card */
   blurb: string;
-  /** Closest Deriv-streamable proxy when derivSymbol is null */
-  chartProxy?: string;
 }
 
 export const SYNTHETICS: SyntheticInstrument[] = [
@@ -37,8 +35,7 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     key: "boom-300",
     label: "Boom 300 Index",
     category: "boom",
-    derivSymbol: null,
-    chartProxy: "BOOM500",
+    derivSymbol: "BOOM300",
     mt5Symbol: "Boom 300 Index",
     bias: "buy",
     blurb: "Frequent upward spikes — quick buy setups.",
@@ -56,8 +53,7 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     key: "boom-600",
     label: "Boom 600 Index",
     category: "boom",
-    derivSymbol: null,
-    chartProxy: "BOOM500",
+    derivSymbol: "BOOM600",
     mt5Symbol: "Boom 600 Index",
     bias: "buy",
     blurb: "Mid-range boom — balanced upward spikes.",
@@ -66,8 +62,7 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     key: "boom-900",
     label: "Boom 900 Index",
     category: "boom",
-    derivSymbol: null,
-    chartProxy: "BOOM500",
+    derivSymbol: "BOOM900",
     mt5Symbol: "Boom 900 Index",
     bias: "buy",
     blurb: "Slow-burn boom — large up moves.",
@@ -87,8 +82,7 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     key: "crash-150",
     label: "Crash 150 Index",
     category: "crash",
-    derivSymbol: null,
-    chartProxy: "CRASH500",
+    derivSymbol: "CRASH150",
     mt5Symbol: "Crash 150 Index",
     bias: "sell",
     blurb: "Aggressive crash variant — fast downward spikes (1s ticks).",
@@ -97,8 +91,7 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     key: "crash-300",
     label: "Crash 300 Index",
     category: "crash",
-    derivSymbol: null,
-    chartProxy: "CRASH500",
+    derivSymbol: "CRASH300",
     mt5Symbol: "Crash 300 Index",
     bias: "sell",
     blurb: "Mid-range crash — frequent downward spikes.",
@@ -116,8 +109,7 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     key: "crash-600",
     label: "Crash 600 Index",
     category: "crash",
-    derivSymbol: null,
-    chartProxy: "CRASH500",
+    derivSymbol: "CRASH600",
     mt5Symbol: "Crash 600 Index",
     bias: "sell",
     blurb: "Slower crash variant — cleaner sells.",
@@ -126,8 +118,7 @@ export const SYNTHETICS: SyntheticInstrument[] = [
     key: "crash-900",
     label: "Crash 900 Index",
     category: "crash",
-    derivSymbol: null,
-    chartProxy: "CRASH500",
+    derivSymbol: "CRASH900",
     mt5Symbol: "Crash 900 Index",
     bias: "sell",
     blurb: "Slow-burn crash — large move setups.",
