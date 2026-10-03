@@ -99,7 +99,9 @@ const TICK_INSTRUMENTS: InstrumentConfig[] = [
 const RISE_FALL: ContractTypeConfig = {
   id: "rise_fall",
   label: "Rise / Fall",
-  tickDuration: false,
+  // Deriv Digital Options support tick-based durations; live capability data
+  // still decides the exact limits for the selected symbol.
+  tickDuration: true,
   buyButtons: [
     { label: "Rise", contractType: "CALL", variant: "success" },
     { label: "Fall", contractType: "PUT", variant: "destructive" },
