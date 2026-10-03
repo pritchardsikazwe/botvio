@@ -18,7 +18,7 @@
 - [ ] Keep ordinary Forex/Gold/Crypto/Stocks analysis separate from SyntX-specific logic and QA SyntX pages/charts.
 - [ ] Implement and test the approved family-aware SyntX experience now without backend or authentication changes.
 - [x] Save Weltrade chart SyntX signals (with WIN/LOSS results) to the Signals tab.
-- [ ] Four-role MT5 architecture: DATA FEED, DIRECT EXECUTION, PROVIDER MASTER, BOTVIO ROBOT MASTER (schema, direct-execution function, idempotency, live gates).
-- [ ] User MT5 card: Send Botvio Signals / Copy a Provider / Copy Botvio Robot, direct-signal status.
-- [ ] Admin MT5 control center: summary cards, role filters, badges, actions, detail drawer.
-- [ ] Verify DATA FEED and direct execution never call TradeCopy link.
+- [x] Four-role MT5 architecture: DATA FEED, DIRECT EXECUTION, PROVIDER MASTER, BOTVIO ROBOT MASTER (schema, direct-execution function, idempotency, live gates).
+- [x] User MT5 card: Send Botvio Signals / Copy a Provider / Copy Botvio Robot, direct-signal status.
+- [x] Admin MT5 control center: summary cards, role filters, badges, actions, detail drawer.
+- [x] Verify DATA FEED and direct execution never call TradeCopy link.

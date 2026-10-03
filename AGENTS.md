@@ -5,3 +5,5 @@
 - TradeCopy uses the mock adapter unless both `TRADECOPY_API_KEY` and `TRADECOPY_MODE=live` are set, and LIVE copying also needs the `tradecopy_live_enabled` app setting plus per-relationship confirmation, to prevent accidental real trades.
 - The Bridge EA/VPS MT5 path is deprecated but kept until TradeCopy demo verification succeeds.
 - Canonical SEO origin is the BASE_URL constant in src/config/domain.ts (https://botvio.live); SEOHead and sitemap/robots functions ignore DB/host values so preview hosts never leak into canonicals (guarded by src/test/seo-canonical.test.ts).
+- MT5 roles (DATA FEED, DIRECT EXECUTION, PROVIDER MASTER, BOTVIO ROBOT MASTER, FOLLOWER) are derived from facts, not stored; direct signals go through `mt5-direct-execution` only and never call TradeCopy `link`, so they never consume a TradeCopy registration.
+- Direct execution is idempotent via unique (trading_account_id, signal_id) in `direct_executions`, simulates orders unless `MT5_DIRECT_MODE=live`, and LIVE accounts need the typed per-account confirmation plus the global live setting; a DB trigger guards direct_* columns from client edits.

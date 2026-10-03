@@ -220,7 +220,7 @@ export function TradingConnectionsCenter() {
       <section id="follower-mt5" className="scroll-mt-6 space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-lg font-semibold">3. MT5 follower</h2>
+            <h2 className="text-lg font-semibold">TradeCopy: copy a provider or Botvio Robot</h2>
             <p className="text-sm text-muted-foreground">Connect the follower account, then choose Provider or Botvio Robot.</p>
           </div>
           <Badge variant="outline">TradeCopy Cloud</Badge>
