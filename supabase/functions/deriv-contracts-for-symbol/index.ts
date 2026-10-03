@@ -1,99 +1,86 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-// Public Deriv WebSocket for market metadata (contracts_for)
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    const { symbol } = await req.json();
-    
-    if (!symbol) {
-      throw new Error('Symbol is required');
-    }
-
-    // Connect to Deriv WS
-    const ws = new WebSocket(`wss://api.derivws.com/trading/v1/options/ws/public`);
-    
-    const result = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        ws.close();
-        reject(new Error('Request timeout'));
-      }, 15000);
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({
-          // Deriv's schema now rejects currency / landing_company / product_type
-          // here ("Properties not allowed"). Symbol alone is the valid request.
-          contracts_for: symbol,
-        }));
-      };
-
-      ws.onmessage = (event) => {
-        clearTimeout(timeout);
-        const data = JSON.parse(event.data);
-        ws.close();
-        
-        if (data.error) {
-          reject(new Error(data.error.message));
-        } else {
-          resolve(data.contracts_for);
-        }
-      };
-
-      ws.onerror = (err) => {
-        clearTimeout(timeout);
-        reject(err);
-      };
-    });
-
-    // Group contracts by category
-    const contracts = result as any;
-    const grouped: Record<string, any[]> = {};
-    
-    if (contracts?.available) {
-      for (const contract of contracts.available) {
-        const category = contract.contract_category_display || 'Other';
-        if (!grouped[category]) {
-          grouped[category] = [];
-        }
-        grouped[category].push({
-          contract_type: contract.contract_type,
-          display_name: contract.contract_display,
-          category: contract.contract_category,
-          min_stake: contract.min_stake,
-          max_stake: contract.max_stake,
-          duration_units: contract.expiry_type,
-          multiplier_range: contract.multiplier_range,
-          barrier_range: contract.barriers,
-        });
+async function requestDeriv(symbol: string) {
+  const ws = new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
+  return await new Promise<any>((resolve, reject) => {
+    let settled = false;
+    const finish = (fn: (v: any) => void, value: any) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      try { ws.close(); } catch {}
+      fn(value);
+    };
+    const timer = setTimeout(() => finish(reject, new Error("Deriv contracts_for timed out")), 15000);
+    ws.onopen = () => ws.send(JSON.stringify({ contracts_for: symbol }));
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(String(event.data));
+        if (data?.error) finish(reject, new Error(data.error.message || ("Invalid symbol: " + symbol)));
+        else finish(resolve, data);
+      } catch (e) {
+        finish(reject, e instanceof Error ? e : new Error("Invalid Deriv response"));
       }
+    };
+    ws.onerror = () => finish(reject, new Error("Deriv public WebSocket connection failed"));
+  });
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  try {
+    const body = await req.json();
+    const symbol = String(body?.symbol ?? "").trim();
+    if (!/^[A-Za-z0-9_]{2,30}$/.test(symbol)) {
+      return new Response(JSON.stringify({ error: "Invalid symbol format" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-
+    const data = await requestDeriv(symbol);
+    const contracts = data?.contracts_for ?? {};
+    const available = Array.isArray(contracts.available) ? contracts.available : [];
+    const grouped: Record<string, any[]> = {};
+    for (const c of available) {
+      const category = String(c.contract_category_display ?? c.contract_category ?? "Other");
+      (grouped[category] ??= []).push({
+        contract_type: c.contract_type,
+        display_name: c.contract_display ?? c.contract_type,
+        category: c.contract_category ?? null,
+        min_stake: c.min_stake ?? null,
+        max_stake: c.max_stake ?? null,
+        min_contract_duration: c.min_contract_duration ?? null,
+        max_contract_duration: c.max_contract_duration ?? null,
+        expiry_type: c.expiry_type ?? null,
+        multiplier_range: c.multiplier_range ?? null,
+        growth_rate_range: c.growth_rate_range ?? null,
+        barriers: c.barriers ?? null,
+        underlying_symbol: c.underlying_symbol ?? symbol,
+        market: c.market ?? null,
+        submarket: c.submarket ?? null,
+      });
+    }
     return new Response(JSON.stringify({
-      symbol: contracts?.symbol,
-      display_name: contracts?.symbol_display,
-      market: contracts?.market,
+      symbol: contracts.underlying_symbol ?? symbol,
+      display_name: contracts.underlying_symbol_name ?? symbol,
+      market: contracts.market ?? null,
       contracts: grouped,
-      raw: contracts
+      available,
+      raw: contracts,
+      api_version: "deriv-current",
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
-  } catch (error: any) {
-    console.error('Contracts for symbol error:', error);
-    return new Response(JSON.stringify({
-      error: error.message
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Contracts lookup failed";
+    console.error("[deriv-contracts-for-symbol]", message);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
