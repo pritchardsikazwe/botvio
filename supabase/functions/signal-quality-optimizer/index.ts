@@ -114,21 +114,45 @@ serve(async (req) => {
       volatilityFit = assetScore.volatility_score || 50;
     }
 
-    // ─── 6. Historical Reliability ───
+    // ─── 6. Symbol + strategy adaptive performance ───
+    // Prefer actual user_trades outcomes because trading_signals intentionally
+    // uses lifecycle states (ACTIVE/CLOSED/EXPIRED), not WON/LOST.
     let historicalReliability = 50;
-    // Use recent settled signals for this symbol+broker
+    let recentLossCluster = 0;
+    let sampleSize = 0;
+
     const { data: recentSignals } = await supabase
       .from("trading_signals")
-      .select("status")
+      .select("id, strategy_name, created_at")
       .eq("symbol", cleanSymbol)
+      .eq("strategy_name", strategy_name)
       .contains("broker", [broker])
-      .in("status", ["WON", "LOST", "EXPIRED"])
       .order("created_at", { ascending: false })
-      .limit(20);
+      .limit(40);
 
-    if (recentSignals && recentSignals.length >= 5) {
-      const wins = recentSignals.filter((s: any) => s.status === "WON").length;
-      historicalReliability = Math.round((wins / recentSignals.length) * 100);
+    const signalIds = (recentSignals ?? []).map((s: any) => s.id).filter(Boolean);
+    if (signalIds.length) {
+      const { data: trades } = await supabase
+        .from("user_trades")
+        .select("signal_id,status,profit_loss,closed_at")
+        .in("signal_id", signalIds)
+        .in("status", ["WIN","LOSS","BREAKEVEN"])
+        .order("closed_at", { ascending: false })
+        .limit(40);
+
+      if (trades && trades.length >= 5) {
+        sampleSize = trades.length;
+        const wins = trades.filter((t: any) => t.status === "WIN").length;
+        const losses = trades.filter((t: any) => t.status === "LOSS").length;
+        historicalReliability = Math.round((wins + 0.5 * trades.filter((t:any)=>t.status==="BREAKEVEN").length) / trades.length * 100);
+        for (const t of trades.slice(0, 5)) {
+          if (t.status === "LOSS") recentLossCluster++;
+          else break;
+        }
+        // Small-sample protection: do not let a handful of trades dominate.
+        if (sampleSize < 10) historicalReliability = Math.round((historicalReliability * sampleSize + 55 * (10 - sampleSize)) / 10);
+        if (losses >= 4 && losses > wins) historicalReliability = Math.max(20, historicalReliability - 12);
+      }
     }
 
     // ─── Compute Final Quality Score ───
@@ -142,23 +166,33 @@ serve(async (req) => {
       0.10 * historicalReliability
     );
 
-    // ─── Decision ───
+    // ─── Decision + adaptive gates ───
+    // Strong strategies keep the normal gate; weak recent performance makes the
+    // engine demand more evidence instead of increasing trade frequency.
+    let approvalThreshold = 78;
+    if (sampleSize >= 10 && historicalReliability < 45) approvalThreshold = 84;
+    else if (sampleSize >= 10 && historicalReliability < 55) approvalThreshold = 81;
+    else if (sampleSize >= 20 && historicalReliability >= 68) approvalThreshold = 76;
+
     let approved = false;
     let rejectionReason: string | null = null;
 
-    if (finalScore >= 78) {
+    if (recentLossCluster >= 3) {
+      rejectionReason = "Symbol strategy cooldown: 3+ consecutive losses";
+    } else if (finalScore >= approvalThreshold) {
       approved = true;
-    } else if (finalScore >= 70) {
-      // Borderline — check sub-scores
+    } else if (finalScore >= approvalThreshold - 8) {
       if (strategyHealth < 30) {
         rejectionReason = "Strategy in cooldown (poor health today)";
       } else if (assetHealth < 25) {
         rejectionReason = "Asset health too low today";
+      } else if (sampleSize >= 10 && historicalReliability < 45) {
+        rejectionReason = "Recent symbol/strategy performance requires a higher quality threshold";
       } else {
-        approved = true; // borderline pass
+        approved = true;
       }
     } else {
-      rejectionReason = `Quality score too low (${finalScore}/100)`;
+      rejectionReason = `Quality score too low (${finalScore}/100; threshold ${approvalThreshold})`;
     }
 
     // ─── Duplicate suppression ───
@@ -215,6 +249,9 @@ serve(async (req) => {
           session_fit: Math.round(sessionFit),
           volatility_fit: Math.round(volatilityFit),
           historical_reliability: Math.round(historicalReliability),
+          adaptive_threshold: approvalThreshold,
+          strategy_sample_size: sampleSize,
+          consecutive_losses: recentLossCluster,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
