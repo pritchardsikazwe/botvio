@@ -40,6 +40,7 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true,
   const [saveToAccount, setSaveToAccount] = useState(showAccountSelection);
   const [accountLabel, setAccountLabel] = useState("");
   const [storedConnection, setStoredConnection] = useState<any>(null);
+  const [preferredAccountType, setPreferredAccountType] = useState<"demo" | "real" | null>(null);
 
   const derivConfig = getDerivConfig();
   const currentEnv = resolveDerivEnv();
@@ -147,7 +148,11 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true,
     }
   };
 
-  const handleOAuthConnect = () => {
+  const handleOAuthConnect = (accountType?: "demo" | "real") => {
+    if (accountType) {
+      setPreferredAccountType(accountType);
+      sessionStorage.setItem("deriv_preferred_account_type", accountType);
+    }
     // Mutex + cooldown check
     if (!canLogin) {
       if (loginInProgress) {
@@ -467,6 +472,43 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true,
               </TabsContent>}
 
               <TabsContent value="oauth" className="space-y-4 mt-4">
+                <div className="rounded-xl border bg-muted/20 p-4">
+                  <div className="mb-3">
+                    <p className="font-semibold">Choose the account you want to use first</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      One Deriv login can return your available Demo and Real Options accounts. Botvio will save them so you can switch later.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button
+                      type="button"
+                      variant={preferredAccountType === "demo" ? "default" : "outline"}
+                      className="h-auto justify-start p-4"
+                      onClick={() => handleOAuthConnect("demo")}
+                      disabled={oauthButtonDisabled}
+                    >
+                      <div className="text-left">
+                        <div className="font-semibold">Connect Demo</div>
+                        <div className="text-xs opacity-80 mt-1">Start safely with your virtual balance</div>
+                      </div>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={preferredAccountType === "real" ? "default" : "outline"}
+                      className="h-auto justify-start p-4"
+                      onClick={() => handleOAuthConnect("real")}
+                      disabled={oauthButtonDisabled}
+                    >
+                      <div className="text-left">
+                        <div className="font-semibold">Connect Real</div>
+                        <div className="text-xs opacity-80 mt-1">Use your live trading account</div>
+                      </div>
+                    </Button>
+                  </div>
+                </div>
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
+                  <strong className="text-foreground">Tip:</strong> After login, Botvio will show every available Demo/Real Options account and let you switch between them without returning to Trading Connections.
+                </div>
                 <div className="text-center py-4">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <User className="h-8 w-8 text-primary" />
@@ -499,7 +541,8 @@ export const DerivConnectionPanel = ({ onConnected, showAccountSelection = true,
 
                 <Button
                   className="w-full"
-                  onClick={handleOAuthConnect}
+                  variant="secondary"
+                  onClick={() => handleOAuthConnect(preferredAccountType || undefined)}
                   disabled={oauthButtonDisabled}
                 >
                   {loginInProgress ? (
