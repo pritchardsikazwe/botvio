@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useDerivSymbols } from "@/hooks/useDerivSymbols";
 import { toast } from "sonner";
-import { Activity, ArrowDownRight, ArrowUpRight, Gauge, Loader2, Sparkles, UserCircle2 } from "lucide-react";
+import { Activity, ArrowDownRight, ArrowUpRight, Gauge, Loader2, Sparkles, UserCircle2, Bot, UserRound, RefreshCw } from "lucide-react";
 
 interface DerivTradePanelProps {
   styleId: string;
@@ -27,6 +27,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const {
     authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
     placeTrade, getProposal, sellContract, onContractUpdate, accountInfo,
+    derivTokens, activeDerivToken, switchDerivToken, initializing,
   } = useDeriv();
 
   const style = getStyleById(styleId);
@@ -52,6 +53,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const [rsiValue, setRsiValue] = useState<number | null>(null);
   const [activeContract, setActiveContract] = useState<{ id: number; buy: number; payout: number; profit: number; validToSell: boolean; status: string } | null>(null);
   const [logs, setLogs] = useState<TradeLog[]>([]);
+  const [tradeMode, setTradeMode] = useState<"manual" | "auto">("manual");
+  const [autoBusy, setAutoBusy] = useState(false);
+  const autoCooldownUntil = useRef(0);
+  const autoZone = useRef<"neutral" | "oversold" | "overbought">("neutral");
   const ticks = useRef<number[]>([]);
   const logId = useRef(0);
 
@@ -60,7 +65,14 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const needsBarrier = contractType?.needsDigit || contractType?.buyButtons.some(b => ["CALL", "PUT", "ONETOUCH", "NOTOUCH", "HIGHER", "LOWER"].includes(b.contractType)) && ["higher-lower", "touch-no-touch"].includes(styleId);
   const symbolLabel = tradableInstruments.find(i => i.symbol === symbol)?.displayName ?? symbol;
   const capability = liveSymbols.bySymbol.get(symbol)?.capability;
-  const spec = capability?.contracts?.[buyButtons[0]?.contractType];
+  const contractSpecs = useMemo(
+    () => Object.fromEntries(buyButtons.map(b => [b.contractType, capability?.contracts?.[b.contractType] ?? null])),
+    [buyButtons, capability],
+  ) as Record<string, typeof capability extends null ? never : any>;
+  const primarySpec = contractSpecs[buyButtons[0]?.contractType];
+  const isRiseFall = styleId === "rise-fall-scalping" && contractId === "rise_fall";
+  const isAutoMode = tradeMode === "auto" && isRiseFall;
+  const connectedAccounts = derivTokens ?? [];
   const currency = balance?.currency ?? accountInfo?.currency ?? "USD";
 
   const addLog = useCallback((message: string, tone: TradeLog["tone"] = "info") => {
@@ -126,12 +138,28 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     return params;
   }, [stake, symbol, currency, duration, durationUnit, needsBarrier, barrier, isMultipliers, multiplier, isAccumulator, growthRate]);
 
+  const validateTrade = (ct: string) => {
+    const s = contractSpecs[ct];
+    const amount = Number(stake);
+    if (!Number.isFinite(amount) || amount <= 0) throw new Error("Enter a valid stake.");
+    if (!s) throw new Error("Deriv has not confirmed this contract for the selected symbol.");
+    if (s.minStake != null && amount < s.minStake) throw new Error(`Minimum stake for this contract is ${s.minStake} ${currency}.`);
+    if (s.maxStake != null && amount > s.maxStake) throw new Error(`Maximum stake for this contract is ${s.maxStake} ${currency}.`);
+    if (durationUnit && s.durationUnits.length > 0 && !s.durationUnits.includes(durationUnit)) {
+      throw new Error(`Deriv does not allow ${UNIT_LABELS[durationUnit] ?? durationUnit} for this contract.`);
+    }
+    const d = Number(duration);
+    if (!Number.isFinite(d) || d <= 0) throw new Error("Enter a valid duration.");
+    if (s.minDuration != null && d < s.minDuration) throw new Error(`Minimum duration is ${s.minDuration} ${UNIT_LABELS[durationUnit] ?? durationUnit}.`);
+    if (s.maxDuration != null && d > s.maxDuration) throw new Error(`Maximum duration is ${s.maxDuration} ${UNIT_LABELS[durationUnit] ?? durationUnit}.`);
+  };
+
   const handlePrice = async () => {
     if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
-    const amount = Number(stake);
-    if (!Number.isFinite(amount) || amount <= 0) { toast.error("Enter a valid stake"); return; }
-    if (spec?.minStake != null && amount < spec.minStake) { toast.error(`Minimum stake is ${spec.minStake}`); return; }
-    if (spec?.maxStake != null && amount > spec.maxStake) { toast.error(`Maximum stake is ${spec.maxStake}`); return; }
+    try { validateTrade(buyButtons[0]?.contractType ?? ""); } catch (e) {
+      const message = e instanceof Error ? e.message : "Trade parameters are not allowed by Deriv.";
+      toast.error(message); addLog(message, "error"); return;
+    }
     setPricing(true);
     try {
       const p = await getProposal(buildParams(buyButtons[0]?.contractType ?? ""));
@@ -145,8 +173,14 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
   const handleBuy = async (contract: string, label: string) => {
     if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
-    const amount = Number(stake);
-    if (!Number.isFinite(amount) || amount <= 0) { toast.error("Enter a valid stake"); return; }
+    try { validateTrade(contract); } catch (e) {
+      const message = e instanceof Error ? e.message : "Trade parameters are not allowed by Deriv.";
+      toast.error(message); addLog(message, "error"); return;
+    }
+    if (activeContract?.status === "open" && activeContract.validToSell) {
+      toast.error("Finish or sell the current contract before opening another.");
+      return;
+    }
     setBusy(true);
     addLog(`Buying ${label} on ${symbol} for ${currency} ${amount.toFixed(2)}...`);
     try {
@@ -160,6 +194,29 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       addLog(message, "error"); toast.error(message);
     } finally { setBusy(false); }
   };
+
+  useEffect(() => {
+    if (!isAutoMode || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length || !rsiValue || autoBusy || busy) return;
+    if (activeContract?.status === "open" && activeContract.validToSell) return;
+    const now = Date.now();
+    if (now < autoCooldownUntil.current) return;
+
+    // Trigger only when RSI enters an extreme zone, then wait for it to leave
+    // the reset band before another automated trade can occur.
+    if (rsiValue <= 30 && autoZone.current !== "oversold") {
+      autoZone.current = "oversold";
+      setAutoBusy(true);
+      autoCooldownUntil.current = now + 30_000;
+      handleBuy("CALL", "Auto Rise").catch(() => {}).finally(() => setAutoBusy(false));
+    } else if (rsiValue >= 70 && autoZone.current !== "overbought") {
+      autoZone.current = "overbought";
+      setAutoBusy(true);
+      autoCooldownUntil.current = now + 30_000;
+      handleBuy("PUT", "Auto Fall").catch(() => {}).finally(() => setAutoBusy(false));
+    } else if (rsiValue > 35 && rsiValue < 65) {
+      autoZone.current = "neutral";
+    }
+  }, [isAutoMode, isDerivConnected, liveSymbols.loading, tradableInstruments.length, rsiValue, autoBusy, busy, activeContract?.status, activeContract?.validToSell, handleBuy]);
 
   const handleSell = async () => {
     if (!activeContract?.id || !activeContract.validToSell) return;
@@ -179,9 +236,21 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
   return (
     <div className="space-y-4">
-      <Card className="glass-card"><CardContent className="p-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0"><UserCircle2 className="h-5 w-5 text-primary shrink-0" /><div><p className="text-[11px] text-muted-foreground">Signed-in account</p><p className="text-sm font-semibold truncate">{accountInfo?.loginid ?? "Not connected"}</p></div></div>
-        <div className="text-right">{accountInfo && <Badge variant="outline">{accountInfo.is_virtual ? "DEMO" : "REAL"}</Badge>}<p className="text-[11px] text-muted-foreground mt-1">{balance ? `${balance.currency} ${balance.balance.toFixed(2)}` : "—"}</p></div>
+      <Card className="glass-card"><CardContent className="p-3 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0"><UserCircle2 className="h-5 w-5 text-primary shrink-0" /><div><p className="text-[11px] text-muted-foreground">Deriv connection</p><p className="text-sm font-semibold truncate">{accountInfo?.loginid ?? "Not connected"}</p></div></div>
+          <div className="text-right">{accountInfo && <Badge variant="outline">{accountInfo.is_virtual ? "DEMO" : "REAL"}</Badge>}<p className="text-[11px] text-muted-foreground mt-1">{balance ? `${balance.currency} ${balance.balance.toFixed(2)}` : "—"}</p></div>
+        </div>
+        {isDerivConnected && connectedAccounts.length > 0 && <div className="flex items-center gap-2">
+          <Select value={activeDerivToken?.id ?? ""} onValueChange={(id) => switchDerivToken(id).catch(e => toast.error(e instanceof Error ? e.message : "Could not switch account"))} disabled={initializing}>
+            <SelectTrigger className="flex-1"><SelectValue placeholder="Switch Deriv account" /></SelectTrigger>
+            <SelectContent className="bg-popover z-50">
+              {connectedAccounts.map(a => <SelectItem key={a.id} value={a.id}>{a.is_virtual ? "DEMO" : "REAL"} · {a.loginid} · {a.currency}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="icon" title="Refresh Deriv connection" onClick={() => switchDerivToken(activeDerivToken?.id ?? "").catch(e => toast.error(e instanceof Error ? e.message : "Reconnect failed"))} disabled={!activeDerivToken || initializing}><RefreshCw className={cn("h-4 w-4", initializing && "animate-spin")} /></Button>
+        </div>}
+        {isDerivConnected && connectedAccounts.length === 0 && <p className="text-[11px] text-muted-foreground">Only the currently connected Deriv account is saved. Connect another Demo or Real account from the Deriv account manager to make it switchable here.</p>}
       </CardContent></Card>
 
       <Card className="glass-card"><CardContent className="p-4 flex items-center justify-between">
@@ -191,7 +260,14 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
       <Card className="glass-card"><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Botvio AI Signal</CardTitle></CardHeader><CardContent className="pt-0"><p className={cn("text-2xl font-black", directionTone)}>{signal?.signal ?? "WAITING"}</p><p className="text-xs text-muted-foreground">{signal ? `${signal.confidence}% confidence — ${signal.reasons?.[0] ?? "Live market read"}` : "Collecting live ticks..."}</p></CardContent></Card>
 
-      <Card className="glass-card"><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Gauge className="h-4 w-4 text-warning" /> RSI (14)</CardTitle></CardHeader><CardContent className="pt-0"><div className="flex items-end justify-between"><p className="text-2xl font-black">{rsiValue != null ? rsiValue.toFixed(1) : "—"}</p><Badge variant="outline">{rsiValue == null ? "Warming up" : rsiValue >= 70 ? "Overbought" : rsiValue <= 30 ? "Oversold" : "Neutral"}</Badge></div></CardContent></Card>
+      <Card className="glass-card"><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Gauge className="h-4 w-4 text-warning" /> RSI (14) — Rise/Fall signal</CardTitle></CardHeader><CardContent className="pt-0 space-y-3">
+        <div className="flex items-end justify-between"><div><p className="text-2xl font-black">{rsiValue != null ? rsiValue.toFixed(1) : "—"}</p><p className="text-[10px] text-muted-foreground">30 Oversold · 50 Neutral · 70 Overbought</p></div><Badge variant="outline" className={cn(rsiValue != null && rsiValue <= 30 ? "text-success border-success/30" : rsiValue != null && rsiValue >= 70 ? "text-destructive border-destructive/30" : "")}>{rsiValue == null ? "Warming up" : rsiValue >= 70 ? "OVERBOUGHT → Fall watch" : rsiValue <= 30 ? "OVERSOLD → Rise watch" : "Neutral"}</Badge></div>
+        {isRiseFall && <div className="grid grid-cols-2 gap-2">
+          <Button variant={tradeMode === "manual" ? "default" : "outline"} onClick={() => setTradeMode("manual")}><UserRound className="h-4 w-4 mr-1" /> Manual</Button>
+          <Button variant={tradeMode === "auto" ? "default" : "outline"} onClick={() => setTradeMode("auto")}><Bot className="h-4 w-4 mr-1" /> RSI Auto</Button>
+        </div>}
+        {isAutoMode && <p className="text-[11px] text-muted-foreground">Auto mode watches live RSI: ≤30 can trigger Rise, ≥70 can trigger Fall. One open contract at a time and a 30-second cooldown prevent repeated entries.</p>}
+      </CardContent></Card>
 
       <Card className="glass-card"><CardContent className="p-4 space-y-3">
         {contractTypes.length > 1 && <div className="space-y-1.5"><Label className="text-xs">Options type</Label><Select value={contractId} onValueChange={setContractId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50">{contractTypes.map(c => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}</SelectContent></Select></div>}
@@ -206,7 +282,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
         {needsBarrier && <div className="space-y-1.5"><Label className="text-xs">{contractType?.needsDigit ? "Barrier / last digit (0–9)" : "Barrier"}</Label><Input inputMode="decimal" value={barrier} onChange={e => { setBarrier(e.target.value); setQuote(null); }} placeholder={contractType?.needsDigit ? "0 to 9" : "e.g. +0.50"} /></div>}
         {isAccumulator && <div className="space-y-1.5"><Label className="text-xs">Growth rate (%)</Label><Input inputMode="decimal" value={growthRate} onChange={e => { setGrowthRate(e.target.value); setQuote(null); }} /></div>}
 
-        {spec && <div className="flex flex-wrap gap-2 text-[10px] text-muted-foreground"><Badge variant="outline">{spec.displayName}</Badge>{spec.minStake != null && <Badge variant="outline">Min {spec.minStake}</Badge>}{spec.maxStake != null && <Badge variant="outline">Max {spec.maxStake}</Badge>}{spec.durationUnits.map(u => <Badge key={u} variant="outline">{UNIT_LABELS[u] ?? u}</Badge>)}</div>}
+        {primarySpec && <div className="flex flex-wrap gap-2 text-[10px] text-muted-foreground"><Badge variant="outline">{primarySpec.displayName}</Badge>{primarySpec.minStake != null && <Badge variant="outline">Min {primarySpec.minStake}</Badge>}{primarySpec.maxStake != null && <Badge variant="outline">Max {primarySpec.maxStake}</Badge>}{primarySpec.durationUnits.map(u => <Badge key={u} variant="outline">{UNIT_LABELS[u] ?? u}</Badge>)}</div>}
 
         {quote && <div className="rounded-xl border p-3 space-y-1"><div className="flex justify-between text-sm"><span>Ask / stake</span><strong>{currency} {quote.ask.toFixed(2)}</strong></div><div className="flex justify-between text-sm"><span>Payout</span><strong>{currency} {quote.payout.toFixed(2)}</strong></div><p className="text-[10px] text-muted-foreground">{quote.longcode}</p></div>}
 
@@ -215,7 +291,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
         {liveSymbols.error && <p className="text-xs text-warning">Live Deriv capability validation is unavailable; markets remain blocked until verified.</p>}
         {!liveSymbols.loading && !tradableInstruments.length && <p className="text-xs text-destructive">No supported live Deriv markets are available for this contract type.</p>}
 
-        <div className="grid grid-cols-2 gap-3 pt-1">{buyButtons.map(btn => <Button key={btn.contractType} size="lg" disabled={busy || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length} onClick={() => handleBuy(btn.contractType, btn.label)} className={cn("h-14 text-base font-bold", btn.variant === "destructive" ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : btn.variant === "success" ? "bg-success hover:bg-success/90 text-success-foreground" : "")}><span className="flex flex-col items-center leading-tight"><span className="flex items-center">{btn.variant === "destructive" ? <ArrowDownRight className="h-5 w-5 mr-1" /> : <ArrowUpRight className="h-5 w-5 mr-1" />}{btn.label}</span><span className="text-[10px] opacity-80">{symbolLabel}</span></span></Button>)}</div>
+        <div className="grid grid-cols-2 gap-3 pt-1">{buyButtons.map(btn => <Button key={btn.contractType} size="lg" disabled={busy || autoBusy || isAutoMode || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length || !contractSpecs[btn.contractType]} onClick={() => handleBuy(btn.contractType, btn.label)} className={cn("h-14 text-base font-bold", btn.variant === "destructive" ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : btn.variant === "success" ? "bg-success hover:bg-success/90 text-success-foreground" : "")}><span className="flex flex-col items-center leading-tight"><span className="flex items-center">{btn.variant === "destructive" ? <ArrowDownRight className="h-5 w-5 mr-1" /> : <ArrowUpRight className="h-5 w-5 mr-1" />}{btn.label}</span><span className="text-[10px] opacity-80">{symbolLabel}</span></span></Button>)}</div>
 
         {activeContract && <div className="rounded-xl border p-3 space-y-2"><div className="flex justify-between text-sm"><span>Open #{activeContract.id}</span><Badge variant="outline">{activeContract.status}</Badge></div><div className="flex justify-between text-sm"><span>Live P/L</span><strong className={activeContract.profit >= 0 ? "text-success" : "text-destructive"}>{activeContract.profit.toFixed(2)}</strong></div><Button variant="destructive" className="w-full" disabled={busy || !activeContract.validToSell} onClick={handleSell}>{activeContract.validToSell ? "Sell Early at Market" : "Early Sell Unavailable"}</Button></div>}
 
