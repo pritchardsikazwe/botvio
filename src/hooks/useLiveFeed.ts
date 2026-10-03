@@ -87,7 +87,7 @@ export function useLiveFeed() {
 
   useEffect(() => {
     const channel = supabase
-      .channel("live-feed-realtime")
+      .channel(`live-feed-realtime-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "live_streams" },

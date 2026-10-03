@@ -107,7 +107,7 @@ export const useRealtimeNotifications = () => {
 
     // Subscribe to new notifications
     const channel = supabase
-      .channel(`notifications:${user.id}`)
+      .channel(`notifications:${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {
@@ -127,7 +127,7 @@ export const useRealtimeNotifications = () => {
 
     // Subscribe to bot trades for real-time updates
     const botTradesChannel = supabase
-      .channel(`bot_trades:${user.id}`)
+      .channel(`bot_trades:${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {
@@ -154,7 +154,7 @@ export const useRealtimeNotifications = () => {
 
     // Subscribe to copied trades
     const copiedTradesChannel = supabase
-      .channel(`copied_trades:${user.id}`)
+      .channel(`copied_trades:${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {
@@ -182,7 +182,7 @@ export const useRealtimeNotifications = () => {
 
     // Subscribe to bot instance status changes
     const botInstancesChannel = supabase
-      .channel(`bot_instances:${user.id}`)
+      .channel(`bot_instances:${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {

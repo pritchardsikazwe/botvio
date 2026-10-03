@@ -664,7 +664,7 @@ export function MarketDashboard({ maxCards, maxBinanceCards, homeMode }: { maxCa
   // Realtime subscriptions — invalidate queries when new data arrives
   useEffect(() => {
     const channel = supabase
-      .channel("market-dashboard-realtime")
+      .channel(`market-dashboard-realtime-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "market_quotes" }, () => {
         queryClient.invalidateQueries({ queryKey: ["market-quotes"] });
       })

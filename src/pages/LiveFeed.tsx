@@ -47,7 +47,7 @@ function LiveStreamViewer({
   // Realtime floating reactions
   useEffect(() => {
     const channel = supabase
-      .channel(`viewer-reactions-${stream.id}`)
+      .channel(`viewer-reactions-${stream.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "live_reactions", filter: `stream_id=eq.${stream.id}` },

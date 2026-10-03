@@ -144,7 +144,7 @@ export const useTradeUpdates = () => {
     if (!user) return;
     
     const channel = supabase
-      .channel('trade-updates')
+      .channel(`trade-updates-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
