@@ -11,6 +11,7 @@ const CONFIG: AssetTradingHubConfig = {
   category: "crypto",
   symbolPatterns: ["BTC", "BITCOIN"],
   alwaysOpen: true,
+  includeWeltradeSignals: true,
   tagline: "Real-time charts with built-in Botvio AI scalping engine, auto-posted M1/M5 signals, expert tips & community — your full Bitcoin trading desk.",
   quickStats: [
     { label: "Top Levels", value: "Round Numbers ($60k/$70k)" },
