@@ -569,6 +569,12 @@ export class DerivWebSocketService {
    * Returns balance info from a balance request after connecting.
    */
   async connectWithOtpUrl(wsUrl: string, otpUrlGetter?: () => Promise<string>): Promise<DerivBalance> {
+    // A Demo/Real switch must replace the authenticated socket. Reusing the
+    // previous socket keeps the old account session alive and makes the UI
+    // appear switched while trades/balance/history still belong to the old account.
+    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+      this.close();
+    }
     this.otpMode = true;
     this.currentUrl = wsUrl;
     if (otpUrlGetter) {
