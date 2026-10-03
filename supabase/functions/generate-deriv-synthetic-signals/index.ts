@@ -93,6 +93,12 @@ function strategySignal(c:Candle[],strategy:{family:StrategyFamily;label:string;
  return{direction:d,score:Math.min(96,score),entry,sl,tp};
 }
 
+function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
+ const a=atr(c)??0;
+ const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
+ const entry=c.at(-1)!.close;
+ return {sl:direction==="BUY"?entry-a*m.sl:entry+a*m.sl,tp:direction==="BUY"?entry+a*m.tp:entry-a*m.tp};
+}
 function request(ws:WebSocket,payload:Record<string,unknown>,timeout=15000){return new Promise<any>((resolve,reject)=>{const req_id=Math.floor(Math.random()*1e9),timer=setTimeout(()=>{ws.removeEventListener("message",h);reject(new Error("Deriv timeout"))},timeout);const h=(e:MessageEvent)=>{try{const x=JSON.parse(String(e.data));if(x.req_id!==req_id)return;clearTimeout(timer);ws.removeEventListener("message",h);x.error?reject(new Error(x.error.message||"Deriv error")):resolve(x)}catch{}};ws.addEventListener("message",h);ws.send(JSON.stringify({...payload,req_id}))})}
 async function getContracts(ws:WebSocket,symbol:string){
  const x=await request(ws,{contracts_for:symbol});
@@ -127,6 +133,8 @@ Deno.serve(async(req)=>{
    for(const p of PLAN){
     const setup=sigs.get(p.tf);if(!setup)continue;const conf=p.confirm.map(x=>sigs.get(x)).filter(Boolean) as Sig[];
     if(conf.some(x=>x.direction!==setup.direction)||conf.filter(x=>x.direction===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost)continue;
+    const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
+    setup.sl=levels.sl; setup.tp=levels.tp;
     const type=p.type,strategyName=`${strategy.family} · ${strategy.label} · ${type} ${p.tf}`,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",s.name).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-(p.tf==="1m"?5:p.tf==="15m"?30:120)*60000).toISOString()).limit(1);
     if(recent?.length)continue;
