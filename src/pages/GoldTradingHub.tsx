@@ -104,8 +104,8 @@ const GoldTradingHub = () => {
                     Botvio AI returns trend, structure, support/resistance, entry zone and risk guidance.
                   </p>
                 </div>
-                <Link to="/chart/XAUUSD">
-                  <Button className="text-xs font-bold">Open AI Chart Analysis</Button>
+                <Link to="/gold">
+                  <Button className="text-xs font-bold">View Gold Trading Hub</Button>
                 </Link>
               </CardContent>
             </Card>
