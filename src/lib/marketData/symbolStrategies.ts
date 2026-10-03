@@ -28,7 +28,7 @@ const PROFILES: Record<SymbolStrategyId, SymbolStrategyProfile> = {
   GOLD_STRUCTURE: {
     id: "GOLD_STRUCTURE",
     label: "Gold Structure + Liquidity",
-    timeframes: ["1m", "5m", "15m", "30m", "1H", "4H", "1D"],
+    timeframes: ["1m", "5m", "15m", "30m", "1H", "4H", "1D", "3D"],
     minConfidence: 76,
     atrStop: 1.35,
     atrTarget: 2.45,
@@ -38,7 +38,7 @@ const PROFILES: Record<SymbolStrategyId, SymbolStrategyProfile> = {
   BTC_MOMENTUM: {
     id: "BTC_MOMENTUM",
     label: "Bitcoin Momentum Breakout",
-    timeframes: ["5m", "15m", "30m", "1H"],
+    timeframes: ["5m", "15m", "30m", "1H", "3D"],
     minConfidence: 77,
     atrStop: 1.55,
     atrTarget: 2.8,
