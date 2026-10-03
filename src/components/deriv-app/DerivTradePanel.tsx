@@ -184,7 +184,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       return;
     }
     setBusy(true);
-    addLog(`Buying ${label} on ${symbol} for ${currency} ${amount.toFixed(2)}...`);
+    addLog(`Buying ${label} on ${symbol} for ${currency} ${Number(stake).toFixed(2)}...`);
     try {
       const result = await placeTrade(buildParams(contract));
       setQuote(null);
