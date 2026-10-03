@@ -60,7 +60,7 @@ export const useDerivSymbols = (
   }, [assets]);
 
   const tradableAssets = useMemo(
-    () => assets.filter((a) => a.status !== "unavailable"),
+    () => assets.filter((a) => a.status === "available"),
     [assets],
   );
 
