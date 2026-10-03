@@ -101,12 +101,27 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
   // Account switching is a real session switch: select the saved token, then
   // re-authorize the WebSocket so Demo/Real changes immediately affect trading.
   const switchDerivToken = useCallback(async (tokenId: string) => {
+    const previous = activeDerivTokenRef.current;
     const selected = await switchToken(tokenId);
     setInitializing(true);
     try {
       await derivAPI.connect(selected.token_encrypted);
       localStorage.setItem("deriv_pat_token", selected.token_encrypted);
       localStorage.removeItem("deriv_oauth_token");
+    } catch (error) {
+      // Do not leave the UI/database pointing at a broken account if the new
+      // Demo/Real session cannot be authenticated.
+      if (previous && previous.id !== selected.id) {
+        try {
+          const restored = await switchToken(previous.id);
+          await derivAPI.connect(restored.token_encrypted);
+          localStorage.setItem("deriv_pat_token", restored.token_encrypted);
+          localStorage.removeItem("deriv_oauth_token");
+        } catch {
+          // The original session is also unavailable; surface the original error.
+        }
+      }
+      throw error;
     } finally {
       setInitializing(false);
     }
