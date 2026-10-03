@@ -1,106 +1,70 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+function normalizeSymbol(sym: Record<string, unknown>) {
+  const symbol = String(sym.underlying_symbol ?? sym.symbol ?? "");
+  return {
+    symbol,
+    display_name: String(sym.underlying_symbol_name ?? sym.display_name ?? symbol),
+    market: sym.market ?? null,
+    submarket: sym.submarket ?? null,
+    pip: sym.pip_size ?? sym.pip ?? null,
+    is_trading_suspended: sym.is_trading_suspended ?? 0,
+    exchange_is_open: sym.exchange_is_open ?? 1,
+  };
+}
 
-// Cache for active symbols (refresh every 5 minutes)
-let cachedSymbols: any = null;
-let cacheTime: number = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    // Return cached if valid
-    if (cachedSymbols && (Date.now() - cacheTime) < CACHE_DURATION) {
-      return new Response(JSON.stringify({
-        symbols: cachedSymbols,
-        cached: true,
-        cache_age_ms: Date.now() - cacheTime
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Connect to Deriv WS
-    const ws = new WebSocket(`wss://api.derivws.com/trading/v1/options/ws/public`);
-    
-    const result = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        ws.close();
-        reject(new Error('Request timeout'));
-      }, 15000);
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({
-          active_symbols: 'brief',
-          product_type: 'basic'
-        }));
-      };
-
-      ws.onmessage = (event) => {
-        clearTimeout(timeout);
-        const data = JSON.parse(event.data);
-        ws.close();
-        
-        if (data.error) {
-          reject(new Error(data.error.message));
-        } else {
-          resolve(data.active_symbols);
-        }
-      };
-
-      ws.onerror = (err) => {
-        clearTimeout(timeout);
-        reject(err);
-      };
-    });
-
-    // Group by market
-    const symbols = result as any[];
-    const grouped: Record<string, any[]> = {};
-    
-    for (const sym of symbols) {
-      const market = sym.market_display_name || sym.market;
-      if (!grouped[market]) {
-        grouped[market] = [];
+async function requestDeriv(payload: Record<string, unknown>) {
+  const ws = new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
+  return await new Promise<any>((resolve, reject) => {
+    let settled = false;
+    const finish = (fn: (v: any) => void, value: any) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      try { ws.close(); } catch {}
+      fn(value);
+    };
+    const timer = setTimeout(() => finish(reject, new Error("Deriv market-data request timed out")), 15000);
+    ws.onopen = () => ws.send(JSON.stringify(payload));
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(String(event.data));
+        if (data?.error) finish(reject, new Error(data.error.message || "Deriv request failed"));
+        else finish(resolve, data);
+      } catch (e) {
+        finish(reject, e instanceof Error ? e : new Error("Invalid Deriv response"));
       }
-      grouped[market].push({
-        symbol: sym.symbol,
-        display_name: sym.display_name,
-        market: sym.market,
-        submarket: sym.submarket,
-        pip: sym.pip,
-        is_trading_suspended: sym.is_trading_suspended,
-        exchange_is_open: sym.exchange_is_open,
-      });
+    };
+    ws.onerror = () => finish(reject, new Error("Deriv public WebSocket connection failed"));
+  });
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  try {
+    const data = await requestDeriv({ active_symbols: "brief" });
+    const rows = Array.isArray(data?.active_symbols) ? data.active_symbols : [];
+    const grouped: Record<string, any[]> = {};
+    for (const raw of rows) {
+      const row = normalizeSymbol(raw);
+      if (!row.symbol) continue;
+      const key = String(row.market ?? "Other");
+      (grouped[key] ??= []).push(row);
     }
-
-    // Update cache
-    cachedSymbols = grouped;
-    cacheTime = Date.now();
-
-    return new Response(JSON.stringify({
-      symbols: grouped,
-      cached: false,
-      total: symbols.length
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    return new Response(JSON.stringify({ symbols: grouped, cached: false, total: rows.length, api_version: "deriv-current" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
-  } catch (error: any) {
-    console.error('Active symbols error:', error);
-    return new Response(JSON.stringify({
-      error: error.message
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Active symbols lookup failed";
+    console.error("[deriv-active-symbols]", message);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
