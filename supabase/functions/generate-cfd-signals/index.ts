@@ -33,6 +33,26 @@ const PLANS=[
 function ema(a:number[],p:number){if(a.length<p)return null;let e=a.slice(0,p).reduce((x,y)=>x+y,0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e=(a[i]-e)*k+e;return e}
 function atr(c:Candle[],p=14){if(c.length<=p)return null;const tr=c.slice(1).map((x,i)=>Math.max(x.high-x.low,Math.abs(x.high-c[i].close),Math.abs(x.low-c[i].close)));return tr.slice(-p).reduce((a,b)=>a+b,0)/Math.min(p,tr.length)}
 function rsi(c:Candle[],p=14){if(c.length<=p)return null;let g=0,l=0;for(let i=c.length-p;i<c.length;i++){const d=c[i].close-c[i-1].close;if(d>0)g+=d;else l-=d}if(l===0)return 100;return 100-100/(1+(g/p)/(l/p))}
+function directionalBias(c:Candle[]):"BUY"|"SELL"|null{
+ if(c.length<60)return null;
+ const closes=c.map(x=>x.close),last=c.at(-1)!;
+ const e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),rs=rsi(c);
+ if(e9==null||e21==null||e50==null||rs==null)return null;
+ if(e9>e21&&last.close>e50&&rs>=45&&rs<=75)return "BUY";
+ if(e9<e21&&last.close<e50&&rs>=25&&rs<=55)return "SELL";
+ return null;
+}
+function candleQuality(c:Candle[]):number{
+ const last=c.at(-1)!;const a=atr(c)??0;const range=last.high-last.low;
+ if(!a||range<=0)return 0;
+ const body=Math.abs(last.close-last.open);
+ const bodyRatio=body/range;
+ if(range>a*2.0)return -6;
+ if(bodyRatio>=0.55&&range>=a*0.6)return 4;
+ if(bodyRatio>=0.35)return 2;
+ return 0;
+}
+
 function signal(c:Candle[],profile:typeof SYMBOLS[number]):Sig|null{
  if(c.length<60)return null;
  const closes=c.map(x=>x.close),last=c.at(-1)!;const e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),a=atr(c),rs=rsi(c);
@@ -47,7 +67,10 @@ function signal(c:Candle[],profile:typeof SYMBOLS[number]):Sig|null{
  if((down||breakoutDown)&&rs<52&&rs>22&&!stretched)direction="SELL";
  if(!direction)return null;
  const trend=up||down?10:0,breakout=breakoutUp||breakoutDown?8:0,rsScore=(direction==="BUY"&&rs>=52&&rs<=68)||(direction==="SELL"&&rs>=32&&rs<=48)?7:3;
- const score=Math.min(96,65+trend+breakout+rsScore+(stretched?0:5));
+ const bias=directionalBias(c);
+ const alignment=bias===direction?6:bias? -5:0;
+ const quality=candleQuality(c);
+ const score=Math.min(96,65+trend+breakout+rsScore+(stretched?0:5)+alignment+quality);
  if(score<profile.min)return null;
  return{direction,score,entry:last.close,sl:direction==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:direction==="BUY"?last.close+a*profile.target:last.close-a*profile.target};
 }
@@ -129,9 +152,11 @@ Deno.serve(async(req)=>{
     const setup=sigs.get(p.tf);if(!setup||setup.score<profile.min+p.minBoost)continue;
     const confirmations=p.confirm.map(tf=>sigs.get(tf)).filter(Boolean) as Sig[];
     const same=confirmations.filter(x=>x.direction===setup.direction).length;
-    const conflict=confirmations.some(x=>x.direction!==setup.direction);
+    const confirmationBias=p.confirm.map(tf=>directionalBias(frames.get(tf)??[])).filter(Boolean) as ("BUY"|"SELL")[];
+    const alignedBias=confirmationBias.filter(x=>x===setup.direction).length;
+    const conflict=confirmations.some(x=>x.direction!==setup.direction)||confirmationBias.some(x=>x!==setup.direction);
     const required=p.tf==="15m"||p.tf==="1H"||p.tf==="3D"?1:(p.confirm.length?1:0);
-    if(conflict||same<required)continue;
+    if(conflict||same+alignedBias<required)continue;
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const strategyName=`${profile.strategy} · ${p.type} ${p.tf}`;
@@ -142,7 +167,7 @@ Deno.serve(async(req)=>{
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
       timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(setup.score),broker:["deriv"],
       category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
-      expires_at:expiresAt,reason:`${profile.name} ${p.type} entry: ${same}/${confirmations.length} higher-timeframe confirmations`,
+      expires_at:expiresAt,reason:`${profile.name} ${p.type} entry: ${same + alignedBias}/${Math.max(confirmations.length, confirmationBias.length)} higher-timeframe confirmations/alignment`,
       explanation_json:{engine:"Botvio CFD MTF Engine v1",signal_type:p.type,timeframe:p.tf,expiry_seconds:p.expiry,expires_at:expiresAt,
         source:"Deriv active_symbols + ticks_history",higher_timeframe_confirmation:same,confirmation_count:confirmations.length}
     }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
