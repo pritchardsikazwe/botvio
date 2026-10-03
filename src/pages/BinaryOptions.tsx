@@ -161,7 +161,7 @@ const BinaryOptions = () => {
   // Realtime subscription for live signal updates
   useEffect(() => {
     const channel = supabase
-      .channel("binary-signals-live")
+      .channel(`binary-signals-live-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "trading_signals" }, () => {
         queryClient.invalidateQueries({ queryKey: ["manual-signals"] });
       })

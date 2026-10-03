@@ -111,7 +111,7 @@ export function createWeltradeBridgeAdapter(config: AdapterConfig): MarketDataAd
 
   const subscribe = () => {
     channel = supabase
-      .channel(`weltrade-feed-${config.feedSymbol}`)
+      .channel(`weltrade-feed-${config.feedSymbol}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "bridge_ticks", filter: `symbol=eq.${config.feedSymbol}` },

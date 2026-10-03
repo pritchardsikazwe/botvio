@@ -47,7 +47,7 @@ export function CreatorStreamView({ streamId, streamMode, title, accessToken, ws
   // Subscribe to reactions count via realtime
   useEffect(() => {
     const channel = supabase
-      .channel(`reactions-${streamId}`)
+      .channel(`reactions-${streamId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "live_reactions", filter: `stream_id=eq.${streamId}` },

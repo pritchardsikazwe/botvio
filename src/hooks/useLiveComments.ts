@@ -46,7 +46,7 @@ export function useLiveComments(streamId: string | null) {
     if (!streamId) return;
 
     const channel = supabase
-      .channel(`comments-${streamId}`)
+      .channel(`comments-${streamId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {

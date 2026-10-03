@@ -53,7 +53,7 @@ export function useBridgeTicks(symbol: string | null, historyLimit = 300) {
 
     // 2) Realtime subscription
     const channel = supabase
-      .channel(`bridge-ticks-${symbol}`)
+      .channel(`bridge-ticks-${symbol}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {

@@ -71,7 +71,7 @@ export function useP2PRealtimeSync() {
   useEffect(() => {
     // Primary: realtime subscription
     const channel = supabase
-      .channel("p2p-live")
+      .channel(`p2p-live-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "p2p_offers" }, () => {
         queryClient.invalidateQueries({ queryKey: ["p2p_offers"] });
         queryClient.invalidateQueries({ queryKey: ["my_p2p_offers"] });
