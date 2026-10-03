@@ -102,65 +102,28 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
   return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
 }
 
-function timeframeToMs(timeframe: string): number {
-  const map: Record<string, number> = {
-    M1: 60_000, M5: 300_000, M15: 900_000, M30: 1_800_000,
-    H1: 3_600_000, H4: 14_400_000, D1: 86_400_000,
-  };
-  return map[timeframe] || 300_000;
-}
-
-// Weltrade SyntX chart signals stay live until TP/SL resolves them (max 60 min).
-const SYNTX_LIVE_MS = 60 * 60 * 1000;
+// Home live-feed retention is intentionally fixed at 15 minutes for every signal.
+// This only controls visibility on Home; signals remain stored in history and
+// any MT5/copy-trading execution is unaffected.
+const HOME_SIGNAL_LIVE_MS = 15 * 60 * 1000;
 function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
 
-function isSignalExpired(signal: { created_at: string; expires_at?: string | null; timeframe?: string; category?: string }): boolean {
-  const now = new Date();
-  if (isSyntx(signal) && !signal.expires_at) return new Date(signal.created_at).getTime() + SYNTX_LIVE_MS < now.getTime();
-  if (signal.expires_at) return new Date(signal.expires_at) < now;
-  const createdAt = new Date(signal.created_at);
-  return new Date(createdAt.getTime() + timeframeToMs(signal.timeframe || "M5")) < now;
+function homeExpiresAt(signal: { created_at: string }): Date {
+  return new Date(new Date(signal.created_at).getTime() + HOME_SIGNAL_LIVE_MS);
 }
 
-function getTimeRemaining(signal: { created_at: string; expires_at?: string | null; timeframe?: string; outcome?: string | null }): string {
-  const now = new Date();
-  if (signal.outcome === "win") {
-    const updatedAt = (signal as any).outcome_updated_at;
-    if (updatedAt) {
-      const showcaseEnd = new Date(new Date(updatedAt).getTime() + 24 * 60 * 60 * 1000);
-      const diffMs = showcaseEnd.getTime() - now.getTime();
-      if (diffMs <= 0) return "Expired";
-      const hours = Math.floor(diffMs / 3_600_000);
-      const minutes = Math.floor((diffMs % 3_600_000) / 60_000);
-      return `${hours}h ${minutes}m`;
-    }
-  }
-  let expiresAt: Date;
-  if (signal.expires_at) {
-    expiresAt = new Date(signal.expires_at);
-  } else if (isSyntx(signal)) {
-    expiresAt = new Date(new Date(signal.created_at).getTime() + SYNTX_LIVE_MS);
-  } else {
-    const createdAt = new Date(signal.created_at);
-    expiresAt = new Date(createdAt.getTime() + timeframeToMs(signal.timeframe || "M5"));
-  }
-  const diffMs = expiresAt.getTime() - now.getTime();
+function isSignalExpired(signal: { created_at: string }): boolean {
+  return homeExpiresAt(signal).getTime() <= Date.now();
+}
+
+function getTimeRemaining(signal: { created_at: string }): string {
+  const diffMs = homeExpiresAt(signal).getTime() - Date.now();
   if (diffMs <= 0) return "Expired";
-  const hours = Math.floor(diffMs / 3_600_000);
-  const minutes = Math.floor((diffMs % 3_600_000) / 60_000);
+  const minutes = Math.floor(diffMs / 60_000);
   const seconds = Math.floor((diffMs % 60_000) / 1000);
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
+  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
-function isWinShowcaseActive(signal: ManualSignal): boolean {
-  if (signal.outcome !== "win") return false;
-  const updatedAt = signal.outcome_updated_at;
-  if (!updatedAt) return false;
-  const showcaseEnd = new Date(new Date(updatedAt).getTime() + 24 * 60 * 60 * 1000);
-  return showcaseEnd > new Date();
-}
 
 export const HomeSignalsWidget = () => {
   const [brokerFilter, setBrokerFilter] = useState("all");
@@ -172,29 +135,17 @@ export const HomeSignalsWidget = () => {
     queryKey: ["home-signals-with-wins"],
     queryFn: async () => {
       const now = new Date();
-      const fourDaysAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000);
+      const fifteenMinutesAgo = new Date(now.getTime() - HOME_SIGNAL_LIVE_MS);
       const { data, error } = await supabase
         .from("trading_signals")
         .select("*")
-        .or(`status.eq.ACTIVE,outcome.eq.win`)
-        .gte("created_at", fourDaysAgo.toISOString())
+        .gte("created_at", fifteenMinutesAgo.toISOString())
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
-      // Weltrade SyntX signals are fetched separately so the high-volume
-      // automated feeds never crowd them out of the 100-row window.
-      const { data: wt } = await supabase
-        .from("trading_signals")
-        .select("*")
-        .eq("category", "syntx")
-        .eq("status", "ACTIVE")
-        .gte("created_at", new Date(now.getTime() - SYNTX_LIVE_MS).toISOString())
-        .order("created_at", { ascending: false })
-        .limit(10);
-      const ids = new Set((data || []).map((d: any) => d.id));
-      return [...(wt || []).filter((d: any) => !ids.has(d.id)), ...(data || [])] as ManualSignal[];
+      return (data || []) as ManualSignal[];
     },
-    refetchInterval: 30000,
+    refetchInterval: 15000,
   });
 
   const headerSection = (
@@ -259,12 +210,8 @@ export const HomeSignalsWidget = () => {
     );
   }
 
-  // Filter: active non-expired + won showcase
-  let displaySignals = (signals || []).filter(s => {
-    if (s.outcome === "win" && isWinShowcaseActive(s)) return true;
-    if (s.status === "ACTIVE" && !isSignalExpired(s)) return true;
-    return false;
-  });
+  // Home is a live 15-minute feed. Do not delete or alter the underlying signal.
+  let displaySignals = (signals || []).filter(s => !isSignalExpired(s));
 
   // Apply broker filter
   if (brokerFilter !== "all") {
@@ -275,17 +222,14 @@ export const HomeSignalsWidget = () => {
     });
   }
 
-  // The ALL view deliberately rotates through the four engine horizons so
-  // frequent M1 scalps do not crowd out 15M / 1H / 1D setups.
+  // The ALL view deliberately rotates through the four engine horizons while
+  // keeping every displayed signal inside the 15-minute Home retention window.
   if (timeframeFilter !== "all") {
     displaySignals = displaySignals
       .filter(s => normTf(s.timeframe) === timeframeFilter)
       .slice(0, 6);
   } else {
-    // Reserve up to 2 slots for live Weltrade SyntX signals.
-    const wt = displaySignals.filter(isSyntx).slice(0, 2);
-    const rest = selectHomeSignalsByHorizon(displaySignals.filter(s => !isSyntx(s)), 6 - wt.length);
-    displaySignals = [...wt, ...rest];
+    displaySignals = selectHomeSignalsByHorizon(displaySignals, 6);
   }
 
   if (displaySignals.length === 0) {
@@ -300,7 +244,7 @@ export const HomeSignalsWidget = () => {
             <p className="text-sm text-muted-foreground">
               {brokerFilter !== "all"
                 ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Try "All" or check back soon.`
-                : "Signals expire based on their timeframe. Check back soon for new opportunities."}
+                : "Signals remain on Home for 15 minutes. Check back soon for new signals."}
             </p>
           </CardContent>
         </Card>
@@ -419,21 +363,10 @@ export const HomeSignalsWidget = () => {
 
                 <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-border">
                   <div className="flex items-center gap-1 text-xs">
-                    {isWin ? (
-                      <>
-                        <Trophy className="h-3 w-3 text-success" />
-                        <span className="text-success font-medium">
-                          Showcase: {getTimeRemaining(signal)}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Clock className="h-3 w-3 text-warning" />
-                        <span className="text-warning font-medium">
-                          Expires: {getTimeRemaining(signal)}
-                        </span>
-                      </>
-                    )}
+                    <Clock className="h-3 w-3 text-warning" />
+                    <span className="text-warning font-medium">
+                      Home expires: {getTimeRemaining(signal)}
+                    </span>
                   </div>
                   {signal.confidence && (
                     <Badge variant="outline" className="text-xs">
