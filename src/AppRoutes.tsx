@@ -189,7 +189,7 @@ const ChartHubResolver = () => {
     USDCNY: <UsdCnyHub />,
   };
 
-  const stockHubs: Record<string, React.ReactNode> = {
+  const stockHubs: Record<string, ReactNode> = {
     NVDA: <NvidiaHub />,
     TSLA: <TeslaHub />,
     AMD: <AmdHub />,
