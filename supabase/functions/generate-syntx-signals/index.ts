@@ -60,7 +60,7 @@ function candleQuality(c:Candle[]):number{
  return 0;
 }
 
-function frameSignal(c:Candle[],bias:string,profile:{min:number;stop:number;target:number;label:string}){if(c.length<60)return null;const closes=c.map(x=>x.close),e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),a=atr(c),rs=rsi(c),last=c.at(-1)!;if(e9==null||e21==null||a==null||a<=0||rs==null)return null;const up=e9>e21&&(e50==null||last.close>e50),down=e9<e21&&(e50==null||last.close<e50),expanded=last.high-last.low>a*1.8;let d:null|"BUY"|"SELL"=null;if(bias==="BUY"&&up&&!expanded)d="BUY";if(bias==="SELL"&&down&&!expanded)d="SELL";if(bias==="BOTH"){const hi=Math.max(...c.slice(-20,-1).map(x=>x.high)),lo=Math.min(...c.slice(-20,-1).map(x=>x.low));if(rs<32&&last.close<lo+a*.5)d="BUY";else if(rs>68&&last.close>hi-a*.5)d="SELL";else if(up&&!expanded)d="BUY";else if(down&&!expanded)d="SELL"}if(!d)return null;const score=Math.min(96,60+(up||down?8:0)+(d==="BUY"&&rs>50&&rs<75?6:d==="SELL"&&rs<50&&rs>25?6:0)+(expanded?5:0));if(score<profile.min)return null;return{direction:d,score,entry:last.close,sl:d==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:d==="BUY"?last.close+a*profile.target:last.close-a*profile.target}}
+function frameSignal(c:Candle[],bias:string,profile:{min:number;stop:number;target:number;label:string}){if(c.length<60)return null;const closes=c.map(x=>x.close),e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),a=atr(c),rs=rsi(c),last=c.at(-1)!;if(e9==null||e21==null||a==null||a<=0||rs==null)return null;const up=e9>e21&&(e50==null||last.close>e50),down=e9<e21&&(e50==null||last.close<e50),expanded=last.high-last.low>a*1.8;let d:null|"BUY"|"SELL"=null;if(bias==="BUY"&&up&&!expanded)d="BUY";if(bias==="SELL"&&down&&!expanded)d="SELL";if(bias==="BOTH"){const hi=Math.max(...c.slice(-20,-1).map(x=>x.high)),lo=Math.min(...c.slice(-20,-1).map(x=>x.low));if(rs<32&&last.close<lo+a*.5)d="BUY";else if(rs>68&&last.close>hi-a*.5)d="SELL";else if(up&&!expanded)d="BUY";else if(down&&!expanded)d="SELL"}if(!d)return null;const bias=directionalBias(c);const alignment=bias===d?6:bias?-5:0;const score=Math.min(96,60+(up||down?8:0)+(d==="BUY"&&rs>50&&rs<75?6:d==="SELL"&&rs<50&&rs>25?6:0)+(expanded?5:0)+alignment+candleQuality(c));if(score<profile.min)return null;return{direction:d,score,entry:last.close,sl:d==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:d==="BUY"?last.close+a*profile.target:last.close-a*profile.target}}
 function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
  const a=atr(c)??0;
  const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
@@ -92,11 +92,17 @@ const setups=[
 
 for(const plan of setups){
   if(!plan.setup) continue;
-  const confirmations=plan.confirm.filter(Boolean);
-  const same=confirmations.filter((x:any)=>x.direction===plan.setup.direction).length;
-  const conflict=confirmations.some((x:any)=>x.direction!==plan.setup.direction);
+  const confirmationDirections=plan.confirm.map((sig:any,index:number)=>{
+    if(sig?.direction) return sig.direction;
+    const names=plan.tf==="1m"?["M15","H1"]:plan.tf==="15m"?["H1","D1"]:plan.tf==="1H"?["D1"]:plan.tf==="3D"?["D1"]:[];
+    const name=names[index];
+    const frame=frames.find((x:any)=>x.n===name)?.data??[];
+    return directionalBias(frame);
+  }).filter(Boolean) as ("BUY"|"SELL")[];
+  const same=confirmationDirections.filter(x=>x===plan.setup.direction).length;
+  const conflict=confirmationDirections.some(x=>x!==plan.setup.direction);
   if(conflict) continue;
-  const required=plan.tf==="1m"?1:plan.tf==="15m"?1:plan.tf==="1H"?1:0;
+  const required=plan.tf==="1m"?1:plan.tf==="15m"?1:plan.tf==="1H"?1:plan.tf==="3D"?1:0;
   if(same<required || plan.setup.score<plan.min) continue;
   const entry=plan.setup.entry;
   const levels=moderateLevels(frames.find((x:any)=>x.n===plan.tf)?.data??frames.find((x:any)=>x.n===plan.tf)?.candles??[],plan.setup.direction,plan.tf);
@@ -109,11 +115,11 @@ for(const plan of setups){
     symbol,direction:plan.setup.direction,entry_price:entry,stop_loss:sl,take_profit:tp,timeframe:plan.tf,
     strategy_name:strategyLabel,signal_type:plan.type,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
     status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,best_expiry:plan.expiry,backup_expiry:plan.backup,expires_at:expiresAt,
-    reason:`${f.family} ${plan.label}: entry confirmed with ${same}/${confirmations.length} higher-timeframe confirmations`,
+    reason:`${f.family} ${plan.label}: entry confirmed with ${same}/${confirmationDirections.length} higher-timeframe confirmations`,
     explanation_json:{
       engine:"SyntX MTF Engine v5",strategy_id:profile.label,source:"Weltrade SyntX API Studio",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
       entry_style:plan.label,timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"])),
-      higher_timeframe_confirmation:same,confirmation_count:confirmations.length
+      higher_timeframe_confirmation:same,confirmation_count:confirmationDirections.length
     }
   }).select("id,symbol,direction,confidence,timeframe").single();
   if(!ins&&row)published.push(row);
