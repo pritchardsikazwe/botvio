@@ -38,7 +38,11 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const [contractId, setContractId] = useState(contractTypes[0]?.id ?? "");
   const contractType = contractTypes.find(c => c.id === contractId) ?? contractTypes[0];
   const buyButtons = contractType?.buyButtons ?? [];
-  const requiredContractTypes = useMemo(() => buyButtons.map(b => b.contractType), [buyButtons]);
+  const [allowEquals, setAllowEquals] = useState(false);
+  const requiredContractTypes = useMemo(() => {
+    const types = buyButtons.map(b => b.contractType);
+    return styleId === "rise-fall-scalping" ? [...types, "PUTE", "CALLE"] : types;
+  }, [buyButtons, styleId]);
   const liveSymbols = useDerivSymbols(instruments, requiredContractTypes, authorized && instruments.length > 0);
   const tradableInstruments = liveSymbols.tradableAssets.map(a => ({ symbol: a.symbol, displayName: a.displayName }));
   const [symbol, setSymbol] = useState(instruments[0]?.symbol ?? "R_75");
@@ -156,7 +160,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     if (!allowedDurationUnits.includes(durationUnit)) {
       setDurationUnit(allowedDurationUnits[0] ?? "t");
     }
-  }, [durationUnitsKey, durationUnit]);
+  }, [durationUnitsKey, durationUnit, isDigitalOptions]);
 
   useEffect(() => {
     if (!authorized || !symbol) return;
@@ -193,10 +197,17 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     });
   }, [authorized, onContractUpdate, addLog]);
 
+  const effectiveContractType = useCallback((ct: string) => {
+    if (!allowEquals || !isRiseFall) return ct;
+    if (ct === "CALL") return "PUTE";
+    if (ct === "PUT") return "CALLE";
+    return ct;
+  }, [allowEquals, isRiseFall]);
+
   const buildParams = useCallback((ct: string) => {
     const amount = Number(stake);
     const params: any = {
-      symbol, contract_type: ct, amount,
+      symbol, contract_type: effectiveContractType(ct), amount,
       currency, basis: "stake",
       duration: Number(duration), duration_unit: durationUnit,
     };
@@ -204,10 +215,11 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     if (isMultipliers) params.multiplier = Number(multiplier);
     if (isAccumulator) params.growth_rate = Number(growthRate);
     return params;
-  }, [stake, symbol, currency, duration, durationUnit, needsBarrier, barrier, isMultipliers, multiplier, isAccumulator, growthRate]);
+  }, [stake, symbol, currency, duration, durationUnit, needsBarrier, barrier, isMultipliers, multiplier, isAccumulator, growthRate, effectiveContractType]);
 
   const validateTrade = (ct: string) => {
-    const s = contractSpecs[ct];
+    const effective = effectiveContractType(ct);
+    const s = contractSpecs[effective] ?? contractSpecs[ct];
     const amount = Number(stake);
     if (!Number.isFinite(amount) || amount <= 0) throw new Error("Enter a valid stake.");
     if (!s) throw new Error("Deriv has not confirmed this contract for the selected symbol.");
@@ -510,6 +522,22 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
               <p className="text-[9px] text-muted-foreground">based on this contract</p>
             </button>
           </div>
+
+          {isRiseFall && (
+            <div className="mt-3 flex items-center justify-between rounded-lg border border-border/60 bg-background/60 px-3 py-2">
+              <div>
+                <p className="text-[10px] font-semibold">Allow equals</p>
+                <p className="text-[9px] text-muted-foreground">Rise/Fall can settle at the entry spot when Deriv offers this contract.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={allowEquals}
+                onChange={e => setAllowEquals(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+                aria-label="Allow equals for Rise/Fall"
+              />
+            </div>
+          )}
 
           {durationPresets.length > 0 && !isMultipliers && (
             <div className="mt-3">
