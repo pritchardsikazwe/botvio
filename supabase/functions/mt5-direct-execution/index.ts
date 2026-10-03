@@ -1,111 +1,168 @@
-// Direct Botvio Signals -> user's own MT5 account.
-// Never registers with TradeCopy and never calls the TradeCopy "link" action:
-// orders go straight to the account through the MT5 API, using the encrypted
-// credential already stored for the account. One signal executes at most once
-// per account (unique trading_account_id + signal_id).
+// Botvio generated signals -> the existing TradeCopy MT5 infrastructure.
+// No Bridge EA, VPS terminal, or direct MT5 API is used for signal execution.
+// 1) Botvio signals can open on the configured Deriv/provider TradeCopy master.
+// 2) Users who enable Direct Signals receive the same signals on their own
+//    TradeCopy follower account.
+// TradeCopy then handles master -> follower replication in the cloud.
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3.23.8";
-import { decryptSecret } from "../_shared/tradecopy/crypto.ts";
+import { createAdapter } from "../_shared/tradecopy/adapter.ts";
+import { normalizeMarketOrder, redact } from "../_shared/tradecopy/core.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-const BASE = (Deno.env.get("MT5_API_STUDIO_BASE_URL") || "https://mt5full3.mtapi.io").replace(/\/+$/, "");
-const API_KEY = Deno.env.get("MT5_API_STUDIO_API_KEY") || Deno.env.get("TRADECOPY_API_KEY");
-// Real orders only when explicitly enabled; otherwise executions are simulated and logged.
-const LIVE_MODE = Deno.env.get("MT5_DIRECT_MODE") === "live" && !!API_KEY;
+const adapter = createAdapter({
+  apiKey: Deno.env.get("TRADECOPY_API_KEY"),
+  mode: Deno.env.get("TRADECOPY_MODE"),
+  baseUrl: Deno.env.get("TRADECOPY_BASE_URL"),
+});
+
 const LIVE_PHRASE = "START LIVE SIGNALS";
-const COLS = "id,user_id,broker,login_id,server,environment,platform,account_role,is_botvio_robot,direct_signal_enabled,direct_signal_status,direct_live_confirmed_at,direct_lot,direct_min_confidence,direct_symbol_map,last_direct_signal_at,last_direct_execution_at,last_direct_error";
+const COLS = [
+  "id,user_id,broker,login_id,server,environment,platform,account_role,is_botvio_robot",
+  "direct_signal_enabled,direct_signal_status,direct_live_confirmed_at,direct_lot,direct_min_confidence,direct_symbol_map",
+  "last_direct_signal_at,last_direct_execution_at,last_direct_error,tradecopy_user_id,tradecopy_active,is_active",
+  "botvio_signal_master_enabled,botvio_signal_master_lot,botvio_signal_min_confidence",
+].join(",");
 
-class Err extends Error { constructor(m: string, public status = 400) { super(m); } }
-
-async function mt5(path: string, q: Record<string, string | number>) {
-  const url = new URL(BASE + path);
-  for (const [k, v] of Object.entries(q)) url.searchParams.set(k, String(v));
-  const res = await fetch(url, { headers: { ApiKey: API_KEY!, Accept: "application/json, text/plain" }, signal: AbortSignal.timeout(25000) });
-  const text = await res.text();
-  let body: unknown = text; try { body = JSON.parse(text); } catch { /* text */ }
-  if (!res.ok) throw new Error(`MT5 ${res.status}: ${String(typeof body === "string" ? body : JSON.stringify(body)).slice(0, 200)}`);
-  return body;
+class Err extends Error {
+  constructor(message: string, public status = 400) {
+    super(message);
+  }
 }
 
 async function liveGlobal(admin: SupabaseClient) {
   const { data } = await admin.from("app_settings").select("key,value").in("key", ["tradecopy_live_enabled", "direct_live_enabled"]);
-  const on = (k: string) => (data ?? []).some((r) => r.key === k && (r.value as { enabled?: boolean })?.enabled === true);
-  return on("direct_live_enabled") || on("tradecopy_live_enabled");
+  const enabled = (key: string) => (data ?? []).some((row) => row.key === key && (row.value as { enabled?: boolean } | null)?.enabled === true);
+  return enabled("tradecopy_live_enabled") || enabled("direct_live_enabled");
 }
 
-async function password(admin: SupabaseClient, accountId: string) {
-  const { data } = await admin.from("tradecopy_credentials").select("password_encrypted").eq("trading_account_id", accountId).maybeSingle();
-  if (!data) throw new Err("Stored MT5 credentials missing — reconnect the account", 404);
-  return decryptSecret(data.password_encrypted, Deno.env.get("TOKEN_ENCRYPTION_KEY")!);
+function assertLiveReady(environment: string, confirmedAt: string | null, globalLive: boolean) {
+  if (environment !== "LIVE") return;
+  if (adapter.mode !== "live") throw new Err("TradeCopy live mode is not configured on the server", 403);
+  if (!confirmedAt || !globalLive) throw new Err("LIVE TradeCopy execution is locked until it is confirmed and enabled globally", 403);
 }
 
-async function connect(admin: SupabaseClient, acct: Record<string, any>) {
-  const pwd = await password(admin, acct.id);
-  const id = crypto.randomUUID();
-  const raw = await mt5("/ConnectEx", { user: String(acct.login_id), password: pwd, server: String(acct.server), id, connectTimeoutSeconds: 40, connectTimeoutClusterMemberSeconds: 15 });
-  return typeof raw === "string" && raw.replace(/"/g, "") ? raw.replace(/"/g, "") : id;
+const normalizeDirection = (value: unknown): "BUY" | "SELL" | null => {
+  const v = String(value ?? "").toUpperCase();
+  if (v === "BUY" || v === "LONG") return "BUY";
+  if (v === "SELL" || v === "SHORT") return "SELL";
+  return null;
+};
+
+const normalSymbol = (s: string) => s.toUpperCase().replace(/\s+/g, "");
+
+async function claimExecution(admin: SupabaseClient, account: Record<string, any>, signal: Record<string, any>, symbol: string, direction: "BUY" | "SELL", volume: number, mode: string) {
+  return admin.from("direct_executions").insert({
+    trading_account_id: account.id, user_id: account.user_id, signal_id: signal.id, symbol: signal.symbol,
+    mt5_symbol: symbol, direction, volume, entry_price: signal.entry_price, stop_loss: signal.stop_loss,
+    take_profit: signal.take_profit, environment: account.environment ?? "DEMO", mode, status: "pending",
+  }).select("id").single();
 }
 
-const norm = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+async function executeForAccount(
+  admin: SupabaseClient,
+  account: Record<string, any>,
+  signal: Record<string, any>,
+  role: "master" | "slave",
+  volume: number,
+  symbol: string,
+  globalLive: boolean,
+) {
+  const direction = normalizeDirection(signal.direction);
+  if (!direction) return { ok: false, skipped: true, reason: "unsupported signal direction" };
+  if (!account.tradecopy_user_id) return { ok: false, skipped: true, reason: "TradeCopy account is not registered" };
+  if (!account.tradecopy_active) return { ok: false, skipped: true, reason: "TradeCopy account is inactive" };
+  if ((signal.confidence ?? 0) < (account.direct_min_confidence ?? account.botvio_signal_min_confidence ?? 70)) {
+    return { ok: false, skipped: true, reason: "confidence below configured threshold" };
+  }
+
+  try {
+    assertLiveReady(String(account.environment ?? "DEMO"), account.direct_live_confirmed_at, globalLive);
+  } catch (e) {
+    const reason = String((e as Error).message);
+    await admin.from("trading_accounts").update({ last_direct_error: reason, direct_signal_status: "blocked_live" }).eq("id", account.id);
+    return { ok: false, skipped: true, reason };
+  }
+
+  const { data: claim, error: claimErr } = await claimExecution(
+    admin, account, signal, symbol, direction, volume, adapter.mode === "live" ? "tradecopy" : "simulated",
+  );
+  if (claimErr || !claim) return { ok: false, skipped: true, reason: "already claimed or execution record unavailable" };
+
+  const now = new Date().toISOString();
+  await admin.from("trading_accounts").update({ last_direct_signal_at: now }).eq("id", account.id);
+
+  try {
+    const order = normalizeMarketOrder({
+      symbol, side: direction, lots: volume, stopLoss: signal.stop_loss, takeProfit: signal.take_profit,
+    });
+    const result = await adapter.createMarketOrder(account.tradecopy_user_id, role, order);
+    await admin.from("direct_executions").update({
+      status: adapter.mode === "live" ? "sent" : "simulated",
+      ticket: String((result as any)?.ticket ?? (result as any)?.orderId ?? ""),
+    }).eq("id", claim.id);
+    await admin.from("trading_accounts").update({
+      last_direct_execution_at: now, last_direct_error: null, direct_signal_status: "on",
+    }).eq("id", account.id);
+    return { ok: true, skipped: false, result: redact(result) };
+  } catch (e) {
+    const msg = String((e as Error).message ?? e).slice(0, 300);
+    await admin.from("direct_executions").update({ status: "failed", error: msg }).eq("id", claim.id);
+    await admin.from("trading_accounts").update({ last_direct_error: msg, direct_signal_status: "error" }).eq("id", account.id);
+    return { ok: false, skipped: false, reason: msg };
+  }
+}
 
 async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
-  let q = admin.from("trading_accounts").select(COLS).eq("direct_signal_enabled", true).eq("is_active", true).eq("is_botvio_robot", false);
-  if (onlyAccountId) q = q.eq("id", onlyAccountId);
-  const { data: accounts } = await q;
-  if (!accounts?.length) return { accounts: 0, executed: 0, skipped: 0 };
   const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-  const { data: signals } = await admin.from("trading_signals")
-    .select("id,symbol,direction,entry_price,stop_loss,take_profit,confidence,created_at")
-    .eq("status", "ACTIVE").gte("created_at", since).order("created_at", { ascending: true }).limit(50);
-  const globalLive = await liveGlobal(admin);
-  let executed = 0, skipped = 0;
+  const { data: signals, error: signalError } = await admin.from("trading_signals")
+    .select("id,symbol,direction,entry_price,stop_loss,take_profit,confidence,created_at,status")
+    .eq("status", "ACTIVE").gte("created_at", since).order("created_at", { ascending: true }).limit(100);
 
-  for (const a of accounts as Record<string, any>[]) {
-    // LIVE accounts need the per-account typed confirmation AND the global live switch.
-    if (a.environment === "LIVE" && (!a.direct_live_confirmed_at || !globalLive)) {
-      await admin.from("trading_accounts").update({ direct_signal_status: "blocked_live", last_direct_error: "LIVE direct execution is locked until confirmed and enabled globally" }).eq("id", a.id);
-      continue;
-    }
-    const map = (a.direct_symbol_map ?? {}) as Record<string, string>;
-    let session: string | null = null;
-    for (const s of signals ?? []) {
-      if ((s.confidence ?? 0) < (a.direct_min_confidence ?? 70)) continue;
-      const direction = String(s.direction).toUpperCase() === "SHORT" ? "SELL" : String(s.direction).toUpperCase() === "LONG" ? "BUY" : String(s.direction).toUpperCase();
-      const mapped = map[s.symbol] ?? map[norm(s.symbol)] ?? s.symbol;
-      // Idempotency: the unique (account, signal) row is claimed before any order is sent.
-      const { data: claim, error: claimErr } = await admin.from("direct_executions").insert({
-        trading_account_id: a.id, user_id: a.user_id, signal_id: s.id, symbol: s.symbol, mt5_symbol: mapped,
-        direction, volume: a.direct_lot ?? 0.01, entry_price: s.entry_price, stop_loss: s.stop_loss, take_profit: s.take_profit,
-        environment: a.environment ?? "DEMO", mode: LIVE_MODE ? "live" : "simulated", status: "pending",
-      }).select("id").single();
-      if (claimErr || !claim) { skipped++; continue; }
-      const now = new Date().toISOString();
-      await admin.from("trading_accounts").update({ last_direct_signal_at: now }).eq("id", a.id);
-      try {
-        let ticket: string | null = null;
-        if (LIVE_MODE) {
-          session = session ?? await connect(admin, a);
-          const res = await mt5("/OrderSend", {
-            id: session, symbol: mapped, operation: direction === "BUY" ? "Buy" : "Sell", volume: Number(a.direct_lot ?? 0.01),
-            price: 0, slippage: 20, stoploss: Number(s.stop_loss ?? 0), takeprofit: Number(s.take_profit ?? 0), comment: "botvio-direct",
-          }) as Record<string, unknown>;
-          ticket = String((res as any)?.ticket ?? (res as any)?.Ticket ?? (res as any)?.order ?? "") || null;
-        }
-        await admin.from("direct_executions").update({ status: LIVE_MODE ? "sent" : "simulated", ticket }).eq("id", claim.id);
-        await admin.from("trading_accounts").update({ last_direct_execution_at: now, last_direct_error: null, direct_signal_status: "on" }).eq("id", a.id);
-        executed++;
-      } catch (e) {
-        const msg = String((e as Error).message ?? e).slice(0, 300);
-        await admin.from("direct_executions").update({ status: "failed", error: msg }).eq("id", claim.id);
-        await admin.from("trading_accounts").update({ last_direct_error: msg, direct_signal_status: "error" }).eq("id", a.id);
+  if (signalError) throw new Err("Could not load Botvio signals: " + signalError.message, 500);
+  if (!signals?.length) return { signals: 0, masterExecuted: 0, directExecuted: 0, skipped: 0 };
+
+  const globalLive = await liveGlobal(admin);
+
+  const { data: masters } = await admin.from("trading_accounts").select(COLS)
+    .eq("botvio_signal_master_enabled", true).eq("account_role", "master")
+    .eq("is_botvio_robot", false).eq("is_active", true).eq("tradecopy_active", true).limit(1);
+
+  const master = masters?.[0] as Record<string, any> | undefined;
+  let masterExecuted = 0, directExecuted = 0, skipped = 0;
+
+  if (master) {
+    for (const signal of signals as Record<string, any>[]) {
+      const direction = normalizeDirection(signal.direction);
+      if (!direction || Number(signal.confidence ?? 0) < Number(master.botvio_signal_min_confidence ?? 70)) {
+        skipped++;
+        continue;
       }
+      const result = await executeForAccount(admin, master, signal, "master", Number(master.botvio_signal_master_lot ?? 0.01), String(signal.symbol), globalLive);
+      if (result.ok) masterExecuted++; else if (result.skipped) skipped++;
     }
-    if (session) { try { await mt5("/Disconnect", { id: session }); } catch { /* ignore */ } }
   }
-  return { accounts: accounts.length, executed, skipped };
+
+  let q = admin.from("trading_accounts").select(COLS)
+    .eq("direct_signal_enabled", true).eq("is_active", true).eq("is_botvio_robot", false)
+    .eq("account_role", "slave").not("tradecopy_user_id", "is", null);
+  if (onlyAccountId) q = q.eq("id", onlyAccountId);
+  const { data: directAccounts } = await q;
+
+  for (const account of (directAccounts ?? []) as Record<string, any>[]) {
+    const map = (account.direct_symbol_map ?? {}) as Record<string, string>;
+    for (const signal of signals as Record<string, any>[]) {
+      const rawSymbol = String(signal.symbol);
+      const mapped = map[rawSymbol] ?? map[normalSymbol(rawSymbol)] ?? rawSymbol;
+      const result = await executeForAccount(admin, account, signal, "slave", Number(account.direct_lot ?? 0.01), mapped, globalLive);
+      if (result.ok) directExecuted++; else if (result.skipped) skipped++;
+    }
+  }
+
+  return { signals: signals.length, signalMasterConfigured: !!master, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, skipped };
 }
 
 Deno.serve(async (req) => {
@@ -116,11 +173,9 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action ?? "");
 
-    // Wake path (new-signal database trigger or service role). It takes no input and only
-    // processes server-side ACTIVE signals for opted-in accounts; every send is deduplicated.
     if (action === "wake" || (token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"))) {
       const r = await deliver(admin);
-      return json({ ok: true, executed: r.executed });
+      return json({ ok: true, adapterMode: adapter.mode, ...r });
     }
 
     if (!token) throw new Err("Sign in required", 401);
@@ -138,33 +193,42 @@ Deno.serve(async (req) => {
       if (String(data.platform ?? "mt5").toLowerCase() === "deriv" || !data.login_id || !data.server) throw new Err("Direct signals need an MT5 account", 400);
       return data as Record<string, any>;
     };
+
     const audit = (ok: boolean, accountId: string | null, details: Record<string, unknown>) =>
-      admin.from("tradecopy_audit_log").insert({ user_id: userId, trading_account_id: accountId, action: `direct_${action}`, mode: LIVE_MODE ? "live" : "simulated", ok, details: details as never });
+      admin.from("tradecopy_audit_log").insert({
+        user_id: userId, trading_account_id: accountId, action: "direct_" + action, mode: adapter.mode, ok, details: details as never,
+      });
 
     switch (action) {
       case "status":
-        return json({ ok: true, mode: LIVE_MODE ? "live" : "simulated", liveEnabled: await liveGlobal(admin), livePhrase: LIVE_PHRASE });
+        return json({ ok: true, mode: adapter.mode, liveEnabled: await liveGlobal(admin), livePhrase: LIVE_PHRASE, execution: "TradeCopy" });
 
       case "enable": {
-        const p = z.object({ account_id: z.string().uuid(), confirm_text: z.string().optional(), lot: z.number().min(0.01).max(5).optional(), min_confidence: z.number().int().min(50).max(99).optional() }).parse(body);
+        const p = z.object({
+          account_id: z.string().uuid(), confirm_text: z.string().optional(),
+          lot: z.number().min(0.01).max(5).optional(), min_confidence: z.number().int().min(50).max(99).optional(),
+        }).parse(body);
         const a = await loadOwn(p.account_id);
+        if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this MT5 account as a TradeCopy follower first");
+        if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this follower before enabling Direct Signals");
         const patch: Record<string, unknown> = { direct_signal_enabled: true, direct_signal_status: "on", last_direct_error: null };
         if (p.lot) patch.direct_lot = p.lot;
         if (p.min_confidence) patch.direct_min_confidence = p.min_confidence;
         if (a.environment === "LIVE") {
-          if (p.confirm_text !== LIVE_PHRASE) throw new Err(`Type "${LIVE_PHRASE}" to enable direct signals on a LIVE account`);
+          if (p.confirm_text !== LIVE_PHRASE) throw new Err("Type \"" + LIVE_PHRASE + "\" to enable direct signals on a LIVE account");
           if (!(await liveGlobal(admin))) throw new Err("LIVE trading is switched off for Botvio right now");
+          if (adapter.mode !== "live") throw new Err("TradeCopy live mode is not configured on the server", 403);
           patch.direct_live_confirmed_at = new Date().toISOString();
         }
         await admin.from("trading_accounts").update(patch).eq("id", a.id);
-        await audit(true, a.id, { environment: a.environment });
-        return json({ ok: true, enabled: true });
+        await audit(true, a.id, { environment: a.environment, execution: "TradeCopy" });
+        return json({ ok: true, enabled: true, execution: "TradeCopy" });
       }
 
       case "disable": {
         const a = await loadOwn(z.object({ account_id: z.string().uuid() }).parse(body).account_id);
         await admin.from("trading_accounts").update({ direct_signal_enabled: false, direct_signal_status: "off", direct_live_confirmed_at: null }).eq("id", a.id);
-        await audit(true, a.id, {});
+        await audit(true, a.id, { execution: "TradeCopy" });
         return json({ ok: true, enabled: false });
       }
 
@@ -178,45 +242,43 @@ Deno.serve(async (req) => {
 
       case "test_connection": {
         const a = await loadOwn(z.object({ account_id: z.string().uuid() }).parse(body).account_id);
-        if (!API_KEY) throw new Err("MT5 connection service is not configured");
+        if (!a.tradecopy_user_id) throw new Err("Connect this account to TradeCopy first");
         try {
-          const s = await connect(admin, a);
-          try { await mt5("/Disconnect", { id: s }); } catch { /* ignore */ }
-          await audit(true, a.id, {});
-          return json({ ok: true, connected: true });
+          const diagnostic = await adapter.diagnostic(a.tradecopy_user_id);
+          await admin.from("trading_accounts").update({ last_direct_error: null, direct_signal_status: "on" }).eq("id", a.id);
+          await audit(true, a.id, { diagnostic: redact(diagnostic), execution: "TradeCopy" });
+          return json({ ok: true, connected: true, diagnostic: redact(diagnostic), execution: "TradeCopy" });
         } catch (e) {
           const msg = String((e as Error).message).slice(0, 200);
-          await admin.from("trading_accounts").update({ last_direct_error: msg }).eq("id", a.id);
-          await audit(false, a.id, { error: msg });
-          return json({ ok: false, error: "Could not connect to this MT5 account. Check the server name and password." });
+          await admin.from("trading_accounts").update({ last_direct_error: msg, direct_signal_status: "error" }).eq("id", a.id);
+          await audit(false, a.id, { error: msg, execution: "TradeCopy" });
+          return json({ ok: false, error: "TradeCopy could not verify this MT5 account. Check the account/server connection." });
         }
       }
 
       case "deliver_now": {
         const p = z.object({ account_id: z.string().uuid().optional() }).parse(body);
-        if (p.account_id) await loadOwn(p.account_id);
-        else if (!isAdmin) throw new Err("Admins only", 403);
-        return json({ ok: true, mode: LIVE_MODE ? "live" : "simulated", ...(await deliver(admin, p.account_id)) });
+        if (p.account_id) await loadOwn(p.account_id); else if (!isAdmin) throw new Err("Admins only", 403);
+        return json({ ok: true, adapterMode: adapter.mode, ...(await deliver(admin, p.account_id)) });
       }
 
       case "admin_set": {
         if (!isAdmin) throw new Err("Admins only", 403);
         const p = z.object({ account_id: z.string().uuid(), enabled: z.boolean() }).parse(body);
-        // Admin can always switch OFF; switching ON a LIVE account still needs the owner's typed confirmation.
         const { data: a } = await admin.from("trading_accounts").select("environment,direct_live_confirmed_at").eq("id", p.account_id).maybeSingle();
         if (p.enabled && a?.environment === "LIVE" && !a.direct_live_confirmed_at) throw new Err("The owner must confirm LIVE direct signals first");
         await admin.from("trading_accounts").update({ direct_signal_enabled: p.enabled, direct_signal_status: p.enabled ? "on" : "off" }).eq("id", p.account_id);
-        await audit(true, p.account_id, { enabled: p.enabled, by: "admin" });
+        await audit(true, p.account_id, { enabled: p.enabled, by: "admin", execution: "TradeCopy" });
         return json({ ok: true });
       }
 
       default:
-        throw new Err(`Unknown action "${action}"`);
+        throw new Err("Unknown action " + action);
     }
   } catch (e) {
     if (e instanceof z.ZodError) return json({ ok: false, error: "Invalid request" }, 400);
     const status = e instanceof Err ? e.status : 500;
-    console.error("[mt5-direct-execution]", (e as Error).message);
-    return json({ ok: false, error: e instanceof Err ? e.message : "Direct execution failed" }, status >= 500 ? 500 : 200);
+    console.error("[mt5-tradecopy-execution]", (e as Error).message);
+    return json({ ok: false, error: e instanceof Err ? e.message : "TradeCopy signal delivery failed" }, status >= 500 ? 500 : 200);
   }
 });
