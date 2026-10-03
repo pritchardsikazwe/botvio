@@ -109,8 +109,8 @@ const DerivOptions = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <DerivAffiliateButton label="Open Deriv Account" />
               <Button variant="outline" size="lg" asChild>
-                <Link to="/connections">
-                  <Wifi className="h-4 w-4 mr-2" /> Connect Real Account
+                <Link to="/deriv-app">
+                  <Wifi className="h-4 w-4 mr-2" /> Connect Deriv & Trade
                 </Link>
               </Button>
             </div>
