@@ -97,7 +97,6 @@ Deno.serve(async (req) => {
     const accountsResponse = await fetch("https://api.derivws.com/trading/v1/options/accounts", {
       method: "GET",
       headers: {
-        "Deriv-App-ID": clientId,
         "Authorization": `Bearer ${accessToken}`,
       },
     });
