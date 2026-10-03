@@ -24,6 +24,7 @@ import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
 import { isPublicPreviewActive } from "@/config/access";
+import { TradingHubSignalHorizons } from "@/components/signals/TradingHubSignalHorizons";
 
 export interface AssetTradingHubConfig {
   seoKey?: string;
@@ -149,6 +150,8 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
         />
 
         <MarketClosedBanner symbol={config.sessionSymbol} />
+
+        <TradingHubSignalHorizons symbol={config.persistSymbol || config.displaySymbol} />
 
         {/* ── Chart-dominant workspace ─────────────────────────────── */}
         {locked ? (
