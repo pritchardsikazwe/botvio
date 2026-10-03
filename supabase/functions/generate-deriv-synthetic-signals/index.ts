@@ -41,7 +41,7 @@ Deno.serve(async(req)=>{
   const active=await request(ws,{active_symbols:"brief"});
   const symbols=(active.active_symbols??[]).map((x:any)=>({code:String(x.underlying_symbol??x.symbol),name:String(x.underlying_symbol_name??x.display_name??x.symbol),market:String(x.market??"")}))
     .filter((x:any)=>/synthetic|volatility|boom|crash|range break|step|jump|drift|dex/i.test(x.name+" "+x.market))
-    .filter((x:any)=>!/1HZ|1M/i.test(x.code+" "+x.name));
+    ;
   const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;
   const list=wanted?symbols.filter((x:any)=>x.code===wanted||x.name===wanted):symbols;
   const published:any[]=[];
