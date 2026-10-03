@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useDerivSymbols } from "@/hooks/useDerivSymbols";
 import { toast } from "sonner";
 import { Activity, ArrowDownRight, ArrowUpRight, Gauge, Loader2, Sparkles, UserCircle2 } from "lucide-react";
 
@@ -34,6 +35,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const style = getStyleById(styleId);
   const contractType = style?.contractTypes[0];
   const instruments = useMemo(() => style?.instruments ?? [], [style]);
+  const requiredContractTypes = useMemo(
+    () => contractType?.buyButtons.map((b) => b.contractType) ?? [],
+    [contractType],
+  );
+  const liveSymbols = useDerivSymbols(instruments, requiredContractTypes, authorized && instruments.length > 0);
+  const tradableInstruments = liveSymbols.tradableAssets.map((a) => ({ symbol: a.symbol, displayName: a.displayName }));
 
   const [symbol, setSymbol] = useState(instruments[0]?.symbol ?? "R_75");
   const [stake, setStake] = useState("1");
@@ -47,7 +54,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const logId = useRef(0);
 
   const isMultipliers = styleId === "multipliers";
-  const symbolLabel = instruments.find((i) => i.symbol === symbol)?.displayName ?? symbol;
+  const symbolLabel = tradableInstruments.find((i) => i.symbol === symbol)?.displayName ?? symbol;
 
   const addLog = useCallback((message: string, tone: TradeLog["tone"] = "info") => {
     logId.current += 1;
@@ -56,6 +63,13 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       ...prev,
     ].slice(0, 25));
   }, []);
+
+  // If Deriv removes a symbol or changes supported contracts, never leave an invalid selection active.
+  useEffect(() => {
+    if (!liveSymbols.loading && tradableInstruments.length > 0 && !tradableInstruments.some((i) => i.symbol === symbol)) {
+      setSymbol(tradableInstruments[0].symbol);
+    }
+  }, [liveSymbols.loading, tradableInstruments, symbol]);
 
   // Live tick stream for the selected symbol
   useEffect(() => {
@@ -144,7 +158,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       <Card className="glass-card overflow-hidden">
         <CardContent className="p-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs text-muted-foreground">{instruments.find((i) => i.symbol === symbol)?.displayName ?? symbol}</p>
+            <p className="text-xs text-muted-foreground">{symbolLabel}</p>
             <p className="text-2xl font-bold tabular-nums">
               {lastTick?.quote != null ? lastTick.quote : "—"}
             </p>
@@ -226,7 +240,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
             <Select value={symbol} onValueChange={setSymbol}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent className="bg-popover z-50 max-h-72">
-                {instruments.map((i) => (
+                {tradableInstruments.map((i) => (
                   <SelectItem key={i.symbol} value={i.symbol}>{i.displayName}</SelectItem>
                 ))}
               </SelectContent>
@@ -258,12 +272,19 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
             )}
           </div>
 
+          {liveSymbols.error && (
+            <p className="text-xs text-warning">Deriv market capabilities are temporarily unavailable. Trading markets are hidden until they are verified.</p>
+          )}
+          {!liveSymbols.loading && tradableInstruments.length === 0 && (
+            <p className="text-xs text-destructive">No supported live Deriv markets are available for this contract type.</p>
+          )}
+
           <div className="grid grid-cols-2 gap-3 pt-1">
             {(contractType?.buyButtons ?? []).map((btn) => (
               <Button
                 key={btn.contractType}
                 size="lg"
-                disabled={busy || !isDerivConnected}
+                disabled={busy || !isDerivConnected || liveSymbols.loading || tradableInstruments.length === 0}
                 onClick={() => handleBuy(btn.contractType, btn.label)}
                 className={cn(
                   "h-14 text-base font-bold",
