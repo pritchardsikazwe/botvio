@@ -29,6 +29,25 @@ function classifyStrategy(name:string,code:string):{family:StrategyFamily;label:
  return{family:"VOLATILITY",label:"Volatility Trend + Breakout",bias:"BOTH"};
 }
 
+function directionalBias(c:Candle[]):"BUY"|"SELL"|null{
+ if(c.length<60)return null;
+ const closes=c.map(x=>x.close),last=c.at(-1)!;
+ const e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),rs=rsi(c);
+ if(e9==null||e21==null||e50==null||rs==null)return null;
+ if(e9>e21&&last.close>e50&&rs>=45&&rs<=75)return "BUY";
+ if(e9<e21&&last.close<e50&&rs>=25&&rs<=55)return "SELL";
+ return null;
+}
+function candleQuality(c:Candle[]):number{
+ const last=c.at(-1)!;const a=atr(c)??0;const range=last.high-last.low;
+ if(!a||range<=0)return 0;
+ const body=Math.abs(last.close-last.open),ratio=body/range;
+ if(range>a*2.0)return -6;
+ if(ratio>=0.55&&range>=a*0.6)return 4;
+ if(ratio>=0.35)return 2;
+ return 0;
+}
+
 function strategySignal(c:Candle[],strategy:{family:StrategyFamily;label:string;bias:"BUY"|"SELL"|"BOTH"}):Sig|null{
  if(c.length<80)return null;
  const last=c.at(-1)!,prev=c.at(-2)!;
@@ -84,7 +103,11 @@ function strategySignal(c:Candle[],strategy:{family:StrategyFamily;label:string;
    else if(bearish&&momentumDown&&rs!>=28&&rs!<=52&&(pullbackSell||breakoutDown)){d="SELL";score=76;why.push("volatility trend","momentum","break/bullback confirmation");}
  }
 
- if(!d||score<70)return null;
+ if(!d)return null;
+ const bias=directionalBias(c);
+ score += bias===d?6:bias?-5:0;
+ score += candleQuality(c);
+ if(score<70)return null;
  if((d==="BUY"&&rs!>78)||(d==="SELL"&&rs!<22))return null;
  const stopMult=strategy.family==="RANGE_BREAK"?1.35:strategy.family==="STEP"?1.0:strategy.family==="BOOM"||strategy.family==="CRASH"?1.2:1.3;
  const targetMult=strategy.family==="RANGE_BREAK"?2.8:strategy.family==="STEP"?1.8:strategy.family==="BOOM"||strategy.family==="CRASH"?2.4:2.5;
@@ -131,8 +154,14 @@ Deno.serve(async(req)=>{
    const frames=new Map<string,Candle[]>();await Promise.all(PLAN.map(async p=>{try{frames.set(p.tf,await getCandles(ws,s.code,{...p,tf:p.tf}))}catch{frames.set(p.tf,[])}}));
    const sigs=new Map<string,Sig|null>();for(const p of PLAN)sigs.set(p.tf,strategySignal(frames.get(p.tf)??[],strategy));
    for(const p of PLAN){
-    const setup=sigs.get(p.tf);if(!setup)continue;const conf=p.confirm.map(x=>sigs.get(x)).filter(Boolean) as Sig[];
-    if(conf.some(x=>x.direction!==setup.direction)||conf.filter(x=>x.direction===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost)continue;
+    const setup=sigs.get(p.tf);if(!setup)continue;
+    const conf=p.confirm.map(x=>sigs.get(x));
+    const confDirections=p.confirm.map((tf,i)=>{
+      const sig=conf[i];
+      if(sig?.direction)return sig.direction;
+      return directionalBias(frames.get(tf)??[]);
+    }).filter(Boolean) as ("BUY"|"SELL")[];
+    if(confDirections.some(x=>x!==setup.direction)||confDirections.filter(x=>x===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost)continue;
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     setup.sl=levels.sl; setup.tp=levels.tp;
     const type=p.type,strategyName=`${strategy.family} · ${strategy.label} · ${type} ${p.tf}`,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
@@ -142,7 +171,7 @@ Deno.serve(async(req)=>{
       symbol:s.name,direction:setup.direction,entry_price:setup.entry,stop_loss:setup.sl,take_profit:setup.tp,timeframe:p.tf,signal_type:type,
       strategy_name:strategyName,confidence:Math.round(setup.score),broker:["deriv"],category:"synthetic",status:"ACTIVE",is_manual:false,
       expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,expires_at:expiresAt,
-      reason:`${s.name} · ${strategy.label} · ${type}: ${conf.filter(x=>x.direction===setup.direction).length}/${conf.length} higher-timeframe confirmations`,
+      reason:`${s.name} · ${strategy.label} · ${type}: ${confDirections.filter(x=>x===setup.direction).length}/${confDirections.length} higher-timeframe confirmations`,
       explanation_json:{engine:"Botvio Deriv Synthetic Strategy Engine v2",strategy_family:strategy.family,strategy_label:strategy.label,signal_type:type,timeframe:p.tf,expiry_seconds:p.expiry,expires_at:expiresAt,source:"Deriv active_symbols + ticks_history"}
     }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
     if(!error&&row)published.push(row);
