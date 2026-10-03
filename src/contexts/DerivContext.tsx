@@ -86,6 +86,7 @@ interface DerivContextType {
   subscribeContract: (contractId: number) => Promise<any>;
   onContractUpdate: (listener: (update: DerivContractUpdate) => void) => () => void;
   refreshBalance: () => Promise<DerivBalance | null>;
+  getTradeHistory: (limit?: number) => Promise<any[]>;
 }
 
 const DerivContext = createContext<DerivContextType | undefined>(undefined);
@@ -399,6 +400,7 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
     activeDerivToken,
     switchDerivToken,
     removeDerivToken,
+    getTradeHistory: derivAPI.getTradeHistory,
   };
 
   return (
