@@ -210,6 +210,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+  const trigger = req.headers.get("x-botvio-automation-secret") ?? "";
+  const { data: expectedSecret, error: secretError } = await admin.rpc("get_botvio_automation_secret");
+  if (secretError || !expectedSecret || trigger !== expectedSecret) {
+    return new Response(JSON.stringify({ ok:false, error:"Unauthorized automation trigger" }), { status:401, headers:{...corsHeaders,"Content-Type":"application/json"} });
+  }
   const { data: run } = await admin.from("auto_trade_runs").insert({ status: "running" }).select("id").single();
   const runId = run?.id;
   let scanned = 0, placed = 0, skipped = 0, errors = 0;
