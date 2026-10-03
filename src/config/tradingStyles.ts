@@ -116,35 +116,32 @@ const HIGHER_LOWER: ContractTypeConfig = {
   ],
 };
 
-// NOTE: Only profitable Deriv digit contracts are enabled (Differs, Under, Odd).
-// Matches / Over / Even are disabled because they consistently underperform on
-// Deriv's payout structure for our users. Re-enable only after re-evaluation.
 const DIGITS_EVEN_ODD: ContractTypeConfig = {
-  id: "even_odd",
-  label: "Odd (Profitable)",
-  tickDuration: false,
+  id: "even_odd", label: "Even / Odd", tickDuration: true,
   buyButtons: [
-    { label: "Odd", contractType: "DIGITODD", variant: "success" },
+    { label: "Even", contractType: "DIGITEVEN", variant: "success" },
+    { label: "Odd", contractType: "DIGITODD", variant: "default" },
   ],
 };
-
 const DIGITS_OVER_UNDER: ContractTypeConfig = {
-  id: "over_under",
-  label: "Under (Profitable)",
-  tickDuration: false,
-  needsDigit: true,
+  id: "over_under", label: "Over / Under", tickDuration: true, needsDigit: true,
   buyButtons: [
-    { label: "Under", contractType: "DIGITUNDER", variant: "success" },
+    { label: "Over", contractType: "DIGITOVER", variant: "success" },
+    { label: "Under", contractType: "DIGITUNDER", variant: "destructive" },
   ],
 };
-
 const DIGITS_MATCH_DIFFER: ContractTypeConfig = {
-  id: "match_differ",
-  label: "Differs (Profitable)",
-  tickDuration: false,
-  needsDigit: true,
+  id: "match_differ", label: "Matches / Differs", tickDuration: true, needsDigit: true,
   buyButtons: [
-    { label: "Differs", contractType: "DIGITDIFF", variant: "success" },
+    { label: "Matches", contractType: "DIGITMATCH", variant: "success" },
+    { label: "Differs", contractType: "DIGITDIFF", variant: "destructive" },
+  ],
+};
+const TOUCH_NO_TOUCH: ContractTypeConfig = {
+  id: "touch_no_touch", label: "Touch / No Touch", needsDigit: false,
+  buyButtons: [
+    { label: "Touch", contractType: "ONETOUCH", variant: "success" },
+    { label: "No Touch", contractType: "NOTOUCH", variant: "destructive" },
   ],
 };
 
