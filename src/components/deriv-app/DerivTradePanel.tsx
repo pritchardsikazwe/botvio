@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDeriv } from "@/contexts/DerivContext";
+import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { getStyleById, type ContractTypeConfig } from "@/config/tradingStyles";
 import { runEngine, rsi, type EngineType, type SignalResult } from "@/lib/signalEngines";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -237,6 +238,17 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
   return (
     <div className="space-y-4">
+      {!isDerivConnected && (
+        <Card className="glass-card border-primary/30">
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <div><p className="font-semibold">Connect Deriv to start trading</p><p className="text-xs text-muted-foreground">Stay here — no need to open Trading Connections.</p></div>
+              <Badge variant="outline">Options</Badge>
+            </div>
+            <DerivConnectionPanel showAccountSelection={true} />
+          </CardContent>
+        </Card>
+      )}
       <Card className="glass-card"><CardContent className="p-3 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0"><UserCircle2 className="h-5 w-5 text-primary shrink-0" /><div><p className="text-[11px] text-muted-foreground">Deriv connection</p><p className="text-sm font-semibold truncate">{accountInfo?.loginid ?? "Not connected"}</p></div></div>
