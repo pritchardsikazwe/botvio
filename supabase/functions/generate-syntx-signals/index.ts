@@ -24,7 +24,7 @@ if(s.includes("VOLATILITY")) return [symbol,{min:s.includes("(1S)")?82:n>=100?79
 return [symbol,{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`}];
 }))
 );
-const TF:Record<string,number>={M5:5,M15:15,H1:60};
+const TF:Record<string,number>={M1:1,M15:15,H1:60,D1:1440};
 function ema(a:number[],p:number){if(a.length<p)return null;let e=a.slice(0,p).reduce((x,y)=>x+y,0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e=(a[i]-e)*k+e;return e}
 function atr(c:Candle[],p=14){if(c.length<=p)return null;const tr=c.slice(1).map((x,i)=>Math.max(x.high-x.low,Math.abs(x.high-c[i].close),Math.abs(x.low-c[i].close)));return tr.slice(-p).reduce((a,b)=>a+b,0)/Math.min(p,tr.length)}
 function rsi(c:Candle[],p=14){if(c.length<=p)return null;let g=0,l=0;for(let i=c.length-p;i<c.length;i++){const d=c[i].close-c[i-1].close;if(d>0)g+=d;else l-=d}if(l===0)return 100;return 100-100/(1+(g/p)/(l/p))}
@@ -36,4 +36,39 @@ Deno.serve(async(req)=>{if(req.method!=="POST")return new Response("POST require
 const trigger=req.headers.get("x-botvio-automation-secret")??"";
 const {data:expectedSecret,error:secretError}=await db.rpc("get_botvio_automation_secret");
 if(secretError||!expectedSecret||trigger!==expectedSecret)return new Response(JSON.stringify({success:false,error:"Unauthorized automation trigger"}),{status:401,headers:{"Content-Type":"application/json"}});const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];for(const c of connections??[]){let session=String(c.session_id||"");try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
-const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{frames.push({n:name,sig:frameSignal(bars(await api(base,key,"/PriceHistory",{id:session,symbol,from:new Date(Date.now()-400*mins*60000).toISOString(),to:new Date().toISOString(),timeFrame:mins})),f.bias,profile)})}catch{}}const valid=frames.filter(x=>x.sig),buys=valid.filter(x=>x.sig.direction==="BUY").length,sells=valid.filter(x=>x.sig.direction==="SELL").length;const direction=buys>=3?"BUY":sells>=3?"SELL":null;if(!direction)continue;const agreed=valid.filter(x=>x.sig.direction===direction),best=agreed.reduce((a,b)=>a.sig.score>b.sig.score?a:b),s=best.sig;if(s.score<70)continue;const{data:recent}=await db.from("trading_signals").select("id").eq("symbol",symbol).eq("strategy_name",profile.label).eq("direction",direction).gte("created_at",new Date(Date.now()-10*60000).toISOString()).limit(1);if(recent?.length)continue;const{data:row,error:ins}=await db.from("trading_signals").insert({symbol,direction,entry_price:s.entry,stop_loss:s.sl,take_profit:s.tp,timeframe:"MTF",strategy_name:profile.label,confidence:Math.round(s.score),broker:["weltrade"],category:"syntx",status:"ACTIVE",is_manual:false,reason:`${f.family} multi-timeframe agreement ${agreed.length}/${valid.length}: ${agreed.map(x=>x.n).join(", ")}`,explanation_json:{engine:"SyntX MTF Engine v3",strategy_id:profile.label,source:"Weltrade SyntX API Studio",timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"]))}}).select("id,symbol,direction,confidence").single();if(!ins&&row)published.push(row)}}return new Response(JSON.stringify({success:true,published,count:published.length,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
+const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{frames.push({n:name,sig:frameSignal(bars(await api(base,key,"/PriceHistory",{id:session,symbol,from:new Date(Date.now()-500*mins*60000).toISOString(),to:new Date().toISOString(),timeFrame:mins})),f.bias,profile)})}catch{frames.push({n:name,sig:null})}}
+
+const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
+const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), scalp=get("M1");
+const setups=[
+  {tf:"1m",label:"SCALP 1M",setup:scalp,confirm:[bias15,biasH1],min:Math.max(profile.min,78)},
+  {tf:"15m",label:"INTRADAY 15M",setup:bias15,confirm:[biasH1,biasD1],min:Math.max(profile.min,profile.min+1)},
+  {tf:"1H",label:"SWING 1H",setup:biasH1,confirm:[biasD1],min:Math.max(profile.min,profile.min+3)},
+  {tf:"1D",label:"POSITION 1D",setup:biasD1,confirm:[],min:Math.max(profile.min,profile.min+5)}
+];
+
+for(const plan of setups){
+  if(!plan.setup) continue;
+  const confirmations=plan.confirm.filter(Boolean);
+  const same=confirmations.filter((x:any)=>x.direction===plan.setup.direction).length;
+  const conflict=confirmations.some((x:any)=>x.direction!==plan.setup.direction);
+  if(conflict) continue;
+  const required=plan.tf==="1m"?1:plan.tf==="15m"?1:plan.tf==="1H"?1:0;
+  if(same<required || plan.setup.score<plan.min) continue;
+  const entry=plan.setup.entry, sl=plan.setup.sl, tp=plan.setup.tp;
+  const strategyLabel=`${profile.label} · ${plan.label}`;
+  const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",symbol).eq("strategy_name",strategyLabel).eq("direction",plan.setup.direction).gte("created_at",new Date(Date.now()-Math.max(10,plan.tf==="1m"?5:plan.tf==="15m"?30:120)*60000).toISOString()).limit(1);
+  if(recent?.length) continue;
+  const {data:row,error:ins}=await db.from("trading_signals").insert({
+    symbol,direction:plan.setup.direction,entry_price:entry,stop_loss:sl,take_profit:tp,timeframe:plan.tf,
+    strategy_name:strategyLabel,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
+    status:"ACTIVE",is_manual:false,
+    reason:`${f.family} ${plan.label}: entry confirmed with ${same}/${confirmations.length} higher-timeframe confirmations`,
+    explanation_json:{
+      engine:"SyntX MTF Engine v4",strategy_id:profile.label,source:"Weltrade SyntX API Studio",
+      entry_style:plan.label,timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"])),
+      higher_timeframe_confirmation:same,confirmation_count:confirmations.length
+    }
+  }).select("id,symbol,direction,confidence,timeframe").single();
+  if(!ins&&row)published.push(row);
+}}return new Response(JSON.stringify({success:true,published,count:published.length,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
