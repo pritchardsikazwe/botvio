@@ -98,7 +98,7 @@ const Signals = () => {
     const d = initialParams?.get("direction")?.toUpperCase();
     return d === "BUY" || d === "SELL" ? d : "all";
   })();
-  const initialBroker = (() => {
+  const initialTimeframe = (() => {\n    const t = initialParams?.get("timeframe")?.toUpperCase();\n    return t && TIMEFRAME_OPTIONS.some((x) => x.value === t) ? t : "all";\n  })();\n  const initialBroker = (() => {
     const b = initialParams?.get("broker");
     return b && BROKERS.some((x) => x.value === b) ? b : "all";
   })();
@@ -107,7 +107,7 @@ const Signals = () => {
 
   const [status, setStatus] = useState("ACTIVE");
   const [direction, setDirection] = useState(initialDirection);
-  const [timeframe, setTimeframe] = useState("all");
+  const [timeframe, setTimeframe] = useState(initialTimeframe);
   const [search, setSearch] = useState("");
 
   const initialTab = (() => {
