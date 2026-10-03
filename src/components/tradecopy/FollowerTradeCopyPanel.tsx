@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2, Radio } from "lucide-react";
+import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2, Radio, Database } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -218,7 +218,7 @@ export function FollowerTradeCopyPanel() {
         {(accounts.isLoading || rels.isLoading) && <Skeleton className="h-24 w-full" />}
         {accounts.data?.map((a) => (
           <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/30 px-3 py-2 text-xs">
-            <span className="font-medium">{a.label} · {a.login_id} · {a.server}</span>
+            <span className="flex min-w-0 items-center gap-2 font-medium"><span className="truncate">{a.label} · {a.login_id} · {a.server}</span>{a.broker?.toLowerCase() === "weltrade" && <span className="rounded-full border border-primary/25 bg-primary/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">MT5 DATA SOURCE</span>}</span>
             <span className="flex items-center gap-2">
               {a.broker?.toLowerCase() === "weltrade" && <Button
                 size="sm"
@@ -229,13 +229,13 @@ export function FollowerTradeCopyPanel() {
                   try {
                     const result = await actAttach.mutateAsync({ action: "attach_market_feed", payload: { account_id: a.id } });
                     const count = Array.isArray((result as any)?.feed?.symbols) ? (result as any).feed.symbols.length : 0;
-                    toast.success(`Weltrade feed attached · ${count} symbols detected`);
+                    toast.success(`Weltrade DATA FEED attached · ${count} symbols detected`);
                   } catch (e) {
                     toast.error((e as Error).message);
                   }
                 }}
               >
-                <Radio className="mr-1 h-3.5 w-3.5" /> Feed
+                <Database className="mr-1 h-3.5 w-3.5" /> DATA FEED
               </Button>}
               <span className="flex gap-1.5"><EnvBadge env={a.environment} /><StatusBadge status={a.connection_status} /></span>
               <Button
@@ -259,7 +259,7 @@ export function FollowerTradeCopyPanel() {
           </div>
         ))}
         {accounts.data && accounts.data.length > 0 && <LinkProvider accounts={accounts.data} />}
-        {accounts.data?.length === 0 && user && <p className="text-sm text-muted-foreground">Connect an MT5 account to start. No Bridge EA or VPS required.</p>}
+        {accounts.data?.length === 0 && user && <p className="text-sm text-muted-foreground">Connect an MT5 account to start. A connected Weltrade follower can also be attached as the Botvio signal DATA FEED without enabling copy trading.</p>}
         {rels.data?.map((r) => <RelationshipCard key={r.id} rel={r} account={accounts.data?.find((a) => a.id === r.follower_account_id)} />)}
 
         {user && (
