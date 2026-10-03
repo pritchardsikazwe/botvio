@@ -1,7 +1,7 @@
 import { computeIndicators, type IndicatorSet } from "./indicators";
 import type { NormalizedCandle, Timeframe } from "./types";
 
-export type DerivFamily = "BOOM" | "CRASH" | "VOLATILITY";
+export type DerivFamily = "BOOM" | "CRASH" | "VOLATILITY" | "RANGE_BREAK";
 export type DerivMode = "SCALPING" | "DAY" | "SWING";
 export type DerivDirection = "BUY" | "SELL";
 export type DerivResult = "WIN" | "LOSS" | "OPEN";
@@ -46,7 +46,42 @@ function classify(symbol: string): DerivFamily | null {
   if (s.includes("BOOM")) return "BOOM";
   if (s.includes("CRASH")) return "CRASH";
   if (s.includes("VOLATILITY") || /^VOL\s*\d+/i.test(s) || s.includes("VIX")) return "VOLATILITY";
+  if (s.includes("RANGE BREAK") || s.includes("RANGEBREAK")) return "RANGE_BREAK";
   return null;
+}
+
+type DerivSymbolProfile = {
+  id: string;
+  label: string;
+  minConfidence: number;
+  stop: number;
+  target: number;
+  maxSpikeAtr: number;
+  requireMomentum: boolean;
+};
+
+function symbolProfile(symbol: string, family: DerivFamily, mode: DerivMode): DerivSymbolProfile {
+  const s = symbol.toUpperCase().replace(/_/g, " ");
+  const n = Number(s.match(/(?:BOOM|CRASH|VOLATILITY)\s*(?:INDEX\s*)?(\d+)/)?.[1] ?? 0);
+  const oneSecond = /1S/.test(s);
+  if (family === "BOOM") {
+    if (n >= 900) return { id:"BOOM_SPIKE_HUNTER_900", label:"Boom 900 Spike Hunter", minConfidence:78, stop:1.15, target:2.35, maxSpikeAtr:2.1, requireMomentum:true };
+    if (n >= 500) return { id:"BOOM_SPIKE_HUNTER_500", label:"Boom 500/600 Spike Hunter", minConfidence:76, stop:1.2, target:2.25, maxSpikeAtr:2.15, requireMomentum:true };
+    return { id:"BOOM_SPIKE_HUNTER_300", label:"Boom 300 Spike Hunter", minConfidence:74, stop:1.15, target:2.1, maxSpikeAtr:2.2, requireMomentum:true };
+  }
+  if (family === "CRASH") {
+    if (n >= 900) return { id:"CRASH_SPIKE_HUNTER_900", label:"Crash 900 Spike Hunter", minConfidence:78, stop:1.15, target:2.35, maxSpikeAtr:2.1, requireMomentum:true };
+    if (n >= 500) return { id:"CRASH_SPIKE_HUNTER_500", label:"Crash 500/600 Spike Hunter", minConfidence:76, stop:1.2, target:2.25, maxSpikeAtr:2.15, requireMomentum:true };
+    return { id:"CRASH_SPIKE_HUNTER_300", label:"Crash 300 Spike Hunter", minConfidence:74, stop:1.15, target:2.1, maxSpikeAtr:2.2, requireMomentum:true };
+  }
+  if (family === "RANGE_BREAK") {
+    const rb = n >= 200 ? "200" : "100";
+    return { id:`RANGE_BREAK_${rb}`, label:`Range Break ${rb} Expansion`, minConfidence:76, stop:1.25, target:2.5, maxSpikeAtr:2.0, requireMomentum:true };
+  }
+  const volTarget = n >= 100 ? 2.75 : n >= 50 ? 2.55 : 2.35;
+  const volStop = n >= 100 ? 1.5 : n >= 50 ? 1.4 : 1.3;
+  const min = oneSecond ? 80 : (n >= 75 ? 77 : 74);
+  return { id:`VOLATILITY_${n || "ADAPTIVE"}${oneSecond ? "_1S" : ""}`, label:`Volatility ${n || ""}${oneSecond ? " (1s)" : ""} Momentum`.trim(), minConfidence:min, stop:volStop, target:volTarget, maxSpikeAtr:oneSecond ? 1.9 : 2.2, requireMomentum:true };
 }
 
 function timeframeAllowed(mode: DerivMode, timeframe: Timeframe): boolean {
@@ -95,9 +130,10 @@ export function computeDerivSignals(
   if (!family || !timeframeAllowed(opts.mode, opts.timeframe) || candles.length < 100) return [];
 
   const defaults = MODE_DEFAULTS[opts.mode];
-  const minConfidence = opts.minConfidence ?? defaults.minConfidence;
-  const atrStop = opts.atrStop ?? defaults.stop;
-  const atrTarget = opts.atrTarget ?? defaults.target;
+  const profile = symbolProfile(opts.symbol, family, opts.mode);
+  const minConfidence = Math.max(opts.minConfidence ?? defaults.minConfidence, profile.minConfidence);
+  const atrStop = opts.atrStop ?? profile.stop;
+  const atrTarget = opts.atrTarget ?? profile.target;
   const maxSignals = opts.maxSignals ?? 50;
   const ind = indicators ?? computeIndicators(candles);
   const signals: DerivEngineSignal[] = [];
@@ -128,7 +164,7 @@ export function computeDerivSignals(
 
     // A large spike candle is treated as a risk event, not an automatic entry.
     // This prevents the engine from chasing the spike itself.
-    const spikeLike = range >= atr * 2.25;
+    const spikeLike = range >= atr * profile.maxSpikeAtr;
     if (spikeLike) continue;
 
     let direction: DerivDirection | null = null;
@@ -171,6 +207,21 @@ export function computeDerivSignals(
       }
     }
 
+    if (family === "RANGE_BREAK") {
+      const recent = candles.slice(Math.max(0, i - 24), i);
+      const rangeHigh = Math.max(...recent.map(x => x.high));
+      const rangeLow = Math.min(...recent.map(x => x.low));
+      if (c.close > rangeHigh && momentumUp && rsi >= 50 && rsi <= 78) {
+        direction = "BUY"; confidence = 68; reasons.push(profile.label, "range expansion", "positive momentum");
+        if (expansion) { confidence += 9; reasons.push("volatility expansion"); }
+        if (c.close > p.high) { confidence += 6; reasons.push("breakout confirmation"); }
+      } else if (c.close < rangeLow && momentumDown && rsi >= 22 && rsi <= 50) {
+        direction = "SELL"; confidence = 68; reasons.push(profile.label, "range breakdown", "negative momentum");
+        if (expansion) { confidence += 9; reasons.push("volatility expansion"); }
+        if (c.close < p.low) { confidence += 6; reasons.push("breakdown confirmation"); }
+      }
+    }
+
     if (family === "VOLATILITY") {
       if (bullish && momentumUp && rsi >= 48 && rsi <= 72) {
         direction = "BUY";
@@ -206,7 +257,7 @@ export function computeDerivSignals(
       mode: opts.mode,
       timeframe: opts.timeframe,
       direction,
-      strategy: `BOTVIO Deriv ${family} ${opts.mode} Engine`,
+      strategy: profile.label,
       confidence: Math.min(96, confidence),
       entry,
       stopLoss,
