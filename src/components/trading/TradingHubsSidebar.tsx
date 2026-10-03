@@ -1,7 +1,9 @@
 import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Globe2, BarChart4, Coins, ChevronRight } from "lucide-react";
+import { Globe2, BarChart4, Coins, ChevronRight, Radio } from "lucide-react";
+import { fetchActiveSymbols, getSymbolCapability } from "@/services/deriv/derivSymbols";
 
 type HubLink = { label: string; route: string; emoji: string };
 
@@ -95,6 +97,8 @@ function HubGroup({
  * can jump straight to any individual hub from one consolidated menu.
  */
 export function TradingHubsSidebar() {
+  const [live, setLive] = useState<{symbol:string;name:string}[]>([]);
+  useEffect(() => { let cancelled=false; (async()=>{ try { const rows=await fetchActiveSymbols(true); const candidates=Object.values(rows).filter((r:any)=>/synthetic|volatility|boom|crash|range break|step|jump/i.test(`${r.display_name??""} ${r.market??""} ${r.submarket??""}`)); const checked=await Promise.all(candidates.map(async(r:any)=>{try{const cap=await getSymbolCapability(r.symbol,true);return !cap.unverified&&!cap.isSuspended&&cap.isOpen&&Object.keys(cap.contracts).length>0?{symbol:r.symbol,name:r.display_name??r.symbol}:null}catch{return null}})); if(!cancelled)setLive(checked.filter(Boolean) as any);}catch{if(!cancelled)setLive([])}})(); return()=>{cancelled=true}},[]);
   return (
     <Card className="bg-card/60 border-border/50 sticky top-20">
       <CardContent className="p-3 space-y-4">
@@ -123,6 +127,11 @@ export function TradingHubsSidebar() {
           iconClass="text-primary"
           hubs={FOREX_HUBS}
         />
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between px-1"><div className="flex items-center gap-1.5"><Radio className="h-3.5 w-3.5 text-success" /><span className="text-[11px] font-extrabold uppercase tracking-wide">Deriv Live Synthetics</span></div><Badge variant="outline" className="text-[9px] h-4 px-1 border-success/30 text-success">{live.length}</Badge></div>
+          <div className="flex flex-wrap gap-1">{live.slice(0,24).map(x=><NavLink key={x.symbol} to={`/synthetic?symbol=${encodeURIComponent(x.symbol)}`} className="rounded-md border border-border/50 px-1.5 py-1 text-[9px] font-mono text-muted-foreground hover:text-primary hover:border-primary/30">{x.name}</NavLink>)}</div>
+        </div>
 
         <HubGroup
           title="US Stocks"
