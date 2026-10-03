@@ -9,20 +9,22 @@ export interface Mt5Account {
   tradecopy_active: boolean | null; tradecopy_user_id: number | null; is_active: boolean | null; is_botvio_robot: boolean | null;
   execution_provider: string | null; created_at: string; updated_at: string | null;
   direct_signal_enabled: boolean; direct_signal_status: string; direct_live_confirmed_at: string | null;
+  botvio_signal_master_enabled: boolean; botvio_signal_master_lot: number; botvio_signal_min_confidence: number;
   direct_lot: number; direct_min_confidence: number; direct_symbol_map: Record<string, string>;
   last_direct_signal_at: string | null; last_direct_execution_at: string | null; last_direct_error: string | null;
 }
 
 export const MT5_COLS =
-  "id,user_id,label,broker,server,login_id,platform,account_role,environment,connection_status,tradecopy_active,tradecopy_user_id,is_active,is_botvio_robot,execution_provider,created_at,updated_at,direct_signal_enabled,direct_signal_status,direct_live_confirmed_at,direct_lot,direct_min_confidence,direct_symbol_map,last_direct_signal_at,last_direct_execution_at,last_direct_error";
+  "id,user_id,label,broker,server,login_id,platform,account_role,environment,connection_status,tradecopy_active,tradecopy_user_id,is_active,is_botvio_robot,execution_provider,created_at,updated_at,direct_signal_enabled,direct_signal_status,direct_live_confirmed_at,direct_lot,direct_min_confidence,direct_symbol_map,last_direct_signal_at,last_direct_execution_at,last_direct_error,botvio_signal_master_enabled,botvio_signal_master_lot,botvio_signal_min_confidence";
 
-export type Mt5Role = "DATA FEED" | "DIRECT EXECUTION" | "PROVIDER MASTER" | "BOTVIO ROBOT MASTER" | "FOLLOWER";
+export type Mt5Role = "DATA FEED" | "DIRECT EXECUTION" | "PROVIDER MASTER" | "BOTVIO ROBOT MASTER" | "BOTVIO SIGNAL MASTER" | "FOLLOWER";
 
 /** Roles are derived from facts, never stored twice: a single MT5 login can hold several at once. */
 export function deriveRoles(a: Mt5Account, ctx: { feedIds: Set<string>; followerIds: Set<string> }): Mt5Role[] {
   const r: Mt5Role[] = [];
   if (a.is_botvio_robot) r.push("BOTVIO ROBOT MASTER");
   else if (a.account_role === "master") r.push("PROVIDER MASTER");
+  if (a.botvio_signal_master_enabled) r.push("BOTVIO SIGNAL MASTER");
   if (ctx.followerIds.has(a.id)) r.push("FOLLOWER");
   if (a.direct_signal_enabled) r.push("DIRECT EXECUTION");
   if (ctx.feedIds.has(a.id)) r.push("DATA FEED");
