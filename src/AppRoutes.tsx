@@ -268,6 +268,8 @@ export const AppRoutes = () => {
     <Route path="auth/deriv/callback" element={<DerivCallback />} />
     <Route path="callback" element={<DerivCallback />} />
     <Route path="trading" element={<Paid><Trading /></Paid>} />
+    {/* XAUUSD has a dedicated gold terminal; keep the generic chart route for other symbols. */}
+    <Route path="chart/XAUUSD" element={<Paid><GoldTradingHub /></Paid>} />
     <Route path="chart/:symbol" element={<Paid><ChartPage /></Paid>} />
     <Route path="gold" element={<Paid><GoldTradingHub /></Paid>} />
     <Route path="news-trader-hub" element={<Paid><NewsTraderHub /></Paid>} />
