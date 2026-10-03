@@ -235,7 +235,7 @@ export const AdminTradeCopyTab = () => {
   );
 };
 
-function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMaster, onProvider, onEmergency, onForceDemo }: {
+function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMaster, onToggleSignalMaster, onProvider, onEmergency, onForceDemo }: {
   r: Row; relations: Rel[]; busy: boolean; onTest: () => void; onToggleDirect: () => void; onToggleMaster: () => void; onToggleSignalMaster: () => void;
   onProvider: (s: "approved" | "suspended") => void; onEmergency: (id: string) => void; onForceDemo: () => void;
 }) {
