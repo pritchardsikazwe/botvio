@@ -32,7 +32,7 @@ function MiniMarketChart({ title, symbol, source, feedSymbol, decimals, to, tag 
     }).join(" ");
   }, [candles]);
 
-  const rising = candles.length >= 2 ? candles.at(-1)!.close >= candles.at(-2)!.close : true;
+  const rising = candles.length >= 2 ? candles[candles.length - 1].close >= candles[candles.length - 2].close : true;
   const live = status === "live";
   const gradientId = "mini-fill-" + feedSymbol.replace(/[^a-zA-Z0-9]/g, "");
 
