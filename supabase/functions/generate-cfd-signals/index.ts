@@ -23,9 +23,10 @@ const SYMBOLS=[
 
 const PLANS=[
   {tf:"1m",type:"SCALPING",minutes:1,count:220,expiry:300,backup:600,minBoost:2,confirm:["15m","1H"]},
-  {tf:"15m",type:"INTRADAY",minutes:15,count:140,expiry:3600,backup:5400,minBoost:3,confirm:["1H","1D"]},
-  {tf:"1H",type:"SWING",minutes:60,count:120,expiry:14400,backup:21600,minBoost:5,confirm:["1D"]},
-  {tf:"1D",type:"POSITION",minutes:1440,count:120,expiry:259200,backup:432000,minBoost:7,confirm:[]}
+  {tf:"15m",type:"INTRADAY",minutes:15,count:180,expiry:3600,backup:5400,minBoost:1,confirm:["1H"]},
+  {tf:"1H",type:"SWING",minutes:60,count:160,expiry:14400,backup:21600,minBoost:2,confirm:["1D"]},
+  {tf:"1D",type:"POSITION",minutes:1440,count:180,expiry:259200,backup:432000,minBoost:4,confirm:[]},
+  {tf:"3D",type:"POSITION",minutes:1440,count:300,expiry:777600,backup:1209600,minBoost:3,confirm:["1D"]}
 ] as const;
 
 function ema(a:number[],p:number){if(a.length<p)return null;let e=a.slice(0,p).reduce((x,y)=>x+y,0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e=(a[i]-e)*k+e;return e}
@@ -77,6 +78,18 @@ async function candles(ws:WebSocket,symbol:string,granularity:number,count:numbe
    .filter((x:Candle)=>Number.isFinite(x.epoch)&&[x.open,x.high,x.low,x.close].every(Number.isFinite));
 }
 
+function aggregateCandles(c:Candle[], days:number):Candle[]{
+ if(days<=1)return c;
+ const buckets=new Map<number,Candle>();
+ for(const x of c){
+   const bucket=Math.floor(x.epoch/(86400*days))*(86400*days);
+   const prev=buckets.get(bucket);
+   if(!prev)buckets.set(bucket,{epoch:bucket,open:x.open,high:x.high,low:x.low,close:x.close});
+   else {prev.high=Math.max(prev.high,x.high);prev.low=Math.min(prev.low,x.low);prev.close=x.close;}
+ }
+ return [...buckets.values()].sort((a,b)=>a.epoch-b.epoch);
+}
+
 Deno.serve(async(req)=>{
  if(req.method!=="POST")return new Response("POST required",{status:405});
  const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -100,7 +113,10 @@ Deno.serve(async(req)=>{
    }
    if(!activeSet.has(profile.symbol)){skipped.push({symbol:profile.symbol,reason:"not active on Deriv"});continue}
    const frames=new Map<string,Candle[]>();
-   await Promise.all(PLANS.map(async p=>{try{frames.set(p.tf,await candles(ws,profile.symbol,p.minutes*60,p.count))}catch{frames.set(p.tf,[])}}));
+   await Promise.all(PLANS.map(async p=>{try{
+  const raw=await candles(ws,profile.symbol,p.minutes*60,p.count);
+  frames.set(p.tf,p.tf==="3D"?aggregateCandles(raw,3):raw);
+}catch{frames.set(p.tf,[])}}));
    const sigs=new Map<string,Sig|null>();
    for(const p of PLANS)sigs.set(p.tf,signal(frames.get(p.tf)??[],profile));
    for(const p of PLANS){
@@ -108,7 +124,7 @@ Deno.serve(async(req)=>{
     const confirmations=p.confirm.map(tf=>sigs.get(tf)).filter(Boolean) as Sig[];
     const same=confirmations.filter(x=>x.direction===setup.direction).length;
     const conflict=confirmations.some(x=>x.direction!==setup.direction);
-    const required=p.confirm.length?1:0;
+    const required=p.tf==="15m"||p.tf==="1H"||p.tf==="3D"?1:(p.confirm.length?1:0);
     if(conflict||same<required)continue;
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const strategyName=`${profile.strategy} · ${p.type} ${p.tf}`;
