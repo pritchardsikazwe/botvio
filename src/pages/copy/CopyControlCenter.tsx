@@ -13,6 +13,7 @@ import { useMyCopySubscriptions, useMyCopiedTrades } from "@/hooks/useBotvio";
 import { CopyTradingRoleGuide } from "@/components/tradecopy/CopyTradingRoleGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const money = (value: number) => `${value >= 0 ? "+" : "-"}$${Math.abs(value).toFixed(2)}`;
 
@@ -180,6 +181,16 @@ export const CopyTradingAdmin = () => {
   const live = accountRows.filter((a) => a.environment === "live").length;
   const active = accountRows.filter((a) => a.tradecopy_active).length;
 
+  const setProviderStatus = async (providerId: string, status: "approved" | "rejected") => {
+    const { error } = await supabase.from("providers").update({ status, verified: status === "approved" }).eq("id", providerId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    await providers.refetch();
+    toast.success(status === "approved" ? "Provider approved" : "Provider rejected");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -223,8 +234,19 @@ export const CopyTradingAdmin = () => {
                 providerRows.length === 0 ? <p className="text-sm text-muted-foreground">No provider profiles found.</p> :
                 providerRows.slice(0, 8).map((p) => (
                   <div key={p.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
-                    <div><p className="text-sm font-semibold">{p.id.slice(0, 8)}…</p><p className="text-xs text-muted-foreground">{p.total_subscribers ?? 0} followers · {p.total_trades ?? 0} trades</p></div>
-                    <Badge variant={p.status === "approved" ? "default" : "outline"}>{p.status ?? "unknown"}</Badge>
+                    <div>
+                      <p className="text-sm font-semibold">{p.id.slice(0, 8)}…</p>
+                      <p className="text-xs text-muted-foreground">{p.total_subscribers ?? 0} followers · {p.total_trades ?? 0} trades</p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-1.5">
+                      <Badge variant={p.status === "approved" ? "default" : "outline"}>{p.status ?? "unknown"}</Badge>
+                      {(p.status === "pending" || p.status === "review") && (
+                        <>
+                          <Button size="sm" onClick={() => setProviderStatus(p.id, "approved")}>Approve</Button>
+                          <Button size="sm" variant="outline" onClick={() => setProviderStatus(p.id, "rejected")}>Reject</Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
             </CardContent>
