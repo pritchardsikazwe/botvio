@@ -62,11 +62,14 @@ function normalizeQuote(body: unknown) {
   const raw = unwrap(body) as Record<string, unknown>;
   const bid = Number(raw?.bid ?? raw?.Bid);
   const ask = Number(raw?.ask ?? raw?.Ask);
-  const last = Number(raw?.last ?? raw?.Last ?? raw?.price ?? raw?.Price);
+  const lastNum = Number(raw?.last ?? raw?.Last ?? raw?.price ?? raw?.Price);
+  // MT5 reports last=0 for bid/ask-only instruments — treat 0 as "no last trade".
+  const last = lastNum > 0 ? lastNum : NaN;
   return {
     bid: Number.isFinite(bid) ? bid : null,
     ask: Number.isFinite(ask) ? ask : null,
     last: Number.isFinite(last) ? last : null,
+    time: raw?.time ?? raw?.Time ?? null,
     symbol: String(raw?.symbol ?? raw?.Symbol ?? ""),
     raw,
   };
@@ -219,7 +222,14 @@ Deno.serve(async (req) => {
       const to = String(body?.to ?? new Date().toISOString());
       const from = String(body?.from ?? new Date(Date.now() - 400 * 5 * 60_000).toISOString());
       if (!symbol) throw new Error("Symbol is required");
-      return json({ ok: true, candles: await withConnection(admin, userId, async (session) => normalizeBars(await callApi("/PriceHistory", { id: session, symbol, from, to, timeFrame: timeframeMap[timeframe] ?? 5 }))) });
+      let rawSample = "";
+      const candles = await withConnection(admin, userId, async (session) => {
+        const raw = await callApi("/PriceHistory", { id: session, symbol, from, to, timeFrame: timeframeMap[timeframe] ?? 5 });
+        const bars = normalizeBars(raw);
+        if (!bars.length) rawSample = (typeof raw === "string" ? raw : JSON.stringify(raw)).slice(0, 400);
+        return bars;
+      });
+      return json({ ok: true, candles, ...(rawSample ? { rawSample } : {}) });
     }
 
     if (action === "disconnect") {
