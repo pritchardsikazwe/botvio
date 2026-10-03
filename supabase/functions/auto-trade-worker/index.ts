@@ -304,7 +304,6 @@ serve(async (req) => {
           if (inst.auto_post !== false) {
             try {
               const lastClose = candles[candles.length - 1]?.close ?? 0;
-              const isBuy = sig.signal === "BUY";
               const sl = sig.stopLoss ?? lastClose;
               const tp = sig.takeProfit ?? lastClose;
               await admin.from("trading_signals").insert({
