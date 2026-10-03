@@ -13,7 +13,7 @@ const MARKET_MAP: Record<string, string[]> = {
 function phaseFor(time:string) {
   const mins = (new Date(time).getTime() - Date.now()) / 60000;
   if (mins <= -30) return "PASSED";
-  if (mins <= 15) return "POST-NEWS";
+  if (mins < 0) return "POST-NEWS";
   if (mins <= 5) return "NEWS MODE";
   if (mins <= 60) return "APPROACHING";
   return "UPCOMING";
