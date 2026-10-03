@@ -9,7 +9,19 @@ export function mapToDerivSymbol(displaySymbol: string): string | null {
   const s = (displaySymbol || "").trim();
   if (!s) return null;
   // Pass-through if already a Deriv code
-  if (s.startsWith("frx") || s.startsWith("cry") || s.includes("_")) return s;
+  // Synthetic indices are already native Deriv symbols. Do not turn JD100,
+  // BOOM/CRASH, 1HZ or Step symbols into forex-prefixed symbols.
+  if (
+    s.startsWith("frx") ||
+    s.startsWith("cry") ||
+    s.includes("_") ||
+    /^JD\\d+$/.test(s) ||
+    /^BOOM\\d+N?$/.test(s) ||
+    /^CRASH\\d+N?$/.test(s) ||
+    /^1HZ\\d+V?$/.test(s) ||
+    s === "stpRNG" ||
+    /^RDBULL$|^RDBEAR$/.test(s)
+  ) return s;
 
   const map: Record<string, string> = {
     // Forex pairs (slash + plain)
