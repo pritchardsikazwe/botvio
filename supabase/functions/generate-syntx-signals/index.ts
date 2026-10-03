@@ -24,7 +24,19 @@ if(s.includes("VOLATILITY")) return [symbol,{min:s.includes("(1S)")?82:n>=100?79
 return [symbol,{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`}];
 }))
 );
-const TF:Record<string,number>={M1:1,M15:15,H1:60,D1:1440};
+const TF:Record<string,number>={M1:1,M15:15,H1:60,D1:1440,D3:1440};
+
+function aggregateDays(c:Candle[],days:number):Candle[]{
+ if(days<=1)return c;
+ const buckets=new Map<number,Candle>();
+ for(const x of c){
+   const bucket=Math.floor(x.time/(86400*days))*(86400*days);
+   const prev=buckets.get(bucket);
+   if(!prev)buckets.set(bucket,{time:bucket,open:x.open,high:x.high,low:x.low,close:x.close});
+   else {prev.high=Math.max(prev.high,x.high);prev.low=Math.min(prev.low,x.low);prev.close=x.close;}
+ }
+ return [...buckets.values()].sort((a,b)=>a.time-b.time);
+}
 function ema(a:number[],p:number){if(a.length<p)return null;let e=a.slice(0,p).reduce((x,y)=>x+y,0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e=(a[i]-e)*k+e;return e}
 function atr(c:Candle[],p=14){if(c.length<=p)return null;const tr=c.slice(1).map((x,i)=>Math.max(x.high-x.low,Math.abs(x.high-c[i].close),Math.abs(x.low-c[i].close)));return tr.slice(-p).reduce((a,b)=>a+b,0)/Math.min(p,tr.length)}
 function rsi(c:Candle[],p=14){if(c.length<=p)return null;let g=0,l=0;for(let i=c.length-p;i<c.length;i++){const d=c[i].close-c[i-1].close;if(d>0)g+=d;else l-=d}if(l===0)return 100;return 100-100/(1+(g/p)/(l/p))}
@@ -36,15 +48,22 @@ Deno.serve(async(req)=>{if(req.method!=="POST")return new Response("POST require
 const trigger=req.headers.get("x-botvio-automation-secret")??"";
 const {data:expectedSecret,error:secretError}=await db.rpc("get_botvio_automation_secret");
 if(secretError||!expectedSecret||trigger!==expectedSecret)return new Response(JSON.stringify({success:false,error:"Unauthorized automation trigger"}),{status:401,headers:{"Content-Type":"application/json"}});const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];for(const c of connections??[]){let session=String(c.session_id||"");try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
-const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{frames.push({n:name,sig:frameSignal(bars(await api(base,key,"/PriceHistory",{id:session,symbol,from:new Date(Date.now()-500*mins*60000).toISOString(),to:new Date().toISOString(),timeFrame:mins})),f.bias,profile)})}catch{frames.push({n:name,sig:null})}}
+const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{
+  const fetchMinutes=name==="D3"?1440:mins;
+  const fetchBars=name==="D3"?300:500;
+  const raw=bars(await api(base,key,"/PriceHistory",{id:session,symbol,from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString(),to:new Date().toISOString(),timeFrame:fetchMinutes}));
+  const data=name==="D3"?aggregateDays(raw,3):raw;
+  frames.push({n:name,sig:frameSignal(data,f.bias,profile)});
+}catch{frames.push({n:name,sig:null})}}
 
 const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
-const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), scalp=get("M1");
+const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), biasD3=get("D3"), scalp=get("M1");
 const setups=[
   {tf:"1m",label:"SCALPING 1M",type:"SCALPING",setup:scalp,confirm:[bias15,biasH1],min:Math.max(profile.min,78),expiry:300,backup:600},
   {tf:"15m",label:"INTRADAY 15M",type:"INTRADAY",setup:bias15,confirm:[biasH1,biasD1],min:Math.max(profile.min,profile.min+1),expiry:3600,backup:5400},
-  {tf:"1H",label:"SWING 1H",type:"SWING",setup:biasH1,confirm:[biasD1],min:Math.max(profile.min,profile.min+3),expiry:14400,backup:21600},
-  {tf:"1D",label:"POSITION 1D",type:"POSITION",setup:biasD1,confirm:[],min:Math.max(profile.min,profile.min+5),expiry:259200,backup:432000}
+  {tf:"1H",label:"SWING 1H",type:"SWING",setup:biasH1,confirm:[biasD1],min:Math.max(profile.min,profile.min+2),expiry:14400,backup:21600},
+  {tf:"1D",label:"POSITION 1D",type:"POSITION",setup:biasD1,confirm:[],min:Math.max(profile.min,profile.min+4),expiry:259200,backup:432000},
+  {tf:"3D",label:"POSITION 3D",type:"POSITION",setup:biasD3,confirm:[biasD1],min:Math.max(profile.min,profile.min+3),expiry:777600,backup:1209600}
 ];
 
 for(const plan of setups){
