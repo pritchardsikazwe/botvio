@@ -71,4 +71,4 @@ for(const plan of setups){
     }
   }).select("id,symbol,direction,confidence,timeframe").single();
   if(!ins&&row)published.push(row);
-}}}}return new Response(JSON.stringify({success:true,published,count:published.length,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
+}}}return new Response(JSON.stringify({success:true,published,count:published.length,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
