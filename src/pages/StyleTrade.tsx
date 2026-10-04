@@ -50,6 +50,12 @@ const StyleTrade = () => {
   const conn = useDerivConnection();
   const isDerivReady = conn.isDerivReady;
   const style = getStyleById(styleId || "");
+  const optionFamily: "momentum" | "barrier" | "digits" =
+    styleId === "digit-contracts" ? "digits" :
+    styleId === "higher-lower" || styleId === "touch-no-touch" ? "barrier" :
+    "momentum";
+  const { instruments: liveInstruments, loading: instrumentsLoading, error: instrumentsError } =
+    useBinaryOptionInstruments(optionFamily);
 
   const [selectedSymbol, setSelectedSymbol] = useState(() => searchParams.get("symbol") || "");
   const [activeContract, setActiveContract] = useState("");
