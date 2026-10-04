@@ -41,7 +41,7 @@ const StyleTrade = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
-    authorized, isDerivConnected, isDerivReady, balance, lastTick, subscribeTicks, unsubscribeTicks,
+    authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
     getProposal, buyContract, subscribeContract, onContractUpdate, refreshBalance,
     accountInfo, accountType, currency, activeDerivToken, derivTokens, switchDerivToken,
   } = useDeriv();
@@ -502,7 +502,6 @@ const StyleTrade = () => {
               </Select>
             )}
             <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
               <Label className="text-xs text-muted-foreground">Manual</Label>
               <Switch checked={autoMode} onCheckedChange={setAutoMode} />
               <Label className="text-xs text-muted-foreground flex items-center gap-1">
@@ -510,8 +509,8 @@ const StyleTrade = () => {
               </Label>
             </div>
             <div className="flex items-center gap-2">
-              <Label className="text-xs text-muted-foreground">Demo</Label>
-              <Switch checked={demoSignalMode} onCheckedChange={setDemoMode} />
+              <Label className="text-xs text-muted-foreground">Simulate</Label>
+              <Switch checked={demoSignalMode} onCheckedChange={setDemoSignalMode} />
             </div>
           </div>
         </div>
