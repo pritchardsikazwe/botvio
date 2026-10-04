@@ -130,7 +130,7 @@ export const CopyProviderCard = ({ data }: { data: CopyProviderCardData }) => {
             <Link to={`/copy-trading/provider/${data.providerId}`}>View</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link to={`/copy-trading/start/${data.providerId}`}>Copy</Link>
+            <Link to={`/copy-trading/start/${data.providerId}`}>{data.platform === "mt5" ? "Copy via MT5" : "Copy via Deriv"}</Link>
           </Button>
           <CopyInviteLinkButton
             providerId={data.providerId}
