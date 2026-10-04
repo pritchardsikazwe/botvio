@@ -1,3 +1,4 @@
+// Deployment trigger: keep TradeCopy API deployment tied to this function path.
 // Secure wrapper around the TradeCopy REST API. API credentials stay server-side.
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
