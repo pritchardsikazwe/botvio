@@ -272,10 +272,12 @@ const CopyStart = () => {
               </div>
               <label className="flex items-center gap-2 rounded-lg border border-border/60 p-3 text-xs"><Checkbox checked={mt5CopySltp} onCheckedChange={(v) => setMt5CopySltp(!!v)} /> Copy provider stop-loss and take-profit</label>
               <div className="rounded-lg bg-muted/30 p-3 text-[11px] text-muted-foreground">TradeCopy links your MT5 follower to this provider's MT5 master. Demo and Live are kept separate.</div>
+              <Button className="w-full" onClick={handleStart} disabled={tradeCopy.isPending}>
+                {tradeCopy.isPending ? "Connecting…" : "Start MT5 Copying"}
+              </Button>
             </CardContent>
           </Card>
         ) : (
-        {/* Risk */}
         <Card className="glass-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Risk settings</CardTitle>
