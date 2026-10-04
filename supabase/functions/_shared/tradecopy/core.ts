@@ -34,7 +34,7 @@ export type CopyOrderType = 0 | 1;
 export class TradeCopyError extends Error {
   constructor(
     message: string,
-    public code: "validation" | "auth" | "upstream" | "network" | "live_guard" | "not_found" | "config",
+    public code: "validation" | "auth" | "upstream" | "network" | "live_guard" | "not_found" | "config" | "duplicate_master",
     public status = 400,
   ) {
     super(message);
