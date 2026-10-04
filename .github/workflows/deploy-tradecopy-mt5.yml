@@ -67,3 +67,4 @@ jobs:
           npx supabase@latest functions deploy generate-deriv-synthetic-signals --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
           npx supabase@latest functions deploy evaluate-live-signals --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
           npx supabase@latest functions deploy top-assets-ranking --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          npx supabase@latest functions deploy signal-performance-audit --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
