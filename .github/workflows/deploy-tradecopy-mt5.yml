@@ -9,6 +9,8 @@ on:
       - "supabase/functions/mt5-direct-execution/**"
       - "supabase/functions/_shared/automationAuth.ts"
       - "supabase/functions/_shared/tradecopy/**"
+      - "supabase/functions/market-worker-intelligence/**"
+      - "supabase/migrations/**"
       - ".github/workflows/deploy-tradecopy-mt5.yml"
   workflow_dispatch:
     inputs:
@@ -84,6 +86,18 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: npx supabase@latest functions deploy provider-event --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+
+      - name: Apply database migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: npx supabase@latest db push --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Deploy Market Worker Intelligence
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: npx supabase@latest functions deploy market-worker-intelligence --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
 
       - name: Deploy MT5 direct execution
         env:
