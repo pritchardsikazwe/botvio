@@ -86,7 +86,7 @@ async function loadAccount(ctx: Ctx, id: string, opts: { allowAdmin?: boolean } 
     .eq("id", requestedId)
     .maybeSingle();
 
-  if (!data && opts.allowAdmin && ctx.isAdmin && /^\\d+$/.test(requestedId)) {
+  if (!data && opts.allowAdmin && ctx.isAdmin && /^\d+$/.test(requestedId)) {
     const externalId = Number(requestedId);
     if (Number.isSafeInteger(externalId) && externalId > 0) {
       const fallback = await ctx.admin
