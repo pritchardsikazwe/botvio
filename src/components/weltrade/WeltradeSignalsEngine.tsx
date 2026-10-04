@@ -135,24 +135,49 @@ export const WeltradeSignalsEngine = () => {
   );
   const stats = useMemo(() => summarizeSignals(signals), [signals]);
 
-  // Save real-candle SyntX signals (and their WIN/LOSS results) to the Signals tab.
+  // Publish confirmed Weltrade signals from the real broker feed into the
+  // central trading_signals table so Home, Signals and downstream routing see
+  // the same signal. This is intentionally broker-wide, not SyntX-only.
   useEffect(() => {
-    if (!instrument.syntxFamily || candles.length < 50 || !signals.length) return;
+    if (candles.length < 50 || !signals.length) return;
+
     const recentSigs = signals.slice(-20).map((s) => ({
-      symbol: instrument.mt5Symbol, timeframe: s.timeframe, direction: s.direction,
-      strategy: s.strategy, strategyId: s.strategyId, confidence: s.confidence,
-      entry: s.entry, stopLoss: s.stopLoss, takeProfit: s.takeProfit,
-      time: s.time, result: s.result, reason: s.reason?.slice(0, 500), family: instrument.syntxFamily,
+      symbol: instrument.mt5Symbol,
+      timeframe: s.timeframe,
+      direction: s.direction,
+      strategy: s.strategy,
+      strategyId: s.strategyId,
+      confidence: s.confidence,
+      entry: s.entry,
+      stopLoss: s.stopLoss,
+      takeProfit: s.takeProfit,
+      time: s.time,
+      result: s.result,
+      reason: s.reason?.slice(0, 500),
+      family: instrument.syntxFamily,
+      category: instrument.category,
+      instrumentLabel: instrument.label,
     }));
-    const key = JSON.stringify(recentSigs.map((s) => [s.time, s.result]));
+
+    const key = JSON.stringify(recentSigs.map((s) => [s.time, s.result, s.direction]));
     const t = setTimeout(async () => {
       const { data: sess } = await supabase.auth.getSession();
       if (!sess.session) return;
-      const cacheKey = `botvio.syntx.sync.${instrument.mt5Symbol}.${prefs.timeframe}`;
+
+      const cacheKey = `botvio.weltrade.sync.${instrument.mt5Symbol}.${prefs.timeframe}`;
       if (sessionStorage.getItem(cacheKey) === key) return;
-      const { data } = await supabase.functions.invoke("record-syntx-signals", { body: { signals: recentSigs } });
+
+      const { data, error } = await supabase.functions.invoke("record-weltrade-signals", {
+        body: { signals: recentSigs },
+      });
+
+      if (error) {
+        console.error("Weltrade signal publish failed:", error);
+        return;
+      }
       if (data?.ok) sessionStorage.setItem(cacheKey, key);
-    }, 3000);
+    }, 1500);
+
     return () => clearTimeout(t);
   }, [signals, candles.length, instrument, prefs.timeframe]);
 
