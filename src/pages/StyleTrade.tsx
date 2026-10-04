@@ -9,6 +9,7 @@ import { DerivDiagnosticsPanel } from "@/components/trading/DerivDiagnosticsPane
 import { DerivConnectionBar } from "@/components/trading/DerivConnectionBar";
 import { TradingNav } from "@/components/trading/TradingNav";
 import { useContractCapabilities } from "@/hooks/useContractCapabilities";
+import { useBinaryOptionInstruments } from "@/hooks/useBinaryOptionInstruments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ const StyleTrade = () => {
   const [stake, setStake] = useState("1");
   const [duration, setDuration] = useState("5");
   const [digit, setDigit] = useState("5");
+  const [barrier, setBarrier] = useState("");
   const [multiplier, setMultiplier] = useState("100");
   const [stopLoss, setStopLoss] = useState("");
   const [takeProfit, setTakeProfit] = useState("");
@@ -97,8 +99,9 @@ const StyleTrade = () => {
   // Init defaults
   useEffect(() => {
     if (style) {
-      if (style.instruments.length > 0 && !selectedSymbol) {
-        setSelectedSymbol(style.instruments[0].symbol);
+      const available = liveInstruments.length > 0 ? liveInstruments : style.instruments;
+      if (available.length > 0 && (!selectedSymbol || !available.some(i => i.symbol === selectedSymbol))) {
+        setSelectedSymbol(available[0].symbol);
       }
       if (style.contractTypes.length > 0 && !activeContract) {
         setActiveContract(style.contractTypes[0].id);
@@ -110,7 +113,7 @@ const StyleTrade = () => {
         setDuration("5");
       }
     }
-  }, [style]);
+  }, [style, liveInstruments]);
 
   // Set multiplier from capability when available
   useEffect(() => {
@@ -348,7 +351,11 @@ const StyleTrade = () => {
       const ct = button.contractType;
       const isDigit = ct.startsWith("DIGIT");
       const isTicksBased = currentContractConfig?.tickDuration === true;
-      const needsBarrier = ct === "DIGITMATCH" || ct === "DIGITDIFF" || ct === "DIGITOVER" || ct === "DIGITUNDER";
+      const needsDigitBarrier = ct === "DIGITMATCH" || ct === "DIGITDIFF" || ct === "DIGITOVER" || ct === "DIGITUNDER";
+      const needsBarrier = currentContractConfig?.needsBarrier === true || needsDigitBarrier;
+      if (needsBarrier && !barrier.trim() && !needsDigitBarrier) {
+        throw new Error("Enter a barrier before placing this contract.");
+      }
 
       const proposalParams: any = {
         symbol: selectedSymbol,
@@ -368,7 +375,8 @@ const StyleTrade = () => {
             } else if (!isMultiplier && !isAccu) {
         proposalParams.duration = durationValue;
         proposalParams.duration_unit = durationUnit;
-        if (needsBarrier) proposalParams.barrier = parseInt(digit);
+        if (needsDigitBarrier) proposalParams.barrier = parseInt(digit);
+        else if (needsBarrier) proposalParams.barrier = barrier.trim();
       }
 
       if (!isMultiplier && !isAccu && stopLoss) {
@@ -529,7 +537,7 @@ const StyleTrade = () => {
                   <Select value={selectedSymbol} onValueChange={setSelectedSymbol}>
                     <SelectTrigger><SelectValue placeholder="Select pair" /></SelectTrigger>
                     <SelectContent>
-                      {style.instruments.map(inst => (
+                      {(liveInstruments.length > 0 ? liveInstruments : style.instruments).map(inst => (
                         <SelectItem key={inst.symbol} value={inst.symbol}>
                           {inst.displayName}
                         </SelectItem>
@@ -541,6 +549,12 @@ const StyleTrade = () => {
                     <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                       <Loader2 className="h-3 w-3 animate-spin" /> Checking live contract availability...
                     </div>
+                  )}
+                  {instrumentsLoading && (
+                    <div className="mt-1 text-[10px] text-muted-foreground">Loading instruments supported by this options family…</div>
+                  )}
+                  {instrumentsError && (
+                    <div className="mt-1 text-[10px] text-warning">Live instrument list unavailable; using the verified fallback list.</div>
                   )}
                   {!capsLoading && selectedSymbol && supportedTypes.length > 0 && (
                     <div className="mt-2 text-[10px] text-success">
@@ -816,6 +830,20 @@ const StyleTrade = () => {
                             />
                           </div>
                         </div>
+
+                        {ct.needsBarrier && (
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Barrier</Label>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="e.g. +0.50 or -0.50"
+                              value={barrier}
+                              onChange={e => setBarrier(e.target.value)}
+                            />
+                            <p className="text-[10px] text-muted-foreground">Use the barrier format supported by the selected instrument.</p>
+                          </div>
+                        )}
 
                         {ct.needsDigit && (
                           <div className="space-y-1.5">
