@@ -44,6 +44,17 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: npx supabase@latest functions deploy tradecopy-api --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
 
+      - name: Deploy Deriv Options copy engine
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: npx supabase@latest functions deploy provider-execute-copy --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Retire legacy MT5 provider event
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: npx supabase@latest functions deploy provider-event --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
       - name: Deploy MT5 direct execution
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
