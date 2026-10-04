@@ -6,6 +6,8 @@ on:
       - botvio-independent-sep13
     paths:
       - "supabase/functions/tradecopy-api/**"
+      - "supabase/functions/mt5-direct-execution/**"
+      - "supabase/functions/_shared/automationAuth.ts"
       - "supabase/functions/_shared/tradecopy/**"
       - ".github/workflows/deploy-tradecopy-mt5.yml"
   workflow_dispatch:
