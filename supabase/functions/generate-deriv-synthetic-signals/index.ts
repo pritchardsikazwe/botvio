@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assertAutomationKey } from "../_shared/automationAuth.ts";
+import { loadPerformanceIndex, performanceGate } from "../_shared/performanceGate.ts";
 
 type Candle={epoch:number;open:number;high:number;low:number;close:number};
 type Sig={direction:"BUY"|"SELL";score:number;entry:number;sl:number;tp:number};
@@ -134,6 +135,7 @@ Deno.serve(async(req)=>{
  if(req.method!=="POST")return new Response("POST required",{status:405});
  try{
   const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const performanceIndex = await loadPerformanceIndex(db);
   if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } });
   await db.from("trading_signals").update({status:"EXPIRED"}).eq("status","ACTIVE").lt("expires_at",new Date().toISOString());
   const ws=new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
@@ -155,16 +157,19 @@ Deno.serve(async(req)=>{
    const sigs=new Map<string,Sig|null>();for(const p of PLAN)sigs.set(p.tf,strategySignal(frames.get(p.tf)??[],strategy));
    for(const p of PLAN){
     const setup=sigs.get(p.tf);if(!setup)continue;
+    const strategyName = `${strategy.family} · ${strategy.label} · ${p.type} ${p.tf}`;
+    const gate=performanceGate(performanceIndex,s.name,p.tf,strategyName);
+    if(!gate.allowed)continue;
     const conf=p.confirm.map(x=>sigs.get(x));
     const confDirections=p.confirm.map((tf,i)=>{
       const sig=conf[i];
       if(sig?.direction)return sig.direction;
       return directionalBias(frames.get(tf)??[]);
     }).filter(Boolean) as ("BUY"|"SELL")[];
-    if(confDirections.some(x=>x!==setup.direction)||confDirections.filter(x=>x===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost)continue;
+    if(confDirections.some(x=>x!==setup.direction)||confDirections.filter(x=>x===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost+gate.scoreBoost)continue;
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     setup.sl=levels.sl; setup.tp=levels.tp;
-    const type=p.type,strategyName=`${strategy.family} · ${strategy.label} · ${type} ${p.tf}`,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
+    const type=p.type,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",s.name).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-(p.tf==="1m"?5:p.tf==="15m"?30:120)*60000).toISOString()).limit(1);
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
