@@ -84,6 +84,15 @@ function symbolProfile(symbol: string, family: DerivFamily, mode: DerivMode): De
   return { id:`VOLATILITY_${n || "ADAPTIVE"}${oneSecond ? "_1S" : ""}`, label:`Volatility ${n || ""}${oneSecond ? " (1s)" : ""} Momentum`.trim(), minConfidence:min, stop:volStop, target:volTarget, maxSpikeAtr:oneSecond ? 1.9 : 2.2, requireMomentum:true };
 }
 
+function bollinger(candles: NormalizedCandle[], period = 20, multiplier = 2) {
+  if (candles.length < period) return null;
+  const values = candles.slice(-period).map((x) => x.close);
+  const mean = values.reduce((a, b) => a + b, 0) / period;
+  const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / period;
+  const sd = Math.sqrt(variance);
+  return { mean, upper: mean + multiplier * sd, lower: mean - multiplier * sd, sd };
+}
+
 function timeframeAllowed(mode: DerivMode, timeframe: Timeframe): boolean {
   if (mode === "SCALPING") return ["1m", "3m", "5m"].includes(timeframe);
   if (mode === "DAY") return ["5m", "15m", "30m"].includes(timeframe);
@@ -172,7 +181,7 @@ export function computeDerivSignals(
     const reasons: string[] = [];
 
     if (family === "BOOM") {
-      if (bullish && momentumUp && rsi < 78) {
+      if (bullish && momentumUp && rsi < 76 && (bullishReject || c.close > p.high)) {
         direction = "BUY";
         confidence = 64;
         reasons.push("Boom upward-spike bias");
@@ -190,7 +199,7 @@ export function computeDerivSignals(
     }
 
     if (family === "CRASH") {
-      if (bearish && momentumDown && rsi > 22) {
+      if (bearish && momentumDown && rsi > 24 && (bearishReject || c.close < p.low)) {
         direction = "SELL";
         confidence = 64;
         reasons.push("Crash downward-spike bias");
@@ -223,20 +232,22 @@ export function computeDerivSignals(
     }
 
     if (family === "VOLATILITY") {
-      if (bullish && momentumUp && rsi >= 48 && rsi <= 72) {
-        direction = "BUY";
-        confidence = 62;
-        reasons.push("bullish multi-indicator structure");
-        reasons.push("positive momentum");
-        if (bullishReject || c.close > p.high) { confidence += 10; reasons.push("pullback/break confirmation"); }
-        if (expansion) { confidence += 5; reasons.push("volatility expansion"); }
-      } else if (bearish && momentumDown && rsi >= 28 && rsi <= 52) {
-        direction = "SELL";
-        confidence = 62;
-        reasons.push("bearish multi-indicator structure");
-        reasons.push("negative momentum");
-        if (bearishReject || c.close < p.low) { confidence += 10; reasons.push("pullback/break confirmation"); }
-        if (expansion) { confidence += 5; reasons.push("volatility expansion"); }
+      const bb = bollinger(candles.slice(0, i + 1), 20, 2);
+      if (bb && bb.sd > 0) {
+        // Volatility indices are driftless by design. Avoid treating EMA/MACD
+        // crossovers as predictive trend signals; trade only strong reversion
+        // from a Bollinger extreme with RSI and candle rejection.
+        const lowerExtreme = c.close <= bb.lower && rsi <= 35 && lowerWick > body * 0.6 && c.close > c.open;
+        const upperExtreme = c.close >= bb.upper && rsi >= 65 && upperWick > body * 0.6 && c.close < c.open;
+        if (lowerExtreme) {
+          direction = "BUY";
+          confidence = 80;
+          reasons.push("Volatility mean reversion", "lower Bollinger extreme", "bullish rejection");
+        } else if (upperExtreme) {
+          direction = "SELL";
+          confidence = 80;
+          reasons.push("Volatility mean reversion", "upper Bollinger extreme", "bearish rejection");
+        }
       }
     }
 
