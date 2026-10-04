@@ -88,8 +88,8 @@ const CopyStart = () => {
         const mt5Account = mt5Accounts?.find((a) => a.id === account);
         if (!mt5Account) throw new Error("Connect an MT5 follower account first");
         if (mt5Account.environment === "LIVE") {
-          const typed = window.prompt('This connects REAL MT5 copy trading. Type "START LIVE MT5 COPY" to confirm.');
-          if (typed !== "START LIVE MT5 COPY") return;
+          const typed = window.prompt('This connects REAL MT5 copy trading. Type "START LIVE COPYING" to confirm.');
+          if (typed !== "START LIVE COPYING") return;
         }
         const linked = await tradeCopy.mutateAsync({
           action: "link",
@@ -114,7 +114,7 @@ const CopyStart = () => {
           payload: {
             relationship_id: relationshipId,
             status: "active",
-            ...(mt5Account.environment === "LIVE" ? { confirm_live: true, confirm_text: "START LIVE MT5 COPY" } : {}),
+            ...(mt5Account.environment === "LIVE" ? { confirm_live: true, confirm_text: "START LIVE COPYING" } : {}),
           },
         });
         toast.success(mt5Account.environment === "LIVE" ? "Live MT5 TradeCopy started" : "Demo MT5 TradeCopy started");
