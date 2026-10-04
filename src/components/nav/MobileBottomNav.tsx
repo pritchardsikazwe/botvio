@@ -5,18 +5,18 @@ import { MobileSideMenu } from "./MobileSideMenu";
 
 const NAV = [
   { label: "Home", to: "/", icon: BarChart3 },
-  { label: "Markets", to: "/markets", icon: BarChart3 },
+  { label: "Connect", to: "/connections", icon: Users },
   { label: "Signals", to: "/signals", icon: Signal },
-  { label: "Copy Trading", to: "/copy-trading", icon: Users },
-  { label: "AI", to: "/chart/XAUUSD", icon: Sparkles },
+  { label: "AI Chart", to: "/chart/XAUUSD", icon: Sparkles },
+  { label: "Deriv", to: "https://t.deriv.link?t=8U3QNKP9UA9G", icon: Bot, external: true },
 ];
 
 export const MobileBottomNav = () => {
   const { pathname } = useLocation();
 
-  if (pathname === "/" || pathname === "/landing" || pathname === "/home-preview" || pathname === "/home-classic") {
-    return null;
-  }
+  // Keep the primary mobile actions visible even on the public homepage.
+  // Desktop navigation remains unchanged.
+
 
   const isActive = (to: string) => to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
 
@@ -26,10 +26,11 @@ export const MobileBottomNav = () => {
         aria-label="Primary mobile navigation"
         className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-6 border-t border-primary/10 bg-[hsl(220_18%_8%_/_0.96)] backdrop-blur-xl lg:hidden"
       >
-        {NAV.map(({ label, to, icon: Icon }) => (
+        {NAV.map(({ label, to, icon: Icon, external }) => (
           <Link
             key={to}
             to={to}
+            {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             className={cn(
               "flex min-h-14 flex-col items-center justify-center gap-1 text-[9px] font-bold transition-colors",
               isActive(to) ? "text-primary" : "text-muted-foreground hover:text-foreground"
