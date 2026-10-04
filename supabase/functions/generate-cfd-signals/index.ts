@@ -25,7 +25,8 @@ const SYMBOLS=[
 
 const PLANS=[
   {tf:"1m",type:"SCALPING",minutes:1,count:220,expiry:300,backup:600,minBoost:2,confirm:["15m","1H"]},
-  {tf:"15m",type:"INTRADAY",minutes:15,count:180,expiry:3600,backup:5400,minBoost:1,confirm:["1H"]},
+  {tf:"5m",type:"SCALPING",minutes:5,count:220,expiry:900,backup:1800,minBoost:1,confirm:["15m","1H"]},
+  {tf:"15m",type:"SCALPING_INTRADAY",minutes:15,count:180,expiry:3600,backup:5400,minBoost:1,confirm:["1H"]},
   {tf:"1H",type:"SWING",minutes:60,count:160,expiry:14400,backup:21600,minBoost:2,confirm:["1D"]},
   {tf:"1D",type:"POSITION",minutes:1440,count:180,expiry:259200,backup:432000,minBoost:4,confirm:[]},
   {tf:"3D",type:"POSITION",minutes:1440,count:300,expiry:777600,backup:1209600,minBoost:3,confirm:["1D"]}
@@ -78,9 +79,39 @@ function signal(c:Candle[],profile:typeof SYMBOLS[number]):Sig|null{
 
 function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
  const a=atr(c)??0;
- const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
+ const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="5m"?{sl:.95,tp:1.45}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
  const entry=c.at(-1)!.close;
  return {sl:direction==="BUY"?entry-a*m.sl:entry+a*m.sl,tp:direction==="BUY"?entry+a*m.tp:entry-a*m.tp};
+}
+
+function strategyTypes(c:Candle[],direction:"BUY"|"SELL",tf:string):string[]{
+  if(c.length<25)return [];
+  const last=c.at(-1)!;
+  const prev=c.slice(-21,-1);
+  const hi=Math.max(...prev.map(x=>x.high)), lo=Math.min(...prev.map(x=>x.low));
+  const a=atr(c)??0;
+  const range=last.high-last.low;
+  const upper=last.high-Math.max(last.open,last.close);
+  const lower=Math.min(last.open,last.close)-last.low;
+  const body=Math.abs(last.close-last.open);
+  const closes=c.map(x=>x.close);
+  const e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50);
+  const out:string[]=[];
+  if((direction==="BUY"&&last.close>hi)||(direction==="SELL"&&last.close<lo))out.push("BREAKOUT");
+  const nearSupport=Math.abs(last.low-lo)<=Math.max(a*.35,Math.abs(last.close)*.0005);
+  const nearResistance=Math.abs(last.high-hi)<=Math.max(a*.35,Math.abs(last.close)*.0005);
+  if(direction==="BUY"&&nearSupport)out.push("SUPPORT");
+  if(direction==="SELL"&&nearResistance)out.push("RESISTANCE");
+  if(direction==="BUY"&&lower>body*1.2&&lower>upper*1.3)out.push("REJECTION");
+  if(direction==="SELL"&&upper>body*1.2&&upper>lower*1.3)out.push("REJECTION");
+  if((direction==="BUY"&&e9!=null&&e21!=null&&e50!=null&&e9>e21&&e21>e50)||
+     (direction==="SELL"&&e9!=null&&e21!=null&&e50!=null&&e9<e21&&e21<e50))out.push("TREND");
+  const recent=c.slice(-10);
+  const first=recent[0]?.close??last.close;
+  const slope=last.close-first;
+  if((direction==="BUY"&&slope>0)||(direction==="SELL"&&slope<0))out.push("TRENDLINE");
+  if(["1m","5m","15m"].includes(tf))out.push("SCALPING");
+  return [...new Set(out)];
 }
 
 function isForexMarketOpen(now = new Date()): boolean {
