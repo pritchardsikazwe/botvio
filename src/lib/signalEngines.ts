@@ -815,11 +815,12 @@ function waitResult(reason: string, ticks?: number[]): SignalResult {
 
 import { ticksDigitEngine, ticksEngine } from "./ticksDigitEngine";
 
-export type EngineType = "rise_fall" | "higher_lower" | "even_odd" | "over_under" |
+export type EngineType = "momentum" | "rise_fall" | "higher_lower" | "even_odd" | "over_under" |
   "match_differ" | "boom_crash" | "accumulators" | "multipliers" | "turbo" | "ticks";
 
 export function runEngine(type: EngineType, ticks: number[]): SignalResult {
   switch (type) {
+    case "momentum":
     case "rise_fall": return riseFallEngine(ticks);
     case "higher_lower": return higherLowerEngine(ticks);
     case "even_odd": return digitsEvenOddEngine(ticks);
