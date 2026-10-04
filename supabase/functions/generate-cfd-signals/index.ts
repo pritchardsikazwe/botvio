@@ -153,7 +153,7 @@ Deno.serve(async(req)=>{
    for(const p of PLANS){
     const gate = performanceGate(performanceIndex, profile.name, p.tf, profile.strategy);
     if(!gate.allowed) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:gate.reason,performance:gate.performance}); continue; }
-    const setup=sigs.get(p.tf);if(!setup||setup.score<profile.min+p.minBoost)continue;
+    const setup=sigs.get(p.tf);if(!setup||setup.score<profile.min+p.minBoost+gate.scoreBoost)continue;
     const confirmations=p.confirm.map(tf=>sigs.get(tf)).filter(Boolean) as Sig[];
     const same=confirmations.filter(x=>x.direction===setup.direction).length;
     const confirmationBias=p.confirm.map(tf=>directionalBias(frames.get(tf)??[])).filter(Boolean) as ("BUY"|"SELL")[];
