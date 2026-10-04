@@ -11,14 +11,11 @@ import { Radar, Timer, Gauge } from "lucide-react";
 
 const ENGINES: { id: EngineType; label: string }[] = [
   { id: "momentum", label: "⭐ Momentum — Default" },
-  { id: "rise_fall", label: "Rise / Fall momentum" },
-  { id: "multipliers", label: "Multipliers trend" },
-  { id: "higher_lower", label: "Higher / Lower barrier" },
-  { id: "even_odd", label: "Digits Even / Odd" },
-  { id: "over_under", label: "Digits Over / Under" },
-  { id: "match_differ", label: "Digits Match / Differ" },
-  { id: "boom_crash", label: "Boom / Crash spikes" },
-  { id: "accumulators", label: "Accumulators" },
+  { id: "momentum", label: "⭐ Momentum — Default" },
+  { id: "higher_lower", label: "Barrier — Higher / Lower" },
+  { id: "even_odd", label: "Digits — Even / Odd" },
+  { id: "over_under", label: "Digits — Over / Under" },
+  { id: "match_differ", label: "Digits — Match / Differ" },
 ];
 
 const MARKETS = [
