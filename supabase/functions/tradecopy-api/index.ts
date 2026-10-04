@@ -207,21 +207,21 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       // account as both the official Botvio Robot master and a provider master.
       const { data: conflictingMasters } = await admin
         .from("trading_accounts")
-        .select("id,is_botvio_robot,user_id,login_id,server")
+        .select("id,is_botvio_robot,user_id,login_id,server,tradecopy_user_id")
         .eq("execution_provider", "tradecopy")
         .eq("account_role", "master")
         .eq("login_id", String(creds.login))
         .eq("server", creds.server);
 
-      const conflict = (conflictingMasters ?? []).find((m: any) =>
-        asRobot ? m.is_botvio_robot !== true : m.is_botvio_robot === true
-      );
+      // One physical MT5 login/server must have exactly one Botvio master route.
+      // Never create a second TradeCopy Master registration for the same account,
+      // even if the requested role is the same.
+      const conflict = (conflictingMasters ?? [])[0];
       if (conflict) {
+        const role = conflict.is_botvio_robot ? "Botvio Robot master" : "provider master";
         throw new TradeCopyError(
-          asRobot
-            ? "This MT5 account is already registered as a provider master and cannot also be the Botvio Robot master."
-            : "This MT5 account is already registered as the Botvio Robot master and cannot also be a provider master.",
-          "validation",
+          `This MT5 account is already registered as a ${role}. Remove the existing master before adding another master for the same MT5 login/server.`,
+          "duplicate_master",
           409,
         );
       }
