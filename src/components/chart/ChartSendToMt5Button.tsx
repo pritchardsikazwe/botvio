@@ -58,8 +58,8 @@ export function ChartSendToMt5Button({ symbol, recommendation, stopLoss, takePro
       });
     } catch (e: any) {
       toast({
-        title: "MT5 queue failed",
-        description: e?.message ?? "Connect and activate an MT5 TradeCopy follower under Connections.",
+        title: "TradeCopy MT5 send failed",
+        description: e?.message ?? "Connect and activate your Deriv MT5 TradeCopy follower under Connections.",
         variant: "destructive",
       });
     } finally {
