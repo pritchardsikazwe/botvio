@@ -1,3 +1,5 @@
 create table if not exists public.market_worker_insights (id uuid primary key default gen_random_uuid(),symbol text not null,worker text not null,timeframe text not null,direction text,confidence integer not null default 0,market_regime text,structure text,strategy_types text[] not null default '{}',support numeric,resistance numeric,breakout_level numeric,rejection_level numeric,atr numeric,payload jsonb not null default '{}',observed_at timestamptz not null default now(),expires_at timestamptz not null default (now() + interval '60 minutes'));
 create index if not exists market_worker_insights_lookup on public.market_worker_insights(symbol,timeframe,worker,observed_at desc);
 create table if not exists public.market_worker_runs (id uuid primary key default gen_random_uuid(),worker text not null,symbols_processed integer not null default 0,insights_written integer not null default 0,errors integer not null default 0,started_at timestamptz not null default now(),finished_at timestamptz,payload jsonb not null default '{}');
+alter table public.market_worker_insights enable row level security;
+alter table public.market_worker_runs enable row level security;
