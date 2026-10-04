@@ -92,15 +92,14 @@ const SignalsHistory = () => {
         {/* Hero */}
         <header className="space-y-3 max-w-3xl">
           <Badge className="text-xs" variant="outline">
-            <Activity className="h-3 w-3 mr-1" /> Public Track Record
+            <Activity className="h-3 w-3 mr-1" /> Fresh Track Record
           </Badge>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-            Botvio Signals History &amp; Verified Track Record
+            Botvio Signals — Fresh Verified Track Record
           </h1>
           <p className="text-muted-foreground">
-            Full archive of every Botvio forex, gold (XAU/USD), synthetic indices and crypto signal we have
-            published — with entry, stop-loss, take-profit, pip outcome and chart screenshots. Updated live
-            as signals close.
+            Fresh verified track record for Botvio forex, gold (XAU/USD), synthetic indices and crypto signals.
+            The archive starts from the current signal engine and is updated live as new signals close.
           </p>
         </header>
 
