@@ -15,7 +15,7 @@ export const APP_VERSION: string =
 
 const APPLIED_VERSION_KEY = "botvio_last_applied_version";
 const RELOAD_GUARD_KEY = "botvio_update_reloaded_for";
-const CHECK_THROTTLE_MS = 5 * 60 * 1000; // at most one network check every 5 minutes
+const CHECK_THROTTLE_MS = 60 * 1000; // at most one version check per minute
 
 export interface RemoteVersion {
   version: string;
@@ -325,6 +325,12 @@ export function initAppUpdates() {
   window.addEventListener("focus", () => void checkForUpdates());
   window.addEventListener("online", () => void checkForUpdates());
 
-  // Long-lived sessions: periodic background check.
-  setInterval(() => void checkForUpdates(), 15 * 60 * 1000);
+  // Long-lived sessions: aggressively check while the PWA is open so users
+  // do not remain on an old build for hours. This is lightweight because the
+  // version endpoint is no-store and the check itself is throttled.
+  setInterval(() => void checkForUpdates(), 2 * 60 * 1000);
+
+  // Also ask the browser to re-check the service-worker script itself. This
+  // catches long-lived installed PWAs even when the app shell is unchanged.
+  setInterval(() => void forceServiceWorkerUpdate(), 2 * 60 * 1000);
 }
