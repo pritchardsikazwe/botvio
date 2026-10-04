@@ -65,14 +65,52 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: npx supabase@latest link --project-ref "$SUPABASE_PROJECT_REF"
 
-      - name: Verify migration history
+      - name: Repair stale remote migration history
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
           set -euo pipefail
-          echo "Checking Supabase migration history..."
-          npx supabase@latest migration list --project-ref "$SUPABASE_PROJECT_REF"
+          versions=(
+            20260925155924
+            20260925155937
+            20260925155945
+            20260925155954
+            20260925160008
+            20260925160024
+            20260925160033
+            20260925160043
+            20260925160052
+            20260925161045
+            20260925162119
+            20260925162555
+            20260925164104
+            20260925164718
+            20260925165042
+            20260930054208
+            20260930160728
+            20260930190313
+            20260930202824
+            20261002152150
+            20261002210042
+            20261003084349
+            20261003084502
+            20261003115951
+            20261003143823
+            20261003165148
+            20261003165156
+          )
+
+          for version in "${versions[@]}"; do
+            echo "Repairing remote migration history: $version -> reverted"
+            npx supabase@latest migration repair --status reverted "$version" --project-ref "$SUPABASE_PROJECT_REF"
+          done
+
+      - name: Pull current remote schema migration
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: npx supabase@latest db pull --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Apply database migrations
         env:
