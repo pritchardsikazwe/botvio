@@ -199,7 +199,9 @@ Deno.serve(async (req) => {
       if (!data) throw new Err("Account not found", 404);
       if (data.user_id !== userId && !isAdmin) throw new Err("Not your account", 403);
       if (data.is_botvio_robot) throw new Err("The Botvio Robot master is managed separately", 400);
-      if (String(data.platform ?? "mt5").toLowerCase() === "deriv" || !data.login_id || !data.server) throw new Err("Direct signals need an MT5 account", 400);
+      const platform = String(data.platform ?? "mt5").toLowerCase().replace(/[\s_-]+/g, "");
+      const nonMt5 = new Set(["mt4", "ctrader", "derivoptions", "binary", "options"]);
+      if (nonMt5.has(platform) || !data.login_id || !data.server) throw new Err("Direct signals need a valid MT5 account with login and server", 400);
       return data as Record<string, any>;
     };
 
@@ -218,7 +220,7 @@ Deno.serve(async (req) => {
           lot: z.number().min(0.01).max(5).optional(), min_confidence: z.number().int().min(50).max(99).optional(),
         }).parse(body);
         const a = await loadOwn(p.account_id);
-        if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this MT5 account as a TradeCopy follower first");
+        if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this Deriv MT5 account as a TradeCopy follower first");
         if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this follower before enabling Direct Signals");
         const patch: Record<string, unknown> = { direct_signal_enabled: true, direct_signal_status: "on", last_direct_error: null };
         if (p.lot) patch.direct_lot = p.lot;
@@ -276,7 +278,7 @@ Deno.serve(async (req) => {
         }).parse(body);
         const a = await loadOwn(p.account_id);
         if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this MT5 account as a TradeCopy follower first");
-        if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this follower first");
+        if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this Deriv MT5 follower first");
         const globalLive = await liveGlobal(admin);
         assertLiveReady(String(a.environment ?? "DEMO"), a.direct_live_confirmed_at, globalLive);
         const order = normalizeMarketOrder({
