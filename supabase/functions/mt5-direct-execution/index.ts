@@ -7,7 +7,7 @@ import { assertAutomationKey } from "../_shared/automationAuth.ts";
 // TradeCopy then handles master -> follower replication in the cloud.
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { z } from "npm:zod@3.23.8";
+import { z } from "https://esm.sh/zod@3.23.8";
 import { createAdapter } from "../_shared/tradecopy/adapter.ts";
 import { normalizeMarketOrder, redact } from "../_shared/tradecopy/core.ts";
 
@@ -148,7 +148,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
       .eq("is_botvio_robot", false).eq("is_active", true).eq("tradecopy_active", true)
       .not("tradecopy_user_id", "is", null).limit(2);
     if ((providerMasters ?? []).length === 1) {
-      master = providerMasters[0] as Record<string, any>;
+      master = providerMasters?.[0] as Record<string, any>;
       signalMasterFallback = true;
     }
   }
@@ -241,7 +241,8 @@ Deno.serve(async (req) => {
     const isAdmin = (roles?.length ?? 0) > 0;
 
     const loadOwn = async (id: string) => {
-      const { data } = await admin.from("trading_accounts").select(COLS).eq("id", id).maybeSingle();
+      const { data: row } = await admin.from("trading_accounts").select(COLS).eq("id", id).maybeSingle();
+      const data = row as Record<string, any> | null;
       if (!data) throw new Err("Account not found", 404);
       if (data.user_id !== userId && !isAdmin) throw new Err("Not your account", 403);
       if (data.is_botvio_robot) throw new Err("The Botvio Robot master is managed separately", 400);
