@@ -58,28 +58,50 @@ function timeframeLabel(timeframe?: string | null): string {
 
 function selectHomeSignalsByHorizon(items: ManualSignal[], limit = 6): ManualSignal[] {
   const horizons = ["M1", "M15", "H1", "D1"];
-  const buckets = new Map<string, ManualSignal[]>(
-    horizons.map(tf => [tf, items.filter(signal => normTf(signal.timeframe) === tf)])
-  );
+  const weltrade = items.filter(signal => {
+    const brokers = (signal as any).broker as string[] | null;
+    return Array.isArray(brokers) && brokers.includes("weltrade");
+  });
+  const other = items.filter(signal => {
+    const brokers = (signal as any).broker as string[] | null;
+    return !Array.isArray(brokers) || !brokers.includes("weltrade");
+  });
+
+  // Home prominently carries 3–4 real Weltrade signals when available,
+  // then uses up to two additional non-Weltrade signals.
   const selected: ManualSignal[] = [];
-  let index = 0;
+  const used = new Set<string>();
 
-  while (selected.length < limit && index < limit) {
-    for (const tf of horizons) {
-      const bucket = buckets.get(tf) || [];
-      if (bucket[index]) selected.push(bucket[index]);
-      if (selected.length >= limit) break;
+  const addByHorizon = (source: ManualSignal[], maxCount: number) => {
+    const buckets = new Map<string, ManualSignal[]>(
+      horizons.map(tf => [tf, source.filter(signal => normTf(signal.timeframe) === tf)])
+    );
+    let index = 0;
+    while (selected.length < limit && maxCount > 0 && index < limit) {
+      for (const tf of horizons) {
+        const bucket = buckets.get(tf) || [];
+        const signal = bucket[index];
+        if (signal && !used.has(signal.id)) {
+          selected.push(signal);
+          used.add(signal.id);
+          maxCount -= 1;
+        }
+        if (selected.length >= limit || maxCount <= 0) break;
+      }
+      index += 1;
     }
-    index += 1;
-  }
+  };
 
-  // If a horizon has no currently valid signal, fill remaining slots with
-  // the newest signals from any horizon rather than inventing data.
+  addByHorizon(weltrade, Math.min(4, limit));
+  addByHorizon(other, Math.min(2, limit - selected.length));
+
+  // If fewer Weltrade signals are available, fill remaining slots with the
+  // newest valid signals rather than inventing data.
   if (selected.length < limit) {
-    const selectedIds = new Set(selected.map(signal => signal.id));
     for (const signal of items) {
-      if (!selectedIds.has(signal.id)) {
+      if (!used.has(signal.id)) {
         selected.push(signal);
+        used.add(signal.id);
         if (selected.length >= limit) break;
       }
     }
@@ -386,23 +408,15 @@ export const HomeSignalsWidget = () => {
                   </span>
                 </div>
 
-                {/* Broker CTAs */}
-                <div className="flex flex-col gap-1.5 mt-1">
-                  <div className="flex gap-1.5">
-                    <a href={EXNESS_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-warning/15 text-warning border-warning/30 hover:bg-warning/25">
-                        <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
-                        Exness
-                      </Button>
-                    </a>
-                    <a href={DERIV_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20">
-                        <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
-                        Deriv
-                      </Button>
-                    </a>
-                  </div>
-                  <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="w-full">
+                {/* Home keeps only two actions per signal: open the matching chart and trade on Weltrade. */}
+                <div className="flex gap-1.5 mt-1">
+                  <Link to={`/chart/${encodeURIComponent(signal.symbol)}?signal=${encodeURIComponent(signal.id)}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7">
+                      <BarChart3 className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                      View Chart
+                    </Button>
+                  </Link>
+                  <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
                     <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
                       <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
                       Weltrade
