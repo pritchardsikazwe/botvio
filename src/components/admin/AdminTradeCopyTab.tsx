@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { Server, Power, ShieldAlert, RefreshCw, Eye, Activity, Send, Bot, Users, Radio, AlertTriangle, Crown } from "lucide-react";
-import { tradecopy } from "@/hooks/useTradeCopy";
+import { tradecopy, useRemoveTradeCopyAccount } from "@/hooks/useTradeCopy";
+import { ConnectMt5Dialog } from "@/components/tradecopy/ConnectMt5Dialog";
 import { deriveRoles, directAction, isMt5, Mt5Account, Mt5Role, MT5_COLS, usesTradeCopySlot } from "@/hooks/useDirectExecution";
 
 type Row = Mt5Account & {
@@ -42,6 +43,7 @@ export const AdminTradeCopyTab = () => {
   const [broker, setBroker] = useState("all");
   const [owner, setOwner] = useState("");
   const [selected, setSelected] = useState<Row | null>(null);
+  const removeAccount = useRemoveTradeCopyAccount();
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin-mt5-center"],
@@ -73,6 +75,25 @@ export const AdminTradeCopyTab = () => {
   });
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-mt5-center"] });
+
+  const remove = async (r: Row) => {
+    if (r.tradecopy_active) {
+      toast.error("Deactivate the TradeCopy account before removing it.");
+      return;
+    }
+    const ok = window.confirm(
+      `Remove ${r.label || "this MT5 account"} (${r.login_id || "unknown login"}) from Botvio and unregister its TradeCopy Master/Slave registration? This does not close the broker account.`
+    );
+    if (!ok) return;
+    try {
+      await removeAccount.mutateAsync(r.id);
+      toast.success("MT5 account removed from Botvio and TradeCopy");
+      setSelected(null);
+      refresh();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
   const act = useMutation({
     mutationFn: async (fn: () => Promise<unknown>) => fn(),
     onSuccess: () => { toast.success("Done"); refresh(); },
@@ -129,7 +150,15 @@ export const AdminTradeCopyTab = () => {
             <CardTitle className="flex items-center gap-2"><Server className="h-5 w-5" /> MT5 Connections & TradeCopy</CardTitle>
             <CardDescription>Every MT5 account by role. Botvio signals enter the configured provider master through TradeCopy; user Direct Signals also execute through TradeCopy. Passwords are never shown.</CardDescription>
           </div>
-          <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />Refresh</Button>
+          <div className="flex flex-wrap gap-2">
+            <ConnectMt5Dialog
+              role="master"
+              robot
+              triggerLabel="Add Botvio MT5 Master"
+              existingMasters={rows.filter((r) => r.account_role === "master" && !r.is_botvio_robot).map((r) => ({ login_id: r.login_id || "", server: r.server || "" }))}
+            />
+            <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />Refresh</Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
@@ -203,6 +232,17 @@ export const AdminTradeCopyTab = () => {
                             )}
                           </>
                         )}
+                        {r.tradecopy_user_id && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            disabled={act.isPending || removeAccount.isPending || r.tradecopy_active}
+                            onClick={() => remove(r)}
+                          >
+                            Remove
+                          </Button>
+                        )}
                       </div></TableCell>
                     </TableRow>
                   ))}
@@ -227,6 +267,7 @@ export const AdminTradeCopyTab = () => {
               onProvider={(s) => setProvider(selected, s)}
               onEmergency={emergency}
               onForceDemo={() => forceDemo(selected)}
+              onRemove={() => remove(selected)}
             />
           )}
         </SheetContent>
@@ -237,7 +278,7 @@ export const AdminTradeCopyTab = () => {
 
 function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMaster, onToggleSignalMaster, onProvider, onEmergency, onForceDemo }: {
   r: Row; relations: Rel[]; busy: boolean; onTest: () => void; onToggleDirect: () => void; onToggleMaster: () => void; onToggleSignalMaster: () => void;
-  onProvider: (s: "approved" | "suspended") => void; onEmergency: (id: string) => void; onForceDemo: () => void;
+  onProvider: (s: "approved" | "suspended") => void; onEmergency: (id: string) => void; onForceDemo: () => void; onRemove: () => void;
 }) {
   const { data: execs } = useQuery({
     queryKey: ["admin-direct-execs", r.id],
@@ -284,6 +325,7 @@ function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMas
         {r.provider && r.provider.status !== "approved" && <Button size="sm" disabled={busy} onClick={() => onProvider("approved")}>Approve Provider</Button>}
         {r.provider && r.provider.status === "approved" && <Button size="sm" variant="outline" disabled={busy} onClick={() => onProvider("suspended")}>Suspend Provider</Button>}
         {r.environment === "LIVE" && <Button size="sm" variant="destructive" disabled={busy} onClick={onForceDemo}><ShieldAlert className="mr-1 h-4 w-4" />Force Demo</Button>}
+        {r.tradecopy_user_id && <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" disabled={busy || r.tradecopy_active} onClick={onRemove}>Remove & unregister</Button>}
       </section>
 
       {r.last_direct_error && <p className="rounded-md border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">Last error: {r.last_direct_error}</p>}
