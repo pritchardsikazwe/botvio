@@ -288,7 +288,7 @@ export const CopyTradingAdmin = () => {
   const accounts = useQuery({
     queryKey: ["admin", "copy-trading", "accounts"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("trading_accounts").select("id,broker,account_role,environment,connection_status,tradecopy_active,is_botvio_robot").order("updated_at", { ascending: false }).limit(500);
+      const { data, error } = await supabase.from("trading_accounts").select("id,broker,platform,execution_provider,account_role,environment,connection_status,tradecopy_active,is_botvio_robot").order("updated_at", { ascending: false }).limit(500);
       if (error) throw error;
       return data ?? [];
     },
@@ -297,10 +297,12 @@ export const CopyTradingAdmin = () => {
   const accountRows = accounts.data ?? [];
   const pending = providerRows.filter((p) => p.status === "pending" || p.status === "review").length;
   const approved = providerRows.filter((p) => p.status === "approved").length;
-  const masters = accountRows.filter((a) => a.account_role === "master").length;
-  const followers = accountRows.filter((a) => a.account_role === "slave" || a.account_role === "follower").length;
-  const live = accountRows.filter((a) => a.environment === "live").length;
-  const active = accountRows.filter((a) => a.tradecopy_active).length;
+  const tradeCopyRows = accountRows.filter((a) => a.execution_provider === "tradecopy");
+  const legacyMt5Rows = accountRows.filter((a) => a.execution_provider !== "tradecopy" && (a.account_role === "master" || a.account_role === "slave" || a.account_role === "follower"));
+  const masters = tradeCopyRows.filter((a) => a.account_role === "master").length;
+  const followers = tradeCopyRows.filter((a) => a.account_role === "slave" || a.account_role === "follower").length;
+  const live = tradeCopyRows.filter((a) => String(a.environment).toUpperCase() === "LIVE").length;
+  const active = tradeCopyRows.filter((a) => a.tradecopy_active).length;
 
   const setProviderStatus = async (providerId: string, status: "approved" | "rejected") => {
     const { error } = await supabase.from("providers").update({ status, verified: status === "approved" }).eq("id", providerId);
@@ -374,16 +376,22 @@ export const CopyTradingAdmin = () => {
           </Card>
 
           <Card className="glass-card">
-            <CardHeader><CardTitle className="text-sm">Connection health</CardTitle><CardDescription>Operational view only — no raw passwords or secrets are shown.</CardDescription></CardHeader>
+            <CardHeader><CardTitle className="text-sm">MT5 TradeCopy health</CardTitle><CardDescription>Only canonical TradeCopy accounts are shown here. Raw passwords and secrets are never displayed.</CardDescription></CardHeader>
             <CardContent className="space-y-2">
               {accounts.isLoading ? <p className="text-sm text-muted-foreground">Loading accounts…</p> :
-                accountRows.length === 0 ? <p className="text-sm text-muted-foreground">No trading accounts visible to this admin query.</p> :
-                accountRows.slice(0, 8).map((a) => (
+                tradeCopyRows.length === 0 ? <p className="text-sm text-muted-foreground">No TradeCopy MT5 accounts visible to this admin query.</p> :
+                tradeCopyRows.slice(0, 8).map((a) => (
                   <div key={a.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
                     <div><p className="text-sm font-semibold">{a.broker ?? "MT5"} · {a.account_role ?? "unassigned"}</p><p className="text-xs text-muted-foreground">{a.environment ?? "demo"} · {a.connection_status ?? "unknown"}</p></div>
                     <div className="flex gap-1.5"><Badge variant={a.tradecopy_active ? "default" : "outline"}>{a.tradecopy_active ? "Active" : "Idle"}</Badge>{a.is_botvio_robot && <Badge variant="secondary">Robot</Badge>}</div>
                   </div>
                 ))}
+              {legacyMt5Rows.length > 0 && (
+                <div className="mt-3 rounded-lg border border-warning/30 bg-warning/5 p-3 text-xs">
+                  <p className="font-semibold text-warning-foreground">Legacy MT5 records detected: {legacyMt5Rows.length}</p>
+                  <p className="mt-1 text-muted-foreground">They are excluded from TradeCopy counts and the new user workflow. Do not activate them for MT5 copying; migrate/review them separately before any cleanup.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
