@@ -98,3 +98,6 @@ project_id = "tqqkzeblmjapgbnsbtgw"
     verify_jwt = false
   [functions.mt5-direct-execution]
     verify_jwt = false
+
+  [functions.signal-performance-audit]
+    verify_jwt = false
