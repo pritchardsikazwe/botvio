@@ -4,7 +4,7 @@ import { assertAutomationKey } from "../_shared/automationAuth.ts";
 type Candle={epoch:number;open:number;high:number;low:number;close:number};
 type Direction="BUY"|"SELL"|"NEUTRAL";
 
-const SYMBOLS=[
+const CORE_SYMBOLS=[
   {symbol:"frxXAUUSD",worker:"gold"},
   {symbol:"cryBTCUSD",worker:"bitcoin"},
   {symbol:"frxXAGUSD",worker:"commodity"},
@@ -33,8 +33,41 @@ function strategies(c:Candle[],dir:Direction,tf:string){if(c.length<25)return []
 function analyse(c:Candle[],tf:string,worker:string){if(c.length<60)return null;const cl=c.map(x=>x.close),last=c.at(-1)!,e9=ema(cl,9),e21=ema(cl,21),e50=ema(cl,50),rs=rsi(c),a=atr(c);if(e9==null||e21==null||e50==null||rs==null||a==null||a<=0)return null;let dir:Direction="NEUTRAL";if(e9>e21&&last.close>e50&&rs>=45&&rs<=78)dir="BUY";if(e9<e21&&last.close<e50&&rs>=22&&rs<=55)dir="SELL";const s=structure(c),p=c.slice(-21,-1),support=Math.min(...p.map(x=>x.low)),resistance=Math.max(...p.map(x=>x.high));const breakout=(dir==="BUY"&&last.close>resistance)||(dir==="SELL"&&last.close<support);const vol=(last.high-last.low)/a;let score=dir==="NEUTRAL"?50:70;if(breakout)score+=8;if((worker==="gold"||worker==="bitcoin")&&vol>1.2)score+=5;if((dir==="BUY"&&s==="HIGHER_HIGH_HIGHER_LOW")||(dir==="SELL"&&s==="LOWER_HIGH_LOWER_LOW"))score+=8;score=Math.min(96,score);const regime=breakout?"BREAKOUT":s==="RANGE"?"RANGE":vol>1.8?"HIGH_VOLATILITY": "TRENDING";return {direction:dir,confidence:score,market_regime:regime,structure:s,support,resistance,breakout_level:breakout?(dir==="BUY"?resistance:support):null,rejection_level:dir==="BUY"?support:dir==="SELL"?resistance:null,atr:a,strategy_types:strategies(c,dir,tf),payload:{worker,tf,last_close:last.close,ema9:e9,ema21:e21,ema50:e50,rsi:rs,volatility_ratio:vol}};
 }
 function req(ws:WebSocket,payload:Record<string,unknown>,timeout=15000){return new Promise<any>((resolve,reject)=>{const id=Math.floor(Math.random()*1e9),t=setTimeout(()=>{ws.removeEventListener("message",h);reject(new Error("Deriv request timeout"))},timeout);const h=(e:MessageEvent)=>{try{const d=JSON.parse(String(e.data));if(d.req_id!==id)return;clearTimeout(t);ws.removeEventListener("message",h);if(d.error)reject(new Error(d.error.message));else resolve(d)}catch{}};ws.addEventListener("message",h);ws.send(JSON.stringify({...payload,req_id:id}))})}
-async function candles(ws:WebSocket,symbol:string,granularity:number,count:number){const d=await req(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,subscribe:0,adjust_start_time:1});return (d.candles??[]).map((x:any)=>({epoch:Number(x.epoch),open:Number(x.open),high:Number(x.high),low:Number(x.low),close:Number(x.close)})).filter((x:Candle)=>Number.isFinite(x.close))}
-Deno.serve(async req0=>{if(req0.method!=="POST")return new Response("POST required",{status:405});if(!assertAutomationKey(req0))return new Response(JSON.stringify({success:false,error:"Unauthorized automation trigger"}),{status:401});const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);const body=await req0.json().catch(()=>({}));const wanted=body?.symbol as string|undefined;const list=wanted?SYMBOLS.filter(x=>x.symbol===wanted):SYMBOLS;const ws=new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(new Error("WebSocket timeout")),12000);ws.addEventListener("open",()=>{clearTimeout(t);resolve()},{once:true});ws.addEventListener("error",()=>{clearTimeout(t);reject(new Error("WebSocket failed"))},{once:true})});const started=new Date().toISOString(),results:any[]=[];try{for(const p of list){for(const f of FRAMES){try{const c=await candles(ws,p.symbol,f.g,f.n);const a=analyse(c,f.tf,p.worker);if(!a)continue;results.push({symbol:p.symbol,worker:p.worker,timeframe:f.tf,...a});}catch(e){results.push({symbol:p.symbol,worker:p.worker,timeframe:f.tf,error:String(e)})}}}const rows=results.filter(x=>!x.error).flatMap(x=>{
+async function activeSymbols(ws:WebSocket){
+  const d=await req(ws,{active_symbols:"full"});
+  return (d.active_symbols??[]).map((x:any)=>({
+    symbol:String(x.underlying_symbol||x.symbol||""),
+    name:String(x.underlying_symbol_name||x.display_name||""),
+    type:String(x.underlying_symbol_type||x.symbol_type||""),
+    market:String(x.market||""),
+    submarket:String(x.submarket||""),
+    subgroup:String(x.subgroup||""),
+    open:Number(x.exchange_is_open??1),
+    suspended:Number(x.is_trading_suspended??0)
+  })).filter((x:any)=>x.symbol && !x.suspended);
+}
+function classifyActive(x:any){
+  const s=[x.symbol,x.name,x.type,x.market,x.submarket,x.subgroup].join(" ").toLowerCase();
+  if(x.type==="synthetic_index" || /synthetic|volatility|boom|crash|step|jump|range.?break|drift|bull|bear|dex/.test(s)) return "synthetic";
+  if(/gold|xau/.test(s)) return "gold";
+  if(/bitcoin|btc/.test(s)) return "bitcoin";
+  if(/silver|xag|oil|brent/.test(s)) return "commodity";
+  if(/ethereum|eth|crypto/.test(s)) return "crypto";
+  if(/forex|eur|gbp|jpy|aud|usd|cad|chf|nzd/.test(s)) return "forex";
+  if(/index|nas|dow|spx|dax|ftse|otc/.test(s)) return "index";
+  return "";
+}
+function candles(ws:WebSocket,symbol:string,granularity:number,count:number){const d=await req(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,subscribe:0,adjust_start_time:1});return (d.candles??[]).map((x:any)=>({epoch:Number(x.epoch),open:Number(x.open),high:Number(x.high),low:Number(x.low),close:Number(x.close)})).filter((x:Candle)=>Number.isFinite(x.close))}
+Deno.serve(async req0=>{if(req0.method!=="POST")return new Response("POST required",{status:405});if(!assertAutomationKey(req0))return new Response(JSON.stringify({success:false,error:"Unauthorized automation trigger"}),{status:401});const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);const body=await req0.json().catch(()=>({}));const wanted=body?.symbol as string|undefined;
+const ws=new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(new Error("WebSocket timeout")),12000);ws.addEventListener("open",()=>{clearTimeout(t);resolve()},{once:true});ws.addEventListener("error",()=>{clearTimeout(t);reject(new Error("WebSocket failed"))},{once:true})});const started=new Date().toISOString(),results:any[]=[];
+try{
+ const discovered=await activeSymbols(ws);
+ const dynamic=discovered.map((x:any)=>({symbol:x.symbol,worker:classifyActive(x)})).filter((x:any)=>x.worker);
+ const merged=[...CORE_SYMBOLS,...dynamic.filter((x:any)=>!CORE_SYMBOLS.some((c:any)=>c.symbol===x.symbol))];
+ const synthetic=merged.filter((x:any)=>x.worker==="synthetic").slice(0,30);
+ const preferred=merged.filter((x:any)=>x.worker!=="synthetic");
+ const list=wanted?merged.filter(x=>x.symbol===wanted):[...preferred,...synthetic];
+ for(const p of list){for(const f of FRAMES){try{const c=await candles(ws,p.symbol,f.g,f.n);const a=analyse(c,f.tf,p.worker);if(!a)continue;results.push({symbol:p.symbol,worker:p.worker,timeframe:f.tf,...a});}catch(e){results.push({symbol:p.symbol,worker:p.worker,timeframe:f.tf,error:String(e)})}}}const rows=results.filter(x=>!x.error).flatMap(x=>{
  const base={...x,observed_at:new Date().toISOString(),expires_at:new Date(Date.now()+60*60*1000).toISOString()};
  const names:string[]=[];
  if(["1H","1D"].includes(x.timeframe)) names.push("htf");
@@ -44,4 +77,4 @@ Deno.serve(async req0=>{if(req0.method!=="POST")return new Response("POST requir
  for(const s of x.strategy_types??[]) names.push(s.toLowerCase());
  names.push("market_regime","market_memory","risk","confluence","validation");
  return [...new Set(names)].map(worker=>({...base,worker}));
-});if(rows.length){const {error}=await db.from("market_worker_insights").insert(rows);if(error)throw error;}try{ws.close()}catch{}return new Response(JSON.stringify({success:true,started_at:started,finished_at:new Date().toISOString(),workers:["htf","gold","bitcoin","forex","synthetic","index","crypto","commodity","trend","trendline","support","resistance","breakout","breakout_retest","rejection","scalping","momentum","range","fakeout","pullback","reversal","confluence","risk","validation","market_regime","market_memory"],insights:rows.length}),{headers:{"Content-Type":"application/json"}})}catch(e){try{ws.close()}catch{}return new Response(JSON.stringify({success:false,error:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
+});if(rows.length){const {error}=await db.from("market_worker_insights").insert(rows);if(error)throw error;}try{ws.close()}catch{}return new Response(JSON.stringify({success:true,started_at:started,finished_at:new Date().toISOString(),discovered_symbols:discovered.length,processed_symbols:list.length,synthetic_symbols:synthetic.length,workers:["htf","gold","bitcoin","forex","synthetic","index","crypto","commodity","trend","trendline","support","resistance","breakout","breakout_retest","rejection","scalping","momentum","range","fakeout","pullback","reversal","confluence","risk","validation","market_regime","market_memory"],insights:rows.length}),{headers:{"Content-Type":"application/json"}})}catch(e){try{ws.close()}catch{}return new Response(JSON.stringify({success:false,error:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
