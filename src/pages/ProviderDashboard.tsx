@@ -1,11 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-/**
- * Legacy provider dashboard compatibility shim.
- * The retired dashboard executed trades directly through the old provider
- * execution/copy stack. Provider operations now use ProviderCommandCenter,
- * MT5 TradeCopy and the isolated Deriv Options copy route.
- */
-const ProviderDashboard = () => <Navigate to="/provider-dashboard" replace />;
+/** Legacy compatibility shim. Provider operations now use the Copy Control Center. */
+const ProviderDashboard = () => <Navigate to="/copy-trading/become-provider" replace />;
 
 export default ProviderDashboard;
