@@ -91,13 +91,19 @@ export const AdminTradeCopyTab = () => {
       setSelected(null);
       refresh();
     } catch (e) {
+      refresh();
       toast.error((e as Error).message);
     }
   };
   const act = useMutation({
     mutationFn: async (fn: () => Promise<unknown>) => fn(),
     onSuccess: () => { toast.success("Done"); refresh(); },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error & { code?: string }) => {
+      // A stale admin page can hold an account row that was already removed.
+      // Refresh the center immediately instead of leaving a dead row/actions on screen.
+      refresh();
+      toast.error(e.code === "not_found" ? "That MT5 account no longer exists in Botvio. The list has been refreshed." : e.message);
+    },
   });
 
   const rows = data?.rows ?? [];
