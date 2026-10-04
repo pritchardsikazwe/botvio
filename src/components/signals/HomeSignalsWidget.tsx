@@ -28,6 +28,7 @@ const BROKER_FILTERS = [
 const TIMEFRAME_FILTERS = [
   { value: "all", label: "All Horizons" },
   { value: "M1", label: "1M · Scalping" },
+  { value: "M5", label: "5M · Momentum" },
   { value: "M15", label: "15M · Intraday" },
   { value: "H1", label: "1H · Swing" },
   { value: "D1", label: "1D · Position" },
@@ -49,6 +50,7 @@ function fmtPrice(v: number | null | undefined): string {
 function timeframeLabel(timeframe?: string | null): string {
   switch (normTf(timeframe)) {
     case "M1": return "1M · SCALPING";
+    case "M5": return "5M · MOMENTUM";
     case "M15": return "15M · INTRADAY";
     case "H1": return "1H · SWING";
     case "D1": return "1D · POSITION";
@@ -57,7 +59,7 @@ function timeframeLabel(timeframe?: string | null): string {
 }
 
 function selectHomeSignalsByHorizon(items: ManualSignal[], limit = 6): ManualSignal[] {
-  const horizons = ["M1", "M15", "H1", "D1"];
+  const horizons = ["M1", "M5", "M15", "H1", "D1"];
   const weltrade = items.filter(signal => {
     const brokers = (signal as any).broker as string[] | null;
     return Array.isArray(brokers) && brokers.includes("weltrade");
