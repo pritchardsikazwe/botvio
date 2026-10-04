@@ -888,7 +888,7 @@ const StyleTrade = () => {
                                 key={btn.contractType}
                                 className="flex-1 h-12 text-base font-bold"
                                 variant={btn.variant === "success" ? "default" : btn.variant === "destructive" ? "destructive" : "default"}
-                                disabled={buying || !selectedSymbol || (!btnSupported && supportedTypes.length > 0)}
+                                disabled={buying || capsLoading || !selectedSymbol || (!btnSupported && supportedTypes.length > 0)}
                                 onClick={() => handleBuy(btn)}
                                 title={!btnSupported && supportedTypes.length > 0 ? `${btn.contractType} not available for ${selectedSymbol}` : undefined}
                               >
