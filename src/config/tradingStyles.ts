@@ -244,11 +244,11 @@ export const TRADING_STYLES: TradingStyle[] = [
   },
   {
     id: "higher-lower",
-    title: "Higher/Lower Barrier Strategy",
-    description: "Botvio AI — BUY near support with RSI oversold, barrier below support. SELL near resistance with RSI overbought, barrier above resistance.",
-    riskTag: "Beginner Friendly",
-    tempoTag: "Timed",
-    contractTypes: [HIGHER_LOWER],
+    title: "Barrier Options",
+    description: "One consolidated barrier workspace for Higher/Lower and Touch/No Touch. Contract availability, barriers and durations are confirmed from Deriv live contract metadata.",
+    riskTag: "Timed",
+    tempoTag: "Selective",
+    contractTypes: [HIGHER_LOWER, TOUCH_NO_TOUCH],
     instruments: RISE_FALL_INSTRUMENTS,
   },
   {
