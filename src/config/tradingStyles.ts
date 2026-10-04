@@ -14,8 +14,10 @@ export interface ContractTypeConfig {
   buyButtons: BuyButton[];
   /** Duration measured in ticks (true) or seconds (false) */
   tickDuration?: boolean;
-  /** Whether this contract type needs a digit/barrier input */
+  /** Whether this contract type needs a digit input */
   needsDigit?: boolean;
+  /** Whether this contract type needs a Deriv barrier input */
+  needsBarrier?: boolean;
 }
 
 export interface BuyButton {
@@ -112,9 +114,10 @@ const HIGHER_LOWER: ContractTypeConfig = {
   id: "higher_lower",
   label: "Higher / Lower",
   tickDuration: false,
+  needsBarrier: true,
   buyButtons: [
-    { label: "Higher", contractType: "CALL", variant: "success" },
-    { label: "Lower", contractType: "PUT", variant: "destructive" },
+    { label: "Higher", contractType: "HIGHER", variant: "success" },
+    { label: "Lower", contractType: "LOWER", variant: "destructive" },
   ],
 };
 
@@ -140,7 +143,7 @@ const DIGITS_MATCH_DIFFER: ContractTypeConfig = {
   ],
 };
 const TOUCH_NO_TOUCH: ContractTypeConfig = {
-  id: "touch_no_touch", label: "Touch / No Touch", needsDigit: false,
+  id: "touch_no_touch", label: "Touch / No Touch", needsBarrier: true,
   buyButtons: [
     { label: "Touch", contractType: "ONETOUCH", variant: "success" },
     { label: "No Touch", contractType: "NOTOUCH", variant: "destructive" },
