@@ -20,7 +20,6 @@ import BeginnerGuide from "./pages/BeginnerGuide";
 import Dashboard from "./pages/Dashboard";
 import Connections from "./pages/Connections";
 import TradeHistory from "./pages/TradeHistory";
-import Providers from "./pages/Providers";
 import CopyMarketplace from "./pages/copy/CopyMarketplace";
 import CopyProviderProfile from "./pages/copy/CopyProviderProfile";
 import CopyStart from "./pages/copy/CopyStart";
@@ -261,7 +260,7 @@ export const AppRoutes = () => {
     <Route path="connections" element={<Connections />} />
     <Route path="bridge-request" element={<Navigate to="/connections" replace />} />
     <Route path="trade-history" element={<TradeHistory />} />
-    <Route path="providers" element={<Providers />} />
+    <Route path="providers" element={<Navigate to="/copy-trading" replace />} />
     <Route path="copy-trading" element={<CopyMarketplace />} />
     <Route path="copy-trading/provider/:providerId" element={<CopyProviderProfile />} />
     <Route path="copy-trading/start/:providerId" element={<CopyStart />} />
