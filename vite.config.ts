@@ -117,7 +117,7 @@ export default defineConfig(({ mode }) => ({
           { name: "Copy Trading", url: "/copy-trading", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Signals", url: "/signals", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "AI Chart & Upload", short_name: "AI Chart", url: "/chart/XAUUSD", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
-          { name: "Open Deriv Account", short_name: "Deriv", url: "https://t.deriv.link?t=8U3QNKP9UA9G", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Open Deriv Account", short_name: "Deriv", url: "/affiliate", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Gold Robot", url: "/apps/gold-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Crypto Robot", url: "/apps/crypto-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Synthetic Robot", url: "/apps/synthetic-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
