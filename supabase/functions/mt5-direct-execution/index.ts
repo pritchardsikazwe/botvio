@@ -155,7 +155,35 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   if (onlyAccountId) q = q.eq("id", onlyAccountId);
   const { data: directAccounts } = await q;
 
+  // Prevent duplicate trades: if a follower is already actively copying the
+  // Botvio Robot or the configured Botvio Signal Master, TradeCopy itself will
+  // deliver the signal. Do not also send the same signal directly to the slave.
+  const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
+  const copyManagedFollowerIds = new Set<string>();
+  if (directIds.length) {
+    const { data: activeLinks } = await admin.from("copy_relationships")
+      .select("follower_account_id,master_account_id,status,is_botvio_robot")
+      .in("follower_account_id", directIds)
+      .eq("status", "active");
+    const masterIds = [...new Set((activeLinks ?? []).map((x: any) => x.master_account_id).filter(Boolean))];
+    const { data: linkMasters } = masterIds.length
+      ? await admin.from("trading_accounts").select("id,is_botvio_robot,botvio_signal_master_enabled").in("id", masterIds)
+      : { data: [] };
+    const masterById = new Map((linkMasters ?? []).map((m: any) => [m.id, m]));
+    for (const link of (activeLinks ?? []) as any[]) {
+      const master = masterById.get(link.master_account_id);
+      if (link.is_botvio_robot === true || master?.is_botvio_robot === true || master?.botvio_signal_master_enabled === true) {
+        copyManagedFollowerIds.add(link.follower_account_id);
+      }
+    }
+  }
+
+  let directSkippedByCopy = 0;
   for (const account of (directAccounts ?? []) as Record<string, any>[]) {
+    if (copyManagedFollowerIds.has(account.id)) {
+      directSkippedByCopy++;
+      continue;
+    }
     const map = (account.direct_symbol_map ?? {}) as Record<string, string>;
     for (const signal of signals as Record<string, any>[]) {
       const rawSymbol = String(signal.symbol);
@@ -165,7 +193,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
     }
   }
 
-  return { signals: signals.length, signalMasterConfigured: !!master, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, skipped };
+  return { signals: signals.length, signalMasterConfigured: !!master, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, directSkippedByCopy, skipped };
 }
 
 Deno.serve(async (req) => {
