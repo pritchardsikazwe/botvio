@@ -231,7 +231,7 @@ async function placeDerivTrade(
       currency: "USD",
       duration,
       duration_unit: durationUnit,
-      symbol,
+      underlying_symbol: symbol,
     };
 
     if (
@@ -241,10 +241,20 @@ async function placeDerivTrade(
       parameters.barrier = String(barrier);
     }
 
+    const proposalResponse = await sendWsRequest(ws, {
+      proposal: 1,
+      ...parameters,
+    });
+
+    const proposalId = proposalResponse?.proposal?.id;
+    const askPrice = Number(proposalResponse?.proposal?.ask_price);
+    if (!proposalId || !Number.isFinite(askPrice) || askPrice <= 0) {
+      throw new Error("Deriv did not return a valid contract proposal");
+    }
+
     const buyResponse = await sendWsRequest(ws, {
-      buy: 1,
-      price: stake,
-      parameters,
+      buy: proposalId,
+      price: askPrice,
     });
 
     if (!buyResponse?.buy?.contract_id) throw new Error("Deriv did not return a contract ID");
