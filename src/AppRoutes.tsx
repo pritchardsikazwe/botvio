@@ -414,10 +414,10 @@ export const AppRoutes = () => {
     <Route path="markets/asia" element={<AsiaMarket />} />
     <Route path="markets/crypto" element={<CryptoMarket />} />
     <Route path="markets/africa" element={<AfricaMarket />} />
-    <Route path="trade-modes" element={<Navigate to="/rise-fall" replace />} />
-    <Route path="deriv-options" element={<Navigate to="/rise-fall" replace />} />
-    <Route path="deriv-app" element={<Navigate to="/rise-fall" replace />} />
-    <Route path="rise-fall" element={<StoreRestrictedRoute><RiseFall /></StoreRestrictedRoute>} />
+    <Route path="trade-modes" element={<Navigate to="/options" replace />} />
+    <Route path="deriv-options" element={<Navigate to="/options" replace />} />
+    <Route path="deriv-app" element={<Navigate to="/options" replace />} />
+    <Route path="rise-fall" element={<Navigate to="/options" replace />} />
     <Route path="options" element={<OptionsTradingHub />} />
     <Route path="options-trading" element={<OptionsTradingHub />} />
     <Route path="options-trading-hub" element={<OptionsTradingHub />} />
