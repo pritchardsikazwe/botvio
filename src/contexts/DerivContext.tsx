@@ -53,7 +53,7 @@ interface DerivContextType {
   switchDerivToken: (tokenId: string) => Promise<void>;
   removeDerivToken: (tokenId: string) => Promise<void>;
   // Actions
-  connect: (apiToken: string) => Promise<DerivBalance>;
+  connect: (apiToken: string, accountId?: string) => Promise<DerivBalance>;
   disconnect: () => void;
   subscribeTicks: (symbol: string) => Promise<void>;
   unsubscribeTicks: (symbol: string) => Promise<void>;
@@ -105,8 +105,9 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
     const selected = await switchToken(tokenId);
     setInitializing(true);
     try {
-      await derivAPI.connect(selected.token_encrypted);
+      await derivAPI.connect(selected.token_encrypted, selected.loginid);
       localStorage.setItem("deriv_pat_token", selected.token_encrypted);
+      localStorage.setItem("deriv_active_account_id", selected.loginid);
       localStorage.removeItem("deriv_oauth_token");
     } catch (error) {
       // Do not leave the UI/database pointing at a broken account if the new
@@ -114,8 +115,9 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
       if (previous && previous.id !== selected.id) {
         try {
           const restored = await switchToken(previous.id);
-          await derivAPI.connect(restored.token_encrypted);
+          await derivAPI.connect(restored.token_encrypted, restored.loginid);
           localStorage.setItem("deriv_pat_token", restored.token_encrypted);
+          localStorage.setItem("deriv_active_account_id", restored.loginid);
           localStorage.removeItem("deriv_oauth_token");
         } catch {
           // The original session is also unavailable; surface the original error.
@@ -197,7 +199,8 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
 
       console.log("[DERIV][init] rehydrating Deriv session — performing fresh authorization");
       try {
-        const bal = await derivAPI.connect(stored);
+        const preferredAccountId = localStorage.getItem("deriv_active_account_id") || undefined;
+        const bal = await derivAPI.connect(stored, preferredAccountId);
         localStorage.setItem("deriv_pat_token", stored);
         console.log(`[DERIV] Authorization successful — Account: ${bal.loginid}`);
         console.log("[DERIV] Global connection state = connected");
@@ -225,12 +228,15 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
   /** Token/account change (OAuth callback, account switch) → re-authorize immediately. */
   useEffect(() => {
     const onTokenUpdated = (e: Event) => {
-      const token = (e as CustomEvent<{ token?: string }>).detail?.token;
+      const detail = (e as CustomEvent<{ token?: string; accountId?: string }>).detail;
+      const token = detail?.token;
+      const accountId = detail?.accountId || localStorage.getItem("deriv_active_account_id") || undefined;
       if (!token) return;
-      console.log("[DERIV][init] token updated — re-authorizing");
+      if (accountId) localStorage.setItem("deriv_active_account_id", accountId);
+      console.log("[DERIV][init] token updated — re-authorizing selected account", accountId || "(auto)");
       setInitializing(true);
       derivAPI
-        .connect(token)
+        .connect(token, accountId)
         .catch((err) => console.warn("[DERIV][init] re-authorize failed:", err))
         .finally(() => setInitializing(false));
     };
