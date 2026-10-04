@@ -75,8 +75,31 @@ interface Ctx { admin: SupabaseClient; adapter: ExecutionAdapter; userId: string
 interface Out { data: Record<string, unknown>; accountId?: string; auditDetails?: Record<string, unknown> }
 
 async function loadAccount(ctx: Ctx, id: string, opts: { allowAdmin?: boolean } = {}): Promise<Account> {
-  const { data } = await ctx.admin.from("trading_accounts").select(ACCOUNT_COLS).eq("id", id).maybeSingle();
-  if (!data) throw new TradeCopyError("Account not found", "not_found", 404);
+  // The canonical identifier is the Botvio trading_accounts UUID. Admin tooling
+  // may also receive a legacy/external TradeCopy account id (for example 35164)
+  // from an older cached UI. Resolve that only for an authenticated admin so a
+  // stale/external id cannot broaden normal user access.
+  const requestedId = String(id ?? "").trim();
+  let { data } = await ctx.admin
+    .from("trading_accounts")
+    .select(ACCOUNT_COLS)
+    .eq("id", requestedId)
+    .maybeSingle();
+
+  if (!data && opts.allowAdmin && ctx.isAdmin && /^\\d+$/.test(requestedId)) {
+    const externalId = Number(requestedId);
+    if (Number.isSafeInteger(externalId) && externalId > 0) {
+      const fallback = await ctx.admin
+        .from("trading_accounts")
+        .select(ACCOUNT_COLS)
+        .eq("tradecopy_user_id", externalId)
+        .limit(1)
+        .maybeSingle();
+      data = fallback.data;
+    }
+  }
+
+  if (!data) throw new TradeCopyError(`Account not found: ${requestedId || "missing account id"}`, "not_found", 404);
   const a = data as Account;
   if (a.user_id !== ctx.userId && !(opts.allowAdmin && ctx.isAdmin)) throw new TradeCopyError("Not your account", "auth", 403);
   return a;
