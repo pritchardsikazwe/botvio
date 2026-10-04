@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ShieldAlert, PlugZap, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ShieldAlert, PlugZap, CheckCircle2, Cloud, Monitor, Wallet, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
@@ -20,6 +20,7 @@ import {
   PLATFORM_LABEL,
   type RiskPresetKey,
 } from "@/hooks/useCopyTrading";
+import { useTradeCopyAccounts, useTradeCopyAction, RISK_TYPE_LABELS, ORDER_FILTER_LABELS } from "@/hooks/useTradeCopy";
 
 /**
  * Follower setup: Connect account → set risk → start copying.
@@ -37,7 +38,10 @@ const CopyStart = () => {
   const provider = providers?.find((p) => p.id === providerId);
   const strategy = (strategies ?? []).find((s) => s.provider_id === providerId);
   const platform = strategy?.platform ?? (provider?.primary_market === "mt5" ? "mt5" : "deriv");
-  const isDeriv = platform === "deriv";
+  const isMt5 = platform === "mt5";
+  const isDeriv = !isMt5;
+  const { data: mt5Accounts } = useTradeCopyAccounts("slave");
+  const tradeCopy = useTradeCopyAction();
 
   const [preset, setPreset] = useState<RiskPresetKey>("conservative");
   const [accountId, setAccountId] = useState("");
@@ -48,10 +52,15 @@ const CopyStart = () => {
   const [maxTradeAmount, setMaxTradeAmount] = useState("1");
   const [stopOnProviderDd, setStopOnProviderDd] = useState(true);
   const [stopOnMyDailyLoss, setStopOnMyDailyLoss] = useState(true);
+  const [mt5RiskType, setMt5RiskType] = useState(1);
+  const [mt5Multiplier, setMt5Multiplier] = useState("1");
+  const [mt5CopySltp, setMt5CopySltp] = useState(true);
+  const [mt5OrderFilter, setMt5OrderFilter] = useState(0);
+  const [mt5AccountId, setMt5AccountId] = useState("");
 
   const eligibleAccounts = useMemo(
-    () => (accounts ?? []).filter((a) => (isDeriv ? a.broker === "deriv" : true)),
-    [accounts, isDeriv],
+    () => isMt5 ? (mt5Accounts ?? []) : (accounts ?? []).filter((a) => a.broker === "deriv"),
+    [accounts, isMt5, mt5Accounts],
   );
 
   const applyPreset = (key: RiskPresetKey) => {
@@ -68,18 +77,56 @@ const CopyStart = () => {
       toast.error("Please sign in to start copying");
       return;
     }
-    const account = accountId || eligibleAccounts[0]?.id;
+    const account = isMt5 ? (mt5AccountId || eligibleAccounts[0]?.id) : (accountId || eligibleAccounts[0]?.id);
     if (!account) {
-      toast.error(isDeriv ? "Connect your Deriv account first" : "Connect your MT5 account first");
-      return;
-    }
-    const dd = Number(drawdown);
-    if (!dd || dd <= 0 || dd > 90) {
-      toast.error("Set a maximum drawdown between 1% and 90%");
+      toast.error(isMt5 ? "Connect an MT5 TradeCopy follower account first" : "Connect your Deriv account first");
       return;
     }
 
     try {
+      if (isMt5) {
+        const mt5Account = mt5Accounts?.find((a) => a.id === account);
+        if (!mt5Account) throw new Error("Connect an MT5 follower account first");
+        if (mt5Account.environment === "LIVE") {
+          const typed = window.prompt('This connects REAL MT5 copy trading. Type "START LIVE MT5 COPY" to confirm.');
+          if (typed !== "START LIVE MT5 COPY") return;
+        }
+        const linked = await tradeCopy.mutateAsync({
+          action: "link",
+          payload: { follower_account_id: mt5Account.id, provider_id: providerId!, copy_order_type: 1 },
+        });
+        const relationshipId = String((linked as any)?.relationshipId ?? "");
+        if (!relationshipId) throw new Error("MT5 provider link was created without a relationship ID");
+        await tradeCopy.mutateAsync({
+          action: "update_settings",
+          payload: {
+            relationship_id: relationshipId,
+            risk_type: mt5RiskType,
+            multiplier: Number(mt5Multiplier) || 1,
+            copy_sltp: mt5CopySltp,
+            order_filter: mt5OrderFilter,
+            scalper_mode: 0,
+            scalper_value: 0,
+          },
+        });
+        await tradeCopy.mutateAsync({
+          action: "set_relationship_status",
+          payload: {
+            relationship_id: relationshipId,
+            status: "active",
+            ...(mt5Account.environment === "LIVE" ? { confirm_live: true, confirm_text: "START LIVE MT5 COPY" } : {}),
+          },
+        });
+        toast.success(mt5Account.environment === "LIVE" ? "Live MT5 TradeCopy started" : "Demo MT5 TradeCopy started");
+        navigate("/copy-trading/my");
+        return;
+      }
+
+      const dd = Number(drawdown);
+      if (!dd || dd <= 0 || dd > 90) {
+        toast.error("Set a maximum drawdown between 1% and 90%");
+        return;
+      }
       await subscribe.mutateAsync({
         provider_id: providerId!,
         trading_account_id: account,
@@ -90,7 +137,7 @@ const CopyStart = () => {
         equity_floor_usd: null,
         baseline_equity_usd: null,
       });
-      toast.success("Copy request submitted. Copying starts once it is approved.");
+      toast.success("Deriv Options copy request submitted. Copying starts once it is approved.");
       navigate("/copy-trading/my");
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Could not start copying");
@@ -112,11 +159,31 @@ const CopyStart = () => {
           </Link>
         </Button>
 
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">
-              Copy {provider?.display_name ?? "provider"}
-            </CardTitle>
+        <Card className="glass-card overflow-hidden">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <CardTitle className="text-base">Copy {provider?.display_name ?? "provider"}</CardTitle>
+                <p className="mt-1 text-xs text-muted-foreground">Choose the correct execution route before connecting your account.</p>
+              </div>
+              <Badge className={isMt5 ? "gap-1 bg-primary/10 text-primary border-primary/20" : "gap-1 bg-warning/10 text-warning border-warning/20"}>
+                {isMt5 ? <Monitor className="h-3 w-3" /> : <Wallet className="h-3 w-3" />}
+                {isMt5 ? "MT5 TradeCopy" : "Deriv Options Copy"}
+              </Badge>
+            </div>
+            <div className={`mt-3 rounded-xl border p-3 ${isMt5 ? "border-primary/25 bg-primary/5" : "border-warning/25 bg-warning/5"}`}>
+              <div className="flex items-start gap-2">
+                {isMt5 ? <Cloud className="mt-0.5 h-4 w-4 text-primary" /> : <Link2 className="mt-0.5 h-4 w-4 text-warning" />}
+                <div>
+                  <p className="text-xs font-semibold">{isMt5 ? "Real MT5 provider route" : "Deriv Options route"}</p>
+                  <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+                    {isMt5
+                      ? "This provider is an MT5 master. Your MT5 follower is linked through Botvio TradeCopy Cloud. It does not use the old Deriv Options/binary-options copier."
+                      : "This provider trades Deriv Options. Your Deriv account is used for the Options copy API. It is separate from MT5 TradeCopy."}
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
@@ -161,13 +228,13 @@ const CopyStart = () => {
               <Button variant="outline" className="w-full" asChild>
                 <Link to="/connections">
                   <PlugZap className="mr-1.5 h-4 w-4" />
-                  {isDeriv ? "Connect Deriv" : "Connect MT5 Account"}
+                  {isMt5 ? "Connect MT5 TradeCopy Account" : "Connect Deriv Options"}
                 </Link>
               </Button>
             ) : (
               <>
                 <Label className="text-xs">Copy into</Label>
-                <Select value={accountId || eligibleAccounts[0].id} onValueChange={setAccountId}>
+                <Select value={isMt5 ? (mt5AccountId || eligibleAccounts[0].id) : (accountId || eligibleAccounts[0].id)} onValueChange={isMt5 ? setMt5AccountId : setAccountId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your account" />
                   </SelectTrigger>
@@ -187,6 +254,27 @@ const CopyStart = () => {
           </CardContent>
         </Card>
 
+        {/* Risk */}
+        {isMt5 ? (
+          <Card className="glass-card border-primary/20">
+            <CardHeader className="pb-2"><CardTitle className="text-sm">MT5 TradeCopy settings</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {Object.entries(RISK_TYPE_LABELS).map(([key, label]) => (
+                  <button type="button" key={key} onClick={() => setMt5RiskType(Number(key))} className={`rounded-lg border p-2 text-left text-[11px] ${mt5RiskType === Number(key) ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5"><Label className="text-xs">{mt5RiskType === 2 ? "Fixed lot size" : "Risk multiplier"}</Label><Input type="number" min="0.01" step="0.01" value={mt5Multiplier} onChange={(e) => setMt5Multiplier(e.target.value)} /></div>
+                <div className="space-y-1.5"><Label className="text-xs">Orders to copy</Label><Select value={String(mt5OrderFilter)} onValueChange={(v) => setMt5OrderFilter(Number(v))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{Object.entries(ORDER_FILTER_LABELS).map(([k,v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select></div>
+              </div>
+              <label className="flex items-center gap-2 rounded-lg border border-border/60 p-3 text-xs"><Checkbox checked={mt5CopySltp} onCheckedChange={(v) => setMt5CopySltp(!!v)} /> Copy provider stop-loss and take-profit</label>
+              <div className="rounded-lg bg-muted/30 p-3 text-[11px] text-muted-foreground">TradeCopy links your MT5 follower to this provider's MT5 master. Demo and Live are kept separate.</div>
+            </CardContent>
+          </Card>
+        ) : (
         {/* Risk */}
         <Card className="glass-card">
           <CardHeader className="pb-2">
@@ -326,7 +414,7 @@ const CopyStart = () => {
             </div>
 
             <Button className="w-full" onClick={handleStart} disabled={subscribe.isPending}>
-              {subscribe.isPending ? "Submitting…" : "Start copying"}
+              {isMt5 ? (tradeCopy.isPending ? "Connecting…" : "Start MT5 Copying") : (subscribe.isPending ? "Submitting…" : "Start Deriv Copying")}
             </Button>
 
             <p className="flex items-start gap-2 text-[11px] text-muted-foreground">
@@ -336,6 +424,7 @@ const CopyStart = () => {
             </p>
           </CardContent>
         </Card>
+        )}
       </main>
     </div>
   );
