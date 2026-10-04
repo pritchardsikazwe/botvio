@@ -326,6 +326,7 @@ export const HomeSignalsWidget = () => {
           const isWin = signal.outcome === "win";
           const isLoss = signal.outcome === "loss";
           const signalBrokers = (signal as any).broker as string[] | null;
+          const signalCategory = String((signal as any).category || "MARKET").toUpperCase();
 
           return (
             <Card
@@ -334,7 +335,7 @@ export const HomeSignalsWidget = () => {
                 isWin ? "border-success/50 ring-1 ring-success/20" : ""
               }`}
             >
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-2 bg-gradient-to-r from-primary/5 via-transparent to-transparent">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
@@ -345,7 +346,7 @@ export const HomeSignalsWidget = () => {
                 </div>
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                    <CardTitle className="text-lg truncate">{signal.symbol}</CardTitle>
+                    <div className="min-w-0"><CardTitle className="text-lg truncate">{signal.symbol}</CardTitle><div className="flex items-center gap-1.5 mt-0.5"><span className="inline-flex h-1.5 w-1.5 rounded-full bg-success animate-pulse" /><span className="text-[9px] uppercase tracking-wider text-success font-bold">Live Posted</span><Badge variant="outline" className="text-[8px] h-4">{signalCategory}</Badge></div></div>
                     <Badge
                       variant={signal.direction === "BUY" ? "default" : "destructive"}
                       className={signal.direction === "BUY" ? "bg-success text-success-foreground" : ""}
