@@ -161,12 +161,12 @@ export const useDerivAPI = () => {
   }, []);
 
   const connect = useCallback(
-    async (apiToken: string): Promise<DerivBalance> => {
+    async (apiToken: string, accountId?: string): Promise<DerivBalance> => {
       updateState({ loading: true, error: null });
       try {
         const getOtpUrl = async () => {
           const { data, error } = await supabase.functions.invoke<DerivOtpResponse>("deriv-get-otp", {
-            body: { deriv_token: apiToken },
+            body: { deriv_token: apiToken, account_id: accountId || localStorage.getItem("deriv_active_account_id") || undefined },
           });
           if (error || !data?.ok || !data?.ws_url) {
             throw new Error(data?.error || error?.message || "Failed to create Deriv PAT session");
