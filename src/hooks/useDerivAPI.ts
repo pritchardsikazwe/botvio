@@ -198,7 +198,7 @@ export const useDerivAPI = () => {
         const balance = await service.connectWithOtpUrl(wsUrl, getOtpUrl);
         const acctInfo: DerivAccountInfo = {
           loginid: balance.loginid,
-          is_virtual: balance.loginid.startsWith("VRTC"),
+          is_virtual: /\/ws\/demo(?:\?|$)/i.test(wsUrl) || balance.loginid.startsWith("VRTC"),
           currency: balance.currency,
           fullname: balance.fullname,
         };
