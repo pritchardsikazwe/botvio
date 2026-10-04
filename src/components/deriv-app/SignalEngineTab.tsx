@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Radar, Timer, Gauge } from "lucide-react";
 
 const ENGINES: { id: EngineType; label: string }[] = [
+  { id: "momentum", label: "⭐ Momentum — Default" },
   { id: "rise_fall", label: "Rise / Fall momentum" },
   { id: "multipliers", label: "Multipliers trend" },
   { id: "higher_lower", label: "Higher / Lower barrier" },
@@ -34,7 +35,7 @@ const MARKETS = [
 
 export const SignalEngineTab = () => {
   const { authorized, lastTick, subscribeTicks, unsubscribeTicks } = useDeriv();
-  const [engine, setEngine] = useState<EngineType>("rise_fall");
+  const [engine, setEngine] = useState<EngineType>("momentum");
   const [symbol, setSymbol] = useState("R_75");
   const [signal, setSignal] = useState<SignalResult | null>(null);
   const ticks = useRef<number[]>([]);
@@ -67,10 +68,10 @@ export const SignalEngineTab = () => {
 
   return (
     <div className="space-y-4">
-      <Card className="glass-card">
+      <Card className="glass-card border-primary/30">
         <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className="text-xs">Engine</Label>
+            <div className="flex items-center justify-between"><Label className="text-xs">Options Strategy</Label><Badge variant="outline" className="text-[10px]">Momentum default</Badge></div>
             <Select value={engine} onValueChange={(v) => setEngine(v as EngineType)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent className="bg-popover z-50">
@@ -101,7 +102,7 @@ export const SignalEngineTab = () => {
           <div className="text-center py-2">
             <p className={cn("text-4xl font-black tracking-tight", tone)}>{signal?.signal ?? "WAIT"}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {authorized ? `Streaming ${symbol}` : "Connect your Deriv account to stream live ticks"}
+              Momentum reads live price movement, EMA structure, RSI and multi-window confirmation. {authorized ? `Streaming ${symbol}` : "Connect your Deriv account to stream live ticks"}
             </p>
           </div>
 
