@@ -92,11 +92,6 @@ export default function DerivCallbackPage() {
           return;
         }
 
-        // Store the access token locally for WebSocket usage.
-        if (data.token) {
-          setDerivOAuthToken(data.token);
-        }
-
         // Save every Options account returned by Deriv, not only the first one.
         // This lets Botvio show Demo + Real together and switch between them
         // without sending the user back to Trading Connections.
@@ -126,6 +121,14 @@ export default function DerivCallbackPage() {
                 is_active: account.loginid === preferred.loginid,
               } as any, { onConflict: "user_id,loginid" });
           }
+        }
+        // Set the selected account before notifying DerivProvider. The new Options API
+        // requires accountId when requesting the OTP WebSocket URL; that URL then
+        // determines whether the session is Demo or Real.
+        if (data.token && preferred?.loginid) {
+          setDerivOAuthToken(data.token, preferred.loginid);
+        } else if (data.token) {
+          setDerivOAuthToken(data.token);
         }
         sessionStorage.removeItem("deriv_preferred_account_type");
 
