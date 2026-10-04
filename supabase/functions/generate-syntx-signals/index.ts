@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { assertAutomationKey } from "../_shared/automationAuth.ts";
+import { assertAutomationKey } from "../_shared/automationAuth.ts";import { loadPerformanceIndex, performanceGate } from "../_shared/performanceGate.ts";
 async function decryptSecret(enc:string,secret:string):Promise<string>{const bytes=Uint8Array.from(atob(enc.replace(/^v1:/,"")),(c)=>c.charCodeAt(0));const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:bytes.slice(0,12)},k,bytes.slice(12));return new TextDecoder().decode(pt)}
 type Candle={time:number;open:number;high:number;low:number;close:number};
 const FAMILIES=[
@@ -71,6 +71,7 @@ function unwrap(x:unknown):unknown{if(x&&typeof x==="object"){const o=x as Recor
 function bars(x:unknown):Candle[]{const r=unwrap(x);const list=Array.isArray(r)?r:(r&&typeof r==="object"?Object.values(r as Record<string,unknown>).find(Array.isArray)??[]:[]);return(list as unknown[]).map(v=>{const b=v as Record<string,unknown>;const t=Number(b.time??b.Time??b.timestamp??b.Timestamp??0);return{time:t>1e12?Math.floor(t/1000):t,open:Number(b.open??b.Open),high:Number(b.high??b.High),low:Number(b.low??b.Low),close:Number(b.close??b.Close)}}).filter(x=>Number.isFinite(x.time)&&[x.open,x.high,x.low,x.close].every(Number.isFinite))}
 async function api(base:string,key:string,path:string,q:Record<string,string|number|undefined>){const u=new URL(base+path);for(const[k,v]of Object.entries(q))if(v!==undefined)u.searchParams.set(k,String(v));const r=await fetch(u,{headers:{ApiKey:key,Accept:"application/json, text/plain"},signal:AbortSignal.timeout(20000)});const t=await r.text();let b:unknown=t;try{b=JSON.parse(t)}catch{}if(!r.ok)throw new Error(`API Studio ${r.status}`);return b}
 Deno.serve(async(req)=>{if(req.method!=="POST")return new Response("POST required",{status:405});try{const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+const performanceIndex = await loadPerformanceIndex(db);
 if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } });const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];for(const c of connections??[]){let session=String(c.session_id||"");try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
 const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{
   const fetchMinutes=name==="D3"?1440:mins;
@@ -108,6 +109,9 @@ for(const plan of setups){
   const levels=moderateLevels(frames.find((x:any)=>x.n===plan.tf)?.data??frames.find((x:any)=>x.n===plan.tf)?.candles??[],plan.setup.direction,plan.tf);
   const sl=levels.sl,tp=levels.tp;
   const strategyLabel=`${profile.label} · ${plan.label}`;
+  const gate=performanceGate(performanceIndex,symbol,plan.tf,strategyLabel);
+  if(!gate.allowed) continue;
+  if(plan.setup.score < plan.min + gate.scoreBoost) continue;
   const expiresAt=new Date(Date.now()+plan.expiry*1000).toISOString();
   const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",symbol).eq("strategy_name",strategyLabel).eq("direction",plan.setup.direction).gte("created_at",new Date(Date.now()-Math.max(10,plan.tf==="1m"?5:plan.tf==="15m"?30:120)*60000).toISOString()).limit(1);
   if(recent?.length) continue;
