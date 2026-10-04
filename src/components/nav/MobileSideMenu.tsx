@@ -35,7 +35,8 @@ const primary: Item[] = [
   { label: "Dashboard", to: "/dashboard", icon: Home },
   { label: "Markets", to: "/markets", icon: BarChart3 },
   { label: "Signals", to: "/signals", icon: Signal, live: true },
-  { label: "Copy Trading", to: "/copy-trading", icon: Copy },
+  { label: "Connect Account for Copy Trading", to: "/connections", icon: Copy },
+  { label: "Copy Trading Marketplace", to: "/copy-trading", icon: Users },
   { label: "Botvio AI Robot", to: "/botvio-robot", icon: Bot },
   { label: "Trading Hub", to: "/gold", icon: Coins },
   { label: "News Trader Hub", to: "/news-trader-hub", icon: Radio, live: true },
@@ -45,10 +46,11 @@ const trading: Item[] = [
   { label: "My Copy Trading", to: "/copy-trading/my", icon: Users },
   { label: "Provider Dashboard", to: "/provider-dashboard", icon: LineChart },
   { label: "Deriv Accounts", to: "/connections", icon: WalletCards },
-  { label: "AI Chart Analysis", to: "/chart/XAUUSD", icon: Sparkles },
+  { label: "AI Chart Analysis & Upload", to: "/chart/XAUUSD", icon: Sparkles },
   { label: "Trading Tools", to: "/tools", icon: Sparkles },
   { label: "Education", to: "/learn", icon: GraduationCap },
   { label: "Products & Plans", to: "/marketplace", icon: Coins },
+  { label: "Open Deriv Account", to: "https://t.deriv.link?t=8U3QNKP9UA9G", icon: WalletCards },
 ];
 
 export const MobileSideMenu = ({ className, trigger }: { className?: string; trigger?: ReactNode }) => {
@@ -66,6 +68,7 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
       <Link
         key={to + label}
         to={to}
+        {...(to.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         onClick={close}
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all",
