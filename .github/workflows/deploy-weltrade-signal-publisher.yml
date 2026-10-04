@@ -1,0 +1,38 @@
+name: Deploy Weltrade Signal Publisher
+
+on:
+  push:
+    branches:
+      - botvio-independent-sep13
+    paths:
+      - "supabase/functions/record-weltrade-signals/**"
+      - ".github/workflows/deploy-weltrade-signal-publisher.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check Supabase secrets
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN" || { echo "::error::Missing SUPABASE_ACCESS_TOKEN"; exit 1; }
+          test -n "$SUPABASE_PROJECT_REF" || { echo "::error::Missing SUPABASE_PROJECT_REF"; exit 1; }
+
+      - name: Deploy Weltrade signal publisher
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: npx supabase@latest functions deploy record-weltrade-signals --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
