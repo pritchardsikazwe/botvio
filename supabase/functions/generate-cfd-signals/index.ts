@@ -193,16 +193,18 @@ Deno.serve(async(req)=>{
     if(conflict||same+alignedBias<required)continue;
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
-    const strategyName=`${profile.strategy} · ${p.type} ${p.tf}`;
-    const cooldown=p.tf==="1m"?5:p.tf==="15m"?30:120;
+    const detectedStrategies=strategyTypes(frames.get(p.tf)??[],setup.direction,p.tf);
+    const strategyLabels=detectedStrategies.length?detectedStrategies:["TREND"];
+    const strategyName=\`${profile.strategy} · ${p.type} ${p.tf} · ${strategyLabels.join(" + ")}\`;
+    const cooldown=p.tf==="1m"?5:p.tf==="5m"?10:p.tf==="15m"?30:120;
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",profile.symbol).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-cooldown*60000).toISOString()).limit(1);
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
       timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(setup.score),broker:["deriv"],
       category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
-      expires_at:expiresAt,reason:`${profile.name} ${p.type} entry: ${same + alignedBias}/${Math.max(confirmations.length, confirmationBias.length)} higher-timeframe confirmations/alignment`,
-      explanation_json:{engine:"Botvio CFD MTF Engine v1",signal_type:p.type,timeframe:p.tf,expiry_seconds:p.expiry,expires_at:expiresAt,
+      expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${same + alignedBias}/${Math.max(confirmations.length, confirmationBias.length)} higher-timeframe confirmations/alignment`,
+      explanation_json:{engine:"Botvio CFD MTF Engine v2",signal_type:p.type,timeframe:p.tf,strategy_types:strategyLabels,expiry_seconds:p.expiry,expires_at:expiresAt,
         source:"Deriv active_symbols + ticks_history",higher_timeframe_confirmation:same,confirmation_count:confirmations.length}
     }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
     if(error)skipped.push({symbol:profile.name,timeframe:p.tf,error:error.message});else published.push(row);
