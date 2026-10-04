@@ -84,6 +84,17 @@ function strategyTypes(c:Candle[],direction:"BUY"|"SELL",tf:string){
  if(["1m","5m","15m"].includes(tf)) out.push("SCALPING");
  return [...new Set(out)];
 }
+async function workerConfluence(db:any,symbol:string,direction:"BUY"|"SELL"){
+ const {data}=await db.from("market_worker_insights").select("worker,timeframe,direction,confidence,market_regime,structure,support,resistance,strategy_types")
+   .eq("symbol",symbol).in("timeframe",["1H","1D"]).gt("expires_at",new Date().toISOString()).order("observed_at",{ascending:false}).limit(30);
+ const rows=(data??[]) as any[];const latest=new Map<string,any>();
+ for(const x of rows){const k=String(x.timeframe);if(!latest.has(k))latest.set(k,x);}
+ const confirms=[latest.get("1H"),latest.get("1D")].filter(Boolean);
+ const aligned=confirms.filter(x=>x.direction===direction).length;
+ const conflict=confirms.some(x=>x.direction&&x.direction!==direction);
+ const avg=confirms.length?Math.round(confirms.reduce((s,x)=>s+Number(x.confidence||0),0)/confirms.length):0;
+ return {allow:!conflict&&(!confirms.length||aligned>0),bonus:aligned*4+(avg>=80?4:avg>=70?2:0)-(conflict?12:0),avg,regime:latest.get("1H")?.market_regime??latest.get("1D")?.market_regime??"UNKNOWN"};
+}
 function unwrap(x:unknown):unknown{if(x&&typeof x==="object"){const o=x as Record<string,unknown>;return o.data??x}return x}
 function bars(x:unknown):Candle[]{const r=unwrap(x);const list=Array.isArray(r)?r:(r&&typeof r==="object"?Object.values(r as Record<string,unknown>).find(Array.isArray)??[]:[]);return(list as unknown[]).map(v=>{const b=v as Record<string,unknown>;const t=Number(b.time??b.Time??b.timestamp??b.Timestamp??0);return{time:t>1e12?Math.floor(t/1000):t,open:Number(b.open??b.Open),high:Number(b.high??b.High),low:Number(b.low??b.Low),close:Number(b.close??b.Close)}}).filter(x=>Number.isFinite(x.time)&&[x.open,x.high,x.low,x.close].every(Number.isFinite))}
 async function api(base:string,key:string,path:string,q:Record<string,string|number|undefined>){const u=new URL(base+path);for(const[k,v]of Object.entries(q))if(v!==undefined)u.searchParams.set(k,String(v));const r=await fetch(u,{headers:{ApiKey:key,Accept:"application/json, text/plain"},signal:AbortSignal.timeout(20000)});const t=await r.text();let b:unknown=t;try{b=JSON.parse(t)}catch{}if(!r.ok)throw new Error(`API Studio ${r.status}`);return b}
@@ -110,6 +121,10 @@ const setups=[
 
 for(const plan of setups){
   if(!plan.setup) continue;
+  const worker=await workerConfluence(db,symbol,plan.setup.direction);
+  if(!worker.allow) continue;
+  plan.setup.score=Math.min(96,plan.setup.score+worker.bonus);
+
   const confirmationDirections=plan.confirm.map((sig:any,index:number)=>{
     if(sig?.direction) return sig.direction;
     const names=plan.tf==="1m"?["M15","H1"]:plan.tf==="15m"?["H1","D1"]:plan.tf==="1H"?["D1"]:plan.tf==="3D"?["D1"]:[];
@@ -140,9 +155,9 @@ for(const plan of setups){
     status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,best_expiry:plan.expiry,backup_expiry:plan.backup,expires_at:expiresAt,
     reason:`${f.family} ${plan.label}: ${strategyLabels.join(", ")} confirmed with ${same}/${confirmationDirections.length} higher-timeframe confirmations`,
     explanation_json:{
-      engine:"SyntX MTF Engine v5",strategy_id:profile.label,strategy_types:strategyLabels,source:"Weltrade SyntX API Studio",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
+      engine:"SyntX MTF Engine v5",strategy_id:profile.label,strategy_types:strategyLabels,source:"Weltrade SyntX API Studio + Botvio Worker Intelligence",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
       entry_style:plan.label,timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"])),
-      higher_timeframe_confirmation:same,confirmation_count:confirmationDirections.length
+      higher_timeframe_confirmation:same,confirmation_count:confirmationDirections.length,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}
     }
   }).select("id,symbol,direction,confidence,timeframe").single();
   if(!ins&&row)published.push(row);
