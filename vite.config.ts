@@ -113,7 +113,11 @@ export default defineConfig(({ mode }) => ({
         screenshots: [{ src: "/botvio-og.jpg", sizes: "1200x630", type: "image/jpeg", form_factor: "wide" }],
         shortcuts: [
           { name: "Dashboard", url: "/dashboard", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Connect Account", short_name: "Connect", url: "/connections", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Copy Trading", url: "/copy-trading", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Signals", url: "/signals", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "AI Chart & Upload", short_name: "AI Chart", url: "/chart/XAUUSD", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+          { name: "Open Deriv Account", short_name: "Deriv", url: "https://t.deriv.link?t=8U3QNKP9UA9G", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Gold Robot", url: "/apps/gold-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Crypto Robot", url: "/apps/crypto-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
           { name: "Synthetic Robot", url: "/apps/synthetic-robot", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
