@@ -114,6 +114,21 @@ function strategyTypes(c:Candle[],direction:"BUY"|"SELL",tf:string):string[]{
   return [...new Set(out)];
 }
 
+async function workerConfluence(db:any,symbol:string,direction:"BUY"|"SELL"){
+ const {data}=await db.from("market_worker_insights").select("worker,timeframe,direction,confidence,market_regime,structure,support,resistance,strategy_types,payload")
+   .eq("symbol",symbol).in("timeframe",["1H","1D"]).gt("expires_at",new Date().toISOString()).order("observed_at",{ascending:false}).limit(30);
+ const rows=(data??[]) as any[];
+ const latest=new Map<string,any>();
+ for(const x of rows){const k=String(x.timeframe);if(!latest.has(k))latest.set(k,x);}
+ const h1=latest.get("1H"),d1=latest.get("1D");
+ const confirms=[h1,d1].filter(Boolean);
+ const aligned=confirms.filter(x=>x.direction===direction).length;
+ const conflict=confirms.some(x=>x.direction && x.direction!==direction);
+ const avg=confirms.length?Math.round(confirms.reduce((s,x)=>s+Number(x.confidence||0),0)/confirms.length):0;
+ const bonus=aligned*4+(avg>=80?4:avg>=70?2:0)-(conflict?12:0);
+ return {allow:!conflict&&(!confirms.length||aligned>0),bonus,h1,d1,avg,regime:h1?.market_regime??d1?.market_regime??"UNKNOWN"};
+}
+
 function isForexMarketOpen(now = new Date()): boolean {
   // Standard FX market: opens Sunday 22:00 UTC and closes Friday 22:00 UTC.
   const day = now.getUTCDay();
@@ -183,7 +198,11 @@ Deno.serve(async(req)=>{
    for(const p of PLANS){
     const gate = performanceGate(performanceIndex, profile.name, p.tf, profile.strategy);
     if(!gate.allowed) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:gate.reason,performance:gate.performance}); continue; }
-    const setup=sigs.get(p.tf);if(!setup||setup.score<profile.min+p.minBoost+gate.scoreBoost)continue;
+    const setup=sigs.get(p.tf);if(!setup)continue;
+    const worker=await workerConfluence(db,profile.symbol,setup.direction);
+    if(!worker.allow) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:"worker confluence conflict",worker}); continue; }
+    const workerScore=Math.min(96,setup.score+worker.bonus);
+    if(workerScore<profile.min+p.minBoost+gate.scoreBoost)continue;
     const confirmations=p.confirm.map(tf=>sigs.get(tf)).filter(Boolean) as Sig[];
     const same=confirmations.filter(x=>x.direction===setup.direction).length;
     const confirmationBias=p.confirm.map(tf=>directionalBias(frames.get(tf)??[])).filter(Boolean) as ("BUY"|"SELL")[];
@@ -201,11 +220,11 @@ Deno.serve(async(req)=>{
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
-      timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(setup.score),broker:["deriv"],
+      timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(workerScore),broker:["deriv"],
       category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
       expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${same + alignedBias}/${Math.max(confirmations.length, confirmationBias.length)} higher-timeframe confirmations/alignment`,
       explanation_json:{engine:"Botvio CFD MTF Engine v2",signal_type:p.type,timeframe:p.tf,strategy_types:strategyLabels,expiry_seconds:p.expiry,expires_at:expiresAt,
-        source:"Deriv active_symbols + ticks_history",higher_timeframe_confirmation:same,confirmation_count:confirmations.length}
+        source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",higher_timeframe_confirmation:same,confirmation_count:confirmations.length,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
     }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
     if(error)skipped.push({symbol:profile.name,timeframe:p.tf,error:error.message});else published.push(row);
    }
