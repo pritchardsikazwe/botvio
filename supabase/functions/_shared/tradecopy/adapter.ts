@@ -47,7 +47,12 @@ type Query = Record<string, string | number | boolean | null | undefined>;
 export class TradeCopyMt5Adapter implements ExecutionAdapter {
   readonly platform = "MT5";
   readonly mode = "live" as const;
-  constructor(private apiKey: string, private baseUrl: string, private fetcher: typeof fetch = fetch) {
+  constructor(
+    private apiKey: string,
+    private baseUrl: string,
+    private fetcher: typeof fetch = fetch,
+    private timeoutMs = 30000,
+  ) {
     if (!apiKey) throw new TradeCopyError("TRADECOPY_API_KEY is not configured", "config", 500);
   }
 
@@ -59,7 +64,9 @@ export class TradeCopyMt5Adapter implements ExecutionAdapter {
       res = await this.fetcher(url.toString(), {
         method,
         headers: { "X-API-KEY": this.apiKey, ApiKey: this.apiKey, Accept: "application/json" },
-        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(15000) : undefined,
+        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
+          ? AbortSignal.timeout(this.timeoutMs)
+          : undefined,
       });
     } catch (e) {
       throw new TradeCopyError(`TradeCopy unreachable: ${(e as Error).message}`, "network", 502);
@@ -210,6 +217,7 @@ export class MockTradeCopyAdapter implements ExecutionAdapter {
 }
 
 export const TRADECOPY_DEFAULT_BASE_URL = "http://us-1-server.tradecopy.online:3310";
+export const TRADECOPY_DEFAULT_TIMEOUT_MS = 30000;
 
 /**
  * Mock unless BOTH the API key is set AND TRADECOPY_MODE=live. This keeps
@@ -217,7 +225,16 @@ export const TRADECOPY_DEFAULT_BASE_URL = "http://us-1-server.tradecopy.online:3
  */
 export function createAdapter(env: { apiKey?: string | null; mode?: string | null; baseUrl?: string | null }): ExecutionAdapter {
   if (env.apiKey && (env.mode ?? "").toLowerCase() === "live") {
-    return new TradeCopyMt5Adapter(env.apiKey, env.baseUrl || TRADECOPY_DEFAULT_BASE_URL);
+    const configuredTimeout = Number(Deno.env.get("TRADECOPY_TIMEOUT_MS") ?? TRADECOPY_DEFAULT_TIMEOUT_MS);
+    const timeoutMs = Number.isFinite(configuredTimeout)
+      ? Math.min(Math.max(Math.trunc(configuredTimeout), 10000), 60000)
+      : TRADECOPY_DEFAULT_TIMEOUT_MS;
+    return new TradeCopyMt5Adapter(
+      env.apiKey,
+      env.baseUrl || TRADECOPY_DEFAULT_BASE_URL,
+      fetch,
+      timeoutMs,
+    );
   }
   return new MockTradeCopyAdapter();
 }
