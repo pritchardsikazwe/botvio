@@ -174,6 +174,7 @@ Deno.serve(async (req) => {
         balance: accountBalance,
         currency: accountCurrency,
         is_virtual: isVirtual,
+        accounts,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
