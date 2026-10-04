@@ -130,11 +130,29 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
 
   const globalLive = await liveGlobal(admin);
 
-  const { data: masters } = await admin.from("trading_accounts").select(COLS)
+  // Prefer the explicitly configured Botvio Signal Master.
+  // If none is configured, use the existing provider master only when there is
+  // exactly one active non-Robot TradeCopy master. This makes the existing
+  // provider account usable without guessing between multiple providers.
+  const { data: configuredMasters } = await admin.from("trading_accounts").select(COLS)
     .eq("botvio_signal_master_enabled", true).eq("account_role", "master")
-    .eq("is_botvio_robot", false).eq("is_active", true).eq("tradecopy_active", true).limit(1);
+    .eq("is_botvio_robot", false).eq("is_active", true).eq("tradecopy_active", true)
+    .not("tradecopy_user_id", "is", null).limit(2);
 
-  const master = masters?.[0] as Record<string, any> | undefined;
+  let master = configuredMasters?.[0] as Record<string, any> | undefined;
+  let signalMasterFallback = false;
+
+  if (!master) {
+    const { data: providerMasters } = await admin.from("trading_accounts").select(COLS)
+      .eq("account_role", "master")
+      .eq("is_botvio_robot", false).eq("is_active", true).eq("tradecopy_active", true)
+      .not("tradecopy_user_id", "is", null).limit(2);
+    if ((providerMasters ?? []).length === 1) {
+      master = providerMasters[0] as Record<string, any>;
+      signalMasterFallback = true;
+    }
+  }
+
   let masterExecuted = 0, directExecuted = 0, skipped = 0;
 
   if (master) {
@@ -193,7 +211,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
     }
   }
 
-  return { signals: signals.length, signalMasterConfigured: !!master, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, directSkippedByCopy, skipped };
+  return { signals: signals.length, signalMasterConfigured: !!master, signalMasterFallback, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, directSkippedByCopy, skipped };
 }
 
 Deno.serve(async (req) => {
