@@ -1,13 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Layers, LineChart, Smartphone, TrendingUp } from "lucide-react";
+import { LineChart } from "lucide-react";
 
-/** The four Deriv trading surfaces, always reachable from one another. */
+/** One canonical Deriv Options surface. Legacy binary-option pages redirect into this workspace. */
 export const TRADING_SURFACES = [
-  { to: "/rise-fall", label: "Rise & Fall", icon: TrendingUp },
-  { to: "/deriv-app", label: "Deriv App", icon: Smartphone },
-  { to: "/deriv-options", label: "Options", icon: LineChart },
-  { to: "/trade/style/rise-fall-scalping", label: "Momentum", icon: Layers },
+  { to: "/options", label: "Deriv Options", icon: LineChart },
 ] as const;
 
 export const TradingNav = ({ className }: { className?: string }) => {
