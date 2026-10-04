@@ -111,7 +111,7 @@ function strategySignal(c:Candle[],strategy:{family:StrategyFamily;label:string;
  }
 
  if(!d)return null;
- const bias=directionalBias(c);
+ const bias=strategy.family==="VOLATILITY"?null:directionalBias(c);
  score += bias===d?6:bias?-5:0;
  score += candleQuality(c);
  if(score<70)return null;
