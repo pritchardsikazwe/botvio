@@ -57,14 +57,18 @@ export function getDerivOAuthToken(): string | null {
   return localStorage.getItem("deriv_oauth_token");
 }
 
-export function setDerivOAuthToken(token: string): void {
+export function setDerivOAuthToken(token: string, accountId?: string): void {
+  if (accountId) localStorage.setItem("deriv_active_account_id", accountId);
   localStorage.setItem("deriv_oauth_token", token);
-  // Tell DerivProvider to (re)authorize immediately — no logout/login required.
-  window.dispatchEvent(new CustomEvent("deriv:token-updated", { detail: { token } }));
+  // Tell DerivProvider to (re)authorize the selected account immediately.
+  window.dispatchEvent(new CustomEvent("deriv:token-updated", {
+    detail: { token, accountId: accountId || localStorage.getItem("deriv_active_account_id") || undefined },
+  }));
 }
 
 export function clearDerivOAuthToken(): void {
   localStorage.removeItem("deriv_oauth_token");
+  localStorage.removeItem("deriv_active_account_id");
   window.dispatchEvent(new CustomEvent("deriv:token-cleared"));
 }
 
