@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Power, RefreshCw, Zap, ShieldCheck } from "lucide-react";
+import { Power, RefreshCw, Zap, ShieldCheck, Link2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { directAction, useMyMt5Accounts } from "@/hooks/useDirectExecution";
@@ -18,6 +18,7 @@ export function Mt5AutoExecuteCard() {
   const { user } = useAuth();
   const { data: accounts, isLoading, refetch } = useMyMt5Accounts();
   const [busy, setBusy] = useState<string | null>(null);
+  const openConnections = () => window.location.assign("/connections");
 
   if (!user) return null;
 
@@ -61,19 +62,33 @@ export function Mt5AutoExecuteCard() {
         </Badge>
       </div>
 
-      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
-        <ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-primary" />
-        No Bridge EA, terminal UID, VPS or MT5 terminal polling is required for this execution route.
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+        <div className="flex items-center gap-2 text-xs font-semibold">
+          <ShieldCheck className="h-4 w-4 text-primary" />
+          <span>Botvio → TradeCopy → MT5</span>
+          <Badge variant="outline" className="ml-auto text-[9px]">CLOUD EXECUTION</Badge>
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Signals are routed through TradeCopy. No Bridge EA, terminal UID, VPS or MT5 terminal polling is used by Botvio.
+        </p>
       </div>
 
       {isLoading ? (
         <p className="text-xs text-muted-foreground">Loading TradeCopy MT5 followers…</p>
       ) : followers.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-4 text-center">
-          <p className="text-sm font-medium">No TradeCopy follower connected</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Connect your Deriv MT5 account under the TradeCopy Connections Center, link it to Botvio Robot or a provider, then activate copying.
-          </p>
+        <div className="rounded-xl border border-dashed border-primary/30 p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 text-primary" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold">Connect a Deriv MT5 account</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Add your Deriv MT5 Demo, register it as a TradeCopy follower, link it to Botvio Robot or a provider, and activate copying.
+              </p>
+              <Button size="sm" className="mt-3" onClick={openConnections}>
+                <Link2 className="mr-1.5 h-3.5 w-3.5" /> Connect MT5
+              </Button>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
@@ -86,18 +101,29 @@ export function Mt5AutoExecuteCard() {
                 </div>
               </div>
               <Badge variant="outline" className="text-[10px]">{account.environment || "DEMO"}</Badge>
+              <Badge variant={account.tradecopy_active ? "default" : "secondary"} className="text-[9px]">
+                {account.tradecopy_active ? "TRADECOPY ACTIVE" : "NOT ACTIVE"}
+              </Badge>
               <span className="text-[10px] text-muted-foreground">
                 {account.direct_lot ?? 0.01} lot · ≥{account.direct_min_confidence ?? 70}%
               </span>
+              <div className="flex items-center gap-1.5 text-[10px] font-medium">
+                {account.direct_signal_enabled
+                  ? <><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Botvio signals ON</>
+                  : <><Power className="h-3.5 w-3.5 text-muted-foreground" /> Botvio signals OFF</>}
+              </div>
               <Switch
                 checked={!!account.direct_signal_enabled}
                 disabled={busy === account.id || !account.tradecopy_active}
                 onCheckedChange={(value) => toggle(account, value)}
+                aria-label={account.direct_signal_enabled ? "Disable Botvio signals" : "Enable Botvio signals"}
               />
+              <Button variant="ghost" size="sm" onClick={openConnections} disabled={!!busy}>
+                <Link2 className="mr-1.5 h-3.5 w-3.5" />Manage
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={!!busy}>
                 <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Refresh
               </Button>
-              <Power className="h-4 w-4 text-muted-foreground" />
             </div>
           ))}
         </div>
