@@ -476,39 +476,44 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
 
     case "remove_account": {
       const accountId = String(body.account_id ?? "");
-      const acct = await loadAccount(ctx, accountId);
+      const acct = await loadAccount(ctx, accountId, { allowAdmin: true });
       if (acct.tradecopy_active) {
         throw new TradeCopyError("Deactivate copying before removing this MT5 account", "validation");
       }
 
-      // Stop any follower relationships first so TradeCopy is no longer using
-      // this account before the local connection record is removed.
-      const { data: rels } = await admin
-        .from("copy_relationships")
+      // True reset: unregister the account from TradeCopy before deleting Botvio's
+      // local record. Otherwise an external Master/Slave can keep consuming an API slot.
+      if (acct.tradecopy_user_id) {
+        if (acct.account_role === "master") {
+          await adapter.deactivateMaster(acct.tradecopy_user_id).catch(() => null);
+          await adapter.removeSource(acct.tradecopy_user_id);
+        } else if (acct.account_role === "slave") {
+          await adapter.deactivateFollower(acct.tradecopy_user_id).catch(() => null);
+          await adapter.unfollow(acct.tradecopy_user_id);
+        }
+      }
+
+      // If a master is removed, unlink and unregister its followers too.
+      const { data: rels } = await admin.from("copy_relationships")
         .select("id,follower_account_id,master_account_id,status")
         .or(`follower_account_id.eq.${acct.id},master_account_id.eq.${acct.id}`);
 
       for (const rel of rels ?? []) {
-        if (rel.follower_account_id === acct.id && acct.tradecopy_user_id) {
-          await adapter.deactivateFollower(acct.tradecopy_user_id).catch(() => null);
-          await adapter.unfollow(acct.tradecopy_user_id).catch(() => null);
-        }
         if (rel.follower_account_id && rel.follower_account_id !== acct.id) {
           const { data: follower } = await admin
             .from("trading_accounts")
             .select("id,tradecopy_user_id,tradecopy_active")
             .eq("id", rel.follower_account_id)
             .maybeSingle();
-          if (follower?.tradecopy_active && follower.tradecopy_user_id) {
+          if (follower?.tradecopy_user_id) {
             await adapter.deactivateFollower(follower.tradecopy_user_id).catch(() => null);
+            await adapter.unfollow(follower.tradecopy_user_id).catch(() => null);
             await admin.from("trading_accounts").update({ tradecopy_active: false }).eq("id", follower.id);
           }
         }
         await admin.from("copy_relationships").delete().eq("id", rel.id);
       }
 
-      // Provider links and encrypted credentials are removed with the Botvio
-      // connection. Historical execution/audit rows remain for reporting.
       await admin.from("provider_accounts").delete().eq("trading_account_id", acct.id);
       await admin.from("tradecopy_credentials").delete().eq("trading_account_id", acct.id);
       await admin.from("symbol_mappings").delete().eq("follower_account_id", acct.id);
@@ -517,11 +522,10 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       const { error: deleteError } = await admin
         .from("trading_accounts")
         .delete()
-        .eq("id", acct.id)
-        .eq("user_id", ctx.userId);
+        .eq("id", acct.id);
       if (deleteError) throw new TradeCopyError(deleteError.message, "validation");
 
-      return { data: { removed: true }, accountId: acct.id };
+      return { data: { removed: true, externalRemoved: !!acct.tradecopy_user_id }, accountId: acct.id };
     }
 
     case "diagnostic": {
