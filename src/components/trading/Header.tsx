@@ -230,11 +230,21 @@ export const Header = () => {
                   </span>
                 )}
               </div>
-            ) : (
+            ) : user ? (
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
                 <div className="w-2 h-2 rounded-full bg-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground">Not Connected</span>
               </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(true)}
+                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border hover:border-primary/40 transition-colors"
+                aria-label="Sign in to connect your trading account"
+              >
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground">Guest — Sign in</span>
+              </button>
             )}
             
             <TradesDrawer />
