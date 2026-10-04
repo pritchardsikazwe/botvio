@@ -34,8 +34,14 @@ export function deriveRoles(a: Mt5Account, ctx: { feedIds: Set<string>; follower
 /** True only when the account holds a TradeCopy registration (master or linked follower). */
 export const usesTradeCopySlot = (a: Mt5Account) => a.tradecopy_user_id != null;
 
-export const isMt5 = (a: { platform: string | null; login_id: string | null; server: string | null }) =>
-  String(a.platform ?? "mt5").toLowerCase() !== "deriv" && !!a.login_id && !!a.server;
+export const isMt5 = (a: { platform: string | null; login_id: string | null; server: string | null }) => {
+  const platform = String(a.platform ?? "mt5").toLowerCase().replace(/[\s_-]+/g, "");
+  // Deriv MT5 accounts are valid MT5 accounts. The previous filter rejected
+  // them simply because their platform field was "deriv", which made a real
+  // Deriv demo follower disappear from the Auto-Execute card.
+  const nonMt5 = new Set(["mt4", "ctrader", "derivoptions", "binary", "options"]);
+  return !!a.login_id && !!a.server && !nonMt5.has(platform);
+};
 
 export async function directAction<T = Record<string, unknown>>(action: string, payload: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await supabase.functions.invoke("mt5-direct-execution", { body: { action, ...payload } });
