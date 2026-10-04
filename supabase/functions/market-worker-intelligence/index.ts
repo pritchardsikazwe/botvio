@@ -57,7 +57,7 @@ function classifyActive(x:any){
   if(/index|nas|dow|spx|dax|ftse|otc/.test(s)) return "index";
   return "";
 }
-function candles(ws:WebSocket,symbol:string,granularity:number,count:number){const d=await req(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,subscribe:0,adjust_start_time:1});return (d.candles??[]).map((x:any)=>({epoch:Number(x.epoch),open:Number(x.open),high:Number(x.high),low:Number(x.low),close:Number(x.close)})).filter((x:Candle)=>Number.isFinite(x.close))}
+async function candles(ws:WebSocket,symbol:string,granularity:number,count:number){const d=await req(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,subscribe:0,adjust_start_time:1});return (d.candles??[]).map((x:any)=>({epoch:Number(x.epoch),open:Number(x.open),high:Number(x.high),low:Number(x.low),close:Number(x.close)})).filter((x:Candle)=>Number.isFinite(x.close))}
 Deno.serve(async req0=>{if(req0.method!=="POST")return new Response("POST required",{status:405});if(!assertAutomationKey(req0))return new Response(JSON.stringify({success:false,error:"Unauthorized automation trigger"}),{status:401});const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);const body=await req0.json().catch(()=>({}));const wanted=body?.symbol as string|undefined;
 const ws=new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(new Error("WebSocket timeout")),12000);ws.addEventListener("open",()=>{clearTimeout(t);resolve()},{once:true});ws.addEventListener("error",()=>{clearTimeout(t);reject(new Error("WebSocket failed"))},{once:true})});const started=new Date().toISOString(),results:any[]=[];
 try{
