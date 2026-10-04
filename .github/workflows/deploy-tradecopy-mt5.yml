@@ -1,6 +1,13 @@
 name: Deploy TradeCopy MT5 Signal Routing
 
 on:
+  push:
+    branches:
+      - botvio-independent-sep13
+    paths:
+      - "supabase/functions/tradecopy-api/**"
+      - "supabase/functions/_shared/tradecopy/**"
+      - ".github/workflows/deploy-tradecopy-mt5.yml"
   workflow_dispatch:
     inputs:
       deploy_signal_functions:
