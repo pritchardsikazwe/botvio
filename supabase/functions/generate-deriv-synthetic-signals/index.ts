@@ -141,8 +141,7 @@ Deno.serve(async(req)=>{
  if(req.method!=="POST")return new Response("POST required",{status:405});
  try{
   const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const performanceIndex = await loadPerformanceIndex(db);
-  if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } });
+    if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } }); const performanceIndex = await loadPerformanceIndex(db);
   await db.from("trading_signals").update({status:"EXPIRED"}).eq("status","ACTIVE").lt("expires_at",new Date().toISOString());
   const ws=new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
   await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(new Error("Deriv WebSocket timeout")),12000);ws.addEventListener("open",()=>{clearTimeout(t);resolve()},{once:true});ws.addEventListener("error",()=>{clearTimeout(t);reject(new Error("Deriv WebSocket failed"))},{once:true})});
