@@ -1,7 +1,7 @@
 // Secure wrapper around the TradeCopy REST API. API credentials stay server-side.
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { z } from "npm:zod@3.23.8";
+import { z } from "https://esm.sh/zod@3.23.8";
 import { createAdapter, ExecutionAdapter } from "../_shared/tradecopy/adapter.ts";
 import {
   assertLiveAllowed, normalizeCopySettings, normalizeMarketOrder, normalizeOrderControl, normalizeRisk,
