@@ -5,7 +5,6 @@ import { DerivAccountsManager } from "@/components/tradecopy/DerivAccountsManage
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
-import { Mt5ConnectionsPanel } from "@/components/tradecopy/Mt5ConnectionsPanel";
 import { RoleEntryCards } from "@/components/tradecopy/CopyTradingRoleGuide";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -209,12 +208,23 @@ export function TradingConnectionsCenter() {
       <section id="mt5-connections" className="scroll-mt-6 space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-lg font-semibold">MT5 Connections</h2>
-            <p className="text-sm text-muted-foreground">Your own MT5 accounts. Send Botvio signals directly, or choose to copy a provider or Botvio Robot.</p>
+            <h2 className="text-lg font-semibold">MT5 TradeCopy connections</h2>
+            <p className="text-sm text-muted-foreground">MT5 accounts use one canonical TradeCopy Cloud route: connect a Provider master or Follower, then configure copying below. Direct legacy MT5 signal execution is no longer exposed here.</p>
           </div>
-          <Badge variant="outline">Direct Botvio Signals</Badge>
+          <Badge variant="outline">TradeCopy Cloud</Badge>
         </div>
-        <Mt5ConnectionsPanel />
+        <Card className="glass-card border-primary/15 bg-primary/5">
+          <CardContent className="flex items-start gap-3 p-4">
+            <Cloud className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div className="text-xs leading-5">
+              <p className="font-semibold text-sm">Canonical MT5 route</p>
+              <p className="mt-1 text-muted-foreground">
+                Use <b>MT5 Provider</b> for a master account that publishes trades, or <b>MT5 Follower</b> for an account that receives copied trades.
+                Botvio AI signals are routed through the Botvio MT5 Signal Master and TradeCopy Cloud. The old Direct Botvio Signals / Bridge path is retired from the user workflow.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       <section id="follower-mt5" className="scroll-mt-6 space-y-3">
