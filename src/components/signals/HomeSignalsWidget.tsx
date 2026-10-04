@@ -129,6 +129,22 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
 // any MT5/copy-trading execution is unaffected.
 const HOME_SIGNAL_LIVE_MS = 15 * 60 * 1000;
 function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
+function marketLabel(signal: any): string {
+  const category = String(signal?.category || "").toLowerCase();
+  const symbol = String(signal?.symbol || "").toUpperCase();
+  if (category === "synthetic" || /^(R_|1HZ|BOOM|CRASH|STEP|JUMP|RANGE|VOL)/.test(symbol)) return "SYNTHETIC";
+  if (category === "syntx") return "WELTRADE SyntX";
+  if (/XAU|GOLD/.test(symbol)) return "GOLD";
+  if (/BTC|ETH|SOL|BNB|XRP/.test(symbol)) return "CRYPTO";
+  if (/EUR|GBP|JPY|AUD|CAD|CHF|NZD/.test(symbol)) return "FOREX";
+  return category ? category.toUpperCase() : "MARKET";
+}
+function riskReward(signal: any): string {
+  const entry = Number(signal?.entry_price), tp = Number(signal?.take_profit), sl = Number(signal?.stop_loss);
+  if (![entry,tp,sl].every(Number.isFinite)) return "—";
+  const risk = Math.abs(entry-sl), reward = Math.abs(tp-entry);
+  return risk > 0 ? `1:${(reward/risk).toFixed(1)}` : "—";
+}
 
 function homeExpiresAt(signal: { created_at: string }): Date {
   return new Date(new Date(signal.created_at).getTime() + HOME_SIGNAL_LIVE_MS);
@@ -317,6 +333,14 @@ export const HomeSignalsWidget = () => {
               }`}
             >
               <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-success">LIVE</span>
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-5">{marketLabel(signal)}</Badge>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">{getTimeRemaining(signal)}</span>
+                </div>
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
                     <CardTitle className="text-lg truncate">{signal.symbol}</CardTitle>
@@ -383,17 +407,25 @@ export const HomeSignalsWidget = () => {
                   </p>
                 )}
 
-                <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-border">
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                  <div className="rounded-md bg-muted/30 px-2 py-1.5">
+                    <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Risk / Reward</p>
+                    <p className="text-xs font-bold">{riskReward(signal)}</p>
+                  </div>
+                  <div className="rounded-md bg-muted/30 px-2 py-1.5">
+                    <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Confidence</p>
+                    <p className="text-xs font-bold text-primary">{signal.confidence ? `${signal.confidence}%` : "—"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
                   <div className="flex items-center gap-1 text-xs">
                     <Clock className="h-3 w-3 text-warning" />
                     <span className="text-warning font-medium">
-                      Home expires: {getTimeRemaining(signal)}
+                      Expires in {getTimeRemaining(signal)}
                     </span>
                   </div>
                   {signal.confidence && (
-                    <Badge variant="outline" className="text-xs">
-                      {signal.confidence}% confidence
-                    </Badge>
+                    
                   )}
                 </div>
 
