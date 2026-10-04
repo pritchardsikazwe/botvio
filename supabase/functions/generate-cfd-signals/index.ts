@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assertAutomationKey } from "../_shared/automationAuth.ts";
+import { loadPerformanceIndex, performanceGate } from "../_shared/performanceGate.ts";
 
 type Candle={epoch:number;open:number;high:number;low:number;close:number};
 type Sig={direction:"BUY"|"SELL";score:number;entry:number;sl:number;tp:number};
@@ -149,6 +150,8 @@ Deno.serve(async(req)=>{
    const sigs=new Map<string,Sig|null>();
    for(const p of PLANS)sigs.set(p.tf,signal(frames.get(p.tf)??[],profile));
    for(const p of PLANS){
+    const gate = performanceGate(performanceIndex, profile.name, p.tf, profile.strategy);
+    if(!gate.allowed) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:gate.reason,performance:gate.performance}); continue; }
     const setup=sigs.get(p.tf);if(!setup||setup.score<profile.min+p.minBoost)continue;
     const confirmations=p.confirm.map(tf=>sigs.get(tf)).filter(Boolean) as Sig[];
     const same=confirmations.filter(x=>x.direction===setup.direction).length;
