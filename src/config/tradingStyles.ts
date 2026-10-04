@@ -234,6 +234,15 @@ export const TRADING_STYLES: TradingStyle[] = [
     instruments: ACCU_INSTRUMENTS,
   },
   {
+    id: "touch-no-touch",
+    title: "Touch / No Touch",
+    description: "Botvio Options workspace for Touch and No Touch contracts. Contract availability, barriers and durations are confirmed from Deriv live contract metadata.",
+    riskTag: "Advanced",
+    tempoTag: "Timed",
+    contractTypes: [TOUCH_NO_TOUCH],
+    instruments: RISE_FALL_INSTRUMENTS,
+  },
+  {
     id: "higher-lower",
     title: "Higher/Lower Barrier Strategy",
     description: "Botvio AI — BUY near support with RSI oversold, barrier below support. SELL near resistance with RSI overbought, barrier above resistance.",
