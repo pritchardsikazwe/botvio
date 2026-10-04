@@ -269,8 +269,8 @@ const StyleTrade = () => {
       if (sig === "UP" && btn.contractType === "MULTUP") return true;
       if (sig === "DOWN" && btn.contractType === "MULTDOWN") return true;
       if (sig === "BUY" && btn.contractType === "ACCU") return true;
-      if (sig === "HIGHER" && btn.contractType === "CALL") return true;
-      if (sig === "LOWER" && btn.contractType === "PUT") return true;
+      if (sig === "HIGHER" && btn.contractType === "HIGHER") return true;
+      if (sig === "LOWER" && btn.contractType === "LOWER") return true;
       return false;
     });
 
@@ -301,6 +301,19 @@ const StyleTrade = () => {
   useEffect(() => { addLogRef.current = addLog; }, [addLog]);
 
   const currentContractConfig = style?.contractTypes.find(c => c.id === activeContract);
+  const activeCapability = currentContractConfig
+    ? capabilities.find(c => c.contract_type === currentContractConfig.buyButtons[0]?.contractType)
+    : undefined;
+  const visibleMinStake = activeCapability?.min_stake ?? 0.35;
+  const visibleMaxStake = activeCapability?.max_stake;
+  const visibleDurationMin = activeCapability?.min_duration ?? 1;
+  const visibleDurationMax = activeCapability?.max_duration ?? (currentContractConfig?.tickDuration ? 10 : 1440);
+  const visibleDurationUnit = activeCapability?.duration_unit ?? (currentContractConfig?.tickDuration ? "t" : "m");
+  const visibleDurationLabel =
+    visibleDurationUnit === "t" ? "ticks" :
+    visibleDurationUnit === "s" ? "seconds" :
+    visibleDurationUnit === "h" ? "hours" :
+    visibleDurationUnit === "d" ? "days" : "minutes";
 
   const tradeCheck = currentSignal
     ? checkCanTrade(riskSession, currentSignal.confidence, getMinInterval(styleId || ""))
@@ -761,13 +774,14 @@ const StyleTrade = () => {
                             <Label className="text-xs">Stake / Trade Amount ({currency ?? "USD"})</Label>
                             <Input
                               type="number"
-                              min="0.01"
+                              min={String(visibleMinStake)}
+                              max={visibleMaxStake != null ? String(visibleMaxStake) : undefined}
                               step="0.01"
                               value={stake}
                               onChange={e => { setStake(e.target.value); setStakeError(""); }}
                             />
                             <div className="flex flex-wrap gap-1.5 pt-1">
-                              {[0.35, 1, 2, 5, 10].map(v => (
+                              {[visibleMinStake, 1, 2, 5, 10].filter((v, i, a) => v <= (visibleMaxStake ?? Number.MAX_SAFE_INTEGER) && a.indexOf(v) === i).map(v => (
                                 <Button key={v} type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]"
                                   onClick={() => { setStake(v.toFixed(2)); setStakeError(""); }}>
                                   {currency ?? "USD"} {v.toFixed(2)}
@@ -781,7 +795,8 @@ const StyleTrade = () => {
                               <Label className="text-xs">Duration (live limits)</Label>
                               <Input
                                 type="number"
-                                min="1"
+                                min={String(visibleDurationMin)}
+                                max={String(visibleDurationMax)}
                                 value={duration}
                                 onChange={e => { setDuration(e.target.value); setDurationError(""); }}
                               />
