@@ -94,25 +94,36 @@ const OptionsTradingHub = () => (
                 Open Deriv Account <ExternalLink className="ml-2 h-4 w-4" />
               </a>
             </Button>
-            <Button size="lg" variant="outline" asChild><Link to="/rise-fall">Open Options Workspace <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            <Button size="lg" variant="outline" asChild><Link to="/trade/style/rise-fall-scalping">Open Momentum Workspace <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">Affiliate disclosure: BOTVIO may receive a commission from qualifying partner activity.</p>
         </div>
       </section>
 
       <section>
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="flex items-end justify-between gap-3 mb-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Simple Options workspace</p>
+            <h2 className="text-2xl font-black">Three focused modes — no clutter</h2>
+            <p className="text-sm text-muted-foreground">We removed the duplicate legacy binary-option modes. Pick the contract family you actually want.</p>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
           {[
-            ["1", "Learn", "Understand Digital Options, Rise/Fall, Higher/Lower and risk."],
-            ["2", "Watch", "Use public market data and BOTVIO's signal research engine."],
-            ["3", "Connect", "Link your Deriv account through the existing secure connection flow."],
-            ["4", "Execute", "Use manual trading or, where enabled, controlled automation."],
-          ].map(([n, title, text]) => (
-            <Card key={n} className="glass-card">
+            ["Momentum", "Rise / Fall", "Default", "Live momentum analysis with Rise/Fall contracts. EMA, RSI and multi-window confirmation.", "/trade/style/rise-fall-scalping"],
+            ["Barrier", "Higher / Lower + Touch / No Touch", "Selective", "One barrier workspace with both supported barrier families. Availability comes from Deriv.", "/trade/style/higher-lower"],
+            ["Digits", "Even / Odd + Over / Under + Match / Differ", "Fast", "One digits workspace for last-digit contracts. Choose the digit contract inside the workspace.", "/trade/style/digit-contracts"],
+          ].map(([title, subtitle, tag, text, href]) => (
+            <Card key={title} className="glass-card border-primary/15">
               <CardContent className="p-5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-black text-primary">{n}</span>
-                <h2 className="mt-3 font-bold">{title}</h2>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{text}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <Badge variant="outline">{tag}</Badge>
+                  {title === "Momentum" && <Badge>Default</Badge>}
+                </div>
+                <h3 className="mt-3 text-xl font-black">{title}</h3>
+                <p className="text-xs font-semibold text-primary mt-1">{subtitle}</p>
+                <p className="mt-2 text-sm leading-5 text-muted-foreground">{text}</p>
+                <Button className="mt-5 w-full" asChild><Link to={href}>Open {title}</Link></Button>
               </CardContent>
             </Card>
           ))}
@@ -239,7 +250,7 @@ const OptionsTradingHub = () => (
             <ShieldCheck className="h-5 w-5 text-primary" />
             <h3 className="mt-3 font-bold">Risk-first controls</h3>
             <p className="mt-1 text-xs text-muted-foreground">Set a stake limit, session limit and minimum signal threshold. Never treat an automated signal as certainty.</p>
-            <Button className="mt-4" variant="outline" size="sm" asChild><Link to="/rise-fall">Open workspace</Link></Button>
+            <Button className="mt-4" variant="outline" size="sm" asChild><Link to="/trade/style/rise-fall-scalping">Open workspace</Link></Button>
           </CardContent>
         </Card>
       </section>
