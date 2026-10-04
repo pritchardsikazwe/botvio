@@ -34,8 +34,10 @@ function isBroker(sig: any, broker: string): boolean {
 }
 
 // Map display / execution symbols → Deriv symbol.
-function toDerivSymbol(sym: string): string | null {
+function toDerivSymbol(sym: string, activeMap?: Map<string, string>): string | null {
   const s = norm(sym);
+  const active = activeMap?.get(s);
+  if (active) return active;
   const map: Record<string, string> = {
     XAUUSD: "frxXAUUSD",
     GOLD: "frxXAUUSD",
@@ -321,6 +323,18 @@ Deno.serve(async (req) => {
     };
 
     const derivWs = await openDerivWs().catch(() => null);
+    const derivSymbolByName = new Map<string, string>();
+    if (derivWs) {
+      try {
+        const active = await request(derivWs, { active_symbols: "brief" }, 10000);
+        for (const item of active.active_symbols ?? []) {
+          const code = String(item.underlying_symbol ?? item.symbol ?? "");
+          const name = String(item.underlying_symbol_name ?? item.display_name ?? "");
+          if (code && name) derivSymbolByName.set(norm(name), code);
+          if (code) derivSymbolByName.set(norm(code), code);
+        }
+      } catch { /* static mappings remain available */ }
+    }
     const derivBarsCache = new Map<string, PriceBar[]>();
     const weltradeBarsCache = new Map<string, PriceBar[]>();
 
@@ -345,7 +359,7 @@ Deno.serve(async (req) => {
           }
           bars = weltradeBarsCache.get(key) ?? [];
         } else {
-          const derivSymbol = toDerivSymbol(sig.symbol);
+          const derivSymbol = toDerivSymbol(sig.symbol, derivSymbolByName);
           if (!derivSymbol || !derivWs) {
             summary.waiting_for_feed++;
             continue;
