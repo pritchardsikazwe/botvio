@@ -278,7 +278,7 @@ const CopyStart = () => {
             </CardContent>
           </Card>
         ) : (
-        <Card className="glass-card">
+          <Card className="glass-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Risk settings</CardTitle>
           </CardHeader>
