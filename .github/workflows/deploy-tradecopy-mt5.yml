@@ -65,6 +65,25 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: npx supabase@latest link --project-ref "$SUPABASE_PROJECT_REF"
 
+      - name: Repair known applied migration history
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          versions=(
+            20260126090748
+            20260128200946
+            20260130200058
+            20261003183000
+            20261003200000
+            20261004101500
+          )
+          for version in "${versions[@]}"; do
+            echo "Marking known remote migration as applied: $version"
+            npx supabase@latest migration repair               --status applied "$version"               --project-ref "$SUPABASE_PROJECT_REF"
+          done
+
       - name: Pull remote schema
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
