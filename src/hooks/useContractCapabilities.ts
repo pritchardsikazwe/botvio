@@ -6,6 +6,8 @@ export interface ContractCapability {
   min_duration?: number;
   max_duration?: number;
   duration_unit?: string;
+  min_stake?: number;
+  max_stake?: number;
   multiplier_range?: number[];
   growth_rate_range?: number[];
   barrier_range?: { min: number; max: number };
@@ -59,6 +61,13 @@ export const useContractCapabilities = (symbol: string | null) => {
           if (match) {
             cap.max_duration = parseInt(match[1]);
           }
+        }
+        if (c.min_stake != null) cap.min_stake = Number(c.min_stake);
+        if (c.max_stake != null) cap.max_stake = Number(c.max_stake);
+        if (c.barriers && typeof c.barriers === "object") {
+          const min = Number(c.barriers.min ?? c.barriers.minimum);
+          const max = Number(c.barriers.max ?? c.barriers.maximum);
+          if (Number.isFinite(min) && Number.isFinite(max)) cap.barrier_range = { min, max };
         }
         if (c.multiplier_range) {
           cap.multiplier_range = c.multiplier_range;
