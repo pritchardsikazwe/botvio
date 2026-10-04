@@ -41,9 +41,9 @@ const StyleTrade = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
-    authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
+    authorized, isDerivConnected, isDerivReady, balance, lastTick, subscribeTicks, unsubscribeTicks,
     getProposal, buyContract, subscribeContract, onContractUpdate, refreshBalance,
-    accountInfo, activeDerivToken,
+    accountInfo, accountType, currency, activeDerivToken, derivTokens, switchDerivToken,
   } = useDeriv();
   // ONE global connection state — no local `connected` flag in this module.
   const conn = useDerivConnection();
@@ -58,6 +58,8 @@ const StyleTrade = () => {
   const [multiplier, setMultiplier] = useState("100");
   const [stopLoss, setStopLoss] = useState("");
   const [takeProfit, setTakeProfit] = useState("");
+  const [stakeError, setStakeError] = useState("");
+  const [durationError, setDurationError] = useState("");
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [buying, setBuying] = useState(false);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
@@ -72,7 +74,7 @@ const StyleTrade = () => {
     createDefaultRiskSession(balance?.balance)
   );
   const [autoMode, setAutoMode] = useState(false);
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoSignalMode, setDemoSignalMode] = useState(false);
 
   // Debug logging: prove the module receives the global state (no second login).
   useEffect(() => {
@@ -88,7 +90,7 @@ const StyleTrade = () => {
   const lastSignalRef = useRef<string>("WAIT");
 
   // Capability gating
-  const { isSupported, getAllowedMultipliers, loading: capsLoading, supportedTypes } = useContractCapabilities(
+  const { isSupported, getAllowedMultipliers, loading: capsLoading, supportedTypes, capabilities } = useContractCapabilities(
     authorized ? selectedSymbol : null
   );
 
@@ -206,7 +208,7 @@ const StyleTrade = () => {
       const engineType = activeContract as EngineType;
 
       let result: SignalResult;
-      if (demoMode) {
+      if (demoSignalMode) {
         result = generateDemoSignal(engineType);
       } else if (tickBuffer.current.length >= 20) {
         result = runEngine(engineType, tickBuffer.current);
@@ -227,7 +229,7 @@ const StyleTrade = () => {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [activeContract, demoMode]);
+  }, [activeContract, demoSignalMode]);
 
   // Auto-mode trade execution
   useEffect(() => {
@@ -296,8 +298,8 @@ const StyleTrade = () => {
     : { allowed: false, reason: null as any, message: "Waiting for signal" };
 
   const handleBuy = async (button: ContractTypeConfig["buyButtons"][0]) => {
-    if (!isDerivConnected) {
-      toast.error("Connect your Deriv account first");
+    if (!isDerivReady) {
+      toast.error("Connect a Deriv Demo or Live account first");
       return;
     }
     if (!selectedSymbol) return;
@@ -308,13 +310,42 @@ const StyleTrade = () => {
       return;
     }
 
+    const activeCap = capabilities.find(c => c.contract_type === button.contractType);
+    const minStake = activeCap?.min_stake ?? 0.35;
+    const maxStake = activeCap?.max_stake ?? Number(balance?.balance ?? Number.MAX_SAFE_INTEGER);
+    const stakeValue = Number(stake);
+    if (!Number.isFinite(stakeValue) || stakeValue <= 0) {
+      setStakeError("Enter a valid trade amount.");
+      return;
+    }
+    if (stakeValue < minStake || stakeValue > maxStake) {
+      setStakeError(`Allowed amount: ${currency ?? "USD"} ${minStake.toFixed(2)} – ${Number.isFinite(maxStake) ? maxStake.toFixed(2) : "maximum"}`);
+      return;
+    }
+    if (balance?.balance != null && stakeValue > Number(balance.balance)) {
+      setStakeError("Trade amount is greater than your available balance.");
+      return;
+    }
+    setStakeError("");
+
+    const isMultiplier = button.contractType === "MULTUP" || button.contractType === "MULTDOWN";
+    const isAccu = button.contractType === "ACCU";
+    const durationCap = activeCap;
+    const durationMin = durationCap?.min_duration ?? 1;
+    const durationMax = durationCap?.max_duration ?? (currentContractConfig?.tickDuration ? 10 : 1440);
+    const durationUnit = durationCap?.duration_unit ?? (currentContractConfig?.tickDuration ? "t" : "m");
+    const durationValue = Number(duration);
+    if (!isMultiplier && !isAccu && (!Number.isFinite(durationValue) || durationValue < durationMin || durationValue > durationMax)) {
+      setDurationError(`Duration must be between ${durationMin} and ${durationMax} ${durationUnit === "t" ? "ticks" : durationUnit === "s" ? "seconds" : durationUnit === "h" ? "hours" : durationUnit === "d" ? "days" : "minutes"}.`);
+      return;
+    }
+    setDurationError("");
+
     setBuying(true);
     addLog("info", `Placing ${button.label} on ${selectedSymbol} — stake $${stake}`);
 
     try {
       const ct = button.contractType;
-      const isMultiplier = ct === "MULTUP" || ct === "MULTDOWN";
-      const isAccu = ct === "ACCU";
       const isDigit = ct.startsWith("DIGIT");
       const isTicksBased = currentContractConfig?.tickDuration === true;
       const needsBarrier = ct === "DIGITMATCH" || ct === "DIGITDIFF" || ct === "DIGITOVER" || ct === "DIGITUNDER";
@@ -322,9 +353,9 @@ const StyleTrade = () => {
       const proposalParams: any = {
         symbol: selectedSymbol,
         contract_type: ct,
-        amount: parseFloat(stake),
+        amount: stakeValue,
         basis: "stake",
-        currency: "USD",
+        currency: currency ?? "USD",
       };
 
       if (isMultiplier) {
@@ -334,16 +365,10 @@ const StyleTrade = () => {
       } else if (isAccu) {
         proposalParams.growth_rate = 0.01;
         if (takeProfit) proposalParams.limit_order = { take_profit: parseFloat(takeProfit) };
-      } else if (isDigit || isTicksBased) {
-        const tickDur = Math.max(1, Math.min(10, parseInt(duration)));
-        proposalParams.duration = tickDur;
-        proposalParams.duration_unit = "t";
-        if (needsBarrier) {
-          proposalParams.barrier = parseInt(digit);
-        }
-      } else {
-        proposalParams.duration = Math.max(1, parseInt(duration));
-        proposalParams.duration_unit = "m";
+            } else if (!isMultiplier && !isAccu) {
+        proposalParams.duration = durationValue;
+        proposalParams.duration_unit = durationUnit;
+        if (needsBarrier) proposalParams.barrier = parseInt(digit);
       }
 
       if (!isMultiplier && !isAccu && stopLoss) {
@@ -352,9 +377,14 @@ const StyleTrade = () => {
 
       console.log("[StyleTrade] proposalParams:", JSON.stringify(proposalParams));
       const proposalRes = await getProposal(proposalParams);
-      addLog("info", `Proposal received — payout $${proposalRes.payout}`);
+      const askPrice = Number(proposalRes.ask_price);
+      const payout = Number(proposalRes.payout);
+      if (!proposalRes.id || !Number.isFinite(askPrice)) {
+        throw new Error("Deriv returned an invalid contract proposal. Refresh the instrument and try again.");
+      }
+      addLog("info", `Proposal received — payout ${Number.isFinite(payout) ? payout.toFixed(2) : "—"}`);
 
-      const contract = await buyContract(proposalRes.id, proposalRes.ask_price);
+      const contract = await buyContract(proposalRes.id, askPrice);
       addLog("success", `✅ Trade opened — Contract ID ${contract.contract_id}`);
       toast.success("Trade placed successfully!");
 
@@ -364,7 +394,7 @@ const StyleTrade = () => {
         time: new Date().toLocaleTimeString(),
         symbol: selectedSymbol,
         contractType: button.contractType,
-        stake: parseFloat(stake),
+        stake: stakeValue,
         status: "running",
         contractId: contract.contract_id,
       };
@@ -381,7 +411,7 @@ const StyleTrade = () => {
     } catch (err: any) {
       addLog("error", `Error: ${err.message}`);
       toast.error(err.message);
-      setRiskSession(prev => recordTradeResult(prev, false, -parseFloat(stake), styleId || ""));
+      setRiskSession(prev => recordTradeResult(prev, false, -stakeValue, styleId || ""));
     } finally {
       setBuying(false);
     }
@@ -451,9 +481,27 @@ const StyleTrade = () => {
           <div className="flex items-center gap-2">
             <Badge variant="outline">{style.riskTag}</Badge>
             <Badge variant="outline">{style.tempoTag}</Badge>
+            {accountType && (
+              <Badge variant={accountType === "REAL" ? "destructive" : "secondary"}>
+                {accountType === "REAL" ? "LIVE ACCOUNT" : "DEMO ACCOUNT"}
+              </Badge>
+            )}
           </div>
-          {/* Auto / Demo toggles */}
-          <div className="flex items-center gap-4">
+          {/* Execution/account controls */}
+          <div className="flex items-center gap-3 flex-wrap justify-end">
+            {derivTokens.length > 1 && (
+              <Select value={activeDerivToken?.id ?? ""} onValueChange={(id) => switchDerivToken(id)}>
+                <SelectTrigger className="w-[155px] h-8 text-xs"><SelectValue placeholder="Switch account" /></SelectTrigger>
+                <SelectContent>
+                  {derivTokens.map((token) => (
+                    <SelectItem key={token.id} value={token.id}>
+                      {token.label || (token.is_virtual ? "Demo" : "Live")} · {token.loginid}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <Label className="text-xs text-muted-foreground">Manual</Label>
               <Switch checked={autoMode} onCheckedChange={setAutoMode} />
@@ -463,7 +511,7 @@ const StyleTrade = () => {
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-xs text-muted-foreground">Demo</Label>
-              <Switch checked={demoMode} onCheckedChange={setDemoMode} />
+              <Switch checked={demoSignalMode} onCheckedChange={setDemoMode} />
             </div>
           </div>
         </div>
@@ -492,8 +540,12 @@ const StyleTrade = () => {
 
                   {capsLoading && (
                     <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Loading capabilities...
+                      <Loader2 className="h-3 w-3 animate-spin" /> Checking live contract availability...
+                    </div>
+                  )}
+                  {!capsLoading && selectedSymbol && supportedTypes.length > 0 && (
+                    <div className="mt-2 text-[10px] text-success">
+                      Contract availability verified for this instrument.
                     </div>
                   )}
 
@@ -687,27 +739,37 @@ const StyleTrade = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1.5">
-                            <Label className="text-xs">Stake (USD)</Label>
+                            <Label className="text-xs">Stake / Trade Amount ({currency ?? "USD"})</Label>
                             <Input
                               type="number"
-                              min="0.35"
+                              min="0.01"
                               step="0.01"
                               value={stake}
-                              onChange={e => setStake(e.target.value)}
+                              onChange={e => { setStake(e.target.value); setStakeError(""); }}
                             />
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {[0.35, 1, 2, 5, 10].map(v => (
+                                <Button key={v} type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]"
+                                  onClick={() => { setStake(v.toFixed(2)); setStakeError(""); }}>
+                                  {currency ?? "USD"} {v.toFixed(2)}
+                                </Button>
+                              ))}
+                            </div>
+                            {stakeError && <p className="text-[10px] text-destructive">{stakeError}</p>}
                           </div>
                           {!hidesDuration && (
                             <div className="space-y-1.5">
-                              <Label className="text-xs">
-                                {isDigitType || isTicksType ? "Duration (ticks, 1-10)" : "Duration (minutes)"}
-                              </Label>
+                              <Label className="text-xs">Duration (live limits)</Label>
                               <Input
                                 type="number"
-                                min={(isDigitType || isTicksType) ? "1" : "1"}
-                                max={(isDigitType || isTicksType) ? "10" : "1440"}
+                                min="1"
                                 value={duration}
-                                onChange={e => setDuration(e.target.value)}
+                                onChange={e => { setDuration(e.target.value); setDurationError(""); }}
                               />
+                              <p className="text-[10px] text-muted-foreground">
+                                Deriv limits: use the selected contract's supported duration.
+                              </p>
+                              {durationError && <p className="text-[10px] text-destructive">{durationError}</p>}
                             </div>
                           )}
                           {isMultiplierType && (
