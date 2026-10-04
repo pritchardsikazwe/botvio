@@ -125,9 +125,8 @@ function aggregateCandles(c:Candle[], days:number):Candle[]{
 Deno.serve(async(req)=>{
  if(req.method!=="POST")return new Response("POST required",{status:405});
  const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
- const performanceIndex = await loadPerformanceIndex(db);
- try{
-  if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } });
+  try{
+  if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } }); const performanceIndex = await loadPerformanceIndex(db);
   await db.from("trading_signals").update({status:"EXPIRED"}).eq("status","ACTIVE").lt("expires_at",new Date().toISOString());
 
   const ws=new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
