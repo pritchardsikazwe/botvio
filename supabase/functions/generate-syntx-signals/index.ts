@@ -25,7 +25,7 @@ if(s.includes("VOLATILITY")) return [symbol,{min:s.includes("(1S)")?82:n>=100?79
 return [symbol,{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`}];
 }))
 );
-const TF:Record<string,number>={M1:1,M15:15,H1:60,D1:1440,D3:1440};
+const TF:Record<string,number>={M1:1,M5:5,M15:15,H1:60,D1:1440,D3:1440};
 
 function aggregateDays(c:Candle[],days:number):Candle[]{
  if(days<=1)return c;
@@ -63,9 +63,26 @@ function candleQuality(c:Candle[]):number{
 function frameSignal(c:Candle[],bias:string,profile:{min:number;stop:number;target:number;label:string}){if(c.length<60)return null;const closes=c.map(x=>x.close),e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),a=atr(c),rs=rsi(c),last=c.at(-1)!;if(e9==null||e21==null||a==null||a<=0||rs==null)return null;const up=e9>e21&&(e50==null||last.close>e50),down=e9<e21&&(e50==null||last.close<e50),expanded=last.high-last.low>a*1.8;let d:null|"BUY"|"SELL"=null;if(bias==="BUY"&&up&&!expanded)d="BUY";if(bias==="SELL"&&down&&!expanded)d="SELL";if(bias==="BOTH"){const hi=Math.max(...c.slice(-20,-1).map(x=>x.high)),lo=Math.min(...c.slice(-20,-1).map(x=>x.low));if(rs<32&&last.close<lo+a*.5)d="BUY";else if(rs>68&&last.close>hi-a*.5)d="SELL";else if(up&&!expanded)d="BUY";else if(down&&!expanded)d="SELL"}if(!d)return null;const dbias=directionalBias(c);const alignment=dbias===d?6:dbias?-5:0;const score=Math.min(96,60+(up||down?8:0)+(d==="BUY"&&rs>50&&rs<75?6:d==="SELL"&&rs<50&&rs>25?6:0)+(expanded?5:0)+alignment+candleQuality(c));if(score<profile.min)return null;return{direction:d,score,entry:last.close,sl:d==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:d==="BUY"?last.close+a*profile.target:last.close-a*profile.target}}
 function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
  const a=atr(c)??0;
- const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
+ const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="5m"?{sl:.95,tp:1.45}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
  const entry=c.at(-1)!.close;
  return {sl:direction==="BUY"?entry-a*m.sl:entry+a*m.sl,tp:direction==="BUY"?entry+a*m.tp:entry-a*m.tp};
+}
+function strategyTypes(c:Candle[],direction:"BUY"|"SELL",tf:string){
+ const out:string[]=[]; if(c.length<25)return out;
+ const last=c.at(-1)!; const prev=c.slice(-21,-1); const hi=Math.max(...prev.map(x=>x.high)); const lo=Math.min(...prev.map(x=>x.low)); const a=atr(c)??0;
+ const body=Math.abs(last.close-last.open), range=last.high-last.low;
+ const upper=last.high-Math.max(last.open,last.close), lower=Math.min(last.open,last.close)-last.low;
+ const breakout=direction==="BUY"?last.close>hi:direction==="SELL"?last.close<lo:false;
+ if(breakout && a>0) out.push("BREAKOUT");
+ const nearSupport=a>0 && last.low<=lo+a*.35; const nearResistance=a>0 && last.high>=hi-a*.35;
+ if(direction==="BUY" && nearSupport) out.push("SUPPORT");
+ if(direction==="SELL" && nearResistance) out.push("RESISTANCE");
+ if((direction==="BUY" && lower>body*1.25 && lower>upper) || (direction==="SELL" && upper>body*1.25 && upper>lower)) out.push("REJECTION");
+ const closes=c.map(x=>x.close); const e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50);
+ if(e9&&e21&&e50 && ((direction==="BUY"&&e9>e21&&e21>e50)||(direction==="SELL"&&e9<e21&&e21<e50))) out.push("TREND");
+ if(e9&&e21 && ((direction==="BUY"&&last.close>e9&&e9>e21)||(direction==="SELL"&&last.close<e9&&e9<e21))) out.push("TRENDLINE");
+ if(["1m","5m","15m"].includes(tf)) out.push("SCALPING");
+ return [...new Set(out)];
 }
 function unwrap(x:unknown):unknown{if(x&&typeof x==="object"){const o=x as Record<string,unknown>;return o.data??x}return x}
 function bars(x:unknown):Candle[]{const r=unwrap(x);const list=Array.isArray(r)?r:(r&&typeof r==="object"?Object.values(r as Record<string,unknown>).find(Array.isArray)??[]:[]);return(list as unknown[]).map(v=>{const b=v as Record<string,unknown>;const t=Number(b.time??b.Time??b.timestamp??b.Timestamp??0);return{time:t>1e12?Math.floor(t/1000):t,open:Number(b.open??b.Open),high:Number(b.high??b.High),low:Number(b.low??b.Low),close:Number(b.close??b.Close)}}).filter(x=>Number.isFinite(x.time)&&[x.open,x.high,x.low,x.close].every(Number.isFinite))}
@@ -84,7 +101,8 @@ const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
 const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), biasD3=get("D3"), scalp=get("M1");
 const setups=[
   {tf:"1m",label:"SCALPING 1M",type:"SCALPING",setup:scalp,confirm:[bias15,biasH1],min:Math.max(profile.min,78),expiry:300,backup:600},
-  {tf:"15m",label:"INTRADAY 15M",type:"INTRADAY",setup:bias15,confirm:[biasH1,biasD1],min:Math.max(profile.min,profile.min+1),expiry:3600,backup:5400},
+  {tf:"5m",label:"SCALPING 5M",type:"SCALPING",setup:scalp5,confirm:[bias15,biasH1],min:Math.max(profile.min,77),expiry:900,backup:1800},
+  {tf:"15m",label:"SCALPING/INTRADAY 15M",type:"SCALPING_INTRADAY",setup:bias15,confirm:[biasH1,biasD1],min:Math.max(profile.min,profile.min+1),expiry:3600,backup:5400},
   {tf:"1H",label:"SWING 1H",type:"SWING",setup:biasH1,confirm:[biasD1],min:Math.max(profile.min,profile.min+2),expiry:14400,backup:21600},
   {tf:"1D",label:"POSITION 1D",type:"POSITION",setup:biasD1,confirm:[],min:Math.max(profile.min,profile.min+4),expiry:259200,backup:432000},
   {tf:"3D",label:"POSITION 3D",type:"POSITION",setup:biasD3,confirm:[biasD1],min:Math.max(profile.min,profile.min+3),expiry:777600,backup:1209600}
@@ -107,7 +125,9 @@ for(const plan of setups){
   const entry=plan.setup.entry;
   const levels=moderateLevels(frames.find((x:any)=>x.n===plan.tf)?.data??frames.find((x:any)=>x.n===plan.tf)?.candles??[],plan.setup.direction,plan.tf);
   const sl=levels.sl,tp=levels.tp;
-  const strategyLabel=`${profile.label} · ${plan.label}`;
+  const detectedStrategies=strategyTypes(frames.find((x:any)=>x.n===plan.tf)?.data??[],plan.setup.direction,plan.tf);
+  const strategyLabels=detectedStrategies.length?detectedStrategies:["TREND"];
+  const strategyLabel=`${profile.label} · ${plan.label} · ${strategyLabels.join(" + ")}`;
   const gate=performanceGate(performanceIndex,symbol,plan.tf,strategyLabel);
   if(!gate.allowed) continue;
   if(plan.setup.score < plan.min + gate.scoreBoost) continue;
@@ -118,9 +138,9 @@ for(const plan of setups){
     symbol,direction:plan.setup.direction,entry_price:entry,stop_loss:sl,take_profit:tp,timeframe:plan.tf,
     strategy_name:strategyLabel,signal_type:plan.type,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
     status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,best_expiry:plan.expiry,backup_expiry:plan.backup,expires_at:expiresAt,
-    reason:`${f.family} ${plan.label}: entry confirmed with ${same}/${confirmationDirections.length} higher-timeframe confirmations`,
+    reason:`${f.family} ${plan.label}: ${strategyLabels.join(", ")} confirmed with ${same}/${confirmationDirections.length} higher-timeframe confirmations`,
     explanation_json:{
-      engine:"SyntX MTF Engine v5",strategy_id:profile.label,source:"Weltrade SyntX API Studio",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
+      engine:"SyntX MTF Engine v5",strategy_id:profile.label,strategy_types:strategyLabels,source:"Weltrade SyntX API Studio",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
       entry_style:plan.label,timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"])),
       higher_timeframe_confirmation:same,confirmation_count:confirmationDirections.length
     }
