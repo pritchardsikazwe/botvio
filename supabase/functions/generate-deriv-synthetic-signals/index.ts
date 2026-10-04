@@ -16,6 +16,7 @@ const PLAN=[
 function ema(a:number[],p:number){if(a.length<p)return null;let e=a.slice(0,p).reduce((x,y)=>x+y,0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e+=(a[i]-e)*k;return e}
 function atr(c:Candle[],p=14){if(c.length<=p)return null;const tr=c.slice(1).map((x,i)=>Math.max(x.high-x.low,Math.abs(x.high-c[i].close),Math.abs(x.low-c[i].close)));return tr.slice(-p).reduce((a,b)=>a+b,0)/Math.min(p,tr.length)}
 function rsi(c:Candle[],p=14){if(c.length<=p)return null;let g=0,l=0;for(let i=c.length-p;i<c.length;i++){const d=c[i].close-c[i-1].close;if(d>0)g+=d;else l-=d}if(l===0)return 100;return 100-100/(1+(g/p)/(l/p))}
+function bollinger(c:Candle[],p=20,m=2){if(c.length<p)return null;const x=c.slice(-p).map(v=>v.close),mean=x.reduce((a,b)=>a+b,0)/p;const variance=x.reduce((a,b)=>a+(b-mean)**2,0)/p;const sd=Math.sqrt(variance);return{mean,upper:mean+m*sd,lower:mean-m*sd,sd};}
 type StrategyFamily="BOOM"|"CRASH"|"VOLATILITY"|"RANGE_BREAK"|"STEP"|"JUMP"|"DRIFT"|"DEX";
 
 function classifyStrategy(name:string,code:string):{family:StrategyFamily;label:string;bias:"BUY"|"SELL"|"BOTH"}{
@@ -100,8 +101,13 @@ function strategySignal(c:Candle[],strategy:{family:StrategyFamily;label:string;
    if(structureUp&&momentumUp&&rs!>=50&&rs!<=76){d="BUY";score=76;why.push("DEX structure","momentum confirmation");}
    else if(structureDown&&momentumDown&&rs!>=24&&rs!<=50){d="SELL";score=76;why.push("DEX structure","momentum confirmation");}
  } else {
-   if(bullish&&momentumUp&&rs!>=48&&rs!<=72&&(pullbackBuy||breakoutUp)){d="BUY";score=76;why.push("volatility trend","momentum","break/pullback confirmation");}
-   else if(bearish&&momentumDown&&rs!>=28&&rs!<=52&&(pullbackSell||breakoutDown)){d="SELL";score=76;why.push("volatility trend","momentum","break/bullback confirmation");}
+   const bb=bollinger(c,20,2);
+   if(bb && bb.sd>0){
+     const lowerExtreme=last.close<=bb.lower && rs!<=35 && lower>body*0.6 && last.close>last.open;
+     const upperExtreme=last.close>=bb.upper && rs!>=65 && upper>body*0.6 && last.close<last.open;
+     if(lowerExtreme){d="BUY";score=80;why.push("volatility mean reversion","lower Bollinger extreme","bullish rejection");}
+     else if(upperExtreme){d="SELL";score=80;why.push("volatility mean reversion","upper Bollinger extreme","bearish rejection");}
+   }
  }
 
  if(!d)return null;
