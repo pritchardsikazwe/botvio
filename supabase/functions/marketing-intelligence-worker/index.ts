@@ -156,6 +156,38 @@ Deno.serve(async (req) => {
       return json({ ok: true, processed: results.length, results });
     }
 
+    if (action === "report") {
+      if (!assertAutomationKey(req)) return json({ error: "Unauthorized" }, 401);
+      const since = new Date(Date.now() - 24 * 3600_000).toISOString();
+      const [{ count: visitors }, { count: engaged }, { count: highIntent }, { count: signups }, { count: signupStarted }, { count: notifications }] = await Promise.all([
+        db.from("marketing_profiles").select("*", { count: "exact", head: true }).gte("last_seen_at", since),
+        db.from("marketing_profiles").select("*", { count: "exact", head: true }).gte("last_seen_at", since).in("lifecycle_stage", ["engaged", "high_intent", "user"]),
+        db.from("marketing_profiles").select("*", { count: "exact", head: true }).gte("last_seen_at", since).eq("lifecycle_stage", "high_intent"),
+        db.from("marketing_profiles").select("*", { count: "exact", head: true }).gte("updated_at", since).eq("signed_up", true),
+        db.from("marketing_profiles").select("*", { count: "exact", head: true }).gte("updated_at", since).eq("signup_started", true),
+        db.from("marketing_notifications").select("*", { count: "exact", head: true }).gte("created_at", since),
+      ]);
+      const v = visitors ?? 0, s = signups ?? 0, ss = signupStarted ?? 0;
+      const report = {
+        report_date: new Date().toISOString().slice(0,10), period: "daily",
+        visitors: v, engaged_visitors: engaged ?? 0, high_intent_visitors: highIntent ?? 0,
+        signups: s, signup_rate: v ? Number((s / v * 100).toFixed(2)) : 0,
+        signup_started: ss, signup_completion_rate: ss ? Number((s / ss * 100).toFixed(2)) : 0,
+        notifications_created: notifications ?? 0,
+        notification_clicks: 0, notification_conversion_rate: 0,
+        top_interests: [], top_pages: [], top_next_actions: [],
+        funnel: { visitors: v, engaged: engaged ?? 0, high_intent: highIntent ?? 0, signup_started: ss, signups: s },
+        recommendations: [
+          v && s / v < 0.03 ? "Improve first-visit signup CTA and reduce signup friction." : "Signup conversion is healthy; test stronger activation CTAs.",
+          (highIntent ?? 0) > s ? "Follow up high-intent visitors with personalised product-specific CTAs." : "Keep personalised follow-up active."
+        ],
+        worker_summary: { generated_at: new Date().toISOString(), source: "marketing-intelligence-worker" }
+      };
+      const { data, error } = await db.from("marketing_worker_reports").upsert(report, { onConflict: "report_date,period" }).select().single();
+      if (error) throw error;
+      return json({ ok: true, report: data });
+    }
+
     if (action === "status") {
       if (!assertAutomationKey(req)) return json({ error: "Unauthorized" }, 401);
       const [{ count: visitors }, { count: highIntent }, { count: notifications }] = await Promise.all([
