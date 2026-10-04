@@ -10,6 +10,7 @@ on:
       - "supabase/functions/_shared/automationAuth.ts"
       - "supabase/functions/_shared/tradecopy/**"
       - "supabase/functions/market-worker-intelligence/**"
+      - "supabase/functions/marketing-intelligence-worker/**"
       - "supabase/migrations/**"
       - ".github/workflows/deploy-tradecopy-mt5.yml"
   workflow_dispatch:
@@ -98,6 +99,12 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: npx supabase@latest functions deploy market-worker-intelligence --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+
+      - name: Deploy Marketing Intelligence Worker
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: npx supabase@latest functions deploy marketing-intelligence-worker --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
 
       - name: Deploy MT5 direct execution
         env:
