@@ -364,9 +364,7 @@ export const WeltradeSignalsEngine = () => {
         <div className="min-w-0">
           <BrokerCandleChart
             candles={candles}
-            indicators={indicators}
             status={status}
-            sourceLabel={diagnostics.sourceLabel}
             brokerLabel="WELTRADE"
             symbolLabel={instrument.label + " (" + instrument.mt5Symbol + ")"}
             timeframe={prefs.timeframe}
