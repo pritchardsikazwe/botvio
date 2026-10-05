@@ -218,7 +218,7 @@ Deno.serve(async(req)=>{
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const detectedStrategies=strategyTypes(frames.get(p.tf)??[],setup.direction,p.tf);
     const strategyLabels=detectedStrategies.length?detectedStrategies:["TREND"];
-    const strategyName=\`${profile.strategy} · ${p.type} ${p.tf} · ${strategyLabels.join(" + ")}\`;
+    const strategyName=`${profile.strategy} · ${p.type} ${p.tf} · ${strategyLabels.join(" + ")}`;
     const cooldown=p.tf==="1m"?5:p.tf==="5m"?10:p.tf==="15m"?30:120;
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",profile.symbol).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-cooldown*60000).toISOString()).limit(1);
     if(recent?.length)continue;
