@@ -292,6 +292,125 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       return { data: { accountId: acct.id, reused: acct.reused }, accountId: acct.id };
     }
 
+    case "promote_existing_master": {
+      if (!ctx.isAdmin) throw new TradeCopyError("Only admins can promote an existing MT5 account to Provider Master", "auth", 403);
+
+      const accountId = z.string().uuid().parse(body.account_id);
+      const { data: source, error: sourceError } = await admin
+        .from("trading_accounts")
+        .select(ACCOUNT_COLS + ",execution_provider,connection_status,is_active")
+        .eq("id", accountId)
+        .maybeSingle();
+      if (sourceError) throw new TradeCopyError(sourceError.message, "validation");
+      if (!source) throw new TradeCopyError("MT5 account not found", "not_found", 404);
+      if (source.execution_provider !== "tradecopy") throw new TradeCopyError("Only TradeCopy MT5 accounts can be promoted", "validation");
+      if (source.account_role === "master") throw new TradeCopyError("This MT5 account is already a master", "duplicate_master");
+      if (source.is_botvio_robot) throw new TradeCopyError("Botvio Robot accounts use a separate route", "validation");
+      if (source.tradecopy_user_id || source.tradecopy_active) {
+        throw new TradeCopyError("This account is already registered as a TradeCopy follower. Disconnect it before promoting it.", "conflict", 409);
+      }
+      if (!source.login_id || !source.server) throw new TradeCopyError("The MT5 login and server are required", "validation");
+
+      const { count: providerMasterCount } = await admin
+        .from("trading_accounts")
+        .select("id", { count: "exact", head: true })
+        .eq("execution_provider", "tradecopy")
+        .eq("account_role", "master")
+        .eq("is_botvio_robot", false);
+      if ((providerMasterCount ?? 0) >= 2) {
+        throw new TradeCopyError("The two TradeCopy provider-master slots are already occupied. Remove or deactivate an existing provider master before adding another.", "master_limit", 409);
+      }
+
+      const { data: conflict } = await admin
+        .from("trading_accounts")
+        .select("id,is_botvio_robot")
+        .eq("execution_provider", "tradecopy")
+        .eq("account_role", "master")
+        .eq("login_id", source.login_id)
+        .eq("server", source.server)
+        .limit(1)
+        .maybeSingle();
+      if (conflict) throw new TradeCopyError("This MT5 login/server is already registered as a master", "duplicate_master", 409);
+
+      const { data: provider } = await admin
+        .from("providers")
+        .select("id,status")
+        .eq("user_id", source.user_id)
+        .limit(1)
+        .maybeSingle();
+      if (!provider) throw new TradeCopyError("The owner of this MT5 account is not a provider", "validation");
+      if (provider.status !== "approved") throw new TradeCopyError("The provider profile must be approved before this account can become a master", "validation");
+
+      const { count: relationshipCount } = await admin
+        .from("copy_relationships")
+        .select("id", { count: "exact", head: true })
+        .or(`master_account_id.eq.${accountId},follower_account_id.eq.${accountId}`);
+      if ((relationshipCount ?? 0) > 0) {
+        throw new TradeCopyError("This account has existing copy relationships. Disconnect those relationships before promoting it.", "conflict", 409);
+      }
+
+      const password = await getPassword(ctx, accountId);
+      const { error: promoteError } = await admin
+        .from("trading_accounts")
+        .update({
+          account_role: "master",
+          environment: "DEMO",
+          tradecopy_active: false,
+          is_botvio_robot: false,
+          botvio_signal_master_enabled: false,
+          connection_status: "pending",
+          is_active: true,
+        })
+        .eq("id", accountId);
+      if (promoteError) throw new TradeCopyError(promoteError.message, "validation");
+
+      try {
+        const reg = await adapter.registerMaster({
+          login: Number(source.login_id),
+          password,
+          server: source.server,
+          comment: "botvio-provider",
+        });
+        const { error: registeredError } = await admin
+          .from("trading_accounts")
+          .update({
+            tradecopy_user_id: reg.tradecopyUserId,
+            external_account_id: String(reg.tradecopyUserId ?? ""),
+            connection_status: "connected",
+          })
+          .eq("id", accountId);
+        if (registeredError) throw new TradeCopyError(registeredError.message, "validation");
+
+        const { data: existingProviderAccount } = await admin
+          .from("provider_accounts")
+          .select("id")
+          .eq("provider_id", provider.id)
+          .eq("trading_account_id", accountId)
+          .limit(1)
+          .maybeSingle();
+        if (!existingProviderAccount) {
+          const { error: linkError } = await admin
+            .from("provider_accounts")
+            .insert({ provider_id: provider.id, trading_account_id: accountId, status: "paused" });
+          if (linkError) throw new TradeCopyError(linkError.message, "validation");
+        }
+
+        return {
+          data: { accountId, promoted: true, providerId: provider.id, tradecopyUserId: reg.tradecopyUserId },
+          accountId,
+          auditDetails: { promoted_existing: true, provider_id: provider.id },
+        };
+      } catch (e) {
+        await admin.from("trading_accounts").update({
+          account_role: "slave",
+          tradecopy_active: false,
+          is_botvio_robot: false,
+          connection_status: "saved",
+        }).eq("id", accountId);
+        throw e;
+      }
+    }
+
     case "connect_follower": {
       const creds = Creds.parse(body);
       const acct = await storeAccount(ctx, creds, "slave");
