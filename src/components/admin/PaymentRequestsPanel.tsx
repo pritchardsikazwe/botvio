@@ -19,7 +19,7 @@ type PaymentRequest = {
   admin_note: string | null;
   created_at: string;
   profile?: { email?: string | null; display_name?: string | null; whatsapp_number?: string | null } | null;
-  plan?: { name?: string | null; code?: string | null } | null;
+  plan?: { name?: string | null; code?: string | null } | null;\n  product?: { id?: string | null; name?: string | null; slug?: string | null; billing_type?: string | null } | null;
 };
 
 export function PaymentRequestsPanel() {
@@ -33,14 +33,14 @@ export function PaymentRequestsPanel() {
     try {
       const { data, error } = await supabase
         .from("payment_requests")
-        .select("*, profiles(email,display_name,whatsapp_number), pricing_plans(name,code)")
+        .select("*, profiles(email,display_name,whatsapp_number), pricing_plans(name,code), products(id,name,slug,billing_type)")
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
       setRequests((data || []).map((r: any) => ({
         ...r,
         profile: r.profiles,
-        plan: r.pricing_plans,
+        plan: r.pricing_plans,\n        product: r.products,
       })));
     } catch (e: any) {
       toast.error(e?.message || "Could not load payment requests");
@@ -52,10 +52,6 @@ export function PaymentRequestsPanel() {
   useEffect(() => { load(); }, []);
 
   const approve = async (request: PaymentRequest) => {
-    if (!request.plan_id) {
-      toast.error("This payment request has no plan attached.");
-      return;
-    }
     setWorking(request.id);
     try {
       const now = new Date();
@@ -67,16 +63,40 @@ export function PaymentRequestsPanel() {
         .eq("id", request.id);
       if (paymentError) throw paymentError;
 
-      const { error: subError } = await supabase
-        .from("user_plan_subscriptions")
-        .upsert({
+      if (request.product_id || request.product?.id) {
+        const productId = request.product_id || request.product?.id;
+        const recurring = request.product?.billing_type === "recurring";
+        const { error: entError } = await supabase.from("entitlements").upsert({
           user_id: request.user_id,
-          pricing_plan_id: request.plan_id,
-          current_period_start: now.toISOString(),
-          current_period_end: end.toISOString(),
+          product_id: productId,
           status: "active",
-        }, { onConflict: "user_id" });
-      if (subError) throw subError;
+          source_order_id: request.order_id || null,
+          started_at: now.toISOString(),
+          ends_at: recurring ? end.toISOString() : null,
+        } as any, { onConflict: "user_id,product_id" });
+        if (entError) throw entError;
+
+        if (request.product?.slug === "mt5-direct" && request.account_id) {
+          const { error: accountError } = await supabase.from("trading_accounts").update({
+            direct_execution_entitled: true,
+            direct_execution_plan: request.product.name || "MT5 Direct",
+            direct_execution_expires_at: recurring ? end.toISOString() : null,
+          } as any).eq("id", request.account_id).eq("user_id", request.user_id);
+          if (accountError) throw accountError;
+        }
+      } else {
+        if (!request.plan_id) throw new Error("This payment request has no plan attached.");
+        const { error: subError } = await supabase
+          .from("user_plan_subscriptions")
+          .upsert({
+            user_id: request.user_id,
+            pricing_plan_id: request.plan_id,
+            current_period_start: now.toISOString(),
+            current_period_end: end.toISOString(),
+            status: "active",
+          }, { onConflict: "user_id" });
+        if (subError) throw subError;
+      }
 
       toast.success(`Payment approved — ${request.profile?.display_name || request.profile?.email || "user"} now has paid access.`);
       await load();
@@ -86,108 +106,3 @@ export function PaymentRequestsPanel() {
       setWorking(null);
     }
   };
-
-  const reject = async (request: PaymentRequest) => {
-    setWorking(request.id);
-    try {
-      const { error } = await supabase
-        .from("payment_requests")
-        .update({ status: "rejected" })
-        .eq("id", request.id);
-      if (error) throw error;
-      toast.success("Payment request rejected.");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message || "Could not reject payment");
-    } finally {
-      setWorking(null);
-    }
-  };
-
-  const visible = requests.filter(r => filter === "all" || r.status === filter);
-  const pending = requests.filter(r => r.status === "submitted").length;
-
-  return (
-    <Card id="payment-requests-panel" className="overflow-hidden">
-      <CardHeader className="border-b">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <WalletCards className="h-5 w-5 text-amber-500" />
-              Signal & Subscription Payments
-              {pending > 0 && <Badge className="bg-amber-500 text-slate-950">{pending} pending</Badge>}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Review mobile-money or crypto payment proofs and activate the selected plan.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="submitted">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="all">All</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="icon" onClick={load} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {loading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading payment requests…</div>
-        ) : visible.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">No payment requests in this view.</div>
-        ) : (
-          <div className="divide-y">
-            {visible.map(request => (
-              <div key={request.id} className="p-4 hover:bg-slate-50">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold">{request.profile?.display_name || "Unnamed user"}</span>
-                      <Badge variant="outline">{request.plan?.name || request.plan?.code || "Plan"}</Badge>
-                      <Badge variant={request.status === "approved" ? "default" : request.status === "rejected" ? "destructive" : "secondary"}>
-                        {request.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">{request.profile?.email || request.user_id}</p>
-                    <p className="text-sm mt-1">
-                      <span className="font-semibold">${request.amount_usd}</span> · {request.method} · {new Date(request.created_at).toLocaleString()}
-                    </p>
-                    {request.profile?.whatsapp_number && (
-                      <p className="text-xs text-muted-foreground mt-1">WhatsApp: {request.profile.whatsapp_number}</p>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    {request.proof_upload_url && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={request.proof_upload_url} target="_blank" rel="noreferrer">
-                          <ExternalLink className="h-4 w-4 mr-1" /> Proof
-                        </a>
-                      </Button>
-                    )}
-                    {request.status === "submitted" && (
-                      <>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" disabled={working === request.id} onClick={() => approve(request)}>
-                          <CheckCircle2 className="h-4 w-4 mr-1" /> Approve & Activate
-                        </Button>
-                        <Button size="sm" variant="destructive" disabled={working === request.id} onClick={() => reject(request)}>
-                          <XCircle className="h-4 w-4 mr-1" /> Reject
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
