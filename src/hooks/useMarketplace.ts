@@ -63,60 +63,39 @@ export function usePurchaseProduct() {
     }) => {
       if (!user) throw new Error("Not authenticated");
 
-      // Create order
+      // TEMPORARY TEST MODE: every active Botvio product is granted immediately.
+      // This bypasses payment/proof review only while the platform is being tested.
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: user.id,
           product_id: product.id,
           product_type: product.type,
-          amount_usd: product.price_usd,
+          amount_usd: 0,
           referral_code: affiliateCode || null,
-          status: product.price_usd === 0 ? "paid" : "pending",
+          status: "paid",
         })
         .select()
         .single();
 
       if (orderError) throw orderError;
 
-      // For free products, grant entitlement immediately
-      if (product.price_usd === 0) {
-        const { error: entError } = await supabase
-          .from("entitlements")
-          .upsert({
-            user_id: user.id,
-            product_id: product.id,
-            status: "active",
-            source_order_id: order.id,
-            ends_at: null,
-          }, { onConflict: "user_id,product_id" });
+      const { error: entError } = await supabase
+        .from("entitlements")
+        .upsert({
+          user_id: user.id,
+          product_id: product.id,
+          status: "active",
+          source_order_id: order.id,
+          ends_at: null,
+        }, { onConflict: "user_id,product_id" });
 
-        if (entError) throw entError;
-      } else {
-        // Create payment request for manual approval
-        const { error: prError } = await supabase
-          .from("payment_requests")
-          .insert({
-            user_id: user.id,
-            amount_usd: product.price_usd,
-            method: paymentMethod,
-            proof_upload_url: proofUrl,
-            product_id: product.id,
-            order_id: order.id,
-            account_id: accountId || null,
-          } as any);
-
-        if (prError) throw prError;
-      }
+      if (entError) throw entError;
 
       return order;
     },
     onSuccess: (_, variables) => {
-      if (variables.product.price_usd === 0) {
-        toast.success(`${variables.product.name} unlocked!`);
-      } else {
-        toast.success("Order submitted! Admin will confirm your payment shortly.");
-      }
+      toast.success(`${variables.product.name} unlocked for testing!`);
       queryClient.invalidateQueries({ queryKey: ["entitlements"] });
       queryClient.invalidateQueries({ queryKey: ["marketplace-products"] });
     },
