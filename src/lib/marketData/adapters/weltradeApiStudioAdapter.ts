@@ -31,7 +31,7 @@ export function createWeltradeApiStudioAdapter(config: AdapterConfig): MarketDat
 
   return {
     id: "weltrade-api-studio",
-    label: "Weltrade SyntX · API Studio",
+    label: "Weltrade SyntX · TradeCopy / MT5 API Studio",
     start(handlers: AdapterHandlers) {
       stopped = false;
       handlers.onStatus("connecting", { wsState: "POLLING", apiStatus: "connecting" });
