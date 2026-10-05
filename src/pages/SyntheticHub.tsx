@@ -322,5 +322,6 @@ export default function SyntheticHub() {
         </Card>
       </main>
     </div>
+      </ProductGate>
   );
 }
