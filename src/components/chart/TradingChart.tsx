@@ -575,7 +575,7 @@ function TradingChartBase({
               variant={hauzaOn ? "default" : "ghost"}
               className={cn("h-6 px-2 text-[10px] font-bold", hauzaOn && "bg-primary/90 hover:bg-primary")}
               onClick={() => setHauzaOn((v) => !v)}
-              title={\`Toggle ${strategy} support, resistance and trend analysis\`}
+              title={`Toggle ${strategy} support, resistance and trend analysis`}
             >
               {strategy}
             </Button>

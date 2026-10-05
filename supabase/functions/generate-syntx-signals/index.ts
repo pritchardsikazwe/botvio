@@ -109,7 +109,7 @@ const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;fo
 }catch{frames.push({n:name,sig:null})}}
 
 const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
-const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), biasD3=get("D3"), scalp=get("M1");
+const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), biasD3=get("D3"), scalp=get("M1"), scalp5=get("M5");
 const setups=[
   {tf:"1m",label:"SCALPING 1M",type:"SCALPING",setup:scalp,confirm:[bias15,biasH1],min:Math.max(profile.min,78),expiry:300,backup:600},
   {tf:"5m",label:"SCALPING 5M",type:"SCALPING",setup:scalp5,confirm:[bias15,biasH1],min:Math.max(profile.min,77),expiry:900,backup:1800},
