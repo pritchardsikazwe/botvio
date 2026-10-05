@@ -231,7 +231,7 @@ Deno.serve(async (req) => {
     const action = String(body?.action ?? "");
 
     if (action === "wake") {
-      if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } });
+      if (!(await assertAutomationKey(req))) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } });
       const r = await deliver(admin);
       return json({ ok: true, adapterMode: adapter.mode, ...r });
     }
