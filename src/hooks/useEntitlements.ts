@@ -21,16 +21,35 @@ export interface Entitlement {
   } | null;
 }
 
+const VISITOR_TRIAL_KEY = "botvio_visitor_trial_started_at";
+const VISITOR_TRIAL_MS = 24 * 60 * 60 * 1000;
+
+function hasVisitorPreview(): boolean {
+  try {
+    const raw = window.localStorage.getItem(VISITOR_TRIAL_KEY);
+    if (!raw) {
+      window.localStorage.setItem(VISITOR_TRIAL_KEY, new Date().toISOString());
+      return true;
+    }
+    const startedAt = new Date(raw).getTime();
+    return Number.isFinite(startedAt) && Date.now() - startedAt < VISITOR_TRIAL_MS;
+  } catch {
+    return false;
+  }
+}
+
 export function useEntitlements() {
   const { user } = useAuth();
 
   return useQuery({
     queryKey: ["entitlements", user?.id],
     queryFn: async () => {
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from("entitlements")
         .select("*, products(id, name, type, slug, price_usd, billing_type)")
-        .eq("user_id", user!.id)
+        .eq("user_id", user.id)
         .eq("status", "active");
 
       if (error) throw error;
@@ -38,20 +57,39 @@ export function useEntitlements() {
     },
     enabled: !!user,
     refetchOnWindowFocus: true,
-    staleTime: 30_000, // 30 seconds
+    staleTime: 30_000,
   });
 }
 
 export function useHasEntitlement(productId: string | undefined) {
+  const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const { data: entitlements } = useEntitlements();
+
   if (!productId) return false;
-  return entitlements?.some((e) => e.product_id === productId && e.status === "active" && (!e.ends_at || new Date(e.ends_at).getTime() > Date.now())) ?? false;
+
+  // Staff/admin roles can inspect all premium products without purchasing each one.
+  if (user && (isAdmin || isSuperAdmin || isSignalManager)) return true;
+
+  // Unauthenticated visitors get a 24-hour read-only preview.
+  if (!user && hasVisitorPreview()) return true;
+
+  return entitlements?.some(
+    (e) =>
+      e.product_id === productId &&
+      e.status === "active" &&
+      (!e.ends_at || new Date(e.ends_at).getTime() > Date.now()),
+  ) ?? false;
 }
 
 export function useHasProductType(type: string) {
+  const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const { data: entitlements } = useEntitlements();
+
+  if (user && (isAdmin || isSuperAdmin || isSignalManager)) return true;
+  if (!user && hasVisitorPreview()) return true;
+
   return entitlements?.some(
-    (e) => e.products?.type === type && e.status === "active"
+    (e) => e.products?.type === type && e.status === "active",
   ) ?? false;
 }
 
