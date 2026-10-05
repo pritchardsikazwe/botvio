@@ -14,7 +14,7 @@ const CONFIG: AssetTradingHubConfig = {
   includeWeltradeSignals: true,
   tagline: "Real-time charts with built-in Botvio AI scalping engine, auto-posted M1/M5 signals, expert tips & community — your full Bitcoin trading desk.",
   quickStats: [
-    { label: "Top Levels", value: "Round Numbers ($60k/$70k)" },
+    { label: "Top Levels", value: "Current round numbers + market structure" },
     { label: "Best Sessions", value: "24/7 — US/Asia Open Spike" },
     { label: "Strategy Focus", value: "Botvio AI Scalp" },
     { label: "Risk Rule", value: "Max 1.5% per trade" },
