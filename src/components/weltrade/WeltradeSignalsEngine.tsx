@@ -31,7 +31,6 @@ import { computeSignals, summarizeSignals, type EngineSignal } from "@/lib/marke
 import { getSyntxProfile, type SyntxStrategyMode } from "@/lib/marketData/syntxStrategy";
 import { computeSyntxSignalsV2, getSyntxStateV2 } from "@/lib/marketData/syntxSignalEngineV2";
 import type { Timeframe } from "@/lib/marketData/types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   WELTRADE_CATEGORIES,
   WELTRADE_CATEGORY_LABEL,
@@ -238,34 +237,6 @@ export const WeltradeSignalsEngine = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 rounded-xl border border-border/50 bg-card/70 p-2.5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-1.5">
-          {WELTRADE_CATEGORIES.map((cat) => (
-            <Button key={cat} size="sm" variant={prefs.category === cat ? "secondary" : "ghost"} className="h-7 px-3 text-[10px] font-bold"
-              onClick={() => {
-                const first = WELTRADE_INSTRUMENTS.find((i) => i.category === cat);
-                setPrefs((p) => ({ ...p, category: cat, instrument: first?.key ?? p.instrument }));
-              }}>
-              {WELTRADE_CATEGORY_LABEL[cat]}
-            </Button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2 lg:min-w-[300px]">
-          <Badge variant="outline" className="shrink-0 text-[9px] border-success/30 text-success">
-            <Activity className="mr-1 h-2.5 w-2.5" /> {status === "live" ? "LIVE" : status.toUpperCase()}
-          </Badge>
-          <Select value={instrument.key} onValueChange={(value) => {
-            const next = WELTRADE_INSTRUMENTS.find((i) => i.key === value);
-            if (next) selectInstrument(next);
-          }}>
-            <SelectTrigger className="h-8 text-xs font-bold"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {categoryInstruments.map((inst) => <SelectItem key={inst.key} value={inst.key}>{inst.label} · {inst.mt5Symbol}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       {needsSignIn && !authLoading && (
         <div className="flex flex-col items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/10 p-3 sm:flex-row">
           <p className="text-xs text-foreground">Sign in to see live Weltrade prices, charts and signals from your connected Weltrade feed.</p>
@@ -274,8 +245,71 @@ export const WeltradeSignalsEngine = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[250px_minmax(0,1fr)]">
-        <Card className={cn("relative overflow-hidden border-2 bg-gradient-to-br", signalTone.border, signalTone.bg)}>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <div className="space-y-3">
+          <Card className="border-border/60 bg-card/80">
+            <CardHeader className="p-3 pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-xs font-black uppercase tracking-wider">Weltrade Markets</CardTitle>
+                  <p className="mt-0.5 text-[9px] text-muted-foreground">Select a SyntX instrument</p>
+                </div>
+                <Badge variant="outline" className="border-success/30 text-success text-[9px]">
+                  <Activity className="mr-1 h-2.5 w-2.5" /> {status === "live" ? "LIVE" : status.toUpperCase()}
+                </Badge>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {WELTRADE_CATEGORIES.map((cat) => (
+                  <Button
+                    key={cat}
+                    size="sm"
+                    variant={prefs.category === cat ? "secondary" : "ghost"}
+                    className="h-6 px-2 text-[9px] font-bold"
+                    onClick={() => {
+                      const first = WELTRADE_INSTRUMENTS.find((i) => i.category === cat);
+                      setPrefs((p) => ({ ...p, category: cat, instrument: first?.key ?? p.instrument }));
+                    }}
+                  >
+                    {WELTRADE_CATEGORY_LABEL[cat]}
+                  </Button>
+                ))}
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 pt-0">
+              <ScrollArea className="h-[430px] pr-1">
+                <div className="space-y-1">
+                  {categoryInstruments.map((inst) => {
+                    const active = inst.key === instrument.key;
+                    return (
+                      <button
+                        key={inst.key}
+                        onClick={() => selectInstrument(inst)}
+                        className={cn(
+                          "w-full rounded-lg border px-2.5 py-2 text-left transition-all",
+                          active
+                            ? "border-primary/60 bg-primary/10 shadow-sm"
+                            : "border-border/30 bg-background/20 hover:border-primary/30 hover:bg-muted/30"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-[11px] font-black text-foreground">{inst.label}</span>
+                          {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
+                        </div>
+                        <div className="mt-0.5 flex items-center justify-between gap-2">
+                          <span className="truncate font-mono text-[9px] text-muted-foreground">{inst.mt5Symbol}</span>
+                          {inst.syntxFamily && (
+                            <span className="shrink-0 text-[8px] uppercase tracking-wide text-warning">{inst.syntxFamily}</span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          <Card className={cn("relative overflow-hidden border-2 bg-gradient-to-br", signalTone.border, signalTone.bg)}>
           <CardContent className="space-y-3 p-3.5">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -359,7 +393,8 @@ export const WeltradeSignalsEngine = () => {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </div>
 
         <div className="min-w-0">
           <BrokerCandleChart
