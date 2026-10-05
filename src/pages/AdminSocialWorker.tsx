@@ -45,7 +45,7 @@ const platforms: { id: Platform; label: string; icon: any }[] = [
 
 const statusVariant = (status: PostStatus) => status === "published" ? "default" : status === "failed" ? "destructive" : "secondary";
 
-export default function AdminSocialWorker() {
+export default function AdminSocialWorker() {\n  const db = supabase as any;
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,8 +61,8 @@ export default function AdminSocialWorker() {
     setLoading(true);
     try {
       const [a, p] = await Promise.all([
-        supabase.from("social_accounts").select("id,platform,account_name,account_id,enabled,connected_at,token_expires_at").order("platform"),
-        supabase.from("social_posts").select("id,platform,content,source_url,scheduled_at,status,published_at,error_message,created_at").order("created_at", { ascending: false }).limit(30),
+        db.from("social_accounts").select("id,platform,account_name,account_id,enabled,connected_at,token_expires_at").order("platform"),
+        db.from("social_posts").select("id,platform,content,source_url,scheduled_at,status,published_at,error_message,created_at").order("created_at", { ascending: false }).limit(30),
       ]);
       if (a.error) throw a.error;
       if (p.error) throw p.error;
@@ -95,7 +95,7 @@ export default function AdminSocialWorker() {
     if (mode === "scheduled" && !schedule) return toast.error("Choose a scheduled time");
     setBusy(true);
     try {
-      const { error } = await supabase.from("social_posts").insert({
+      const { error } = await db.from("social_posts").insert({
         platform,
         content: content.trim(),
         source_url: sourceUrl.trim() || null,
@@ -111,7 +111,7 @@ export default function AdminSocialWorker() {
   };
 
   const approve = async (id: string) => {
-    const { error } = await supabase.from("social_posts").update({ status: "approved" }).eq("id", id).eq("status", "draft");
+    const { error } = await db.from("social_posts").update({ status: "approved" }).eq("id", id).eq("status", "draft");
     if (error) toast.error(error.message); else { toast.success("Post approved for the worker"); load(); }
   };
 
