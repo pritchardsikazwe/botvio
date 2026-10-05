@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useDerivLiveTicks } from "@/hooks/useDerivLiveTicks";
 import { brokerReviews } from "@/data/brokerReviews";
 import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
+import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { rsi, riseFallEngine } from "@/lib/signalEngines";
 
 const DERIV_SIGNUP = brokerReviews.deriv.affiliateUrl || "https://t.deriv.link?t=8U3QNKP9UA9G";
@@ -74,8 +75,8 @@ function SignalPreview({ symbol, name }: { symbol: string; name: string }) {
 const OptionsTradingHub = () => (
   <div className="min-h-screen bg-background">
     <SEOHead
-      title="Options Trading Hub — Deriv Signals, Strategies & AI Analysis | BOTVIO"
-      description="Learn options trading, explore Deriv Digital Options, review automated signal previews, study strategies and connect your Deriv account through BOTVIO."
+      title="Deriv Options Trading Hub — Live Signals & Strategy Research | BOTVIO"
+      description="Trade and research Deriv Options with BOTVIO: live synthetic market data, Rise/Fall, Higher/Lower, Digits signals, strategy research and direct Deriv account connection."
     />
     <Header />
 
@@ -83,9 +84,9 @@ const OptionsTradingHub = () => (
       <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-success/5 p-6 md:p-10">
         <div className="max-w-3xl">
           <Badge className="mb-3"><Sparkles className="mr-1 h-3 w-3" /> BOTVIO OPTIONS HUB</Badge>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight">Options trading, signals and strategy research in one place.</h1>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight">Deriv Options trading, live signals and strategy research.</h1>
           <p className="mt-4 text-muted-foreground text-base md:text-lg">
-            Start with education, test signals on market data, choose a strategy, then connect a Deriv account when you are ready.
+            Research the market first, watch live signals, test a strategy, then connect your own Deriv account directly inside the Options Hub.
             BOTVIO signals are analysis tools — they are not guarantees of results.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -94,18 +95,28 @@ const OptionsTradingHub = () => (
                 Open Deriv Account <ExternalLink className="ml-2 h-4 w-4" />
               </a>
             </Button>
+            <Button size="lg" variant="outline" asChild><a href="#connect-deriv">Connect Existing Account <Wallet className="ml-2 h-4 w-4" /></a></Button>
             <Button size="lg" variant="outline" asChild><Link to="/trade/style/rise-fall-scalping">Open Momentum Workspace <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">Affiliate disclosure: BOTVIO may receive a commission from qualifying partner activity.</p>
         </div>
       </section>
 
+      <section id="connect-deriv" className="scroll-mt-24">
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Direct Deriv connection</p>
+          <h2 className="text-2xl font-black">Connect your Deriv account</h2>
+          <p className="text-sm text-muted-foreground">Use secure Deriv OAuth to connect Demo or Real Options accounts. PAT connection remains available as an alternative.</p>
+        </div>
+        <DerivConnectionPanel showAccountSelection />
+      </section>
+
       <section>
         <div className="flex items-end justify-between gap-3 mb-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Simple Options workspace</p>
-            <h2 className="text-2xl font-black">Three focused modes — no clutter</h2>
-            <p className="text-sm text-muted-foreground">We removed the duplicate legacy binary-option modes. Pick the contract family you actually want.</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Options workspace</p>
+            <h2 className="text-2xl font-black">Three focused modes</h2>
+            <p className="text-sm text-muted-foreground">Choose the contract family you actually want instead of navigating legacy duplicate pages.</p>
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
@@ -172,7 +183,7 @@ const OptionsTradingHub = () => (
               ["Synthetic Indices guide", "/synthetic-hub"],
               ["Trading strategies", "/strategies"],
               ["Risk management tools", "/tools"],
-              ["Deriv connection", "/connections"],
+              ["Deriv connection", "#connect-deriv"],
             ].map(([title, href]) => (
               <Link key={href} to={href} className="rounded-xl border bg-background/50 p-4 transition hover:border-primary/40 hover:bg-primary/5">
                 <p className="font-semibold text-sm">{title}</p>
