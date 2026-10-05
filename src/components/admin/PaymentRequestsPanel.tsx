@@ -19,7 +19,8 @@ type PaymentRequest = {
   admin_note: string | null;
   created_at: string;
   profile?: { email?: string | null; display_name?: string | null; whatsapp_number?: string | null } | null;
-  plan?: { name?: string | null; code?: string | null } | null;\n  product?: { id?: string | null; name?: string | null; slug?: string | null; billing_type?: string | null } | null;
+  plan?: { name?: string | null; code?: string | null } | null;
+  product?: { id?: string | null; name?: string | null; slug?: string | null; billing_type?: string | null } | null;
 };
 
 export function PaymentRequestsPanel() {
@@ -40,7 +41,8 @@ export function PaymentRequestsPanel() {
       setRequests((data || []).map((r: any) => ({
         ...r,
         profile: r.profiles,
-        plan: r.pricing_plans,\n        product: r.products,
+        plan: r.pricing_plans,
+        product: r.products,
       })));
     } catch (e: any) {
       toast.error(e?.message || "Could not load payment requests");
