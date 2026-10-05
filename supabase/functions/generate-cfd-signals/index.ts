@@ -200,16 +200,20 @@ Deno.serve(async(req)=>{
     if(!gate.allowed) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:gate.reason,performance:gate.performance}); continue; }
     const setup=sigs.get(p.tf);if(!setup)continue;
     const worker=await workerConfluence(db,profile.symbol,setup.direction);
-    if(!worker.allow) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:"worker confluence conflict",worker}); continue; }
+    // Higher-timeframe intelligence is a quality modifier, not a hard requirement.
+    // Each horizon must be able to generate independently.
     const workerScore=Math.min(96,setup.score+worker.bonus);
-    if(workerScore<profile.min+p.minBoost+gate.scoreBoost)continue;
     const confirmations=p.confirm.map(tf=>sigs.get(tf)).filter(Boolean) as Sig[];
     const same=confirmations.filter(x=>x.direction===setup.direction).length;
     const confirmationBias=p.confirm.map(tf=>directionalBias(frames.get(tf)??[])).filter(Boolean) as ("BUY"|"SELL")[];
     const alignedBias=confirmationBias.filter(x=>x===setup.direction).length;
     const conflict=confirmations.some(x=>x.direction!==setup.direction)||confirmationBias.some(x=>x!==setup.direction);
-    const required=p.tf==="15m"||p.tf==="1H"||p.tf==="3D"?1:(p.confirm.length?1:0);
-    if(conflict||same+alignedBias<required)continue;
+    const confirmationCount=Math.max(confirmations.length,confirmationBias.length);
+    const alignedCount=same+alignedBias;
+    const confirmationBonus=alignedCount>0 ? Math.min(4,alignedCount*2) : 0;
+    const conflictPenalty=conflict ? 4 : 0;
+    const finalScore=Math.min(96,Math.max(0,workerScore+confirmationBonus-conflictPenalty));
+    if(finalScore<profile.min+p.minBoost+gate.scoreBoost)continue;
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const detectedStrategies=strategyTypes(frames.get(p.tf)??[],setup.direction,p.tf);
@@ -220,11 +224,11 @@ Deno.serve(async(req)=>{
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
-      timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(workerScore),broker:["deriv"],
+      timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(finalScore),broker:["deriv"],
       category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
-      expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${same + alignedBias}/${Math.max(confirmations.length, confirmationBias.length)} higher-timeframe confirmations/alignment`,
+      expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${alignedCount}/${confirmationCount} higher-timeframe confirmations/alignment`,
       explanation_json:{engine:"Botvio CFD MTF Engine v2",signal_type:p.type,timeframe:p.tf,strategy_types:strategyLabels,expiry_seconds:p.expiry,expires_at:expiresAt,
-        source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",higher_timeframe_confirmation:same,confirmation_count:confirmations.length,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
+        source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",higher_timeframe_confirmation:alignedCount,confirmation_count:confirmationCount,confirmation_bonus:confirmationBonus,conflict_penalty:conflictPenalty,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
     }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
     if(error)skipped.push({symbol:profile.name,timeframe:p.tf,error:error.message});else published.push(row);
    }
