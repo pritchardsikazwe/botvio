@@ -12,7 +12,7 @@ const CONFIG: AssetTradingHubConfig = {
   symbolPatterns: ["XAG", "SILVER"],
   tagline: "Real-time silver charts with built-in Botvio AI engine, auto-posted M1/M5 scalping signals, expert tips & strategies — your full XAG/USD trading desk.",
   quickStats: [
-    { label: "Key Levels", value: "$25 / $28 / $30 zones" },
+    { label: "Key Levels", value: "Current round numbers + recent S/R" },
     { label: "Best Sessions", value: "London & NY Overlap" },
     { label: "Strategy Focus", value: "Botvio AI" },
     { label: "Risk Rule", value: "Max 2% per trade" },
