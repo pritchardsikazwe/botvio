@@ -56,7 +56,9 @@ export interface TradingChartProps {
   height?: number;
   unavailableMessage?: string;
   errorDetail?: string | null;
-  /** Hauza-style pivot support/resistance overlay. */
+  /** Instrument-specific strategy label. */
+  strategyName?: string;
+  /** Legacy compatibility: enables the structure-analysis overlay. */
   showHauza?: boolean;
 }
 
@@ -93,6 +95,7 @@ function TradingChartBase({
   height = 460,
   unavailableMessage = "Market data unavailable",
   errorDetail = null,
+  strategyName,
   showHauza = false,
 }: TradingChartProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -116,6 +119,16 @@ function TradingChartBase({
   });
   const [fullscreen, setFullscreen] = useState(false);
   const [hauzaOn, setHauzaOn] = useState(showHauza);
+  const strategy = useMemo(() => {
+    if (strategyName) return strategyName;
+    const text = (symbolLabel + " " + brokerLabel + " " + sourceLabel).toUpperCase();
+    if (text.includes("XAU") || text.includes("GOLD")) return "Gold Structure Strategy";
+    if (text.includes("BTC") || text.includes("ETH") || text.includes("CRYPTO")) return "Crypto Momentum Strategy";
+    if (text.includes("NAS") || text.includes("US30") || text.includes("GER40") || text.includes("INDEX")) return "Index Structure Strategy";
+    if (text.includes("SYNTH") || text.includes("VOLATILITY") || text.includes("BOOM") || text.includes("CRASH") || text.includes("STEP") || text.includes("RISE") || text.includes("FALL")) return "Synthetic Structure Strategy";
+    if (text.includes("WELTRADE") || text.includes("SYNTX")) return "Weltrade SyntX Strategy";
+    return "Forex Structure Strategy";
+  }, [strategyName, symbolLabel, brokerLabel, sourceLabel]);
   const hauzaTrendRef = useRef<ISeriesApi<"Line"> | null>(null);
   const hauzaLinesRef = useRef<IPriceLine[]>([]);
 
@@ -562,9 +575,9 @@ function TradingChartBase({
               variant={hauzaOn ? "default" : "ghost"}
               className={cn("h-6 px-2 text-[10px] font-bold", hauzaOn && "bg-primary/90 hover:bg-primary")}
               onClick={() => setHauzaOn((v) => !v)}
-              title="Toggle Hauza support, resistance and trend overlay"
+              title={\`Toggle ${strategy} support, resistance and trend analysis\`}
             >
-              Hauza
+              {strategy}
             </Button>
           )}
           {([
