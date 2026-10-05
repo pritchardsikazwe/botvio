@@ -45,9 +45,7 @@ export function useEntitlements() {
 export function useHasEntitlement(productId: string | undefined) {
   const { data: entitlements } = useEntitlements();
   if (!productId) return false;
-  return entitlements?.some(
-    (e) => e.product_id === productId && e.status === "active"
-  ) ?? false;
+  return entitlements?.some((e) => e.product_id === productId && e.status === "active" && (!e.ends_at || new Date(e.ends_at).getTime() > Date.now())) ?? false;
 }
 
 export function useHasProductType(type: string) {
