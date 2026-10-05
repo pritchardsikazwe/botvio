@@ -117,6 +117,12 @@ export const AdminTradeCopyTab = () => {
   );
 
   const count = (rl: Mt5Role) => rows.filter((r) => r.roles.includes(rl)).length;
+  const providerMasters = rows.filter((r) => r.account_role === "master" && !r.is_botvio_robot);
+  const robotMasters = rows.filter((r) => r.account_role === "master" && r.is_botvio_robot);
+  const registeredProviderSlots = providerMasters.filter((r) => !!r.tradecopy_user_id).length;
+  const providerSlotFull = registeredProviderSlots >= 2;
+  const weltradeProvider = rows.find((r) => (r.broker ?? "").toLowerCase() === "weltrade" && r.login_id === "43304349");
+  const stale35165 = !rows.some((r) => r.tradecopy_user_id === 35165) && providerSlotFull;
   const cards = [
     { label: "Total MT5 accounts", value: rows.length, icon: Server },
     { label: "Direct Execution active", value: count("DIRECT EXECUTION"), icon: Send },
@@ -180,19 +186,51 @@ export const AdminTradeCopyTab = () => {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2"><Server className="h-5 w-5" /> MT5 Connections & TradeCopy</CardTitle>
-            <CardDescription>Every MT5 account by role. Botvio signals enter the configured provider master through TradeCopy; user Direct Signals also execute through TradeCopy. Passwords are never shown.</CardDescription>
+            <CardDescription>Admin control for provider masters, Botvio Robot routing, direct MT5 execution, LIVE safety, and TradeCopy diagnostics. Passwords are never shown.</CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
             <ConnectMt5Dialog
               role="master"
               robot
-              triggerLabel="Add Botvio MT5 Master"
+              triggerLabel="Add Botvio Robot Master"
               existingMasters={rows.filter((r) => r.account_role === "master" && !r.is_botvio_robot).map((r) => ({ login_id: r.login_id || "", server: r.server || "" }))}
             />
             <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />Refresh</Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">TradeCopy Control Center</p>
+                <p className="mt-1 text-xs text-muted-foreground">Provider slots are limited to two. Botvio Robot is managed separately from provider routing.</p>
+              </div>
+              <Badge variant={providerSlotFull ? "secondary" : "outline"}>{registeredProviderSlots}/2 provider slots</Badge>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="rounded-xl border border-border/60 bg-background/60 p-3">
+                <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold">① Deriv Provider</span><Badge variant="outline">{providerMasters.some((r) => r.login_id === "41242244") ? "Configured" : "Missing"}</Badge></div>
+                <p className="mt-1 text-xs text-muted-foreground">Login 41242244 · DEMO · External 35164</p>
+                {providerMasters.find((r) => r.login_id === "41242244") && <Button className="mt-2 w-full" size="sm" variant="outline" onClick={() => setSelected(providerMasters.find((r) => r.login_id === "41242244")!)}>Manage Deriv</Button>}
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/60 p-3">
+                <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold">② Weltrade Provider</span><Badge variant="outline">{weltradeProvider?.account_role === "master" ? "Configured" : "Ready"}</Badge></div>
+                <p className="mt-1 text-xs text-muted-foreground">Login 43304349 · Weltrade-Demo</p>
+                {weltradeProvider && weltradeProvider.account_role !== "master" && !weltradeProvider.tradecopy_user_id && <Button className="mt-2 w-full" size="sm" disabled={act.isPending} onClick={() => promoteExistingMaster(weltradeProvider)}><Crown className="mr-1 h-4 w-4" />Promote Existing Account</Button>}
+                {weltradeProvider?.account_role === "master" && <Button className="mt-2 w-full" size="sm" variant="outline" onClick={() => setSelected(weltradeProvider)}>Manage Weltrade</Button>}
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/60 p-3">
+                <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold">Botvio Robot</span><Badge variant="outline">{robotMasters.length ? "Registered" : "Independent"}</Badge></div>
+                <p className="mt-1 text-xs text-muted-foreground">Does not belong in the two provider slots.</p>
+                {robotMasters.length ? <Button className="mt-2 w-full" size="sm" variant="outline" onClick={() => setSelected(robotMasters[0])}>Manage Robot</Button> : <div className="mt-2 text-[11px] text-muted-foreground">No Robot TradeCopy master currently registered.</div>}
+              </div>
+            </div>
+            {stale35165 && <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+              <div><span className="font-semibold">External slot check required:</span> Botvio has no account 35165, but TradeCopy is still reporting the provider limit as full. Do not delete or recreate a provider blindly; use the external TradeCopy cleanup process before registering another master.</div>
+            </div>}
+          </div>
+
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
             {cards.map(({ label, value, icon: Icon }) => (
               <div key={label} className="rounded-xl border border-border/60 bg-background/60 p-3">
