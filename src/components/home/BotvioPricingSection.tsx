@@ -17,14 +17,14 @@ export function BotvioPricingSection() {
   const { data } = useQuery({
     queryKey: ["home-botvio-products"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("id,name,slug,type,short_description,price_usd,billing_type,billing_interval,is_featured,is_active").eq("is_active", true).eq("is_featured", true).order("created_at", { ascending: false }).limit(4);
+      const { data, error } = await supabase.from("products").select("id,name,slug,type,short_description,price_usd,billing_type,billing_interval,is_featured,is_active").eq("is_active", true).order("created_at", { ascending: false }).limit(10);
       if (error) throw error;
       return data || [];
     },
     staleTime: 60_000,
   });
 
-  const products = data?.length ? data.map((p) => ({ ...p, icon: p.type === "bot" ? Bot : p.slug.includes("synthetic") ? Zap : p.slug.includes("mt5") ? Crown : ChartNoAxesCombined })) : FALLBACK;
+  const PRODUCT_ORDER = ["mt5-direct", "gold-robot", "synthetic-robot", "synthetic-hub", "weltrade-hub"];\n  const products = data?.length ? data.filter((p) => PRODUCT_ORDER.includes(p.slug)).sort((a, b) => PRODUCT_ORDER.indexOf(a.slug) - PRODUCT_ORDER.indexOf(b.slug)).map((p) => ({ ...p, icon: p.type === "bot" ? Bot : p.slug.includes("synthetic") ? Zap : p.slug.includes("mt5") ? Crown : ChartNoAxesCombined })) : FALLBACK;
 
   return (
     <section className="border-y border-border/50 bg-card/20">
@@ -34,7 +34,7 @@ export function BotvioPricingSection() {
           <h2 className="text-3xl font-black sm:text-4xl">Choose what you want to unlock</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">Hubs, robots and MT5 execution are separate products. Subscribe only to what you need.</p>
         </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {products.map((p: any) => {
             const Icon = p.icon;
             const price = typeof p.price_usd === "number" ? p.price_usd : null;
