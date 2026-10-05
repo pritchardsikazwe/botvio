@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Badge } from "@/components/ui/badge";
@@ -22,28 +22,16 @@ const questions = [
 ];
 
 export default function AITradingAnswers() {
+  const { slug } = useParams();
+  const selected = questions.find(([key]) => key === slug);
   const faq = questions.map(([slug,q,a])=>({ "@type":"Question", name:q, acceptedAnswer:{ "@type":"Answer", text:a }}));
   return <div className="min-h-screen bg-background">
     <SEOHead
-      title="AI Trading Answers: Forex, Gold, MT5, Synthetic Indices & Copy Trading"
-      description="Clear answers to common AI trading questions about forex, gold, MT5, synthetic indices, signals, bots and copy trading."
-      jsonLd={{"@context":"https://schema.org","@graph":[
-        {"@type":"CollectionPage",name:"Botvio AI Trading Answers",url:"https://botvio.live/ai-trading",description:"AI trading research and direct answers."},
-        {"@type":"FAQPage",mainEntity:faq}
-      ]}}
+      title={selected ? selected[1] : "AI Trading Answers: Forex, Gold, MT5, Synthetic Indices & Copy Trading"}
+      description={selected ? selected[2] : "Clear answers to common AI trading questions about forex, gold, MT5, synthetic indices, signals, bots and copy trading."}
+      jsonLd={selected ? {"@context":"https://schema.org","@type":"QAPage","mainEntity":{"@type":"Question","name":selected[1],"text":selected[1],"answerCount":1,"acceptedAnswer":{"@type":"Answer","text":selected[2]}}} : {"@context":"https://schema.org","@graph":[{"@type":"CollectionPage",name:"Botvio AI Trading Answers",url:"https://botvio.live/ai-trading",description:"AI trading research and direct answers."},{"@type":"FAQPage",mainEntity:faq}]}}
     />
     <Header />
-    <main className="container mx-auto px-4 py-10 max-w-6xl">
-      <Badge>AI TRADING RESEARCH</Badge>
-      <h1 className="mt-4 text-4xl font-bold tracking-tight">AI Trading Answers</h1>
-      <p className="mt-4 max-w-3xl text-lg text-muted-foreground">Direct, research-first answers to the questions traders ask about AI trading, gold, forex, synthetic indices, MT5, signals and copy trading.</p>
-      <div className="mt-10 grid gap-4 md:grid-cols-2">
-        {questions.map(([slug,q,a])=><article key={slug} className="rounded-2xl border bg-card p-5">
-          <h2 className="text-xl font-semibold">{q}</h2>
-          <p className="mt-3 text-muted-foreground leading-relaxed">{a}</p>
-          <Link to={`/ai-trading/${slug}`} className="mt-4 inline-flex items-center gap-2 text-primary font-medium">Read answer <ArrowRight className="h-4 w-4"/></Link>
-        </article>)}
-      </div>
-    </main>
+    {selected ? <main className="container mx-auto px-4 py-10 max-w-3xl"><Link to="/ai-trading" className="text-sm text-primary">← All AI answers</Link><h1 className="mt-5 text-4xl font-bold">{selected[1]}</h1><div className="mt-6 rounded-2xl border bg-card p-6"><p className="text-lg leading-relaxed text-muted-foreground">{selected[2]}</p></div><h2 className="mt-10 text-2xl font-semibold">What to check next</h2><p className="mt-3 text-muted-foreground">Verify current broker terms, product availability, leverage, fees, execution conditions and local requirements. Trading involves substantial risk.</p></main> : <main className="container mx-auto px-4 py-10 max-w-6xl"><Badge>AI TRADING RESEARCH</Badge><h1 className="mt-4 text-4xl font-bold tracking-tight">AI Trading Answers</h1><p className="mt-4 max-w-3xl text-lg text-muted-foreground">Direct, research-first answers to the questions traders ask about AI trading, gold, forex, synthetic indices, MT5, signals and copy trading.</p><div className="mt-10 grid gap-4 md:grid-cols-2">{questions.map(([slug,q,a])=><article key={slug} className="rounded-2xl border bg-card p-5"><h2 className="text-xl font-semibold">{q}</h2><p className="mt-3 text-muted-foreground leading-relaxed">{a}</p><Link to={`/ai-trading/${slug}`} className="mt-4 inline-flex items-center gap-2 text-primary font-medium">Read answer <ArrowRight className="h-4 w-4"/></Link></article>)}</div></main>}
   </div>;
 }
