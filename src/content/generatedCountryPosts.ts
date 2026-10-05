@@ -23,3 +23,5 @@ for(const slug of Object.keys(countryData)){
  const t=templates(c);
  for(const [key,p] of Object.entries(t)) GENERATED_COUNTRY_POSTS[`${slug}-${key}`]=p;
 }
+
+export const GENERATED_COUNTRY_INDEX: import("./blogIndex").BlogIndexEntry[] = Object.entries(GENERATED_COUNTRY_POSTS).map(([slug,p])=>({slug,title:p.title,excerpt:p.excerpt,category:p.category,readTime:p.readTime,date:p.date,featured:false,image:"🌍"}));
