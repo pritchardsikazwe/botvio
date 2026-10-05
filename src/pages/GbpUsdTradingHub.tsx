@@ -12,7 +12,7 @@ const CONFIG: AssetTradingHubConfig = {
   symbolPatterns: ["GBP", "CABLE"],
   tagline: "Real-time Cable charts with built-in Botvio AI engine, auto-posted M1/M5 scalping signals, expert tips & strategies — your full GBP/USD trading desk.",
   quickStats: [
-    { label: "Key Levels", value: "Round numbers (1.2500, 1.3000)" },
+    { label: "Key Levels", value: "Current round numbers + recent S/R" },
     { label: "Best Sessions", value: "London (08:00–12:00 UTC)" },
     { label: "Strategy Focus", value: "Botvio AI Scalp" },
     { label: "Risk Rule", value: "Max 2% per trade" },
