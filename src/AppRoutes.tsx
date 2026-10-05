@@ -10,7 +10,6 @@ const Paid = ({ children }: { children: ReactNode }) => (
   <PaidRouteGuard>{children}</PaidRouteGuard>
 );
 
-import Index from "./pages/Index";
 import HomeMockup from "./pages/HomeMockup";
 import Landing from "./pages/Landing";
 import Install from "./pages/Install";
@@ -237,8 +236,8 @@ export const AppRoutes = () => {
   return (
   <Routes>
     <Route path="/" element={<HomeMockup />} />
-    <Route path="home-preview" element={<HomeMockup />} />
-    <Route path="home-classic" element={<Index />} />
+    <Route path="home-preview" element={<Navigate to="/" replace />} />
+    <Route path="home-classic" element={<Navigate to="/" replace />} />
     <Route path=".lovable/oauth/consent" element={<OAuthConsent />} />
     <Route path="landing" element={<Landing />} />
     <Route path="install" element={<Install />} />
