@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useBotInstances, useMyCopySubscriptions, useTradingAccounts, useMySubscription, useNotifications } from "@/hooks/useBotvio";
+import { useBotInstances, useMyCopySubscriptions, useTradingAccounts, useNotifications } from "@/hooks/useBotvio";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { Header } from "@/components/trading/Header";
 import { MarketDataPanel } from "@/components/trading/MarketDataPanel";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { BotvioRobotSignalShortcut } from "@/components/dashboard/BotvioRobotSignalShortcut";
+import { useEntitlements } from "@/hooks/useEntitlements";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -19,12 +20,13 @@ const Dashboard = () => {
   const { data: botInstances, isLoading: botsLoading } = useBotInstances();
   const { data: subscriptions, isLoading: subsLoading } = useMyCopySubscriptions();
   const { data: accounts, isLoading: accountsLoading } = useTradingAccounts();
-  const { data: myPlan, isLoading: planLoading } = useMySubscription();
+  const { data: entitlements } = useEntitlements();
   const { data: notifications } = useNotifications();
 
-  const activeBots = botInstances?.filter(b => b.status === "active").length || 0;
+  const activeRobots = entitlements?.filter(e => e.products?.type === "bot" && e.status === "active").length || 0;
   const activeSubscriptions = subscriptions?.filter(s => s.status === "active").length || 0;
   const connectedAccounts = accounts?.length || 0;
+  const connectedBrokerNames = Array.from(new Set((accounts ?? []).map((a: any) => String(a.broker || "MT5").toUpperCase()))).join(" · ") || "No accounts yet";
   const unreadNotifications = notifications?.filter(n => !n.is_read).length || 0;
 
   // Fetch real today's P&L from executions
@@ -59,7 +61,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Trading Dashboard" description="Monitor your active trading bots, copy trading subscriptions, and portfolio performance across Deriv and Binance in real time." noIndex />
+      <SEOHead title="Trading Dashboard" description="Monitor your active Botvio robots, MT5 connections, copy trading and portfolio performance in one workspace." noIndex />
       <Header />
       
       <main className="container mx-auto px-3 py-4 md:px-4">
@@ -78,7 +80,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Bots</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Robots</CardTitle>
               <Bot className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
@@ -157,22 +159,11 @@ const Dashboard = () => {
             </div>
           </CardHeader>
           <CardContent className="pt-1 pb-3">
-            {planLoading ? (
-              <Skeleton className="h-12 w-full" />
-            ) : (
-              <div className="flex items-center gap-4">
-                <Badge variant="secondary" className="text-sm px-3 py-1.5">
-                  {myPlan?.pricing_plan?.name || "Starter"}
-                </Badge>
-                <div className="text-sm text-muted-foreground">
-                  <span>Max Bots: {myPlan?.pricing_plan?.max_bot_instances || 2}</span>
-                  <span className="mx-2">•</span>
-                  <span>Max Accounts: {myPlan?.pricing_plan?.max_accounts || 1}</span>
-                  <span className="mx-2">•</span>
-                  <span>Copy Trading: {myPlan?.pricing_plan?.allow_copy_trading ? "✓" : "✗"}</span>
-                </div>
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {entitlements && entitlements.length > 0 ? entitlements.slice(0, 5).map((e) => (
+                <Badge key={e.id} variant="secondary" className="text-sm px-3 py-1.5">{e.products?.name || "Active product"}</Badge>
+              )) : <span className="text-sm text-muted-foreground">No active Store products yet.</span>}
+            </div>
           </CardContent>
         </Card>
 
@@ -188,7 +179,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Bot Instances</CardTitle>
-                  <CardDescription>Your active trading bots</CardDescription>
+                  <CardDescription>Your current bot instances</CardDescription>
                 </div>
                 <Button size="sm" asChild>
                   <Link to="/bots">
