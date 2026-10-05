@@ -101,14 +101,20 @@ export default function DerivCallbackPage() {
           preferredType === "demo" ? !!a.is_virtual : preferredType === "real" ? !a.is_virtual : !!a.is_virtual
         ) || accounts[0];
         if (user && data.token && accounts.length > 0) {
+          // Keep the modern Deriv account switcher and the main trading-account
+          // registry in sync. Previously OAuth only populated user_deriv_tokens,
+          // so the UI could say "connected" while Trading Accounts had nothing
+          // to trade with.
           await supabase
             .from("user_deriv_tokens" as any)
             .update({ is_active: false } as any)
             .eq("user_id", user.id)
             .eq("is_active", true);
 
-
           for (const account of accounts) {
+            const isActive = account.loginid === preferred.loginid;
+            const label = account.is_virtual ? "Deriv Demo" : "Deriv Real";
+
             await supabase
               .from("user_deriv_tokens" as any)
               .upsert({
@@ -117,9 +123,43 @@ export default function DerivCallbackPage() {
                 is_virtual: !!account.is_virtual,
                 currency: account.currency || "USD",
                 token_encrypted: data.token,
-                label: account.is_virtual ? "Demo" : "Real",
-                is_active: account.loginid === preferred.loginid,
+                label,
+                is_active: isActive,
               } as any, { onConflict: "user_id,loginid" });
+
+            // Find the existing trading account first so reconnecting Deriv
+            // updates the credential instead of creating duplicate accounts.
+            const { data: existingAccount } = await supabase
+              .from("trading_accounts")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("broker", "deriv")
+              .eq("login_id", account.loginid)
+              .maybeSingle();
+
+            const accountPayload = {
+              user_id: user.id,
+              broker: "deriv",
+              label,
+              api_key_encrypted: data.token,
+              login_id: account.loginid,
+              connection_type: "oauth",
+              connection_status: "connected",
+              is_virtual: !!account.is_virtual,
+            };
+
+            if (existingAccount?.id) {
+              const { error: updateError } = await supabase
+                .from("trading_accounts")
+                .update(accountPayload)
+                .eq("id", existingAccount.id);
+              if (updateError) console.error("Failed to update Deriv trading account:", updateError);
+            } else {
+              const { error: insertError } = await supabase
+                .from("trading_accounts")
+                .insert(accountPayload);
+              if (insertError) console.error("Failed to add Deriv trading account:", insertError);
+            }
           }
         }
         // Set the selected account before notifying DerivProvider. The new Options API
