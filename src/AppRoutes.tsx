@@ -318,7 +318,7 @@ export const AppRoutes = () => {
     <Route path="beginner-guide" element={<BeginnerGuide />} />
     <Route path="auth/deriv/callback" element={<DerivCallback />} />
     <Route path="callback" element={<DerivCallback />} />
-    <Route path="trading" element={<Paid><Trading /></Paid>} />
+    <Route path="trading" element={<Navigate to="/markets" replace />} />
     {/* Gold uses the dedicated gold terminal everywhere, matching /gold. */}
     <Route path="chart/XAUUSD" element={<Paid><GoldTradingHub /></Paid>} />
     <Route path="chart/xauusd" element={<Navigate to="/chart/XAUUSD" replace />} />
@@ -424,7 +424,7 @@ export const AppRoutes = () => {
     <Route path="reset-password" element={<ResetPassword />} />
     <Route path="sports-betting" element={<StoreRestrictedRoute><SportsBetting /></StoreRestrictedRoute>} />
     <Route path="unsubscribe" element={<Unsubscribe />} />
-    <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
+    <Route path="trade/style/:styleId" element={<Navigate to="/options" replace />} />
     <Route path="blog" element={<Blog />} />
     <Route path="ar/dubai" element={<ArabicDubaiTradingGuide />} />
     <Route path="ar/saudi-arabia" element={<SaudiArabicTradingGuide />} />
