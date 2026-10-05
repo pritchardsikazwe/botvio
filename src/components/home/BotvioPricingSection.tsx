@@ -24,7 +24,8 @@ export function BotvioPricingSection() {
     staleTime: 60_000,
   });
 
-  const PRODUCT_ORDER = ["mt5-direct", "gold-robot", "synthetic-robot", "synthetic-hub", "weltrade-hub"];\n  const products = data?.length ? data.filter((p) => PRODUCT_ORDER.includes(p.slug)).sort((a, b) => PRODUCT_ORDER.indexOf(a.slug) - PRODUCT_ORDER.indexOf(b.slug)).map((p) => ({ ...p, icon: p.type === "bot" ? Bot : p.slug.includes("synthetic") ? Zap : p.slug.includes("mt5") ? Crown : ChartNoAxesCombined })) : FALLBACK;
+  const PRODUCT_ORDER = ["mt5-direct", "gold-robot", "synthetic-robot", "synthetic-hub", "weltrade-hub"];
+  const products = data?.length ? data.filter((p) => PRODUCT_ORDER.includes(p.slug)).sort((a, b) => PRODUCT_ORDER.indexOf(a.slug) - PRODUCT_ORDER.indexOf(b.slug)).map((p) => ({ ...p, icon: p.type === "bot" ? Bot : p.slug.includes("synthetic") ? Zap : p.slug.includes("mt5") ? Crown : ChartNoAxesCombined })) : FALLBACK;
 
   return (
     <section className="border-y border-border/50 bg-card/20">
