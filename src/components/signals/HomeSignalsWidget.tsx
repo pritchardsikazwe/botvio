@@ -427,10 +427,7 @@ export const HomeSignalsWidget = () => {
                       Expires in {getTimeRemaining(signal)}
                     </span>
                   </div>
-                  {signal.confidence && (
-                    
-                  )}
-                </div>
+                                  </div>
 
                 {/* Posted time */}
                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
