@@ -38,16 +38,17 @@ export const WELTRADE_CATEGORY_LABEL: Record<WeltradeCategory, string> = {
 /**
  * Weltrade instrument catalogue.
  *
- * - SyntX indices (GainX / PainX / FlipX / SwitchX / FX VOL) are proprietary to
- *   Weltrade. The primary BOTVIO source is the user's connected Weltrade SyntX
- *   MT5 DEMO through API Studio; the Bridge EA remains an available fallback.
- * - Majors (FX, metals, indices, crypto, commodities) trade the same underlying
- *   markets, streamed live from Deriv's public feed and labelled as a reference
- *   feed. No prices are ever simulated.
+ * - SyntX indices use the connected TradeCopy / MT5 API Studio market-data
+ *   connection. This is the primary Botvio feed for Weltrade SyntX charts,
+ *   indicators and signal analysis.
+ * - The legacy Bridge EA path remains available for compatibility but is not
+ *   the primary Weltrade market-data source.
+ * - Majors (FX, metals, indices, crypto, commodities) use Deriv as a clearly
+ *   labelled reference feed. No prices are simulated.
  */
 export const WELTRADE_INSTRUMENTS: WeltradeInstrument[] = [
-  // ── SyntX (Bridge EA only) ─────────────────────────────────────────────
-  { key: "gainx-400", label: "GainX 400", mt5Symbol: "GainX 400", category: "syntx", syntxFamily: "gainx", source: "weltrade-bridge", feedSymbol: "GainX 400", decimals: 3, bias: "sell", blurb: "Directional decline with adverse upward-jump risk." },
+  // ── SyntX (TradeCopy / MT5 API Studio) ─────────────────────────────────
+  { key: "gainx-400", label: "GainX 400", mt5Symbol: "GainX 400", category: "syntx", syntxFamily: "gainx", source: "weltrade-api-studio", feedSymbol: "GainX 400", decimals: 3, bias: "sell", blurb: "Directional decline with adverse upward-jump risk." },
   { key: "gainx-600", label: "GainX 600", mt5Symbol: "GainX 600", category: "syntx", syntxFamily: "gainx", source: "weltrade-bridge", feedSymbol: "GainX 600", decimals: 3, bias: "sell", blurb: "GainX directional framework; jump risk remains." },
   { key: "gainx-800", label: "GainX 800", mt5Symbol: "GainX 800", category: "syntx", syntxFamily: "gainx", source: "weltrade-bridge", feedSymbol: "GainX 800", decimals: 3, bias: "sell", blurb: "GainX directional framework; jump risk remains." },
   { key: "painx-400", label: "PainX 400", mt5Symbol: "PainX 400", category: "syntx", syntxFamily: "painx", source: "weltrade-bridge", feedSymbol: "PainX 400", decimals: 3, bias: "buy", blurb: "Directional rise with adverse downward-drop risk." },
