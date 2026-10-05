@@ -6575,6 +6575,9 @@ export type Database = {
           account_role: string | null
           api_key_encrypted: string
           api_secret_encrypted: string | null
+          botvio_signal_master_enabled: boolean
+          botvio_signal_master_lot: number
+          botvio_signal_min_confidence: number
           broker: string
           connection_status: string | null
           connection_type: string | null
@@ -6614,6 +6617,9 @@ export type Database = {
           account_role?: string | null
           api_key_encrypted: string
           api_secret_encrypted?: string | null
+          botvio_signal_master_enabled?: boolean
+          botvio_signal_master_lot?: number
+          botvio_signal_min_confidence?: number
           broker: string
           connection_status?: string | null
           connection_type?: string | null
@@ -6653,6 +6659,9 @@ export type Database = {
           account_role?: string | null
           api_key_encrypted?: string
           api_secret_encrypted?: string | null
+          botvio_signal_master_enabled?: boolean
+          botvio_signal_master_lot?: number
+          botvio_signal_min_confidence?: number
           broker?: string
           connection_status?: string | null
           connection_type?: string | null
