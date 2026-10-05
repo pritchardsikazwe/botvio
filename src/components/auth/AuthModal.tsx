@@ -10,7 +10,6 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { lovable } from "@/integrations/lovable/index";
 
 interface AuthModalProps {
   open: boolean;
@@ -28,8 +27,9 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + "/oauth/callback" },
       });
       if (error) {
         toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
@@ -44,9 +44,12 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email.trim(), password);
     if (error) {
-      toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
+      const message = error.message?.toLowerCase().includes("invalid login credentials")
+        ? "The email or password is incorrect. If this is an older Botvio account, please use Sign Up or Continue with Google on the current Botvio account system."
+        : error.message;
+      toast({ title: "Sign in failed", description: message, variant: "destructive" });
     } else {
       toast({ title: "Welcome back!", description: "You have been signed in successfully." });
       onOpenChange(false);
