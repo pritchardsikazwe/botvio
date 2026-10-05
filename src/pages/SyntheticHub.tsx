@@ -14,7 +14,7 @@ import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { MultiAssetScalpRobot } from "@/components/chart/MultiAssetScalpRobot";
+import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 import { fetchActiveSymbols, getSymbolCapability, type SymbolCapability } from "@/services/deriv/derivSymbols";
 import { TradingHubSignalHorizons } from "@/components/signals/TradingHubSignalHorizons";
 
@@ -236,19 +236,12 @@ export default function SyntheticHub() {
         {/* MT5 auto-execute setup */}
         <Mt5AutoExecuteCard />
 
-        {/* Botvio Scalp Robot — auto signals with Entry / SL / TP */}
-        <MultiAssetScalpRobot
-          title="Botvio Scalp Robot · Synthetics"
-          assets={[
-            { displaySymbol: "R_75", label: "Vol 75", emoji: "📈", cryptoAlwaysOpen: true },
-            { displaySymbol: "R_100", label: "Vol 100", emoji: "📊", cryptoAlwaysOpen: true },
-            { displaySymbol: "R_50", label: "Vol 50", emoji: "📉", cryptoAlwaysOpen: true },
-            { displaySymbol: "BOOM500", label: "Boom 500", emoji: "🚀", cryptoAlwaysOpen: true },
-            { displaySymbol: "BOOM1000", label: "Boom 1000", emoji: "🚀", cryptoAlwaysOpen: true },
-            { displaySymbol: "CRASH500", label: "Crash 500", emoji: "💥", cryptoAlwaysOpen: true },
-            { displaySymbol: "CRASH1000", label: "Crash 1000", emoji: "💥", cryptoAlwaysOpen: true },
-            { displaySymbol: "stpRNG", label: "Step Index", emoji: "🪜", cryptoAlwaysOpen: true },
-          ]}
+        {/* Current Synthetic Robot workflow. Signal generation remains in the hub engine above. */}
+        <BotvioRobotPromo
+          compact
+          productName="Synthetic Robot"
+          marketFocus="Deriv synthetic indices"
+          description="Use the current Synthetic Robot workflow for Boom, Crash, Volatility and Step markets with AI setups, structured risk levels and supported MT5/Deriv execution controls."
         />
 
 
