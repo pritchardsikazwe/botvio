@@ -45,7 +45,8 @@ const platforms: { id: Platform; label: string; icon: any }[] = [
 
 const statusVariant = (status: PostStatus) => status === "published" ? "default" : status === "failed" ? "destructive" : "secondary";
 
-export default function AdminSocialWorker() {\n  const db = supabase as any;
+export default function AdminSocialWorker() {
+  const db = supabase as any;
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
