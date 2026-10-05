@@ -619,6 +619,9 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
 
     case "remove_account": {
       const accountId = String(body.account_id ?? "");
+      if (!/^[0-9a-f-]{36}$/i.test(accountId)) throw new TradeCopyError("Invalid account id", "validation");
+      const { data: exists } = await admin.from("trading_accounts").select("id").eq("id", accountId).maybeSingle();
+      if (!exists) return { data: { removed: true, alreadyRemoved: true }, accountId };
       const acct = await loadAccount(ctx, accountId, { allowAdmin: true });
       if (acct.tradecopy_active) {
         throw new TradeCopyError("Deactivate copying before removing this MT5 account", "validation");
