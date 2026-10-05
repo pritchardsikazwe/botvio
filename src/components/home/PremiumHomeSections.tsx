@@ -20,6 +20,7 @@ import {
   Quote,
 } from "lucide-react";
 import { blogContent } from "@/content/blogPosts";
+import { BotvioPricing } from "@/components/home/BotvioPricing";
 
 /**
  * Premium editorial home sections (Phase 1 of the AdSense/Helpful-Content
@@ -457,6 +458,7 @@ export function PremiumHomeSections() {
       <MarketOverview />
       <HomeEducation />
       <FeaturedBrokers />
+      <BotvioPricing />
       <LatestArticles />
       <HomeTestimonials />
       <HomeFAQ />
