@@ -47,7 +47,7 @@ const GoldTradingHub = () => {
           action={
             <>
               <Badge className="border-primary/30 bg-primary/20 font-mono text-xs text-primary">XAUUSD</Badge>
-              <Badge variant="outline" className="border-success/40 text-xs text-success">Market Open</Badge>
+              <Badge variant="outline" className="border-success/40 text-xs text-success">LIVE XAUUSD</Badge>
               <Badge variant="outline" className="border-warning/30 text-xs text-warning">Botvio AI Strategies Live</Badge>
             </>
           }
