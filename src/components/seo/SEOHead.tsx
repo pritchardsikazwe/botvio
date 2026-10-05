@@ -94,6 +94,19 @@ export const SEOHead = ({
         name: siteName,
         url: baseUrl,
         inLanguage: lang,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${baseUrl}/blog?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Botvio",
+        url: baseUrl,
+        applicationCategory: "FinanceApplication",
+        operatingSystem: "Web",
+        description: "AI-focused trading platform providing market research, trading signals, chart analysis, automated strategies and copy-trading workflows.",
       },
     ],
   };
