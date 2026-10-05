@@ -86,6 +86,7 @@ import SaudiTradingGuide from "./pages/SaudiTradingGuide";
 import SaudiArabicTradingGuide from "./pages/SaudiArabicTradingGuide";
 import SaudiArabicBlogPost from "./pages/SaudiArabicBlogPost";
 import LocalizedNativeArticle from "./pages/LocalizedNativeArticle";
+import AITradingAnswers from "./pages/AITradingAnswers";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -447,6 +448,9 @@ export const AppRoutes = () => {
     <Route path="press" element={<Press />} />
     <Route path="case-studies" element={<CaseStudies />} />
     <Route path="authority-signals" element={<AuthoritySignals />} />
+
+    <Route path="ai-trading" element={<AITradingAnswers />} />
+    <Route path="ai-trading/:slug" element={<AITradingAnswers />} />
 
     {/* SEO Answer Pages */}
     <Route path="what-is-botvio" element={<SEOAnswerPage />} />
