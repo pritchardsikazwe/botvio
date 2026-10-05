@@ -84,14 +84,8 @@ const Dashboard = () => {
               <Bot className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
-              {botsLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                <div className="text-xl font-bold">{activeBots}</div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                of {botInstances?.length || 0} total instances
-              </p>
+              <div className="text-xl font-bold">{activeRobots}</div>
+              <p className="text-xs text-muted-foreground">current robot entitlements</p>
             </CardContent>
           </Card>
 
@@ -121,9 +115,7 @@ const Dashboard = () => {
               ) : (
                 <div className="text-xl font-bold">{connectedAccounts}</div>
               )}
-              <p className="text-xs text-muted-foreground">
-                Deriv & Binance
-              </p>
+              <p className="text-xs text-muted-foreground">{connectedBrokerNames}</p>
             </CardContent>
           </Card>
 
@@ -145,16 +137,16 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Current Plan */}
+        {/* Current Botvio Access */}
         <Card className="glass-card mb-4">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Current Plan</CardTitle>
-                <CardDescription>Your subscription details</CardDescription>
+                <CardTitle>Current Botvio Access</CardTitle>
+                <CardDescription>Your active Store products</CardDescription>
               </div>
               <Button variant="outline" asChild>
-                <Link to="/billing">Upgrade Plan</Link>
+                <Link to="/marketplace">Open Botvio Store</Link>
               </Button>
             </div>
           </CardHeader>
@@ -178,12 +170,12 @@ const Dashboard = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Bot Instances</CardTitle>
+                  <CardTitle>Legacy Bot Instances</CardTitle>
                   <CardDescription>Your current bot instances</CardDescription>
                 </div>
                 <Button size="sm" asChild>
                   <Link to="/bots">
-                    View All <ArrowRight className="ml-2 h-4 w-4" />
+                    View Robots <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
