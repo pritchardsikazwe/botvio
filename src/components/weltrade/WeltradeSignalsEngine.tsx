@@ -20,7 +20,7 @@ import {
   RefreshCw,
   Target,
 } from "lucide-react";
-import { TradingChart } from "@/components/chart/TradingChart";
+import { BrokerCandleChart } from "@/components/chart/BrokerCandleChart";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
@@ -362,7 +362,7 @@ export const WeltradeSignalsEngine = () => {
         </Card>
 
         <div className="min-w-0">
-          <TradingChart
+          <BrokerCandleChart
             candles={candles}
             indicators={indicators}
             status={status}
@@ -377,12 +377,8 @@ export const WeltradeSignalsEngine = () => {
             decimals={instrument.decimals}
             signals={signals}
             activeSignal={activeSignal}
-            focusSignal={focusSignal}
             showHauza
             unavailableMessage={bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
-            errorDetail={bridgeOffline
-              ? diagnostics.lastError ?? (instrument.label + " is a proprietary Weltrade index. Its live prices come from your own MT5 terminal via the BOTVIO Bridge EA — start the EA to stream this chart. No prices are ever simulated.")
-              : diagnostics.lastError}
           />
         </div>
       </div>
