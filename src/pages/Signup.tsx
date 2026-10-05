@@ -9,8 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, Mail, Lock, User, Globe, Phone, Crown, Zap, Star, Gift, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { lovable } from "@/integrations/lovable/index";
 
 const PLANS = [
   { code: "free", name: "Free Trial", price: "$0/mo", icon: Gift, description: "5 chart analyses/day" },
@@ -24,7 +24,7 @@ export default function Signup() {
   const { signUp } = useAuth(); const navigate = useNavigate();
   const [loading,setLoading]=useState(false), [googleLoading,setGoogleLoading]=useState(false), [email,setEmail]=useState(""), [password,setPassword]=useState(""), [displayName,setDisplayName]=useState(""), [country,setCountry]=useState(""), [whatsapp,setWhatsapp]=useState(""), [selectedPlan,setSelectedPlan]=useState("free");
   const submit=async(e:React.FormEvent)=>{ e.preventDefault(); if(!displayName.trim()||!whatsapp.trim()){toast({title:"Complete your profile",description:"Full name and WhatsApp number are required.",variant:"destructive"});return;} setLoading(true); const {error}=await signUp(email,password,country,whatsapp,selectedPlan,displayName.trim()); if(error) toast({title:"Sign up failed",description:error.message,variant:"destructive"}); else {toast({title:"Account created!",description:"Please check your email to verify your account."});navigate("/dashboard");} setLoading(false); };
-  const google=async()=>{setGoogleLoading(true);try{const {error}=await lovable.auth.signInWithOAuth("google",{redirect_uri:window.location.origin});if(error)toast({title:"Google sign-up failed",description:error.message,variant:"destructive"});}catch(err:any){toast({title:"Google sign-up failed",description:err?.message||"Unknown error",variant:"destructive"});}finally{setGoogleLoading(false);}};
+  const google=async()=>{setGoogleLoading(true);try{const {error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+"/"}});if(error)toast({title:"Google sign-up failed",description:error.message,variant:"destructive"});}catch(err:any){toast({title:"Google sign-up failed",description:err?.message||"Unknown error",variant:"destructive"});}finally{setGoogleLoading(false);}};
   return <div className="min-h-screen bg-background"><Header/><main className="container mx-auto max-w-3xl px-4 py-8"><div className="mb-8 text-center"><div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><User className="h-6 w-6"/></div><h1 className="text-3xl font-bold">Create your Botvio account</h1><p className="mt-2 text-muted-foreground">Set up your account once, then manage trading, signals, copy trading and billing from your workspace.</p></div>
     <Card className="mx-auto max-w-2xl border-border/60 shadow-sm"><CardHeader><CardTitle>Sign Up</CardTitle><CardDescription>Your account is created on this page — no popup.</CardDescription></CardHeader><CardContent>
       <Button type="button" variant="outline" className="mb-6 w-full" onClick={google} disabled={googleLoading}>{googleLoading?<Loader2 className="mr-2 h-4 w-4 animate-spin"/>:<span className="mr-2 font-bold">G</span>} Continue with Google</Button>
