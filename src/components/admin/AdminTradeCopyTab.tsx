@@ -128,6 +128,17 @@ export const AdminTradeCopyTab = () => {
     { label: "Errors", value: rows.filter((r) => r.last_direct_error || r.connection_status === "error").length, icon: AlertTriangle },
   ];
 
+  const promoteExistingMaster = (r: Row) => {
+    if (r.account_role === "master") return;
+    const broker = (r.broker ?? "").trim().toLowerCase();
+    if (broker !== "weltrade" || r.tradecopy_user_id) return;
+    const ok = window.confirm(
+      `Promote the existing Weltrade MT5 account ${r.login_id || "unknown"} on ${r.server || "unknown server"} to Provider Master? Botvio will reuse the existing account and encrypted credentials; it will not create a duplicate account. It will remain DEMO and inactive until tested/activated.`
+    );
+    if (!ok) return;
+    act.mutate(() => tradecopy("promote_existing_master", { account_id: r.id }));
+  };
+
   const toggleDirect = (r: Row) => act.mutate(() => directAction("admin_set", { account_id: r.id, enabled: !r.direct_signal_enabled }));
   const toggleMaster = (r: Row) => act.mutate(() => tradecopy("set_master_active", { account_id: r.id, active: !r.tradecopy_active }));
   const toggleSignalMaster = (r: Row) => act.mutate(() => tradecopy("set_signal_master", {
@@ -221,6 +232,11 @@ export const AdminTradeCopyTab = () => {
                       <TableCell className="text-xs text-muted-foreground">{ago(r.last_direct_execution_at || r.updated_at)}</TableCell>
                       <TableCell><div className="flex flex-wrap justify-end gap-1.5">
                         <Button size="sm" variant="outline" onClick={() => setSelected(r)}><Eye className="mr-1 h-4 w-4" />View</Button>
+                        {r.account_role === "slave" && !r.tradecopy_user_id && (r.broker ?? "").toLowerCase() === "weltrade" && (
+                          <Button size="sm" variant="default" disabled={act.isPending} onClick={() => promoteExistingMaster(r)}>
+                            <Crown className="mr-1 h-4 w-4" />Promote to Provider Master
+                          </Button>
+                        )}
                         {!r.is_botvio_robot && r.account_role !== "master" && (
                           <Button size="sm" variant={r.direct_signal_enabled ? "outline" : "default"} disabled={act.isPending} onClick={() => toggleDirect(r)}>
                             <Send className="mr-1 h-4 w-4" />{r.direct_signal_enabled ? "Disable Direct" : "Enable Direct"}
