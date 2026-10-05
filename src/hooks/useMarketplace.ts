@@ -53,11 +53,13 @@ export function usePurchaseProduct() {
       paymentMethod,
       proofUrl,
       affiliateCode,
+      accountId,
     }: {
       product: MarketplaceProduct;
       paymentMethod: string;
       proofUrl?: string;
       affiliateCode?: string;
+      accountId?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
 
@@ -99,6 +101,9 @@ export function usePurchaseProduct() {
             amount_usd: product.price_usd,
             method: paymentMethod,
             proof_upload_url: proofUrl,
+            product_id: product.id,
+            order_id: order.id,
+            account_id: accountId || null,
           });
 
         if (prError) throw prError;
