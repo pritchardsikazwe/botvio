@@ -270,9 +270,9 @@ export const AppRoutes = () => {
     <Route path="provider-dashboard" element={<ProviderCommandCenter />} />
     <Route path="botvio-robot" element={<BotvioRobotDashboard />} />
     <Route path="bots" element={<Paid><Bots /></Paid>} />
-    <Route path="billing" element={<Billing />} />
+    <Route path="billing" element={<Navigate to="/marketplace" replace />} />
     <Route path="signup" element={<Signup />} />
-    <Route path="payment" element={<Payment />} />
+    <Route path="payment" element={<Navigate to="/marketplace" replace />} />
 
     {/* Admin */}
     <Route path="admin/login" element={<ErrorBoundary><AdminLogin /></ErrorBoundary>} />
@@ -299,8 +299,8 @@ export const AppRoutes = () => {
     <Route path="settings/binance" element={<BinanceSettings />} />
     <Route path="settings/deriv-otp" element={<ErrorBoundary><RequireSuperAdmin><DerivOtpTester /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="binance" element={<Paid><BinanceHub /></Paid>} />
-    <Route path="bots/binance" element={<Paid><BinanceBots /></Paid>} />
-    <Route path="bots/binance/:id" element={<Paid><BinanceBotDetail /></Paid>} />
+    <Route path="bots/binance" element={<Navigate to="/binance" replace />} />
+    <Route path="bots/binance/:id" element={<Navigate to="/binance" replace />} />
     <Route path="terms" element={<Terms />} />
     <Route path="privacy" element={<Privacy />} />
     <Route path="about" element={<About />} />
@@ -480,7 +480,7 @@ export const AppRoutes = () => {
     ))}
 
     <Route path="signals/:pair" element={<Paid><SignalPairPage /></Paid>} />
-    <Route path="bots/:botSlug" element={<Paid><BotDetailPage /></Paid>} />
+    <Route path="bots/:botSlug" element={<Navigate to="/bots" replace />} />
 
     {countryTrafficSlugs.flatMap((c) => [
       <Route key={`forex-${c.slug}`} path={`forex-trading-${c.slug}`} element={<CountryTrafficPage />} />,
