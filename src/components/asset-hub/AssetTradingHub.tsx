@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { TradingViewAdvancedChart } from "@/components/chart/TradingViewAdvancedChart";
 import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
-import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
+import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 import { SessionsPanel } from "@/components/chart/SessionsPanel";
 import { NewsEventsCard } from "@/components/chart/NewsEventsCard";
 import { AssetSignalButton } from "./AssetSignalButton";
@@ -270,15 +270,27 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
 
           {/* AI Analysis */}
           <TabsContent value="ai" className="mt-6 space-y-4">
-            {config.chartProvider !== "tradingview" && (
-              <BotvioScalpRobot displaySymbol={config.displaySymbol} assetLabel={config.assetLabel} />
-            )}
+            <BotvioRobotPromo
+              compact
+              productName={config.assetLabel}
+              marketFocus={config.assetLabel}
+              description={`Use the current Botvio Robot workflow for ${config.assetLabel}: AI setups, structured entry/SL/TP levels, supported automation and execution controls.`}
+            />
 
             {config.siblingScalp && (
-              <BotvioScalpRobot
-                displaySymbol={config.siblingScalp.displaySymbol}
-                assetLabel={config.siblingScalp.assetLabel}
-              />
+              <Card className="border-border/50 bg-card">
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Related market</p>
+                    <p className="text-xs text-muted-foreground">
+                      {config.siblingScalp.assetLabel} remains available as a separate trading hub.
+                    </p>
+                  </div>
+                  <Link to={`/chart/${config.siblingScalp.displaySymbol.replace("/", "")}`}>
+                    <Button variant="outline" className="text-xs font-bold">Open {config.siblingScalp.assetLabel}</Button>
+                  </Link>
+                </CardContent>
+              </Card>
             )}
 
             <Card className="border-primary/20 bg-card">
