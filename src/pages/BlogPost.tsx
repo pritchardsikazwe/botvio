@@ -21,6 +21,7 @@ import { DUBAI_ARTICLE_SUPPLEMENTS } from "@/content/dubaiArticleSupplements";
 import { DUBAI_EXPANDED_POSTS } from "@/content/dubaiExpandedPosts";
 import { DUBAI_FINAL_POSTS } from "@/content/dubaiFinalPosts";
 import { DUBAI_GOLD_COPY_POSTS } from "@/content/dubaiGoldCopyPosts";
+import { COUNTRY_EXPANDED_POSTS } from "@/content/botswanaNigeriaPosts";
 import { DUBAI_ARABIC_POSTS } from "@/content/dubaiArabicPosts";
 import { SAUDI_POSTS } from "@/content/saudiPosts";
 import { LOCALIZED_DEEP_POSTS } from "@/content/localizedDeepPosts";
@@ -156,7 +157,7 @@ const BlogPost = () => {
     enabled: !!slug,
   });
 
-  const staticPost = blogContent[slug || ""] || binanceBlogPosts[slug || ""] || dubaiBlogPosts[slug || ""] || DUBAI_EXPANDED_POSTS[slug || ""] || DUBAI_FINAL_POSTS[slug || ""] || DUBAI_GOLD_COPY_POSTS[slug || ""] || SAUDI_POSTS[slug || ""] || LOCALIZED_DEEP_POSTS[slug || ""];
+  const staticPost = COUNTRY_EXPANDED_POSTS[slug || ""] || blogContent[slug || ""] || binanceBlogPosts[slug || ""] || dubaiBlogPosts[slug || ""] || DUBAI_EXPANDED_POSTS[slug || ""] || DUBAI_FINAL_POSTS[slug || ""] || DUBAI_GOLD_COPY_POSTS[slug || ""] || SAUDI_POSTS[slug || ""] || LOCALIZED_DEEP_POSTS[slug || ""];
   const post = dbPost
     ? {
         title: dbPost.title,
