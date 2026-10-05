@@ -97,6 +97,9 @@ export default function DerivCallbackPage() {
         // without sending the user back to Trading Connections.
         const preferredType = sessionStorage.getItem("deriv_preferred_account_type");
         const accounts = Array.isArray(data.accounts) ? data.accounts : [];
+        const preferred = accounts.find((a: any) =>
+          preferredType === "demo" ? !!a.is_virtual : preferredType === "real" ? !a.is_virtual : !!a.is_virtual
+        ) || accounts[0];
         if (user && data.token && accounts.length > 0) {
           await supabase
             .from("user_deriv_tokens" as any)
@@ -104,9 +107,6 @@ export default function DerivCallbackPage() {
             .eq("user_id", user.id)
             .eq("is_active", true);
 
-          const preferred = accounts.find((a: any) =>
-            preferredType === "demo" ? !!a.is_virtual : preferredType === "real" ? !a.is_virtual : !!a.is_virtual
-          ) || accounts[0];
 
           for (const account of accounts) {
             await supabase
