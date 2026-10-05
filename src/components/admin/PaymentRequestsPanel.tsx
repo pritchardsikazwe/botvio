@@ -11,6 +11,9 @@ type PaymentRequest = {
   id: string;
   user_id: string;
   plan_id: string | null;
+  product_id: string | null;
+  order_id: string | null;
+  account_id: string | null;
   amount_usd: number;
   currency: string;
   method: string;
