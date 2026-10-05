@@ -1,425 +1,149 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useMarketplaceProducts, usePurchaseProduct, MarketplaceProduct } from "@/hooks/useMarketplace";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { Header } from "@/components/trading/Header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentMethodSelector } from "@/components/billing/PaymentMethodSelector";
-import { StoreSubscriptionPaywall } from "@/components/billing/StoreSubscriptionPaywall";
-import { 
-  Bot, GraduationCap, ShoppingCart, Check, Crown, 
-  Package, Star, Zap, Lock, Upload
-} from "lucide-react";
+import { Activity, ArrowRight, Check, Crown, ExternalLink, Lock, Radio, Rocket, ShoppingCart, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 
-const PRODUCT_TABS = [
-  { value: "all", label: "All", icon: Package },
-  { value: "course", label: "Courses", icon: GraduationCap },
-  { value: "strategy", label: "Strategies", icon: Zap },
-  { value: "bot", label: "Bots", icon: Bot },
-];
+const PRODUCT_ORDER = ["mt5-direct", "gold-robot", "synthetic-robot", "synthetic-hub", "weltrade-hub"];
 
-// Sort priority: course first, then strategy, bot
-const TYPE_ORDER: Record<string, number> = {
-  course: 0,
-  strategy: 1,
-  bot: 2,
-};
-
-const TYPE_COLORS: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
-  course: {
-    bg: "bg-blue-500/15",
-    text: "text-blue-400",
-    border: "border-blue-500/40",
-    gradient: "from-blue-500/20 to-indigo-500/10",
-  },
-  strategy: {
-    bg: "bg-violet-500/15",
-    text: "text-violet-400",
-    border: "border-violet-500/40",
-    gradient: "from-violet-500/20 to-purple-500/10",
-  },
-  bot: {
-    bg: "bg-amber-500/15",
-    text: "text-amber-400",
-    border: "border-amber-500/40",
-    gradient: "from-amber-500/20 to-orange-500/10",
-  },
+const PRODUCT_CONFIG: Record<string, { category: string; tagline: string; description: string; features: string[]; icon: typeof Crown; accent: string; route?: string }> = {
+  "mt5-direct": { category: "MT5 EXECUTION", tagline: "Send Botvio signals directly to your own MT5.", description: "Connect an MT5 account, subscribe, and receive Botvio signals directly on that account. LIVE execution stays behind a confirmation gate.", features: ["Use your own MT5 account", "DEMO or LIVE with safety controls", "Direct Botvio signal delivery"], icon: Activity, accent: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10" },
+  "gold-robot": { category: "AUTOMATION", tagline: "Automated Gold trading with Botvio.", description: "A Botvio trading robot built for Gold workflows and MT5 execution.", features: ["MT5 automation", "Botvio Gold strategy", "Risk controls before LIVE"], icon: Crown, accent: "text-amber-400 border-amber-500/30 bg-amber-500/10" },
+  "synthetic-robot": { category: "AUTOMATION", tagline: "Automated Synthetic Index trading.", description: "Botvio automation for supported synthetic-index workflows and MT5 execution.", features: ["Synthetic Index automation", "MT5 execution workflow", "Risk controls before LIVE"], icon: Rocket, accent: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
+  "synthetic-hub": { category: "MARKET HUB", tagline: "Live Synthetic Index signals, charts and analysis.", description: "Access the Botvio Synthetic Hub for verified Deriv synthetic markets, live charts, signals and trading intelligence.", features: ["Boom, Crash, Volatility & Step", "Live charts and signals", "Send signals to MT5"], icon: Zap, accent: "text-violet-400 border-violet-500/30 bg-violet-500/10", route: "/synthetic-hub" },
+  "weltrade-hub": { category: "MARKET HUB", tagline: "Weltrade SyntX charts, signals and analysis.", description: "Access the Botvio Weltrade Hub for SyntX market intelligence, charts, signals and MT5 workflows.", features: ["SyntX market coverage", "Charts and signals", "MT5 workflow support"], icon: Activity, accent: "text-orange-400 border-orange-500/30 bg-orange-500/10", route: "/weltrade" },
 };
 
 const Marketplace = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState("all");
-  const { data: products, isLoading } = useMarketplaceProducts(activeTab === "all" ? undefined : activeTab);
+  const { data: products, isLoading } = useMarketplaceProducts();
   const { data: entitlements } = useEntitlements();
   const purchaseMutation = usePurchaseProduct();
-
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
   const accountId = searchParams.get("account_id") || undefined;
 
-  const isOwned = (productId: string) =>
-    entitlements?.some((e) => e.product_id === productId && e.status === "active") ?? false;
+  const visibleProducts = useMemo(() => {
+    if (!products) return [];
+    return products.filter((p) => PRODUCT_ORDER.includes(p.slug)).sort((a, b) => PRODUCT_ORDER.indexOf(a.slug) - PRODUCT_ORDER.indexOf(b.slug));
+  }, [products]);
 
-  // Sort products by type priority then featured, exclude signal_packs
-  const sortedProducts = products
-    ? [...products]
-        .filter((p) => p.type !== "signal_pack")
-        .sort((a, b) => {
-          const aOrder = TYPE_ORDER[a.type] ?? 99;
-          const bOrder = TYPE_ORDER[b.type] ?? 99;
-          if (aOrder !== bOrder) return aOrder - bOrder;
-          if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
-          return 0;
-        })
-    : [];
+  const isOwned = (productId: string) => entitlements?.some((e) => e.product_id === productId && e.status === "active" && (!e.ends_at || new Date(e.ends_at).getTime() > Date.now())) ?? false;
 
   useEffect(() => {
     const slug = searchParams.get("product");
-    if (!slug || !products?.length) return;
-    const target = products.find((p) => p.slug === slug);
+    if (!slug) return;
+    const target = visibleProducts.find((p) => p.slug === slug);
     if (target) {
       setSelectedProduct(target);
       if (target.price_usd > 0 && user) setShowCheckout(true);
     }
-  }, [searchParams, products, user]);
+  }, [searchParams, visibleProducts, user]);
 
   const handleBuy = (product: MarketplaceProduct) => {
-    if (!user) {
-      toast.error("Please sign in to purchase");
-      return;
-    }
-    if (isOwned(product.id)) {
-      toast.info("You already own this product");
-      return;
-    }
-    if (product.price_usd === 0) {
-      purchaseMutation.mutate({ product, paymentMethod: "free" });
-      return;
-    }
+    if (!user) { toast.error("Please sign in to continue"); return; }
+    if (isOwned(product.id)) { toast.info("This access is already active"); return; }
+    if (product.price_usd === 0) { purchaseMutation.mutate({ product, paymentMethod: "free", accountId }); return; }
     setSelectedProduct(product);
     setShowCheckout(true);
   };
 
+  const handleOpen = (product: MarketplaceProduct) => {
+    const route = PRODUCT_CONFIG[product.slug]?.route;
+    if (route) window.location.href = route;
+    else toast.info("Your access is active. Open your MT5 or Robot controls from your dashboard.");
+  };
+
   const handleCheckout = async () => {
-    if (!selectedProduct || !paymentMethod) {
-      toast.error("Please select a payment method");
-      return;
-    }
-    if (!proofFile) {
-      toast.error("Please attach your payment proof screenshot");
-      return;
-    }
-
-    // Upload proof
-    let proofUrl: string | undefined;
-    if (user && proofFile) {
-      const ext = proofFile.name.split(".").pop();
-      const path = `proofs/${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from("charts")
-        .upload(path, proofFile);
-      if (!uploadErr) {
-        const { data: urlData } = supabase.storage.from("charts").getPublicUrl(path);
-        proofUrl = urlData.publicUrl;
-      }
-    }
-
+    if (!selectedProduct || !paymentMethod || !user) { toast.error("Select a payment method"); return; }
+    if (!proofFile) { toast.error("Attach your payment proof screenshot"); return; }
+    const ext = proofFile.name.split(".").pop() || "png";
+    const path = "proofs/" + user.id + "/" + Date.now() + "." + ext;
+    const { error: uploadErr } = await supabase.storage.from("charts").upload(path, proofFile);
+    if (uploadErr) { toast.error("Payment proof upload failed"); return; }
+    const { data: urlData } = supabase.storage.from("charts").getPublicUrl(path);
     const storedRef = localStorage.getItem("botvio_referral");
     let affiliateCode: string | undefined;
-    if (storedRef) {
-      try {
-        const parsed = JSON.parse(storedRef);
-        if (parsed.expiresAt > Date.now()) {
-          affiliateCode = parsed.code;
-        }
-      } catch {}
-    }
-
-    purchaseMutation.mutate({
-      product: selectedProduct,
-      paymentMethod,
-      proofUrl,
-      affiliateCode,
-      accountId,
-    });
-    setShowCheckout(false);
-    setSelectedProduct(null);
-    setPaymentMethod("");
-    setProofFile(null);
+    if (storedRef) { try { const parsed = JSON.parse(storedRef); if (parsed.expiresAt > Date.now()) affiliateCode = parsed.code; } catch {} }
+    purchaseMutation.mutate({ product: selectedProduct, paymentMethod, proofUrl: urlData.publicUrl, affiliateCode, accountId });
+    setShowCheckout(false); setSelectedProduct(null); setPaymentMethod(""); setProofFile(null);
   };
-
-  const getProductIcon = (type: string) => {
-    switch (type) {
-      case "bot": return <Bot className="h-6 w-6" />;
-      case "course": return <GraduationCap className="h-6 w-6" />;
-      case "strategy": return <Zap className="h-6 w-6" />;
-      default: return <Package className="h-6 w-6" />;
-    }
-  };
-
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case "bot": return "Trading Bot";
-      case "course": return "Course";
-      case "strategy": return "Strategy";
-      default: return type;
-    }
-  };
-
-  const colors = (type: string) => TYPE_COLORS[type] || TYPE_COLORS.bot;
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead seoKey="marketplace" title="Marketplace — Trading Bots, Courses & Strategies" description="Browse and purchase premium trading bots, strategy templates, and forex mentorship courses. Find tools for gold scalping, Deriv automation, Exness copy trading, and crypto strategies." />
+      <SEOHead seoKey="marketplace" title="Botvio Store — MT5 Signals, Trading Robots & Market Hubs" description="Choose Botvio MT5 direct signals, trading robots, Synthetic Hub or Weltrade Hub. Subscribe only to the tools you need." />
       <Header />
-
-      <main className="container mx-auto px-4 py-6">
-        <StoreSubscriptionPaywall />
-        {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-warning/10 p-8 md:p-12 mb-8">
-          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-warning/5 blur-3xl" />
-          <div className="relative z-10 text-center">
-            <Badge variant="outline" className="mb-4 border-primary/40 text-primary bg-primary/10 px-4 py-1">
-              <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
-              Botvio Marketplace
-            </Badge>
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
-              Trading Tools & Education
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Subscribe to signals, access premium courses, and supercharge your trading with bots & strategies.
-            </p>
-          </div>
-        </div>
-
-        {/* Product Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto h-12 bg-muted/50 border border-border/50 rounded-xl p-1">
-            {PRODUCT_TABS.map((tab) => {
-              const Icon = tab.icon;
-              const c = colors(tab.value);
-              return (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="flex items-center gap-1.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">{tab.label}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        </Tabs>
-
-        {/* Products Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-80 rounded-xl" />
-            ))}
-          </div>
-        ) : sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedProducts.map((product) => {
-              const owned = isOwned(product.id);
-              const c = colors(product.type);
-              return (
-                <Card
-                  key={product.id}
-                  className={`group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg border ${c.border} bg-gradient-to-br ${c.gradient} ${
-                    product.is_featured ? "ring-2 ring-warning/40 shadow-warning/10 shadow-lg" : ""
-                  }`}
-                >
-                  {product.is_featured && (
-                    <div className="bg-gradient-to-r from-warning to-amber-500 text-white text-xs px-3 py-1.5 text-center font-semibold tracking-wide">
-                      ⭐ Featured Product
-                    </div>
-                  )}
-
-                  {product.cover_image_url && (
-                    <div className="h-44 bg-muted overflow-hidden">
-                      <img
-                        src={product.cover_image_url}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
-
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-11 h-11 rounded-xl ${c.bg} flex items-center justify-center ${c.text} ring-1 ring-white/10`}>
-                          {getProductIcon(product.type)}
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg leading-tight">{product.name}</CardTitle>
-                          <Badge variant="outline" className={`text-xs capitalize mt-1.5 ${c.border} ${c.text} bg-transparent`}>
-                            {getTypeLabel(product.type)}
-                          </Badge>
-                        </div>
-                      </div>
-                      {owned && (
-                        <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          <Check className="h-3 w-3 mr-1" />
-                          Owned
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-
-                  <CardContent>
-                    {product.short_description && (
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                        {product.short_description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <span className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                          {product.price_usd === 0 ? "Free" : `$${product.price_usd}`}
-                        </span>
-                        {product.billing_type === "recurring" && product.price_usd > 0 && (
-                          <span className="text-sm text-muted-foreground ml-0.5">
-                            /{product.billing_interval || "month"}
-                          </span>
-                        )}
-                      </div>
-                      {product.billing_type === "one_time" && product.price_usd > 0 && (
-                        <Badge variant="secondary" className="text-xs">One-time</Badge>
-                      )}
-                    </div>
-
-                    {owned ? (
-                      <Button className="w-full border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" variant="outline">
-                        <Check className="h-4 w-4 mr-2" />
-                        Open
-                      </Button>
-                    ) : (
-                      <Button
-                        className={`w-full font-semibold transition-all ${
-                          product.price_usd === 0
-                            ? "border-primary/30 hover:bg-primary/10"
-                            : product.type === "signal_pack"
-                              ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/20"
-                              : ""
-                        }`}
-                        variant={product.price_usd === 0 ? "outline" : "default"}
-                        onClick={() => handleBuy(product)}
-                        disabled={purchaseMutation.isPending}
-                      >
-                        {product.price_usd === 0 ? (
-                          <>
-                            <Zap className="h-4 w-4 mr-2" />
-                            Get Free
-                          </>
-                        ) : product.billing_type === "recurring" ? (
-                          <>
-                            <Crown className="h-4 w-4 mr-2" />
-                            Subscribe
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            Buy Now
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        ) : (
-          <Card className="glass-card border-dashed">
-            <CardContent className="py-16 text-center">
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Products Yet</h3>
-              <p className="text-muted-foreground">
-                Products will appear here once they're added by the admin.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Affiliate CTA */}
-        <Card className="mt-8 border-primary/30 bg-gradient-to-r from-primary/5 via-background to-warning/5 overflow-hidden">
-          <CardContent className="py-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-warning/20 ring-1 ring-primary/20">
-                  <Star className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base">Earn Commissions</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Refer products and earn up to 20% on every sale
-                  </p>
-                </div>
-              </div>
-              <Button variant="gold" asChild>
-                <a href="/affiliate">Join Affiliate Program</a>
-              </Button>
+      <main className="container mx-auto px-4 py-6 md:py-8 space-y-8">
+        <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-warning/5 p-7 md:p-12">
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-warning/10 blur-3xl" />
+          <div className="relative z-10 max-w-3xl">
+            <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10 border border-primary/20"><ShoppingCart className="mr-1.5 h-3.5 w-3.5" /> BOTVIO STORE</Badge>
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight">Choose what you want to unlock.</h1>
+            <p className="mt-4 max-w-2xl text-base md:text-lg text-muted-foreground leading-7">Botvio is built around market hubs, automated robots and direct MT5 execution. Subscribe only to the tools you need — no confusing provider or TradeCopy setup required.</p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Badge variant="outline" className="border-success/30 text-success"><Check className="mr-1 h-3 w-3" /> Simple subscriptions</Badge>
+              <Badge variant="outline" className="border-primary/30 text-primary"><Check className="mr-1 h-3 w-3" /> Your MT5 account</Badge>
+              <Badge variant="outline" className="border-warning/30 text-warning"><Check className="mr-1 h-3 w-3" /> LIVE safety controls</Badge>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
+
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {isLoading ? [1,2,3,4,5].map((i) => <div key={i} className="h-[390px] rounded-2xl border border-border/50 bg-card/60 animate-pulse" />) : visibleProducts.map((product) => {
+            const cfg = PRODUCT_CONFIG[product.slug];
+            if (!cfg) return null;
+            const Icon = cfg.icon;
+            const owned = isOwned(product.id);
+            return <Card key={product.id} className="group relative overflow-hidden border-border/60 bg-card/80 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl">
+              {product.is_featured && <div className="bg-primary/10 border-b border-primary/10 px-4 py-2 text-center text-[10px] font-black tracking-widest text-primary">RECOMMENDED</div>}
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div className={"flex h-12 w-12 items-center justify-center rounded-2xl border " + cfg.accent}><Icon className="h-6 w-6" /></div>
+                  {owned ? <Badge className="border border-success/30 bg-success/10 text-success"><Check className="mr-1 h-3 w-3" /> Active</Badge> : <Badge variant="outline" className="text-[10px] tracking-wider">{cfg.category}</Badge>}
+                </div>
+                <h2 className="mt-5 text-xl font-black">{product.name}</h2>
+                <p className="mt-2 text-sm font-semibold text-foreground/90">{cfg.tagline}</p>
+                <p className="mt-2 min-h-[72px] text-sm leading-6 text-muted-foreground">{product.short_description || cfg.description}</p>
+                <div className="my-5 space-y-2.5">{cfg.features.map((feature) => <div key={feature} className="flex items-center gap-2 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5 shrink-0 text-success" /> {feature}</div>)}</div>
+                <div className="flex items-end justify-between border-t border-border/50 pt-4"><div><span className="text-3xl font-black">${product.price_usd}</span><span className="ml-1 text-xs text-muted-foreground">/{product.billing_interval || "month"}</span></div><Badge variant="outline" className="text-[10px]">{product.billing_type === "recurring" ? "Monthly" : "One-time"}</Badge></div>
+                <Button className="mt-5 w-full font-bold" variant={owned ? "outline" : "default"} onClick={() => owned ? handleOpen(product) : handleBuy(product)} disabled={purchaseMutation.isPending}>{owned ? <><ExternalLink className="mr-2 h-4 w-4" /> Open</> : <><Zap className="mr-2 h-4 w-4" /> Get Access</>}</Button>
+                {product.slug === "mt5-direct" && <p className="mt-3 text-center text-[10px] text-muted-foreground">Connect your MT5 account first, then activate Direct Signals.</p>}
+              </CardContent>
+            </Card>;
+          })}
+        </section>
+
+        {!isLoading && visibleProducts.length === 0 && <Card className="border-dashed"><CardContent className="py-14 text-center"><Lock className="mx-auto mb-3 h-10 w-10 text-muted-foreground" /><h2 className="font-bold">Botvio products are being configured</h2><p className="mt-1 text-sm text-muted-foreground">Please check back shortly.</p></CardContent></Card>}
+
+        <section className="grid gap-4 md:grid-cols-3">{[
+          { icon: Radio, title: "1. Choose", text: "Pick a hub, robot or direct MT5 execution service." },
+          { icon: ShoppingCart, title: "2. Subscribe", text: "Submit payment and proof. Admin approval activates your access." },
+          { icon: Sparkles, title: "3. Trade", text: "Open your hub, connect MT5 or use your activated robot." },
+        ].map(({ icon: Icon, title, text: body }) => <Card key={title} className="border-border/50 bg-card/50"><CardContent className="p-5"><Icon className="h-5 w-5 text-primary" /><h3 className="mt-3 font-bold">{title}</h3><p className="mt-1 text-xs leading-5 text-muted-foreground">{body}</p></CardContent></Card>)}</section>
+
+        <Card className="border-warning/20 bg-warning/5"><CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"><div><h3 className="font-bold">Need help choosing?</h3><p className="mt-1 text-xs text-muted-foreground">Start with a Hub if you want signals and analysis. Choose MT5 Direct if you want Botvio signals delivered to your own connected MT5. Choose a Robot for automation.</p></div><Button asChild variant="outline"><Link to="/dashboard">Open Dashboard <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></CardContent></Card>
       </main>
 
-      {/* Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Checkout</DialogTitle>
-            <DialogDescription>
-              {selectedProduct && (
-                <span>
-                  Purchase <strong>{selectedProduct.name}</strong> for{" "}
-                  <strong>${selectedProduct.price_usd}</strong>
-                  {selectedProduct.billing_type === "recurring"
-                    ? `/${selectedProduct.billing_interval || "month"}`
-                    : " (one-time)"}
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          <PaymentMethodSelector
-            planCode={selectedProduct?.slug || "product"}
-            planName={selectedProduct?.name || "Product"}
-            amount={selectedProduct?.price_usd || 0}
-            embedded
-            onPaymentInitiated={(method) => setPaymentMethod(method)}
-            onMethodChange={(method) => setPaymentMethod(method)}
-            onProofFileChange={(file) => setProofFile(file)}
-          />
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCheckout(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCheckout} disabled={!paymentMethod || !proofFile || purchaseMutation.isPending}>
-              {purchaseMutation.isPending ? "Processing..." : "Complete Purchase"}
-            </Button>
-          </DialogFooter>
+          <DialogHeader><DialogTitle>{selectedProduct?.name} subscription</DialogTitle><DialogDescription>{selectedProduct && <>Activate <strong>{selectedProduct.name}</strong> for <strong>${selectedProduct.price_usd}/{selectedProduct.billing_interval || "month"}</strong>. Payment is reviewed by Botvio before access is activated.</>}</DialogDescription></DialogHeader>
+          <PaymentMethodSelector planCode={selectedProduct?.slug || "product"} planName={selectedProduct?.name || "Product"} amount={selectedProduct?.price_usd || 0} embedded onPaymentInitiated={setPaymentMethod} onMethodChange={setPaymentMethod} onProofFileChange={setProofFile} />
+          <div className="rounded-xl border border-border/50 bg-muted/20 p-3 text-xs text-muted-foreground">After submitting your proof, an admin confirms the payment and activates your subscription. For MT5 Direct, the selected connected account is linked to the entitlement.</div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowCheckout(false)}>Cancel</Button><Button onClick={handleCheckout} disabled={!paymentMethod || !proofFile || purchaseMutation.isPending}>{purchaseMutation.isPending ? "Submitting..." : "Submit Subscription"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
