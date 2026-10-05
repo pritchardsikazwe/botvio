@@ -155,6 +155,27 @@ const CountryPage = () => {
               </section>
             )}
 
+            <section className="space-y-4">
+              <h2 className="text-2xl font-bold">Research Hub for {info.name} Traders</h2>
+              <p className="text-muted-foreground">Explore country-specific research on forex, gold, Deriv synthetic indices, MT5, copy trading, AI trading, signals and risk management.</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {[
+                  ["forex-trading-guide", "Forex Trading Guide"],
+                  ["gold", "Gold / XAUUSD Guide"],
+                  ["synthetic", "Deriv Synthetic Indices"],
+                  ["mt5", "MT5 Trading"],
+                  ["copy", "Copy Trading"],
+                  ["ai", "AI Trading"],
+                  ["signals", "Trading Signals"],
+                  ["risk", "Risk Management"],
+                ].map(([key, label]) => (
+                  <Link key={key} to={`/blog/${country}-${key}`} className="flex items-center justify-between rounded-lg border p-4 hover:border-primary transition-colors">
+                    <span className="font-medium">{label}</span><ArrowRight className="h-4 w-4" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+
             <TradeTip type="disclaimer" tip={`⚠️ Trading involves significant risk. Botvio does not guarantee profits. ${info.name} users should only trade with funds they can afford to lose.`} />
 
             <section className="bg-gradient-to-r from-primary/10 to-warning/10 rounded-xl p-8 text-center space-y-4">
