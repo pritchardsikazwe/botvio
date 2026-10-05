@@ -24,6 +24,7 @@ const LIVE_PHRASE = "START LIVE SIGNALS";
 const COLS = [
   "id,user_id,broker,login_id,server,environment,platform,account_role,is_botvio_robot",
   "direct_signal_enabled,direct_signal_status,direct_live_confirmed_at,direct_lot,direct_min_confidence,direct_symbol_map",
+  "direct_execution_entitled,direct_execution_plan,direct_execution_expires_at",
   "last_direct_signal_at,last_direct_execution_at,last_direct_error,tradecopy_user_id,tradecopy_active,is_active",
   "botvio_signal_master_enabled,botvio_signal_master_lot,botvio_signal_min_confidence",
 ].join(",");
@@ -57,6 +58,12 @@ const normalizeDirection = (value: unknown): "BUY" | "SELL" | null => {
 
 const normalSymbol = (s: string) => s.toUpperCase().replace(/\s+/g, "");
 
+function hasPaidMt5Entitlement(account: Record<string, any>) {
+  if (account.direct_execution_entitled !== true) return false;
+  const expires = account.direct_execution_expires_at ? new Date(account.direct_execution_expires_at).getTime() : null;
+  return expires === null || Number.isNaN(expires) || expires > Date.now();
+}
+
 async function claimExecution(admin: SupabaseClient, account: Record<string, any>, signal: Record<string, any>, symbol: string, direction: "BUY" | "SELL", volume: number, mode: string) {
   return admin.from("direct_executions").insert({
     trading_account_id: account.id, user_id: account.user_id, signal_id: signal.id, symbol: signal.symbol,
@@ -76,6 +83,7 @@ async function executeForAccount(
 ) {
   const direction = normalizeDirection(signal.direction);
   if (!direction) return { ok: false, skipped: true, reason: "unsupported signal direction" };
+  if (!hasPaidMt5Entitlement(account)) return { ok: false, skipped: true, reason: "MT5 Direct Execution is not active for this paid subscription" };
   if (!account.tradecopy_user_id) return { ok: false, skipped: true, reason: "TradeCopy account is not registered" };
   if (!account.tradecopy_active) return { ok: false, skipped: true, reason: "TradeCopy account is inactive" };
   if ((signal.confidence ?? 0) < (account.direct_min_confidence ?? account.botvio_signal_min_confidence ?? 70)) {
@@ -168,7 +176,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   }
 
   let q = admin.from("trading_accounts").select(COLS)
-    .eq("direct_signal_enabled", true).eq("is_active", true).eq("is_botvio_robot", false)
+    .eq("direct_signal_enabled", true).eq("direct_execution_entitled", true).eq("is_active", true).eq("is_botvio_robot", false)
     .eq("account_role", "slave").not("tradecopy_user_id", "is", null);
   if (onlyAccountId) q = q.eq("id", onlyAccountId);
   const { data: directAccounts } = await q;
@@ -267,6 +275,7 @@ Deno.serve(async (req) => {
           lot: z.number().min(0.01).max(5).optional(), min_confidence: z.number().int().min(50).max(99).optional(),
         }).parse(body);
         const a = await loadOwn(p.account_id);
+        if (!hasPaidMt5Entitlement(a)) throw new Err("MT5 Direct Execution is a paid feature. Your account has not been enabled by an admin or the subscription has expired.", 403);
         if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this Deriv MT5 account as a TradeCopy follower first");
         if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this follower before enabling Direct Signals");
         const patch: Record<string, unknown> = { direct_signal_enabled: true, direct_signal_status: "on", last_direct_error: null };
@@ -324,6 +333,7 @@ Deno.serve(async (req) => {
           take_profit: z.number().positive().optional(),
         }).parse(body);
         const a = await loadOwn(p.account_id);
+        if (!hasPaidMt5Entitlement(a)) throw new Err("MT5 Direct Execution is a paid feature. Your subscription does not include direct execution.", 403);
         if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this MT5 account as a TradeCopy follower first");
         if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this Deriv MT5 follower first");
         const globalLive = await liveGlobal(admin);
@@ -355,12 +365,33 @@ Deno.serve(async (req) => {
 
       case "admin_set": {
         if (!isAdmin) throw new Err("Admins only", 403);
-        const p = z.object({ account_id: z.string().uuid(), enabled: z.boolean() }).parse(body);
-        const { data: a } = await admin.from("trading_accounts").select("environment,direct_live_confirmed_at").eq("id", p.account_id).maybeSingle();
-        if (p.enabled && a?.environment === "LIVE" && !a.direct_live_confirmed_at) throw new Err("The owner must confirm LIVE direct signals first");
-        await admin.from("trading_accounts").update({ direct_signal_enabled: p.enabled, direct_signal_status: p.enabled ? "on" : "off" }).eq("id", p.account_id);
-        await audit(true, p.account_id, { enabled: p.enabled, by: "admin", execution: "TradeCopy" });
-        return json({ ok: true });
+        const p = z.object({
+          account_id: z.string().uuid(),
+          enabled: z.boolean(),
+          entitled: z.boolean().optional(),
+          plan: z.string().trim().max(80).optional(),
+          expires_at: z.string().datetime().nullable().optional(),
+        }).parse(body);
+        const { data: a } = await admin.from("trading_accounts")
+          .select("environment,direct_live_confirmed_at,direct_signal_enabled,direct_execution_entitled,direct_execution_plan,direct_execution_expires_at")
+          .eq("id", p.account_id).maybeSingle();
+        if (!a) throw new Err("MT5 account not found", 404);
+        const entitlement = p.entitled ?? p.enabled;
+        if (p.enabled && !entitlement) throw new Err("Grant the paid MT5 execution entitlement before enabling direct signals");
+        if (p.enabled && a.environment === "LIVE" && !a.direct_live_confirmed_at) throw new Err("The owner must confirm LIVE direct signals first");
+        const expired = p.expires_at ? new Date(p.expires_at).getTime() <= Date.now() : false;
+        if (entitlement && expired) throw new Err("The paid MT5 execution expiry must be in the future");
+        const patch: Record<string, unknown> = {
+          direct_execution_entitled: entitlement,
+          direct_execution_plan: entitlement ? (p.plan ?? a.direct_execution_plan ?? "MT5 Direct") : null,
+          direct_execution_expires_at: entitlement ? (p.expires_at ?? a.direct_execution_expires_at ?? null) : null,
+          direct_signal_enabled: p.enabled && entitlement,
+          direct_signal_status: p.enabled && entitlement ? "on" : "off",
+        };
+        if (!entitlement) patch.direct_live_confirmed_at = null;
+        await admin.from("trading_accounts").update(patch).eq("id", p.account_id);
+        await audit(true, p.account_id, { enabled: p.enabled && entitlement, entitled: entitlement, plan: patch.direct_execution_plan, expires_at: patch.direct_execution_expires_at, by: "admin", execution: "TradeCopy" });
+        return json({ ok: true, entitled: entitlement, enabled: p.enabled && entitlement, plan: patch.direct_execution_plan, expires_at: patch.direct_execution_expires_at });
       }
 
       default:
