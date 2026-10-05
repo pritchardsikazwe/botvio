@@ -378,7 +378,7 @@ export const WeltradeSignalsEngine = () => {
             signals={signals}
             activeSignal={activeSignal}
             focusSignal={focusSignal}
-            showHauza
+            cleanMode
             unavailableMessage={bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
             errorDetail={bridgeOffline
               ? diagnostics.lastError ?? (instrument.label + " is a proprietary Weltrade index. Its live prices come from your own MT5 terminal via the BOTVIO Bridge EA — start the EA to stream this chart. No prices are ever simulated.")
