@@ -17,10 +17,10 @@ const CHART_STRATEGIES = [
     color: "text-success",
     bgColor: "bg-success/10",
     quickSteps: [
-      "Price taps a Daily S/R zone (round numbers: $2300, $2350…)",
+      "Price taps a current Daily S/R zone, recent swing level or psychological round number",
       "Wick rejection ≥ 50% of candle range",
       "EMA 20 confirms direction → Enter on candle close",
-      "SL: 5-10 pips beyond zone | TP: 1:2 RR minimum",
+      "SL: beyond the invalidation level | TP: target the next structure zone with at least 1:2 RR",
     ],
   },
   {
