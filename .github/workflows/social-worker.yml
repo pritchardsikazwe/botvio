@@ -1,0 +1,20 @@
+name: Botvio Social Worker
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run social publishing worker
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          BOTVIO_AUTOMATION_KEY: ${{ secrets.BOTVIO_AUTOMATION_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL"
+          test -n "$BOTVIO_AUTOMATION_KEY"
+          curl --fail-with-body -sS             -X POST "$SUPABASE_URL/functions/v1/social-worker"             -H "Content-Type: application/json"             -H "apikey: $BOTVIO_AUTOMATION_KEY"             --data '{"action":"run"}'
