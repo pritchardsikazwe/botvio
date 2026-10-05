@@ -122,6 +122,7 @@ export default function AdminControlCenter(){
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/providers")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><ShieldCheck className="h-4 w-4"/>Providers</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("tradecopy-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/blog")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><FileText className="h-4 w-4"/>Blog & Articles</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/admin/social-worker")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Send className="h-4 w-4"/>Social Worker</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/settings")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Settings className="h-4 w-4"/>Settings</button>
         </nav></ScrollArea>
       </aside>
