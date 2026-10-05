@@ -1,143 +1,186 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBots, useBotInstances, useTradingAccounts, useCreateBotInstance, useUpdateBotInstance } from "@/hooks/useBotvio";
 import { useEntitlements } from "@/hooks/useEntitlements";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMarketplaceProducts, MarketplaceProduct } from "@/hooks/useMarketplace";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Header } from "@/components/trading/Header";
-import { useNavigate, Link } from "react-router-dom";
-import { Bot, Play, Pause, Square, Settings2, ArrowRight, ShieldCheck, Sparkles, Zap, Bell, Eye, TrendingUp } from "lucide-react";
-import { toast } from "sonner";
+import { Link, useNavigate } from "react-router-dom";
+import { Bot, ArrowRight, ShieldCheck, Sparkles, Activity, Crown, Rocket, Zap, Check, Link2 } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 
-type Mode = "auto" | "signals" | "watch";
-type Risk = "conservative" | "balanced" | "aggressive";
-type Market = "gold" | "forex" | "indices" | "crypto" | "synthetic";
-
-const MARKETS: { id: Market; label: string; sub: string }[] = [
-  { id: "gold", label: "Gold / XAUUSD", sub: "MT5" },
-  { id: "forex", label: "Forex", sub: "MT5" },
-  { id: "indices", label: "Indices", sub: "MT5" },
-  { id: "synthetic", label: "Synthetic Indices", sub: "Deriv" },
-];
-
-const RISK: Record<Risk, { label: string; description: string; risk: number; loss: number; trades: number }> = {
-  conservative: { label: "Conservative", description: "Lower exposure and tighter limits", risk: 0.5, loss: 2, trades: 2 },
-  balanced: { label: "Balanced", description: "Moderate exposure and limits", risk: 1, loss: 5, trades: 3 },
-  aggressive: { label: "Aggressive", description: "Higher exposure and limits", risk: 2, loss: 8, trades: 5 },
+const ROBOT_ORDER = ["gold-robot", "synthetic-robot"];
+const PRODUCT_COPY: Record<string, { eyebrow: string; description: string; features: string[]; icon: typeof Bot; accent: string; route?: string }> = {
+  "gold-robot": {
+    eyebrow: "GOLD AUTOMATION",
+    description: "Botvio Gold Robot for XAU/USD workflows, strategy signals, MT5 automation and risk controls.",
+    features: ["Gold / XAUUSD strategy", "MT5 automation workflow", "Risk controls before LIVE"],
+    icon: Crown,
+    accent: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+    route: "/gold",
+  },
+  "synthetic-robot": {
+    eyebrow: "SYNTHETIC AUTOMATION",
+    description: "Botvio Synthetic Robot for supported Deriv synthetic-index workflows and MT5 execution.",
+    features: ["Boom, Crash & Volatility workflows", "Synthetic strategy automation", "Risk controls before LIVE"],
+    icon: Rocket,
+    accent: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+    route: "/synthetic-hub",
+  },
 };
 
 const Bots = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: bots } = useBots();
-  const { data: instances, isLoading: instancesLoading } = useBotInstances();
-  const { data: accounts } = useTradingAccounts();
-  const createInstance = useCreateBotInstance();
-  const updateInstance = useUpdateBotInstance();
+  const { data: products, isLoading } = useMarketplaceProducts();
   const { data: entitlements } = useEntitlements();
 
-  const [step, setStep] = useState(1);
-  const [market, setMarket] = useState<Market>("synthetic");
-  const [mode, setMode] = useState<Mode>("signals");
-  const [risk, setRisk] = useState<Risk>("balanced");
-  const [accountId, setAccountId] = useState("");
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const robots = useMemo(
+    () => (products ?? [])
+      .filter((p) => ROBOT_ORDER.includes(p.slug))
+      .sort((a, b) => ROBOT_ORDER.indexOf(a.slug) - ROBOT_ORDER.indexOf(b.slug)),
+    [products],
+  );
 
-  const selectedBot = useMemo(() => bots?.find((b: any) => b.code === "botvio") ?? bots?.[0] ?? null, [bots]);
-  const currentRisk = RISK[risk];
-  const demoAccounts = useMemo(() => (accounts ?? []).filter((a: any) => a.broker === "deriv"), [accounts]);
-  const selectedAccount = demoAccounts.find((a: any) => a.id === accountId) ?? demoAccounts[0];
-
-  const userOwnsBotProduct = () => {
-    if (!entitlements) return false;
-    return entitlements.some((e: any) => e.products?.type === "bot" && e.status === "active");
-  };
+  const isOwned = (product: MarketplaceProduct) =>
+    entitlements?.some((e) =>
+      e.product_id === product.id &&
+      e.status === "active" &&
+      (!e.ends_at || new Date(e.ends_at).getTime() > Date.now())
+    ) ?? false;
 
   if (!user) {
-    return <div className="min-h-screen bg-background"><Header /><div className="container mx-auto px-4 py-16 text-center space-y-4"><Bot className="mx-auto h-14 w-14 text-primary" /><h1 className="text-2xl font-bold">Sign in to create an AI Bot</h1><Button onClick={() => navigate("/")}>Go to Home</Button></div></div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-16 text-center">
+          <Bot className="mx-auto h-14 w-14 text-primary" />
+          <h1 className="mt-4 text-2xl font-black">Sign in to access Botvio AI Robots</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Choose a robot, activate access, then connect your MT5 account.</p>
+          <Button className="mt-5" onClick={() => navigate("/")}>Go to Home</Button>
+        </main>
+      </div>
+    );
   }
-
-  const finish = async () => {
-    if (!selectedBot) {
-      toast.error("Botvio AI is not available yet. Please try again shortly.");
-      return;
-    }
-    if (selectedBot.is_premium && !userOwnsBotProduct()) {
-      toast.error("Activate the required Botvio plan first.");
-      navigate("/billing");
-      return;
-    }
-    if (!selectedAccount) {
-      toast.error("Connect a Deriv account first. MT5/CFD accounts are handled from normal MT5 connections.");
-      navigate("/connections");
-      return;
-    }
-    try {
-      const created: any = await createInstance.mutateAsync({
-        bot_id: selectedBot.id,
-        trading_account_id: selectedAccount.id,
-        name: "Botvio AI · " + (MARKETS.find((m) => m.id === market)?.label ?? "Trading"),
-        markets: market === "synthetic" ? ["Volatility 75 Index", "Boom/Crash"] : [MARKETS.find((m) => m.id === market)?.label ?? market],
-        risk_per_trade_percent: currentRisk.risk,
-        max_daily_loss_percent: currentRisk.loss,
-        max_open_trades: currentRisk.trades,
-        max_stake: 10,
-        config_json: {
-          onboarding_version: "2026",
-          mode,
-          risk_profile: risk,
-          market,
-          demo_first: true,
-          advanced_hidden_by_default: true,
-        },
-      });
-      if (created?.id) await updateInstance.mutateAsync({ id: created.id, status: "paused" });
-      toast.success("AI Bot created in paused/demo-first mode.");
-      setStep(1);
-      setMode("signals");
-      setRisk("balanced");
-      setShowAdvanced(false);
-    } catch (error: any) {
-      toast.error(error?.message || "Could not create the bot");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead seoKey="bots" title="Botvio AI Bots — Simple Automated Trading" description="Create one Botvio AI Bot and choose your market, trading mode and risk. Advanced strategy controls stay hidden until you need them." />
+      <SEOHead
+        seoKey="bots"
+        title="Botvio AI Trading Robots"
+        description="Botvio Gold Robot and Synthetic Robot automation with MT5 execution, risk controls and demo-first setup."
+      />
       <Header />
-      <main className="container mx-auto max-w-5xl px-4 py-6 space-y-5">
-        <section className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-success/5 p-6 md:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <Badge className="mb-3"><Sparkles className="mr-1 h-3 w-3" /> BOTVIO AI</Badge>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight">AI BOTS</h1>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">One simple bot experience. Choose what you trade, how Botvio should work, and your risk. The underlying engines stay in place — Botvio selects the right one for you.</p>
+
+      <main className="container mx-auto max-w-6xl px-4 py-6 md:py-8 space-y-6">
+        <section className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-success/5 p-6 md:p-9">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <Badge className="mb-3 gap-1 bg-primary/10 text-primary hover:bg-primary/10">
+                <Sparkles className="h-3 w-3" /> BOTVIO AUTOMATION
+              </Badge>
+              <h1 className="text-3xl font-black tracking-tight md:text-4xl">AI Trading Robots</h1>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground md:text-base">
+                This is the current Botvio robot area. Choose a supported robot, activate its subscription in the Botvio Store,
+                connect your own MT5 account and keep LIVE execution behind the safety controls.
+              </p>
             </div>
-            <div className="rounded-2xl border bg-background/60 p-4 text-sm">
-              <div className="flex items-center gap-2 text-success font-semibold"><ShieldCheck className="h-4 w-4" /> Demo-first</div>
-              <p className="mt-1 text-xs text-muted-foreground">New bots are created paused. Start them only when you're ready.</p>
+            <div className="rounded-2xl border border-success/20 bg-background/70 p-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-success">
+                <ShieldCheck className="h-4 w-4" /> Demo-first
+              </div>
+              <p className="mt-1 max-w-xs text-xs text-muted-foreground">Test your workflow before enabling LIVE execution.</p>
             </div>
           </div>
-          <div className="mt-6 grid grid-cols-4 gap-2">{["Market", "Mode", "Risk", "Review"].map((label, i) => <div key={label} className={"h-1.5 rounded-full transition-all " + (step > i ? "bg-primary" : "bg-muted")} />)}</div>
-          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">{["Market", "Mode", "Risk", "Review"].map((x) => <span key={x}>{x}</span>)}</div>
         </section>
 
-        {step === 1 && <Card className="glass-card"><CardHeader><CardTitle>1. What do you want to trade?</CardTitle><CardDescription>Botvio chooses the appropriate engine automatically.</CardDescription></CardHeader><CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">{MARKETS.map((m) => <button key={m.id} type="button" onClick={() => { setMarket(m.id); setStep(2); }} className={"rounded-2xl border p-4 text-left transition-all hover:border-primary/50 hover:-translate-y-0.5 " + (market === m.id ? "border-primary bg-primary/10" : "bg-background/40")}><div className="flex items-center justify-between"><span className="font-bold">{m.label}</span><Badge variant="outline">{m.sub}</Badge></div><p className="mt-2 text-xs text-muted-foreground">{m.id === "synthetic" ? "Volatility, Boom, Crash and other Deriv markets." : "Botvio manages the strategy layer; account connection stays simple."}</p></button>)}</CardContent></Card>}
+        <section className="grid gap-4 md:grid-cols-2">
+          {isLoading ? [1, 2].map((i) => (
+            <div key={i} className="h-72 animate-pulse rounded-2xl border border-border/50 bg-card/60" />
+          )) : robots.map((product) => {
+            const copy = PRODUCT_COPY[product.slug];
+            const Icon = copy.icon;
+            const owned = isOwned(product);
+            return (
+              <Card key={product.id} className="overflow-hidden border-border/60 bg-card/80">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className={"flex h-12 w-12 items-center justify-center rounded-2xl border " + copy.accent}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    {owned ? (
+                      <Badge className="border border-success/30 bg-success/10 text-success"><Check className="mr-1 h-3 w-3" /> Active</Badge>
+                    ) : (
+                      <Badge variant="outline">ROBOT</Badge>
+                    )}
+                  </div>
+                  <p className="mt-5 text-[10px] font-black tracking-[0.16em] text-primary">{copy.eyebrow}</p>
+                  <h2 className="mt-1 text-2xl font-black">{product.name}</h2>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.description}</p>
+                  <div className="mt-5 space-y-2">
+                    {copy.features.map((feature) => (
+                      <div key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Check className="h-3.5 w-3.5 text-success" /> {feature}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <Button asChild>
+                      <Link to={owned ? (copy.route || "/dashboard") : "/marketplace?product=" + product.slug}>
+                        {owned ? "Open Robot" : "Get Robot"} <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <Link to="/connections"><Link2 className="mr-2 h-4 w-4" /> MT5 Connections</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </section>
 
-        {step === 2 && <Card className="glass-card"><CardHeader><CardTitle>2. How should Botvio work?</CardTitle><CardDescription>Keep it simple. You can change this later.</CardDescription></CardHeader><CardContent className="grid gap-3 md:grid-cols-3">{([["auto","Auto Trade","Botvio executes eligible trades.",Zap],["signals","Signals","Get Botvio's trade ideas without execution.",Bell],["watch","Watch","Analyse markets without placing trades.",Eye]] as const).map(([id,label,desc,Icon]) => <button key={id} type="button" onClick={() => { setMode(id); setStep(3); }} className={"rounded-2xl border p-5 text-left hover:border-primary/50 transition-all " + (mode === id ? "border-primary bg-primary/10" : "")}><Icon className="h-6 w-6 text-primary" /><h3 className="mt-3 font-bold">{label}</h3><p className="mt-1 text-xs text-muted-foreground">{desc}</p></button>)}</CardContent></Card>}
+        {!isLoading && robots.length === 0 && (
+          <Card className="border-dashed">
+            <CardContent className="py-12 text-center">
+              <Bot className="mx-auto h-10 w-10 text-muted-foreground" />
+              <h2 className="mt-3 font-bold">Robots are being configured</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Open the Botvio Store to see the currently available products.</p>
+              <Button className="mt-4" asChild><Link to="/marketplace">Open Botvio Store</Link></Button>
+            </CardContent>
+          </Card>
+        )}
 
-        {step === 3 && <Card className="glass-card"><CardHeader><CardTitle>3. Choose your risk</CardTitle><CardDescription>These are starting limits, not promises of performance.</CardDescription></CardHeader><CardContent className="space-y-4"><div className="grid gap-3 md:grid-cols-3">{(Object.keys(RISK) as Risk[]).map((id) => <button key={id} type="button" onClick={() => setRisk(id)} className={"rounded-2xl border p-5 text-left transition-all hover:border-primary/50 " + (risk === id ? "border-primary bg-primary/10" : "")}><div className="flex items-center justify-between"><span className="font-bold">{RISK[id].label}</span><TrendingUp className="h-4 w-4 text-primary" /></div><p className="mt-1 text-xs text-muted-foreground">{RISK[id].description}</p><p className="mt-3 text-xs">Risk/trade <b>{RISK[id].risk}%</b> · Daily limit <b>{RISK[id].loss}%</b></p></button>)}</div><div className="flex justify-between"><Button variant="ghost" onClick={() => setStep(2)}>Back</Button><Button onClick={() => setStep(4)}>Continue <ArrowRight className="ml-1 h-4 w-4" /></Button></div></CardContent></Card>}
+        <section className="grid gap-4 md:grid-cols-3">
+          {[
+            { icon: Zap, title: "1. Choose a robot", text: "Gold or Synthetic automation based on the market you want to trade." },
+            { icon: Activity, title: "2. Connect MT5", text: "Use your own connected MT5 account. Demo is recommended before LIVE." },
+            { icon: ShieldCheck, title: "3. Control execution", text: "Manage signal delivery, lot size, confidence and LIVE confirmation from Connections." },
+          ].map(({ icon: Icon, title, text }) => (
+            <Card key={title} className="border-border/50 bg-card/50">
+              <CardContent className="p-5">
+                <Icon className="h-5 w-5 text-primary" />
+                <h3 className="mt-3 font-bold">{title}</h3>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{text}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
 
-        {step === 4 && <Card className="glass-card"><CardHeader><CardTitle>4. Review & connect</CardTitle><CardDescription>We'll keep the new bot paused until you start it.</CardDescription></CardHeader><CardContent className="space-y-5"><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Market</p><p className="font-bold">{MARKETS.find((m) => m.id === market)?.label}</p></div><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Mode</p><p className="font-bold">{mode === "auto" ? "Auto Trade" : mode === "signals" ? "Signals" : "Watch"}</p></div><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Risk</p><p className="font-bold">{currentRisk.label}</p></div><div className="rounded-2xl border p-4"><p className="text-xs text-muted-foreground">Account</p><p className="font-bold">{selectedAccount ? selectedAccount.label : "Not connected"}</p></div></div><div className="rounded-2xl border border-warning/30 bg-warning/5 p-4 text-xs text-muted-foreground">For Deriv Synthetic markets, connect your Deriv account below. Forex/Gold/Indices/CFD execution continues through normal MT5 account onboarding.</div><Select value={accountId || selectedAccount?.id || ""} onValueChange={setAccountId}><SelectTrigger><SelectValue placeholder="Select Deriv account" /></SelectTrigger><SelectContent>{demoAccounts.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.label}{a.login_id ? " · " + a.login_id : ""}</SelectItem>)}</SelectContent></Select><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => navigate("/connections")}>Connect account</Button><Button onClick={market === "synthetic" ? finish : () => navigate("/connections")} disabled={market === "synthetic" && createInstance.isPending}>{market === "synthetic" ? (createInstance.isPending ? "Creating…" : "Create Demo Bot") : "Continue to MT5 connection"}</Button></div><button type="button" className="text-xs text-muted-foreground underline" onClick={() => setShowAdvanced((v) => !v)}><Settings2 className="inline h-3 w-3 mr-1" /> {showAdvanced ? "Hide" : "Show"} advanced settings</button>{showAdvanced && <div className="rounded-2xl border bg-muted/20 p-4 text-xs text-muted-foreground space-y-1"><p>Advanced controls remain available through the bot instance settings.</p><p>Strategy engine, sessions, max trades, stop loss/take profit and symbol mapping are intentionally hidden from first-time setup.</p></div>}<div className="flex justify-between"><Button variant="ghost" onClick={() => setStep(3)}>Back</Button></div></CardContent></Card>}
-
-        <Card className="border-primary/10"><CardHeader><CardTitle className="text-sm">My Bots</CardTitle><CardDescription>Existing bot instances and their status.</CardDescription></CardHeader><CardContent>{instancesLoading ? <div className="space-y-2"><Skeleton className="h-16" /><Skeleton className="h-16" /></div> : instances && instances.length ? <div className="space-y-3">{instances.map((instance: any) => <div key={instance.id} className="rounded-2xl border p-4 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><div className={"h-2.5 w-2.5 rounded-full " + (instance.status === "active" ? "bg-success animate-pulse" : instance.status === "paused" ? "bg-warning" : "bg-muted-foreground")} /><div><p className="font-semibold">{instance.name}</p><p className="text-xs text-muted-foreground">{instance.bot?.name} · {instance.markets?.join(", ")}</p></div></div><div className="flex items-center gap-2"><Badge variant="outline">{instance.status}</Badge><Button variant="outline" size="icon" onClick={() => updateInstance.mutate({id: instance.id, status: instance.status === "active" ? "paused" : "active"})}>{instance.status === "active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}</Button><Button variant="outline" size="icon" onClick={() => updateInstance.mutate({id: instance.id, status: "stopped"})}><Square className="h-4 w-4" /></Button></div></div>)}</div> : <div className="py-8 text-center text-sm text-muted-foreground"><Bot className="mx-auto mb-3 h-10 w-10" />No bots yet. Start the 4-step setup above.</div>}</CardContent></Card>
-
-        <div className="flex flex-wrap gap-2"><Button variant="outline" asChild><Link to="/copy-trading"><span className="mr-2">👥</span> Copy Trading</Link></Button><Button variant="outline" asChild><Link to="/rise-fall"><Zap className="mr-2 h-4 w-4" /> Deriv Options</Link></Button></div>
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-bold">Need signals without automation?</h3>
+              <p className="mt-1 text-xs text-muted-foreground">Use the Signals Center or MT5 Direct Signals instead of a robot.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" asChild><Link to="/signals">Signals</Link></Button>
+              <Button variant="outline" asChild><Link to="/marketplace?product=mt5-direct">MT5 Direct</Link></Button>
+              <Button variant="outline" asChild><Link to="/marketplace">Botvio Store</Link></Button>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
