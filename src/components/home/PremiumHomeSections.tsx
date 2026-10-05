@@ -31,6 +31,7 @@ import { BotvioPricing } from "@/components/home/BotvioPricing";
  */
 
 const trending = [
+  { title: "Deriv Options Hub", to: "/options", tag: "Deriv Options" },
   { title: "Gold (XAU/USD) Analysis", to: "/gold", tag: "Gold" },
   { title: "EUR/USD Forecast", to: "/eur-usd", tag: "Forex" },
   { title: "GBP/USD Forecast", to: "/gbp-usd", tag: "Forex" },
@@ -211,6 +212,11 @@ export function PremiumHomeHero() {
           <Link to="/signals?tab=chart-analysis">
             <Button size="lg" variant="outline" className="gap-2 font-bold">
               <Brain className="h-4 w-4" /> AI Chart Analysis
+            </Button>
+          </Link>
+          <Link to="/options">
+            <Button size="lg" variant="outline" className="gap-2 font-bold">
+              <TrendingUp className="h-4 w-4" /> Deriv Options Hub
             </Button>
           </Link>
         </div>
