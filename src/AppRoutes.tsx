@@ -377,10 +377,11 @@ export const AppRoutes = () => {
     <Route path="dax" element={<Paid><Ger40Hub /></Paid>} />
     <Route path="de40" element={<Paid><Ger40Hub /></Paid>} />
 
-    <Route path="weltrade" element={<Paid><WeltradeSyntheticHub /></Paid>} />
-    <Route path="weltrade/synthetic" element={<Paid><WeltradeSyntheticHub /></Paid>} />
-    <Route path="weltrade-synthetic" element={<Paid><WeltradeSyntheticHub /></Paid>} />
-    <Route path="weltrade-trade" element={<Paid><WeltradeTrade /></Paid>} />
+    {/* Current Weltrade Hub is the canonical SyntX workspace. Legacy Weltrade pages redirect here. */}
+    <Route path="weltrade" element={<Paid><WeltradeHub /></Paid>} />
+    <Route path="weltrade/synthetic" element={<Navigate to="/weltrade" replace />} />
+    <Route path="weltrade-synthetic" element={<Navigate to="/weltrade" replace />} />
+    <Route path="weltrade-trade" element={<Navigate to="/weltrade" replace />} />
     <Route path="synthetic-hub" element={<Paid><SyntheticHub /></Paid>} />
     <Route path="synthetic" element={<Paid><SyntheticHub /></Paid>} />
     <Route path="synthetics" element={<Paid><SyntheticHub /></Paid>} />
