@@ -94,7 +94,7 @@ const Signals = () => {
     const c = initialParams?.get("market") ?? initialParams?.get("category");
     return c && CATEGORIES.some((x) => x.value === c) ? c : "all";
   })();
-  const initialDirection = (() => {
+  const initialStatus = (() => {\n    const s = initialParams?.get("status")?.toUpperCase();\n    return s === "ALL" || s === "ACTIVE" || s === "CLOSED" || s === "EXPIRED" ? s : "ACTIVE";\n  })();\n  const showFullHistory = initialParams?.get("history") === "all";\n\n  const initialDirection = (() => {
     const d = initialParams?.get("direction")?.toUpperCase();
     return d === "BUY" || d === "SELL" ? d : "all";
   })();
@@ -109,7 +109,7 @@ const Signals = () => {
   const [category, setCategory] = useState(initialCategory);
   const [broker, setBroker] = useState(initialBroker);
 
-  const [status, setStatus] = useState("ACTIVE");
+  const [status, setStatus] = useState(initialStatus);
   const [direction, setDirection] = useState(initialDirection);
   const [timeframe, setTimeframe] = useState(initialTimeframe);
   const [search, setSearch] = useState("");
