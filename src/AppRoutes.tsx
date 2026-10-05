@@ -116,8 +116,6 @@ import Nas100Hub from "./pages/index-hubs/Nas100Hub";
 import Ger40Hub from "./pages/index-hubs/Ger40Hub";
 
 import WeltradeHub from "./pages/WeltradeHub";
-import WeltradeTrade from "./pages/WeltradeTrade";
-import WeltradeSyntheticHub from "./pages/WeltradeSyntheticHub";
 import SyntheticHub from "./pages/SyntheticHub";
 import AutoTrade from "./pages/AutoTrade";
 import RiseFall from "./pages/RiseFall";
