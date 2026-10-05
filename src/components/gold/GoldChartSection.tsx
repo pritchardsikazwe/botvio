@@ -6,8 +6,7 @@ import { useState } from "react";
 import { GoldBotvioSignalButton } from "./GoldHauzaSignalButton";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { MarketClosedBanner } from "@/components/trading/MarketClosedBanner";
-import { GoldScalpingRobot } from "./GoldScalpingRobot";
-import { BotvioScalpRobot } from "@/components/chart/BotvioScalpRobot";
+import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 
 
 const CHART_STRATEGIES = [
@@ -88,11 +87,13 @@ export function GoldChartSection() {
         </div>
       </div>
 
-      {/* Scalp Robot — 1m / 5m breakout & S/R break detector (Gold) */}
-      <GoldScalpingRobot displaySymbol="XAU/USD" />
-
-      {/* Scalp Robot — Silver (XAG/USD) */}
-      <BotvioScalpRobot displaySymbol="XAG/USD" assetLabel="Silver" />
+      {/* Current Botvio Robot workflow — replaces the legacy client-side scalp widgets. */}
+      <BotvioRobotPromo
+        compact
+        productName="Gold Robot"
+        marketFocus="XAU/USD"
+        description="Use the current Botvio Gold Robot workflow for AI trade setups, structured entry/SL/TP levels, supported MT5 execution and risk controls."
+      />
 
        {/* ── Botvio Strategy Quick-Reference ─────── */}
        <div>
