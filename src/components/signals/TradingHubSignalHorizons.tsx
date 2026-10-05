@@ -5,6 +5,7 @@ import { getSymbolStrategy } from "@/lib/marketData/symbolStrategies";
 
 const MODES = [
   { tf: "1M", query: "M1", name: "SCALPING", expiry: "5 min", icon: Crosshair, suffix: "Fast entry + micro confirmation" },
+  { tf: "5M", query: "M5", name: "MOMENTUM", expiry: "20 min", icon: TrendingUp, suffix: "Momentum continuation + confirmation" },
   { tf: "15M", query: "M15", name: "INTRADAY", expiry: "1 hour", icon: Timer, suffix: "Session trend + breakout/pullback" },
   { tf: "1H", query: "H1", name: "SWING", expiry: "4 hours", icon: TrendingUp, suffix: "Structure + higher-timeframe confirmation" },
   { tf: "1D", query: "D1", name: "POSITION", expiry: "3 days", icon: Clock3, suffix: "Daily structure + macro trend" },
@@ -39,13 +40,13 @@ export function TradingHubSignalHorizons({
         </Link>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {MODES.map(({ tf, query, name, expiry, icon: Icon, suffix }) => {
           const strategy = strategyNames?.[name] ?? fallback;
           return (
             <Link
               key={tf}
-              to={`/signals?timeframe=${query}&symbol=${encodeURIComponent(symbol)}`}
+              to={`/signals?timeframe=${query}&status=all&history=all&symbol=${encodeURIComponent(symbol)}`}
               className="group rounded-2xl border border-border/60 bg-card/70 p-3 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
             >
               <div className="flex items-start justify-between gap-2">
