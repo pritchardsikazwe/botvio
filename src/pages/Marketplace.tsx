@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useMarketplaceProducts, usePurchaseProduct, MarketplaceProduct } from "@/hooks/useMarketplace";
@@ -58,6 +59,7 @@ const TYPE_COLORS: Record<string, { bg: string; text: string; border: string; gr
 
 const Marketplace = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("all");
   const { data: products, isLoading } = useMarketplaceProducts(activeTab === "all" ? undefined : activeTab);
   const { data: entitlements } = useEntitlements();
@@ -67,6 +69,7 @@ const Marketplace = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const accountId = searchParams.get("account_id") || undefined;
 
   const isOwned = (productId: string) =>
     entitlements?.some((e) => e.product_id === productId && e.status === "active") ?? false;
@@ -84,7 +87,7 @@ const Marketplace = () => {
         })
     : [];
 
-  const handleBuy = (product: MarketplaceProduct) => {
+  useEffect(() => {\n    const slug = searchParams.get("product");\n    if (!slug || !products?.length) return;\n    const target = products.find((p) => p.slug === slug);\n    if (target) {\n      setSelectedProduct(target);\n      if (target.price_usd > 0 && user) setShowCheckout(true);\n    }\n  }, [searchParams, products, user]);\n\n  const handleBuy = (product: MarketplaceProduct) => {
     if (!user) {
       toast.error("Please sign in to purchase");
       return;
