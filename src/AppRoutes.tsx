@@ -47,8 +47,6 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import DerivCallback from "./pages/DerivCallback";
-import StyleTrade from "./pages/StyleTrade";
-import Trading from "./pages/Trading";
 import ChartPage from "./pages/ChartPage";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
