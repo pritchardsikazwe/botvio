@@ -1,0 +1,42 @@
+name: Deploy Botvio MT5 Execution Only
+
+on:
+  push:
+    branches:
+      - botvio-independent-sep13
+    paths:
+      - "supabase/functions/mt5-direct-execution/**"
+      - "supabase/functions/_shared/automationAuth.ts"
+      - "supabase/functions/_shared/tradecopy/**"
+      - ".github/workflows/deploy-mt5-execution-only.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify production target
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          if [ "$SUPABASE_PROJECT_REF" != "tqqkzeblmjapgbnsbtgw" ]; then
+            echo "::error::Refusing MT5 execution deployment unless the target is the existing Botvio production backend."
+            exit 1
+          fi
+
+      - name: Deploy MT5 direct execution only
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          npx supabase@latest link --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase@latest functions deploy mt5-direct-execution --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
