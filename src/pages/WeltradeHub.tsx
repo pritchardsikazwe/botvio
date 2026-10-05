@@ -96,6 +96,7 @@ const WeltradeHub = () => {
     </div>
   );
       </ProductGate>
+  );
 };
 
 export default WeltradeHub;
