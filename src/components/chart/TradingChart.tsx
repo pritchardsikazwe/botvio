@@ -58,8 +58,6 @@ export interface TradingChartProps {
   errorDetail?: string | null;
   /** Hauza-style pivot support/resistance overlay. */
   showHauza?: boolean;
-  /** Start as a broker-native chart with Botvio analysis overlays disabled. */
-  cleanMode?: boolean;
 }
 
 const STATUS_META: Record<FeedStatus, { label: string; className: string }> = {
@@ -96,7 +94,6 @@ function TradingChartBase({
   unavailableMessage = "Market data unavailable",
   errorDetail = null,
   showHauza = false,
-  cleanMode = false,
 }: TradingChartProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -112,10 +109,10 @@ function TradingChartBase({
 
   const [chartType, setChartType] = useState<ChartType>("candles");
   const [overlays, setOverlays] = useState<TradingChartOverlays>({
-    signals: !cleanMode,
-    levels: !cleanMode,
-    indicators: !cleanMode,
-    rsi: !cleanMode,
+    signals: true,
+    levels: true,
+    indicators: true,
+    rsi: true,
   });
   const [fullscreen, setFullscreen] = useState(false);
   const [hauzaOn, setHauzaOn] = useState(showHauza);
@@ -559,7 +556,7 @@ function TradingChartBase({
         </div>
         <div className="mx-1 hidden h-4 w-px bg-border sm:block" />
         <div className="flex flex-wrap items-center gap-1">
-          {showHauza && !cleanMode && (
+          {showHauza && (
             <Button
               size="sm"
               variant={hauzaOn ? "default" : "ghost"}
