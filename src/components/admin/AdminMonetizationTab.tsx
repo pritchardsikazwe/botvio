@@ -20,7 +20,7 @@ export function AdminMonetizationTab() {
     return (products || []).map((p:any) => ({ ...p, active_users: counts[p.id] || 0 }));
   }});
   const update = useMutation({ mutationFn: async ({ id, patch }: { id:string; patch:Record<string,unknown> }) => {
-    const { error } = await supabase.from("products").update(patch).eq("id", id); if (error) throw error;
+    const { error } = await supabase.from("products").update(patch as any).eq("id", id); if (error) throw error;
   }, onSuccess: () => { qc.invalidateQueries({ queryKey:["admin-monetization-products"] }); qc.invalidateQueries({ queryKey:["home-botvio-products"] }); qc.invalidateQueries({ queryKey:["marketplace-products"] }); toast.success("Monetization setting updated"); }, onError:(e:any)=>toast.error(e.message || "Update failed") });
   return <Card id="monetization-panel" className="overflow-hidden">
     <CardHeader className="border-b"><div className="flex items-center justify-between gap-3"><div><CardTitle className="flex items-center gap-2"><DollarSign className="h-5 w-5 text-amber-500"/>Botvio Monetization</CardTitle><p className="mt-1 text-sm text-muted-foreground">Control hubs, robots and MT5 Direct pricing and availability. Changes appear on the Marketplace and Home pricing cards.</p></div><Button variant="outline" size="icon" onClick={()=>qc.invalidateQueries({queryKey:["admin-monetization-products"]})}><RefreshCw className="h-4 w-4"/></Button></div></CardHeader>
