@@ -104,7 +104,7 @@ export function usePurchaseProduct() {
             product_id: product.id,
             order_id: order.id,
             account_id: accountId || null,
-          });
+          } as any);
 
         if (prError) throw prError;
       }
