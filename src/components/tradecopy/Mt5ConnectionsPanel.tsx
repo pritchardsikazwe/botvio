@@ -71,7 +71,7 @@ function AccountCard({ a }: { a: Mt5Account }) {
             <Badge variant="outline" className="text-[10px]">No TradeCopy needed</Badge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Botvio signals can be sent to this MT5 account only when an admin has assigned an active paid MT5 Direct Execution entitlement. Direct execution is separate from provider-copy slots.</p>
-          {!paidActive && <p className="mt-2 rounded-lg border border-warning/30 bg-warning/5 p-2 text-xs text-muted-foreground">MT5 Direct Execution is a paid feature. Ask Botvio support/admin to assign the subscription to this account.</p>}
+          {!paidActive && <p className="mt-2 rounded-lg border border-warning/30 bg-warning/5 p-2 text-xs text-muted-foreground">MT5 Direct Execution is a paid feature. Choose the MT5 Direct subscription below. After payment is verified, this account can receive Botvio signals.</p>}
           <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
             <div><span className="text-muted-foreground">Last signal:</span> {ago(a.last_direct_signal_at)}</div>
             <div><span className="text-muted-foreground">Last execution:</span> {ago(a.last_direct_execution_at)}</div>
@@ -85,7 +85,7 @@ function AccountCard({ a }: { a: Mt5Account }) {
             )}
             {a.direct_signal_enabled
               ? <Button variant="outline" className="min-h-11" disabled={m.isPending} onClick={() => run("disable", {}, "Direct Botvio Signals turned off")}>Turn off Direct Signals</Button>
-              : <Button className="min-h-11" disabled={m.isPending || !paidActive} onClick={startSendToMt5}><Zap className="mr-2 h-4 w-4" />SEND BOTVIO SIGNALS</Button>}
+              : <Button className="min-h-11" disabled={m.isPending} onClick={startSendToMt5}><Zap className="mr-2 h-4 w-4" />SEND BOTVIO SIGNALS</Button>}
             <Button variant="ghost" className="min-h-11" disabled={m.isPending} onClick={() => run("test_connection", {}, "MT5 connection works")}><PlugZap className="mr-2 h-4 w-4" />Test connection</Button>
           </div>
           {!!execs?.length && (
@@ -105,6 +105,30 @@ function AccountCard({ a }: { a: Mt5Account }) {
         </div>
         <p className="text-[11px] text-muted-foreground">Copying a provider or Botvio Robot uses TradeCopy and is only set up when you pick a copy source below.</p>
       </CardContent>
+
+      <Dialog open={subscriptionOpen} onOpenChange={setSubscriptionOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Unlock MT5 Direct Signals</DialogTitle>
+            <DialogDescription>Send Botvio signals directly to this connected MT5 account. This is a separate paid product from TradeCopy.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <div className="flex items-center gap-3"><CreditCard className="h-5 w-5 text-primary" /><div><p className="font-semibold">MT5 Direct Execution</p><p className="text-xs text-muted-foreground">Subscription → payment → verification → activation</p></div></div>
+            </div>
+            <div className="grid gap-2 text-sm">
+              <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" />Choose the MT5 Direct plan</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" />Complete payment and submit confirmation</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" />Botvio verifies the subscription</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" />Return here and press Send to MT5</div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSubscriptionOpen(false)}>Not now</Button>
+            <Button onClick={() => { window.location.href = "/marketplace?product=mt5-direct&account_id=" + encodeURIComponent(a.id); }}>VIEW MT5 DIRECT PLANS</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={liveOpen} onOpenChange={setLiveOpen}>
         <DialogContent>
