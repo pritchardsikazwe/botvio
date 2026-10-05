@@ -56,9 +56,7 @@ const Marketplace = () => {
   const handleBuy = (product: MarketplaceProduct) => {
     if (!user) { toast.error("Please sign in to continue"); return; }
     if (isOwned(product.id)) { toast.info("This access is already active"); return; }
-    if (product.price_usd === 0) { purchaseMutation.mutate({ product, paymentMethod: "free", accountId }); return; }
-    setSelectedProduct(product);
-    setShowCheckout(true);
+    purchaseMutation.mutate({ product, paymentMethod: "free", accountId });
   };
 
   const handleOpen = (product: MarketplaceProduct) => {
@@ -119,8 +117,14 @@ const Marketplace = () => {
                 <p className="mt-2 text-sm font-semibold text-foreground/90">{cfg.tagline}</p>
                 <p className="mt-2 min-h-[72px] text-sm leading-6 text-muted-foreground">{product.short_description || cfg.description}</p>
                 <div className="my-5 space-y-2.5">{cfg.features.map((feature) => <div key={feature} className="flex items-center gap-2 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5 shrink-0 text-success" /> {feature}</div>)}</div>
-                <div className="flex items-end justify-between border-t border-border/50 pt-4"><div><span className="text-3xl font-black">${product.price_usd}</span><span className="ml-1 text-xs text-muted-foreground">/{product.billing_interval || "month"}</span></div><Badge variant="outline" className="text-[10px]">{product.billing_type === "recurring" ? "Monthly" : "One-time"}</Badge></div>
-                <Button className="mt-5 w-full font-bold" variant={owned ? "outline" : "default"} onClick={() => owned ? handleOpen(product) : handleBuy(product)} disabled={purchaseMutation.isPending}>{owned ? <><ExternalLink className="mr-2 h-4 w-4" /> Open</> : <><Zap className="mr-2 h-4 w-4" /> Get Access</>}</Button>
+                <div className="flex items-end justify-between border-t border-border/50 pt-4">
+                  <div>
+                    <span className="text-2xl font-black text-success">{owned ? "ACTIVE" : "FREE TEST ACCESS"}</span>
+                    <span className="ml-2 text-xs text-muted-foreground line-through">${product.price_usd}/month</span>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] border-success/30 text-success">TEST MODE</Badge>
+                </div>
+                <Button className="mt-5 w-full font-bold" variant={owned ? "outline" : "default"} onClick={() => owned ? handleOpen(product) : handleBuy(product)} disabled={purchaseMutation.isPending}>{owned ? <><ExternalLink className="mr-2 h-4 w-4" /> Open</> : <><Zap className="mr-2 h-4 w-4" /> Activate Free Access</>}</Button>
                 {product.slug === "mt5-direct" && <p className="mt-3 text-center text-[10px] text-muted-foreground">Connect your MT5 account first, then activate Direct Signals.</p>}
               </CardContent>
             </Card>;
@@ -128,6 +132,11 @@ const Marketplace = () => {
         </section>
 
         {!isLoading && visibleProducts.length === 0 && <Card className="border-dashed"><CardContent className="py-14 text-center"><Lock className="mx-auto mb-3 h-10 w-10 text-muted-foreground" /><h2 className="font-bold">Botvio products are being configured</h2><p className="mt-1 text-sm text-muted-foreground">Please check back shortly.</p></CardContent></Card>}
+
+        <section className="rounded-2xl border border-success/20 bg-success/5 p-4 text-center">
+          <p className="text-sm font-bold text-success">BOTVIO TEST ACCESS IS OPEN</p>
+          <p className="mt-1 text-xs text-muted-foreground">All active products can be activated free while we test the platform. No payment proof is required in this test mode.</p>
+        </section>
 
         <section className="grid gap-4 md:grid-cols-3">{[
           { icon: Radio, title: "1. Choose", text: "Pick a hub, robot or direct MT5 execution service." },
