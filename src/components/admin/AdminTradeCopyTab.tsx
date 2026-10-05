@@ -139,7 +139,22 @@ export const AdminTradeCopyTab = () => {
     act.mutate(() => tradecopy("promote_existing_master", { account_id: r.id }));
   };
 
-  const toggleDirect = (r: Row) => act.mutate(() => directAction("admin_set", { account_id: r.id, enabled: !r.direct_signal_enabled }));
+  const toggleDirect = (r: Row) => act.mutate(() => directAction("admin_set", {
+    account_id: r.id, enabled: !r.direct_signal_enabled, entitled: r.direct_execution_entitled,
+    plan: r.direct_execution_plan || "MT5 Direct",
+    expires_at: r.direct_execution_expires_at || null,
+  }));
+  const togglePaidMt5 = (r: Row) => {
+    const grant = !r.direct_execution_entitled;
+    const expires = grant ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null;
+    act.mutate(() => directAction("admin_set", {
+      account_id: r.id,
+      enabled: grant,
+      entitled: grant,
+      plan: grant ? "MT5 Direct — 30 Days" : undefined,
+      expires_at: expires,
+    }));
+  };
   const toggleMaster = (r: Row) => act.mutate(() => tradecopy("set_master_active", { account_id: r.id, active: !r.tradecopy_active }));
   const toggleSignalMaster = (r: Row) => act.mutate(() => tradecopy("set_signal_master", {
     account_id: r.id,
@@ -211,11 +226,11 @@ export const AdminTradeCopyTab = () => {
               <Table>
                 <TableHeader><TableRow>
                   <TableHead>Owner / Account</TableHead><TableHead>Broker · Login · Server</TableHead><TableHead>Roles</TableHead>
-                  <TableHead>Env</TableHead><TableHead>Direct Signals</TableHead><TableHead>TradeCopy</TableHead><TableHead>Last activity</TableHead><TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Env</TableHead><TableHead>MT5 Paid Access</TableHead><TableHead>Direct Signals</TableHead><TableHead>TradeCopy</TableHead><TableHead>Last activity</TableHead><TableHead className="text-right">Actions</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
-                    <TableRow><TableCell colSpan={8} className="py-6 text-center text-muted-foreground">No accounts match these filters.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="py-6 text-center text-muted-foreground">No accounts match these filters.</TableCell></TableRow>
                   ) : filtered.map((r) => (
                     <TableRow key={r.id}>
                       <TableCell><div className="font-medium">{r.label || "MT5 account"}</div><div className="text-xs text-muted-foreground">{r.owner}</div></TableCell>
@@ -224,6 +239,10 @@ export const AdminTradeCopyTab = () => {
                         {r.roles.length ? r.roles.map((x) => <Badge key={x} variant="outline" className={`text-[10px] ${ROLE_STYLE[x]}`}>{x}</Badge>) : <span className="text-xs text-muted-foreground">—</span>}
                       </div></TableCell>
                       <TableCell><Badge variant={r.environment === "LIVE" ? "destructive" : "secondary"}>{r.environment || "DEMO"}</Badge></TableCell>
+                      <TableCell className="text-xs">
+                        <div>{r.direct_execution_entitled ? "PAID ACTIVE" : "LOCKED"}</div>
+                        {r.direct_execution_entitled && r.direct_execution_expires_at && <div className="text-muted-foreground">until {new Date(r.direct_execution_expires_at).toLocaleDateString()}</div>}
+                      </TableCell>
                       <TableCell className="text-xs"><div>{r.direct_signal_enabled ? "ON" : "OFF"}</div>{r.last_direct_error && <div className="max-w-[160px] truncate text-destructive" title={r.last_direct_error}>{r.last_direct_error}</div>}</TableCell>
                       <TableCell className="text-xs">
                         <div>{usesTradeCopySlot(r) ? "Registered (uses slot)" : "Not registered"}</div>
@@ -238,9 +257,14 @@ export const AdminTradeCopyTab = () => {
                           </Button>
                         )}
                         {!r.is_botvio_robot && r.account_role !== "master" && (
-                          <Button size="sm" variant={r.direct_signal_enabled ? "outline" : "default"} disabled={act.isPending} onClick={() => toggleDirect(r)}>
-                            <Send className="mr-1 h-4 w-4" />{r.direct_signal_enabled ? "Disable Direct" : "Enable Direct"}
-                          </Button>
+                          <>
+                            <Button size="sm" variant={r.direct_execution_entitled ? "outline" : "default"} disabled={act.isPending} onClick={() => togglePaidMt5(r)}>
+                              <Crown className="mr-1 h-4 w-4" />{r.direct_execution_entitled ? "Revoke Paid MT5" : "Grant Paid MT5 · 30d"}
+                            </Button>
+                            <Button size="sm" variant={r.direct_signal_enabled ? "outline" : "secondary"} disabled={act.isPending || !r.direct_execution_entitled} onClick={() => toggleDirect(r)}>
+                              <Send className="mr-1 h-4 w-4" />{r.direct_signal_enabled ? "Disable Direct" : "Enable Direct"}
+                            </Button>
+                          </>
                         )}
                         {r.account_role === "master" && r.tradecopy_user_id && (
                           <>
@@ -329,6 +353,7 @@ function AccountDetail({ r, relations, busy, onTest, onToggleDirect, onToggleMas
         <Badge variant={r.environment === "LIVE" ? "destructive" : "secondary"}>{r.environment || "DEMO"}</Badge>
         {r.roles.map((x) => <Badge key={x} variant="outline" className={ROLE_STYLE[x]}>{x}</Badge>)}
         <Badge variant="outline">{usesTradeCopySlot(r) ? `TradeCopy ID ${r.tradecopy_user_id}` : "No TradeCopy registration"}</Badge>
+        <Badge variant="outline" className={r.direct_execution_entitled ? "border-emerald-500/30 text-emerald-500" : ""}>{r.direct_execution_entitled ? `PAID MT5 · ${r.direct_execution_plan || "Active"}` : "PAID MT5 LOCKED"}</Badge>
         {r.botvio_signal_master_enabled && <Badge variant="outline" className="border-emerald-500/30 text-emerald-500">BOTVIO SIGNAL DESTINATION · {r.botvio_signal_master_lot} lot · ≥{r.botvio_signal_min_confidence}%</Badge>}
         {r.provider && <Badge variant="outline">Provider: {r.provider.status}</Badge>}
       </div>
