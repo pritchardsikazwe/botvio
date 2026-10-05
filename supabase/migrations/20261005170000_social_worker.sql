@@ -65,3 +65,15 @@ grant select, insert, update on public.social_posts to authenticated;
 
 create index if not exists social_posts_queue_idx on public.social_posts(status, scheduled_at);
 create index if not exists social_posts_platform_idx on public.social_posts(platform, created_at desc);
+
+
+create table if not exists public.social_oauth_states (
+  state text primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  platform text not null check (platform in ('linkedin','facebook','instagram','x','tiktok')),
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+alter table public.social_oauth_states enable row level security;
+revoke all on public.social_oauth_states from anon, authenticated;
+create index if not exists social_oauth_states_expiry_idx on public.social_oauth_states(expires_at);
