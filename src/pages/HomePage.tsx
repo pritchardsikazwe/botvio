@@ -6,6 +6,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
 import { HomeMarketCharts } from "@/components/home/HomeMarketCharts";
+import { BotvioPricingSection } from "@/components/home/BotvioPricingSection";
 import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -204,6 +205,8 @@ const HomePage = () => {
             <p className="mt-5 text-[10px] leading-4 text-muted-foreground">Some broker links on Botvio may be affiliate links. If you open an account through an affiliate link, Botvio may receive compensation at no additional cost to you. Trading involves risk.</p>
           </div>
         </section>
+
+        <BotvioPricingSection />
 
         <section className="container mx-auto px-4 pb-14">
           <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-primary/10 px-6 py-10 text-center sm:px-10"><div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10" /><div className="relative"><ShieldCheck className="mx-auto h-8 w-8 text-primary" /><h2 className="mt-3 text-3xl font-black">Build your trading workflow with Botvio</h2><p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">Create a free account, explore the markets and unlock the tools that fit your strategy.</p><Button size="lg" onClick={start} className="mt-6 px-8 font-bold">Start Free <ArrowRight className="ml-2 h-4 w-4" /></Button></div></div>
