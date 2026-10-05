@@ -1,4 +1,28 @@
 # Botvio canonical crawl policy
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /billing/
+Disallow: /accounts/
+Disallow: /connections/
+Disallow: /trade-history/
+Disallow: /provider-dashboard/
+Disallow: /callback
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /billing/
+Disallow: /accounts/
+Disallow: /connections/
+Disallow: /trade-history/
+Disallow: /provider-dashboard/
+Disallow: /callback
+
 User-agent: *
 Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
