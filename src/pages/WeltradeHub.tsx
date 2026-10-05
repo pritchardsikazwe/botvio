@@ -1,3 +1,4 @@
+import { ProductGate } from "@/components/access/ProductGate";
 import { useState } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
@@ -18,6 +19,7 @@ const WeltradeHub = () => {
   const [activeTab, setActiveTab] = useState("charts");
 
   return (
+      <ProductGate slug="weltrade-hub" title="Weltrade Hub subscription required" description="Unlock Weltrade Hub to access its premium market intelligence, signals and MT5 workflows.">
     <div className="min-h-screen bg-background">
       <SEOHead seoKey="weltrade"
         title="Weltrade Hub – GainX, PainX, FlipX, SwitchX & FX Charts & Signals"
@@ -93,6 +95,7 @@ const WeltradeHub = () => {
       </main>
     </div>
   );
+      </ProductGate>
 };
 
 export default WeltradeHub;
