@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Bot, Send, Users, Zap, AlertTriangle, PlugZap } from "lucide-react";
+import { Bot, Send, Users, Zap, AlertTriangle, PlugZap, CreditCard, CheckCircle2 } from "lucide-react";
 import {
   DIRECT_LIVE_PHRASE, Mt5Account, useDirectExecutions, useDirectMutation, useDirectStatus, useMyMt5Accounts,
 } from "@/hooks/useDirectExecution";
@@ -19,6 +19,7 @@ function AccountCard({ a }: { a: Mt5Account }) {
   const m = useDirectMutation();
   const { data: execs } = useDirectExecutions(a.direct_signal_enabled || a.last_direct_signal_at ? a.id : undefined, 5);
   const [liveOpen, setLiveOpen] = useState(false);
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
   const [phrase, setPhrase] = useState("");
   const [lot, setLot] = useState(String(a.direct_lot ?? 0.01));
   const isLive = a.environment === "LIVE";
@@ -28,6 +29,14 @@ function AccountCard({ a }: { a: Mt5Account }) {
     m.mutate({ action, payload: { account_id: a.id, ...payload } }, {
       onSuccess: () => toast.success(ok), onError: (e: Error) => toast.error(e.message),
     });
+  const startSendToMt5 = () => {
+    if (!paidActive) {
+      setSubscriptionOpen(true);
+      return;
+    }
+    enable();
+  };
+
   const enable = () => {
     const l = Number(lot);
     if (!(l >= 0.01 && l <= 5)) return toast.error("Lot size must be between 0.01 and 5");
@@ -76,7 +85,7 @@ function AccountCard({ a }: { a: Mt5Account }) {
             )}
             {a.direct_signal_enabled
               ? <Button variant="outline" className="min-h-11" disabled={m.isPending} onClick={() => run("disable", {}, "Direct Botvio Signals turned off")}>Turn off Direct Signals</Button>
-              : <Button className="min-h-11" disabled={m.isPending || !paidActive} onClick={enable}><Zap className="mr-2 h-4 w-4" />SEND BOTVIO SIGNALS</Button>}
+              : <Button className="min-h-11" disabled={m.isPending || !paidActive} onClick={startSendToMt5}><Zap className="mr-2 h-4 w-4" />SEND BOTVIO SIGNALS</Button>}
             <Button variant="ghost" className="min-h-11" disabled={m.isPending} onClick={() => run("test_connection", {}, "MT5 connection works")}><PlugZap className="mr-2 h-4 w-4" />Test connection</Button>
           </div>
           {!!execs?.length && (
