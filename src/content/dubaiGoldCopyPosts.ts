@@ -16,11 +16,6 @@ const make = (title:string, excerpt:string, body:string) => ({
 });
 
 export const DUBAI_GOLD_COPY_POSTS: Record<string, ReturnType<typeof make>> = {
-  "gold-trading-dubai-guide": make(
-    "Gold Trading in Dubai: Complete XAUUSD Guide for UAE Traders",
-    "A Dubai-focused XAUUSD guide covering gold market drivers, sessions, MT5, position sizing and practical research routines.",
-    `<h2>Why gold matters to Dubai traders</h2><p>Gold is a major global market and a common instrument for traders who want exposure to a highly watched commodity. XAUUSD quotes gold against the US dollar, so Dubai traders need to understand both gold-specific drivers and the role of USD conditions.</p><h2>What moves XAUUSD?</h2><p>Gold can react to interest-rate expectations, inflation data, central-bank policy, the US dollar, geopolitical risk and changes in market sentiment. No single factor predicts the next candle, so a research plan should combine context with a clearly defined entry and invalidation rule.</p><h2>Dubai trading time</h2><p>Dubai uses Gulf Standard Time (UTC+4). Record London and New York session times in GST and verify daylight-saving changes for the relevant date. Do not copy an old timetable without checking the current conversion.</p><h2>Gold on MT5</h2><p>When using MT5, confirm the exact XAUUSD symbol, contract size, minimum volume, spread, margin and trading hours for your broker account. The same symbol name can have different contract conditions between providers.</p><h2>Risk framework</h2><ol><li>Choose the maximum planned loss first.</li><li>Define the invalidation level.</li><li>Calculate position size from the actual contract specification.</li><li>Check news risk before entry.</li><li>Record the trade and the reason for taking it.</li></ol><h2>Botvio gold research</h2><p>Botvio can provide chart analysis and gold research, but a signal is decision support rather than a guaranteed outcome. Use the live chart and current market information rather than relying on an old price level.</p><h2>Frequently asked questions</h2><h3>Is gold always bullish?</h3><p>No. Gold can rise or fall sharply and can reverse around macroeconomic events.</p><h3>What is the best time to trade gold in Dubai?</h3><p>There is no universal best hour. Test the session that matches your strategy and execution capacity, with London and New York activity considered where relevant.</p>`
-  ),
   "xauusd-trading-strategy-dubai": make(
     "XAUUSD Trading Strategy for Dubai Traders",
     "A rules-based educational framework for researching XAUUSD from Dubai without relying on guaranteed signals.",
@@ -126,6 +121,6 @@ export const DUBAI_GOLD_COPY_INDEX: BlogIndexEntry[] = Object.entries(DUBAI_GOLD
   category:p.category,
   readTime:p.readTime,
   date:p.date,
-  featured:i<6,
+  featured:i<5,
   image:"🇦🇪",
 }));
