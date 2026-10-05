@@ -22,6 +22,8 @@ function AccountCard({ a }: { a: Mt5Account }) {
   const [phrase, setPhrase] = useState("");
   const [lot, setLot] = useState(String(a.direct_lot ?? 0.01));
   const isLive = a.environment === "LIVE";
+  const entitlementExpired = !!a.direct_execution_expires_at && new Date(a.direct_execution_expires_at).getTime() <= Date.now();
+  const paidActive = a.direct_execution_entitled && !entitlementExpired;
   const run = (action: string, payload: Record<string, unknown>, ok: string) =>
     m.mutate({ action, payload: { account_id: a.id, ...payload } }, {
       onSuccess: () => toast.success(ok), onError: (e: Error) => toast.error(e.message),
@@ -49,6 +51,7 @@ function AccountCard({ a }: { a: Mt5Account }) {
             <Badge className={a.direct_signal_enabled ? "bg-success/15 text-success border-success/30" : ""} variant={a.direct_signal_enabled ? "outline" : "secondary"}>
               Direct Signals {a.direct_signal_enabled ? "ON" : "OFF"}
             </Badge>
+            <Badge variant={paidActive ? "outline" : "secondary"}>{paidActive ? `Paid MT5 · ${a.direct_execution_plan || "Active"}` : "MT5 Direct · Locked"}</Badge>
           </div>
         </div>
       </CardHeader>
@@ -58,7 +61,8 @@ function AccountCard({ a }: { a: Mt5Account }) {
             <div className="flex items-center gap-2"><Send className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">Direct Botvio Signals</p></div>
             <Badge variant="outline" className="text-[10px]">No TradeCopy needed</Badge>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Botvio signals are placed straight on this account. This does not use a TradeCopy registration and is separate from copy trading.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Botvio signals can be sent to this MT5 account only when an admin has assigned an active paid MT5 Direct Execution entitlement. Direct execution is separate from provider-copy slots.</p>
+          {!paidActive && <p className="mt-2 rounded-lg border border-warning/30 bg-warning/5 p-2 text-xs text-muted-foreground">MT5 Direct Execution is a paid feature. Ask Botvio support/admin to assign the subscription to this account.</p>}
           <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
             <div><span className="text-muted-foreground">Last signal:</span> {ago(a.last_direct_signal_at)}</div>
             <div><span className="text-muted-foreground">Last execution:</span> {ago(a.last_direct_execution_at)}</div>
@@ -72,7 +76,7 @@ function AccountCard({ a }: { a: Mt5Account }) {
             )}
             {a.direct_signal_enabled
               ? <Button variant="outline" className="min-h-11" disabled={m.isPending} onClick={() => run("disable", {}, "Direct Botvio Signals turned off")}>Turn off Direct Signals</Button>
-              : <Button className="min-h-11" disabled={m.isPending} onClick={enable}><Zap className="mr-2 h-4 w-4" />SEND BOTVIO SIGNALS</Button>}
+              : <Button className="min-h-11" disabled={m.isPending || !paidActive} onClick={enable}><Zap className="mr-2 h-4 w-4" />SEND BOTVIO SIGNALS</Button>}
             <Button variant="ghost" className="min-h-11" disabled={m.isPending} onClick={() => run("test_connection", {}, "MT5 connection works")}><PlugZap className="mr-2 h-4 w-4" />Test connection</Button>
           </div>
           {!!execs?.length && (
@@ -125,7 +129,7 @@ export function Mt5ConnectionsPanel() {
       {isLoading ? <Skeleton className="h-48 w-full" /> : error ? (
         <p className="text-sm text-destructive">MT5 accounts could not be loaded.</p>
       ) : accounts.length === 0 ? (
-        <Card className="glass-card"><CardContent className="p-5 text-sm text-muted-foreground">No MT5 account connected yet. Connect one in the MT5 section below, then turn on Direct Botvio Signals or pick a copy source.</CardContent></Card>
+        <Card className="glass-card"><CardContent className="p-5 text-sm text-muted-foreground">No MT5 account connected yet. Connect one in the MT5 section below. Paid Direct MT5 execution is enabled only for accounts selected by an admin.</CardContent></Card>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">{accounts.map((a) => <AccountCard key={a.id} a={a} />)}</div>
       )}
