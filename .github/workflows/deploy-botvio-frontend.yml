@@ -10,9 +10,6 @@ on:
       - "index.html"
       - "vite.config.ts"
       - "package.json"
-      - "package-lock.json"
-      - "bun.lockb"
-      - "bun.lock"
       - "wrangler.jsonc"
       - "tsconfig*.json"
       - "tailwind.config.*"
@@ -38,10 +35,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build production frontend
         run: npm run build
