@@ -23,7 +23,6 @@ const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Roc
   crash: { label: "Crash", icon: Bomb, tone: "text-red-400 border-red-500/40" },
   volatility: { label: "Volatility", icon: Activity, tone: "text-blue-400 border-blue-500/40" },
   step: { label: "Step", icon: Zap, tone: "text-amber-400 border-amber-500/40" },
-      </ProductGate>
 };
 
 export default function SyntheticHub() {
