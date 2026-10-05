@@ -62,10 +62,15 @@ int OnInit()
    // Resolve broker preset → symbol list
    if(InpBrokerPreset == PRESET_WELTRADE)
    {
-      g_tickSymbols = "GainX 400,GainX 600,GainX 800,PainX 400,PainX 600,PainX 800,"
+      g_tickSymbols = "GainX 400,GainX 600,GainX 800,GainX 999,GainX 1200,"
+                      "PainX 400,PainX 600,PainX 800,PainX 999,PainX 1200,"
                       "FlipX 1,FlipX 2,FlipX 3,FlipX 4,FlipX 5,"
                       "SwitchX 600,SwitchX 1200,SwitchX 1800,"
-                      "FX VOL 20,FX VOL 40,FX VOL 80";
+                      "FX VOL 20,FX VOL 40,FX VOL 60,FX VOL 80,FX VOL 99,"
+                      "SFX VOL 20,SFX VOL 40,SFX VOL 60,SFX VOL 80,SFX VOL 99,"
+                      "BreakX 600,BreakX 1200,BreakX 1800,"
+                      "TrendX 600,TrendX 1200,TrendX 1800,"
+                      "PlusX 1,FiboX,QuadX,MAX PainX,MAX GainX";
       Print("Broker preset: WELTRADE — streaming SyntX (GainX/PainX/FlipX/SwitchX/FX VOL)");
    }
    else if(InpBrokerPreset == PRESET_EXNESS)
