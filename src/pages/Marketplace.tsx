@@ -87,7 +87,17 @@ const Marketplace = () => {
         })
     : [];
 
-  useEffect(() => {\n    const slug = searchParams.get("product");\n    if (!slug || !products?.length) return;\n    const target = products.find((p) => p.slug === slug);\n    if (target) {\n      setSelectedProduct(target);\n      if (target.price_usd > 0 && user) setShowCheckout(true);\n    }\n  }, [searchParams, products, user]);\n\n  const handleBuy = (product: MarketplaceProduct) => {
+  useEffect(() => {
+    const slug = searchParams.get("product");
+    if (!slug || !products?.length) return;
+    const target = products.find((p) => p.slug === slug);
+    if (target) {
+      setSelectedProduct(target);
+      if (target.price_usd > 0 && user) setShowCheckout(true);
+    }
+  }, [searchParams, products, user]);
+
+  const handleBuy = (product: MarketplaceProduct) => {
     if (!user) {
       toast.error("Please sign in to purchase");
       return;
@@ -144,6 +154,7 @@ const Marketplace = () => {
       paymentMethod,
       proofUrl,
       affiliateCode,
+      accountId,
     });
     setShowCheckout(false);
     setSelectedProduct(null);
