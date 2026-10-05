@@ -2,7 +2,12 @@
 // Supabase Cron/pg_net should send a dedicated project automation secret in the apikey header.
 // The service-role fallback is retained only for backwards compatibility.
 export function assertAutomationKey(req: Request): boolean {
-  const presented = req.headers.get("apikey") ?? "";
+  // Accept the dedicated apikey header and the legacy Botvio cron header used by
+  // existing pg_cron/pg_net jobs. Never log or return either secret.
+  const presented =
+    req.headers.get("apikey") ??
+    req.headers.get("x-botvio-automation-secret") ??
+    "";
   if (!presented) return false;
 
   // Preferred: a dedicated Edge Function secret. Never log or return its value.
