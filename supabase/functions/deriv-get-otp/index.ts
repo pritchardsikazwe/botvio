@@ -16,24 +16,28 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const match = authHeader.match(/^Bearer\s+(.+)$/i);
+    if (!match?.[1]) {
       return new Response(
         JSON.stringify({ ok: false, error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const token = match[1].trim();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getUser(token);
-    
+    // Validate the caller with the service-role client. This avoids depending on
+    // the anon-key/RLS client configuration while still requiring a real user JWT.
+    const authClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { data: claimsData, error: claimsError } = await authClient.auth.getUser(token);
+
     if (claimsError || !claimsData?.user) {
+      console.error("deriv-get-otp auth validation failed:", claimsError?.message ?? "no user");
       return new Response(
         JSON.stringify({ ok: false, error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -41,7 +45,11 @@ Deno.serve(async (req) => {
     }
 
     const userId = claimsData.user.id;
-    const body = await req.json();
+    const admin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    const body = await req.json().catch(() => ({}));
     const { connection_id, account_id, deriv_token } = body;
 
     if (!connection_id && !account_id && !deriv_token) {
@@ -51,12 +59,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get the Deriv access token from the connection
+    // Get the Deriv access token from the connection.
     let derivAccessToken: string | null = typeof deriv_token === "string" ? deriv_token.trim() : null;
     let accountIdToUse = account_id;
 
     if (connection_id) {
-      const { data: connection, error: connError } = await supabase
+      const { data: connection, error: connError } = await admin
         .from("deriv_connections")
         .select("oauth_access_token, login_id")
         .eq("id", connection_id)
@@ -71,14 +79,12 @@ Deno.serve(async (req) => {
       }
 
       derivAccessToken = connection.oauth_access_token;
-      if (!accountIdToUse) {
-        accountIdToUse = connection.login_id;
-      }
+      if (!accountIdToUse) accountIdToUse = connection.login_id;
     }
 
-    // Also try getting token from deriv_connections by user + env if no connection_id
+    // Also try the user's latest connected Deriv connection if no token was supplied.
     if (!derivAccessToken) {
-      const { data: conn } = await supabase
+      const { data: conn } = await admin
         .from("deriv_connections")
         .select("oauth_access_token, login_id")
         .eq("user_id", userId)
@@ -108,8 +114,6 @@ Deno.serve(async (req) => {
     }
 
     if (!derivAccessToken || !accountIdToUse) {
-      // Expected state (user hasn't linked Deriv yet) — return 200 so clients
-      // handle it gracefully instead of surfacing a runtime error.
       return new Response(
         JSON.stringify({
           ok: false,
@@ -120,15 +124,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    const clientId = "33XSUutrVPDWusVXuDUwW";
-
-    // Request OTP from Deriv REST API
     const otpResponse = await fetch(
       `https://api.derivws.com/trading/v1/options/accounts/${accountIdToUse}/otp`,
       {
         method: "POST",
         headers: {
-          "Deriv-App-ID": clientId,
+          "Deriv-App-ID": "33XSUutrVPDWusVXuDUwW",
           "Authorization": `Bearer ${derivAccessToken}`,
         },
       }
@@ -144,7 +145,6 @@ Deno.serve(async (req) => {
     }
 
     const otpData = await otpResponse.json();
-    // Response should contain { data: { url: "wss://..." } }
     const wsUrl = otpData?.data?.url || otpData?.url;
 
     if (!wsUrl) {
@@ -155,11 +155,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({
-        ok: true,
-        ws_url: wsUrl,
-        account_id: accountIdToUse,
-      }),
+      JSON.stringify({ ok: true, ws_url: wsUrl, account_id: accountIdToUse }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
