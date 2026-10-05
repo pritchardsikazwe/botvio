@@ -1,3 +1,4 @@
+import { ProductGate } from "@/components/access/ProductGate";
 import { useMemo, useState, useEffect } from "react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
@@ -22,6 +23,7 @@ const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Roc
   crash: { label: "Crash", icon: Bomb, tone: "text-red-400 border-red-500/40" },
   volatility: { label: "Volatility", icon: Activity, tone: "text-blue-400 border-blue-500/40" },
   step: { label: "Step", icon: Zap, tone: "text-amber-400 border-amber-500/40" },
+      </ProductGate>
 };
 
 export default function SyntheticHub() {
@@ -45,6 +47,7 @@ export default function SyntheticHub() {
   }, [filter, liveKeys]);
 
   return (
+      <ProductGate slug="synthetic-hub" title="Synthetic Hub subscription required" description="Unlock Synthetic Hub to access its premium signals, charts and trading intelligence.">
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Deriv Synthetic Hub – Auto Signals on Boom, Crash, Volatility & Step"
