@@ -134,6 +134,27 @@ const CountryPage = () => {
               </section>
             )}
 
+            {(country === "botswana" || country === "nigeria") && (
+              <section className="space-y-4">
+                <h2 className="text-2xl font-bold">Research for {info.name} Traders</h2>
+                <p className="text-muted-foreground">Explore country-specific research covering forex, gold, Deriv synthetic indices, MT5, copy trading, AI trading and risk management.</p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {[
+                    [`${country}-forex-trading-guide`, "Forex Trading Guide"],
+                    [`${country}-gold-trading-guide`, "Gold / XAUUSD Guide"],
+                    [`${country}-deriv-synthetic`, "Deriv Synthetic Indices"],
+                    [`${country}-deriv-mt5`, "Deriv MT5"],
+                    [`${country}-copy-trading`, "Copy Trading"],
+                    [`${country}-risk-management`, "Risk Management"],
+                  ].map(([slug, label]) => (
+                    <Link key={slug} to={`/blog/${slug}`} className="flex items-center justify-between rounded-lg border p-4 hover:border-primary transition-colors">
+                      <span className="font-medium">{label}</span><ArrowRight className="h-4 w-4" />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <TradeTip type="disclaimer" tip={`⚠️ Trading involves significant risk. Botvio does not guarantee profits. ${info.name} users should only trade with funds they can afford to lose.`} />
 
             <section className="bg-gradient-to-r from-primary/10 to-warning/10 rounded-xl p-8 text-center space-y-4">
