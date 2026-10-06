@@ -224,8 +224,8 @@ Deno.serve(async(req)=>{
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
-      timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(finalScore),broker:["deriv"],
-      category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
+      timeframe:p.tf,strategy_name:strategyName,confidence:Math.round(finalScore),broker:["deriv"],
+      category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,
       expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${alignedCount}/${confirmationCount} higher-timeframe confirmations/alignment`,
       explanation_json:{engine:"Botvio CFD MTF Engine v2",signal_type:p.type,timeframe:p.tf,strategy_types:strategyLabels,expiry_seconds:p.expiry,expires_at:expiresAt,
         source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",higher_timeframe_confirmation:alignedCount,confirmation_count:confirmationCount,confirmation_bonus:confirmationBonus,conflict_penalty:conflictPenalty,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
