@@ -28,19 +28,19 @@ jobs:
         include:
           - id: gold-robot
             name: Botvio Gold Robot
-            app_id: live.botvio.gold
+            app_id: gold.botvio.live
           - id: crypto-robot
             name: Botvio Crypto Robot
-            app_id: live.botvio.crypto
+            app_id: crypto.botvio.live
           - id: synthetic-robot
             name: Botvio Synthetic Robot
-            app_id: live.botvio.synthetic
+            app_id: synthetic.botvio.live
           - id: weltrade-robot
             name: Botvio Weltrade Robot
-            app_id: live.botvio.weltrade
+            app_id: weltrade.botvio.live
           - id: deriv-copy
             name: Botvio Deriv Copy Trading
-            app_id: live.botvio.copy
+            app_id: copy.botvio.live
     env:
       CAP_APP_ID: ${{ matrix.app_id }}
       CAP_APP_NAME: ${{ matrix.name }}
@@ -114,19 +114,19 @@ jobs:
         include:
           - id: gold-robot
             name: Botvio Gold Robot
-            app_id: live.botvio.gold
+            app_id: gold.botvio.live
           - id: crypto-robot
             name: Botvio Crypto Robot
-            app_id: live.botvio.crypto
+            app_id: crypto.botvio.live
           - id: synthetic-robot
             name: Botvio Synthetic Robot
-            app_id: live.botvio.synthetic
+            app_id: synthetic.botvio.live
           - id: weltrade-robot
             name: Botvio Weltrade Robot
-            app_id: live.botvio.weltrade
+            app_id: weltrade.botvio.live
           - id: deriv-copy
             name: Botvio Deriv Copy Trading
-            app_id: live.botvio.copy
+            app_id: copy.botvio.live
     env:
       CAP_APP_ID: ${{ matrix.app_id }}
       CAP_APP_NAME: ${{ matrix.name }}
