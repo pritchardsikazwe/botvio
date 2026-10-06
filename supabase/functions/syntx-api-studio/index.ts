@@ -44,6 +44,17 @@ function unwrap(body: unknown): unknown {
   return body;
 }
 
+function normalizeSymbolKey(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function resolveBrokerSymbol(requested: string, symbols: string[]) {
+  const exact = symbols.find((s) => s.toLowerCase() === requested.toLowerCase());
+  if (exact) return exact;
+  const key = normalizeSymbolKey(requested);
+  return symbols.find((s) => normalizeSymbolKey(s) === key) ?? requested;
+}
+
 function normalizeSymbols(body: unknown): string[] {
   const raw = unwrap(body);
   if (Array.isArray(raw)) {
@@ -247,9 +258,15 @@ Deno.serve(async (req) => {
     }
 
     if (action === "quote") {
-      const symbol = String(body?.symbol ?? "").trim();
-      if (!symbol) throw new Error("Symbol is required");
-      return json({ ok: true, quote: await withConnection(admin, userId, async (session) => normalizeQuote(await callApi("/GetQuote", { id: session, symbol }))) });
+      const requestedSymbol = String(body?.symbol ?? "").trim();
+      if (!requestedSymbol) throw new Error("Symbol is required");
+      let resolvedSymbol = requestedSymbol;
+      const quote = await withConnection(admin, userId, async (session) => {
+        const symbols = normalizeSymbols(await callApi("/Symbols", { id: session }));
+        resolvedSymbol = resolveBrokerSymbol(requestedSymbol, symbols);
+        return normalizeQuote(await callApi("/GetQuote", { id: session, symbol: resolvedSymbol }));
+      });
+      return json({ ok: true, quote, requestedSymbol, resolvedSymbol });
     }
 
     if (action === "history") {
@@ -260,12 +277,15 @@ Deno.serve(async (req) => {
       const from = String(body?.from ?? new Date(Date.now() - 400 * 5 * 60_000).toISOString());
       if (!symbol) throw new Error("Symbol is required");
       let rawSample = "";
+      let resolvedSymbol = symbol;
       const candles = await withConnection(admin, userId, async (session) => {
+        const symbols = normalizeSymbols(await callApi("/Symbols", { id: session }));
+        resolvedSymbol = resolveBrokerSymbol(symbol, symbols);
         // MT5 servers report times in broker-server local time (no zone). Derive
         // the offset from a live quote so candles line up with real UTC time.
         let offsetSec = 0;
         try {
-          const q = unwrap(await callApi("/GetQuote", { id: session, symbol })) as Record<string, unknown>;
+          const q = unwrap(await callApi("/GetQuote", { id: session, symbol: resolvedSymbol })) as Record<string, unknown>;
           const qt = q?.time ?? q?.Time;
           if (qt) {
             const diff = new Date(String(qt).replace(/Z?$/, "Z")).getTime() - Date.now();
@@ -273,15 +293,15 @@ Deno.serve(async (req) => {
           }
         } catch { /* fall back to no offset */ }
         const shift = (iso: string) => new Date(new Date(iso).getTime() + offsetSec * 1000).toISOString().slice(0, 19);
-        const raw = await callApi("/PriceHistory", { id: session, symbol, from: shift(from), to: shift(to), timeFrame: timeframeMap[timeframe] ?? 5 });
+        const raw = await callApi("/PriceHistory", { id: session, symbol: resolvedSymbol, from: shift(from), to: shift(to), timeFrame: timeframeMap[timeframe] ?? 5 });
         const bars = normalizeBars(raw).map((b) => ({ ...b, time: b.time - offsetSec }));
         if (!bars.length) {
           rawSample = (typeof raw === "string" ? raw : JSON.stringify(raw)).slice(0, 800);
-          throw new Error(`TradeCopy PriceHistory returned no valid candles for ${symbol} (${timeframe}). Response: ${rawSample}`);
+          throw new Error(`TradeCopy PriceHistory returned no valid candles for ${resolvedSymbol} (${timeframe}). Response: ${rawSample}`);
         }
         return bars;
       });
-      return json({ ok: true, candles, ...(rawSample ? { rawSample } : {}) });
+      return json({ ok: true, candles, requestedSymbol: symbol, resolvedSymbol, ...(rawSample ? { rawSample } : {}) });
     }
 
     if (action === "diagnostics") {
@@ -297,7 +317,8 @@ Deno.serve(async (req) => {
       };
       const symbols = await withConnection(admin, userId, async (session) => normalizeSymbols(await callApi("/Symbols", { id: session })));
       result.symbolCount = symbols.length;
-      result.symbolSample = symbols.filter((s) => s.toLowerCase().includes(requestedSymbol.toLowerCase().replace(/[-_]/g, ""))).slice(0, 25);
+      result.symbolSample = symbols.filter((s) => normalizeSymbolKey(s).includes(normalizeSymbolKey(requestedSymbol))).slice(0, 25);
+      result.resolvedSymbol = resolveBrokerSymbol(requestedSymbol, symbols);
       try {
         result.quote = await withConnection(admin, userId, async (session) => normalizeQuote(await callApi("/GetQuote", { id: session, symbol: requestedSymbol })));
       } catch (e) {
