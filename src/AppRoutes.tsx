@@ -121,6 +121,7 @@ import WeltradeHub from "./pages/WeltradeHub";
 import SyntheticHub from "./pages/SyntheticHub";
 import AutoTrade from "./pages/AutoTrade";
 import RiseFall from "./pages/RiseFall";
+import StyleTrade from "./pages/StyleTrade";
 import NewsCalendar from "./pages/NewsCalendar";
 import GlobalMarkets from "./pages/markets/GlobalMarkets";
 import USMarket from "./pages/markets/USMarket";
@@ -423,7 +424,7 @@ export const AppRoutes = () => {
     <Route path="reset-password" element={<ResetPassword />} />
     <Route path="sports-betting" element={<StoreRestrictedRoute><SportsBetting /></StoreRestrictedRoute>} />
     <Route path="unsubscribe" element={<Unsubscribe />} />
-    <Route path="trade/style/:styleId" element={<Navigate to="/options" replace />} />
+    <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
     <Route path="blog" element={<Blog />} />
     <Route path="ar/dubai" element={<ArabicDubaiTradingGuide />} />
     <Route path="ar/saudi-arabia" element={<SaudiArabicTradingGuide />} />
