@@ -4,16 +4,33 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Activity, BarChart3, RefreshCw } from "lucide-react";
+import { Activity, BarChart3, RefreshCw, Shield, Target } from "lucide-react";
 import { AutoTradePanel } from "@/components/trading/AutoTradePanel";
 
 const WS_URL = "wss://api.derivws.com/trading/v1/options/ws/public";
 const MARKETS = [
   { symbol: "R_10", name: "Volatility 10" },
+  { symbol: "R_25", name: "Volatility 25" },
+  { symbol: "R_50", name: "Volatility 50" },
   { symbol: "R_75", name: "Volatility 75" },
   { symbol: "R_100", name: "Volatility 100" },
-  { symbol: "1HZ100V", name: "Vol 100 (1s)" },
+  { symbol: "1HZ10V", name: "Volatility 10 (1s)" },
+  { symbol: "1HZ15V", name: "Volatility 15 (1s)" },
+  { symbol: "1HZ25V", name: "Volatility 25 (1s)" },
+  { symbol: "1HZ30V", name: "Volatility 30 (1s)" },
+  { symbol: "1HZ50V", name: "Volatility 50 (1s)" },
+  { symbol: "1HZ75V", name: "Volatility 75 (1s)" },
+  { symbol: "1HZ90V", name: "Volatility 90 (1s)" },
+  { symbol: "1HZ100V", name: "Volatility 100 (1s)" },
+  { symbol: "BOOM300", name: "Boom 300" },
+  { symbol: "BOOM500", name: "Boom 500" },
+  { symbol: "BOOM600", name: "Boom 600" },
+  { symbol: "BOOM900", name: "Boom 900" },
   { symbol: "BOOM1000", name: "Boom 1000" },
+  { symbol: "CRASH300", name: "Crash 300" },
+  { symbol: "CRASH500", name: "Crash 500" },
+  { symbol: "CRASH600", name: "Crash 600" },
+  { symbol: "CRASH900", name: "Crash 900" },
   { symbol: "CRASH1000", name: "Crash 1000" },
 ];
 const fmt = (n: number) => Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : "—";
@@ -29,12 +46,12 @@ export function DerivOptionsTradingTerminal() {
     let closed = false;
     try {
       ws = new WebSocket(WS_URL);
-      ws.onopen = () => MARKETS.forEach(m => ws?.send(JSON.stringify({ ticks: m.symbol, subscribe: 1 })));
+      ws.onopen = () => { ws?.send(JSON.stringify({ active_symbols: "brief" })); MARKETS.forEach(m => ws?.send(JSON.stringify({ ticks: m.symbol, subscribe: 1 }))); };
       ws.onmessage = e => {
         try {
           const d = JSON.parse(e.data);
           if (d.msg_type !== "tick") return;
-          const symbol = String(d.tick?.symbol || "");
+          const symbol = String(d.tick?.underlying_symbol || d.tick?.symbol || "");
           const price = Number(d.tick?.quote);
           if (!symbol || !Number.isFinite(price) || closed) return;
           setQuotes(prev => {
@@ -88,7 +105,7 @@ export function DerivOptionsTradingTerminal() {
       <div className="flex gap-2 items-center"><Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">● LIVE</Badge><Button size="sm" variant="outline" className="border-white/10" onClick={loadTrades}><RefreshCw className="h-3.5 w-3.5 mr-1"/>Refresh</Button></div>
     </div>
     <div className="p-4 space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">{MARKETS.map(m => { const q = quotes[m.symbol]; const pct = q?.previous ? ((q.price-q.previous)/q.previous)*100 : 0; const up = pct >= 0; return <button key={m.symbol} onClick={()=>setSelected(m.symbol)} className={"text-left rounded-xl border p-3 " + (selected===m.symbol ? "border-primary bg-primary/10" : "border-white/10 bg-white/[.02]")}><div className="flex justify-between"><span className="text-xs font-semibold">{m.name}</span><span className={up?"text-emerald-400":"text-red-400"}>{up?"↑":"↓"}</span></div><div className="mt-1 text-base font-black">{q?fmt(q.price):"—"}</div><div className={up?"text-[11px] text-emerald-400":"text-[11px] text-red-400"}>{q?(up?"+":"")+pct.toFixed(3)+"%":"Connecting…"}</div><div className="text-[10px] text-slate-500 mt-1">{bias===null?"Waiting for ticks":"Bias "+bias+"%"}</div></button>; })}</div>
+      <div className="flex gap-2 overflow-x-auto pb-1 snap-x">{MARKETS.map(m => { const q = quotes[m.symbol]; const pct = q?.previous ? ((q.price-q.previous)/q.previous)*100 : 0; const up = pct >= 0; return <button key={m.symbol} onClick={()=>setSelected(m.symbol)} className={"text-left rounded-xl border p-3 min-w-[150px] snap-start " + (selected===m.symbol ? "border-primary bg-primary/10" : "border-white/10 bg-white/[.02]")}><div className="flex justify-between"><span className="text-xs font-semibold">{m.name}</span><span className={up?"text-emerald-400":"text-red-400"}>{up?"↑":"↓"}</span></div><div className="mt-1 text-base font-black">{q?fmt(q.price):"—"}</div><div className={up?"text-[11px] text-emerald-400":"text-[11px] text-red-400"}>{q?(up?"+":"")+pct.toFixed(3)+"%":"Connecting…"}</div><div className="text-[10px] text-slate-500 mt-1">{bias===null?"Waiting for ticks":"Bias "+bias+"%"}</div></button>; })}</div>
 
       <div className="grid xl:grid-cols-[1fr_320px] gap-4">
         <div className="space-y-4">
