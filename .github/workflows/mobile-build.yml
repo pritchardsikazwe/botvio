@@ -26,9 +26,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - id: botvio
-            name: Botvio
-            app_id: live.botvio.app
+          - id: gold-robot
+            name: Botvio Gold Robot
+            app_id: live.botvio.gold
+          - id: crypto-robot
+            name: Botvio Crypto Robot
+            app_id: live.botvio.crypto
+          - id: synthetic-robot
+            name: Botvio Synthetic Robot
+            app_id: live.botvio.synthetic
+          - id: weltrade-robot
+            name: Botvio Weltrade Robot
+            app_id: live.botvio.weltrade
+          - id: deriv-copy
+            name: Botvio Deriv Copy Trading
+            app_id: live.botvio.copy
     env:
       CAP_APP_ID: ${{ matrix.app_id }}
       CAP_APP_NAME: ${{ matrix.name }}
