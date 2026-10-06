@@ -65,6 +65,33 @@ const DERIV_MT5: Record<string, string> = {
   "USD/CHF": "USDCHF", "NZD/USD": "NZDUSD", "EUR/JPY": "EURJPY", "GBP/JPY": "GBPJPY", "EUR/GBP": "EURGBP",
   "GOLD": "XAUUSD", "XAU/USD": "XAUUSD", "XAUUSD": "XAUUSD", "SILVER": "XAGUSD", "XAG/USD": "XAGUSD",
   "BTC/USD": "BTCUSD", "ETH/USD": "ETHUSD", "US30": "US 30", "NAS100": "US Tech 100", "UK100": "UK 100",
+  // Deriv Synthetic CFDs. Keep these explicit so a Deriv master receives
+  // Synthetic Hub signals instead of silently skipping them.
+  "BOOM300": "Boom 300 Index", "BOOM 300 INDEX": "Boom 300 Index",
+  "BOOM500": "Boom 500 Index", "BOOM 500 INDEX": "Boom 500 Index",
+  "BOOM600": "Boom 600 Index", "BOOM 600 INDEX": "Boom 600 Index",
+  "BOOM900": "Boom 900 Index", "BOOM 900 INDEX": "Boom 900 Index",
+  "BOOM1000": "Boom 1000 Index", "BOOM 1000 INDEX": "Boom 1000 Index",
+  "CRASH150": "Crash 150 Index", "CRASH 150 INDEX": "Crash 150 Index",
+  "CRASH300": "Crash 300 Index", "CRASH 300 INDEX": "Crash 300 Index",
+  "CRASH500": "Crash 500 Index", "CRASH 500 INDEX": "Crash 500 Index",
+  "CRASH600": "Crash 600 Index", "CRASH 600 INDEX": "Crash 600 Index",
+  "CRASH900": "Crash 900 Index", "CRASH 900 INDEX": "Crash 900 Index",
+  "CRASH1000": "Crash 1000 Index", "CRASH 1000 INDEX": "Crash 1000 Index",
+  "R_10": "Volatility 10 Index", "VOLATILITY 10 INDEX": "Volatility 10 Index",
+  "R_25": "Volatility 25 Index", "VOLATILITY 25 INDEX": "Volatility 25 Index",
+  "R_50": "Volatility 50 Index", "VOLATILITY 50 INDEX": "Volatility 50 Index",
+  "R_75": "Volatility 75 Index", "VOLATILITY 75 INDEX": "Volatility 75 Index",
+  "1HZ10V": "Volatility 10 (1s) Index", "VOLATILITY 10 (1S) INDEX": "Volatility 10 (1s) Index",
+  "1HZ25V": "Volatility 25 (1s) Index", "VOLATILITY 25 (1S) INDEX": "Volatility 25 (1s) Index",
+  "1HZ50V": "Volatility 50 (1s) Index", "VOLATILITY 50 (1S) INDEX": "Volatility 50 (1s) Index",
+  "1HZ75V": "Volatility 75 (1s) Index", "VOLATILITY 75 (1S) INDEX": "Volatility 75 (1s) Index",
+  "1HZ100V": "Volatility 100 (1s) Index", "VOLATILITY 100 (1S) INDEX": "Volatility 100 (1s) Index",
+  "1HZ150V": "Volatility 150 (1s) Index", "VOLATILITY 150 (1S) INDEX": "Volatility 150 (1s) Index",
+  "1HZ250V": "Volatility 250 (1s) Index", "VOLATILITY 250 (1S) INDEX": "Volatility 250 (1s) Index",
+  "1HZ15V": "Volatility 15 (1s) Index", "VOLATILITY 15 (1S) INDEX": "Volatility 15 (1s) Index",
+  "1HZ30V": "Volatility 30 (1s) Index", "VOLATILITY 30 (1S) INDEX": "Volatility 30 (1s) Index",
+  "1HZ90V": "Volatility 90 (1s) Index", "VOLATILITY 90 (1S) INDEX": "Volatility 90 (1s) Index",
 };
 const derivMt5Symbol = (s: string) => DERIV_MT5[String(s).toUpperCase()] ?? DERIV_MT5[String(s)] ?? null;
 
