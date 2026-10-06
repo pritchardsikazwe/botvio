@@ -14,17 +14,51 @@ const FAMILIES=[
 {symbols:["SwitchX 600","SwitchX 1200","SwitchX 1800"],family:"SwitchX",bias:"BOTH"},
 {symbols:["FX VOL 20","FX VOL 40","FX VOL 80"],family:"FX Vol.",bias:"BOTH"}
 ];
-const STRATEGY_BY_SYMBOL:Record<string,{min:number;stop:number;target:number;label:string}>=Object.fromEntries(
-FAMILIES.flatMap(f=>f.symbols.map(symbol=>{
-const s=symbol.toUpperCase();
-const n=Number(s.match(/(?:BOOM|CRASH|VOLATILITY)\s*(?:\(1S\)\s*)?(\d+)/)?.[1]||0);
-if(s.includes("BOOM")) return [symbol,{min:n>=900?82:n>=500?79:77,stop:1.15,target:2.35,label:`Boom ${n} Spike Hunter`}];
-if(s.includes("CRASH")) return [symbol,{min:n>=900?82:n>=500?79:77,stop:1.15,target:2.35,label:`Crash ${n} Spike Hunter`}];
-if(s.includes("RANGE BREAK")) return [symbol,{min:78,stop:1.25,target:2.5,label:s.replace(" INDEX","")+" Expansion"}];
-if(s.includes("VOLATILITY")) return [symbol,{min:s.includes("(1S)")?82:n>=100?79:76,stop:n>=100?1.5:1.35,target:n>=100?2.75:2.5,label:s.replace(" INDEX","")+" Momentum"}];
-return [symbol,{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`}];
-}))
-);
+const STRATEGY_BY_SYMBOL:Record<string,{min:number;stop:number;target:number;label:string}>={
+  "Boom 300 Index":{min:77,stop:1.15,target:2.35,label:"Boom 300 Spike Hunter"},
+  "Boom 500 Index":{min:79,stop:1.15,target:2.35,label:"Boom 500 Spike Hunter"},
+  "Boom 600 Index":{min:79,stop:1.15,target:2.35,label:"Boom 600 Spike Hunter"},
+  "Boom 900 Index":{min:82,stop:1.15,target:2.35,label:"Boom 900 Spike Hunter"},
+  "Boom 1000 Index":{min:82,stop:1.15,target:2.35,label:"Boom 1000 Spike Hunter"},
+  "Crash 300 Index":{min:77,stop:1.15,target:2.35,label:"Crash 300 Spike Hunter"},
+  "Crash 500 Index":{min:79,stop:1.15,target:2.35,label:"Crash 500 Spike Hunter"},
+  "Crash 600 Index":{min:79,stop:1.15,target:2.35,label:"Crash 600 Spike Hunter"},
+  "Crash 900 Index":{min:82,stop:1.15,target:2.35,label:"Crash 900 Spike Hunter"},
+  "Crash 1000 Index":{min:82,stop:1.15,target:2.35,label:"Crash 1000 Spike Hunter"},
+  "Volatility 10 Index":{min:76,stop:1.35,target:2.5,label:"Volatility 10 Momentum"},
+  "Volatility 25 Index":{min:76,stop:1.35,target:2.5,label:"Volatility 25 Momentum"},
+  "Volatility 50 Index":{min:76,stop:1.35,target:2.5,label:"Volatility 50 Momentum"},
+  "Volatility 75 Index":{min:76,stop:1.35,target:2.5,label:"Volatility 75 Momentum"},
+  "Volatility 100 Index":{min:79,stop:1.5,target:2.75,label:"Volatility 100 Momentum"},
+  "Volatility 150 Index":{min:79,stop:1.5,target:2.75,label:"Volatility 150 Momentum"},
+  "Volatility 250 Index":{min:79,stop:1.5,target:2.75,label:"Volatility 250 Momentum"},
+  "Volatility 10 (1s) Index":{min:82,stop:1.5,target:2.75,label:"Volatility 10 1s Momentum"},
+  "Volatility 15 (1s) Index":{min:82,stop:1.5,target:2.75,label:"Volatility 15 1s Momentum"},
+  "Volatility 30 (1s) Index":{min:82,stop:1.5,target:2.75,label:"Volatility 30 1s Momentum"},
+  "Volatility 50 (1s) Index":{min:82,stop:1.5,target:2.75,label:"Volatility 50 1s Momentum"},
+  "Volatility 75 (1s) Index":{min:82,stop:1.5,target:2.75,label:"Volatility 75 1s Momentum"},
+  "Volatility 90 (1s) Index":{min:82,stop:1.5,target:2.75,label:"Volatility 90 1s Momentum"},
+  "Volatility 100 (1s) Index":{min:82,stop:1.5,target:2.75,label:"Volatility 100 1s Momentum"},
+  "Range Break 100 Index":{min:78,stop:1.25,target:2.5,label:"Range Break 100 Expansion"},
+  "Range Break 200 Index":{min:78,stop:1.25,target:2.5,label:"Range Break 200 Expansion"},
+  "GainX 400":{min:74,stop:1.4,target:2.2,label:"GainX 400 Adaptive MTF"},
+  "GainX 600":{min:74,stop:1.4,target:2.2,label:"GainX 600 Adaptive MTF"},
+  "GainX 800":{min:74,stop:1.4,target:2.2,label:"GainX 800 Adaptive MTF"},
+  "PainX 400":{min:74,stop:1.4,target:2.2,label:"PainX 400 Adaptive MTF"},
+  "PainX 600":{min:74,stop:1.4,target:2.2,label:"PainX 600 Adaptive MTF"},
+  "PainX 800":{min:74,stop:1.4,target:2.2,label:"PainX 800 Adaptive MTF"},
+  "FlipX 1":{min:74,stop:1.4,target:2.2,label:"FlipX 1 Adaptive MTF"},
+  "FlipX 2":{min:74,stop:1.4,target:2.2,label:"FlipX 2 Adaptive MTF"},
+  "FlipX 3":{min:74,stop:1.4,target:2.2,label:"FlipX 3 Adaptive MTF"},
+  "FlipX 4":{min:74,stop:1.4,target:2.2,label:"FlipX 4 Adaptive MTF"},
+  "FlipX 5":{min:74,stop:1.4,target:2.2,label:"FlipX 5 Adaptive MTF"},
+  "SwitchX 600":{min:74,stop:1.4,target:2.2,label:"SwitchX 600 Adaptive MTF"},
+  "SwitchX 1200":{min:74,stop:1.4,target:2.2,label:"SwitchX 1200 Adaptive MTF"},
+  "SwitchX 1800":{min:74,stop:1.4,target:2.2,label:"SwitchX 1800 Adaptive MTF"},
+  "FX VOL 20":{min:74,stop:1.4,target:2.2,label:"FX VOL 20 Adaptive MTF"},
+  "FX VOL 40":{min:74,stop:1.4,target:2.2,label:"FX VOL 40 Adaptive MTF"},
+  "FX VOL 80":{min:74,stop:1.4,target:2.2,label:"FX VOL 80 Adaptive MTF"}
+};
 const TF:Record<string,number>={M1:1,M5:5,M15:15,H1:60,D1:1440,D3:1440};
 
 function aggregateDays(c:Candle[],days:number):Candle[]{
