@@ -56,74 +56,18 @@ export function PaymentRequestsPanel() {
 
   useEffect(() => { load(); }, []);
 
-  const approve = async (request: PaymentRequest) => {
+  const review = async (request: PaymentRequest, action: "approve" | "reject") => {
     setWorking(request.id);
     try {
-      const now = new Date();
-      const end = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-      const { error: paymentError } = await supabase
-        .from("payment_requests")
-        .update({ status: "approved" })
-        .eq("id", request.id);
-      if (paymentError) throw paymentError;
-
-      if (request.product_id || request.product?.id) {
-        const productId = request.product_id || request.product?.id;
-        const recurring = request.product?.billing_type === "recurring";
-        const { error: entError } = await supabase.from("entitlements").upsert({
-          user_id: request.user_id,
-          product_id: productId,
-          status: "active",
-          source_order_id: request.order_id || null,
-          started_at: now.toISOString(),
-          ends_at: recurring ? end.toISOString() : null,
-        } as any, { onConflict: "user_id,product_id" });
-        if (entError) throw entError;
-
-        if (request.product?.slug === "mt5-direct" && request.account_id) {
-          const { error: accountError } = await supabase.from("trading_accounts").update({
-            direct_execution_entitled: true,
-            direct_execution_plan: request.product.name || "MT5 Direct",
-            direct_execution_expires_at: recurring ? end.toISOString() : null,
-          } as any).eq("id", request.account_id).eq("user_id", request.user_id);
-          if (accountError) throw accountError;
-        }
-      } else {
-        if (!request.plan_id) throw new Error("This payment request has no plan attached.");
-        const { error: subError } = await supabase
-          .from("user_plan_subscriptions")
-          .upsert({
-            user_id: request.user_id,
-            pricing_plan_id: request.plan_id,
-            current_period_start: now.toISOString(),
-            current_period_end: end.toISOString(),
-            status: "active",
-          }, { onConflict: "user_id" });
-        if (subError) throw subError;
-      }
-
-      toast.success(`Payment approved — ${request.profile?.display_name || request.profile?.email || "user"} now has paid access.`);
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message || "Could not approve payment");
-    } finally {
-      setWorking(null);
-    }
-  };
-
-  const reject = async (request: PaymentRequest) => {
-    setWorking(request.id);
-    try {
-      const { error } = await supabase
-        .from("payment_requests")
-        .update({ status: "rejected" })
-        .eq("id", request.id);
+      const { data, error } = await supabase.functions.invoke("review-payment", {
+        body: { paymentRequestId: request.id, action },
+      });
       if (error) throw error;
-      toast.success("Payment request rejected.");
+      if (!data?.ok) throw new Error(data?.error || "Payment review failed");
+      toast.success(action === "approve" ? "Payment approved and access activated." : "Payment request rejected.");
       await load();
     } catch (e: any) {
-      toast.error(e?.message || "Could not reject payment");
+      toast.error(e?.message || "Could not review payment");
     } finally {
       setWorking(null);
     }
@@ -198,10 +142,10 @@ export function PaymentRequestsPanel() {
                     )}
                     {request.status === "submitted" && (
                       <>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" disabled={working === request.id} onClick={() => approve(request)}>
+                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" disabled={working === request.id} onClick={() => review(request, "approve")}>
                           <CheckCircle2 className="h-4 w-4 mr-1" /> Approve & Activate
                         </Button>
-                        <Button size="sm" variant="destructive" disabled={working === request.id} onClick={() => reject(request)}>
+                        <Button size="sm" variant="destructive" disabled={working === request.id} onClick={() => review(request, "reject")}>
                           <XCircle className="h-4 w-4 mr-1" /> Reject
                         </Button>
                       </>
