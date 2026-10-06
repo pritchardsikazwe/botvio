@@ -15,6 +15,12 @@ Deno.serve(async(req)=>{
   const {data:{user}}=await userClient.auth.getUser();
   if(!user) return json({ok:false,error:"Sign in required"},401);
   const body=await req.json().catch(()=>null);
+  if (body?.action === "status") {
+    const admin = createClient(url, service);
+    const { data: setting, error: settingError } = await admin.from("app_settings").select("value").eq("key", "marketplace_test_mode").maybeSingle();
+    if (settingError) return json({ ok: false, error: settingError.message }, 500);
+    return json({ ok: true, enabled: (setting?.value as { enabled?: boolean } | null)?.enabled === true });
+  }
   const productId=String(body?.productId??"");
   const referralCode=body?.affiliateCode ? String(body.affiliateCode) : null;
   if(!productId) return json({ok:false,error:"Product is required"},400);
