@@ -104,6 +104,52 @@ const Index = () => {
             education + brokers + latest articles + testimonials + FAQ).
             Contains the sole <h1> for the page. */}
         <PremiumHomeSections />
+        <section aria-label="Botvio trading command center" className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card/80 p-5 md:p-7 shadow-sm">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,hsl(var(--primary)/0.12),transparent_42%)] pointer-events-none" />
+          <div className="relative grid gap-5 lg:grid-cols-[1.25fr_.75fr] items-stretch">
+            <div className="rounded-xl border border-border/70 bg-background/60 p-5 md:p-6">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <Badge variant="outline" className="text-primary border-primary/30">BOTVIO OPTIONS</Badge>
+                <Badge variant="outline">Deriv</Badge>
+                <Badge variant="outline">AI-assisted</Badge>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black tracking-tight">One place for signals, options & execution</h2>
+              <p className="mt-2 max-w-2xl text-sm md:text-base text-muted-foreground">
+                Explore Deriv options, synthetic markets and Botvio signals from one clean workspace. Connect your account when you are ready to trade.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Button asChild size="sm">
+                  <Link to="/deriv-options"><Zap className="h-4 w-4 mr-2" />Open Deriv Options</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/binary-options"><Signal className="h-4 w-4 mr-2" />View Binary Signals</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/rise-fall"><TrendingUp className="h-4 w-4 mr-2" />Rise & Fall</Link>
+                </Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-border/70 bg-background/60 p-4">
+                <p className="text-xs text-muted-foreground">Markets</p>
+                <p className="mt-1 text-2xl font-black">50+</p>
+                <p className="text-xs text-muted-foreground mt-1">synthetics & major markets</p>
+              </div>
+              <div className="rounded-xl border border-border/70 bg-background/60 p-4">
+                <p className="text-xs text-muted-foreground">Modes</p>
+                <p className="mt-1 text-2xl font-black">8+</p>
+                <p className="text-xs text-muted-foreground mt-1">contract styles</p>
+              </div>
+              <div className="col-span-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-bold">Trade with defined risk</p>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Use demo mode first, set a stake limit, and never risk money you cannot afford to lose.</p>
+              </div>
+            </div>
+          </div>
+        </section>
         {/* Start Here — free learning paths band */}
         <section aria-label="Start Here" className="rounded-xl border border-primary/30 bg-primary/5 p-4 md:p-5">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
