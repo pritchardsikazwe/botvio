@@ -1,0 +1,50 @@
+name: Deploy TradeCopy SyntX API Studio
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-syntx-api-studio:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_ID: tqqkzeblmjapgbnsbtgw
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check Supabase deployment secret
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_ACCESS_TOKEN" || {
+            echo "::error::Missing GitHub Actions secret SUPABASE_ACCESS_TOKEN."
+            exit 1
+          }
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Verify production project target
+        run: |
+          set -euo pipefail
+          test "$SUPABASE_PROJECT_ID" = "tqqkzeblmjapgbnsbtgw"
+
+      - name: Deploy only syntx-api-studio
+        run: |
+          set -euo pipefail
+          supabase functions deploy syntx-api-studio \
+            --project-ref "$SUPABASE_PROJECT_ID" \
+            --use-api
+
+      - name: Verify deployment
+        run: |
+          set -euo pipefail
+          supabase functions list --project-ref "$SUPABASE_PROJECT_ID" | grep -E "syntx-api-studio"
