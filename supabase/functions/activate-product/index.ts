@@ -27,7 +27,7 @@ Deno.serve(async(req)=>{
   const admin=createClient(url,service);
   const {data,result,error}=await admin.rpc("activate_product_atomic",{p_user_id:user.id,p_product_id:productId,p_referral_code:referralCode});
   if(error) return json({ok:false,error:error.message},400);
-  return json({ok:true,...(result??data)});
+  return json({ok:true,...(data ?? {})});
  }catch(e){
   console.error("[activate-product]",e instanceof Error?e.message:"activation failed");
   return json({ok:false,error:e instanceof Error?e.message:"Activation failed"},400);
