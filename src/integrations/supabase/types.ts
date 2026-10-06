@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       admin_permissions: {
         Row: {
           created_at: string
@@ -4313,13 +4343,16 @@ export type Database = {
       }
       payment_requests: {
         Row: {
+          account_id: string | null
           admin_note: string | null
           amount_usd: number
           created_at: string
           currency: string | null
           id: string
           method: string
+          order_id: string | null
           plan_id: string | null
+          product_id: string | null
           proof_upload_url: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -4328,13 +4361,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_id?: string | null
           admin_note?: string | null
           amount_usd: number
           created_at?: string
           currency?: string | null
           id?: string
           method: string
+          order_id?: string | null
           plan_id?: string | null
+          product_id?: string | null
           proof_upload_url?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -4343,13 +4379,16 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_id?: string | null
           admin_note?: string | null
           amount_usd?: number
           created_at?: string
           currency?: string | null
           id?: string
           method?: string
+          order_id?: string | null
           plan_id?: string | null
+          product_id?: string | null
           proof_upload_url?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -4359,10 +4398,31 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "payment_requests_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payment_requests_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -7275,6 +7335,14 @@ export type Database = {
       }
     }
     Functions: {
+      activate_product_atomic: {
+        Args: {
+          p_product_id: string
+          p_referral_code?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       auto_expire_signals: { Args: never; Returns: undefined }
       claim_chart_upload_slot: {
         Args: { _user_id: string }
@@ -7385,6 +7453,14 @@ export type Database = {
       refresh_follower_count: {
         Args: { target_creator_id: string }
         Returns: undefined
+      }
+      review_payment_atomic: {
+        Args: {
+          p_action: string
+          p_admin_user_id: string
+          p_payment_request_id: string
+        }
+        Returns: Json
       }
       submit_bridge_connection_request: {
         Args: {
