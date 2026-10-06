@@ -89,7 +89,7 @@ export function useHasProductType(type: string) {
   if (!user && hasVisitorPreview()) return true;
 
   return entitlements?.some(
-    (e) => e.products?.type === type && e.status === "active",
+    (e) => e.products?.type === type && e.status === "active" && (!e.ends_at || new Date(e.ends_at).getTime() > Date.now()),
   ) ?? false;
 }
 
