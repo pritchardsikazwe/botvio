@@ -376,6 +376,45 @@ Deno.serve(async (req) => {
       return json({ ok: true, diagnostics: result });
     }
 
+    if (action === "audit_all") {
+      // Feed audit: one session, every requested SyntX symbol. Reports only what
+      // API Studio actually returned — no credentials, no fabricated candles.
+      const requested = (Array.isArray(body?.symbols) ? body.symbols : []).map((x: unknown) => String(x).trim()).filter(Boolean).slice(0, 60);
+      if (!requested.length) throw new Error("symbols[] is required");
+      const report = await withConnection(admin, userId, async (session) => {
+        const symbols = normalizeSymbols(await callApi("/Symbols", { id: session }));
+        const now = Date.now();
+        const rows = [];
+        for (const requestedSymbol of requested) {
+          const candidates = brokerSymbolCandidates(requestedSymbol, symbols);
+          const row: Record<string, unknown> = { requestedSymbol, resolvedSymbol: null, inSymbolList: false, quoteOk: false, historyCount: 0, failure: null };
+          let failure = candidates.length ? "" : "Symbol not present in the broker /Symbols list";
+          for (const candidate of candidates) {
+            row.resolvedSymbol = candidate;
+            row.inSymbolList = symbols.includes(candidate);
+            try {
+              const q = normalizeQuote(await callApi("/GetQuote", { id: session, symbol: candidate }));
+              row.quoteOk = (q.last ?? q.bid ?? q.ask) != null;
+            } catch (e) { failure = `Quote: ${safeError(e)}`; }
+            for (const hours of [6, 24, 168]) {
+              try {
+                const raw = await callApi("/PriceHistory", { id: session, symbol: candidate, from: new Date(now - hours * 3_600_000).toISOString().slice(0, 19), to: new Date(now).toISOString().slice(0, 19), timeFrame: 5 });
+                const n = normalizeBars(raw).length;
+                if (n) { row.historyCount = n; break; }
+                failure = `PriceHistory M5 returned [] for ${candidate} (6h/24h/7d windows)`;
+              } catch (e) { failure = `History: ${safeError(e)}`; break; }
+            }
+            if (row.quoteOk && Number(row.historyCount) > 0) { failure = ""; break; }
+          }
+          row.failure = failure || null;
+          row.live = row.quoteOk === true && Number(row.historyCount) > 0;
+          rows.push(row);
+        }
+        return { symbolCount: symbols.length, rows };
+      });
+      return json({ ok: true, audit: report });
+    }
+
     if (action === "disconnect") {
       const c = await loadConnection(admin, userId);
       if (c.session_id) {
