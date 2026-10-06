@@ -75,10 +75,7 @@ const Marketplace = () => {
     const { error: uploadErr } = await supabase.storage.from("charts").upload(path, proofFile);
     if (uploadErr) { toast.error("Payment proof upload failed"); return; }
     const { data: urlData } = supabase.storage.from("charts").getPublicUrl(path);
-    const storedRef = localStorage.getItem("botvio_referral");
-    let affiliateCode: string | undefined;
-    if (storedRef) { try { const parsed = JSON.parse(storedRef); if (parsed.expiresAt > Date.now()) affiliateCode = parsed.code; } catch {} }
-    paymentRequestMutation.mutate({ product: selectedProduct, paymentMethod, proofUrl: urlData.publicUrl, affiliateCode, accountId });
+    paymentRequestMutation.mutate({ product: selectedProduct, paymentMethod, proofUrl: urlData.publicUrl, accountId });
     setShowCheckout(false); setSelectedProduct(null); setPaymentMethod(""); setProofFile(null);
   };
 
