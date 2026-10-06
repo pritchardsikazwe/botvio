@@ -27,7 +27,11 @@ export function BotvioPricingSection() {
     staleTime: 60_000,
   });
 
-  const products = data?.length ? PRODUCT_ORDER.map((slug) => data.find((p) => p.slug === slug)).filter(Boolean).map((p: any) => ({ ...p, icon: p.type === "bot" ? Bot : p.slug.includes("synthetic") ? Zap : p.slug.includes("mt5") ? Crown : ChartNoAxesCombined })) : FALLBACK;
+  const products = PRODUCT_ORDER.map((slug) => {
+    const live = data?.find((p) => p.slug === slug);
+    const fallback = FALLBACK.find((p) => p.slug === slug);
+    return live ? { ...live, icon: live.type === "bot" ? Bot : live.slug.includes("synthetic") ? Zap : live.slug.includes("mt5") ? Crown : ChartNoAxesCombined } : fallback;
+  }).filter(Boolean);
 
   return (
     <section className="border-y border-border/50 bg-card/20">
