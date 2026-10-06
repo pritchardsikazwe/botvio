@@ -74,6 +74,9 @@ async function hasPaidMt5Entitlement(admin: SupabaseClient, account: Record<stri
     if (expires === null || (!Number.isNaN(expires) && expires > Date.now())) return true;
   }
   if (!account.user_id) return false;
+  // Admin-owned accounts have full access without buying the plan.
+  const { data: staff } = await admin.from("user_roles").select("role").eq("user_id", account.user_id).in("role", ["admin", "super_admin"]).limit(1);
+  if (staff?.length) return true;
   const { data: product } = await admin.from("products").select("id").eq("slug", "mt5-direct").maybeSingle();
   if (!product?.id) return false;
   const { data: entitlement } = await admin.from("entitlements")

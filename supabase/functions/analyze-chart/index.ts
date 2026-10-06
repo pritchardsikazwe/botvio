@@ -102,7 +102,13 @@ serve(async (req) => {
     let claimRemaining = 0;
     let claimMax = 0;
     let claimTrialExpired = false;
+    let isStaff = false;
     if (userId) {
+      const { data: staffRole } = await supabase.from("user_roles").select("role").eq("user_id", userId).in("role", ["admin", "super_admin"]).limit(1);
+      isStaff = (staffRole?.length ?? 0) > 0;
+      if (isStaff) planCode = "vip";
+    }
+    if (userId && !isStaff) {
       const { data: claim, error: claimErr } = await supabase.rpc("claim_chart_upload_slot", {
         _user_id: userId,
       });

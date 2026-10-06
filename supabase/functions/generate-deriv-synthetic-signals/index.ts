@@ -144,7 +144,7 @@ async function getContracts(ws:WebSocket,symbol:string){
  const x=await request(ws,{contracts_for:symbol});
  return new Set<string>((x.contracts_for?.available??[]).map((v:any)=>String(v.contract_type)).filter(Boolean));
 }
-async function getCandles(ws:WebSocket,symbol:string,p:{g:number;count:number;tf?:string}){const x=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity:p.g,count:p.count,subscribe:0,adjust_start_time:1});const raw=(x.candles??[]).map((v:any)=>({epoch:+v.epoch,open:+v.open,high:+v.high,low:+v.low,close:+v.close})).filter((v:Candle)=>[v.epoch,v.open,v.high,v.low,v.close].every(Number.isFinite));if(p.tf!=="3D")return raw;const buckets=new Map<number,Candle>();for(const v of raw){const key=Math.floor(v.epoch/259200)*259200;const prev=buckets.get(key);if(!prev)buckets.set(key,{epoch:key,open:v.open,high:v.high,low:v.low,close:v.close});else{prev.high=Math.max(prev.high,v.high);prev.low=Math.min(prev.low,v.low);prev.close=v.close}}return[...buckets.values()].sort((a,b)=>a.epoch-b.epoch)}
+async function getCandles(ws:WebSocket,symbol:string,p:{g:number;count:number;tf?:string}){const x=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity:p.g,count:p.count,adjust_start_time:1});const raw=(x.candles??[]).map((v:any)=>({epoch:+v.epoch,open:+v.open,high:+v.high,low:+v.low,close:+v.close})).filter((v:Candle)=>[v.epoch,v.open,v.high,v.low,v.close].every(Number.isFinite));if(p.tf!=="3D")return raw;const buckets=new Map<number,Candle>();for(const v of raw){const key=Math.floor(v.epoch/259200)*259200;const prev=buckets.get(key);if(!prev)buckets.set(key,{epoch:key,open:v.open,high:v.high,low:v.low,close:v.close});else{prev.high=Math.max(prev.high,v.high);prev.low=Math.min(prev.low,v.low);prev.close=v.close}}return[...buckets.values()].sort((a,b)=>a.epoch-b.epoch)}
 
 Deno.serve(async(req)=>{
  if(req.method!=="POST")return new Response("POST required",{status:405});
@@ -190,12 +190,12 @@ Deno.serve(async(req)=>{
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",s.name).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-(p.tf==="1m"?5:p.tf==="15m"?30:120)*60000).toISOString()).limit(1);
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
-      symbol:s.name,direction:setup.direction,entry_price:setup.entry,stop_loss:setup.sl,take_profit:setup.tp,timeframe:p.tf,signal_type:type,
+      symbol:s.name,direction:setup.direction,entry_price:setup.entry,stop_loss:setup.sl,take_profit:setup.tp,timeframe:p.tf,
       strategy_name:strategyName,confidence:Math.round(setup.score),broker:["deriv"],category:"synthetic",status:"ACTIVE",is_manual:false,
-      expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,expires_at:expiresAt,
+      expiry_seconds:p.expiry,expires_at:expiresAt,
       reason:`${s.name} · ${strategy.label} · ${type}: ${confDirections.filter(x=>x===setup.direction).length}/${confDirections.length} higher-timeframe confirmations`,
       explanation_json:{engine:"Botvio Deriv Synthetic Strategy Engine v2",strategy_family:strategy.family,strategy_label:strategy.label,signal_type:type,timeframe:p.tf,expiry_seconds:p.expiry,expires_at:expiresAt,source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
-    }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
+    }).select("id,symbol,direction,timeframe,expiry_seconds,expires_at,confidence").single();
     if(!error&&row)published.push(row);
    }
   }

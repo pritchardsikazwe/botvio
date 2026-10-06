@@ -151,7 +151,7 @@ function request(ws:WebSocket,payload:Record<string,unknown>,timeout=15000){
 }
 
 async function candles(ws:WebSocket,symbol:string,granularity:number,count:number):Promise<Candle[]>{
- const data=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,subscribe:0,adjust_start_time:1});
+ const data=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,adjust_start_time:1});
  return (data.candles??[]).map((x:any)=>({epoch:Number(x.epoch),open:Number(x.open),high:Number(x.high),low:Number(x.low),close:Number(x.close)}))
    .filter((x:Candle)=>Number.isFinite(x.epoch)&&[x.open,x.high,x.low,x.close].every(Number.isFinite));
 }
@@ -192,13 +192,13 @@ Deno.serve(async(req)=>{
    await Promise.all(PLANS.map(async p=>{try{
   const raw=await candles(ws,profile.symbol,p.minutes*60,p.count);
   frames.set(p.tf,p.tf==="3D"?aggregateCandles(raw,3):raw);
-}catch{frames.set(p.tf,[])}}));
+}catch(e){frames.set(p.tf,[]);if(skipped.length<60)skipped.push({symbol:profile.symbol,timeframe:p.tf,reason:"candles failed: "+String((e as Error)?.message??e).slice(0,120)})}}));
    const sigs=new Map<string,Sig|null>();
    for(const p of PLANS)sigs.set(p.tf,signal(frames.get(p.tf)??[],profile));
    for(const p of PLANS){
     const gate = performanceGate(performanceIndex, profile.name, p.tf, profile.strategy);
     if(!gate.allowed) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:gate.reason,performance:gate.performance}); continue; }
-    const setup=sigs.get(p.tf);if(!setup)continue;
+    const setup=sigs.get(p.tf);if(!setup){if(skipped.length<60)skipped.push({symbol:profile.symbol,timeframe:p.tf,reason:`no setup (${(frames.get(p.tf)??[]).length} candles)`});continue;}
     const worker=await workerConfluence(db,profile.symbol,setup.direction);
     // Higher-timeframe intelligence is a quality modifier, not a hard requirement.
     // Each horizon must be able to generate independently.
@@ -213,7 +213,7 @@ Deno.serve(async(req)=>{
     const confirmationBonus=alignedCount>0 ? Math.min(4,alignedCount*2) : 0;
     const conflictPenalty=conflict ? 4 : 0;
     const finalScore=Math.min(96,Math.max(0,workerScore+confirmationBonus-conflictPenalty));
-    if(finalScore<profile.min+p.minBoost+gate.scoreBoost+7)continue; // stricter scores restored
+    if(finalScore<profile.min+p.minBoost+gate.scoreBoost){if(skipped.length<60)skipped.push({symbol:profile.symbol,timeframe:p.tf,reason:`score ${Math.round(finalScore)} < ${profile.min+p.minBoost+gate.scoreBoost}`});continue;} // repeats blocked by timeframe guard
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const detectedStrategies=strategyTypes(frames.get(p.tf)??[],setup.direction,p.tf);
@@ -224,12 +224,12 @@ Deno.serve(async(req)=>{
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
-      timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(finalScore),broker:["deriv"],
-      category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
+      timeframe:p.tf,strategy_name:strategyName,confidence:Math.round(finalScore),broker:["deriv"],
+      category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,
       expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${alignedCount}/${confirmationCount} higher-timeframe confirmations/alignment`,
       explanation_json:{engine:"Botvio CFD MTF Engine v2",signal_type:p.type,timeframe:p.tf,strategy_types:strategyLabels,expiry_seconds:p.expiry,expires_at:expiresAt,
         source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",higher_timeframe_confirmation:alignedCount,confirmation_count:confirmationCount,confirmation_bonus:confirmationBonus,conflict_penalty:conflictPenalty,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
-    }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
+    }).select("id,symbol,direction,timeframe,expiry_seconds,expires_at,confidence").single();
     if(error)skipped.push({symbol:profile.name,timeframe:p.tf,error:error.message});else published.push(row);
    }
   }

@@ -186,14 +186,14 @@ for(const plan of setups){
   const strategyLabel=`${profile.label} · ${plan.label} · ${strategyLabels.join(" + ")}`;
   const gate=performanceGate(performanceIndex,symbol,plan.tf,strategyLabel);
   if(!gate.allowed) continue;
-  if(plan.setup.score < plan.min + gate.scoreBoost + 7) continue; // stricter scores restored
+  if(plan.setup.score < plan.min + gate.scoreBoost) continue; // repeats blocked by timeframe guard
   const expiresAt=new Date(Date.now()+plan.expiry*1000).toISOString();
   const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",symbol).eq("timeframe",plan.tf).gte("created_at",new Date(Date.now()-Math.max(10,plan.tf==="1m"?5:plan.tf==="15m"?30:120)*60000).toISOString()).limit(1);
   if(recent?.length) continue;
   const {data:row,error:ins}=await db.from("trading_signals").insert({
     symbol,direction:plan.setup.direction,entry_price:entry,stop_loss:sl,take_profit:tp,timeframe:plan.tf,
-    strategy_name:strategyLabel,signal_type:plan.type,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
-    status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,best_expiry:plan.expiry,backup_expiry:plan.backup,expires_at:expiresAt,
+    strategy_name:strategyLabel,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
+    status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,expires_at:expiresAt,
     reason:`${f.family} ${plan.label}: ${strategyLabels.join(", ")} confirmed with ${same}/${confirmationDirections.length} higher-timeframe confirmations`,
     explanation_json:{
       engine:"SyntX MTF Engine v5",strategy_id:profile.label,strategy_types:strategyLabels,source:"Weltrade SyntX API Studio + Botvio Worker Intelligence",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
