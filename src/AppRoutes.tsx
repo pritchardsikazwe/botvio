@@ -383,6 +383,7 @@ export const AppRoutes = () => {
     {/* Current Weltrade Hub is the canonical SyntX workspace. Legacy Weltrade pages redirect here. */}
     <Route path="weltrade" element={<Paid><WeltradeHub /></Paid>} />
     <Route path="weltrade/signals" element={<WeltradeSyntxPage />} />
+    {/* Canonical SEO URLs use compact slugs such as /weltrade/gainx600 and /weltrade/flipx1. */}
     <Route path="weltrade/:symbol" element={<WeltradeSyntxPage />} />
     <Route path="weltrade/synthetic" element={<Navigate to="/weltrade" replace />} />
     <Route path="weltrade-synthetic" element={<Navigate to="/weltrade" replace />} />
