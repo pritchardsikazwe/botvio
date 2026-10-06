@@ -213,14 +213,14 @@ Deno.serve(async(req)=>{
     const confirmationBonus=alignedCount>0 ? Math.min(4,alignedCount*2) : 0;
     const conflictPenalty=conflict ? 4 : 0;
     const finalScore=Math.min(96,Math.max(0,workerScore+confirmationBonus-conflictPenalty));
-    if(finalScore<profile.min+p.minBoost+gate.scoreBoost)continue;
+    if(finalScore<profile.min+p.minBoost+gate.scoreBoost+7)continue; // stricter scores restored
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const detectedStrategies=strategyTypes(frames.get(p.tf)??[],setup.direction,p.tf);
     const strategyLabels=detectedStrategies.length?detectedStrategies:["TREND"];
     const strategyName=`${profile.strategy} · ${p.type} ${p.tf} · ${strategyLabels.join(" + ")}`;
     const cooldown=p.tf==="1m"?5:p.tf==="5m"?10:p.tf==="15m"?30:120;
-    const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",profile.symbol).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-cooldown*60000).toISOString()).limit(1);
+    const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",profile.symbol).eq("timeframe",p.tf).gte("created_at",new Date(Date.now()-cooldown*60000).toISOString()).limit(1);
     if(recent?.length)continue;
     const {data:row,error}=await db.from("trading_signals").insert({
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
