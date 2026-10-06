@@ -309,10 +309,28 @@ export const WeltradeSignalsEngine = () => {
               </ScrollArea>
             </CardContent>
           </Card>
+        <div className="min-w-0 rounded-xl border border-border/50 bg-card/40 p-1">
+          <div className="min-w-0 rounded-xl border border-border/50 bg-card/40 p-1">
 
-          <div className="min-w-0 xl:sticky xl:top-20 xl:self-start">
- </Card>
-
+          <BrokerCandleChart
+            candles={candles}
+            status={status}
+            brokerLabel="WELTRADE"
+            symbolLabel={instrument.label + " (" + instrument.mt5Symbol + ")"}
+            timeframe={prefs.timeframe}
+            onTimeframeChange={(tf) => setPrefs((p) => ({ ...p, timeframe: tf }))}
+            price={price}
+            bid={lastTick?.bid ?? null}
+            ask={lastTick?.ask ?? null}
+            decimals={instrument.decimals}
+            signals={signals}
+            activeSignal={activeSignal}
+            showHauza
+            unavailableMessage={diagnostics?.lastError ? `Weltrade API Studio error: ${diagnostics.lastError}` : bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
+          />
+          </div>
+        </div>
+        <div className="min-w-0 xl:sticky xl:top-20 xl:self-start">
           <Card className={cn("relative overflow-hidden border-2 bg-gradient-to-br", signalTone.border, signalTone.bg)}>
           <CardContent className="space-y-3 p-3.5">
             <div className="flex items-start justify-between gap-2">
@@ -397,29 +415,8 @@ export const WeltradeSignalsEngine = () => {
               </div>
             )}
           </CardContent>
-          </Card>          </div>
-          <div className="min-w-0 rounded-xl border border-border/50 bg-card/40 p-1">
-
-          <BrokerCandleChart
-            candles={candles}
-            status={status}
-            brokerLabel="WELTRADE"
-            symbolLabel={instrument.label + " (" + instrument.mt5Symbol + ")"}
-            timeframe={prefs.timeframe}
-            onTimeframeChange={(tf) => setPrefs((p) => ({ ...p, timeframe: tf }))}
-            price={price}
-            bid={lastTick?.bid ?? null}
-            ask={lastTick?.ask ?? null}
-            decimals={instrument.decimals}
-            signals={signals}
-            activeSignal={activeSignal}
-            showHauza
-            unavailableMessage={diagnostics?.lastError ? `Weltrade API Studio error: ${diagnostics.lastError}` : bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
-          />
-          </div>
-          <div className="min-w-0 xl:sticky xl:top-20 xl:self-start">
-
-          </div>
+          </Card>
+        </div>
       </div>
 
       {familyProfile && (
