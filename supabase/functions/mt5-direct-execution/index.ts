@@ -68,7 +68,7 @@ const DERIV_MT5: Record<string, string> = {
   // Deriv Synthetic CFDs. Keep these explicit so a Deriv master receives
   // Synthetic Hub signals instead of silently skipping them.
   "BOOM300": "Boom 300 Index", "BOOM 300 INDEX": "Boom 300 Index",
-  "BOOM500": "Boom 500 Index", "BOOM 500 INDEX": "Boom 500 Index",
+  "BOOM500": "Boom 500 Index", "BOOM 500 INDEX": "Boom 500 Index", "BOOM 500 INDEX MT5": "Boom 500 Index",
   "BOOM600": "Boom 600 Index", "BOOM 600 INDEX": "Boom 600 Index",
   "BOOM900": "Boom 900 Index", "BOOM 900 INDEX": "Boom 900 Index",
   "BOOM1000": "Boom 1000 Index", "BOOM 1000 INDEX": "Boom 1000 Index",
@@ -399,7 +399,9 @@ Deno.serve(async (req) => {
         const globalLive = await liveGlobal(admin);
         assertLiveReady(String(a.environment ?? "DEMO"), a.direct_live_confirmed_at, globalLive);
         const map = (a.direct_symbol_map ?? {}) as Record<string, string>;
-        const mappedSymbol = map[p.symbol] ?? map[normalSymbol(p.symbol)] ?? p.symbol;
+        const userMappedSymbol = map[p.symbol] ?? map[normalSymbol(p.symbol)] ?? null;
+        const isDeriv = /deriv/i.test(String(a.server ?? a.broker ?? ""));
+        const mappedSymbol = userMappedSymbol ?? (isDeriv ? derivMt5Symbol(p.symbol) : null) ?? p.symbol;
         const order = normalizeMarketOrder({
           symbol: mappedSymbol,
           side: p.direction,
