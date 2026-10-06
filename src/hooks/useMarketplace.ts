@@ -43,64 +43,56 @@ export function useMarketplaceProducts(type?: string) {
   });
 }
 
+export function useMarketplaceTestMode() {
+  return useQuery({
+    queryKey: ["marketplace-test-mode"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("activate-product", { body: { action: "status" } });
+      if (error) throw error;
+      return data?.enabled === true;
+    },
+    staleTime: 30_000,
+  });
+}
+
 export function usePurchaseProduct() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async ({
-      product,
-      paymentMethod,
-      proofUrl,
-      affiliateCode,
-      accountId,
-    }: {
-      product: MarketplaceProduct;
-      paymentMethod: string;
-      proofUrl?: string;
-      affiliateCode?: string;
-      accountId?: string;
-    }) => {
-      if (!user) throw new Error("Not authenticated");
-
-      // TEMPORARY TEST MODE: every active Botvio product is granted immediately.
-      // This bypasses payment/proof review only while the platform is being tested.
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          user_id: user.id,
-          product_id: product.id,
-          product_type: product.type,
-          amount_usd: 0,
-          referral_code: affiliateCode || null,
-          status: "paid",
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      const { error: entError } = await supabase
-        .from("entitlements")
-        .upsert({
-          user_id: user.id,
-          product_id: product.id,
-          status: "active",
-          source_order_id: order.id,
-          ends_at: null,
-        }, { onConflict: "user_id,product_id" });
-
-      if (entError) throw entError;
-
-      return order;
+    mutationFn: async ({ product, affiliateCode }: { product: MarketplaceProduct; affiliateCode?: string }) => {
+      const { data, error } = await supabase.functions.invoke("activate-product", { body: { productId: product.id, affiliateCode: affiliateCode || null } });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Could not activate product");
+      return data;
     },
     onSuccess: (_, variables) => {
-      toast.success(`${variables.product.name} unlocked for testing!`);
+      toast.success(variables.product.name + " unlocked for testing!");
       queryClient.invalidateQueries({ queryKey: ["entitlements"] });
       queryClient.invalidateQueries({ queryKey: ["marketplace-products"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message);
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useSubmitPaymentRequest() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ product, paymentMethod, proofUrl, accountId }: {
+      product: MarketplaceProduct; paymentMethod: string; proofUrl: string; affiliateCode?: string; accountId?: string;
+    }) => {
+      if (!user) throw new Error("Not authenticated");
+      const { data, error } = await supabase.from("payment_requests").insert({
+        user_id: user.id, product_id: product.id, account_id: accountId || null,
+        amount_usd: Number(product.price_usd), currency: "USD", method: paymentMethod,
+        proof_upload_url: proofUrl, status: "submitted",
+      }).select("id,status").single();
+      if (error) throw error;
+      return data;
     },
+    onSuccess: () => {
+      toast.success("Payment submitted. Botvio will verify it before activation.");
+      queryClient.invalidateQueries({ queryKey: ["entitlements"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
