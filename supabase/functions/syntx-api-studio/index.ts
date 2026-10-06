@@ -320,13 +320,13 @@ Deno.serve(async (req) => {
       result.symbolSample = symbols.filter((s) => normalizeSymbolKey(s).includes(normalizeSymbolKey(requestedSymbol))).slice(0, 25);
       result.resolvedSymbol = resolveBrokerSymbol(requestedSymbol, symbols);
       try {
-        result.quote = await withConnection(admin, userId, async (session) => normalizeQuote(await callApi("/GetQuote", { id: session, symbol: requestedSymbol })));
+        result.quote = await withConnection(admin, userId, async (session) => normalizeQuote(await callApi("/GetQuote", { id: session, symbol: String(result.resolvedSymbol) })));
       } catch (e) {
         result.quoteError = safeError(e);
       }
       try {
         result.history = await withConnection(admin, userId, async (session) => {
-          const raw = await callApi("/PriceHistory", { id: session, symbol: requestedSymbol, from: new Date(Date.now() - 60 * 60_000).toISOString().slice(0, 19), to: new Date().toISOString().slice(0, 19), timeFrame: 5 });
+          const raw = await callApi("/PriceHistory", { id: session, symbol: String(result.resolvedSymbol), from: new Date(Date.now() - 60 * 60_000).toISOString().slice(0, 19), to: new Date().toISOString().slice(0, 19), timeFrame: 5 });
           const bars = normalizeBars(raw);
           return { count: bars.length, sample: bars.slice(-3) };
         });
