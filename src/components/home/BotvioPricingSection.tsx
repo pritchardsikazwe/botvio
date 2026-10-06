@@ -6,26 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bot, ChartNoAxesCombined, Crown, Lock, Zap } from "lucide-react";
 
+const PRODUCT_ORDER = ["mt5-direct", "gold-robot", "synthetic-robot", "synthetic-hub", "weltrade-hub"];
+
 const FALLBACK = [
-  { name: "Synthetic Hub", slug: "synthetic-hub", type: "hub", description: "Deriv synthetic indices, live signals and analysis.", icon: Zap },
-  { name: "Weltrade Hub", slug: "weltrade-hub", type: "hub", description: "Weltrade SyntX markets, signals and MT5 workflows.", icon: ChartNoAxesCombined },
-  { name: "Botvio Robots", slug: "botvio-robots", type: "bot", description: "Downloadable MT5 robots and automated strategies.", icon: Bot },
-  { name: "MT5 Direct", slug: "mt5-direct", type: "execution", description: "Send Botvio signals directly to your connected MT5.", icon: Crown },
+  { name: "MT5 Direct Signals", slug: "mt5-direct", type: "execution", description: "Send Botvio signals directly to your connected MT5.", price_usd: 29, billing_type: "recurring", billing_interval: "month", icon: Crown },
+  { name: "Botvio Gold Robot", slug: "gold-robot", type: "bot", description: "MT5 automation for Botvio Gold strategies.", price_usd: 39, billing_type: "recurring", billing_interval: "month", icon: Bot },
+  { name: "Botvio Synthetic Robot", slug: "synthetic-robot", type: "bot", description: "MT5 automation for Deriv synthetic strategies.", price_usd: 39, billing_type: "recurring", billing_interval: "month", icon: Bot },
+  { name: "Synthetic Hub", slug: "synthetic-hub", type: "hub", description: "Deriv synthetic indices, live signals and analysis.", price_usd: 19, billing_type: "recurring", billing_interval: "month", icon: Zap },
+  { name: "Weltrade Hub", slug: "weltrade-hub", type: "hub", description: "Weltrade SyntX markets, signals and MT5 workflows.", price_usd: 19, billing_type: "recurring", billing_interval: "month", icon: ChartNoAxesCombined },
 ];
 
 export function BotvioPricingSection() {
   const { data } = useQuery({
     queryKey: ["home-botvio-products"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("id,name,slug,type,short_description,price_usd,billing_type,billing_interval,is_featured,is_active").eq("is_active", true).order("created_at", { ascending: false }).limit(10);
+      const { data, error } = await supabase.from("products").select("id,name,slug,type,short_description,price_usd,billing_type,billing_interval,is_featured,is_active").in("slug", PRODUCT_ORDER);
       if (error) throw error;
       return data || [];
     },
     staleTime: 60_000,
   });
 
-  const PRODUCT_ORDER = ["mt5-direct", "gold-robot", "synthetic-robot", "synthetic-hub", "weltrade-hub"];
-  const products = data?.length ? data.filter((p) => PRODUCT_ORDER.includes(p.slug)).sort((a, b) => PRODUCT_ORDER.indexOf(a.slug) - PRODUCT_ORDER.indexOf(b.slug)).map((p) => ({ ...p, icon: p.type === "bot" ? Bot : p.slug.includes("synthetic") ? Zap : p.slug.includes("mt5") ? Crown : ChartNoAxesCombined })) : FALLBACK;
+  const products = data?.length ? PRODUCT_ORDER.map((slug) => data.find((p) => p.slug === slug)).filter(Boolean).map((p: any) => ({ ...p, icon: p.type === "bot" ? Bot : p.slug.includes("synthetic") ? Zap : p.slug.includes("mt5") ? Crown : ChartNoAxesCombined })) : FALLBACK;
 
   return (
     <section className="border-y border-border/50 bg-card/20">
@@ -38,7 +40,8 @@ export function BotvioPricingSection() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {products.map((p: any) => {
             const Icon = p.icon;
-            const price = typeof p.price_usd === "number" ? p.price_usd : null;
+            const parsedPrice = Number(p.price_usd);
+            const price = Number.isFinite(parsedPrice) ? parsedPrice : null;
             const configured = price !== null && price > 0;
             return (
               <Card key={p.id || p.slug} className="border-border/60 bg-card/80 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl">
