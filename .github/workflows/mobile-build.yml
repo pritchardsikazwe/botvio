@@ -40,7 +40,7 @@ jobs:
             app_id: live.botvio.weltradeai
           - id: deriv-copy
             name: Botvio Deriv Copy Trading
-            app_id: copy.botvio.live
+            app_id: live.botvio.copy
     env:
       CAP_APP_ID: ${{ matrix.app_id }}
       CAP_APP_NAME: ${{ matrix.name }}
@@ -51,7 +51,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
 
       - run: npm install --no-audit --no-fund
 
