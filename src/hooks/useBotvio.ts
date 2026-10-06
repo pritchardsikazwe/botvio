@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { MT5_COLS } from "@/hooks/useDirectExecution";
 import type {
   TradingAccount,
   Bot,
@@ -25,7 +26,7 @@ export function useTradingAccounts() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trading_accounts")
-        .select("*")
+        .select(MT5_COLS)
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       
@@ -58,7 +59,7 @@ export function useAddTradingAccount() {
           api_secret_encrypted: account.api_secret || null,
           login_id: account.login_id || null,
         })
-        .select()
+        .select(MT5_COLS)
         .single();
       
       if (error) throw error;
@@ -130,7 +131,7 @@ export function useBotInstances() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("bot_instances")
-        .select("*, bot:bots(*), trading_account:trading_accounts(*)")
+        .select("*, bot:bots(*), trading_account:" + MT5_COLS)
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       
@@ -299,7 +300,7 @@ export function useMyCopySubscriptions() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("copy_subscriptions")
-        .select("*, provider:providers(*), subscriber_trading_account:trading_accounts(*)")
+        .select("*, provider:providers(*), subscriber_trading_account:" + MT5_COLS)
         .eq("subscriber_user_id", user!.id)
         .order("created_at", { ascending: false });
       
