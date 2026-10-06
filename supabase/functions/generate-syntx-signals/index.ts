@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assertAutomationKey } from "../_shared/automationAuth.ts";import { loadPerformanceIndex, performanceGate } from "../_shared/performanceGate.ts";
 async function decryptSecret(enc:string,secret:string):Promise<string>{const bytes=Uint8Array.from(atob(enc.replace(/^v1:/,"")),(c)=>c.charCodeAt(0));const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:bytes.slice(0,12)},k,bytes.slice(12));return new TextDecoder().decode(pt)}
+const LOOSEN=7; // moderate loosening of minimum scores
 type Candle={time:number;open:number;high:number;low:number;close:number};
 const FAMILIES=[
 {symbols:["Boom 300 Index","Boom 500 Index","Boom 600 Index","Boom 900 Index","Boom 1000 Index"],family:"Boom",bias:"BUY"},
@@ -94,7 +95,7 @@ function candleQuality(c:Candle[]):number{
  return 0;
 }
 
-function frameSignal(c:Candle[],bias:string,profile:{min:number;stop:number;target:number;label:string}){if(c.length<60)return null;const closes=c.map(x=>x.close),e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),a=atr(c),rs=rsi(c),last=c.at(-1)!;if(e9==null||e21==null||a==null||a<=0||rs==null)return null;const up=e9>e21&&(e50==null||last.close>e50),down=e9<e21&&(e50==null||last.close<e50),expanded=last.high-last.low>a*1.8;let d:null|"BUY"|"SELL"=null;if(bias==="BUY"&&up&&!expanded)d="BUY";if(bias==="SELL"&&down&&!expanded)d="SELL";if(bias==="BOTH"){const hi=Math.max(...c.slice(-20,-1).map(x=>x.high)),lo=Math.min(...c.slice(-20,-1).map(x=>x.low));if(rs<32&&last.close<lo+a*.5)d="BUY";else if(rs>68&&last.close>hi-a*.5)d="SELL";else if(up&&!expanded)d="BUY";else if(down&&!expanded)d="SELL"}if(!d)return null;const dbias=directionalBias(c);const alignment=dbias===d?6:dbias?-5:0;const score=Math.min(96,60+(up||down?8:0)+(d==="BUY"&&rs>50&&rs<75?6:d==="SELL"&&rs<50&&rs>25?6:0)+(expanded?5:0)+alignment+candleQuality(c));if(score<profile.min)return null;return{direction:d,score,entry:last.close,sl:d==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:d==="BUY"?last.close+a*profile.target:last.close-a*profile.target}}
+function frameSignal(c:Candle[],bias:string,profile:{min:number;stop:number;target:number;label:string}){if(c.length<60)return null;const closes=c.map(x=>x.close),e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50),a=atr(c),rs=rsi(c),last=c.at(-1)!;if(e9==null||e21==null||a==null||a<=0||rs==null)return null;const up=e9>e21&&(e50==null||last.close>e50),down=e9<e21&&(e50==null||last.close<e50),expanded=last.high-last.low>a*1.8;let d:null|"BUY"|"SELL"=null;if(bias==="BUY"&&up&&!expanded)d="BUY";if(bias==="SELL"&&down&&!expanded)d="SELL";if(bias==="BOTH"){const hi=Math.max(...c.slice(-20,-1).map(x=>x.high)),lo=Math.min(...c.slice(-20,-1).map(x=>x.low));if(rs<32&&last.close<lo+a*.5)d="BUY";else if(rs>68&&last.close>hi-a*.5)d="SELL";else if(up&&!expanded)d="BUY";else if(down&&!expanded)d="SELL"}if(!d)return null;const dbias=directionalBias(c);const alignment=dbias===d?6:dbias?-5:0;const score=Math.min(96,60+(up||down?8:0)+(d==="BUY"&&rs>50&&rs<75?6:d==="SELL"&&rs<50&&rs>25?6:0)+(expanded?5:0)+alignment+candleQuality(c));if(score<profile.min-LOOSEN)return null;return{direction:d,score,entry:last.close,sl:d==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:d==="BUY"?last.close+a*profile.target:last.close-a*profile.target}}
 function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
  const a=atr(c)??0;
  const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="5m"?{sl:.95,tp:1.45}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
@@ -127,21 +128,29 @@ async function workerConfluence(db:any,symbol:string,direction:"BUY"|"SELL"){
  const aligned=confirms.filter(x=>x.direction===direction).length;
  const conflict=confirms.some(x=>x.direction&&x.direction!==direction);
  const avg=confirms.length?Math.round(confirms.reduce((s,x)=>s+Number(x.confidence||0),0)/confirms.length):0;
- return {allow:!conflict&&(!confirms.length||aligned>0),bonus:aligned*4+(avg>=80?4:avg>=70?2:0)-(conflict?12:0),avg,regime:latest.get("1H")?.market_regime??latest.get("1D")?.market_regime??"UNKNOWN"};
+ return {allow:aligned>0||!conflict,bonus:aligned*4+(avg>=80?4:avg>=70?2:0)-(conflict?12:0),avg,regime:latest.get("1H")?.market_regime??latest.get("1D")?.market_regime??"UNKNOWN"};
 }
 function unwrap(x:unknown):unknown{if(x&&typeof x==="object"){const o=x as Record<string,unknown>;return o.data??x}return x}
-function bars(x:unknown):Candle[]{const r=unwrap(x);const list=Array.isArray(r)?r:(r&&typeof r==="object"?Object.values(r as Record<string,unknown>).find(Array.isArray)??[]:[]);return(list as unknown[]).map(v=>{const b=v as Record<string,unknown>;const t=Number(b.time??b.Time??b.timestamp??b.Timestamp??0);return{time:t>1e12?Math.floor(t/1000):t,open:Number(b.open??b.Open),high:Number(b.high??b.High),low:Number(b.low??b.Low),close:Number(b.close??b.Close)}}).filter(x=>Number.isFinite(x.time)&&[x.open,x.high,x.low,x.close].every(Number.isFinite))}
-async function api(base:string,key:string,path:string,q:Record<string,string|number|undefined>){const u=new URL(base+path);for(const[k,v]of Object.entries(q))if(v!==undefined)u.searchParams.set(k,String(v));const r=await fetch(u,{headers:{ApiKey:key,Accept:"application/json, text/plain"},signal:AbortSignal.timeout(20000)});const t=await r.text();let b:unknown=t;try{b=JSON.parse(t)}catch{}if(!r.ok)throw new Error(`API Studio ${r.status}`);return b}
+function bars(x:unknown):Candle[]{const r=unwrap(x);const list=Array.isArray(r)?r:(r&&typeof r==="object"?Object.values(r as Record<string,unknown>).find(Array.isArray)??[]:[]);return(list as unknown[]).map(v=>{const b=v as Record<string,unknown>;const tr=b.time??b.Time??b.timestamp??b.Timestamp??b.date??b.Date;const t=typeof tr==="number"?tr:Math.floor(new Date(String(tr).replace(/(T\d{2}:\d{2}(:\d{2})?(\.\d+)?)$/,"$1Z")).getTime()/1000);return{time:t>1e10?Math.floor(t/1000):t,open:Number(b.open??b.Open??b.openPrice),high:Number(b.high??b.High??b.highPrice),low:Number(b.low??b.Low??b.lowPrice),close:Number(b.close??b.Close??b.closePrice)}}).filter(x=>Number.isFinite(x.time)&&[x.open,x.high,x.low,x.close].every(Number.isFinite))}
+async function api(base:string,key:string,path:string,q:Record<string,string|number|undefined>){const u=new URL(base+path);for(const[k,v]of Object.entries(q))if(v!==undefined)u.searchParams.set(k,String(v));const r=await fetch(u,{headers:{ApiKey:key,Accept:"application/json, text/plain"},signal:AbortSignal.timeout(20000)});const t=await r.text();let b:unknown=t;try{b=JSON.parse(t)}catch{}if(!r.ok)throw new Error(`API Studio ${r.status}: ${t.slice(0,200)}`);return b}
 Deno.serve(async(req)=>{if(req.method!=="POST")return new Response("POST required",{status:405});try{const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } }); const performanceIndex = await loadPerformanceIndex(db);const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];const diag:any[]=[];for(const c of connections??[]){let session=String(c.session_id||"");try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
-let brokerSymbols:string[]=[];try{const sr=unwrap(await api(base,key,"/Symbols",{id:session}));const arr=Array.isArray(sr)?sr:[];brokerSymbols=arr.map((x:any)=>typeof x==="string"?x:String(x?.symbol??x?.name??"")).filter(Boolean)}catch(e){diag.push({login:c.login,error:"Symbols: "+String(e)})}
+if (!assertAutomationKey(req)) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } }); const performanceIndex = await loadPerformanceIndex(db);const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];const diag:any[]=[];let gotData=false;const rej:Record<string,number>={};const R=(k:string)=>{rej[k]=(rej[k]??0)+1};for(const c of connections??[]){let session=String(c.session_id||"");try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
+const bad=(x:unknown)=>{const t=typeof x==="string"?x:JSON.stringify(x??"");return /INVALID_TOKEN|not found|expired|not connected|API Studio [45]\d\d/i.test(t)&&!Array.isArray(unwrap(x))};
+let reconnected=false;const reconnect=async()=>{reconnected=true;const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"&&raw.replace(/"/g,"")?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)};
+let symRaw:unknown=null;try{symRaw=await api(base,key,"/Symbols",{id:session})}catch(e){symRaw=String(e)}
+if(!session||bad(symRaw)){try{const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id);symRaw=await api(base,key,"/Symbols",{id:session})}catch(e){diag.push({login:c.login,error:"Reconnect: "+String(e)});continue}}
+let brokerSymbols:string[]=[];try{const sr=unwrap(symRaw);const arr=Array.isArray(sr)?sr:[];brokerSymbols=arr.map((x:any)=>typeof x==="string"?x:String(x?.symbol??x?.name??"")).filter(Boolean)}catch(e){diag.push({login:c.login,error:"Symbols: "+String(e)})}
 const nk=(v:string)=>v.toLowerCase().replace(/[^a-z0-9]/g,"");const resolve=(r:string)=>brokerSymbols.find(s=>s.toLowerCase()===r.toLowerCase())??brokerSymbols.find(s=>nk(s)===nk(r))??r;
-const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{
+const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];let symOff=0;const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{
   const fetchMinutes=name==="D3"?1440:mins;
   const fetchBars=name==="D3"?300:500;
-  const raw=bars(await api(base,key,"/PriceHistory",{id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString(),to:new Date().toISOString(),timeFrame:fetchMinutes}));
-  const data=name==="D3"?aggregateDays(raw,3):raw;
-  frames.push({n:name,data,sig:frameSignal(data,f.bias,profile)});
+  const rawBody=await api(base,key,"/PriceHistory",{id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString().slice(0,19),to:new Date(Date.now()+4*3600000).toISOString().slice(0,19),timeFrame:fetchMinutes});
+  let raw=bars(rawBody);if(!raw.length&&bad(rawBody)&&!reconnected){try{await reconnect();raw=bars(await api(base,key,"/PriceHistory",{id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString().slice(0,19),to:new Date(Date.now()+4*3600000).toISOString().slice(0,19),timeFrame:fetchMinutes}))}catch(e){diag.push({login:c.login,error:"Reconnect: "+String(e).slice(0,200)})}}if(!raw.length&&diag.length<4)diag.push({symbol,resolved:resolve(symbol),brokerCount:brokerSymbols.length,brokerSample:brokerSymbols.filter(x=>/gain|pain|flip/i.test(x)).slice(0,8),tf:name,sample:(typeof rawBody==="string"?rawBody:JSON.stringify(rawBody)).slice(0,300)});
+  if(raw.length)gotData=true;
+  if(name==="M1"&&raw.length){const d=raw.at(-1)!.time-Math.floor(Date.now()/1000);symOff=d>900?Math.round(d/1800)*1800:0}
+  const shifted=symOff?raw.map(x=>({...x,time:x.time-symOff})):raw;
+  const data=name==="D3"?aggregateDays(shifted,3):shifted;
+  if(data.length<60)R(name+":bars_"+(data.length>0?"few":"0"));frames.push({n:name,data,sig:frameSignal(data,f.bias,profile)});
 }catch(e){if(diag.length<40)diag.push({symbol,resolved:resolve(symbol),tf:name,error:String(e)});frames.push({n:name,sig:null})}}
 
 const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
@@ -156,9 +165,9 @@ const setups=[
 ];
 
 for(const plan of setups){
-  if(!plan.setup) continue;
+  if(!plan.setup){R(plan.tf+':no_setup');continue;}
   const worker=await workerConfluence(db,symbol,plan.setup.direction);
-  if(!worker.allow) continue;
+  if(!worker.allow){R(plan.tf+':worker');continue;}
   plan.setup.score=Math.min(96,plan.setup.score+worker.bonus);
 
   const confirmationDirections=plan.confirm.map((sig:any,index:number)=>{
@@ -170,9 +179,9 @@ for(const plan of setups){
   }).filter(Boolean) as ("BUY"|"SELL")[];
   const same=confirmationDirections.filter(x=>x===plan.setup.direction).length;
   const conflict=confirmationDirections.some(x=>x!==plan.setup.direction);
-  if(conflict) continue;
-  const required=plan.tf==="1m"?1:plan.tf==="15m"?1:plan.tf==="1H"?1:plan.tf==="3D"?1:0;
-  if(same<required || plan.setup.score<plan.min) continue;
+  if(conflict && same===0){R(plan.tf+':conflict');continue;}
+  const required=(plan.tf==="1m"||plan.tf==="15m"||plan.tf==="1H"||plan.tf==="3D")&&confirmationDirections.length?1:0;
+  if(same<required || plan.setup.score<plan.min-LOOSEN){R(plan.tf+':score_or_confirm');continue;}
   const entry=plan.setup.entry;
   const sourceFrame=frames.find((x:any)=>x.n===plan.tf);
   const sourceCandle=sourceFrame?.data?.at(-1)??null;
@@ -185,22 +194,22 @@ for(const plan of setups){
   const strategyLabels=detectedStrategies.length?detectedStrategies:["TREND"];
   const strategyLabel=`${profile.label} · ${plan.label} · ${strategyLabels.join(" + ")}`;
   const gate=performanceGate(performanceIndex,symbol,plan.tf,strategyLabel);
-  if(!gate.allowed) continue;
-  if(plan.setup.score < plan.min + gate.scoreBoost) continue;
+  if(!gate.allowed){R(plan.tf+':perf_gate');continue;}
+  if(plan.setup.score < plan.min + gate.scoreBoost - LOOSEN){R(plan.tf+':perf_score');continue;}
   const expiresAt=new Date(Date.now()+plan.expiry*1000).toISOString();
   const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",symbol).eq("strategy_name",strategyLabel).eq("direction",plan.setup.direction).gte("created_at",new Date(Date.now()-Math.max(10,plan.tf==="1m"?5:plan.tf==="15m"?30:120)*60000).toISOString()).limit(1);
-  if(recent?.length) continue;
+  if(recent?.length){R(plan.tf+':cooldown');continue;}
   const {data:row,error:ins}=await db.from("trading_signals").insert({
     symbol,direction:plan.setup.direction,entry_price:entry,stop_loss:sl,take_profit:tp,timeframe:plan.tf,
-    strategy_name:strategyLabel,signal_type:plan.type,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
-    status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,best_expiry:plan.expiry,backup_expiry:plan.backup,expires_at:expiresAt,
+    strategy_name:strategyLabel,confidence:Math.round(plan.setup.score),broker:["weltrade"],category:"syntx",
+    status:"ACTIVE",is_manual:false,expiry_seconds:plan.expiry,expires_at:expiresAt,
     reason:`${f.family} ${plan.label}: ${strategyLabels.join(", ")} confirmed with ${same}/${confirmationDirections.length} higher-timeframe confirmations`,
     explanation_json:{
-      engine:"SyntX MTF Engine v5",strategy_id:profile.label,strategy_types:strategyLabels,source:"Weltrade SyntX API Studio + Botvio Worker Intelligence",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
+      engine:"SyntX MTF Engine v5",signal_type:plan.type,strategy_id:profile.label,strategy_types:strategyLabels,source:"Weltrade SyntX API Studio + Botvio Worker Intelligence",expiry_seconds:plan.expiry,expires_at:expiresAt,
       entry_style:plan.label,timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"])),
       higher_timeframe_confirmation:same,confirmation_count:confirmationDirections.length,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime},
       feed_audit:{source:"Weltrade SyntX API Studio",symbol,requested_timeframe:plan.tf,candle_time:candleTime,candle_closed:candleClosed,candle_ohlc:sourceCandle?{open:sourceCandle.open,high:sourceCandle.high,low:sourceCandle.low,close:sourceCandle.close}:null,entry_price:entry}
     }
   }).select("id,symbol,direction,confidence,timeframe").single();
-  if(!ins&&row)published.push(row);
-}}}return new Response(JSON.stringify({success:true,published,count:published.length,diagnostics:diag,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
+  if(!ins&&row)published.push(row);else if(ins)R(plan.tf+':insert_error:'+ins.message.slice(0,60));
+}}if(gotData)break;}return new Response(JSON.stringify({success:true,published,count:published.length,diagnostics:diag,rejections:rej,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});

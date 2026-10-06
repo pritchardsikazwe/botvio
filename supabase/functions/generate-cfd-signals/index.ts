@@ -3,6 +3,7 @@ import { assertAutomationKey } from "../_shared/automationAuth.ts";
 import { loadPerformanceIndex, performanceGate } from "../_shared/performanceGate.ts";
 
 type Candle={epoch:number;open:number;high:number;low:number;close:number};
+const LOOSEN=7; // moderate loosening of minimum scores
 type Sig={direction:"BUY"|"SELL";score:number;entry:number;sl:number;tp:number};
 
 const SYMBOLS=[
@@ -73,7 +74,7 @@ function signal(c:Candle[],profile:typeof SYMBOLS[number]):Sig|null{
  const alignment=bias===direction?6:bias? -5:0;
  const quality=candleQuality(c);
  const score=Math.min(96,65+trend+breakout+rsScore+(stretched?0:5)+alignment+quality);
- if(score<profile.min)return null;
+ if(score<profile.min-LOOSEN)return null;
  return{direction,score,entry:last.close,sl:direction==="BUY"?last.close-a*profile.stop:last.close+a*profile.stop,tp:direction==="BUY"?last.close+a*profile.target:last.close-a*profile.target};
 }
 
@@ -151,7 +152,7 @@ function request(ws:WebSocket,payload:Record<string,unknown>,timeout=15000){
 }
 
 async function candles(ws:WebSocket,symbol:string,granularity:number,count:number):Promise<Candle[]>{
- const data=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,subscribe:0,adjust_start_time:1});
+ const data=await request(ws,{ticks_history:symbol,end:"latest",style:"candles",granularity,count,adjust_start_time:1});
  return (data.candles??[]).map((x:any)=>({epoch:Number(x.epoch),open:Number(x.open),high:Number(x.high),low:Number(x.low),close:Number(x.close)}))
    .filter((x:Candle)=>Number.isFinite(x.epoch)&&[x.open,x.high,x.low,x.close].every(Number.isFinite));
 }
@@ -179,7 +180,7 @@ Deno.serve(async(req)=>{
   await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(new Error("Deriv WebSocket timeout")),12000);ws.addEventListener("open",()=>{clearTimeout(t);resolve()},{once:true});ws.addEventListener("error",()=>{clearTimeout(t);reject(new Error("Deriv WebSocket connection failed"))},{once:true})});
   const active=await request(ws,{active_symbols:"brief"});
   const activeSet=new Set((active.active_symbols??[]).map((x:any)=>String(x.underlying_symbol??x.symbol)));
-  const published:any[]=[];const skipped:any[]=[];const wanted=(await req.json().catch(()=>({})))?.symbol as string|undefined;
+  const published:any[]=[];const skipped:any[]=[];const rej:Record<string,number>={};const R=(k:string)=>{rej[k]=(rej[k]??0)+1};const wanted=(await req.json().catch(()=>({})))?.symbol as string|undefined;
   const profiles=wanted?SYMBOLS.filter(x=>x.symbol===wanted):SYMBOLS;
 
   for(const profile of profiles){
@@ -198,7 +199,7 @@ Deno.serve(async(req)=>{
    for(const p of PLANS){
     const gate = performanceGate(performanceIndex, profile.name, p.tf, profile.strategy);
     if(!gate.allowed) { skipped.push({symbol:profile.name,timeframe:p.tf,reason:gate.reason,performance:gate.performance}); continue; }
-    const setup=sigs.get(p.tf);if(!setup)continue;
+    const setup=sigs.get(p.tf);if(!setup){R(p.tf+':no_setup'+((frames.get(p.tf)?.length??0)<60?'_few_candles':''));continue;}
     const worker=await workerConfluence(db,profile.symbol,setup.direction);
     // Higher-timeframe intelligence is a quality modifier, not a hard requirement.
     // Each horizon must be able to generate independently.
@@ -211,9 +212,9 @@ Deno.serve(async(req)=>{
     const confirmationCount=Math.max(confirmations.length,confirmationBias.length);
     const alignedCount=same+alignedBias;
     const confirmationBonus=alignedCount>0 ? Math.min(4,alignedCount*2) : 0;
-    const conflictPenalty=conflict ? 4 : 0;
+    const conflictPenalty=conflict&&alignedCount===0 ? 4 : 0;
     const finalScore=Math.min(96,Math.max(0,workerScore+confirmationBonus-conflictPenalty));
-    if(finalScore<profile.min+p.minBoost+gate.scoreBoost)continue;
+    if(finalScore<profile.min+p.minBoost+gate.scoreBoost-LOOSEN){R(p.tf+':score');continue;}
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     const expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const detectedStrategies=strategyTypes(frames.get(p.tf)??[],setup.direction,p.tf);
@@ -221,19 +222,19 @@ Deno.serve(async(req)=>{
     const strategyName=`${profile.strategy} · ${p.type} ${p.tf} · ${strategyLabels.join(" + ")}`;
     const cooldown=p.tf==="1m"?5:p.tf==="5m"?10:p.tf==="15m"?30:120;
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",profile.symbol).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-cooldown*60000).toISOString()).limit(1);
-    if(recent?.length)continue;
+    if(recent?.length){R(p.tf+':cooldown');continue;}
     const {data:row,error}=await db.from("trading_signals").insert({
       symbol:profile.name,direction:setup.direction,entry_price:setup.entry,stop_loss:levels.sl,take_profit:levels.tp,
-      timeframe:p.tf,signal_type:p.type,strategy_name:strategyName,confidence:Math.round(finalScore),broker:["deriv"],
-      category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,best_expiry:p.expiry,backup_expiry:p.backup,
+      timeframe:p.tf,strategy_name:strategyName,confidence:Math.round(finalScore),broker:["deriv"],
+      category:profile.category,status:"ACTIVE",is_manual:false,expiry_seconds:p.expiry,
       expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${alignedCount}/${confirmationCount} higher-timeframe confirmations/alignment`,
       explanation_json:{engine:"Botvio CFD MTF Engine v2",signal_type:p.type,timeframe:p.tf,strategy_types:strategyLabels,expiry_seconds:p.expiry,expires_at:expiresAt,
         source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",higher_timeframe_confirmation:alignedCount,confirmation_count:confirmationCount,confirmation_bonus:confirmationBonus,conflict_penalty:conflictPenalty,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
-    }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
+    }).select("id,symbol,direction,timeframe,expiry_seconds,expires_at,confidence").single();
     if(error)skipped.push({symbol:profile.name,timeframe:p.tf,error:error.message});else published.push(row);
    }
   }
   try{ws.close()}catch{}
-  return new Response(JSON.stringify({success:true,published,count:published.length,skipped,generated_at:new Date().toISOString(),source:"Deriv MTF CFD Engine"}),{headers:{"Content-Type":"application/json"}});
+  return new Response(JSON.stringify({success:true,published,count:published.length,rejections:rej,skipped,generated_at:new Date().toISOString(),source:"Deriv MTF CFD Engine"}),{headers:{"Content-Type":"application/json"}});
  }catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}
 });
