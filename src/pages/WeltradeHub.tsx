@@ -23,7 +23,7 @@ const WeltradeHub = () => {
     <div className="min-h-screen bg-background">
       <SEOHead seoKey="weltrade"
         title="Weltrade Hub – GainX, PainX, FlipX, SwitchX & FX Charts & Signals"
-        description="Weltrade analysis hub with family-aware SyntX strategies, live MT5 bridge charts, signals, account comparisons and educational risk guidance."
+        description="Weltrade analysis hub with family-aware SyntX strategies, live API Studio market-data charts, signals, account comparisons and educational risk guidance."
         ogImage="https://botvio.live/icon-512.png"
       />
       <Header />
@@ -39,7 +39,7 @@ const WeltradeHub = () => {
                 <Badge className="bg-warning/20 text-warning border-warning/30 font-mono text-xs">SYNTX</Badge>
                 <Badge variant="outline" className="border-success/40 text-success text-xs">24/5 Market</Badge>
                 <Badge variant="outline" className="border-warning/30 text-warning text-xs">
-                  <Sparkles className="h-3 w-3 mr-1" /> Live Bridge Feed
+                  <Sparkles className="h-3 w-3 mr-1" /> Live API Studio Feed
                 </Badge>
               </div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
