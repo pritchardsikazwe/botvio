@@ -52,7 +52,26 @@ function resolveBrokerSymbol(requested: string, symbols: string[]) {
   const exact = symbols.find((s) => s.toLowerCase() === requested.toLowerCase());
   if (exact) return exact;
   const key = normalizeSymbolKey(requested);
-  return symbols.find((s) => normalizeSymbolKey(s) === key) ?? requested;
+  const normalized = symbols.find((s) => normalizeSymbolKey(s) === key);
+  if (normalized) return normalized;
+  // Weltrade/MT5 can expose suffix variants (for example broker-specific
+  // symbol suffixes). Prefer a symbol whose normalized name starts with the
+  // requested canonical name before falling back to the request itself.
+  return symbols.find((s) => {
+    const candidate = normalizeSymbolKey(s);
+    return candidate.startsWith(key) || key.startsWith(candidate);
+  }) ?? requested;
+}
+
+function brokerSymbolCandidates(requested: string, symbols: string[]) {
+  const key = normalizeSymbolKey(requested);
+  const exact = symbols.filter((s) => s.toLowerCase() === requested.toLowerCase());
+  const normalized = symbols.filter((s) => normalizeSymbolKey(s) === key);
+  const variants = symbols.filter((s) => {
+    const candidate = normalizeSymbolKey(s);
+    return candidate.startsWith(key) || key.startsWith(candidate);
+  });
+  return [...new Set([...exact, ...normalized, ...variants, requested])];
 }
 
 function normalizeSymbols(body: unknown): string[] {
@@ -280,12 +299,14 @@ Deno.serve(async (req) => {
       let resolvedSymbol = symbol;
       const candles = await withConnection(admin, userId, async (session) => {
         const symbols = normalizeSymbols(await callApi("/Symbols", { id: session }));
-        resolvedSymbol = resolveBrokerSymbol(symbol, symbols);
+        const candidates = brokerSymbolCandidates(symbol, symbols);
+        let lastRaw = "";
+        let lastSymbol = candidates[0] ?? symbol;
         // MT5 servers report times in broker-server local time (no zone). Derive
         // the offset from a live quote so candles line up with real UTC time.
         let offsetSec = 0;
         try {
-          const q = unwrap(await callApi("/GetQuote", { id: session, symbol: resolvedSymbol })) as Record<string, unknown>;
+          const q = unwrap(await callApi("/GetQuote", { id: session, symbol: candidates[0] ?? symbol })) as Record<string, unknown>;
           const qt = q?.time ?? q?.Time;
           if (qt) {
             const diff = new Date(String(qt).replace(/Z?$/, "Z")).getTime() - Date.now();
@@ -293,13 +314,32 @@ Deno.serve(async (req) => {
           }
         } catch { /* fall back to no offset */ }
         const shift = (iso: string) => new Date(new Date(iso).getTime() + offsetSec * 1000).toISOString().slice(0, 19);
-        const raw = await callApi("/PriceHistory", { id: session, symbol: resolvedSymbol, from: shift(from), to: shift(to), timeFrame: timeframeMap[timeframe] ?? 5 });
-        const bars = normalizeBars(raw).map((b) => ({ ...b, time: b.time - offsetSec }));
-        if (!bars.length) {
-          rawSample = (typeof raw === "string" ? raw : JSON.stringify(raw)).slice(0, 800);
-          throw new Error(`TradeCopy PriceHistory returned no valid candles for ${resolvedSymbol} (${timeframe}). Response: ${rawSample}`);
+        const windows = [
+          [from, to],
+          [new Date(Date.now() - 24 * 60 * 60_000).toISOString(), new Date().toISOString()],
+          [new Date(Date.now() - 7 * 24 * 60 * 60_000).toISOString(), new Date().toISOString()],
+        ] as const;
+        for (const candidate of candidates) {
+          for (const [windowFrom, windowTo] of windows) {
+            const raw = await callApi("/PriceHistory", {
+              id: session,
+              symbol: candidate,
+              from: shift(windowFrom),
+              to: shift(windowTo),
+              timeFrame: timeframeMap[timeframe] ?? 5,
+            });
+            const bars = normalizeBars(raw).map((b) => ({ ...b, time: b.time - offsetSec }));
+            lastSymbol = candidate;
+            lastRaw = typeof raw === "string" ? raw : JSON.stringify(raw);
+            if (bars.length) {
+              resolvedSymbol = candidate;
+              return bars;
+            }
+          }
         }
-        return bars;
+        resolvedSymbol = lastSymbol;
+        rawSample = lastRaw.slice(0, 800);
+        throw new Error(`TradeCopy PriceHistory returned no valid candles for ${resolvedSymbol} (${timeframe}). Tried ${candidates.length} broker symbol variant(s) and multiple history windows. Response: ${rawSample}`);
       });
       return json({ ok: true, candles, requestedSymbol: symbol, resolvedSymbol, ...(rawSample ? { rawSample } : {}) });
     }
