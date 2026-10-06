@@ -15,7 +15,7 @@ env:
 jobs:
   android:
     name: Android Test - ${{ matrix.name }}
-    runs-on: windows-2025
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -23,16 +23,16 @@ jobs:
         include:
           - id: gold-robot
             name: Botvio Gold Robot
-            app_id: live.botvio.gold
+            app_id: live.botvio.goldai
           - id: crypto-robot
             name: Botvio Crypto Robot
-            app_id: live.botvio.crypto
+            app_id: live.botvio.cryptoai
           - id: synthetic-robot
             name: Botvio Synthetic Robot
-            app_id: live.botvio.synthetic
+            app_id: live.botvio.syntheticai
           - id: weltrade-robot
             name: Botvio Weltrade Robot
-            app_id: live.botvio.weltrade
+            app_id: live.botvio.weltradeai
           - id: deriv-copy
             name: Botvio Deriv Copy Trading
             app_id: live.botvio.copy
@@ -50,7 +50,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
