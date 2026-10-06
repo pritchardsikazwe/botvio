@@ -50,7 +50,7 @@ export default function SyntheticHub() {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Deriv Synthetic Hub – Auto Signals on Boom, Crash, Volatility & Step"
-        description="Live BUY/SELL signals plotted directly on synthetic index charts. Boom 500, Crash 150-900, Volatility 10/25/75, Step Index. Auto-execute via Deriv API or MT5 Bridge."
+        description="Live BUY/SELL signals plotted directly on synthetic index charts. Boom 500, Crash 150-900, Volatility 10/25/75, Step Index. Auto-execute via Deriv API or TradeCopy MT5."
       />
       <Header />
 
@@ -73,7 +73,7 @@ export default function SyntheticHub() {
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
               Real-time BUY / SELL signals plotted directly on Boom, Crash, Volatility & Step index charts.
               Multi-timeframe entries (H4 → M15/M5), S/R zones and spike pattern detection. Auto-execute via
-              your Deriv account or your MT5 Bridge EA — your choice per signal.
+              your Deriv account or your connected TradeCopy MT5 follower — your choice per signal.
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function SyntheticHub() {
                   This index does not stream on Deriv's public WebSocket feed, so we don't show a
                   misleading chart from a different symbol. Open the live chart inside your MT5
                   terminal and use <strong className="text-foreground">Send to MT5</strong> to
-                  auto-execute Botvio signals via your Bridge EA.
+                  auto-execute Botvio signals through your TradeCopy MT5 follower.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
                   <Badge variant="outline" className="text-[10px] border-warning/40 text-warning font-mono">
@@ -307,7 +307,7 @@ export default function SyntheticHub() {
               </h3>
               <p className="text-xs text-muted-foreground">
                 Tap <strong>Trade on Deriv</strong> for instant CFD-multiplier execution, or
-                <strong> Send to MT5</strong> to queue the trade onto your Bridge EA terminal.
+                <strong> Send to MT5</strong> to route the trade through your connected TradeCopy MT5 follower.
               </p>
             </div>
           </CardContent>
