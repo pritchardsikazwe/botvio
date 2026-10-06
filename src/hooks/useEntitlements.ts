@@ -21,6 +21,8 @@ export interface Entitlement {
   } | null;
 }
 
+export function isEntitlementActive(e: Pick<Entitlement, "status" | "ends_at">): boolean { return e.status === "active" && (!e.ends_at || new Date(e.ends_at).getTime() > Date.now()); }
+
 const VISITOR_TRIAL_KEY = "botvio_visitor_trial_started_at";
 const VISITOR_TRIAL_MS = 24 * 60 * 60 * 1000;
 
@@ -49,8 +51,7 @@ export function useEntitlements() {
       const { data, error } = await supabase
         .from("entitlements")
         .select("*, products(id, name, type, slug, price_usd, billing_type)")
-        .eq("user_id", user.id)
-        .eq("status", "active");
+        .eq("user_id", user.id);
 
       if (error) throw error;
       return data as Entitlement[];
@@ -75,9 +76,7 @@ export function useHasEntitlement(productId: string | undefined) {
 
   return entitlements?.some(
     (e) =>
-      e.product_id === productId &&
-      e.status === "active" &&
-      (!e.ends_at || new Date(e.ends_at).getTime() > Date.now()),
+      e.product_id === productId && isEntitlementActive(e),
   ) ?? false;
 }
 
@@ -89,7 +88,7 @@ export function useHasProductType(type: string) {
   if (!user && hasVisitorPreview()) return true;
 
   return entitlements?.some(
-    (e) => e.products?.type === type && e.status === "active" && (!e.ends_at || new Date(e.ends_at).getTime() > Date.now()),
+    (e) => e.products?.type === type && isEntitlementActive(e),
   ) ?? false;
 }
 
