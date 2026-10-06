@@ -22,9 +22,9 @@ Deno.serve(async(req)=>{
   const requestId=String(body?.paymentRequestId??"");
   const action=String(body?.action??"");
   if(!requestId || !["approve","reject"].includes(action)) return json({ok:false,error:"paymentRequestId and action are required"},400);
-  const {data,result,error}=await admin.rpc("review_payment_atomic",{p_admin_user_id:user.id,p_payment_request_id:requestId,p_action:action});
+  const { data, error } = await admin.rpc("review_payment_atomic",{p_admin_user_id:user.id,p_payment_request_id:requestId,p_action:action});
   if(error) return json({ok:false,error:error.message},400);
-  return json({ok:true,...(result??data)});
+  return json({ok:true,...(data ?? {})});
  }catch(e){
   console.error("[review-payment]",e instanceof Error?e.message:"review failed");
   return json({ok:false,error:e instanceof Error?e.message:"Payment review failed"},400);
