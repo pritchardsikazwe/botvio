@@ -71,7 +71,22 @@ export function createWeltradeApiStudioAdapter(config: AdapterConfig): MarketDat
           await poll();
           timer = setInterval(poll, 2500);
         } catch (error) {
-          if (!stopped) handlers.onStatus("error", { wsState: "POLLING", apiStatus: "error", error: (error as Error).message });
+          let message = (error as Error).message;
+          // Surface the upstream TradeCopy/API Studio failure instead of hiding it
+          // behind the generic "Market data unavailable" chart state.
+          try {
+            const diagnostic = await invoke<{ diagnostics?: { quoteError?: string; historyError?: string; symbolSample?: string[]; symbolCount?: number } }>(
+              "diagnostics",
+              { symbol: config.feedSymbol, timeframe: TF_API[config.timeframe] ?? "QhPeriodM5" },
+            );
+            const d = diagnostic.diagnostics;
+            const detail = d?.historyError || d?.quoteError;
+            const symbols = d?.symbolSample?.length ? ` Matching symbols: ${d.symbolSample.join(", ")}` : ` API symbols: ${d?.symbolCount ?? 0}.`;
+            if (detail) message = `${detail}${symbols}`;
+          } catch (diagnosticError) {
+            message = `${message}. Diagnostic check also failed: ${(diagnosticError as Error).message}`;
+          }
+          if (!stopped) handlers.onStatus("error", { wsState: "POLLING", apiStatus: "error", error: message });
         }
       };
 
