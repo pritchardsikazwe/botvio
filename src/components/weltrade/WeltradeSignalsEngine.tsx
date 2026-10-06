@@ -309,8 +309,8 @@ export const WeltradeSignalsEngine = () => {
               </ScrollArea>
             </CardContent>
           </Card>
+        </div>
         <div className="min-w-0 rounded-xl border border-border/50 bg-card/40 p-1">
-          <div className="min-w-0 rounded-xl border border-border/50 bg-card/40 p-1">
 
           <BrokerCandleChart
             candles={candles}
