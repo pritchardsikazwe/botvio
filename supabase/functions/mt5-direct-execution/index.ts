@@ -58,6 +58,16 @@ const normalizeDirection = (value: unknown): "BUY" | "SELL" | null => {
 
 const normalSymbol = (s: string) => s.toUpperCase().replace(/\s+/g, "");
 
+// Botvio signal names -> standard Deriv MT5 symbol names. Markets not listed
+// (e.g. Weltrade SyntX) are never sent to a Deriv master.
+const DERIV_MT5: Record<string, string> = {
+  "EUR/USD": "EURUSD", "GBP/USD": "GBPUSD", "USD/JPY": "USDJPY", "AUD/USD": "AUDUSD", "USD/CAD": "USDCAD",
+  "USD/CHF": "USDCHF", "NZD/USD": "NZDUSD", "EUR/JPY": "EURJPY", "GBP/JPY": "GBPJPY", "EUR/GBP": "EURGBP",
+  "GOLD": "XAUUSD", "XAU/USD": "XAUUSD", "XAUUSD": "XAUUSD", "SILVER": "XAGUSD", "XAG/USD": "XAGUSD",
+  "BTC/USD": "BTCUSD", "ETH/USD": "ETHUSD", "US30": "US 30", "NAS100": "US Tech 100", "UK100": "UK 100",
+};
+const derivMt5Symbol = (s: string) => DERIV_MT5[String(s).toUpperCase()] ?? DERIV_MT5[String(s)] ?? null;
+
 async function hasPaidMt5Entitlement(admin: SupabaseClient, account: Record<string, any>) {
   if (account.direct_execution_entitled === true) {
     const expires = account.direct_execution_expires_at ? new Date(account.direct_execution_expires_at).getTime() : null;
@@ -95,7 +105,7 @@ async function executeForAccount(
 ) {
   const direction = normalizeDirection(signal.direction);
   if (!direction) return { ok: false, skipped: true, reason: "unsupported signal direction" };
-  if (!(await hasPaidMt5Entitlement(admin, account))) return { ok: false, skipped: true, reason: "MT5 Direct Execution is not active for this paid subscription" };
+  if (role !== "master" && !(await hasPaidMt5Entitlement(admin, account))) return { ok: false, skipped: true, reason: "MT5 Direct Execution is not active for this paid subscription" };
   if (!account.tradecopy_user_id) return { ok: false, skipped: true, reason: "TradeCopy account is not registered" };
   if (!account.tradecopy_active) return { ok: false, skipped: true, reason: "TradeCopy account is inactive" };
   if ((signal.confidence ?? 0) < (account.direct_min_confidence ?? account.botvio_signal_min_confidence ?? 70)) {
@@ -182,7 +192,15 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
         skipped++;
         continue;
       }
-      const result = await executeForAccount(admin, master, signal, "master", Number(master.botvio_signal_master_lot ?? 0.01), String(signal.symbol), globalLive);
+      const isDeriv = /deriv/i.test(String(master.server ?? master.broker ?? ""));
+      const mt5Symbol = isDeriv ? derivMt5Symbol(String(signal.symbol)) : String(signal.symbol);
+      if (!mt5Symbol) { skipped++; continue; }
+      // One master trade per market per 30 minutes keeps the demo from stacking duplicates.
+      const { data: recentTrade } = await admin.from("direct_executions").select("id")
+        .eq("trading_account_id", master.id).eq("mt5_symbol", mt5Symbol).neq("status", "failed")
+        .gte("created_at", new Date(Date.now() - 30 * 60_000).toISOString()).limit(1);
+      if (recentTrade?.length) { skipped++; continue; }
+      const result = await executeForAccount(admin, master, signal, "master", Number(master.botvio_signal_master_lot ?? 0.01), mt5Symbol, globalLive);
       if (result.ok) masterExecuted++; else if (result.skipped) skipped++;
     }
   }
