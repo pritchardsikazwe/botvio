@@ -141,17 +141,17 @@ let symRaw:unknown=null;try{symRaw=await api(base,key,"/Symbols",{id:session})}c
 if(!session||bad(symRaw)){try{const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id);symRaw=await api(base,key,"/Symbols",{id:session})}catch(e){diag.push({login:c.login,error:"Reconnect: "+String(e)});continue}}
 let brokerSymbols:string[]=[];try{const sr=unwrap(symRaw);const arr=Array.isArray(sr)?sr:[];brokerSymbols=arr.map((x:any)=>typeof x==="string"?x:String(x?.symbol??x?.name??"")).filter(Boolean)}catch(e){diag.push({login:c.login,error:"Symbols: "+String(e)})}
 const nk=(v:string)=>v.toLowerCase().replace(/[^a-z0-9]/g,"");const resolve=(r:string)=>brokerSymbols.find(s=>s.toLowerCase()===r.toLowerCase())??brokerSymbols.find(s=>nk(s)===nk(r))??r;
-const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;for(const f of families)for(const symbol of f.symbols){const frames:any[]=[];let symOff=0;const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};for(const[name,mins]of Object.entries(TF)){try{
-  const fetchMinutes=name==="D3"?1440:mins;
-  const fetchBars=name==="D3"?300:500;
-  const rawBody=await api(base,key,"/PriceHistory",{id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString().slice(0,19),to:new Date(Date.now()+4*3600000).toISOString().slice(0,19),timeFrame:fetchMinutes});
-  let raw=bars(rawBody);if(!raw.length&&bad(rawBody)&&!reconnected){try{await reconnect();raw=bars(await api(base,key,"/PriceHistory",{id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString().slice(0,19),to:new Date(Date.now()+4*3600000).toISOString().slice(0,19),timeFrame:fetchMinutes}))}catch(e){diag.push({login:c.login,error:"Reconnect: "+String(e).slice(0,200)})}}if(!raw.length&&diag.length<4)diag.push({symbol,resolved:resolve(symbol),brokerCount:brokerSymbols.length,brokerSample:brokerSymbols.filter(x=>/gain|pain|flip/i.test(x)).slice(0,8),tf:name,sample:(typeof rawBody==="string"?rawBody:JSON.stringify(rawBody)).slice(0,300)});
-  if(raw.length)gotData=true;
-  if(name==="M1"&&raw.length){const d=raw.at(-1)!.time-Math.floor(Date.now()/1000);symOff=d>900?Math.round(d/1800)*1800:0}
-  const shifted=symOff?raw.map(x=>({...x,time:x.time-symOff})):raw;
-  const data=name==="D3"?aggregateDays(shifted,3):shifted;
-  if(data.length<60)R(name+":bars_"+(data.length>0?"few":"0"));frames.push({n:name,data,sig:frameSignal(data,f.bias,profile)});
-}catch(e){if(diag.length<40)diag.push({symbol,resolved:resolve(symbol),tf:name,error:String(e)});frames.push({n:name,sig:null})}}
+const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;const allSyms=families.flatMap(f=>f.symbols.map(symbol=>({f,symbol})));const slot=Math.floor(Date.now()/300000)%3;const batch=wanted?allSyms:allSyms.filter((_,i)=>i%3===slot);for(const{f,symbol}of batch){const frames:any[]=[];const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};
+const fetchTf=async(name:string,mins:number)=>{const fetchMinutes=name==="D3"?1440:mins;const fetchBars=name==="D3"?300:500;const q={id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString().slice(0,19),to:new Date(Date.now()+4*3600000).toISOString().slice(0,19),timeFrame:fetchMinutes};
+  const rawBody=await api(base,key,"/PriceHistory",q);let raw=bars(rawBody);
+  if(!raw.length&&bad(rawBody)&&!reconnected){try{await reconnect();raw=bars(await api(base,key,"/PriceHistory",{...q,id:session}))}catch(e){diag.push({login:c.login,error:"Reconnect: "+String(e).slice(0,200)})}}
+  if(!raw.length&&diag.length<4)diag.push({symbol,tf:name,sample:(typeof rawBody==="string"?rawBody:JSON.stringify(rawBody)).slice(0,300)});
+  return raw};
+const fetched=await Promise.all(Object.entries(TF).map(async([name,mins])=>{try{return{name,raw:await fetchTf(name,mins)}}catch(e){if(diag.length<40)diag.push({symbol,tf:name,error:String(e).slice(0,200)});return{name,raw:null as Candle[]|null}}}));
+const m1=fetched.find(x=>x.name==="M1")?.raw;let symOff=0;if(m1?.length){const d=m1.at(-1)!.time-Math.floor(Date.now()/1000);symOff=d>900?Math.round(d/1800)*1800:0}
+for(const{name,raw}of fetched){if(!raw){frames.push({n:name,sig:null});continue}if(raw.length)gotData=true;
+  const shifted=symOff?raw.map(x=>({...x,time:x.time-symOff})):raw;const data=name==="D3"?aggregateDays(shifted,3):shifted;
+  if(data.length<60)R(name+":bars_"+(data.length>0?"few":"0"));frames.push({n:name,data,sig:frameSignal(data,f.bias,profile)})}
 
 const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
 const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), biasD3=get("D3"), scalp=get("M1"), scalp5=get("M5");
