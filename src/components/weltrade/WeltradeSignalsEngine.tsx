@@ -328,7 +328,6 @@ export const WeltradeSignalsEngine = () => {
             showHauza
             unavailableMessage={diagnostics?.lastError ? `Weltrade API Studio error: ${diagnostics.lastError}` : bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
           />
-          </div>
         </div>
         <div className="min-w-0 xl:sticky xl:top-20 xl:self-start">
           <Card className={cn("relative overflow-hidden border-2 bg-gradient-to-br", signalTone.border, signalTone.bg)}>
