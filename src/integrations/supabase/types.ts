@@ -6584,6 +6584,9 @@ export type Database = {
           created_at: string
           credential_ref: string | null
           deriv_account_id: string | null
+          direct_execution_entitled: boolean
+          direct_execution_expires_at: string | null
+          direct_execution_plan: string | null
           direct_live_confirmed_at: string | null
           direct_lot: number
           direct_min_confidence: number
@@ -6626,6 +6629,9 @@ export type Database = {
           created_at?: string
           credential_ref?: string | null
           deriv_account_id?: string | null
+          direct_execution_entitled?: boolean
+          direct_execution_expires_at?: string | null
+          direct_execution_plan?: string | null
           direct_live_confirmed_at?: string | null
           direct_lot?: number
           direct_min_confidence?: number
@@ -6668,6 +6674,9 @@ export type Database = {
           created_at?: string
           credential_ref?: string | null
           deriv_account_id?: string | null
+          direct_execution_entitled?: boolean
+          direct_execution_expires_at?: string | null
+          direct_execution_plan?: string | null
           direct_live_confirmed_at?: string | null
           direct_lot?: number
           direct_min_confidence?: number
