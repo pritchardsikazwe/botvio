@@ -4,6 +4,7 @@ import { DerivConnection } from "@/components/trading/DerivConnection";
 import { DerivConnectionBar } from "@/components/trading/DerivConnectionBar";
 import { TradingNav } from "@/components/trading/TradingNav";
 import { DemoMt5Card } from "@/components/broker/DemoMt5Card";
+import { DerivOptionsTradingTerminal } from "@/components/trading/DerivOptionsTradingTerminal";
 
 import { DerivAffiliateButton } from "@/components/trading/DerivAffiliateButton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -91,6 +92,7 @@ const DerivOptions = () => {
       <main className="container mx-auto px-4 py-6 space-y-8">
         <DerivConnectionBar />
         <TradingNav />
+        <DerivOptionsTradingTerminal />
         {/* Big CTA Hero */}
         <section className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background to-primary/5 p-8 md:p-12 text-center space-y-5">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.15),transparent_60%)]" />
