@@ -71,12 +71,12 @@ const DONTS = [
 ];
 
 const PRO_TIPS = [
-  "Use Digit Differs on V75 — 90%+ baseline win rate with proper timing",
+  "Use Digit Differs on V75 — high-frequency digit setups require disciplined timing and risk control",
   "Accumulators work best in calm, ranging markets — avoid during spikes",
   "Combine Rise/Fall with support/resistance levels for higher accuracy",
   "Set Take Profit on Accumulators to lock gains before range break",
-  "Use the demo token (03Ddx1HRu2yFRJ8) to test strategies before going live",
-  "🏆 Most winning trades come from DIFFERS and FALL — focus your strategy on these!",
+  "Use your own authenticated Deriv demo connection to test strategies before going live",
+  "Use multiple contract types only when they match your tested strategy and risk plan.",
 ];
 
 const DerivOptions = () => {
@@ -104,7 +104,7 @@ const DerivOptions = () => {
               <span className="text-primary">with AI</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Connect your real account and let Botvio's intelligent engine execute across 8+ contract types and 50+ markets — automatically.
+              Connect your Deriv account to explore options, synthetic markets and Botvio AI-assisted signals in one trading workspace.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <DerivAffiliateButton label="Open Deriv Account" />
@@ -115,6 +115,44 @@ const DerivOptions = () => {
               </Button>
             </div>
           </div>
+        </section>
+
+        {/* Trading command center */}
+        <section className="grid gap-4 lg:grid-cols-[1.4fr_.6fr]">
+          <Card className="glass-card border-primary/20 overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="bg-primary/15 text-primary border-primary/30">OPTIONS COMMAND CENTER</Badge>
+                <Badge variant="outline">Deriv API</Badge>
+              </div>
+              <CardTitle className="text-2xl">Choose your contract style</CardTitle>
+              <CardDescription>Start with a demo account, review the contract terms and only then move to live trading.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                ["Rise / Fall","Simple directional contracts","/trade/style/rise-fall-scalping"],
+                ["Digits","Matches, Differs & digit patterns","/trade/style/digit-contracts"],
+                ["Multipliers","Control leverage and risk","/trade/style/multipliers"],
+                ["Boom / Crash","Synthetic spike strategies","/trade/style/boom-crash"],
+              ].map(([title,desc,href]) => (
+                <Link key={title} to={href} className="rounded-xl border border-border/70 bg-background/60 p-4 hover:border-primary/40 hover:bg-primary/5 transition-colors">
+                  <p className="font-bold text-sm">{title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{desc}</p>
+                  <span className="inline-flex items-center text-xs text-primary font-semibold mt-3">Explore <ArrowRight className="h-3 w-3 ml-1" /></span>
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+          <Card className="glass-card border-amber-500/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Risk first</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>Options can move quickly and losses can occur. Start with demo trading and use a stake size you can afford to lose.</p>
+              <div className="rounded-lg bg-muted/50 p-3"><span className="font-semibold text-foreground">Botvio AI</span> provides analysis and signals; it does not guarantee a profitable outcome.</div>
+              <Button asChild className="w-full" variant="outline"><Link to="/deriv-app">Manage Deriv connection</Link></Button>
+            </CardContent>
+          </Card>
         </section>
 
         {/* API Connection */}
@@ -146,7 +184,7 @@ const DerivOptions = () => {
                   </div>
                   <p className="font-bold text-sm">{c.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {c.name.includes("Digit") && "Predict the last digit of the price. Fast 1-10 tick contracts with 90%+ win rates on Differs."}
+                    {c.name.includes("Digit") && "Predict the last digit of the price. Fast 1-10 tick contracts with faster contract cycles with clearly defined terms."}
                     {c.name.includes("Rise") && "Predict if the price will rise or fall. Best for beginners — simple, clean entries."}
                     {c.name.includes("Multiplier") && "Amplify your gains up to 1000x. Set SL/TP for risk control on forex & synthetics."}
                     {c.name.includes("Accumulator") && "Grow your payout steadily with 1-5% growth rate. Best in calm, ranging markets."}
