@@ -1,4 +1,4 @@
-// DEPRECATED path (Bridge EA / VPS). Kept until TradeCopy demo verification succeeds — see docs/TRADECOPY.md.
+// TradeCopy-only hub execution. Legacy MT5 Bridge/VPS execution is retired.
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -41,10 +41,10 @@ interface Options {
 }
 
 /**
- * Auto-routes hub BUY/SELL signals to the user's MT5 Bridge EA.
- * - Reads `user_mt5_terminals` to confirm at least one terminal has auto_execute=true
- * - De-duplicates: only fires once per (symbol + direction) per session unless signal flips
- * - Calls the `queue-hub-trade` edge function which inserts into `mt5_commands`
+ * Auto-routes hub BUY/SELL signals through the user's TradeCopy MT5 follower.
+ * - Requires an active TradeCopy follower registration.
+ * - De-duplicates: only fires once per (symbol + direction) per session unless signal flips.
+ * - Calls mt5-direct-execution with the follower account ID.
  */
 export function useMt5HubExecution({
   symbol,
@@ -63,35 +63,26 @@ export function useMt5HubExecution({
   const { user } = useAuth();
   const lastFiredRef = useRef<string | null>(null);
 
-  // Has the user enabled auto-execute on at least one terminal?
-  const { data: hasAutoTerminal } = useQuery({
-    queryKey: ["mt5-auto-terminal", user?.id],
+  // Active TradeCopy follower used for hub auto-execution.
+  const { data: tradecopyFollower } = useQuery({
+    queryKey: ["hub-tradecopy-follower", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("user_mt5_terminals")
-        .select("id")
+      const { data, error } = await supabase
+        .from("trading_accounts")
+        .select("id,label,broker,server,login_id,environment,account_role,tradecopy_user_id,tradecopy_active,is_active,is_botvio_robot,direct_lot")
         .eq("user_id", user!.id)
-        .eq("auto_execute", true)
-        .limit(1);
-      return (data?.length ?? 0) > 0;
+        .eq("account_role", "slave")
+        .eq("is_botvio_robot", false)
+        .eq("is_active", true)
+        .not("tradecopy_user_id", "is", null)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
     },
     refetchInterval: 30_000,
-  });
-
-  // Is shared demo MT5 enabled by admin AND opted-in by user?
-  const { data: demoEnabled } = useQuery({
-    queryKey: ["demo-mt5-active", user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const [{ data: us }, { data: cfg }] = await Promise.all([
-        supabase.from("user_settings").select("use_demo_mt5").eq("user_id", user!.id).maybeSingle(),
-        supabase.from("app_settings").select("value").eq("key", "demo_mt5").maybeSingle(),
-      ]);
-      const v = (cfg?.value ?? {}) as { enabled?: boolean; terminal_uid?: string };
-      return !!us?.use_demo_mt5 && !!v.enabled && !!v.terminal_uid;
-    },
-    refetchInterval: 60_000,
   });
 
   // Per-symbol "Auto-send to MT5" toggle from user_settings.hub_auto_mt5_symbols
@@ -112,10 +103,6 @@ export function useMt5HubExecution({
 
   useEffect(() => {
     if (!user || !enabled || !hubAutoEnabled) return;
-    // Allow either personal terminal OR shared demo MT5
-    if (!hasAutoTerminal && !demoEnabled) {
-      // Fall through to paper-trade simulation below
-    }
     if (live.signal !== "BUY" && live.signal !== "SELL") return;
     if (live.confidence < minConfidence) return;
 
@@ -138,73 +125,57 @@ export function useMt5HubExecution({
           tp = Number(tpRaw.toFixed(5));
         }
 
-        // No MT5 path → record a paper trade (simulation)
-        if (!hasAutoTerminal && !demoEnabled) {
-          if (typeof px !== "number" || px <= 0) return;
-          const { error: ptErr } = await supabase.from("paper_trades").insert({
-            user_id: user.id,
-            symbol,
-            direction: live.signal,
-            lot: 0.01,
-            entry_price: Number(px.toFixed(5)),
-            sl,
-            tp,
-            source: `paper:${source}`,
-            status: "OPEN",
-          });
-          if (ptErr) {
-            console.warn("[Paper] insert failed:", ptErr);
-            lastFiredRef.current = null;
-            return;
-          }
+        if (!tradecopyFollower?.id) {
           toast({
-            title: `📝 Paper trade opened: ${live.signal} ${symbol}`,
-            description: `Entry ${px.toFixed(5)} · SL ${sl ?? "—"} / TP ${tp ?? "—"} · Connect MT5 to trade live.`,
-          });
-          return;
-        }
-
-        const { data: { session } } = await supabase.auth.getSession();
-        const accessToken = session?.access_token;
-        if (!accessToken) return;
-
-        const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/queue-hub-trade`;
-        const resp = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            symbol,
-            direction: live.signal,
-            source,
-            ...(sl ? { sl } : {}),
-            ...(tp ? { tp } : {}),
-          }),
-        });
-        const json = await resp.json().catch(() => ({}));
-        if (!resp.ok) {
-          console.warn("[MT5 Auto] Failed to queue trade:", json);
-          toast({
-            title: "MT5 auto-execute failed",
-            description: json?.error ?? "Could not queue trade.",
+            title: "TradeCopy follower required",
+            description: "Connect your MT5 account as a TradeCopy follower before enabling hub auto-execution.",
             variant: "destructive",
           });
-          // allow retry next signal cycle
           lastFiredRef.current = null;
           return;
         }
+
+        if (!tradecopyFollower.tradecopy_active) {
+          toast({
+            title: "TradeCopy follower is inactive",
+            description: "Activate TradeCopy copying for this MT5 follower before auto-execution.",
+            variant: "destructive",
+          });
+          lastFiredRef.current = null;
+          return;
+        }
+
+        const { data: result, error } = await supabase.functions.invoke("mt5-direct-execution", {
+          body: {
+            action: "send_order",
+            account_id: tradecopyFollower.id,
+            symbol,
+            direction: live.signal,
+            volume: Number(tradecopyFollower.direct_lot ?? 0.01),
+            ...(sl ? { stop_loss: sl } : {}),
+            ...(tp ? { take_profit: tp } : {}),
+          },
+        });
+
+        if (error || !result?.ok) {
+          console.warn("[TradeCopy Auto] Failed to execute:", error ?? result);
+          toast({
+            title: "TradeCopy auto-execution failed",
+            description: result?.error ?? error?.message ?? "Could not send the order through TradeCopy.",
+            variant: "destructive",
+          });
+          lastFiredRef.current = null;
+          return;
+        }
+
         toast({
-          title: `${json.demo ? "🧪 Demo " : ""}MT5 trade queued: ${live.signal} ${symbol}`,
-          description: json.adjusted
-            ? `Vol ${json.volume} (broker min) • SL ${sl ?? "—"} / TP ${tp ?? "—"}`
-            : `Vol ${json.volume} • SL ${sl ?? "—"} / TP ${tp ?? "—"}`,
+          title: "TradeCopy order sent: " + live.signal + " " + symbol,
+          description: "MT5 follower " + (tradecopyFollower.login_id ?? tradecopyFollower.label ?? "account") + " received the order.",
         });
       } catch (err) {
         console.error("[MT5 Auto] Error:", err);
         lastFiredRef.current = null;
       }
     })();
-  }, [user, enabled, hasAutoTerminal, demoEnabled, hubAutoEnabled, live.signal, live.confidence, live.lastPrice, symbol, minConfidence, source, effSlPct, effTpPct]);
+  }, [user, enabled, tradecopyFollower, hubAutoEnabled, live.signal, live.confidence, live.lastPrice, symbol, minConfidence, source, effSlPct, effTpPct]);
 }
