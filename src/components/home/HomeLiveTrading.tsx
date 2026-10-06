@@ -122,7 +122,7 @@ export const HomeLiveTrading = () => {
               <p className="mt-1 text-xs text-muted-foreground">Live positions only — no signal cards and no entry prices shown.</p>
             </div>
             <div className="flex shrink-0 gap-2">
-              <Button asChild size="sm" variant="outline" className="text-xs"><Link to="/copy-trading">Copy Trading <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link></Button>
+              <Button asChild size="sm" variant="outline" className="text-xs"><Link to="/marketplace">Copy Trading <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link></Button>
               <Button asChild size="sm" className="text-xs font-black"><Link to="/billing"><Crown className="mr-1.5 h-3.5 w-3.5" />Subscribe</Link></Button>
             </div>
           </div>
