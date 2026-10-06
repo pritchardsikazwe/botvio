@@ -17,6 +17,7 @@ import { trackBotvioEvent } from "@/components/analytics/analytics";
 import { SignalModesGuide } from "@/components/signals/SignalModesGuide";
 import { BotvioPricingSection } from "@/components/home/BotvioPricingSection";
 import { DerivOptionsHome } from "@/components/home/DerivOptionsHome";
+import { HomeLiveTrading } from "@/components/home/HomeLiveTrading";
 
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -183,6 +184,11 @@ const HomeMockup = () => {
         <section data-reveal="workflows" className={`border-y border-border/50 bg-card/20 transition-all duration-700 ${visibleSections.workflows ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}><div className="container mx-auto px-4 py-12 sm:py-16"><div className="mx-auto max-w-2xl text-center"><Badge variant="outline" className="mb-3">TRADING WORKFLOWS</Badge><h2 className="text-3xl font-black">Choose how you want to trade</h2><p className="mt-3 text-sm text-muted-foreground">Research manually, follow signals, copy a provider or explore automation.</p></div><div className="mt-8 grid gap-4 md:grid-cols-3"><Link to="/signals" className="rounded-2xl border border-border/60 bg-card p-5"><Bell className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">Signals</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Track opportunities and signal history.</p></Link><Link to="/copy-trading" className="rounded-2xl border border-border/60 bg-card p-5"><Users className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">Copy Trading</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Compare providers and follow strategies.</p></Link><Link to="/bots" className="rounded-2xl border border-border/60 bg-card p-5"><Bot className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">AI Bots</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Explore supported automated strategies.</p></Link></div></div></section>
 
         <DerivOptionsHome />
+
+        {/* Compact live-trading showcase on the actual production home route. */}
+        <section className="container mx-auto px-4 py-4">
+          <HomeLiveTrading />
+        </section>
 
         <BotvioRobotPromo />
 
