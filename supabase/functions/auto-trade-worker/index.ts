@@ -244,19 +244,24 @@ serve(async (req) => {
     }
 
     for (const [userId, items] of byUser) {
-      // ── Plan gating: only paid tiers (basic / standard / vip) get the cloud worker ──
-      const { data: planRow } = await admin
-        .from("user_plan_subscriptions")
-        .select("status, pricing_plans!inner(code)")
-        .eq("user_id", userId)
-        .eq("status", "active")
-        .maybeSingle();
-      const planCode = (planRow as any)?.pricing_plans?.code ?? "free";
-      const PAID_PLANS = ["basic", "standard", "vip", "pro", "premium"];
-      if (!PAID_PLANS.includes(planCode)) {
-        skipped += items.length;
-        details.push({ userId, reason: "free_plan", planCode });
-        continue;
+      // Deriv Options is a free Botvio feature. Paid-plan gating applies only
+      // to non-Deriv routes; Deriv users trade through their own connected
+      // Deriv account and do not need a Botvio Marketplace entitlement.
+      const hasDerivOptions = items.some((item: any) => item.route === "deriv");
+      if (!hasDerivOptions) {
+        const { data: planRow } = await admin
+          .from("user_plan_subscriptions")
+          .select("status, pricing_plans!inner(code)")
+          .eq("user_id", userId)
+          .eq("status", "active")
+          .maybeSingle();
+        const planCode = (planRow as any)?.pricing_plans?.code ?? "free";
+        const PAID_PLANS = ["basic", "standard", "vip", "pro", "premium"];
+        if (!PAID_PLANS.includes(planCode)) {
+          skipped += items.length;
+          details.push({ userId, reason: "free_plan", planCode, appliesTo: "non-deriv-routes-only" });
+          continue;
+        }
       }
 
       // Load limits (defaults if missing)
