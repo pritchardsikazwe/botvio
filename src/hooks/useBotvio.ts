@@ -305,7 +305,7 @@ export function useMyCopySubscriptions() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as CopySubscription[];
+      return data as unknown as CopySubscription[];
     },
     enabled: !!user,
   });
