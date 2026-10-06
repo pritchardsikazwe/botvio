@@ -31,7 +31,7 @@ export function useTradingAccounts() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as TradingAccount[];
+      return data as unknown as TradingAccount[];
     },
     enabled: !!user,
   });
@@ -136,7 +136,7 @@ export function useBotInstances() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as BotInstance[];
+      return data as unknown as BotInstance[];
     },
     enabled: !!user,
   });
@@ -305,7 +305,7 @@ export function useMyCopySubscriptions() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as CopySubscription[];
+      return data as unknown as CopySubscription[];
     },
     enabled: !!user,
   });

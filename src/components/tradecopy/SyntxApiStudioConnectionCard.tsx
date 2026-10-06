@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, KeyRound, Loader2, Power, RefreshCw, ShieldCheck, Wifi } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { WELTRADE_INSTRUMENTS } from "@/config/weltradeInstruments";
+
+type AuditRow = { requestedSymbol: string; resolvedSymbol: string | null; quoteOk: boolean; historyCount: number; live: boolean; failure: string | null };
 
 type Status = {
   connected: boolean;
@@ -43,6 +46,7 @@ export function SyntxApiStudioConnectionCard() {
   const [status, setStatus] = useState<Status>({ connected: false });
   const [symbols, setSymbols] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [audit, setAudit] = useState<AuditRow[] | null>(null);
   const resolvedServer = server === "custom" ? customServer.trim() : server;
 
   const call = async <T,>(action: string, payload: Record<string, unknown> = {}) => {
@@ -100,6 +104,18 @@ export function SyntxApiStudioConnectionCard() {
     finally { setBusy(false); }
   };
 
+  const runAudit = async () => {
+    setBusy(true);
+    try {
+      const list = WELTRADE_INSTRUMENTS.filter((i) => i.category === "syntx").map((i) => i.feedSymbol);
+      const r = await call<{ audit: { rows: AuditRow[] } }>("audit_all", { symbols: list });
+      setAudit(r.audit.rows);
+      const live = r.audit.rows.filter((x) => x.live).length;
+      toast.success(`Feed audit: ${live}/${r.audit.rows.length} markets returned quotes and candles`);
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(false); }
+  };
+
   return (
     <Card className="glass-card border-primary/25 bg-primary/5">
       <CardHeader className="pb-3">
@@ -150,6 +166,8 @@ export function SyntxApiStudioConnectionCard() {
           </div>
         )}
         {symbols.length > 0 && <div className="rounded-xl border border-border/50 bg-background/50 p-3"><div className="mb-2 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /><p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Discovered SyntX / MT5 symbols</p></div><div className="flex max-h-24 flex-wrap gap-1.5 overflow-auto">{symbols.map((symbol) => <Badge key={symbol} variant="outline" className="font-mono text-[10px]">{symbol}</Badge>)}</div></div>}
+        {status.connected && <Button size="sm" variant="outline" onClick={() => void runAudit()} disabled={busy}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}Audit all SyntX markets</Button>}
+        {audit && <div className="max-h-72 overflow-auto rounded-xl border bg-background/50"><table className="w-full text-[11px]"><thead><tr className="text-left text-muted-foreground"><th className="p-2">Market</th><th className="p-2">Broker symbol</th><th className="p-2">Quote</th><th className="p-2">Candles</th><th className="p-2">Result</th></tr></thead><tbody>{audit.map((r) => <tr key={r.requestedSymbol} className="border-t"><td className="p-2 font-semibold">{r.requestedSymbol}</td><td className="p-2 font-mono">{r.resolvedSymbol ?? "—"}</td><td className="p-2">{r.quoteOk ? "OK" : "No"}</td><td className="p-2">{r.historyCount}</td><td className={`p-2 ${r.live ? "text-success" : "text-destructive"}`}>{r.live ? "Live" : r.failure ?? "Failed"}</td></tr>)}</tbody></table></div>}
         {status.lastError && <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">{status.lastError}</p>}
         <p className="text-[10px] leading-relaxed text-muted-foreground">Password is sent only to the secure Supabase function and stored encrypted. The SyntX data connection exposes quotes/history to BOTVIO; it does not expose OrderSend or copy-trading controls.</p>
       </CardContent>

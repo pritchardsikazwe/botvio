@@ -7,7 +7,7 @@ import { ArrowRight, Activity } from "lucide-react";
 type MiniProps = {
   title: string;
   symbol: string;
-  source: "deriv" | "weltrade-bridge";
+  source: "deriv" | "weltrade-api-studio";
   feedSymbol: string;
   decimals: number;
   to: string;
@@ -92,7 +92,7 @@ export function HomeMarketCharts() {
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <MiniMarketChart title="Synthetic" symbol="BOOM 500 Index" source="deriv" feedSymbol="BOOM500" decimals={3} to="/synthetic-hub" tag="DERIV" />
-          <MiniMarketChart title="Weltrade" symbol="GainX 400" source="weltrade-bridge" feedSymbol="GainX 400" decimals={3} to="/weltrade" tag="MT5" />
+          <MiniMarketChart title="Weltrade" symbol="GainX 400" source="weltrade-api-studio" feedSymbol="GainX 400" decimals={3} to="/weltrade" tag="MT5" />
           <MiniMarketChart title="Bitcoin" symbol="BTC/USD" source="deriv" feedSymbol="cryBTCUSD" decimals={2} to="/bitcoin" tag="24/7" />
         </div>
       </div>
