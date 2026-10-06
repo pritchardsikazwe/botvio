@@ -56,7 +56,7 @@ export function DerivOptionsTradingTerminal() {
       .order("created_at", { ascending: false })
       .limit(12);
     const mapped = (data || [])
-      .filter((t:any) => MARKETS.some(m => m.symbol === t.display_symbol))
+      .filter((t:any) => MARKETS.some(m => m.name === t.display_symbol || m.symbol === t.display_symbol))
       .map((t:any) => ({
         id: t.id,
         symbol: t.display_symbol,
