@@ -29,7 +29,7 @@ const PLAN_TIER: Record<string, number> = {
 };
 
 export function useSubscriptionGate(): SubscriptionGate {
-  const { user } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ["subscription-gate", user?.id],
@@ -51,7 +51,7 @@ export function useSubscriptionGate(): SubscriptionGate {
   const code = plan?.code || "free";
   const tier = PLAN_TIER[code] ?? 0;
 
-  if (OPEN_ACCESS) {
+  if (OPEN_ACCESS || (user && (isAdmin || isSuperAdmin))) {
     return {
       planCode: code, planName: plan?.name || "Free",
       isPaid: true, isBasicOrAbove: true, isStandardOrAbove: true, isVIP: true,

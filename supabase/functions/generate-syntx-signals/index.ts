@@ -186,7 +186,7 @@ for(const plan of setups){
   const strategyLabel=`${profile.label} · ${plan.label} · ${strategyLabels.join(" + ")}`;
   const gate=performanceGate(performanceIndex,symbol,plan.tf,strategyLabel);
   if(!gate.allowed) continue;
-  if(plan.setup.score < plan.min + gate.scoreBoost + 7) continue; // stricter scores restored
+  if(plan.setup.score < plan.min + gate.scoreBoost) continue; // repeats blocked by timeframe guard
   const expiresAt=new Date(Date.now()+plan.expiry*1000).toISOString();
   const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",symbol).eq("timeframe",plan.tf).gte("created_at",new Date(Date.now()-Math.max(10,plan.tf==="1m"?5:plan.tf==="15m"?30:120)*60000).toISOString()).limit(1);
   if(recent?.length) continue;
