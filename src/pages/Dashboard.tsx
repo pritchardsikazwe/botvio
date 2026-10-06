@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useBotInstances, useMyCopySubscriptions, useTradingAccounts, useNotifications } from "@/hooks/useBotvio";
+import { useBotInstances, useMyCopySubscriptions, useTradingAccounts, useNotifications, useMyProvider, useUpdateBotInstance, useMarkNotificationRead } from "@/hooks/useBotvio";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,37 +12,45 @@ import { Header } from "@/components/trading/Header";
 import { MarketDataPanel } from "@/components/trading/MarketDataPanel";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { BotvioRobotSignalShortcut } from "@/components/dashboard/BotvioRobotSignalShortcut";
-import { useEntitlements } from "@/hooks/useEntitlements";
+import { useEntitlements, isEntitlementActive } from "@/hooks/useEntitlements";
+import { isRestrictedOnStore } from "@/lib/mobile";
+import { useState } from "react";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: botInstances, isLoading: botsLoading } = useBotInstances();
+  const { data: botInstances, isLoading: botsLoading, isError: botsError, refetch: refetchBots } = useBotInstances();
   const { data: subscriptions, isLoading: subsLoading } = useMyCopySubscriptions();
   const { data: accounts, isLoading: accountsLoading } = useTradingAccounts();
-  const { data: entitlements } = useEntitlements();
-  const { data: notifications } = useNotifications();
+  const { data: entitlements, isLoading: entitlementsLoading, isError: entitlementsError, refetch: refetchEntitlements } = useEntitlements();
+  const { data: notifications, isLoading: notificationsLoading, isError: notificationsError, refetch: refetchNotifications } = useNotifications();
+  const { data: myProvider } = useMyProvider();
+  const updateBot = useUpdateBotInstance();
+  const markNotificationRead = useMarkNotificationRead();
+  const [showAllNotifications, setShowAllNotifications] = useState(false);
 
-  const activeRobots = entitlements?.filter(e => e.products?.type === "bot" && e.status === "active").length || 0;
+  const activeRobots = entitlements?.filter(e => e.products?.type === "bot" && e.products?.slug !== "mt5-direct" && isEntitlementActive(e)).length || 0;
+  const activeHubs = entitlements?.filter(e => e.products?.type !== "bot" && isEntitlementActive(e)).length || 0;
   const activeSubscriptions = subscriptions?.filter(s => s.status === "active").length || 0;
   const connectedAccounts = accounts?.length || 0;
   const connectedBrokerNames = Array.from(new Set((accounts ?? []).map((a: any) => String(a.broker || "MT5").toUpperCase()))).join(" · ") || "No accounts yet";
   const unreadNotifications = notifications?.filter(n => !n.is_read).length || 0;
 
-  // Fetch real today's P&L from executions
-  const { data: todayPnL = 0 } = useQuery({
+  // Fetch closed P&L and direct signals sent today
+  const { data: pnlSummary, isLoading: pnlLoading, isError: pnlError, refetch: refetchPnl } = useQuery({
     queryKey: ["todays-pnl", user?.id],
     queryFn: async () => {
-      if (!user) return 0;
+      if (!user) return { pnl: null, signalsSent: 0 };
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
-      const { data, error } = await supabase
-        .from("executions")
-        .select("pnl")
-        .eq("user_id", user.id)
-        .gte("created_at", todayStart.toISOString());
-      if (error) throw error;
-      return (data || []).reduce((sum, e) => sum + (e.pnl || 0), 0);
+      const [closed, direct] = await Promise.all([
+        supabase.from("executions").select("pnl").eq("user_id", user.id).gte("created_at", todayStart.toISOString()).not("pnl", "is", null),
+        supabase.from("direct_executions").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", todayStart.toISOString()),
+      ]);
+      if (closed.error) throw closed.error;
+      if (direct.error) throw direct.error;
+      const rows = closed.data || [];
+      return { pnl: rows.length ? rows.reduce((sum, e) => sum + Number(e.pnl || 0), 0) : null, signalsSent: direct.count || 0 };
     },
     enabled: !!user,
   });
@@ -69,7 +77,7 @@ const Dashboard = () => {
         <div className="mb-4">
           <h1 className="text-xl font-bold mb-1">Trading Dashboard</h1>
           <p className="text-muted-foreground">
-            Manage your trading bots and copy trading subscriptions
+            Your Botvio access, MT5 connection, signals and activity in one place.
           </p>
         </div>
 
@@ -91,15 +99,15 @@ const Dashboard = () => {
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Today's P&L</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Today's P&L (closed trades)</CardTitle>
               <TrendingUp className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
               <div className={`text-xl font-bold ${todayPnL >= 0 ? "text-success" : "text-destructive"}`}>
-                {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
+                {pnlLoading ? <Skeleton className="h-7 w-24" /> : pnlError ? "—" : pnlSummary?.pnl == null ? "—" : (pnlSummary.pnl >= 0 ? "+" : "") + pnlSummary.pnl.toFixed(2) + " USD"}
               </div>
               <p className="text-xs text-muted-foreground">
-                across all accounts
+                {pnlSummary?.signalsSent ? pnlSummary.signalsSent + " signals sent today" : "No closed trades today"}
               </p>
             </CardContent>
           </Card>
@@ -152,10 +160,11 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="pt-1 pb-3">
             <div className="flex flex-wrap items-center gap-2">
-              {entitlements && entitlements.length > 0 ? entitlements.slice(0, 5).map((e) => (
-                <Badge key={e.id} variant="secondary" className="text-sm px-3 py-1.5">{e.products?.name || "Active product"}</Badge>
-              )) : <span className="text-sm text-muted-foreground">No active Store products yet.</span>}
+              {entitlementsLoading ? <Skeleton className="h-8 w-full" /> : entitlementsError ? <div className="text-sm text-destructive">Could not load access. <Button size="sm" variant="outline" onClick={() => refetchEntitlements()}>Retry</Button></div> : entitlements?.filter(isEntitlementActive).length ? entitlements.filter(isEntitlementActive).map((e) => (
+                <Button key={e.id} asChild variant="secondary" className="h-auto text-sm px-3 py-1.5"><Link to={e.products?.slug === "synthetic-hub" ? "/synthetic" : e.products?.slug === "weltrade-hub" ? "/weltrade" : e.products?.slug === "mt5-direct" ? "/connections" : "/botvio-robot"}>{e.products?.name || "Active product"} · {e.ends_at ? new Date(e.ends_at).toLocaleDateString() : "No expiry"}</Link></Button>
+              )) : <span className="text-sm text-muted-foreground">No active Store products yet.</span>}}
             </div>
+            {entitlements && entitlements.some(e => !isEntitlementActive(e)) && <div className="mt-2 text-xs text-muted-foreground">Expired: {entitlements.filter(e => !isEntitlementActive(e)).map(e => e.products?.name || "Product").join(", ")}</div>}
           </CardContent>
         </Card>
 
@@ -186,7 +195,7 @@ const Dashboard = () => {
                   <Skeleton className="h-16 w-full" />
                   <Skeleton className="h-16 w-full" />
                 </div>
-              ) : botInstances && botInstances.length > 0 ? (
+              ) : botsError ? (<div className="text-sm text-destructive">Could not load bots. <Button size="sm" variant="outline" onClick={() => refetchBots()}>Retry</Button></div>) : botInstances && botInstances.length > 0 ? (
                 <div className="space-y-2">
                   {botInstances.slice(0, 3).map((instance) => (
                     <div
@@ -208,7 +217,7 @@ const Dashboard = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label={instance.status === "active" ? `Pause bot ${instance.name}` : `Start bot ${instance.name}`}
+                        disabled={updateBot.isPending} onClick={() => updateBot.mutate({ id: instance.id, status: instance.status === "active" ? "paused" : "active" })} aria-label={instance.status === "active" ? "Pause bot" : "Start bot"}
                       >
                         {instance.status === "active" ? (
                           <Pause className="h-4 w-4" />
@@ -219,6 +228,7 @@ const Dashboard = () => {
                     </div>
                   ))}
                 </div>
+                <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={() => setShowAllNotifications(v => !v)}>{showAllNotifications ? "Show recent" : "View all"}</Button><Button size="sm" variant="ghost" disabled={!unreadNotifications} onClick={async () => { const { error } = await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false); if (!error) refetchNotifications(); }}>Mark all read</Button></div>
               ) : (
                 <div className="text-center py-5">
                   <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
@@ -249,12 +259,12 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-1 pb-3">
-              {notifications && notifications.length > 0 ? (
+              {notificationsLoading ? <div className="space-y-2"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div> : notificationsError ? <div className="text-sm text-destructive">Could not load notifications. <Button size="sm" variant="outline" onClick={() => refetchNotifications()}>Retry</Button></div> : notifications && notifications.length > 0 ? (
                 <div className="space-y-2">
-                  {notifications.slice(0, 5).map((notif) => (
+                  {(showAllNotifications ? notifications : notifications.slice(0, 5)).map((notif) => (
                     <div
                       key={notif.id}
-                      className={`flex items-start gap-3 p-2.5 rounded-lg ${
+                      onClick={() => { if (!notif.is_read) markNotificationRead.mutate(notif.id); }} className={`flex items-start gap-3 p-2.5 rounded-lg cursor-pointer ${
                         notif.is_read ? "bg-muted/30" : "bg-muted/50"
                       }`}
                     >
@@ -349,45 +359,14 @@ const Dashboard = () => {
         )}
 
         {/* Quick Actions */}
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
-            <Link to="/signals">
-              <Signal className="h-6 w-6 mb-2" />
-              <span>Live Signals</span>
-            </Link>
-          </Button>
-          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
-            <Link to="/trading">
-              <CandlestickChart className="h-6 w-6 mb-2" />
-              <span>Trading Workspace</span>
-            </Link>
-          </Button>
-          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
-            <Link to="/accounts">
-              <Wallet className="h-6 w-6 mb-2" />
-              <span>Connect Account</span>
-            </Link>
-          </Button>
-          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
-            <Link to="/bots">
-              <Bot className="h-6 w-6 mb-2" />
-              <span>Activate Bot</span>
-            </Link>
-          </Button>
-          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
-            <Link to="/copy-trading">
-              <Users className="h-6 w-6 mb-2" />
-              <span>Copy Traders</span>
-            </Link>
-          </Button>
-          <Button variant="outline" className="h-auto py-3 flex-col" asChild>
-            <Link to="/provider-dashboard">
-              <TrendingUp className="h-6 w-6 mb-2" />
-              <span>Provider Panel</span>
-            </Link>
-          </Button>
-        </div>
-      </main>
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">{[
+          { path: "/signals", icon: Signal, label: "Live Signals" },
+          { path: "/markets", icon: CandlestickChart, label: "Trading Workspace" },
+          { path: "/accounts", icon: Wallet, label: "Connect Account" },
+          { path: "/bots", icon: Bot, label: "Activate Bot" },
+          { path: "/copy-trading", icon: Users, label: "Copy Traders" },
+          ...(myProvider ? [{ path: "/provider-dashboard", icon: TrendingUp, label: "Provider Panel" }] : []),
+        ].filter(action => !isRestrictedOnStore(action.path)).map(({ path, icon: Icon, label }) => <Button key={path} variant="outline" className="h-auto py-3 flex-col" asChild><Link to={path}><Icon className="h-6 w-6 mb-2" /><span>{label}</span></Link></Button>)}</div>\n    </main>
     </div>
   );
 };
