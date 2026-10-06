@@ -246,7 +246,7 @@ export const WeltradeSignalsEngine = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)_340px]">
         <div className="space-y-3">
           <Card className="border-border/60 bg-card/80">
             <CardHeader className="p-3 pb-2">
@@ -309,6 +309,9 @@ export const WeltradeSignalsEngine = () => {
               </ScrollArea>
             </CardContent>
           </Card>
+
+          <div className="min-w-0 xl:sticky xl:top-20 xl:self-start">
+ </Card>
 
           <Card className={cn("relative overflow-hidden border-2 bg-gradient-to-br", signalTone.border, signalTone.bg)}>
           <CardContent className="space-y-3 p-3.5">
@@ -394,10 +397,9 @@ export const WeltradeSignalsEngine = () => {
               </div>
             )}
           </CardContent>
-          </Card>
-        </div>
+          </Card>          </div>
+          <div className="min-w-0 rounded-xl border border-border/50 bg-card/40 p-1">
 
-        <div className="min-w-0">
           <BrokerCandleChart
             candles={candles}
             status={status}
@@ -414,7 +416,10 @@ export const WeltradeSignalsEngine = () => {
             showHauza
             unavailableMessage={diagnostics?.lastError ? `Weltrade API Studio error: ${diagnostics.lastError}` : bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
           />
-        </div>
+          </div>
+          <div className="min-w-0 xl:sticky xl:top-20 xl:self-start">
+
+          </div>
       </div>
 
       {familyProfile && (
