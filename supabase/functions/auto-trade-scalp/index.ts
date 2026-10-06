@@ -12,12 +12,29 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const DERIV_WS = "wss://api.derivws.com/trading/v1/options/ws/public";
 
 const SYMBOL_MAP: Record<string, string> = {
-  // Deriv synthetic indices used by the Options command center.
+  // Deriv synthetic indices — exact New API underlying symbols.
   "Volatility 10": "R_10",
+  "Volatility 25": "R_25",
+  "Volatility 50": "R_50",
   "Volatility 75": "R_75",
   "Volatility 100": "R_100",
-  "Vol 100 (1s)": "1HZ100V",
+  "Volatility 10 (1s)": "1HZ10V",
+  "Volatility 15 (1s)": "1HZ15V",
+  "Volatility 25 (1s)": "1HZ25V",
+  "Volatility 30 (1s)": "1HZ30V",
+  "Volatility 50 (1s)": "1HZ50V",
+  "Volatility 75 (1s)": "1HZ75V",
+  "Volatility 90 (1s)": "1HZ90V",
+  "Volatility 100 (1s)": "1HZ100V",
+  "Boom 300": "BOOM300",
+  "Boom 500": "BOOM500",
+  "Boom 600": "BOOM600",
+  "Boom 900": "BOOM900",
   "Boom 1000": "BOOM1000",
+  "Crash 300": "CRASH300",
+  "Crash 500": "CRASH500",
+  "Crash 600": "CRASH600",
+  "Crash 900": "CRASH900",
   "Crash 1000": "CRASH1000",
   "XAU/USD": "frxXAUUSD",
   "XAG/USD": "frxXAGUSD",
@@ -157,6 +174,45 @@ function isMarketOpen(symbol:string):boolean {
   return true;
 }
 
+async function getActiveDerivSymbols():Promise<Set<string>> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(DERIV_WS);
+    const timer = setTimeout(() => { try { ws.close(); } catch {} resolve(new Set()); }, 10000);
+    ws.onopen = () => ws.send(JSON.stringify({ active_symbols: "brief" }));
+    ws.onmessage = (ev) => {
+      try {
+        const m = JSON.parse(ev.data);
+        if (m.msg_type === "active_symbols" && Array.isArray(m.active_symbols)) {
+          clearTimeout(timer); try { ws.close(); } catch {}
+          resolve(new Set(m.active_symbols.map((x:any) => String(x.underlying_symbol || x.symbol || "")).filter(Boolean)));
+        }
+      } catch {}
+    };
+    ws.onerror = () => { clearTimeout(timer); resolve(new Set()); };
+  });
+}
+
+async function supportsMultiplier(symbol:string, contractType:"MULTUP"|"MULTDOWN"):Promise<boolean> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(DERIV_WS);
+    const timer = setTimeout(() => { try { ws.close(); } catch {} resolve(false); }, 10000);
+    ws.onopen = () => ws.send(JSON.stringify({ contracts_for: symbol }));
+    ws.onmessage = (ev) => {
+      try {
+        const m = JSON.parse(ev.data);
+        if (m.msg_type === "contracts_for") {
+          clearTimeout(timer); try { ws.close(); } catch {}
+          const available = Array.isArray(m.contracts_for?.available) ? m.contracts_for.available : [];
+          resolve(available.some((c:any) => String(c.contract_type) === contractType));
+        } else if (m.error) {
+          clearTimeout(timer); try { ws.close(); } catch {} resolve(false);
+        }
+      } catch {}
+    };
+    ws.onerror = () => { clearTimeout(timer); resolve(false); };
+  });
+}
+
 async function runForUser(supabase:any,settings:any){
   const userId=settings.user_id;
   const log=(msg:string,extra?:any)=>console.log(`[auto-trade-scalp ${userId.slice(0,8)}] ${msg}`,extra||"");
@@ -179,7 +235,7 @@ async function runForUser(supabase:any,settings:any){
     const {data:hasOpen}=await supabase.rpc("has_open_auto_trade",{_user_id:userId,_display_symbol:displaySymbol});
     if(hasOpen===true){results.push({displaySymbol,skipped:"already_open"});continue;}
 
-    const profile=strategyFor(displaySymbol);
+    const profile=strategyFor(displaySymbol);\n    const [supportsUp, supportsDown] = await Promise.all([supportsMultiplier(derivSymbol,"MULTUP"), supportsMultiplier(derivSymbol,"MULTDOWN")]);\n    if(!supportsUp || !supportsDown){results.push({displaySymbol,skipped:"multiplier_contract_not_supported",derivSymbol});continue;}
     const [c1m,c5m,c15m,c1h,c1d]=await Promise.all([
       fetchCandles(derivSymbol,60,120),fetchCandles(derivSymbol,300,120),
       fetchCandles(derivSymbol,900,120),fetchCandles(derivSymbol,3600,120),
