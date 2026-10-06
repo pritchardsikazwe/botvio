@@ -195,7 +195,7 @@ Deno.serve(async(req)=>{
       expiry_seconds:p.expiry,expires_at:expiresAt,
       reason:`${s.name} · ${strategy.label} · ${type}: ${confDirections.filter(x=>x===setup.direction).length}/${confDirections.length} higher-timeframe confirmations`,
       explanation_json:{engine:"Botvio Deriv Synthetic Strategy Engine v2",strategy_family:strategy.family,strategy_label:strategy.label,signal_type:type,timeframe:p.tf,expiry_seconds:p.expiry,expires_at:expiresAt,source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
-    }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
+    }).select("id,symbol,direction,timeframe,expiry_seconds,expires_at,confidence").single();
     if(!error&&row)published.push(row);
    }
   }

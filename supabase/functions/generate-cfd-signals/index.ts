@@ -229,7 +229,7 @@ Deno.serve(async(req)=>{
       expires_at:expiresAt,reason:`${profile.name} ${p.type} ${strategyLabels.join(", ")} entry: ${alignedCount}/${confirmationCount} higher-timeframe confirmations/alignment`,
       explanation_json:{engine:"Botvio CFD MTF Engine v2",signal_type:p.type,timeframe:p.tf,strategy_types:strategyLabels,expiry_seconds:p.expiry,expires_at:expiresAt,
         source:"Deriv active_symbols + ticks_history + Botvio Worker Intelligence",higher_timeframe_confirmation:alignedCount,confirmation_count:confirmationCount,confirmation_bonus:confirmationBonus,conflict_penalty:conflictPenalty,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}}
-    }).select("id,symbol,direction,timeframe,signal_type,expiry_seconds,expires_at,confidence").single();
+    }).select("id,symbol,direction,timeframe,expiry_seconds,expires_at,confidence").single();
     if(error)skipped.push({symbol:profile.name,timeframe:p.tf,error:error.message});else published.push(row);
    }
   }
