@@ -412,7 +412,7 @@ export const WeltradeSignalsEngine = () => {
             signals={signals}
             activeSignal={activeSignal}
             showHauza
-            unavailableMessage={bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
+            unavailableMessage={diagnostics?.lastError ? `Weltrade API Studio error: ${diagnostics.lastError}` : bridgeOffline ? "Weltrade market data unavailable" : "Market data unavailable"}
           />
         </div>
       </div>
