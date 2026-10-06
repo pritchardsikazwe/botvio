@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
-import { useMarketplaceProducts, usePurchaseProduct, MarketplaceProduct } from "@/hooks/useMarketplace";
+import { useMarketplaceProducts, useMarketplaceTestMode, usePurchaseProduct, useSubmitPaymentRequest, MarketplaceProduct } from "@/hooks/useMarketplace";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +30,8 @@ const Marketplace = () => {
   const { data: products, isLoading } = useMarketplaceProducts();
   const { data: entitlements } = useEntitlements();
   const purchaseMutation = usePurchaseProduct();
+  const paymentRequestMutation = useSubmitPaymentRequest();
+  const { data: marketplaceTestMode, isLoading: testModeLoading } = useMarketplaceTestMode();
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -56,7 +58,7 @@ const Marketplace = () => {
   const handleBuy = (product: MarketplaceProduct) => {
     if (!user) { toast.error("Please sign in to continue"); return; }
     if (isOwned(product.id)) { toast.info("This access is already active"); return; }
-    purchaseMutation.mutate({ product, paymentMethod: "free", accountId });
+    purchaseMutation.mutate({ product, affiliateCode: (() => { try { const r = JSON.parse(localStorage.getItem("botvio_referral") || "null"); return r?.expiresAt > Date.now() ? r.code : undefined; } catch { return undefined; } })() });
   };
 
   const handleOpen = (product: MarketplaceProduct) => {
@@ -76,7 +78,7 @@ const Marketplace = () => {
     const storedRef = localStorage.getItem("botvio_referral");
     let affiliateCode: string | undefined;
     if (storedRef) { try { const parsed = JSON.parse(storedRef); if (parsed.expiresAt > Date.now()) affiliateCode = parsed.code; } catch {} }
-    purchaseMutation.mutate({ product: selectedProduct, paymentMethod, proofUrl: urlData.publicUrl, affiliateCode, accountId });
+    paymentRequestMutation.mutate({ product: selectedProduct, paymentMethod, proofUrl: urlData.publicUrl, affiliateCode, accountId });
     setShowCheckout(false); setSelectedProduct(null); setPaymentMethod(""); setProofFile(null);
   };
 
@@ -119,12 +121,12 @@ const Marketplace = () => {
                 <div className="my-5 space-y-2.5">{cfg.features.map((feature) => <div key={feature} className="flex items-center gap-2 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5 shrink-0 text-success" /> {feature}</div>)}</div>
                 <div className="flex items-end justify-between border-t border-border/50 pt-4">
                   <div>
-                    <span className="text-2xl font-black text-success">{owned ? "ACTIVE" : "FREE TEST ACCESS"}</span>
-                    <span className="ml-2 text-xs text-muted-foreground line-through">${product.price_usd}/month</span>
+                    <span className="text-2xl font-black text-success">{owned ? "ACTIVE" : marketplaceTestMode ? "FREE TEST ACCESS" : `${product.price_usd}/month`}</span>
+                    {!owned && marketplaceTestMode && <span className="ml-2 text-xs text-muted-foreground line-through">${product.price_usd}/month</span>}
                   </div>
-                  <Badge variant="outline" className="text-[10px] border-success/30 text-success">TEST MODE</Badge>
+                  {marketplaceTestMode && <Badge variant="outline" className="text-[10px] border-success/30 text-success">TEST MODE</Badge>}
                 </div>
-                <Button className="mt-5 w-full font-bold" variant={owned ? "outline" : "default"} onClick={() => owned ? handleOpen(product) : handleBuy(product)} disabled={purchaseMutation.isPending}>{owned ? <><ExternalLink className="mr-2 h-4 w-4" /> Open</> : <><Zap className="mr-2 h-4 w-4" /> Activate Free Access</>}</Button>
+                <Button className="mt-5 w-full font-bold" variant={owned ? "outline" : "default"} onClick={() => owned ? handleOpen(product) : marketplaceTestMode ? handleBuy(product) : (setSelectedProduct(product), setShowCheckout(true))} disabled={purchaseMutation.isPending || paymentRequestMutation.isPending || testModeLoading}>{owned ? <><ExternalLink className="mr-2 h-4 w-4" /> Open</> : <><Zap className="mr-2 h-4 w-4" /> {marketplaceTestMode ? "Activate Free Access" : "Subscribe"}</>}</Button>
                 {product.slug === "mt5-direct" && <p className="mt-3 text-center text-[10px] text-muted-foreground">Connect your MT5 account first, then activate Direct Signals.</p>}
               </CardContent>
             </Card>;
@@ -133,10 +135,10 @@ const Marketplace = () => {
 
         {!isLoading && visibleProducts.length === 0 && <Card className="border-dashed"><CardContent className="py-14 text-center"><Lock className="mx-auto mb-3 h-10 w-10 text-muted-foreground" /><h2 className="font-bold">Botvio products are being configured</h2><p className="mt-1 text-sm text-muted-foreground">Please check back shortly.</p></CardContent></Card>}
 
-        <section className="rounded-2xl border border-success/20 bg-success/5 p-4 text-center">
+        {marketplaceTestMode && <section className="rounded-2xl border border-success/20 bg-success/5 p-4 text-center">
           <p className="text-sm font-bold text-success">BOTVIO TEST ACCESS IS OPEN</p>
           <p className="mt-1 text-xs text-muted-foreground">All active products can be activated free while we test the platform. No payment proof is required in this test mode.</p>
-        </section>
+        </section>}
 
         <section className="grid gap-4 md:grid-cols-3">{[
           { icon: Radio, title: "1. Choose", text: "Pick a hub, robot or direct MT5 execution service." },
@@ -152,7 +154,7 @@ const Marketplace = () => {
           <DialogHeader><DialogTitle>{selectedProduct?.name} subscription</DialogTitle><DialogDescription>{selectedProduct && <>Activate <strong>{selectedProduct.name}</strong> for <strong>${selectedProduct.price_usd}/{selectedProduct.billing_interval || "month"}</strong>. Payment is reviewed by Botvio before access is activated.</>}</DialogDescription></DialogHeader>
           <PaymentMethodSelector planCode={selectedProduct?.slug || "product"} planName={selectedProduct?.name || "Product"} amount={selectedProduct?.price_usd || 0} embedded onPaymentInitiated={setPaymentMethod} onMethodChange={setPaymentMethod} onProofFileChange={setProofFile} />
           <div className="rounded-xl border border-border/50 bg-muted/20 p-3 text-xs text-muted-foreground">After submitting your proof, an admin confirms the payment and activates your subscription. For MT5 Direct, the selected connected account is linked to the entitlement.</div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowCheckout(false)}>Cancel</Button><Button onClick={handleCheckout} disabled={!paymentMethod || !proofFile || purchaseMutation.isPending}>{purchaseMutation.isPending ? "Submitting..." : "Submit Subscription"}</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowCheckout(false)}>Cancel</Button><Button onClick={handleCheckout} disabled={!paymentMethod || !proofFile || paymentRequestMutation.isPending}>{paymentRequestMutation.isPending ? "Submitting..." : "Submit Subscription"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
