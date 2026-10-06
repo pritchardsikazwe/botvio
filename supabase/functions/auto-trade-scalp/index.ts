@@ -12,6 +12,13 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const DERIV_WS = "wss://api.derivws.com/trading/v1/options/ws/public";
 
 const SYMBOL_MAP: Record<string, string> = {
+  // Deriv synthetic indices used by the Options command center.
+  "Volatility 10": "R_10",
+  "Volatility 75": "R_75",
+  "Volatility 100": "R_100",
+  "Vol 100 (1s)": "1HZ100V",
+  "Boom 1000": "BOOM1000",
+  "Crash 1000": "CRASH1000",
   "XAU/USD": "frxXAUUSD",
   "XAG/USD": "frxXAGUSD",
   "EUR/USD": "frxEURUSD",
