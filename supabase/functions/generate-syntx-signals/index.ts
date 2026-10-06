@@ -138,7 +138,12 @@ for(const plan of setups){
   const required=plan.tf==="1m"?1:plan.tf==="15m"?1:plan.tf==="1H"?1:plan.tf==="3D"?1:0;
   if(same<required || plan.setup.score<plan.min) continue;
   const entry=plan.setup.entry;
-  const levels=moderateLevels(frames.find((x:any)=>x.n===plan.tf)?.data??frames.find((x:any)=>x.n===plan.tf)?.candles??[],plan.setup.direction,plan.tf);
+  const sourceFrame=frames.find((x:any)=>x.n===plan.tf);
+  const sourceCandle=sourceFrame?.data?.at(-1)??null;
+  const candleTime=Number(sourceCandle?.time??0);
+  const tfSeconds=plan.tf==="1m"?60:plan.tf==="5m"?300:plan.tf==="15m"?900:plan.tf==="1H"?3600:plan.tf==="1D"?86400:259200;
+  const candleClosed=Boolean(candleTime>0 && candleTime+tfSeconds<=Math.floor(Date.now()/1000));
+  const levels=moderateLevels(sourceFrame?.data??sourceFrame?.candles??[],plan.setup.direction,plan.tf);
   const sl=levels.sl,tp=levels.tp;
   const detectedStrategies=strategyTypes(frames.find((x:any)=>x.n===plan.tf)?.data??[],plan.setup.direction,plan.tf);
   const strategyLabels=detectedStrategies.length?detectedStrategies:["TREND"];
@@ -157,7 +162,8 @@ for(const plan of setups){
     explanation_json:{
       engine:"SyntX MTF Engine v5",strategy_id:profile.label,strategy_types:strategyLabels,source:"Weltrade SyntX API Studio + Botvio Worker Intelligence",signal_type:plan.type,expiry_seconds:plan.expiry,expires_at:expiresAt,
       entry_style:plan.label,timeframes:Object.fromEntries(frames.map(x=>[x.n,x.sig?.direction??"WAIT"])),
-      higher_timeframe_confirmation:same,confirmation_count:confirmationDirections.length,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime}
+      higher_timeframe_confirmation:same,confirmation_count:confirmationDirections.length,worker_confluence:{score_bonus:worker.bonus,htf_average:worker.avg,market_regime:worker.regime},
+      feed_audit:{source:"Weltrade SyntX API Studio",symbol,requested_timeframe:plan.tf,candle_time:candleTime,candle_closed:candleClosed,candle_ohlc:sourceCandle?{open:sourceCandle.open,high:sourceCandle.high,low:sourceCandle.low,close:sourceCandle.close}:null,entry_price:entry}
     }
   }).select("id,symbol,direction,confidence,timeframe").single();
   if(!ins&&row)published.push(row);
