@@ -117,8 +117,7 @@ async function loadConnection(admin: ReturnType<typeof createClient>, userId: st
   return data;
 }
 
-async function ensureSession(admin: ReturnType<typeof createClient>, connection: Record<string, unknown>) {
-  if (connection.session_id) return String(connection.session_id);
+async function connectSession(admin: ReturnType<typeof createClient>, connection: Record<string, unknown>) {
   const password = await decryptSecret(String(connection.password_encrypted), Deno.env.get("TOKEN_ENCRYPTION_KEY")!);
   const sessionId = crypto.randomUUID();
   const raw = await callApi("/ConnectEx", {
@@ -141,18 +140,56 @@ async function ensureSession(admin: ReturnType<typeof createClient>, connection:
   return session;
 }
 
+async function ensureSession(admin: ReturnType<typeof createClient>, connection: Record<string, unknown>) {
+  if (connection.session_id) return String(connection.session_id);
+  return connectSession(admin, connection);
+}
+
+function isRecoverableSessionError(error: unknown) {
+  const message = safeError(error);
+  return /401|403|unauthori[sz]ed|forbidden|session|not connected|invalid.*(id|connection)|expired|disconnect/i.test(message);
+}
+
+async function clearSession(admin: ReturnType<typeof createClient>, connectionId: unknown) {
+  await admin.from("syntx_api_connections").update({
+    session_id: null,
+    connection_status: "connecting",
+    last_error: null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", connectionId);
+}
+
 async function withConnection(admin: ReturnType<typeof createClient>, userId: string, fn: (session: string, c: Record<string, unknown>) => Promise<unknown>) {
   const c = await loadConnection(admin, userId);
   try {
     const session = await ensureSession(admin, c);
     return await fn(session, c);
-  } catch (error) {
-    await admin.from("syntx_api_connections").update({
-      connection_status: "error",
-      last_error: safeError(error),
-      updated_at: new Date().toISOString(),
-    }).eq("id", c.id);
-    throw error;
+  } catch (firstError) {
+    if (!isRecoverableSessionError(firstError)) {
+      await admin.from("syntx_api_connections").update({
+        connection_status: "error",
+        last_error: safeError(firstError),
+        updated_at: new Date().toISOString(),
+      }).eq("id", c.id);
+      throw firstError;
+    }
+
+    // API Studio sessions can expire upstream while our DB still has the old
+    // session id. Clear it, reconnect with the stored MT5 credentials, then
+    // retry the original request exactly once.
+    try {
+      await clearSession(admin, c.id);
+      const freshConnection = { ...c, session_id: null };
+      const freshSession = await connectSession(admin, freshConnection);
+      return await fn(freshSession, freshConnection);
+    } catch (retryError) {
+      await admin.from("syntx_api_connections").update({
+        connection_status: "error",
+        last_error: safeError(retryError),
+        updated_at: new Date().toISOString(),
+      }).eq("id", c.id);
+      throw retryError;
+    }
   }
 }
 
