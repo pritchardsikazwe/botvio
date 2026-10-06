@@ -9,7 +9,7 @@ import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { createAdapter } from "../_shared/tradecopy/adapter.ts";
-import { normalizeMarketOrder, redact } from "../_shared/tradecopy/core.ts";
+import { TradeCopyError, normalizeMarketOrder, redact } from "../_shared/tradecopy/core.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -58,10 +58,22 @@ const normalizeDirection = (value: unknown): "BUY" | "SELL" | null => {
 
 const normalSymbol = (s: string) => s.toUpperCase().replace(/\s+/g, "");
 
-function hasPaidMt5Entitlement(account: Record<string, any>) {
-  if (account.direct_execution_entitled !== true) return false;
-  const expires = account.direct_execution_expires_at ? new Date(account.direct_execution_expires_at).getTime() : null;
-  return expires === null || Number.isNaN(expires) || expires > Date.now();
+async function hasPaidMt5Entitlement(admin: SupabaseClient, account: Record<string, any>) {
+  if (account.direct_execution_entitled === true) {
+    const expires = account.direct_execution_expires_at ? new Date(account.direct_execution_expires_at).getTime() : null;
+    if (expires === null || (!Number.isNaN(expires) && expires > Date.now())) return true;
+  }
+  if (!account.user_id) return false;
+  const { data: product } = await admin.from("products").select("id").eq("slug", "mt5-direct").maybeSingle();
+  if (!product?.id) return false;
+  const { data: entitlement } = await admin.from("entitlements")
+    .select("id,status,ends_at")
+    .eq("user_id", account.user_id)
+    .eq("product_id", product.id)
+    .eq("status", "active")
+    .or("ends_at.is.null,ends_at.gt." + new Date().toISOString())
+    .maybeSingle();
+  return !!entitlement;
 }
 
 async function claimExecution(admin: SupabaseClient, account: Record<string, any>, signal: Record<string, any>, symbol: string, direction: "BUY" | "SELL", volume: number, mode: string) {
@@ -83,7 +95,7 @@ async function executeForAccount(
 ) {
   const direction = normalizeDirection(signal.direction);
   if (!direction) return { ok: false, skipped: true, reason: "unsupported signal direction" };
-  if (!hasPaidMt5Entitlement(account)) return { ok: false, skipped: true, reason: "MT5 Direct Execution is not active for this paid subscription" };
+  if (!(await hasPaidMt5Entitlement(admin, account))) return { ok: false, skipped: true, reason: "MT5 Direct Execution is not active for this paid subscription" };
   if (!account.tradecopy_user_id) return { ok: false, skipped: true, reason: "TradeCopy account is not registered" };
   if (!account.tradecopy_active) return { ok: false, skipped: true, reason: "TradeCopy account is inactive" };
   if ((signal.confidence ?? 0) < (account.direct_min_confidence ?? account.botvio_signal_min_confidence ?? 70)) {
@@ -176,7 +188,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   }
 
   let q = admin.from("trading_accounts").select(COLS)
-    .eq("direct_signal_enabled", true).eq("direct_execution_entitled", true).eq("is_active", true).eq("is_botvio_robot", false)
+    .eq("direct_signal_enabled", true).eq("is_active", true).eq("is_botvio_robot", false)
     .eq("account_role", "slave").not("tradecopy_user_id", "is", null);
   if (onlyAccountId) q = q.eq("id", onlyAccountId);
   const { data: directAccounts } = await q;
@@ -275,7 +287,7 @@ Deno.serve(async (req) => {
           lot: z.number().min(0.01).max(5).optional(), min_confidence: z.number().int().min(50).max(99).optional(),
         }).parse(body);
         const a = await loadOwn(p.account_id);
-        if (!hasPaidMt5Entitlement(a)) throw new Err("MT5 Direct Execution is a paid feature. Your account has not been enabled by an admin or the subscription has expired.", 403);
+        if (!(await hasPaidMt5Entitlement(admin, a))) throw new Err("MT5 Direct Execution is a paid feature. Your account has not been enabled by an admin or the subscription has expired.", 403);
         if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this Deriv MT5 account as a TradeCopy follower first");
         if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this follower before enabling Direct Signals");
         const patch: Record<string, unknown> = { direct_signal_enabled: true, direct_signal_status: "on", last_direct_error: null };
@@ -333,13 +345,15 @@ Deno.serve(async (req) => {
           take_profit: z.number().positive().optional(),
         }).parse(body);
         const a = await loadOwn(p.account_id);
-        if (!hasPaidMt5Entitlement(a)) throw new Err("MT5 Direct Execution is a paid feature. Your subscription does not include direct execution.", 403);
+        if (!(await hasPaidMt5Entitlement(admin, a))) throw new Err("MT5 Direct Execution is a paid feature. Your subscription does not include direct execution.", 403);
         if (a.account_role !== "slave" || !a.tradecopy_user_id) throw new Err("Connect this MT5 account as a TradeCopy follower first");
         if (!a.tradecopy_active) throw new Err("Activate TradeCopy copying for this Deriv MT5 follower first");
         const globalLive = await liveGlobal(admin);
         assertLiveReady(String(a.environment ?? "DEMO"), a.direct_live_confirmed_at, globalLive);
+        const map = (a.direct_symbol_map ?? {}) as Record<string, string>;
+        const mappedSymbol = map[p.symbol] ?? map[normalSymbol(p.symbol)] ?? p.symbol;
         const order = normalizeMarketOrder({
-          symbol: p.symbol,
+          symbol: mappedSymbol,
           side: p.direction,
           lots: p.volume,
           stopLoss: p.stop_loss,
@@ -399,6 +413,10 @@ Deno.serve(async (req) => {
     }
   } catch (e) {
     if (e instanceof z.ZodError) return json({ ok: false, error: "Invalid request" }, 400);
+    if (e instanceof TradeCopyError) {
+      console.error("[mt5-tradecopy-execution][TradeCopyError]", e.message);
+      return json({ ok: false, error: e.message });
+    }
     const status = e instanceof Err ? e.status : 500;
     console.error("[mt5-tradecopy-execution]", (e as Error).message);
     return json({ ok: false, error: e instanceof Err ? e.message : "TradeCopy signal delivery failed" }, status >= 500 ? 500 : 200);
