@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -409,6 +410,9 @@ const BillingRequestsTab = () => {
 
 const Admin = () => {
   const { user, isSuperAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "signals";
+  const setActiveTab = (tab: string) => setSearchParams(prev => { const n = new URLSearchParams(prev); n.set("tab", tab); return n; }, { replace: true });
   const [dataLoading, setDataLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -963,7 +967,7 @@ const Admin = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="signals" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="glass-card p-1 flex-wrap">
             <TabsTrigger value="signals" className="flex items-center gap-2">
               <Signal className="w-4 h-4" />
