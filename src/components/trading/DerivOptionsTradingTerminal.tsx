@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Activity, BarChart3, Bot, Pause, Play, RefreshCw, Shield, Target } from "lucide-react";
+import { Activity, BarChart3, RefreshCw } from "lucide-react";
+import { AutoTradePanel } from "@/components/trading/AutoTradePanel";
 
 const WS_URL = "wss://api.derivws.com/trading/v1/options/ws/public";
 const MARKETS = [
@@ -20,9 +21,6 @@ const fmt = (n: number) => Number.isFinite(n) ? n.toLocaleString(undefined, { mi
 export function DerivOptionsTradingTerminal() {
   const [quotes, setQuotes] = useState<Record<string, { price:number; previous:number; ticks:number[] }>>({});
   const [selected, setSelected] = useState("R_10");
-  const [strategy, setStrategy] = useState("Rise/Fall Momentum");
-  const [automation, setAutomation] = useState(false);
-  const [risk, setRisk] = useState("Medium");
   const [trades, setTrades] = useState<any[]>([]);
   const [loadingTrades, setLoadingTrades] = useState(true);
 
@@ -51,8 +49,24 @@ export function DerivOptionsTradingTerminal() {
 
   const loadTrades = async () => {
     setLoadingTrades(true);
-    const { data } = await supabase.from("bot_trades").select("id,symbol,side,stake,status,pnl,opened_at,broker_trade_id").eq("status", "open").order("opened_at", { ascending: false }).limit(12);
-    setTrades((data || []).filter((t:any) => MARKETS.some(m => m.symbol === t.symbol)));
+    const { data } = await supabase
+      .from("auto_trade_executions")
+      .select("id,display_symbol,side,status,pnl_usd,created_at,confidence")
+      .in("status", ["pending", "filled"])
+      .order("created_at", { ascending: false })
+      .limit(12);
+    const mapped = (data || [])
+      .filter((t:any) => MARKETS.some(m => m.symbol === t.display_symbol))
+      .map((t:any) => ({
+        id: t.id,
+        symbol: t.display_symbol,
+        side: t.side,
+        stake: null,
+        status: t.status,
+        pnl: t.pnl_usd,
+        opened_at: t.created_at,
+      }));
+    setTrades(mapped);
     setLoadingTrades(false);
   };
   useEffect(() => { loadTrades(); const id = window.setInterval(loadTrades, 10000); return () => window.clearInterval(id); }, []);
@@ -90,14 +104,12 @@ export function DerivOptionsTradingTerminal() {
         </div>
 
         <div className="space-y-4">
-          <Card className="bg-[#0b1119] border-white/10 text-white"><CardContent className="p-4">
-            <div className="flex items-center justify-between"><div className="font-bold">Strategy Automation</div><button onClick={()=>setAutomation(!automation)} className={"w-11 h-6 rounded-full p-1 "+(automation?"bg-primary":"bg-slate-700")}><span className={"block h-4 w-4 rounded-full bg-white transition-transform "+(automation?"translate-x-5":"")}/></button></div>
-            <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3"><div className="text-sm font-bold flex items-center gap-2"><Bot className="h-4 w-4 text-primary"/> {strategy}</div><p className="text-[11px] text-slate-400 mt-1">EMA 20/50 + momentum confirmation with risk filters.</p></div>
-            <select value={strategy} onChange={e=>setStrategy(e.target.value)} className="mt-3 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 text-sm"><option>Rise/Fall Momentum</option><option>Breakout Scalper</option><option>AI Reversal</option><option>Trend Follower</option><option>Range Trader</option></select>
-            <div className="mt-3"><div className="text-[11px] text-slate-500 mb-1">Risk Level</div><div className="grid grid-cols-3 gap-1">{["Low","Medium","High"].map(x=><button key={x} onClick={()=>setRisk(x)} className={"rounded-lg py-2 text-xs "+(risk===x?"bg-primary text-primary-foreground":"bg-white/5 text-slate-300")}>{x}</button>)}</div></div>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div className="rounded-lg bg-white/5 p-2"><span className="text-slate-500">Stake</span><div className="font-bold">$1.00</div></div><div className="rounded-lg bg-white/5 p-2"><span className="text-slate-500">Duration</span><div className="font-bold">5 minutes</div></div></div>
-            <Button asChild className="w-full mt-3"><Link to="/trade/style/rise-fall-scalping">{automation?<><Pause className="h-4 w-4 mr-2"/>Manage Automation</>:<><Play className="h-4 w-4 mr-2"/>Configure Auto Trading</>}</Link></Button>
-          </Card></CardContent></Card>
+          <div className="rounded-xl border border-primary/20 bg-white/[.02] p-2">
+            <AutoTradePanel
+              scope="Deriv Options"
+              availableAssets={MARKETS.map(m => ({ displaySymbol: m.symbol, label: m.name }))}
+            />
+          </div>
           <Card className="bg-[#0b1119] border-white/10 text-white"><CardContent className="p-4"><div className="font-bold flex items-center gap-2"><Shield className="h-4 w-4 text-red-400"/>Risk Controls</div><div className="grid grid-cols-2 gap-2 mt-3"><div className="rounded-lg border border-white/10 p-2"><span className="text-[10px] text-slate-500">Max trades</span><div className="font-bold">20</div></div><div className="rounded-lg border border-white/10 p-2"><span className="text-[10px] text-slate-500">Loss streak</span><div className="font-bold">3</div></div></div><div className="mt-3 text-xs text-slate-400 flex items-center gap-2"><Target className="h-3.5 w-3.5"/>Pause automation after 3 consecutive losses.</div></CardContent></Card>
           <Card className="bg-[#0b1119] border-white/10 text-white"><CardContent className="p-4"><div className="font-bold flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary"/>Trade Analytics</div><div className="grid grid-cols-2 gap-2 mt-3"><div className="rounded-lg bg-emerald-500/10 p-2"><div className="text-[10px] text-slate-500">Running</div><div className="text-xl font-black">{trades.length}</div></div><div className="rounded-lg bg-white/5 p-2"><div className="text-[10px] text-slate-500">Open P/L</div><div className={totalPnl>=0?"text-xl font-black text-emerald-400":"text-xl font-black text-red-400"}>{totalPnl>=0?"+":""}{"$"}{totalPnl.toFixed(2)}</div></div></div></CardContent></Card>
         </div>
