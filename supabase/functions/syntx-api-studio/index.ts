@@ -275,10 +275,44 @@ Deno.serve(async (req) => {
         const shift = (iso: string) => new Date(new Date(iso).getTime() + offsetSec * 1000).toISOString().slice(0, 19);
         const raw = await callApi("/PriceHistory", { id: session, symbol, from: shift(from), to: shift(to), timeFrame: timeframeMap[timeframe] ?? 5 });
         const bars = normalizeBars(raw).map((b) => ({ ...b, time: b.time - offsetSec }));
-        if (!bars.length) rawSample = (typeof raw === "string" ? raw : JSON.stringify(raw)).slice(0, 400);
+        if (!bars.length) {
+          rawSample = (typeof raw === "string" ? raw : JSON.stringify(raw)).slice(0, 800);
+          throw new Error(`TradeCopy PriceHistory returned no valid candles for ${symbol} (${timeframe}). Response: ${rawSample}`);
+        }
         return bars;
       });
       return json({ ok: true, candles, ...(rawSample ? { rawSample } : {}) });
+    }
+
+    if (action === "diagnostics") {
+      const requestedSymbol = String(body?.symbol ?? "").trim();
+      const timeframe = String(body?.timeframe ?? "QhPeriodM5");
+      if (!requestedSymbol) throw new Error("Symbol is required");
+      const connection = await loadConnection(admin, userId);
+      const result: Record<string, unknown> = {
+        account: { login: connection.login, broker: connection.broker, server: connection.server, environment: connection.environment },
+        connectionStatus: connection.connection_status,
+        requestedSymbol,
+        timeframe,
+      };
+      const symbols = await withConnection(admin, userId, async (session) => normalizeSymbols(await callApi("/Symbols", { id: session })));
+      result.symbolCount = symbols.length;
+      result.symbolSample = symbols.filter((s) => s.toLowerCase().includes(requestedSymbol.toLowerCase().replace(/[-_]/g, ""))).slice(0, 25);
+      try {
+        result.quote = await withConnection(admin, userId, async (session) => normalizeQuote(await callApi("/GetQuote", { id: session, symbol: requestedSymbol })));
+      } catch (e) {
+        result.quoteError = safeError(e);
+      }
+      try {
+        result.history = await withConnection(admin, userId, async (session) => {
+          const raw = await callApi("/PriceHistory", { id: session, symbol: requestedSymbol, from: new Date(Date.now() - 60 * 60_000).toISOString().slice(0, 19), to: new Date().toISOString().slice(0, 19), timeFrame: 5 });
+          const bars = normalizeBars(raw);
+          return { count: bars.length, sample: bars.slice(-3) };
+        });
+      } catch (e) {
+        result.historyError = safeError(e);
+      }
+      return json({ ok: true, diagnostics: result });
     }
 
     if (action === "disconnect") {
