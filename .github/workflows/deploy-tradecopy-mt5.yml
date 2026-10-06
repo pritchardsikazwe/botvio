@@ -13,6 +13,17 @@ on:
       - "supabase/functions/deriv-oauth-exchange/**"
       - "supabase/functions/deriv-get-otp/**"
       - "supabase/functions/marketing-intelligence-worker/**"
+      - "supabase/functions/syntx-api-studio/**"
+      - "supabase/functions/record-weltrade-signals/**"
+      - "supabase/functions/record-syntx-signals/**"
+      - "supabase/functions/tradecopy-reconcile/**"
+      - "supabase/functions/generate-cfd-signals/**"
+      - "supabase/functions/generate-syntx-signals/**"
+      - "supabase/functions/generate-deriv-synthetic-signals/**"
+      - "supabase/functions/evaluate-live-signals/**"
+      - "supabase/functions/auto-trade-scalp/**"
+      - "supabase/functions/auto-trade-worker/**"
+      - "supabase/functions/scalp-mt5-worker/**"
       - "supabase/migrations/**"
       - ".github/workflows/deploy-tradecopy-mt5.yml"
   workflow_dispatch:
@@ -77,6 +88,10 @@ jobs:
             echo "BOTVIO_SUPABASE_TARGET=NEW_INDEPENDENT"
           else
             echo "BOTVIO_SUPABASE_TARGET=UNKNOWN"
+          fi
+          if [ "$SUPABASE_PROJECT_REF" != "tqqkzeblmjapgbnsbtgw" ]; then
+            echo "::error::Production deploys must target the existing Botvio project. Refusing to deploy elsewhere."
+            exit 1
           fi
 
       - name: Link Supabase project for IPv4 connectivity
@@ -146,7 +161,7 @@ jobs:
         run: npx supabase@latest functions deploy queue-hub-trade --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
 
       - name: Deploy signal generators
-        if: ${{ inputs.deploy_signal_functions }}
+        if: ${{ github.event_name == 'push' || inputs.deploy_signal_functions }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
@@ -158,3 +173,9 @@ jobs:
           npx supabase@latest functions deploy top-assets-ranking --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
           npx supabase@latest functions deploy signal-performance-audit --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
           npx supabase@latest functions deploy record-weltrade-signals --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          npx supabase@latest functions deploy record-syntx-signals --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          npx supabase@latest functions deploy syntx-api-studio --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          npx supabase@latest functions deploy tradecopy-reconcile --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          npx supabase@latest functions deploy auto-trade-scalp --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          npx supabase@latest functions deploy auto-trade-worker --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          npx supabase@latest functions deploy scalp-mt5-worker --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
