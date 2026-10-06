@@ -12,8 +12,7 @@ on:
 permissions:
   contents: read
 
-# One shared source generates five native products.
-# Each product gets its own Android applicationId and iOS bundle identifier.
+# Build the current Botvio production app for store testing.
 # Store signing/upload credentials are intentionally added later.
 
 env:
@@ -27,21 +26,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - id: gold-robot
-            name: Botvio Gold Robot
-            app_id: live.botvio.gold
-          - id: crypto-robot
-            name: Botvio Crypto Robot
-            app_id: live.botvio.crypto
-          - id: synthetic-robot
-            name: Botvio Synthetic Robot
-            app_id: live.botvio.synthetic
-          - id: weltrade-robot
-            name: Botvio Weltrade Robot
-            app_id: live.botvio.weltrade
-          - id: deriv-copy
-            name: Botvio Deriv Copy Trading
-            app_id: live.botvio.copy
+          - id: botvio
+            name: Botvio
+            app_id: live.botvio.app
     env:
       CAP_APP_ID: ${{ matrix.app_id }}
       CAP_APP_NAME: ${{ matrix.name }}
