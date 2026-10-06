@@ -174,7 +174,7 @@ async function runForUser(supabase:any,settings:any){
 
   const results:any[]=[];
   for(const displaySymbol of settings.enabled_assets){
-    const derivSymbol=SYMBOL_MAP[displaySymbol]; if(!derivSymbol)continue;
+    const derivSymbol=SYMBOL_MAP[displaySymbol] ?? displaySymbol; if(!derivSymbol)continue;
     if(!isMarketOpen(displaySymbol)){results.push({displaySymbol,skipped:"market_closed"});continue;}
     const {data:hasOpen}=await supabase.rpc("has_open_auto_trade",{_user_id:userId,_display_symbol:displaySymbol});
     if(hasOpen===true){results.push({displaySymbol,skipped:"already_open"});continue;}
