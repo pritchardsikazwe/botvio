@@ -158,7 +158,7 @@ async function ensureSession(admin: ReturnType<typeof createClient>, connection:
 
 function isRecoverableSessionError(error: unknown) {
   const message = safeError(error);
-  return /401|403|unauthori[sz]ed|forbidden|session|not connected|invalid.*(id|connection)|expired|disconnect/i.test(message);
+  return /401|403|unauthori[sz]ed|forbidden|invalid[_ -]?token|client\s+with\s+id.*not\s+found|session|not connected|invalid.*(id|connection)|expired|disconnect/i.test(message);
 }
 
 async function clearSession(admin: ReturnType<typeof createClient>, connectionId: unknown) {
