@@ -85,7 +85,7 @@ const Dashboard = () => {
         <BotvioRobotSignalShortcut />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Active Robots</CardTitle>
@@ -103,13 +103,21 @@ const Dashboard = () => {
               <TrendingUp className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
-              <div className={`text-xl font-bold ${todayPnL >= 0 ? "text-success" : "text-destructive"}`}>
+              <div className={`text-xl font-bold ${pnlSummary?.pnl == null ? "text-muted-foreground" : pnlSummary.pnl >= 0 ? "text-success" : "text-destructive"}`}>
                 {pnlLoading ? <Skeleton className="h-7 w-24" /> : pnlError ? "—" : pnlSummary?.pnl == null ? "—" : (pnlSummary.pnl >= 0 ? "+" : "") + pnlSummary.pnl.toFixed(2) + " USD"}
               </div>
               <p className="text-xs text-muted-foreground">
                 {pnlSummary?.signalsSent ? pnlSummary.signalsSent + " signals sent today" : "No closed trades today"}
               </p>
             </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Hubs & Access</CardTitle>
+              <BarChart3 className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent className="pt-1 pb-3"><div className="text-xl font-bold">{activeHubs}</div><p className="text-xs text-muted-foreground">active hub access</p></CardContent>
           </Card>
 
           <Card className="glass-card">
@@ -162,7 +170,7 @@ const Dashboard = () => {
             <div className="flex flex-wrap items-center gap-2">
               {entitlementsLoading ? <Skeleton className="h-8 w-full" /> : entitlementsError ? <div className="text-sm text-destructive">Could not load access. <Button size="sm" variant="outline" onClick={() => refetchEntitlements()}>Retry</Button></div> : entitlements?.filter(isEntitlementActive).length ? entitlements.filter(isEntitlementActive).map((e) => (
                 <Button key={e.id} asChild variant="secondary" className="h-auto text-sm px-3 py-1.5"><Link to={e.products?.slug === "synthetic-hub" ? "/synthetic" : e.products?.slug === "weltrade-hub" ? "/weltrade" : e.products?.slug === "mt5-direct" ? "/connections" : "/botvio-robot"}>{e.products?.name || "Active product"} · {e.ends_at ? new Date(e.ends_at).toLocaleDateString() : "No expiry"}</Link></Button>
-              )) : <span className="text-sm text-muted-foreground">No active Store products yet.</span>}}
+              )) : <span className="text-sm text-muted-foreground">No active Store products yet.</span>}
             </div>
             {entitlements && entitlements.some(e => !isEntitlementActive(e)) && <div className="mt-2 text-xs text-muted-foreground">Expired: {entitlements.filter(e => !isEntitlementActive(e)).map(e => e.products?.name || "Product").join(", ")}</div>}
           </CardContent>
@@ -227,8 +235,8 @@ const Dashboard = () => {
                       </Button>
                     </div>
                   ))}
+                  <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={() => setShowAllNotifications(v => !v)}>{showAllNotifications ? "Show recent" : "View all"}</Button><Button size="sm" variant="ghost" disabled={!unreadNotifications} onClick={async () => { const { error } = await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false); if (!error) refetchNotifications(); }}>Mark all read</Button></div>
                 </div>
-                <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={() => setShowAllNotifications(v => !v)}>{showAllNotifications ? "Show recent" : "View all"}</Button><Button size="sm" variant="ghost" disabled={!unreadNotifications} onClick={async () => { const { error } = await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false); if (!error) refetchNotifications(); }}>Mark all read</Button></div>
               ) : (
                 <div className="text-center py-5">
                   <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
