@@ -134,6 +134,7 @@ import AfricaMarket from "./pages/markets/AfricaMarket";
 import BrokerPage from "./pages/BrokerPage";
 import BrokersIndex from "./pages/BrokersIndex";
 import BinaryOptions from "./pages/BinaryOptions";
+import DerivOptionsTerminalPage from "./pages/DerivOptionsTerminalPage";
 import LiveFeed from "./pages/LiveFeed";
 import FlippingChallenges from "./pages/FlippingChallenges";
 import ResetPassword from "./pages/ResetPassword";
@@ -414,6 +415,8 @@ export const AppRoutes = () => {
     <Route path="markets/crypto" element={<CryptoMarket />} />
     <Route path="markets/africa" element={<AfricaMarket />} />
     <Route path="trade-modes" element={<Navigate to="/options" replace />} />
+    <Route path="deriv/options" element={<DerivOptionsTerminalPage />} />
+    <Route path="deriv-options-terminal" element={<Navigate to="/deriv/options" replace />} />
     <Route path="deriv-options" element={<Navigate to="/options" replace />} />
     <Route path="deriv-app" element={<Navigate to="/options" replace />} />
     <Route path="rise-fall" element={<Navigate to="/options" replace />} />
