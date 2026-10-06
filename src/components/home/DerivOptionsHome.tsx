@@ -115,7 +115,7 @@ export const DerivOptionsHome = () => {
               <Badge variant={live ? "default" : "secondary"} className="text-[10px]">
                 {live ? "LIVE" : "CONNECTING…"}
               </Badge>
-              <Link to="/deriv-app">
+              <Link to="/options">
                 <Button size="sm" className="gap-1 text-xs font-bold">
                   Trade Options <ArrowRight className="h-3 w-3" />
                 </Button>
@@ -134,7 +134,7 @@ export const DerivOptionsHome = () => {
               const strength = Math.min(99, Math.round(50 + Math.abs(changePct) * 400));
 
               return (
-                <Link key={symbol} to={`/deriv-app?symbol=${symbol}`} className="block">
+                <Link key={symbol} to={`/options?symbol=${symbol}`} className="block">
                   <div className="rounded-lg border border-border/60 bg-card/60 p-3 hover:border-primary/50 transition-colors h-full">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-bold truncate">{label}</span>
