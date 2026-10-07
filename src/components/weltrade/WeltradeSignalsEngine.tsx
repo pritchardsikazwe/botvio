@@ -130,7 +130,7 @@ export const WeltradeSignalsEngine = () => {
 
   const recent = useMemo(() => [...signals].reverse(), [signals]);
   const activeSignal = useMemo(
-    () => recent.find((s) => s.result === "OPEN") ?? recent[0] ?? null,
+    () => recent[0] ?? null,
     [recent]
   );
   const stats = useMemo(() => summarizeSignals(signals), [signals]);
