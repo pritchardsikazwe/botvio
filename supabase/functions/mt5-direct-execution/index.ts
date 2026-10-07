@@ -195,7 +195,9 @@ async function executeForAccount(
 
   try {
     const order = normalizeMarketOrder({
-      symbol, side: direction, lots: volume, stopLoss: signal.stop_loss, takeProfit: signal.take_profit,
+      symbol, side: direction, lots: volume,
+      stopLoss: signal.stop_loss, takeProfit: signal.take_profit,
+      referencePrice: signal.entry_price,
     });
     const result = await adapter.createMarketOrder(account.tradecopy_user_id, role, order);
     const r = result as any;
@@ -452,6 +454,7 @@ Deno.serve(async (req) => {
           lots: p.volume,
           stopLoss: p.stop_loss,
           takeProfit: p.take_profit,
+          referencePrice: undefined,
         });
         const result = await adapter.createMarketOrder(a.tradecopy_user_id, "slave", order);
         await admin.from("tradecopy_audit_log").insert({
