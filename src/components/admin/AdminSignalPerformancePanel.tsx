@@ -85,7 +85,7 @@ export function AdminSignalPerformancePanel() {
     {rows.length>0 && <div className="grid xl:grid-cols-4 gap-3">
       <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Average quality score</p><p className="text-2xl font-black">{avgQuality.toFixed(0)}</p><p className="text-[10px] text-muted-foreground mt-1">Tracked from generated signals.</p></CardContent></Card>
       <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Outcome coverage</p><p className="text-2xl font-black">{pct(decided.length/rows.length*100)}</p><p className="text-[10px] text-muted-foreground mt-1">Signals with WIN/LOSS outcomes.</p></CardContent></Card>
-      <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Best confidence band</p><p className="text-2xl font-black">{confidenceBands.filter(x=>x.count).sort((a,b)=>b.winRate-a.winRate)[0]?.key||"—"}</p></CardContent></Card>
+      <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Best confidence band</p><p className="text-2xl font-black">{confidenceBands.filter(x=>x.count).sort((a,b)=>b.winRate-a.winRate)[0]?.key as string||"—"}</p></CardContent></Card>
       <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Optimization status</p><p className="text-2xl font-black">{decided.length<30?"Collecting":"Ready"}</p><p className="text-[10px] text-muted-foreground mt-1">30+ decided signals unlock stronger comparisons.</p></CardContent></Card>
     </div>}
     <div className="grid xl:grid-cols-3 gap-4"><Table title="By Symbol" data={symbols}/><Table title="By Strategy" data={strategies}/><Table title="By Timeframe" data={timeframes}/></div>
