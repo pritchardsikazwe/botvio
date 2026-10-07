@@ -129,9 +129,12 @@ export const WeltradeSignalsEngine = () => {
   }, [familyProfile, strategyMode]);
 
   const recent = useMemo(() => [...signals].reverse(), [signals]);
+  // Never keep displaying an old historical direction as the live signal.
+  // A signal is "active" only when it belongs to the newest two loaded candles;
+  // otherwise the card must show WAIT until the current market confirms a new setup.
   const activeSignal = useMemo(
-    () => recent.find((s) => s.result === "OPEN") ?? recent[0] ?? null,
-    [recent]
+    () => recent.find((s) => s.index >= candles.length - 2) ?? null,
+    [recent, candles.length]
   );
   const stats = useMemo(() => summarizeSignals(signals), [signals]);
 
