@@ -189,12 +189,6 @@ export function computeDerivSignals(
         reasons.push("positive momentum");
         if (bullishReject || c.close > p.high) { confidence += 10; reasons.push("bullish confirmation"); }
         if (expansion) { confidence += 5; reasons.push("controlled range expansion"); }
-      } else if (!bullish && bearish && momentumDown && rsi > 30 && bearishReject && opts.mode !== "SCALPING") {
-        direction = "SELL";
-        confidence = 57;
-        reasons.push("counter-bias bearish structure");
-        reasons.push("momentum confirmation");
-        reasons.push("bearish rejection");
       }
     }
 
@@ -207,12 +201,6 @@ export function computeDerivSignals(
         reasons.push("negative momentum");
         if (bearishReject || c.close < p.low) { confidence += 10; reasons.push("bearish confirmation"); }
         if (expansion) { confidence += 5; reasons.push("controlled range expansion"); }
-      } else if (!bearish && bullish && momentumUp && rsi < 70 && bullishReject && opts.mode !== "SCALPING") {
-        direction = "BUY";
-        confidence = 57;
-        reasons.push("counter-bias bullish structure");
-        reasons.push("momentum confirmation");
-        reasons.push("bullish rejection");
       }
     }
 
