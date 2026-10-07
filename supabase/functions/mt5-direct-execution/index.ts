@@ -201,14 +201,27 @@ async function executeForAccount(
     });
     let result: unknown;
     let stopsStrippedForDemo = false;
+    let stopDiagnostic: unknown = null;
     try {
       result = await adapter.createMarketOrder(account.tradecopy_user_id, role, order);
     } catch (firstError) {
       const firstMsg = String((firstError as Error)?.message ?? firstError);
       const invalidStops = /invalid stops|invalid stop|stops in the request/i.test(firstMsg);
+      if (!invalidStops) throw firstError;
+
+      // Capture the broker/TradeCopy account diagnostic when MT5 rejects SL/TP.
+      // This is read-only and gives us the actual account-side evidence needed
+      // for the permanent stop-distance fix; never fabricate a stop level.
+      try {
+        stopDiagnostic = await adapter.diagnostic(account.tradecopy_user_id);
+        console.warn("[mt5-direct-execution] TradeCopy diagnostic after Invalid stops:", redact(stopDiagnostic));
+      } catch (diagnosticError) {
+        console.warn("[mt5-direct-execution] Could not retrieve TradeCopy diagnostic:", String((diagnosticError as Error)?.message ?? diagnosticError));
+      }
+
       // DEMO-only diagnostic fallback: prove the market-order path works without
       // silently weakening LIVE risk controls. LIVE accounts fail closed.
-      if (String(account.environment ?? "DEMO").toUpperCase() !== "DEMO" || !invalidStops) throw firstError;
+      if (String(account.environment ?? "DEMO").toUpperCase() !== "DEMO") throw firstError;
       console.warn("[mt5-direct-execution] DEMO TradeCopy rejected signal stops; retrying market order without SL/TP for execution-path validation");
       result = await adapter.createMarketOrder(account.tradecopy_user_id, role, {
         ...order,
@@ -223,7 +236,7 @@ async function executeForAccount(
       status: adapter.mode === "live" ? "sent" : "simulated",
       ticket: String(ticket),
       error: stopsStrippedForDemo
-        ? "DEMO diagnostic: TradeCopy rejected the supplied SL/TP as invalid; market order was accepted without stops. Do not use this fallback for LIVE."
+        ? `DEMO diagnostic: TradeCopy rejected the supplied SL/TP as invalid; market order was accepted without stops. Diagnostic: ${JSON.stringify(redact(stopDiagnostic)).slice(0, 900)}. Do not use this fallback for LIVE.`
         : (adapter.mode === "live" ? null : "Simulated (TradeCopy mock mode) — no real order sent"),
     }).eq("id", claim.id);
     await admin.from("trading_accounts").update({
