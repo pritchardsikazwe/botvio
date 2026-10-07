@@ -20,7 +20,7 @@ const pct = (v: number) => v ? v.toFixed(1) + "%" : "—";
 const groupBy = (rows: Signal[], keyFn: (r: Signal) => string): Group[] => {
   const m = new Map<string, Signal[]>();
   rows.forEach(r => { const k = keyFn(r) || "Unknown"; m.set(k, [...(m.get(k) || []), r]); });
-  return [...m.entries()].map(([key, rs]) => {
+  return [...m.entries()].map(([key, rs]: [string, Signal[]]) => {
     const wins = rs.filter(r => String(r.status).toUpperCase() === "WIN").length;
     const losses = rs.filter(r => String(r.status).toUpperCase() === "LOSS").length;
     const decided = wins + losses;
