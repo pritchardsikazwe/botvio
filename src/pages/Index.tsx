@@ -319,7 +319,7 @@ const Index = () => {
         {/* Compact live-trading showcase — positions only, no signals/entries */}
         <HomeLiveTrading />
 
-        {/* 1 — Latest Trading Signals */
+        {/* 1 — Latest Trading Signals */}
         <section>
           <HomeSignalsWidget />
         </section>
