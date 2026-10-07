@@ -177,8 +177,11 @@ export function SyntheticSignalCard({
       });
 
       const raw = result?.result ?? {};
+      const nested = raw.data && typeof raw.data === "object"
+        ? raw.data as Record<string, unknown>
+        : {};
       const ticket = String(
-        raw.ticket ?? raw.orderId ?? raw.order ?? raw.data?.ticket ?? raw.data?.order ?? raw.data?.orderId ?? "",
+        raw.ticket ?? raw.orderId ?? raw.order ?? nested.ticket ?? nested.order ?? nested.orderId ?? "",
       );
       const destination = [mt5Account.broker ?? "MT5", mt5Account.server ?? "", mt5Account.login_id ? `Login ${mt5Account.login_id}` : ""]
         .filter(Boolean)
