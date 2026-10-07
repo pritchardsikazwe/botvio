@@ -76,6 +76,7 @@ export const Header = () => {
                   return (
                     <Button
                       key={group.label}
+                      data-tour={`nav-${group.label.toLowerCase().replace(/\s+/g, "-")}`}
                       variant={active ? "secondary" : "ghost"}
                       size="sm"
                       className="px-2.5 text-xs"
@@ -89,7 +90,12 @@ export const Header = () => {
                 return (
                   <DropdownMenu key={group.label}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant={active ? "secondary" : "ghost"} size="sm" className="px-2.5 text-xs">
+                      <Button
+                        data-tour={`nav-${group.label.toLowerCase().replace(/\s+/g, "-")}`}
+                        variant={active ? "secondary" : "ghost"}
+                        size="sm"
+                        className="px-2.5 text-xs"
+                      >
                         {group.label}
                         <ChevronDown className="w-3 h-3 ml-1 opacity-60" />
                       </Button>
@@ -112,7 +118,7 @@ export const Header = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="px-2.5 text-xs">
+                  <Button data-tour="nav-more" variant="ghost" size="sm" className="px-2.5 text-xs">
                     <Menu className="w-3.5 h-3.5 mr-1" />
                     More
                   </Button>
