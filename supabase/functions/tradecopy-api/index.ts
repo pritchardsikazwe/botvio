@@ -381,6 +381,25 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
           .eq("id", accountId);
         if (registeredError) throw new TradeCopyError(registeredError.message, "validation");
 
+        // Weltrade Provider Master: only mark it active after TradeCopy
+        // confirms activation and the diagnostic reports the account reachable.
+        const isWeltrade = /weltrade/i.test(String(source.broker ?? source.server ?? ""));
+        let weltradeVerified = false;
+        if (isWeltrade && reg.tradecopyUserId) {
+          await adapter.activateMaster(reg.tradecopyUserId);
+          const diag = redact(await adapter.diagnostic(reg.tradecopyUserId)) as Record<string, unknown>;
+          const txt = JSON.stringify(diag ?? {}).toLowerCase();
+          weltradeVerified = !/"(connected|active|success)":\s*false/.test(txt) && !/error|not found|invalid/.test(txt);
+          await admin.from("trading_accounts").update({
+            last_diagnostic: diag as never, last_diagnostic_at: new Date().toISOString(),
+            ...(weltradeVerified ? { tradecopy_active: true } : { connection_status: "error" }),
+          }).eq("id", accountId);
+          if (!weltradeVerified) {
+            await adapter.deactivateMaster(reg.tradecopyUserId).catch(() => null);
+            throw new TradeCopyError("TradeCopy registered the Weltrade master but could not confirm it is active. Check the diagnostic in Admin.", "upstream", 502);
+          }
+        }
+
         const { data: existingProviderAccount } = await admin
           .from("provider_accounts")
           .select("id")
@@ -391,12 +410,12 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
         if (!existingProviderAccount) {
           const { error: linkError } = await admin
             .from("provider_accounts")
-            .insert({ provider_id: provider.id, trading_account_id: accountId, status: "paused" });
+            .insert({ provider_id: provider.id, trading_account_id: accountId, status: weltradeVerified ? "active" : "paused" });
           if (linkError) throw new TradeCopyError(linkError.message, "validation");
         }
 
         return {
-          data: { accountId, promoted: true, providerId: provider.id, tradecopyUserId: reg.tradecopyUserId },
+          data: { accountId, promoted: true, providerId: provider.id, tradecopyUserId: reg.tradecopyUserId, weltradeProviderMaster: weltradeVerified },
           accountId,
           auditDetails: { promoted_existing: true, provider_id: provider.id },
         };
@@ -615,6 +634,31 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
         adapter.getSuffix(acct.tradecopy_user_id), adapter.getSpecial(acct.tradecopy_user_id), adapter.getAllSymbols(acct.tradecopy_user_id),
       ]);
       return { data: { suffix: redact(suffix), special: redact(special), symbols: redact(all) }, accountId: acct.id };
+    }
+
+    case "admin_remove_external_source": {
+      // Admin-only cleanup of an orphan TradeCopy source by its external ID,
+      // even when Botvio no longer has a local trading_accounts row for it.
+      if (!ctx.isAdmin) throw new TradeCopyError("Admins only", "auth", 403);
+      const PROTECTED = new Set([35164]); // active Botvio provider master — never remove
+      const tcId = z.coerce.number().int().positive().parse(body.tradecopy_id);
+      if (PROTECTED.has(tcId)) throw new TradeCopyError(`TradeCopy ID ${tcId} is the active Botvio provider master and is protected`, "validation", 403);
+      const { data: local } = await admin.from("trading_accounts")
+        .select("id,tradecopy_active,account_role").eq("tradecopy_user_id", tcId).limit(1).maybeSingle();
+      if (local?.tradecopy_active) throw new TradeCopyError("This TradeCopy source is still active in Botvio. Deactivate it first.", "validation");
+      await adapter.deactivateMaster(tcId).catch(() => null);
+      const upstream = await adapter.removeSource(tcId);
+      if (local?.id) {
+        await admin.from("trading_accounts").update({
+          tradecopy_user_id: null, external_account_id: null, tradecopy_active: false, connection_status: "saved",
+        }).eq("id", local.id);
+        await admin.from("provider_accounts").update({ status: "paused" }).eq("trading_account_id", local.id);
+      }
+      return {
+        data: { removed: true, tradecopyId: tcId, localAccountCleared: !!local?.id, upstream: redact(upstream) },
+        accountId: local?.id ?? undefined,
+        auditDetails: { tradecopy_id: tcId, external_remove: true },
+      };
     }
 
     case "remove_account": {

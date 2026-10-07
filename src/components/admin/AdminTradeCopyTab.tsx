@@ -95,6 +95,8 @@ export const AdminTradeCopyTab = () => {
       toast.error((e as Error).message);
     }
   };
+  const [externalId, setExternalId] = useState("");
+  const [externalResult, setExternalResult] = useState<string | null>(null);
   const act = useMutation({
     mutationFn: async (fn: () => Promise<unknown>) => fn(),
     onSuccess: () => { toast.success("Done"); refresh(); },
@@ -180,6 +182,19 @@ export const AdminTradeCopyTab = () => {
     if (error) throw error;
   });
 
+  const removeExternal = () => {
+    const id = externalId.trim();
+    if (!/^\d+$/.test(id)) { toast.error("Enter a numeric TradeCopy ID"); return; }
+    if (id === "35164") { toast.error("35164 is the active Botvio provider master and is protected"); return; }
+    if (!window.confirm(`Unregister TradeCopy source ${id}? This cannot be undone.`)) return;
+    act.mutate(async () => {
+      const r = await tradecopy<{ removed: boolean; localAccountCleared: boolean }>("admin_remove_external_source", { tradecopy_id: Number(id) });
+      setExternalResult(`TradeCopy source ${id} removed${r.localAccountCleared ? " (Botvio record cleared)" : ""} — ${r.mode} mode.`);
+      setExternalId("");
+      return r;
+    }, { onError: (e) => setExternalResult(`Failed: ${(e as Error).message}`) });
+  };
+
   return (
     <div className="space-y-4">
       <Card className="glass-card">
@@ -199,6 +214,15 @@ export const AdminTradeCopyTab = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 space-y-2">
+            <p className="text-sm font-medium">Remove orphan TradeCopy source by ID</p>
+            <p className="text-xs text-muted-foreground">Unregisters a TradeCopy source even if Botvio has no matching account. 35164 is protected.</p>
+            <div className="flex flex-wrap gap-2">
+              <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} placeholder="TradeCopy ID, e.g. 35165" className="max-w-xs" />
+              <Button size="sm" variant="destructive" onClick={removeExternal} disabled={act.isPending}>Remove source</Button>
+            </div>
+            {externalResult && <p className="text-xs">{externalResult}</p>}
+          </div>
           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

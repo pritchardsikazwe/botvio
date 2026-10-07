@@ -20,7 +20,7 @@ const pct = (v: number) => v ? v.toFixed(1) + "%" : "—";
 const groupBy = (rows: Signal[], keyFn: (r: Signal) => string): Group[] => {
   const m = new Map<string, Signal[]>();
   rows.forEach(r => { const k = keyFn(r) || "Unknown"; m.set(k, [...(m.get(k) || []), r]); });
-  return [...m.entries()].map(([key, rs]) => {
+  return [...m.entries()].map(([key, rs]: [string, Signal[]]) => {
     const wins = rs.filter(r => String(r.status).toUpperCase() === "WIN").length;
     const losses = rs.filter(r => String(r.status).toUpperCase() === "LOSS").length;
     const decided = wins + losses;
@@ -46,7 +46,7 @@ export function AdminSignalPerformancePanel() {
     const { data, error } = await supabase.from("trading_signals")
       .select("symbol,strategy_name,timeframe,direction,status,confidence,quality_score,ai_win_probability,expiry_seconds,best_expiry,backup_expiry,created_at")
       .gte("created_at", since).order("created_at", { ascending:false }).limit(5000);
-    if (error) setError(error.message); else setRows((data || []) as Signal[]);
+    if (error) setError(error.message); else setRows((data || []) as unknown as Signal[]);
     setLoading(false);
   };
   useEffect(()=>{ load(); },[days]);
@@ -85,10 +85,10 @@ export function AdminSignalPerformancePanel() {
     {rows.length>0 && <div className="grid xl:grid-cols-4 gap-3">
       <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Average quality score</p><p className="text-2xl font-black">{avgQuality.toFixed(0)}</p><p className="text-[10px] text-muted-foreground mt-1">Tracked from generated signals.</p></CardContent></Card>
       <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Outcome coverage</p><p className="text-2xl font-black">{pct(decided.length/rows.length*100)}</p><p className="text-[10px] text-muted-foreground mt-1">Signals with WIN/LOSS outcomes.</p></CardContent></Card>
-      <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Best confidence band</p><p className="text-2xl font-black">{confidenceBands.filter(x=>x.count).sort((a,b)=>b.winRate-a.winRate)[0]?.key||"—"}</p></CardContent></Card>
+      <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Best confidence band</p><p className="text-2xl font-black">{confidenceBands.filter(x=>x.count).sort((a,b)=>b.winRate-a.winRate)[0]?.key as string||"—"}</p></CardContent></Card>
       <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Optimization status</p><p className="text-2xl font-black">{decided.length<30?"Collecting":"Ready"}</p><p className="text-[10px] text-muted-foreground mt-1">30+ decided signals unlock stronger comparisons.</p></CardContent></Card>
     </div>}
     <div className="grid xl:grid-cols-3 gap-4"><Table title="By Symbol" data={symbols}/><Table title="By Strategy" data={strategies}/><Table title="By Timeframe" data={timeframes}/></div>
-    <Card><CardHeader className="pb-3"><CardTitle className="text-sm">Confidence calibration</CardTitle></CardHeader><CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">{confidenceBands.map(x=><div key={x.key} className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">{x.key}</p><p className="text-lg font-black">{x.count}</p><Badge variant="outline">{x.count?pct(x.winRate):"Pending"}</Badge></div>)}</CardContent></Card>
+    <Card><CardHeader className="pb-3"><CardTitle className="text-sm">Confidence calibration</CardTitle></CardHeader><CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">{confidenceBands.map(x=><div key={String(x.key)} className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">{String(x.key)}</p><p className="text-lg font-black">{x.count}</p><Badge variant="outline">{x.count?pct(x.winRate):"Pending"}</Badge></div>)}</CardContent></Card>
   </section>;
 }
