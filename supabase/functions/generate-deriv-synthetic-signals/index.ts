@@ -126,7 +126,7 @@ function strategySignal(c:Candle[],strategy:{family:StrategyFamily;label:string;
 
 function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
  const a=atr(c)??0;
- const m=tf==="1m"?{sl:.90,tp:1.35}:tf==="15m"?{sl:1.00,tp:1.60}:tf==="1H"?{sl:1.15,tp:1.85}:tf==="1D"?{sl:1.30,tp:2.10}:{sl:1.50,tp:2.30};
+ const m=tf==="1m"?{sl:.80,tp:1.20}:tf==="15m"?{sl:.95,tp:1.50}:tf==="1H"?{sl:1.10,tp:1.75}:tf==="1D"?{sl:1.25,tp:1.90}:{sl:1.30,tp:2.00};
  const entry=c.at(-1)!.close;
  return {sl:direction==="BUY"?entry-a*m.sl:entry+a*m.sl,tp:direction==="BUY"?entry+a*m.tp:entry-a*m.tp};
 }
@@ -186,6 +186,17 @@ Deno.serve(async(req)=>{
     if(confDirections.some(x=>x!==setup.direction)||confDirections.filter(x=>x===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost+gate.scoreBoost)continue;
     const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
     setup.sl=levels.sl; setup.tp=levels.tp;
+
+    // One live direction per synthetic symbol. Do not publish a BUY while a
+    // recent SELL is still active, or vice versa.
+    const {data:opposite}=await db.from("trading_signals")
+      .select("id")
+      .eq("symbol",s.name)
+      .eq("status","ACTIVE")
+      .neq("direction",setup.direction)
+      .gte("created_at",new Date(Date.now()-30*60*1000).toISOString())
+      .limit(1);
+    if(opposite?.length)continue;
     const type=p.type,expiresAt=new Date(Date.now()+p.expiry*1000).toISOString();
     const {data:recent}=await db.from("trading_signals").select("id").eq("symbol",s.name).eq("strategy_name",strategyName).eq("direction",setup.direction).gte("created_at",new Date(Date.now()-(p.tf==="1m"?5:p.tf==="15m"?30:120)*60000).toISOString()).limit(1);
     if(recent?.length)continue;
