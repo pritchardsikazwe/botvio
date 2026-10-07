@@ -82,6 +82,7 @@ const DERIV_MT5: Record<string, string> = {
   "R_25": "Volatility 25 Index", "VOLATILITY 25 INDEX": "Volatility 25 Index",
   "R_50": "Volatility 50 Index", "VOLATILITY 50 INDEX": "Volatility 50 Index",
   "R_75": "Volatility 75 Index", "VOLATILITY 75 INDEX": "Volatility 75 Index",
+  "R_100": "Volatility 100 Index", "VOLATILITY 100 INDEX": "Volatility 100 Index",
   "1HZ10V": "Volatility 10 (1s) Index", "VOLATILITY 10 (1S) INDEX": "Volatility 10 (1s) Index",
   "1HZ25V": "Volatility 25 (1s) Index", "VOLATILITY 25 (1S) INDEX": "Volatility 25 (1s) Index",
   "1HZ50V": "Volatility 50 (1s) Index", "VOLATILITY 50 (1S) INDEX": "Volatility 50 (1s) Index",
@@ -94,6 +95,34 @@ const DERIV_MT5: Record<string, string> = {
   "1HZ90V": "Volatility 90 (1s) Index", "VOLATILITY 90 (1S) INDEX": "Volatility 90 (1s) Index",
 };
 const derivMt5Symbol = (s: string) => DERIV_MT5[String(s).toUpperCase()] ?? DERIV_MT5[String(s)] ?? null;
+
+// Validate the mapped symbol against the account's real MT5 symbol list before
+// any order is sent. Only possible against the live TradeCopy API; mock mode
+// has no real symbol list, so it reports "unverified" instead of inventing one.
+const symbolCache = new Map<number, Set<string> | null>();
+async function validateMt5Symbol(tcUserId: number, symbol: string): Promise<{ ok: boolean; reason?: string; verified: boolean }> {
+  if (adapter.mode !== "live") return { ok: true, verified: false };
+  if (!symbolCache.has(tcUserId)) {
+    try {
+      const raw = await adapter.getAllSymbols(tcUserId);
+      const names = new Set<string>();
+      const walk = (v: unknown) => {
+        if (typeof v === "string") names.add(v.trim().toUpperCase());
+        else if (Array.isArray(v)) v.forEach(walk);
+        else if (v && typeof v === "object") Object.values(v as Record<string, unknown>).forEach(walk);
+      };
+      walk(raw);
+      symbolCache.set(tcUserId, names);
+    } catch (e) {
+      console.error("[mt5-direct-execution] symbol list failed", (e as Error).message);
+      symbolCache.set(tcUserId, null);
+    }
+  }
+  const names = symbolCache.get(tcUserId);
+  if (!names) return { ok: false, verified: false, reason: "Could not load the MT5 symbol list from TradeCopy" };
+  if (!names.has(symbol.toUpperCase())) return { ok: false, verified: true, reason: `Symbol "${symbol}" is not offered on this MT5 account` };
+  return { ok: true, verified: true };
+}
 
 async function hasPaidMt5Entitlement(admin: SupabaseClient, account: Record<string, any>) {
   if (account.direct_execution_entitled === true) {
@@ -150,6 +179,8 @@ async function executeForAccount(
     return { ok: false, skipped: true, reason };
   }
 
+  const check = await validateMt5Symbol(Number(account.tradecopy_user_id), symbol);
+
   const { data: claim, error: claimErr } = await claimExecution(
     admin, account, signal, symbol, direction, volume, adapter.mode === "live" ? "tradecopy" : "simulated",
   );
@@ -157,15 +188,22 @@ async function executeForAccount(
 
   const now = new Date().toISOString();
   await admin.from("trading_accounts").update({ last_direct_signal_at: now }).eq("id", account.id);
+  if (!check.ok) {
+    await admin.from("direct_executions").update({ status: "failed", error: check.reason }).eq("id", claim.id);
+    return { ok: false, skipped: false, reason: check.reason };
+  }
 
   try {
     const order = normalizeMarketOrder({
       symbol, side: direction, lots: volume, stopLoss: signal.stop_loss, takeProfit: signal.take_profit,
     });
     const result = await adapter.createMarketOrder(account.tradecopy_user_id, role, order);
+    const r = result as any;
+    const ticket = r?.ticket ?? r?.orderId ?? r?.order ?? r?.data?.ticket ?? r?.data?.order ?? r?.data?.orderId ?? "";
     await admin.from("direct_executions").update({
       status: adapter.mode === "live" ? "sent" : "simulated",
-      ticket: String((result as any)?.ticket ?? (result as any)?.orderId ?? ""),
+      ticket: String(ticket),
+      error: adapter.mode === "live" ? null : "Simulated (TradeCopy mock mode) — no real order sent",
     }).eq("id", claim.id);
     await admin.from("trading_accounts").update({
       last_direct_execution_at: now, last_direct_error: null, direct_signal_status: "on",
@@ -199,39 +237,43 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
     .eq("is_botvio_robot", false).eq("is_active", true).eq("tradecopy_active", true)
     .not("tradecopy_user_id", "is", null).limit(2);
 
-  let master = configuredMasters?.[0] as Record<string, any> | undefined;
+  // Configured Signal Master wins. Otherwise every active non-Robot provider
+  // master (max two: Deriv + Weltrade) is considered, and each only receives
+  // signals whose symbol maps to its own broker.
+  let masters = (configuredMasters ?? []) as Record<string, any>[];
   let signalMasterFallback = false;
-
-  if (!master) {
+  if (!masters.length) {
     const { data: providerMasters } = await admin.from("trading_accounts").select(COLS)
       .eq("account_role", "master")
       .eq("is_botvio_robot", false).eq("is_active", true).eq("tradecopy_active", true)
       .not("tradecopy_user_id", "is", null).limit(2);
-    if ((providerMasters ?? []).length === 1) {
-      master = providerMasters?.[0] as Record<string, any>;
-      signalMasterFallback = true;
-    }
+    masters = (providerMasters ?? []) as Record<string, any>[];
+    signalMasterFallback = masters.length > 0;
   }
+  const master = masters[0];
 
   let masterExecuted = 0, directExecuted = 0, skipped = 0;
+  const failures: Array<{ account: string; symbol: string; reason: string }> = [];
 
-  if (master) {
+  for (const m of masters) {
+    const isDeriv = /deriv/i.test(String(m.server ?? m.broker ?? ""));
+    const isWeltrade = /weltrade/i.test(String(m.server ?? m.broker ?? ""));
     for (const signal of signals as Record<string, any>[]) {
       const direction = normalizeDirection(signal.direction);
-      if (!direction || Number(signal.confidence ?? 0) < Number(master.botvio_signal_min_confidence ?? 70)) {
-        skipped++;
-        continue;
-      }
-      const isDeriv = /deriv/i.test(String(master.server ?? master.broker ?? ""));
-      const mt5Symbol = isDeriv ? derivMt5Symbol(String(signal.symbol)) : String(signal.symbol);
+      if (!direction || Number(signal.confidence ?? 0) < Number(m.botvio_signal_min_confidence ?? 70)) { skipped++; continue; }
+      const sig = String(signal.symbol);
+      const derivSym = derivMt5Symbol(sig);
+      // Deriv master: only exact Deriv MT5 mappings. Weltrade master: never Deriv-only symbols.
+      const mt5Symbol = isDeriv ? derivSym : (isWeltrade && derivSym && /index/i.test(derivSym) ? null : sig);
       if (!mt5Symbol) { skipped++; continue; }
-      // One master trade per market per 30 minutes keeps the demo from stacking duplicates.
       const { data: recentTrade } = await admin.from("direct_executions").select("id")
-        .eq("trading_account_id", master.id).eq("mt5_symbol", mt5Symbol).neq("status", "failed")
+        .eq("trading_account_id", m.id).eq("mt5_symbol", mt5Symbol).neq("status", "failed")
         .gte("created_at", new Date(Date.now() - 30 * 60_000).toISOString()).limit(1);
       if (recentTrade?.length) { skipped++; continue; }
-      const result = await executeForAccount(admin, master, signal, "master", Number(master.botvio_signal_master_lot ?? 0.01), mt5Symbol, globalLive);
-      if (result.ok) masterExecuted++; else if (result.skipped) skipped++;
+      const result = await executeForAccount(admin, m, signal, "master", Number(m.botvio_signal_master_lot ?? 0.01), mt5Symbol, globalLive);
+      if (result.ok) masterExecuted++;
+      else if (result.skipped) skipped++;
+      else failures.push({ account: m.id, symbol: mt5Symbol, reason: String(result.reason ?? "") });
     }
   }
 
@@ -279,7 +321,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
     }
   }
 
-  return { signals: signals.length, signalMasterConfigured: !!master, signalMasterFallback, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, directSkippedByCopy, skipped };
+  return { signals: signals.length, masters: masters.length, failures, signalMasterConfigured: !!master, signalMasterFallback, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, directSkippedByCopy, skipped };
 }
 
 Deno.serve(async (req) => {
