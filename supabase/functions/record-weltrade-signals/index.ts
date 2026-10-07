@@ -85,6 +85,20 @@ Deno.serve(async (req) => {
 
       const outcome = s.result === "WIN" ? "win" : s.result === "LOSS" ? "loss" : "pending";
 
+      if (outcome === "pending") {
+        const recentWindow = new Date(Math.max(0, s.time * 1000 - 30 * 60 * 1000)).toISOString();
+        const { data: opposite } = await admin
+          .from("trading_signals")
+          .select("id,direction")
+          .eq("symbol", symbol)
+          .eq("timeframe", s.timeframe)
+          .eq("status", "ACTIVE")
+          .neq("direction", s.direction)
+          .gte("created_at", recentWindow)
+          .limit(1);
+        if (opposite?.length) continue;
+      }
+
       if (existing?.length) {
         const row = existing[0];
         if (row.outcome === "pending" && outcome !== "pending") {
