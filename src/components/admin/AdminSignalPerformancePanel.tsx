@@ -89,6 +89,6 @@ export function AdminSignalPerformancePanel() {
       <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Optimization status</p><p className="text-2xl font-black">{decided.length<30?"Collecting":"Ready"}</p><p className="text-[10px] text-muted-foreground mt-1">30+ decided signals unlock stronger comparisons.</p></CardContent></Card>
     </div>}
     <div className="grid xl:grid-cols-3 gap-4"><Table title="By Symbol" data={symbols}/><Table title="By Strategy" data={strategies}/><Table title="By Timeframe" data={timeframes}/></div>
-    <Card><CardHeader className="pb-3"><CardTitle className="text-sm">Confidence calibration</CardTitle></CardHeader><CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">{confidenceBands.map(x=><div key={x.key} className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">{x.key}</p><p className="text-lg font-black">{x.count}</p><Badge variant="outline">{x.count?pct(x.winRate):"Pending"}</Badge></div>)}</CardContent></Card>
+    <Card><CardHeader className="pb-3"><CardTitle className="text-sm">Confidence calibration</CardTitle></CardHeader><CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">{confidenceBands.map(x=><div key={String(x.key)} className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">{String(x.key)}</p><p className="text-lg font-black">{x.count}</p><Badge variant="outline">{x.count?pct(x.winRate):"Pending"}</Badge></div>)}</CardContent></Card>
   </section>;
 }
