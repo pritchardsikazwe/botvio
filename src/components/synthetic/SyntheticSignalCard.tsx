@@ -6,6 +6,7 @@ import { Crosshair, TrendingUp, TrendingDown, Pause, Activity, Zap, Cpu, Loader2
 import { useDerivLiveSignal } from "@/hooks/useDerivLiveSignal";
 import { usePersistLiveSignal } from "@/hooks/usePersistGoldLiveSignal";
 import { supabase } from "@/integrations/supabase/client";
+import { directAction, useMyMt5Accounts } from "@/hooks/useDirectExecution";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import type { SyntheticInstrument } from "@/config/synthetics";
@@ -27,8 +28,13 @@ export function SyntheticSignalCard({
   onSignalChange,
 }: Props) {
   const { user } = useAuth();
+  const { data: mt5Accounts } = useMyMt5Accounts();
   const [busyDeriv, setBusyDeriv] = useState(false);
   const [busyMt5, setBusyMt5] = useState(false);
+
+  const mt5Account = (mt5Accounts ?? []).find(
+    (a) => a.account_role === "slave" && a.tradecopy_active && a.tradecopy_user_id && a.is_active && !a.is_botvio_robot,
+  );
 
   const chartSymbol = instrument.derivSymbol ?? instrument.chartProxy ?? null;
   const live = useDerivLiveSignal(chartSymbol, 300);
@@ -128,7 +134,10 @@ export function SyntheticSignalCard({
     }
   };
 
-  // ─── Send to MT5 Bridge EA (queue-hub-trade) ─────────────────────
+  // ─── Send to MT5 through the current TradeCopy execution path ─────
+  // Synthetic Hub must use mt5-direct-execution directly. The old
+  // queue-hub-trade/Bridge EA route is retired and can produce legacy
+  // "queued / Volume undefined / Terminal undefined" UI messages.
   const sendToMt5 = async (forcedDir?: "BUY" | "SELL") => {
     const direction = forcedDir ?? dir;
     if (!direction) {
@@ -142,35 +151,50 @@ export function SyntheticSignalCard({
       toast({ title: "Sign in required", variant: "destructive" });
       return;
     }
+    if (!mt5Account) {
+      toast({
+        title: "MT5 TradeCopy follower required",
+        description: "Connect and activate an MT5 follower in Connections before sending this synthetic signal.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setBusyMt5(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      if (!accessToken) throw new Error("No active session");
+      const volume = Number(mt5Account.direct_lot ?? 0.01);
+      if (!Number.isFinite(volume) || volume <= 0) throw new Error("MT5 lot size is not configured");
 
-      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/queue-hub-trade`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          symbol: instrument.mt5Symbol,
-          direction,
-          source: `synthetic-${instrument.category}`,
-        }),
+      const result = await directAction<{
+        execution?: string;
+        adapterMode?: string;
+        result?: Record<string, unknown>;
+      }>("send_order", {
+        account_id: mt5Account.id,
+        symbol: instrument.mt5Symbol,
+        direction,
+        volume,
       });
-      const json = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(json?.error ?? "MT5 queue failed");
+
+      const raw = result?.result ?? {};
+      const ticket = String(
+        raw.ticket ?? raw.orderId ?? raw.order ?? raw.data?.ticket ?? raw.data?.order ?? raw.data?.orderId ?? "",
+      );
+      const destination = [mt5Account.broker ?? "MT5", mt5Account.server ?? "", mt5Account.login_id ? `Login ${mt5Account.login_id}` : ""]
+        .filter(Boolean)
+        .join(" · ");
+      const mode = String(result?.adapterMode ?? "unknown").toLowerCase();
+      const statusLabel = mode === "live" ? "sent" : "accepted (test mode)";
+      const ticketText = ticket ? ` · Ticket ${ticket}` : "";
+
       toast({
-        title: `MT5 ${direction} queued`,
-        description: `${instrument.label} • Volume ${json.volume} • Terminal ${json.terminal_uid?.slice(0, 8)}…`,
+        title: `MT5 ${direction} ${statusLabel}`,
+        description: `${instrument.label} · ${volume.toFixed(2)} lot · ${destination}${ticketText}`,
       });
     } catch (e: any) {
       toast({
-        title: "MT5 queue failed",
-        description: e?.message ?? "Add your Bridge EA terminal under Connections.",
+        title: "MT5 TradeCopy send failed",
+        description: e?.message ?? "Could not send the synthetic signal through TradeCopy.",
         variant: "destructive",
       });
     } finally {
