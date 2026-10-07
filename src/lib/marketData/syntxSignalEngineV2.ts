@@ -6,7 +6,18 @@ import { getSyntxProfile, type SyntxFamily, type SyntxStrategyMode } from "./syn
 const PROGRESSION = new Set<SyntxFamily>(["plusx","fibox","quadx","max-painx","max-gainx"]);
 
 function structure(c:NormalizedCandle[],i:number,d:"BUY"|"SELL"){if(i<6)return 0;const a=c[i-2],b=c[i-4],z=c[i-6];return d==="BUY"?(a.high>b.high&&b.high>z.high&&a.low>b.low&&b.low>z.low?12:0):(a.high<b.high&&b.high<z.high&&a.low<b.low&&b.low<z.low?12:0)}
-function rejection(c:NormalizedCandle[],i:number,d:"BUY"|"SELL",atr:number){const x=c[i],body=Math.abs(x.close-x.open),lo=Math.min(x.open,x.close)-x.low,hi=x.high-Math.max(x.open,x.close);return d==="BUY"&&lo>body*1.2&&lo>atr*.25?8:d==="SELL"&&hi>body*1.2&&hi>atr*.25?8:0}
+function rejection(c:NormalizedCandle[],i:number,d:"BUY"|"SELL",atr:number){
+ const x=c[i],body=Math.abs(x.close-x.open),lo=Math.min(x.open,x.close)-x.low,hi=x.high-Math.max(x.open,x.close);
+ const bull=x.close>x.open&&lo>body*1.2&&lo>atr*.25;
+ const bear=x.close<x.open&&hi>body*1.2&&hi>atr*.25;
+ return d==="BUY"&&bull?8:d==="SELL"&&bear?8:0;
+}
+function confirmedRejection(c:NormalizedCandle[],i:number,d:"BUY"|"SELL",atr:number){
+ const x=c[i],body=Math.abs(x.close-x.open),lo=Math.min(x.open,x.close)-x.low,hi=x.high-Math.max(x.open,x.close);
+ return d==="BUY"
+   ? x.close>x.open&&lo>Math.max(body*1.2,atr*.25)
+   : x.close<x.open&&hi>Math.max(body*1.2,atr*.25);
+}
 function result(c:NormalizedCandle[],i:number,d:"BUY"|"SELL",sl:number,tp:number){for(let j=i+1;j<c.length;j++){if(d==="BUY"){if(c[j].low<=sl)return"LOSS" as const;if(c[j].high>=tp)return"WIN" as const}else{if(c[j].high>=sl)return"LOSS" as const;if(c[j].low<=tp)return"WIN" as const}}return"OPEN" as const}
 
 type Regime = "BUY" | "SELL" | "NEUTRAL";
@@ -46,7 +57,18 @@ export function computeSyntxSignalsV2(candles:NormalizedCandle[],opts:SyntxEngin
   if(!d||score<min)continue;
   // Hard counter-trend gate: never publish a signal against a confirmed EMA regime.
   if(regimeAligned(regime,d)===false && regime!=="NEUTRAL")continue;
-  const entry=x.close,sl=d==="BUY"?entry-atr*1.5:entry+atr*1.5,tp=d==="BUY"?entry+atr*2.2:entry-atr*2.2;
+  // Keep SyntX exits realistic for the selected timeframe. ATR is used so the
+  // levels adapt to volatility instead of using an oversized fixed target.
+  const exitProfile =
+    opts.timeframe==="1m" ? { sl:0.85, tp:1.25 } :
+    opts.timeframe==="3m" ? { sl:0.9, tp:1.35 } :
+    opts.timeframe==="5m" ? { sl:1.0, tp:1.5 } :
+    opts.timeframe==="15m" ? { sl:1.1, tp:1.65 } :
+    opts.timeframe==="30m" ? { sl:1.2, tp:1.8 } :
+    { sl:1.3, tp:1.9 };
+  const entry=x.close;
+  const sl=d==="BUY"?entry-atr*exitProfile.sl:entry+atr*exitProfile.sl;
+  const tp=d==="BUY"?entry+atr*exitProfile.tp:entry-atr*exitProfile.tp;
   out.push({id:`${opts.symbol}-${opts.timeframe}-${x.time}-${d}-v2`,symbol:opts.symbol,label:opts.label,timeframe:opts.timeframe,direction:d,strategy:`${getSyntxProfile(opts.family)?.label??"SyntX"} · ${opts.mode} · Engine v2`,confidence:Math.min(96,Math.round(score)),entry,stopLoss:sl,takeProfit:tp,time:x.time,index:i,result:result(candles,i,d,sl,tp),reason});
  }
  return out.slice(-(opts.maxSignals??40));
