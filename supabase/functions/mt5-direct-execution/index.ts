@@ -266,10 +266,12 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
       // Deriv master: only exact Deriv MT5 mappings. Weltrade master: never Deriv-only symbols.
       const mt5Symbol = isDeriv ? derivSym : (isWeltrade && derivSym && /index/i.test(derivSym) ? null : sig);
       if (!mt5Symbol) { skipped++; continue; }
-      const { data: recentTrade } = await admin.from("direct_executions").select("id")
-        .eq("trading_account_id", m.id).eq("mt5_symbol", mt5Symbol).neq("status", "failed")
-        .gte("created_at", new Date(Date.now() - 30 * 60_000).toISOString()).limit(1);
-      if (recentTrade?.length) { skipped++; continue; }
+      // Cooldown: 30 min after a sent trade, 10 min after a failure (stops retry storms).
+      const { data: recentTrade } = await admin.from("direct_executions").select("id,status,created_at")
+        .eq("trading_account_id", m.id).eq("mt5_symbol", mt5Symbol)
+        .gte("created_at", new Date(Date.now() - 30 * 60_000).toISOString()).order("created_at", { ascending: false }).limit(1);
+      const last = recentTrade?.[0];
+      if (last && (last.status !== "failed" || Date.parse(last.created_at) > Date.now() - 10 * 60_000)) { skipped++; continue; }
       const result = await executeForAccount(admin, m, signal, "master", Number(m.botvio_signal_master_lot ?? 0.01), mt5Symbol, globalLive);
       if (result.ok) masterExecuted++;
       else if (result.skipped) skipped++;
