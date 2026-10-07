@@ -215,6 +215,11 @@ export function normalizeOrders(payload: unknown): NormalizedOrder[] {
 
 export interface MarketOrderInput { symbol: string; side: Side; lots: number; stopLoss?: number | null; takeProfit?: number | null }
 
+/**
+ * Validate SL/TP geometry against the signal/expected entry before TradeCopy.
+ * MT5 validates stops against the actual market price, so this is deliberately
+ * conservative: invalid-side stops are rejected instead of being sent blindly.
+ */
 export function normalizeMarketOrder(input: Record<string, unknown>): MarketOrderInput {
   const side = String(input.side ?? "").toUpperCase();
   if (side !== "BUY" && side !== "SELL") throw new TradeCopyError("side must be BUY or SELL", "validation");
@@ -222,8 +227,18 @@ export function normalizeMarketOrder(input: Record<string, unknown>): MarketOrde
   if (!Number.isFinite(lots) || lots <= 0 || lots > 100) throw new TradeCopyError("lots must be between 0 and 100", "validation");
   const sl = num(input.stopLoss);
   const tp = num(input.takeProfit);
+  const reference = num(input.referencePrice);
   if (sl !== null && sl < 0) throw new TradeCopyError("stopLoss must be ≥ 0", "validation");
   if (tp !== null && tp < 0) throw new TradeCopyError("takeProfit must be ≥ 0", "validation");
+  if (reference !== null && reference > 0) {
+    if (side === "BUY") {
+      if (sl !== null && sl >= reference) throw new TradeCopyError("BUY stop loss must be below the reference entry price", "validation");
+      if (tp !== null && tp <= reference) throw new TradeCopyError("BUY take profit must be above the reference entry price", "validation");
+    } else {
+      if (sl !== null && sl <= reference) throw new TradeCopyError("SELL stop loss must be above the reference entry price", "validation");
+      if (tp !== null && tp >= reference) throw new TradeCopyError("SELL take profit must be below the reference entry price", "validation");
+    }
+  }
   return { symbol: normalizeSymbol(input.symbol), side, lots: Math.round(lots * 100) / 100, stopLoss: sl, takeProfit: tp };
 }
 
