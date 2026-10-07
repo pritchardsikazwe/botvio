@@ -46,7 +46,7 @@ export function AdminSignalPerformancePanel() {
     const { data, error } = await supabase.from("trading_signals")
       .select("symbol,strategy_name,timeframe,direction,status,confidence,quality_score,ai_win_probability,expiry_seconds,best_expiry,backup_expiry,created_at")
       .gte("created_at", since).order("created_at", { ascending:false }).limit(5000);
-    if (error) setError(error.message); else setRows((data || []) as Signal[]);
+    if (error) setError(error.message); else setRows((data || []) as unknown as Signal[]);
     setLoading(false);
   };
   useEffect(()=>{ load(); },[days]);
