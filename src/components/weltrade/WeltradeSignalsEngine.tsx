@@ -132,8 +132,6 @@ export const WeltradeSignalsEngine = () => {
   // A historical signal must never remain displayed as the live direction.
   // Only a signal on one of the newest two candles is considered active.
   const activeSignal = useMemo(
-    () => recent[0] ?? null,
-    [recent]
     () => recent.find((s) => s.index >= candles.length - 2) ?? null,
     [recent, candles.length]
   );
