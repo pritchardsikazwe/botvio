@@ -352,6 +352,14 @@ export function FollowerTradeCopyPanel() {
         ))}
         {accounts.data?.length === 0 && user && <p className="text-sm text-muted-foreground">Connect an MT5 account to start. A connected Weltrade follower can also be attached as the Botvio signal DATA FEED without enabling copy trading.</p>}
 
+        {rels.data?.map((rel) => (
+          <RelationshipCard
+            key={rel.id}
+            rel={rel}
+            account={accounts.data?.find((account) => account.id === rel.follower_account_id)}
+          />
+        ))}
+
         {user && (
           <div className="space-y-4">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
