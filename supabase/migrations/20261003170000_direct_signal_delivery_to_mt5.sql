@@ -95,7 +95,7 @@ BEGIN
      AND EXISTS (SELECT 1 FROM public.trading_accounts WHERE direct_signal_enabled) THEN
     BEGIN
       PERFORM net.http_post(
-        url := 'https://bkygpojmlxcikhbuqgmv.supabase.co/functions/v1/mt5-direct-execution',
+        url := 'https://tqqkzeblmjapgbnsbtgw.supabase.co/functions/v1/mt5-direct-execution',
         headers := '{"Content-Type":"application/json"}'::jsonb,
         body := '{"action":"wake"}'::jsonb
       );
