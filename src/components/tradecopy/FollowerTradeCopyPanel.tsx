@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2, Radio, Database, Bot, ExternalLink } from "lucide-react";
+import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2, Radio, Database, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -272,17 +272,6 @@ export function FollowerTradeCopyPanel() {
                     Your copied robot trades are shown here. Trade execution is handled in the background; you do not need to manage the copier yourself.
                   </p>
                 </div>
-                {accounts.data?.[0]?.tradecopy_user_id && (
-                  <Button asChild size="sm" variant="outline">
-                    <a
-                      href={`https://tradecopy.online/profile/order-history/slave/${accounts.data[0].tradecopy_user_id}/server_1`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View activity <ExternalLink className="ml-2 h-3.5 w-3.5" />
-                    </a>
-                  </Button>
-                )}
               </div>
             </div>
 
