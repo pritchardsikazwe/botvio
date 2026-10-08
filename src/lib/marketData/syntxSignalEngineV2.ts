@@ -66,7 +66,6 @@ export function computeSyntxSignalsV2(candles:NormalizedCandle[],opts:SyntxEngin
   // Never publish a confirmed counter-trend signal. In a mixed/transition regime,
   // publish nothing and let the UI show WAIT rather than forcing a direction.
   if(regime!=="NEUTRAL" && regime!==d)continue;
-  const entry=x.close,sl=d==="BUY"?entry-atr*1.5:entry+atr*1.5,tp=d==="BUY"?entry+atr*2.2:entry-atr*2.2;
   out.push({id:`${opts.symbol}-${opts.timeframe}-${x.time}-${d}-v2`,symbol:opts.symbol,label:opts.label,timeframe:opts.timeframe,direction:d,strategy:`${getSyntxProfile(opts.family)?.label??"SyntX"} · ${opts.mode} · Engine v2`,confidence:Math.min(96,Math.round(score)),entry,stopLoss:sl,takeProfit:tp,time:x.time,index:i,result:result(candles,i,d,sl,tp),reason});
  }
  return out.slice(-(opts.maxSignals??40));
