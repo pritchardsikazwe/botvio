@@ -57,9 +57,9 @@ function LinkProvider({ accounts }: { accounts: TcAccount[] }) {
   return (
     <div className="space-y-3 rounded-xl border border-border/50 p-4">
       <div>
-        <div className="text-sm font-semibold">Choose what this MT5 account copies</div>
+        <div className="text-sm font-semibold">Advanced API copier (fallback)</div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Deriv connection and MT5 copy trading are separate. This screen controls the MT5 follower account only.
+          This is the managed Botvio API path. Prefer the TradeCopy Cloud Signal Provider workflow above; use this only when an API-managed relationship is specifically required.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
@@ -79,7 +79,7 @@ function LinkProvider({ accounts }: { accounts: TcAccount[] }) {
       <div className="space-y-1.5"><Label>Orders to copy</Label>
         <Select value={copyType} onValueChange={setCopyType}><SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent><SelectItem value="1">New orders only</SelectItem><SelectItem value="0">Existing + new orders</SelectItem></SelectContent></Select></div>
-      <Button onClick={link} disabled={!acct || act.isPending || providers.isError}>Link MT5 Copy Source</Button>
+      <Button onClick={link} disabled={!acct || act.isPending || providers.isError}>Link via Botvio API</Button>
       {providers.isError && (
         <p className="text-xs text-destructive sm:col-span-2 lg:col-span-4">
           Provider list could not be loaded. Refresh and try again.
@@ -209,8 +209,8 @@ export function FollowerTradeCopyPanel() {
   return (
     <Card className="border-border/50">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-        <CardTitle className="text-sm">MT5 copy trading (TradeCopy cloud)</CardTitle>
-        {user && <ConnectMt5Dialog role="slave" triggerLabel="Connect MT5 Follower" />}
+        <CardTitle className="text-sm">Advanced MT5 API controls</CardTitle>
+        {user && <ConnectMt5Dialog role="slave" triggerLabel="Connect MT5 for API management" />}
       </CardHeader>
       <CardContent className="space-y-4">
         <AdapterModeNotice />
