@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
+import { TradeCopyCloudSignalPanel } from "@/components/tradecopy/TradeCopyCloudSignalPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { TradeCopyAccountDashboard } from "@/components/tradecopy/TradeCopyAccountDashboard";
 import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
@@ -48,6 +49,8 @@ export const FollowerDashboard = () => {
         </div>
 
         <CopyTradingRoleGuide role="follower" />
+
+        <TradeCopyCloudSignalPanel />
 
         <TradeCopyAccountDashboard role="slave" />
 
@@ -113,7 +116,7 @@ export const BotvioRobotDashboard = () => {
   const metrics = [
     { label: "Robot", value: "Server-side AI", tone: "text-success", icon: Bot },
     { label: "Signals", value: "Auto generated", tone: "text-primary", icon: Activity },
-    { label: "Execution", value: "MT5 Bridge", tone: "text-primary", icon: Cloud },
+    { label: "Execution", value: "TradeCopy Cloud", tone: "text-primary", icon: Cloud },
     { label: "Safety", value: "User controlled", tone: "text-success", icon: ShieldCheck },
   ];
 
@@ -131,7 +134,7 @@ export const BotvioRobotDashboard = () => {
                 AI trading intelligence, connected to your MT5.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
-                Botvio scans supported markets, builds structured BUY/SELL setups and routes eligible signals through your configured MT5 Bridge.
+                Botvio scans supported markets, builds structured BUY/SELL setups and publishes eligible signals through the TradeCopy Cloud master used for follower copying.
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
                 <Button asChild className="bg-white text-emerald-950 hover:bg-white/90">
@@ -196,7 +199,7 @@ export const BotvioRobotDashboard = () => {
             <Card className="border-border/60 bg-white shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base">MT5 Auto-Execute</CardTitle>
-                <CardDescription>Connect a Bridge EA and route qualifying signals to the selected MT5 terminal.</CardDescription>
+                <CardDescription>Use TradeCopy Cloud as the MT5 execution/copy layer. Botvio Robot is the master signal account; follower accounts are copied in TradeCopy Cloud.</CardDescription>
               </CardHeader>
               <CardContent><Mt5AutoExecuteCard /></CardContent>
             </Card>
@@ -212,7 +215,7 @@ export const BotvioRobotDashboard = () => {
                     ["01", "Scan", "AI evaluates supported markets."],
                     ["02", "Setup", "BUY/SELL with entry, SL and TP."],
                     ["03", "Queue", "Eligible signal enters the MT5 route."],
-                    ["04", "Execute", "Bridge EA sends the order to MT5."],
+                    ["04", "Execute", "TradeCopy Cloud copies the master order to follower MT5 accounts."],
                   ].map(([n, title, description]) => (
                     <div key={n} className="rounded-2xl border border-border/60 bg-muted/30 p-4">
                       <span className="text-[10px] font-bold text-primary">{n}</span>
@@ -265,7 +268,7 @@ export const BotvioRobotDashboard = () => {
                   <ShieldCheck className="mt-0.5 h-5 w-5 text-emerald-600" />
                   <div>
                     <p className="text-sm font-bold text-emerald-950">User-controlled risk</p>
-                    <p className="mt-1 text-xs leading-5 text-emerald-900/70">You control sizing, confidence thresholds, stop-loss, take-profit and whether MT5 Auto-Execute is enabled.</p>
+                    <p className="mt-1 text-xs leading-5 text-emerald-900/70">You control sizing, confidence thresholds, stop-loss and take-profit; TradeCopy Cloud handles follower replication.</p>
                   </div>
                 </div>
               </CardContent>
