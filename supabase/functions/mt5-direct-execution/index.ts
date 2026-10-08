@@ -292,7 +292,12 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   for (const m of masters) {
     const isDeriv = /deriv/i.test(String(m.server ?? m.broker ?? ""));
     const isWeltrade = /weltrade/i.test(String(m.server ?? m.broker ?? ""));
+    // Once TradeCopy/broker reports a position-limit rejection, stop sending
+    // additional master orders in this delivery cycle. Do not keep retrying
+    // other symbols against the same exhausted account.
+    let masterPositionLimitReached = false;
     for (const signal of signals as Record<string, any>[]) {
+      if (masterPositionLimitReached) { skipped++; continue; }
       const direction = normalizeDirection(signal.direction);
       if (!direction || Number(signal.confidence ?? 0) < Number(m.botvio_signal_min_confidence ?? 70)) { skipped++; continue; }
       const sig = String(signal.symbol);
@@ -307,9 +312,30 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
       const last = recentTrade?.[0];
       if (last && (last.status !== "failed" || Date.parse(last.created_at) > Date.now() - 10 * 60_000)) { skipped++; continue; }
       const result = await executeForAccount(admin, m, signal, "master", Number(m.botvio_signal_master_lot ?? 0.01), mt5Symbol, globalLive);
-      if (result.ok) masterExecuted++;
-      else if (result.skipped) skipped++;
-      else failures.push({ account: m.id, symbol: mt5Symbol, reason: String(result.reason ?? "") });
+      if (result.ok) {
+        masterExecuted++;
+      } else if (result.skipped) {
+        skipped++;
+      } else {
+        const reason = String(result.reason ?? "");
+        failures.push({ account: m.id, symbol: mt5Symbol, reason });
+        if (isPositionLimitError(reason)) {
+          masterPositionLimitReached = true;
+          // Persist a clear diagnostic for the admin UI. This is a broker/TradeCopy
+          // exposure condition, not evidence that the signal or symbol mapping is bad.
+          await admin.from("trading_accounts").update({
+            last_direct_error: "TradeCopy/broker position limit reached; remaining master signals skipped for this delivery cycle",
+            direct_signal_status: "error",
+          }).eq("id", m.id);
+        } else if (isInvalidVolumeError(reason)) {
+          // Never guess a replacement lot size. Volume rules differ by instrument
+          // and broker, so the symbol is skipped until its valid lot size is known.
+          await admin.from("trading_accounts").update({
+            last_direct_error: `TradeCopy rejected ${mt5Symbol} volume ${Number(m.botvio_signal_master_lot ?? 0.01)} as invalid; no automatic lot-size escalation was attempted`,
+            direct_signal_status: "error",
+          }).eq("id", m.id);
+        }
+      }
     }
   }
 
@@ -322,7 +348,10 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   // Prevent duplicate trades: if a follower is already actively copying the
   // Botvio Robot or the configured Botvio Signal Master, TradeCopy itself will
   // deliver the signal. Do not also send the same signal directly to the slave.
-  const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
+  const isPositionLimitError = (reason: string) => /TRADE_RETCODE_LIMIT_POSITIONS|limit[_ ]positions|maximum.*position|position.*limit|too many positions/i.test(reason);
+const isInvalidVolumeError = (reason: string) => /invalid volume|volume.*invalid|invalid.*lot|lot.*invalid/i.test(reason);
+
+const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
   const copyManagedFollowerIds = new Set<string>();
   if (directIds.length) {
     const { data: activeLinks } = await admin.from("copy_relationships")
