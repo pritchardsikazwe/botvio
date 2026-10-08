@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2, Radio, Database } from "lucide-react";
+import { AlertTriangle, OctagonX, Pause, Play, Square, Trash2, Radio, Database, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -209,11 +209,10 @@ export function FollowerTradeCopyPanel() {
   return (
     <Card className="border-border/50">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-        <CardTitle className="text-sm">Advanced MT5 API controls</CardTitle>
-        {user && <ConnectMt5Dialog role="slave" triggerLabel="Connect MT5 for API management" />}
+        <CardTitle className="flex items-center gap-2 text-sm"><Bot className="h-4 w-4 text-primary" />Botvio Robot</CardTitle>
+        {user && <ConnectMt5Dialog role="slave" triggerLabel="Connect MT5 account" />}
       </CardHeader>
       <CardContent className="space-y-4">
-        <AdapterModeNotice />
         {!user && <p className="text-sm text-muted-foreground">Sign in to connect your MT5 account and copy a provider.</p>}
         {(accounts.isLoading || rels.isLoading) && <Skeleton className="h-24 w-full" />}
         {accounts.data?.map((a) => (
@@ -258,13 +257,42 @@ export function FollowerTradeCopyPanel() {
             </span>
           </div>
         ))}
-        {accounts.data && accounts.data.length > 0 && <LinkProvider accounts={accounts.data} />}
         {accounts.data?.length === 0 && user && <p className="text-sm text-muted-foreground">Connect an MT5 account to start. A connected Weltrade follower can also be attached as the Botvio signal DATA FEED without enabling copy trading.</p>}
-        {rels.data?.map((r) => <RelationshipCard key={r.id} rel={r} account={accounts.data?.find((a) => a.id === r.follower_account_id)} />)}
 
         {user && (
-          <div className="space-y-2">
-            <Label>Copy history</Label>
+          <div className="space-y-4">
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <Bot className="h-4 w-4 text-primary" />
+                    Botvio Robot Activity
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    Your copied robot trades are shown here. Trade execution is handled in the background; you do not need to manage the copier yourself.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {accounts.data?.[0]?.tradecopy_user_id ? (
+              <div className="overflow-hidden rounded-xl border border-border/60 bg-background">
+                <iframe
+                  title="Botvio Robot trade activity"
+                  src={`https://tradecopy.online/profile/order-history/slave/${accounts.data[0].tradecopy_user_id}/server_1`}
+                  className="h-[520px] w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                Connect your MT5 account to display Botvio Robot activity.
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Recent Botvio execution events</Label>
             {events.data?.length === 0 && <p className="text-xs text-muted-foreground">No copied trades yet.</p>}
             <div className="space-y-1.5">
               {events.data?.map((e) => (
@@ -286,7 +314,7 @@ export function FollowerTradeCopyPanel() {
             )}
           </div>
         )}
-        <p className="text-[11px] text-muted-foreground">Copy trading carries real risk of loss. Past provider results do not guarantee future results.</p>
+        <p className="text-[11px] text-muted-foreground">Botvio manages the robot connection for you. Trading carries real risk of loss, and copied execution can differ from the source trade.</p>
       </CardContent>
     </Card>
   );
