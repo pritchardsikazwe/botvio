@@ -33,6 +33,11 @@ on:
         required: true
         default: true
         type: boolean
+      apply_database_migrations:
+        description: "Apply pending Supabase migrations to production (use only after schema audit)"
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: tradecopy-mt5-deploy-${{ github.ref }}
@@ -83,9 +88,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$SUPABASE_PROJECT_REF" = "tqqkzeblmjapgbnsbtgw" ]; then
-            echo "BOTVIO_SUPABASE_TARGET=OLD_LOVABLE"
-          elif [ "$SUPABASE_PROJECT_REF" = "bkygpojmlxcikhbuqgmv" ]; then
-            echo "BOTVIO_SUPABASE_TARGET=NEW_INDEPENDENT"
+            echo "BOTVIO_SUPABASE_TARGET=BOTVIO_PRODUCTION"
           else
             echo "BOTVIO_SUPABASE_TARGET=UNKNOWN"
           fi
@@ -118,11 +121,15 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: npx supabase@latest functions deploy provider-event --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
 
-      - name: Apply database migrations
+      - name: Apply database migrations (explicit opt-in only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_database_migrations == true }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
-        run: npx supabase@latest db push --project-ref "$SUPABASE_PROJECT_REF"
+        run: |
+          set -euo pipefail
+          echo "Applying database migrations to the verified Botvio production project only."
+          npx supabase@latest db push --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Deploy Deriv OAuth exchange
         env:
