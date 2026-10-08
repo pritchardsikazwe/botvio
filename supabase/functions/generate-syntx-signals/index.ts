@@ -203,4 +203,4 @@ for(const plan of setups){
     }
   }).select("id,symbol,direction,confidence,timeframe").single();
   if(!ins&&row)published.push(row);
-}}}return new Response(JSON.stringify({success:true,published,count:published.length,diagnostics:diag,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
+}}}console.log("syntx run",JSON.stringify({conns:(connections??[]).length,published:published.length,diag:diag.slice(0,6)}));return new Response(JSON.stringify({success:true,published,count:published.length,diagnostics:diag,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
