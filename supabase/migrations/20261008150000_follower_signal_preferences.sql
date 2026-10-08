@@ -22,14 +22,32 @@ create policy "followers can view own signal preferences"
   on public.follower_signal_preferences
   for select
   to authenticated
-  using ((select auth.uid()) = user_id);
+  using (
+  (select auth.uid()) = user_id
+  and exists (
+    select 1 from public.trading_accounts ta
+    where ta.id = trading_account_id
+      and ta.user_id = (select auth.uid())
+      and ta.account_role = 'slave'
+      and ta.is_botvio_robot = false
+  )
+);
 
 drop policy if exists "followers can insert own signal preferences" on public.follower_signal_preferences;
 create policy "followers can insert own signal preferences"
   on public.follower_signal_preferences
   for insert
   to authenticated
-  with check ((select auth.uid()) = user_id);
+  with check (
+  (select auth.uid()) = user_id
+  and exists (
+    select 1 from public.trading_accounts ta
+    where ta.id = trading_account_id
+      and ta.user_id = (select auth.uid())
+      and ta.account_role = 'slave'
+      and ta.is_botvio_robot = false
+  )
+);
 
 drop policy if exists "followers can update own signal preferences" on public.follower_signal_preferences;
 create policy "followers can update own signal preferences"
