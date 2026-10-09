@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { supabase } from "@/integrations/supabase/client";
-import { OPEN_ACCESS, isLegacyAccessAccount } from "@/config/access";
+import { OPEN_ACCESS } from "@/config/access";
 import { useNativeStoreAccess } from "@/hooks/useNativeStoreAccess";
 
 export interface AccessGate {
@@ -48,8 +48,7 @@ export function useAccessGate(): AccessGate {
   });
 
   const adminBypass = isAdmin || isSuperAdmin;
-  const grandfathered = !!user && isLegacyAccessAccount(user.created_at);
-  const isPaid = sub.isPaid || !!nativeStore.data?.isPaid || grandfathered;
+  const isPaid = sub.isPaid || !!nativeStore.data?.isPaid;
   const isTrial = !isPaid && !!trialInfo && !trialInfo.expired;
   const trialDaysLeft = trialInfo?.daysLeft ?? 0;
   const trialExpired = !!trialInfo?.expired;
@@ -63,7 +62,7 @@ export function useAccessGate(): AccessGate {
     isTrial,
     trialDaysLeft,
     trialExpired,
-    hasAccess: OPEN_ACCESS || adminBypass || grandfathered || isPaid || isTrial,
-    planCode: grandfathered && !sub.isPaid ? "legacy" : (nativePlanCode ?? sub.planCode),
+    hasAccess: OPEN_ACCESS || adminBypass || isPaid || isTrial,
+    planCode: nativePlanCode ?? sub.planCode,
   };
 }
