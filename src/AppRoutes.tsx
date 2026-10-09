@@ -251,19 +251,19 @@ export const AppRoutes = () => {
     <Route path="apps/synthetic-robot" element={<StandaloneApp appId="synthetic-robot" />} />
     <Route path="apps/weltrade-robot" element={<StandaloneApp appId="weltrade-robot" />} />
     <Route path="apps/deriv-copy" element={<StandaloneApp appId="deriv-copy" />} />
-    <Route path="dashboard" element={<BotvioRobotDashboard />} />
+    <Route path="dashboard" element={<Paid><BotvioRobotDashboard /></Paid>} />
     <Route path="accounts" element={<Navigate to="/connections" replace />} />
-    <Route path="connections" element={<Connections />} />
+    <Route path="connections" element={<Paid><Connections /></Paid>} />
     <Route path="bridge-request" element={<Navigate to="/connections" replace />} />
-    <Route path="trade-history" element={<TradeHistory />} />
+    <Route path="trade-history" element={<Paid><TradeHistory /></Paid>} />
     <Route path="providers" element={<Navigate to="/copy-trading" replace />} />
     <Route path="copy-trading" element={<CopyMarketplace />} />
     <Route path="copy-trading/provider/:providerId" element={<CopyProviderProfile />} />
     <Route path="copy-trading/start/:providerId" element={<CopyStart />} />
     <Route path="copy-trading/onboarding" element={<CopyTradingOnboarding />} />
-    <Route path="copy-trading/my" element={<FollowerDashboard />} />
-    <Route path="copy-trading/become-provider" element={<BecomeProvider />} />
-    <Route path="provider-dashboard" element={<ProviderCommandCenter />} />
+    <Route path="copy-trading/my" element={<Paid><FollowerDashboard /></Paid>} />
+    <Route path="copy-trading/become-provider" element={<Paid><BecomeProvider /></Paid>} />
+    <Route path="provider-dashboard" element={<Paid><ProviderCommandCenter /></Paid>} />
     <Route path="botvio-robot" element={<Navigate to="/dashboard" replace />} />
     <Route path="bots" element={<Paid><Bots /></Paid>} />
     <Route path="billing" element={<Navigate to="/marketplace" replace />} />
@@ -291,10 +291,10 @@ export const AppRoutes = () => {
     <Route path="track-record" element={<Paid><SignalsHistory /></Paid>} />
     <Route path="marketplace" element={<Marketplace />} />
     <Route path="vip" element={<BotvioVIP />} />
-    <Route path="my-products" element={<MyProducts />} />
-    <Route path="settings" element={<Settings />} />
+    <Route path="my-products" element={<Paid><MyProducts /></Paid>} />
+    <Route path="settings" element={<Paid><Settings /></Paid>} />
     <Route path="account/delete" element={<AccountClosure />} />
-    <Route path="settings/binance" element={<BinanceSettings />} />
+    <Route path="settings/binance" element={<Paid><BinanceSettings /></Paid>} />
     <Route path="settings/deriv-otp" element={<ErrorBoundary><RequireSuperAdmin><DerivOtpTester /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="binance" element={<Paid><BinanceHub /></Paid>} />
     <Route path="bots/binance" element={<Navigate to="/binance" replace />} />
