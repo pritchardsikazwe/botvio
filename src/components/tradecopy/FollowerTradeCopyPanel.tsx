@@ -255,6 +255,9 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
       {rel.emergency_stopped_at && <p className="flex items-center gap-2 rounded-lg bg-destructive/10 p-2 text-xs text-destructive"><AlertTriangle className="h-4 w-4" />Emergency stop active since {new Date(rel.emergency_stopped_at).toLocaleString()}. Start Copying resets it.</p>}
       {rel.last_error && <p className="text-xs text-destructive">{rel.last_error}</p>}
 
+      <details className="rounded-lg border border-border/50">
+        <summary className="cursor-pointer p-3 text-sm font-semibold">Risk and safety settings <span className="font-normal text-muted-foreground">· lot size, SL/TP and loss limits</span></summary>
+        <div className="space-y-3 border-t border-border/50 p-3">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-1.5"><Label>Risk mode</Label>
           <Select value={String(form.risk_type)} onValueChange={(v) => set("risk_type", Number(v))}><SelectTrigger><SelectValue /></SelectTrigger>
@@ -272,11 +275,20 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
         <div className="space-y-1.5"><Label>Close all at total loss</Label><Input type="number" min="0" step="1" placeholder="Off" value={form.lossForAllOrder} onChange={(e) => set("lossForAllOrder", e.target.value)} /></div>
         <div className="space-y-1.5"><Label>Close all if equity below</Label><Input type="number" min="0" step="1" placeholder="Off" value={form.equityUnderLow} onChange={(e) => set("equityUnderLow", e.target.value)} /></div>
       </div>
-      <Button variant="outline" onClick={save} disabled={act.isPending}>Save settings</Button>
+      <Button variant="outline" onClick={save} disabled={act.isPending}>Save risk settings</Button>
+        </div>
+      </details>
 
-      <FollowerSignalPreferences followerAccountId={rel.follower_account_id} />
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+        <FollowerSignalPreferences followerAccountId={rel.follower_account_id} />
+      </div>
 
-      <SymbolMappings followerAccountId={rel.follower_account_id} />
+      <details className="rounded-lg border border-border/50">
+        <summary className="cursor-pointer p-3 text-sm font-semibold">Advanced symbol mapping <span className="font-normal text-muted-foreground">· only if your broker uses different symbol names</span></summary>
+        <div className="border-t border-border/50 p-3">
+          <SymbolMappings followerAccountId={rel.follower_account_id} />
+        </div>
+      </details>
 
       <div className="flex flex-wrap gap-2 border-t border-border/50 pt-3">
         <Button onClick={() => setStatus("active")} disabled={act.isPending || rel.status === "active"}><Play className="mr-2 h-4 w-4" />Start Copying</Button>
