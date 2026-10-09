@@ -13,12 +13,16 @@ const Connections = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <main className="container mx-auto max-w-5xl space-y-5 px-3 py-5 sm:px-4 sm:py-7">
       <main className="container mx-auto max-w-6xl space-y-4 px-3 py-5 sm:px-4 sm:py-6">
         {!user ? (
           <section className="mx-auto max-w-xl rounded-2xl border border-border/60 bg-card p-6 text-center sm:p-8">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <ShieldCheck className="h-6 w-6 text-primary" />
             </div>
+            <h1 className="text-2xl font-bold">Trading connections</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Sign in to connect Deriv or manage your MT5 copy-trading accounts.
             <h1 className="text-2xl font-bold">Connect your trading account</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Sign in to connect your MT5 account, choose your Botvio trading source and control automated copying.
@@ -28,6 +32,8 @@ const Connections = () => {
         ) : (
           <>
             <div>
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Trading connections</h1>
+              <p className="mt-1 text-sm text-muted-foreground">Manage your Deriv and MT5 accounts in one place.</p>
               <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Trading setup</h1>
               <p className="mt-1 text-sm text-muted-foreground">Connect once. Choose your markets. Start or pause your robot when you want.</p>
             </div>
