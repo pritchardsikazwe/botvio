@@ -57,6 +57,7 @@ export default function AdminSocialWorker() {
   const [mode, setMode] = useState<"draft" | "scheduled">("draft");
   const [schedule, setSchedule] = useState("");
   const [autoWorker, setAutoWorker] = useState(false);
+  const [linkedinConfig, setLinkedinConfig] = useState<{clientIdConfigured: boolean; clientSecretConfigured: boolean; redirectUri: string; requiredScopes: string[]} | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -76,7 +77,14 @@ export default function AdminSocialWorker() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    let active = true;
+    supabase.functions.invoke("social-oauth", { body: { action: "status", platform: "linkedin" } })
+      .then(({ data, error }) => { if (active && !error && data && !data.error) setLinkedinConfig(data); })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   const connected = useMemo(() => new Set(accounts.filter(a => a.enabled).map(a => a.platform)), [accounts]);
 
@@ -155,6 +163,35 @@ export default function AdminSocialWorker() {
         </div>
         <Button onClick={runWorker} disabled={busy}><RefreshCw className="h-4 w-4 mr-2" />Run worker</Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Linkedin className="h-5 w-5" /> LinkedIn API setup</CardTitle>
+          <CardDescription>Credentials are read only by the server from Supabase Edge Function secrets. Add them later without changing this page; never paste the client secret into a browser form.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border p-3">
+              <p className="text-sm font-medium">Client ID</p>
+              <Badge variant={linkedinConfig?.clientIdConfigured ? "default" : "secondary"} className="mt-2">{linkedinConfig ? (linkedinConfig.clientIdConfigured ? "Configured" : "Add later") : "Checking…"}</Badge>
+              <p className="mt-2 text-xs text-muted-foreground">Supabase secret: <code>LINKEDIN_CLIENT_ID</code></p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-sm font-medium">Primary Client Secret</p>
+              <Badge variant={linkedinConfig?.clientSecretConfigured ? "default" : "secondary"} className="mt-2">{linkedinConfig ? (linkedinConfig.clientSecretConfigured ? "Configured" : "Add later") : "Checking…"}</Badge>
+              <p className="mt-2 text-xs text-muted-foreground">Supabase secret: <code>LINKEDIN_CLIENT_SECRET</code></p>
+            </div>
+          </div>
+          <div className="rounded-lg bg-muted/50 p-3 text-sm">
+            <p className="font-medium">OAuth callback URL</p>
+            <code className="mt-1 block break-all text-xs">{linkedinConfig?.redirectUri || "https://YOUR_PROJECT.supabase.co/functions/v1/social-oauth/callback"}</code>
+            <p className="mt-2 text-xs text-muted-foreground">Register this exact URL in your LinkedIn Developer app. Required scopes: <code>openid profile w_member_social</code>.</p>
+          </div>
+          {linkedinConfig && (!linkedinConfig.clientIdConfigured || !linkedinConfig.clientSecretConfigured) && (
+            <p className="text-sm text-muted-foreground">LinkedIn connection will remain unavailable until both Supabase secrets are added and the OAuth callback URL is registered in LinkedIn Developer settings.</p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-5">
         {platforms.map(({ id, label, icon: Icon }) => {
