@@ -16,6 +16,10 @@ export interface SubscriptionGate {
   canAccessPremiumSignals: boolean;
   canAccessSportsBetting: boolean;
   canAccessAllCourses: boolean;
+  canAccessSignalsCenter: boolean;
+  canUploadAiCharts: boolean;
+  canAccessTradingHubs: boolean;
+  canAccessLegacyBots: boolean;
   maxAccounts: number;
   maxBotInstances: number;
   isLoading: boolean;
@@ -64,6 +68,7 @@ export function useSubscriptionGate(): SubscriptionGate {
       isPaid: true, isBasicOrAbove: true, isStandardOrAbove: true, isVIP: true,
       canCopyTrade: true, canUsePremiumBots: true, canBeProvider: true,
       canAccessPremiumSignals: true, canAccessSportsBetting: true, canAccessAllCourses: true,
+      canAccessSignalsCenter: true, canUploadAiCharts: true, canAccessTradingHubs: true, canAccessLegacyBots: true,
       maxAccounts: 99, maxBotInstances: 99, isLoading: false,
     };
   }
@@ -81,6 +86,10 @@ export function useSubscriptionGate(): SubscriptionGate {
     canAccessPremiumSignals: plan?.allow_premium_signals ?? false,
     canAccessSportsBetting: plan?.allow_sports_betting ?? false,
     canAccessAllCourses: plan?.allow_all_courses ?? false,
+    canAccessSignalsCenter: plan?.allow_signals_center ?? true,
+    canUploadAiCharts: plan?.allow_ai_chart_upload ?? plan?.allow_premium_signals ?? false,
+    canAccessTradingHubs: plan?.allow_trading_hubs ?? true,
+    canAccessLegacyBots: plan?.allow_legacy_bots ?? false,
     maxAccounts: plan?.max_accounts ?? 1,
     maxBotInstances: plan?.max_bot_instances ?? 0,
     isLoading,
