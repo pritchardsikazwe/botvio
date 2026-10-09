@@ -389,7 +389,8 @@ const Dashboard = () => {
           { path: "/bots", icon: Bot, label: "Activate Bot" },
           { path: "/copy-trading", icon: Users, label: "Copy Traders" },
           ...(myProvider ? [{ path: "/provider-dashboard", icon: TrendingUp, label: "Provider Panel" }] : []),
-        ].filter(action => !isRestrictedOnStore(action.path)).map(({ path, icon: Icon, label }) => <Button key={path} variant="outline" className="h-auto py-3 flex-col" asChild><Link to={path}><Icon className="h-6 w-6 mb-2" /><span>{label}</span></Link></Button>)}</div>\n    </main>
+        ].filter(action => !isRestrictedOnStore(action.path)).map(({ path, icon: Icon, label }) => <Button key={path} variant="outline" className="h-auto py-3 flex-col" asChild><Link to={path}><Icon className="h-6 w-6 mb-2" /><span>{label}</span></Link></Button>)}</div>
+    </main>
     </div>
   );
 };
