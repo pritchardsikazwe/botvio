@@ -104,7 +104,15 @@ export const AdminTradeCopyTab = () => {
       // A stale admin page can hold an account row that was already removed.
       // Refresh the center immediately instead of leaving a dead row/actions on screen.
       refresh();
-      toast.error(e.code === "not_found" ? "That MT5 account no longer exists in Botvio. The list has been refreshed." : e.message);
+      const missingAccount = e.code === "not_found" && /account not found/i.test(e.message);
+      const missingCreds = /credentials missing/i.test(e.message);
+      toast.error(
+        missingAccount
+          ? "That MT5 account no longer exists in Botvio. The list has been refreshed."
+          : missingCreds
+            ? "This MT5 account's saved password is missing. Reconnect it with its MT5 login, trader password and server, then promote again."
+            : e.message,
+      );
     },
   });
 
