@@ -221,6 +221,34 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       return { data: { adapterMode: adapter.mode, liveEnabled: await globalLiveEnabled(ctx), platform: adapter.platform } };
     }
 
+    case "disconnect_registration": {
+      // Unregister the account from TradeCopy (follower or master) WITHOUT
+      // deleting Botvio's local row, so it can be re-registered in another role.
+      const acct = await loadAccount(ctx, String(body.account_id), { allowAdmin: true });
+      if (acct.tradecopy_active) {
+        throw new TradeCopyError("Deactivate copying before disconnecting this MT5 account", "validation");
+      }
+      if (!acct.tradecopy_user_id) {
+        return { data: { disconnected: true, alreadyDisconnected: true }, accountId: acct.id };
+      }
+      if (acct.account_role === "master") {
+        await adapter.deactivateMaster(acct.tradecopy_user_id).catch(() => null);
+        await adapter.removeSource(acct.tradecopy_user_id).catch(() => null);
+      } else {
+        await adapter.deactivateFollower(acct.tradecopy_user_id).catch(() => null);
+        await adapter.unfollow(acct.tradecopy_user_id).catch(() => null);
+      }
+      await admin.from("copy_relationships").delete()
+        .or(`follower_account_id.eq.${acct.id},master_account_id.eq.${acct.id}`);
+      // Keep tradecopy_credentials: the stored password is needed to re-register
+      // the account in its new role.
+      const { error: upErr } = await admin.from("trading_accounts")
+        .update({ tradecopy_user_id: null, tradecopy_active: false })
+        .eq("id", acct.id);
+      if (upErr) throw new TradeCopyError(upErr.message, "validation");
+      return { data: { disconnected: true }, accountId: acct.id };
+    }
+
     case "connect_master": {
       const creds = Creds.parse(body);
       const asRobot = body.botvio_robot === true;
