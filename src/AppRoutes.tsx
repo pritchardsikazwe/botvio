@@ -251,19 +251,19 @@ export const AppRoutes = () => {
     <Route path="apps/synthetic-robot" element={<StandaloneApp appId="synthetic-robot" />} />
     <Route path="apps/weltrade-robot" element={<StandaloneApp appId="weltrade-robot" />} />
     <Route path="apps/deriv-copy" element={<StandaloneApp appId="deriv-copy" />} />
-    <Route path="dashboard" element={<BotvioRobotDashboard />} />
+    <Route path="dashboard" element={<Paid><BotvioRobotDashboard /></Paid>} />
     <Route path="accounts" element={<Navigate to="/connections" replace />} />
-    <Route path="connections" element={<Connections />} />
+    <Route path="connections" element={<Paid><Connections /></Paid>} />
     <Route path="bridge-request" element={<Navigate to="/connections" replace />} />
-    <Route path="trade-history" element={<TradeHistory />} />
+    <Route path="trade-history" element={<Paid><TradeHistory /></Paid>} />
     <Route path="providers" element={<Navigate to="/copy-trading" replace />} />
     <Route path="copy-trading" element={<CopyMarketplace />} />
     <Route path="copy-trading/provider/:providerId" element={<CopyProviderProfile />} />
-    <Route path="copy-trading/start/:providerId" element={<CopyStart />} />
-    <Route path="copy-trading/onboarding" element={<CopyTradingOnboarding />} />
-    <Route path="copy-trading/my" element={<FollowerDashboard />} />
-    <Route path="copy-trading/become-provider" element={<BecomeProvider />} />
-    <Route path="provider-dashboard" element={<ProviderCommandCenter />} />
+    <Route path="copy-trading/start/:providerId" element={<Paid><CopyStart /></Paid>} />
+    <Route path="copy-trading/onboarding" element={<Paid><CopyTradingOnboarding /></Paid>} />
+    <Route path="copy-trading/my" element={<Paid><FollowerDashboard /></Paid>} />
+    <Route path="copy-trading/become-provider" element={<Paid><BecomeProvider /></Paid>} />
+    <Route path="provider-dashboard" element={<Paid><ProviderCommandCenter /></Paid>} />
     <Route path="botvio-robot" element={<Navigate to="/dashboard" replace />} />
     <Route path="bots" element={<Paid><Bots /></Paid>} />
     <Route path="billing" element={<Navigate to="/marketplace" replace />} />
@@ -291,10 +291,10 @@ export const AppRoutes = () => {
     <Route path="track-record" element={<Paid><SignalsHistory /></Paid>} />
     <Route path="marketplace" element={<Marketplace />} />
     <Route path="vip" element={<BotvioVIP />} />
-    <Route path="my-products" element={<MyProducts />} />
-    <Route path="settings" element={<Settings />} />
+    <Route path="my-products" element={<Paid><MyProducts /></Paid>} />
+    <Route path="settings" element={<Paid><Settings /></Paid>} />
     <Route path="account/delete" element={<AccountClosure />} />
-    <Route path="settings/binance" element={<BinanceSettings />} />
+    <Route path="settings/binance" element={<Paid><BinanceSettings /></Paid>} />
     <Route path="settings/deriv-otp" element={<ErrorBoundary><RequireSuperAdmin><DerivOtpTester /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="binance" element={<Paid><BinanceHub /></Paid>} />
     <Route path="bots/binance" element={<Navigate to="/binance" replace />} />
@@ -385,7 +385,7 @@ export const AppRoutes = () => {
 
     {/* Current Weltrade Hub is the canonical SyntX workspace. Legacy Weltrade pages redirect here. */}
     <Route path="weltrade" element={<Paid><WeltradeHub /></Paid>} />
-    <Route path="weltrade/signals" element={<WeltradeSyntxPage />} />
+    <Route path="weltrade/signals" element={<Paid><WeltradeSyntxPage /></Paid>} />
     {/* Canonical SEO URLs use compact slugs such as /weltrade/gainx600 and /weltrade/flipx1. */}
     <Route path="weltrade/:symbol" element={<WeltradeSyntxPage />} />
     <Route path="weltrade/synthetic" element={<Navigate to="/weltrade" replace />} />
@@ -417,7 +417,7 @@ export const AppRoutes = () => {
     <Route path="markets/crypto" element={<CryptoMarket />} />
     <Route path="markets/africa" element={<AfricaMarket />} />
     <Route path="trade-modes" element={<Navigate to="/options" replace />} />
-    <Route path="deriv/options" element={<DerivOptionsTerminalPage />} />
+    <Route path="deriv/options" element={<Paid><DerivOptionsTerminalPage /></Paid>} />
     <Route path="deriv-options-terminal" element={<Navigate to="/deriv/options" replace />} />
     <Route path="deriv-options" element={<Navigate to="/options" replace />} />
     <Route path="deriv-app" element={<Navigate to="/options" replace />} />

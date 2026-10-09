@@ -22,6 +22,51 @@ import { AdapterModeNotice, EnvBadge, StatusBadge } from "./ModeBadges";
 
 const ROBOT = "__botvio_robot__";
 
+/** Live open positions from the authenticated TradeCopy API; refreshes every 10 seconds. */
+function AccountOpenTrades({ account }: { account: TcAccount }) {
+  const query = useQuery({
+    queryKey: ["tradecopy", "user-open-trades", account.id],
+    enabled: !!account.tradecopy_user_id,
+    queryFn: async () => {
+      const { tradecopy } = await import("@/hooks/useTradeCopy");
+      return tradecopy<{ orders: Record<string, unknown>[] }>("open_orders", { account_id: account.id });
+    },
+    refetchInterval: (q) => q.state.error ? false : 10_000,
+    staleTime: 5_000,
+    retry: false,
+  });
+  const orders = query.data?.orders ?? [];
+  const price = (value: unknown) => value == null || !Number.isFinite(Number(value)) ? "—" : Number(value).toFixed(2);
+  return (
+    <div className="rounded-xl border border-border/50 p-3">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <div className="text-sm font-semibold">{account.label || account.broker || "MT5 account"}</div>
+        <span className="text-xs text-muted-foreground">{query.isLoading ? "Loading live positions…" : query.isError ? "Could not load positions" : orders.length + " open trade" + (orders.length === 1 ? "" : "s")}</span>
+      </div>
+      {query.isError ? (
+        <div className="text-xs text-destructive">Open trades are temporarily unavailable. <Button size="sm" variant="outline" onClick={() => query.refetch()}>Retry</Button></div>
+      ) : orders.length === 0 && !query.isLoading ? (
+        <p className="py-3 text-center text-xs text-muted-foreground">No open trades reported for this account.</p>
+      ) : (
+        <div className="space-y-2">
+          {orders.map((order, index) => {
+            const side = String(order.side ?? order.type ?? order.action ?? "—").toUpperCase();
+            const pnl = order.profit ?? order.pnl ?? order.profit_loss;
+            return (
+              <div key={String(order.ticket ?? order.order_id ?? order.id ?? index)} className="grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg bg-muted/30 p-3 text-xs sm:grid-cols-4">
+                <div><span className="text-muted-foreground">Symbol</span><p className="font-semibold">{String(order.symbol ?? order.symbol_name ?? "—")}</p></div>
+                <div><span className="text-muted-foreground">Side / lot</span><p className="font-semibold">{side} · {String(order.lots ?? order.volume ?? order.lot ?? "—")}</p></div>
+                <div><span className="text-muted-foreground">Entry / current</span><p className="font-semibold">{price(order.openPrice ?? order.open_price ?? order.price_open ?? order.entry_price)} / {price(order.currentPrice ?? order.current_price ?? order.price_current)}</p></div>
+                <div><span className="text-muted-foreground">Floating P/L</span><p className={"font-semibold " + (pnl == null ? "text-muted-foreground" : Number(pnl) >= 0 ? "text-success" : "text-destructive")}>{price(pnl)}</p></div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LinkProvider({ accounts }: { accounts: TcAccount[] }) {
   const { user } = useAuth();
   const act = useTradeCopyAction();
@@ -154,9 +199,9 @@ function FollowerSignalPreferences({ followerAccountId }: { followerAccountId: s
   return (
     <div className="space-y-3 rounded-xl border border-border/50 p-4">
       <div>
-        <div className="font-semibold">Signals I want to copy</div>
+        <div className="font-semibold">Choose markets for Botvio signal delivery</div>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Choose the markets this follower is allowed to receive from Botvio. “All markets” keeps the default.
+          Choose the symbols Botvio-managed signal delivery may send to this MT5 account. “All markets” keeps the default.
         </p>
       </div>
 
@@ -291,9 +336,9 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
       </details>
 
       <div className="flex flex-wrap gap-2 border-t border-border/50 pt-3">
-        <Button onClick={() => setStatus("active")} disabled={act.isPending || rel.status === "active"}><Play className="mr-2 h-4 w-4" />Start Copying</Button>
-        <Button variant="outline" onClick={() => setStatus("paused")} disabled={act.isPending || rel.status !== "active"}><Pause className="mr-2 h-4 w-4" />Pause</Button>
-        <Button variant="outline" onClick={() => setStatus("stopped")} disabled={act.isPending}><Square className="mr-2 h-4 w-4" />Stop</Button>
+        <Button onClick={() => setStatus("active")} disabled={act.isPending || rel.status === "active"}><Play className="mr-2 h-4 w-4" />{rel.is_botvio_robot ? "Enable Auto Trading" : "Start Copying"}</Button>
+        <Button variant="outline" onClick={() => setStatus("paused")} disabled={act.isPending || rel.status !== "active"}><Pause className="mr-2 h-4 w-4" />{rel.is_botvio_robot ? "Pause Auto Trading" : "Pause"}</Button>
+        <Button variant="outline" onClick={() => setStatus("stopped")} disabled={act.isPending}><Square className="mr-2 h-4 w-4" />{rel.is_botvio_robot ? "Disable Auto Trading" : "Stop"}</Button>
         <Button variant="destructive" onClick={emergency} disabled={act.isPending}><OctagonX className="mr-2 h-4 w-4" />Emergency stop</Button>
         {account && <DiagnosticButton accountId={account.id} disabled={!account.tradecopy_user_id} />}
       </div>
@@ -388,22 +433,31 @@ export function FollowerTradeCopyPanel() {
               </div>
             </div>
 
-            {accounts.data?.[0]?.tradecopy_user_id ? (
-              <div className="overflow-hidden rounded-xl border border-border/60 bg-background">
-                <iframe
-                  title="Botvio Robot trade activity"
-                  src={`https://tradecopy.online/profile/order-history/slave/${accounts.data[0].tradecopy_user_id}/server_1`}
-                  className="h-[520px] w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
-              </div>
+            {accounts.data?.some((a) => !!a.tradecopy_user_id) ? (
+              <section className="space-y-3">
+                <div>
+                  <Label>Open trades · live</Label>
+                  <p className="mt-1 text-xs text-muted-foreground">Positions currently reported by TradeCopy. This list refreshes automatically every 10 seconds.</p>
+                </div>
+                {accounts.data.filter((a) => !!a.tradecopy_user_id).map((account) => <AccountOpenTrades key={account.id} account={account} />)}
+                <details className="rounded-xl border border-border/50">
+                  <summary className="cursor-pointer p-3 text-sm font-semibold">TradeCopy order history · closed and past orders</summary>
+                  <div className="overflow-hidden border-t border-border/50 bg-background">
+                    <iframe
+                      title="Botvio Robot trade history"
+                      src={`https://tradecopy.online/profile/order-history/slave/${accounts.data.find((a) => !!a.tradecopy_user_id)!.tradecopy_user_id}/server_1`}
+                      className="h-[520px] w-full border-0"
+                      loading="lazy"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                    />
+                  </div>
+                </details>
+              </section>
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-                Connect your MT5 account to display Botvio Robot activity.
+                Connect your MT5 account to display live trades and order history.
               </div>
             )}
-
             <div className="space-y-2">
               <Label>Recent Botvio execution events</Label>
             {events.data?.length === 0 && <p className="text-xs text-muted-foreground">No copied trades yet.</p>}

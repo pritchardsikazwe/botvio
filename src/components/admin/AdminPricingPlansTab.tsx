@@ -26,6 +26,7 @@ interface PricingPlan {
   allow_premium_signals: boolean | null;
   allow_sports_betting: boolean | null;
   allow_all_courses: boolean | null;
+  allow_ai_chart_upload: boolean | null;
   is_active: boolean | null;
   created_at: string;
 }
@@ -49,6 +50,7 @@ export const AdminPricingPlansTab = () => {
     allow_premium_signals: false,
     allow_sports_betting: false,
     allow_all_courses: false,
+    allow_ai_chart_upload: false,
     is_active: true,
   });
 
@@ -135,6 +137,7 @@ export const AdminPricingPlansTab = () => {
       allow_premium_signals: false,
       allow_sports_betting: false,
       allow_all_courses: false,
+      allow_ai_chart_upload: false,
       is_active: true,
     });
     setEditDialog({ open: true, plan: null });
@@ -154,6 +157,7 @@ export const AdminPricingPlansTab = () => {
       allow_premium_signals: plan.allow_premium_signals || false,
       allow_sports_betting: plan.allow_sports_betting || false,
       allow_all_courses: plan.allow_all_courses || false,
+      allow_ai_chart_upload: plan.allow_ai_chart_upload || false,
       is_active: plan.is_active !== false,
     });
     setEditDialog({ open: true, plan });
@@ -247,6 +251,9 @@ export const AdminPricingPlansTab = () => {
                         )}
                         {plan.allow_all_courses && (
                           <Badge variant="outline" className="text-xs bg-success/10">Courses</Badge>
+                        )}
+                        {plan.allow_ai_chart_upload && (
+                          <Badge variant="outline" className="text-xs bg-primary/10">AI Chart Upload</Badge>
                         )}
                       </div>
                     </TableCell>
@@ -433,6 +440,17 @@ export const AdminPricingPlansTab = () => {
                     onCheckedChange={(checked) =>
                       setFormData({ ...formData, allow_all_courses: checked })
                     }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="allow_ai_chart_upload" className="font-normal">Allow AI Chart Upload</Label>
+                    <p className="text-xs text-muted-foreground">Controls whether this subscription includes AI chart analysis; upload limits are configured separately.</p>
+                  </div>
+                  <Switch
+                    id="allow_ai_chart_upload"
+                    checked={formData.allow_ai_chart_upload}
+                    onCheckedChange={(checked) => setFormData({ ...formData, allow_ai_chart_upload: checked })}
                   />
                 </div>
                 <div className="flex items-center justify-between">

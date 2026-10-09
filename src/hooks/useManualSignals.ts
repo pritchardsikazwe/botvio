@@ -111,7 +111,7 @@ export const useManualSignals = (filters?: {
 
       // Apply status filter
       if (filters?.status && filters.status !== "all") {
-        signals = signals.filter(s => s.status === filters.status);
+        signals = filters.status === "CLOSED" ? signals.filter(s => s.status === "CLOSED" || s.status === "EXPIRED") : signals.filter(s => s.status === filters.status);
       }
 
       // Apply broker filter

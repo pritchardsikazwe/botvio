@@ -258,8 +258,22 @@ const Signals = () => {
           )}
 
           <TabsContent value="signals" className="mt-6">
-            {/* Quick Direction Chips */}
-            <div className="flex flex-wrap items-center gap-2 mb-4">
+            {/* Compact mobile filters: status + market */}
+            <div className="mb-4 space-y-3 sm:hidden">
+              <div className="grid grid-cols-3 gap-2" aria-label="Filter signals by status">
+                {[{ value: "ACTIVE", label: "Open" }, { value: "CLOSED", label: "Closed" }, { value: "all", label: "All" }].map((item) => (
+                  <Button key={item.value} size="sm" variant={status === item.value ? "default" : "outline"} className="w-full rounded-full" onClick={() => setStatus(item.value)}>{item.label}</Button>
+                ))}
+              </div>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger aria-label="Filter signals by market"><SelectValue placeholder="Choose market" /></SelectTrigger>
+                <SelectContent>{CATEGORIES.map((cat) => <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>)}</SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{activeCount} open signal{activeCount === 1 ? "" : "s"} in this view</p>
+            </div>
+
+            {/* Full quick filters remain available on tablet and desktop */}
+            <div className="hidden sm:flex flex-wrap items-center gap-2 mb-4">
               <Button
                 size="sm"
                 variant={direction === "all" ? "default" : "outline"}

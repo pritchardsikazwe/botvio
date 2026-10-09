@@ -12,20 +12,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-
-const productDestination = (slug?: string) => {
-  switch (slug) {
-    case "synthetic-hub": return "/synthetic-hub";
-    case "weltrade-hub": return "/weltrade";
-    case "mt5-direct":
-    case "mt5-direct-signals": return "/connections";
-    case "botvio-gold-robot": return "/apps/gold-robot";
-    case "botvio-synthetic-robot": return "/apps/synthetic-robot";
-    case "botvio-ai-robot":
-    case "botvio-robot": return "/dashboard";
-    default: return "/marketplace";
-  }
-};
+import { getProductDestination } from "@/lib/productDestination";
 
 const MyProducts = () => {
   const { user } = useAuth();
@@ -108,7 +95,7 @@ const MyProducts = () => {
         ) : filtered && filtered.length > 0 ? (
           <div className="space-y-4">
             {filtered.map((ent) => (
-              <Link key={ent.id} to={productDestination(ent.products?.slug)} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><Card className="glass-card transition-colors hover:border-primary/40">
+              <Link key={ent.id} to={getProductDestination(ent.products?.slug, ent.products?.type)} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><Card className="glass-card transition-colors hover:border-primary/40">
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">

@@ -65,8 +65,16 @@ export const BOTVIO_FOLLOWER_MARKETS = [
   { symbol: "USDCAD", label: "USDCAD", group: "Forex" },
   { symbol: "BTCUSD", label: "BTCUSD", group: "Crypto" },
   { symbol: "ETHUSD", label: "ETHUSD", group: "Crypto" },
+  { symbol: "SOLUSD", label: "SOLUSD", group: "Crypto" },
+  { symbol: "XRPUSD", label: "XRPUSD", group: "Crypto" },
   { symbol: "US30", label: "US30", group: "Indices" },
   { symbol: "NAS100", label: "NAS100", group: "Indices" },
+  { symbol: "Volatility 75 Index", label: "Volatility 75 Index", group: "Synthetic" },
+  { symbol: "Volatility 100 Index", label: "Volatility 100 Index", group: "Synthetic" },
+  { symbol: "Volatility 50 Index", label: "Volatility 50 Index", group: "Synthetic" },
+  { symbol: "Boom 1000 Index", label: "Boom 1000 Index", group: "Synthetic" },
+  { symbol: "Crash 1000 Index", label: "Crash 1000 Index", group: "Synthetic" },
+  { symbol: "Step Index", label: "Step Index", group: "Synthetic" },
 ] as const;
 
 export interface FollowerSignalPreferences {

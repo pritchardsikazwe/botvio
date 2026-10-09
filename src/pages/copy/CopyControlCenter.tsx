@@ -20,6 +20,7 @@ import { useTradeCopyAccounts, tradecopy } from "@/hooks/useTradeCopy";
 import { CopyTradingRoleGuide } from "@/components/tradecopy/CopyTradingRoleGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getProductDestination } from "@/lib/productDestination";
 
 const money = (value: number) => `${value >= 0 ? "+" : "-"}$${Math.abs(value).toFixed(2)}`;
 
@@ -212,7 +213,7 @@ export const BotvioRobotDashboard = () => {
   }
 
   return <TradingOverview
-    access={activeEntitlements.map(item => ({ id: item.id, name: item.products?.name ?? "Active product", slug: item.products?.slug, endsAt: item.ends_at, href: item.products?.slug === "synthetic-hub" ? "/synthetic" : item.products?.slug === "weltrade-hub" ? "/weltrade" : item.products?.slug === "mt5-direct" ? "/connections" : "/botvio-robot" }))}
+    access={activeEntitlements.map(item => ({ id: item.id, name: item.products?.name ?? "Active product", slug: item.products?.slug, endsAt: item.ends_at, href: getProductDestination(item.products?.slug, item.products?.type) }))}
     accounts={(tradingAccounts ?? []) as unknown as import("@/components/dashboard/TradingOverview").OverviewAccount[]}
     positions={positions}
     accessLoading={entitlementsLoading} accountsLoading={tradingAccountsLoading} positionLoading={positionLoading}
