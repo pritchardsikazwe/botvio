@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Users, Eye, Clock3, MousePointerClick, TrendingUp, Smartphone, Globe2, Filter as Funnel } from "lucide-react";
+import { RefreshCw, Users, Eye, Clock3, MousePointerClick, TrendingUp, Globe2, Filter as Funnel } from "lucide-react";
 
 type Summary={visitors:number;sessions:number;page_views:number;avg_pages_per_session:number;avg_session_seconds:number;registered_countries:{country:string;users:number}[];top_pages:{path:string;visits:number}[];sources:{source:string;visits:number}[];devices:{device:string;visits:number}[];funnel:Record<string,number>};
 
@@ -28,6 +28,9 @@ export function AdminAnalyticsPanel(){
    (profiles||[]).forEach((p:any)=>{const key=String(p.country).trim();if(key)counts[key]=(counts[key]||0)+1;});
    setCountries(Object.entries(counts).map(([country,users])=>({country,users})).sort((a,b)=>b.users-a.users).slice(0,10));
   } catch(e:any) {
+   setData(null);
+   setLive([]);
+   setCountries([]);
    console.error("Admin analytics failed to load",e);
    toast.error(e?.message||"Analytics could not be loaded. Check the analytics RPC and table permissions.");
   } finally {
