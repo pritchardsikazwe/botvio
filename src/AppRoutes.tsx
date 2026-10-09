@@ -39,6 +39,7 @@ import SignalsHistory from "./pages/SignalsHistory";
 import Settings from "./pages/Settings";
 import DerivOtpTester from "./pages/DerivOtpTester";
 import Marketplace from "./pages/Marketplace";
+import BotvioVIP from "./pages/BotvioVIP";
 import MyProducts from "./pages/MyProducts";
 import BinanceSettings from "./pages/BinanceSettings";
 import BinanceHub from "./pages/BinanceHub";
@@ -289,6 +290,7 @@ export const AppRoutes = () => {
     <Route path="signals-history" element={<Paid><SignalsHistory /></Paid>} />
     <Route path="track-record" element={<Paid><SignalsHistory /></Paid>} />
     <Route path="marketplace" element={<Marketplace />} />
+    <Route path="vip" element={<BotvioVIP />} />
     <Route path="my-products" element={<MyProducts />} />
     <Route path="settings" element={<Settings />} />
     <Route path="account/delete" element={<AccountClosure />} />
