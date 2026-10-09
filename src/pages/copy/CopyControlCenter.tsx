@@ -14,7 +14,6 @@ import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { useMyCopySubscriptions, useMyCopiedTrades, useTradingAccounts } from "@/hooks/useBotvio";
 import { useEntitlements, isEntitlementActive } from "@/hooks/useEntitlements";
 import { useTradeCopyAccounts, tradecopy } from "@/hooks/useTradeCopy";
-import { useAuth } from "@/contexts/AuthContext";
 import { CopyTradingRoleGuide } from "@/components/tradecopy/CopyTradingRoleGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
