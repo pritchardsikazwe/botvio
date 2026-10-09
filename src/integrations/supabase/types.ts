@@ -3113,6 +3113,44 @@ export type Database = {
           },
         ]
       }
+      follower_signal_preferences: {
+        Row: {
+          allowed_symbols: string[]
+          created_at: string
+          id: string
+          mode: string
+          trading_account_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allowed_symbols?: string[]
+          created_at?: string
+          id?: string
+          mode?: string
+          trading_account_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allowed_symbols?: string[]
+          created_at?: string
+          id?: string
+          mode?: string
+          trading_account_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follower_signal_preferences_trading_account_id_fkey"
+            columns: ["trading_account_id"]
+            isOneToOne: true
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_comments: {
         Row: {
           body: string

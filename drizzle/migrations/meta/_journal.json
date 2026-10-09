@@ -71,6 +71,13 @@
       "when": 1791527156506,
       "tag": "0009_schedule_deriv_synthetic_signals",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791542201777,
+      "tag": "0010_follower_signal_preferences",
+      "breakpoints": true
     }
   ]
 }
