@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Match the Botvio user dashboard to the supplied dark overview reference; preserve account/auth/trading behavior and verify the appearance.
+
 - [x] Deploy repairs to the existing five-minute Weltrade maker: prioritize GainX/PainX/FlipX, validate sessions, match broker symbols/time, use closed candles and correct timeframe metadata; preserve Home and MT5 routes.
 - [ ] Confirm scheduled Weltrade publication and MT5 orders (blocked: 09:25 run returned no broker symbols; Weltrade provider copying remains inactive). No successful signal or trade claimed.
 
