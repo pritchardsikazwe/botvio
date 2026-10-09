@@ -199,9 +199,9 @@ function FollowerSignalPreferences({ followerAccountId }: { followerAccountId: s
   return (
     <div className="space-y-3 rounded-xl border border-border/50 p-4">
       <div>
-        <div className="font-semibold">Signals I want to copy</div>
+        <div className="font-semibold">Choose markets for Botvio signal delivery</div>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Choose the markets this follower is allowed to receive from Botvio. “All markets” keeps the default.
+          Choose the symbols Botvio-managed signal delivery may send to this MT5 account. “All markets” keeps the default.
         </p>
       </div>
 
@@ -336,9 +336,9 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
       </details>
 
       <div className="flex flex-wrap gap-2 border-t border-border/50 pt-3">
-        <Button onClick={() => setStatus("active")} disabled={act.isPending || rel.status === "active"}><Play className="mr-2 h-4 w-4" />Start Copying</Button>
-        <Button variant="outline" onClick={() => setStatus("paused")} disabled={act.isPending || rel.status !== "active"}><Pause className="mr-2 h-4 w-4" />Pause</Button>
-        <Button variant="outline" onClick={() => setStatus("stopped")} disabled={act.isPending}><Square className="mr-2 h-4 w-4" />Stop</Button>
+        <Button onClick={() => setStatus("active")} disabled={act.isPending || rel.status === "active"}><Play className="mr-2 h-4 w-4" />{rel.is_botvio_robot ? "Enable Auto Trading" : "Start Copying"}</Button>
+        <Button variant="outline" onClick={() => setStatus("paused")} disabled={act.isPending || rel.status !== "active"}><Pause className="mr-2 h-4 w-4" />{rel.is_botvio_robot ? "Pause Auto Trading" : "Pause"}</Button>
+        <Button variant="outline" onClick={() => setStatus("stopped")} disabled={act.isPending}><Square className="mr-2 h-4 w-4" />{rel.is_botvio_robot ? "Disable Auto Trading" : "Stop"}</Button>
         <Button variant="destructive" onClick={emergency} disabled={act.isPending}><OctagonX className="mr-2 h-4 w-4" />Emergency stop</Button>
         {account && <DiagnosticButton accountId={account.id} disabled={!account.tradecopy_user_id} />}
       </div>
