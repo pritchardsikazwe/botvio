@@ -106,7 +106,7 @@ export const SubscriptionRequestsTab = () => {
           plan_name: plans?.find(p => p.id === r.plan_id)?.name,
           plan_code: plans?.find(p => p.id === r.plan_id)?.code,
           current_price_usd: plans?.find(p => p.id === r.plan_id)?.price_usd ?? null,
-          plan_active: plans?.find(p => p.id === r.plan_id)?.is_active !== false,
+          plan_active: !!plans?.find(p => p.id === r.plan_id) && plans?.find(p => p.id === r.plan_id)?.is_active !== false,
           profile: profiles?.find(p => p.user_id === r.user_id) || undefined,
         })),
         ...payReqs.map(r => ({
@@ -123,7 +123,7 @@ export const SubscriptionRequestsTab = () => {
           plan_name: plans?.find(p => p.id === r.plan_id)?.name,
           plan_code: plans?.find(p => p.id === r.plan_id)?.code,
           current_price_usd: plans?.find(p => p.id === r.plan_id)?.price_usd ?? null,
-          plan_active: plans?.find(p => p.id === r.plan_id)?.is_active !== false,
+          plan_active: !!plans?.find(p => p.id === r.plan_id) && plans?.find(p => p.id === r.plan_id)?.is_active !== false,
           profile: profiles?.find(p => p.user_id === r.user_id) || undefined,
         })),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
