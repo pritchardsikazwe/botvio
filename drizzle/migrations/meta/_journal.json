@@ -64,6 +64,13 @@
       "when": 1791284968079,
       "tag": "0008_wake_signal_master_delivery",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791527156506,
+      "tag": "0009_schedule_deriv_synthetic_signals",
+      "breakpoints": true
     }
   ]
 }
