@@ -61,7 +61,7 @@ jobs:
           ls -la dist | head -30
 
       - name: Add Capacitor Android
-        run: npx cap add android --no-interactive
+        run: npx cap add android
 
       - name: Verify Capacitor project
         run: |
