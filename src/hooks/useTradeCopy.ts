@@ -120,7 +120,7 @@ export function useSaveFollowerSignalPreferences() {
         .select("id,user_id,trading_account_id,mode,allowed_symbols,updated_at,created_at")
         .single();
       if (error) throw error;
-      return data as FollowerSignalPreferences;
+      return data as unknown as FollowerSignalPreferences;
     },
     onSuccess: (_data, input) => {
       qc.invalidateQueries({ queryKey: ["tradecopy", "signal-preferences", input.tradingAccountId] });
