@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Users, Eye, Clock3, MousePointerClick, TrendingUp, Smartphone, Globe2, Filter as Funnel } from "lucide-react";
+import { RefreshCw, Users, Eye, Clock3, MousePointerClick, TrendingUp, Globe2, Filter as Funnel } from "lucide-react";
 
 type Summary={visitors:number;sessions:number;page_views:number;avg_pages_per_session:number;avg_session_seconds:number;registered_countries:{country:string;users:number}[];top_pages:{path:string;visits:number}[];sources:{source:string;visits:number}[];devices:{device:string;visits:number}[];funnel:Record<string,number>};
 
@@ -11,7 +12,31 @@ const labels:Record<string,string>={market_open:"Market opens",signal_view:"Sign
 
 export function AdminAnalyticsPanel(){
  const [days,setDays]=useState(30); const [data,setData]=useState<Summary|null>(null); const [live,setLive]=useState<any[]>([]); const [countries,setCountries]=useState<{country:string;users:number}[]>([]); const [loading,setLoading]=useState(true);
- const load=async()=>{setLoading(true); const {data,error}=await (supabase as any).rpc("admin_analytics_summary",{p_days:days}); if(!error)setData(data as Summary); const cutoff=new Date(Date.now()-90000).toISOString(); const {data:presence}=await (supabase as any).from("user_presence").select("user_id,last_seen_at,current_path,device_type").gte("last_seen_at",cutoff).order("last_seen_at",{ascending:false}).limit(20); if(presence)setLive(presence); const {data:profiles}=await (supabase as any).from("profiles").select("country").not("country","is",null).neq("country",""); const counts:Record<string,number>={}; (profiles||[]).forEach((p:any)=>{const key=String(p.country).trim(); if(key) counts[key]=(counts[key]||0)+1;}); setCountries(Object.entries(counts).map(([country,users])=>({country,users})).sort((a,b)=>b.users-a.users).slice(0,10)); setLoading(false);};
+ const load=async()=>{
+  setLoading(true);
+  try {
+   const {data:summary,error:summaryError}=await (supabase as any).rpc("admin_analytics_summary",{p_days:days});
+   if(summaryError) throw summaryError;
+   setData(summary as Summary);
+   const cutoff=new Date(Date.now()-90000).toISOString();
+   const {data:presence,error:presenceError}=await (supabase as any).from("user_presence").select("user_id,last_seen_at,current_path,device_type").gte("last_seen_at",cutoff).order("last_seen_at",{ascending:false}).limit(20);
+   if(presenceError) throw presenceError;
+   setLive(presence||[]);
+   const {data:profiles,error:profilesError}=await (supabase as any).from("profiles").select("country").not("country","is",null).neq("country","");
+   if(profilesError) throw profilesError;
+   const counts:Record<string,number>={};
+   (profiles||[]).forEach((p:any)=>{const key=String(p.country).trim();if(key)counts[key]=(counts[key]||0)+1;});
+   setCountries(Object.entries(counts).map(([country,users])=>({country,users})).sort((a,b)=>b.users-a.users).slice(0,10));
+  } catch(e:any) {
+   setData(null);
+   setLive([]);
+   setCountries([]);
+   console.error("Admin analytics failed to load",e);
+   toast.error(e?.message||"Analytics could not be loaded. Check the analytics RPC and table permissions.");
+  } finally {
+   setLoading(false);
+  }
+ }
  useEffect(()=>{load()},[days]);
  const Stat=({title,value,icon:Icon,sub}:{title:string;value:string|number;icon:any;sub?:string})=><Card><CardContent className="p-4 flex items-center justify-between"><div><p className="text-xs text-muted-foreground">{title}</p><p className="mt-1 text-2xl font-black">{value}</p>{sub&&<p className="mt-1 text-[10px] text-muted-foreground">{sub}</p>}</div><Icon className="h-5 w-5 text-primary"/></CardContent></Card>;
  return <section id="analytics-panel" className="space-y-4">
@@ -19,7 +44,8 @@ export function AdminAnalyticsPanel(){
   <div className="grid grid-cols-2 xl:grid-cols-5 gap-4">{[
    ["Visitors",data?.visitors||0,Users],["Sessions",data?.sessions||0,MousePointerClick],["Page Views",data?.page_views||0,Eye],["Views / Session",data?.avg_pages_per_session||0,TrendingUp],["Avg Session",data?.avg_session_seconds?Math.round(data.avg_session_seconds/60)+"m":"0m",Clock3]
   ].map(([t,v,I])=><Stat key={t as string} title={t as string} value={v as any} icon={I as any}/>)}</div>
-  <Card><CardHeader><CardTitle className="text-sm flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"/> Live authenticated visitors</CardTitle></CardHeader><CardContent>{live.length===0?<p className="text-xs text-muted-foreground">No active authenticated visitors in the last 90 seconds.</p>:<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{live.map(x=><div key={x.user_id} className="rounded-xl border p-3 text-xs"><div className="flex justify-between"><b>{x.device_type||"device"}</b><span className="text-emerald-600">LIVE</span></div><p className="mt-1 truncate text-muted-foreground">{x.current_path||"/"}</p><p className="mt-1 text-[10px] text-muted-foreground">{new Date(x.last_seen_at).toLocaleTimeString()}</p></div>)}</div>}</CardContent></Card>\n  <div className="grid xl:grid-cols-4 gap-4">
+  <Card><CardHeader><CardTitle className="text-sm flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"/> Live authenticated visitors</CardTitle></CardHeader><CardContent>{live.length===0?<p className="text-xs text-muted-foreground">No active authenticated visitors in the last 90 seconds.</p>:<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{live.map(x=><div key={x.user_id} className="rounded-xl border p-3 text-xs"><div className="flex justify-between"><b>{x.device_type||"device"}</b><span className="text-emerald-600">LIVE</span></div><p className="mt-1 truncate text-muted-foreground">{x.current_path||"/"}</p><p className="mt-1 text-[10px] text-muted-foreground">{new Date(x.last_seen_at).toLocaleTimeString()}</p></div>)}</div>}</CardContent></Card>
+  <div className="grid xl:grid-cols-4 gap-4">
    <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><Globe2 className="h-4 w-4 text-primary"/>Top landing / visited pages</CardTitle></CardHeader><CardContent className="space-y-2">{(data?.top_pages||[]).slice(0,8).map((x,i)=><div key={x.path} className="flex justify-between text-xs"><span className="truncate max-w-[75%]"><Badge variant="outline" className="mr-2 text-[9px]">{i+1}</Badge>{x.path}</span><b>{x.visits}</b></div>)}</CardContent></Card>
    <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><Globe2 className="h-4 w-4 text-primary"/>Registered users by country</CardTitle></CardHeader><CardContent className="space-y-2">{countries.length===0?<p className="text-xs text-muted-foreground">No registered-user country data yet.</p>:countries.map(x=><div key={x.country} className="flex justify-between text-xs"><span>{x.country}</span><b>{x.users}</b></div>)}</CardContent></Card><Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><TrendingUp className="h-4 w-4 text-primary"/>Traffic sources</CardTitle></CardHeader><CardContent className="space-y-2">{(data?.sources||[]).slice(0,8).map(x=><div key={x.source} className="flex justify-between text-xs"><span>{x.source}</span><b>{x.visits}</b></div>)}</CardContent></Card>
    <Card><CardHeader><CardTitle className="text-sm flex gap-2 items-center"><Globe2 className="h-4 w-4 text-primary"/>Devices</CardTitle></CardHeader><CardContent className="space-y-2">{(data?.devices||[]).map(x=><div key={x.device} className="flex justify-between text-xs"><span className="capitalize">{x.device}</span><b>{x.visits}</b></div>)}<div className="pt-2 text-[10px] text-muted-foreground">Country reporting remains available from registered-user profiles; anonymous visitor country requires edge/IP enrichment.</div></CardContent></Card>
