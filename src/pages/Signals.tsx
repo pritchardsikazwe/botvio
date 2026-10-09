@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { trackBotvioEvent } from "@/components/analytics/analytics";
 import { SignalModesGuide } from "@/components/signals/SignalModesGuide";
 
@@ -134,6 +135,9 @@ const Signals = () => {
   });
 
   const isPremium = useHasProductType("signal_pack");
+  const subscription = useSubscriptionGate();
+  const canUploadAiChart = isPremium || subscription.canUploadAiCharts;
+
   const { permission, requestPermission } = usePushNotifications();
 
   useEffect(() => {
@@ -167,6 +171,26 @@ const Signals = () => {
     setTimeframe("all");
     setSearch("");
   };
+
+  if (!subscription.isLoading && !subscription.canAccessSignalsCenter && !isSignalManager) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SEOHead seoKey="signals" title="Signals Center Access — Botvio" description="Manage your Botvio subscription to unlock the Signals Center." />
+        <Header />
+        <main className="container mx-auto max-w-2xl px-4 py-16">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Crown className="mx-auto h-12 w-12 text-primary" />
+              <h1 className="mt-4 text-2xl font-black">Signals Center is not included in your current plan</h1>
+              <p className="mt-2 text-sm text-muted-foreground">Upgrade your subscription or contact an administrator if you believe this access should be included.</p>
+              <Button asChild className="mt-5"><Link to="/marketplace">View subscription plans</Link></Button>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
@@ -224,7 +248,7 @@ const Signals = () => {
           </TabsList>
 
           <TabsContent value="chart-analysis" className="mt-6">
-            <ChartUpload isPremium={isPremium} />
+            <ChartUpload isPremium={canUploadAiChart} />
           </TabsContent>
 
           {isSignalManager && (
