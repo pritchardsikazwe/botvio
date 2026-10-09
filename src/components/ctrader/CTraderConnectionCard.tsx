@@ -15,7 +15,7 @@ export function CTraderConnectionCard() {
   const [showSetup, setShowSetup] = useState(false);
   const clientId = import.meta.env.VITE_CTRADER_CLIENT_ID as string | undefined;
   const redirectUri = import.meta.env.VITE_CTRADER_REDIRECT_URI as string | undefined;
-  const configured = Boolean(clientId?.trim() && redirectUri?.trim());
+  const configured = Boolean(clientId?.trim() && redirectUri?.trim());\n\n  const startDemoAuthorization = () => {\n    if (!clientId || !redirectUri) return;\n    const state = crypto.randomUUID();\n    sessionStorage.setItem("ctrader_oauth_state", state);\n    const authorizeUrl = new URL("https://id.ctrader.com/my/settings/openapi/grantingaccess/");\n    authorizeUrl.searchParams.set("client_id", clientId);\n    authorizeUrl.searchParams.set("redirect_uri", redirectUri);\n    authorizeUrl.searchParams.set("scope", "accounts");\n    authorizeUrl.searchParams.set("product", "web");\n    authorizeUrl.searchParams.set("state", state);\n    window.location.assign(authorizeUrl.toString());\n  };
 
   return (
     <Card id="ctrader-connection" className="glass-card">
