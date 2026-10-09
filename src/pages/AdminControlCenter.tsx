@@ -23,7 +23,7 @@ type AdminUser = { user_id:string; email:string|null; display_name:string|null; 
 const PAGE_SIZE=10;
 
 export default function AdminControlCenter(){
-  const { user }=useAuth();
+  const { user, isSuperAdmin, isAdmin }=useAuth();
   const navigate=useNavigate();
   const [users,setUsers]=useState<AdminUser[]>([]),[loading,setLoading]=useState(true),[search,setSearch]=useState("");
   const [onlineCount,setOnlineCount]=useState(0),[onlineUsers,setOnlineUsers]=useState<AdminUser[]>([]);
@@ -100,11 +100,11 @@ export default function AdminControlCenter(){
         {[[Signal,"Signals","/signals"],[BarChart3,"Signal Performance",()=>document.getElementById("signal-performance-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Bot,"AI Bots","/bots"],[TrendingUp,"Copy Trading","/copy-trading"],[ShieldCheck,"Providers","/providers"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <button type="button" onClick={()=>document.getElementById("tradecopy-panel")?.scrollIntoView({behavior:"smooth",block:"start"})} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Content & SEO</p>
-        {[[FileText,"Blog & Articles","/blog"],[Globe2,"Pages","/"],[Sparkles,"SEO Settings","/admin"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        {[[FileText,"Blog & Articles","/admin/legacy"],[Globe2,"Pages","/admin/legacy"],[Sparkles,"SEO & Content Tools","/admin/legacy"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">System</p>
-        {[[BarChart3,"Analytics",()=>document.getElementById("analytics-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Settings,"Settings",()=>navigate("/settings")]].map(([I,l,action]: any)=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        {[[BarChart3,"Analytics",()=>document.getElementById("analytics-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Settings,"Admin Settings",()=>navigate("/admin/legacy")]].map(([I,l,action]: any)=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
       </nav></ScrollArea>
-      <div className="p-4 border-t border-white/10 text-xs text-slate-400">{user?.email||"Admin"}<div className="text-slate-600">Super Admin</div></div>
+      <div className="p-4 border-t border-white/10 text-xs text-slate-400">{user?.email||"Admin"}<div className="text-slate-600">{isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : "Access restricted"}</div></div>
     </aside>
 
     {mobileMenuOpen&&<div className="lg:hidden fixed inset-0 z-50">
@@ -122,14 +122,14 @@ export default function AdminControlCenter(){
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/copy-trading")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><TrendingUp className="h-4 w-4"/>Copy Trading</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/providers")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><ShieldCheck className="h-4 w-4"/>Providers</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("tradecopy-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
-          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/blog")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><FileText className="h-4 w-4"/>Blog & Articles</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/admin/legacy")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><FileText className="h-4 w-4"/>Blog & Articles</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/admin/social-worker")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Send className="h-4 w-4"/>Social Worker</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/settings")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Settings className="h-4 w-4"/>Settings</button>
         </nav></ScrollArea>
       </aside>
     </div>}
     <main className="flex-1 min-w-0">
-      <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden" onClick={()=>setMobileMenuOpen(true)} aria-label="Open admin menu"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon"><Bell/></Button><Button variant="ghost" size="icon"><Settings/></Button></header>
+      <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden" onClick={()=>setMobileMenuOpen(true)} aria-label="Open admin menu"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon" aria-label="View live users" title="View live users" onClick={()=>document.getElementById("live-users-panel")?.scrollIntoView({behavior:"smooth",block:"start"})}><Bell/></Button><Button variant="ghost" size="icon" aria-label="Admin settings" title="Admin settings" onClick={()=>navigate("/admin/legacy")}><Settings/></Button></header>
       <div className="p-4 lg:p-7 space-y-6 max-w-[1600px] mx-auto">
         <AdminAnalyticsPanel />
         <AdminSignalPerformancePanel />
