@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, ExternalLink } from "lucide-react";
+import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -114,19 +117,25 @@ export const ProviderCommandCenter = () => (
   </div>
 );
 
+const errorText = (error: unknown) => (error instanceof Error ? error.message : "Request failed");
+
 export const BotvioRobotDashboard = () => {
+  const { user, loading: authLoading } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
   const { data: entitlements, isLoading: entitlementsLoading, isError: entitlementsError, refetch: refetchEntitlements } = useEntitlements();
-  const { data: tradingAccounts, isLoading: tradingAccountsLoading } = useTradingAccounts();
+  const { data: tradingAccounts, isLoading: tradingAccountsLoading, isError: tradingAccountsError, error: tradingAccountsErr, refetch: refetchTradingAccounts } = useTradingAccounts();
   const { data: copySubscriptions } = useMyCopySubscriptions();
   const followerAccounts = useTradeCopyAccounts("slave");
+  const masterAccounts = useTradeCopyAccounts("master");
   const activeEntitlements = (entitlements ?? []).filter(isEntitlementActive);
   const activeCopySubscriptions = (copySubscriptions ?? []).filter((item) => item.status === "active");
-  const accountsWithTradeCopy = (followerAccounts.data ?? []).filter((account) => !!account.tradecopy_user_id);
+  const accountsWithTradeCopy = [...(followerAccounts.data ?? []), ...(masterAccounts.data ?? [])].filter((account) => !!account.tradecopy_user_id);
   const positionQueries = useQueries({
     queries: accountsWithTradeCopy.map((account) => ({
       queryKey: ["botvio-dashboard-open-orders", account.id],
       queryFn: () => tradecopy<{ orders: Record<string, unknown>[] }>("open_orders", { account_id: account.id }),
-      refetchInterval: 10_000,
+      enabled: !!user,
+      refetchInterval: 15_000,
       staleTime: 5_000,
       retry: false,
     })),
@@ -134,19 +143,22 @@ export const BotvioRobotDashboard = () => {
   const positions = accountsWithTradeCopy.flatMap((account, index) => {
     const query = positionQueries[index];
     return (query?.data?.orders ?? []).map((order, orderIndex) => ({
-      key: String(order.ticket ?? order.order_id ?? order.id ?? `${account.id}-${orderIndex}`),
+      key: `${account.id}-${String(order.ticket ?? order.order_id ?? order.id ?? orderIndex)}`,
       account: account.label || account.broker || "MT5 account",
-      broker: account.broker || "MT5",
+      broker: `${account.broker || "MT5"} · ${account.account_role === "master" ? "Master" : "Follower"}`,
       symbol: String(order.symbol ?? order.symbol_name ?? "—"),
-      side: String(order.type ?? order.side ?? order.action ?? "—").toUpperCase(),
-      volume: String(order.volume ?? order.lots ?? order.lot ?? "—"),
-      entry: order.open_price ?? order.openPrice ?? order.price_open ?? order.entry_price,
-      current: order.current_price ?? order.currentPrice ?? order.price_current,
-      pnl: order.profit ?? order.pnl ?? order.profit_loss,
+      side: String(order.side ?? order.type ?? order.action ?? "—").toUpperCase(),
+      volume: order.lots ?? order.volume ?? order.lot ?? null,
+      entry: order.openPrice ?? order.open_price ?? order.price_open ?? order.entry_price ?? null,
+      pnl: order.profit ?? order.pnl ?? order.profit_loss ?? null,
+      mock: query?.data?.mode === "mock",
     }));
   });
-  const positionErrors = positionQueries.some((query) => query.isError);
-  const positionLoading = followerAccounts.isLoading || positionQueries.some((query) => query.isLoading);
+  const failedAccounts = accountsWithTradeCopy.flatMap((account, index) => positionQueries[index]?.isError ? [{ name: account.label || account.broker || "MT5 account", message: errorText(positionQueries[index].error) }] : []);
+  const positionErrors = failedAccounts.length > 0;
+  const anyMock = positionQueries.some((query) => query.data?.mode === "mock");
+  const retryPositions = () => { followerAccounts.refetch(); masterAccounts.refetch(); positionQueries.forEach((query) => query.refetch()); };
+  const positionLoading = followerAccounts.isLoading || masterAccounts.isLoading || positionQueries.some((query) => query.isLoading);
   const metrics = [
     { label: "Active subscriptions", value: entitlementsLoading ? "…" : String(activeEntitlements.length), tone: "text-emerald-300", icon: Layers3 },
     { label: "Linked accounts", value: tradingAccountsLoading ? "…" : String(tradingAccounts?.length ?? 0), tone: "text-cyan-300", icon: Wallet },
@@ -156,10 +168,33 @@ export const BotvioRobotDashboard = () => {
   const workflows = [
     { title: "Deriv Options", description: "Options contracts and supported synthetic markets", icon: Zap, href: "/options", action: "Open Options", accent: "text-amber-300" },
     { title: "Deriv Synthetic MT5 & Currencies", description: "Synthetic indices and supported currency pairs", icon: ChartNoAxesCombined, href: "/connections", action: "Manage MT5", accent: "text-emerald-300" },
-    { title: "Weltrade MT5", description: "Supported Forex, Gold, indices and SyntX markets", icon: Cloud, href: "/connections", action: "Manage account", accent: "text-cyan-300" },
+    { title: "Weltrade MT5", description: "Supported Forex, Gold, indices and SyntX markets", icon: Cloud, href: "/weltrade", action: "Open Weltrade hub", accent: "text-cyan-300" },
     { title: "Botvio Provider Signals", description: "Provider setup, signal delivery and execution status", icon: Radio, href: "/provider-dashboard", action: "Provider centre", accent: "text-violet-300" },
     { title: "Follow Providers", description: "Manage copy relationships and follower settings", icon: Users, href: "/copy-trading/my", action: "Manage follows", accent: "text-amber-300" },
   ];
+
+  if (authLoading) {
+    return <div className="min-h-screen bg-[#080d16] text-slate-100"><Header /><div className="flex items-center justify-center gap-2 py-24 text-sm text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /> Checking your session…</div></div>;
+  }
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#080d16] text-slate-100">
+        <Header />
+        <main className="mx-auto max-w-md px-4 py-20">
+          <Card className="border-white/10 bg-[#111a28] text-slate-100">
+            <CardContent className="p-6 text-center">
+              <Bot className="mx-auto h-10 w-10 text-emerald-300" />
+              <h1 className="mt-3 text-xl font-bold">Sign in to open Botvio Robot</h1>
+              <p className="mt-2 text-sm text-slate-400">Your subscriptions, trading accounts and open trades are private to your account.</p>
+              <Button className="mt-5 w-full bg-emerald-300 text-slate-950 hover:bg-emerald-200" onClick={() => setAuthOpen(true)}>Sign in</Button>
+              <Button asChild variant="link" className="mt-2 text-emerald-300"><Link to="/signup">Create a free account</Link></Button>
+            </CardContent>
+          </Card>
+        </main>
+        <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#080d16] text-slate-100">
@@ -226,13 +261,28 @@ export const BotvioRobotDashboard = () => {
             </Card>
 
             <Card className="border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-lg">Open trades</CardTitle><CardDescription className="text-slate-400">Positions returned by your connected TradeCopy follower accounts</CardDescription></div><Badge variant="outline" className="border-emerald-300/20 text-emerald-200"><Activity className="mr-1 h-3 w-3" /> Live lookup</Badge></div></CardHeader>
-              <CardContent>
-                {positionLoading ? <div className="space-y-2"><div className="h-10 animate-pulse rounded-lg bg-white/5" /><div className="h-10 animate-pulse rounded-lg bg-white/5" /></div> :
-                  positionErrors || followerAccounts.isError ? <div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100">Open positions could not be verified for one or more accounts. Check your connection status or open Trading Connections.</div> :
-                  positions.length ? <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-white/10 text-xs text-slate-400"><th className="py-3 pr-3 font-medium">Account</th><th className="py-3 pr-3 font-medium">Market</th><th className="py-3 pr-3 font-medium">Side</th><th className="py-3 pr-3 font-medium">Volume</th><th className="py-3 pr-3 font-medium">Entry</th><th className="py-3 font-medium">Floating P/L</th></tr></thead><tbody>{positions.map((position) => <tr key={position.key} className="border-b border-white/5 last:border-0"><td className="py-3 pr-3"><p className="font-medium">{position.account}</p><p className="text-xs text-slate-500">{position.broker}</p></td><td className="py-3 pr-3 font-semibold">{position.symbol}</td><td className={`py-3 pr-3 font-semibold ${position.side.includes("BUY") ? "text-emerald-300" : position.side.includes("SELL") ? "text-rose-300" : "text-slate-300"}`}>{position.side}</td><td className="py-3 pr-3">{position.volume}</td><td className="py-3 pr-3">{position.entry == null ? "—" : String(position.entry)}</td><td className={`py-3 font-semibold ${Number(position.pnl) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{position.pnl == null ? "—" : Number(position.pnl).toFixed(2)}</td></tr>)}</tbody></table><p className="mt-3 text-xs text-slate-500">Prices and P/L are shown only when returned by the connected TradeCopy account.</p></div> :
-                  <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Activity className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No trades currently running</p><p className="mt-1 text-sm text-slate-400">No open positions were returned by your connected TradeCopy follower accounts.</p></div>}
+              <CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><div><CardTitle className="text-lg">Open trades</CardTitle><CardDescription className="text-slate-400">Positions returned by your connected TradeCopy accounts · refreshes every 15s</CardDescription></div><div className="flex items-center gap-2">{anyMock ? <Badge variant="outline" className="border-amber-300/30 text-amber-200">TEST MODE — not broker data</Badge> : <Badge variant="outline" className="border-emerald-300/20 text-emerald-200"><Activity className="mr-1 h-3 w-3" /> Live lookup</Badge>}<Button size="sm" variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10" onClick={retryPositions} aria-label="Refresh open trades"><RefreshCw className="h-3.5 w-3.5" /></Button></div></div></CardHeader>
+              <CardContent className="space-y-3">
+                {positionErrors && <div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100"><p className="font-semibold">Open positions could not be checked for {failedAccounts.length} account{failedAccounts.length > 1 ? "s" : ""}.</p><ul className="mt-1 space-y-0.5 text-xs">{failedAccounts.map((f) => <li key={f.name}>{f.name}: {f.message}</li>)}</ul><Button size="sm" variant="outline" className="mt-3 border-amber-300/30 bg-transparent text-amber-100" onClick={retryPositions}>Retry</Button></div>}
+                {followerAccounts.isError || masterAccounts.isError ? <div className="rounded-xl border border-red-400/20 p-4 text-sm text-red-300">Your TradeCopy accounts could not be loaded. <Button size="sm" variant="outline" onClick={retryPositions}>Retry</Button></div> :
+                  positionLoading ? <div className="space-y-2"><div className="h-10 animate-pulse rounded-lg bg-white/5" /><div className="h-10 animate-pulse rounded-lg bg-white/5" /></div> :
+                  accountsWithTradeCopy.length === 0 ? <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Wallet className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No TradeCopy account connected</p><p className="mt-1 text-sm text-slate-400">Connect an MT5 account in Trading Connections to see its open trades here.</p></div> :
+                  positions.length ? <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-white/10 text-xs text-slate-400"><th className="py-3 pr-3 font-medium">Account</th><th className="py-3 pr-3 font-medium">Market</th><th className="py-3 pr-3 font-medium">Side</th><th className="py-3 pr-3 font-medium">Lots</th><th className="py-3 pr-3 font-medium">Entry</th><th className="py-3 font-medium">Floating P/L</th></tr></thead><tbody>{positions.map((position) => <tr key={position.key} className="border-b border-white/5 last:border-0"><td className="py-3 pr-3"><p className="font-medium">{position.account}</p><p className="text-xs text-slate-500">{position.broker}{position.mock ? " · test" : ""}</p></td><td className="py-3 pr-3 font-semibold">{position.symbol}</td><td className={`py-3 pr-3 font-semibold ${position.side.includes("BUY") ? "text-emerald-300" : position.side.includes("SELL") ? "text-rose-300" : "text-slate-300"}`}>{position.side}</td><td className="py-3 pr-3">{position.volume == null ? "—" : String(position.volume)}</td><td className="py-3 pr-3">{position.entry == null ? "—" : String(position.entry)}</td><td className={`py-3 font-semibold ${position.pnl == null ? "text-slate-400" : Number(position.pnl) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{position.pnl == null || !Number.isFinite(Number(position.pnl)) ? "—" : Number(position.pnl).toFixed(2)}</td></tr>)}</tbody></table><p className="mt-3 text-xs text-slate-500">Prices and P/L are shown only when returned by the connected TradeCopy account.</p></div> :
+                  !positionErrors && <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Activity className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No trades currently running</p><p className="mt-1 text-sm text-slate-400">No open positions were returned by your connected TradeCopy accounts.</p></div>}
                 <div className="mt-4 flex flex-wrap gap-2"><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/trade-history">Trade history <ArrowRight className="ml-2 h-4 w-4" /></Link></Button><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/connections">Manage connections <Wallet className="ml-2 h-4 w-4" /></Link></Button></div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/10 bg-[#111a28] text-slate-100">
+              <CardHeader><CardTitle className="text-lg">Linked trading accounts</CardTitle><CardDescription className="text-slate-400">Accounts saved to your Botvio profile and their connection status</CardDescription></CardHeader>
+              <CardContent>
+                {tradingAccountsLoading ? <div className="h-10 animate-pulse rounded-lg bg-white/5" /> :
+                  tradingAccountsError ? <div className="rounded-xl border border-red-400/20 p-4 text-sm text-red-300">Accounts could not be loaded: {errorText(tradingAccountsErr)} <Button size="sm" variant="outline" onClick={() => refetchTradingAccounts()}>Retry</Button></div> :
+                  !(tradingAccounts?.length) ? <div className="rounded-xl border border-dashed border-white/15 p-6 text-center text-sm text-slate-400">No trading accounts linked yet. <Link to="/connections" className="text-emerald-300 underline">Connect one</Link></div> :
+                  <div className="space-y-2">{(tradingAccounts as unknown as { id: string; label?: string | null; broker?: string | null; server?: string | null; login_id?: string | null; account_role?: string | null; environment?: string | null; connection_status?: string | null; tradecopy_active?: boolean | null }[]).map((a) => {
+                    const connected = !!a.tradecopy_active || a.connection_status === "connected";
+                    return <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{a.label || a.broker || "Trading account"}</p><p className="text-xs text-slate-400">{[a.broker, a.server, a.login_id ? `#${a.login_id}` : null, a.account_role, a.environment].filter(Boolean).join(" · ")}</p></div><Badge variant="outline" className={connected ? "border-emerald-300/30 text-emerald-200" : "border-white/15 text-slate-300"}>{connected ? "Connected" : (a.connection_status || "Not connected")}</Badge></div>;
+                  })}</div>}
               </CardContent>
             </Card>
           </div>
