@@ -151,7 +151,8 @@ serve(async (req) => {
       }
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const LOVABLE_API_KEY = OPENAI_API_KEY || Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       await logError(supabase, "analyze-chart", userId, ERROR_CODES.MISSING_AI_KEY, "LOVABLE_API_KEY not configured", null, 500);
       if (jobId) {
@@ -240,18 +241,18 @@ ${timeframe ? `Current Timeframe: ${timeframe}` : ""}
 Keep the response structured and actionable.`;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
 
     let aiResponse;
     try {
-      aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      aiResponse = await fetch(OPENAI_API_KEY ? "https://api.openai.com/v1/chat/completions" : "https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${LOVABLE_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: OPENAI_API_KEY ? "gpt-4o" : "google/gemini-2.5-pro",
           messages: [
             {
               role: "user",
