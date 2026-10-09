@@ -131,7 +131,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
   const autoPostSignal = useCallback(async (
     structured: any, sym: string, tf: string, chartImageUrl: string, brokers: string[],
   ) => {
-    if (!user) return;
+    if (!user || !["BUY", "SELL"].includes(structured.recommendation)) return;
     try {
       const direction = structured.recommendation === "SELL" ? "SELL" : "BUY";
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
