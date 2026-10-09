@@ -4,6 +4,7 @@ import { DerivAccountsManager } from "@/components/tradecopy/DerivAccountsManage
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { SyntxApiStudioConnectionCard } from "@/components/tradecopy/SyntxApiStudioConnectionCard";
+import { CTraderConnectionCard } from "@/components/ctrader/CTraderConnectionCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, ArrowRight, Cloud, ShieldCheck, Users, Wallet } from "lucide-react";
@@ -48,7 +49,7 @@ export function TradingConnectionsCenter() {
         </a>
       </div>
 
-      <section id="mt5-copy-trading" className="scroll-mt-6 space-y-3">
+      <section id="ctrader-open-api" className="scroll-mt-6 space-y-3 border-t border-border/60 pt-5">\n        <div>\n          <h2 className="text-lg font-semibold">3. cTrader connection test</h2>\n          <p className="text-sm text-muted-foreground">Independent cTrader Open API setup. This does not connect to or modify MT5 TradeCopy.</p>\n        </div>\n        <CTraderConnectionCard />\n      </section>\n\n      <section id="mt5-copy-trading" className="scroll-mt-6 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-lg font-semibold">1. MT5 robot and copy trading</h2>
           <Badge variant="outline"><Cloud className="mr-1 h-3 w-3" /> TradeCopy Cloud</Badge>
