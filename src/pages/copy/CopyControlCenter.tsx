@@ -279,8 +279,8 @@ export const BotvioRobotDashboard = () => {
                 {tradingAccountsLoading ? <div className="h-10 animate-pulse rounded-lg bg-white/5" /> :
                   tradingAccountsError ? <div className="rounded-xl border border-red-400/20 p-4 text-sm text-red-300">Accounts could not be loaded: {errorText(tradingAccountsErr)} <Button size="sm" variant="outline" onClick={() => refetchTradingAccounts()}>Retry</Button></div> :
                   !(tradingAccounts?.length) ? <div className="rounded-xl border border-dashed border-white/15 p-6 text-center text-sm text-slate-400">No trading accounts linked yet. <Link to="/connections" className="text-emerald-300 underline">Connect one</Link></div> :
-                  <div className="space-y-2">{tradingAccounts.map((a) => {
-                    const connected = a.tradecopy_active || a.connection_status === "connected";
+                  <div className="space-y-2">{(tradingAccounts as unknown as { id: string; label?: string | null; broker?: string | null; server?: string | null; login_id?: string | null; account_role?: string | null; environment?: string | null; connection_status?: string | null; tradecopy_active?: boolean | null }[]).map((a) => {
+                    const connected = !!a.tradecopy_active || a.connection_status === "connected";
                     return <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{a.label || a.broker || "Trading account"}</p><p className="text-xs text-slate-400">{[a.broker, a.server, a.login_id ? `#${a.login_id}` : null, a.account_role, a.environment].filter(Boolean).join(" · ")}</p></div><Badge variant="outline" className={connected ? "border-emerald-300/30 text-emerald-200" : "border-white/15 text-slate-300"}>{connected ? "Connected" : (a.connection_status || "Not connected")}</Badge></div>;
                   })}</div>}
               </CardContent>
