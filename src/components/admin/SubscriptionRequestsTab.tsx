@@ -32,6 +32,8 @@ interface MergedRequest {
   created_at: string;
   plan_name?: string;
   plan_code?: string;
+  current_price_usd?: number | null;
+  plan_active?: boolean;
   profile?: {
     email: string | null;
     display_name: string | null;
@@ -85,7 +87,7 @@ export const SubscriptionRequestsTab = () => {
 
       // Fetch plans
       const { data: plans } = allPlanIds.length > 0
-        ? await supabase.from("pricing_plans").select("id, name, code").in("id", allPlanIds)
+        ? await supabase.from("pricing_plans").select("id, name, code, price_usd, is_active").in("id", allPlanIds)
         : { data: [] };
 
       // Merge into unified list
@@ -103,6 +105,8 @@ export const SubscriptionRequestsTab = () => {
           created_at: r.created_at,
           plan_name: plans?.find(p => p.id === r.plan_id)?.name,
           plan_code: plans?.find(p => p.id === r.plan_id)?.code,
+          current_price_usd: plans?.find(p => p.id === r.plan_id)?.price_usd ?? null,
+          plan_active: plans?.find(p => p.id === r.plan_id)?.is_active !== false,
           profile: profiles?.find(p => p.user_id === r.user_id) || undefined,
         })),
         ...payReqs.map(r => ({
@@ -118,6 +122,8 @@ export const SubscriptionRequestsTab = () => {
           created_at: r.created_at,
           plan_name: plans?.find(p => p.id === r.plan_id)?.name,
           plan_code: plans?.find(p => p.id === r.plan_id)?.code,
+          current_price_usd: plans?.find(p => p.id === r.plan_id)?.price_usd ?? null,
+          plan_active: plans?.find(p => p.id === r.plan_id)?.is_active !== false,
           profile: profiles?.find(p => p.user_id === r.user_id) || undefined,
         })),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -269,7 +275,7 @@ export const SubscriptionRequestsTab = () => {
           <TableHead>Contact</TableHead>
           <TableHead>Source</TableHead>
           <TableHead>Plan</TableHead>
-          <TableHead>Amount</TableHead>
+          <TableHead>Submitted / Current</TableHead>
           <TableHead>Method</TableHead>
           <TableHead>Proof</TableHead>
           <TableHead>Status</TableHead>
@@ -310,9 +316,15 @@ export const SubscriptionRequestsTab = () => {
               </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant="secondary">{req.plan_name || "No plan"}</Badge>
+              <div className="flex flex-col items-start gap-1">
+                <Badge variant="secondary">{req.plan_name || "No plan"}</Badge>
+                {req.plan_active === false && <Badge variant="outline" className="border-amber-500 text-amber-600">Legacy / inactive plan</Badge>}
+              </div>
             </TableCell>
-            <TableCell className="font-bold">${req.amount_usd}</TableCell>
+            <TableCell>
+              <div className="text-sm font-semibold">Submitted: ${Number(req.amount_usd || 0).toFixed(2)}</div>
+              <div className="text-xs text-muted-foreground">{req.plan_active === false ? "Current price unavailable (inactive plan)" : req.current_price_usd != null ? `Current list price: ${Number(req.current_price_usd).toFixed(2)}` : "Current list price unavailable"}</div>
+            </TableCell>
             <TableCell className="capitalize text-sm">
               {req.payment_method?.replace("_", " ") || "—"}
             </TableCell>
@@ -434,8 +446,10 @@ export const SubscriptionRequestsTab = () => {
                 {selectedRequest.profile.country && (
                   <p className="flex items-center gap-1"><Globe className="h-3 w-3" /> {selectedRequest.profile.country}</p>
                 )}
-                <p><strong>Amount:</strong> ${selectedRequest.amount_usd}</p>
-                <p><strong>Plan:</strong> {selectedRequest.plan_name || "Not specified"}</p>
+                <p><strong>Amount submitted:</strong> ${Number(selectedRequest.amount_usd || 0).toFixed(2)}</p>
+                <p><strong>Plan requested:</strong> {selectedRequest.plan_name || "Not specified"}{selectedRequest.plan_active === false ? " (legacy / inactive)" : ""}</p>
+                <p><strong>Current list price:</strong> {selectedRequest.plan_active === false || selectedRequest.current_price_usd == null ? "Unavailable for inactive/unknown plan" : `${Number(selectedRequest.current_price_usd).toFixed(2)}`}</p>
+                {selectedRequest.plan_active === false && <p className="text-amber-600"><strong>Review required:</strong> this request references an inactive plan. Confirm the payment and intended entitlement before approving.</p>}
                 <p><strong>Source:</strong> {selectedRequest.source === "subscription_request" ? "Subscription Request" : "Payment Request"}</p>
               </div>
             )}
