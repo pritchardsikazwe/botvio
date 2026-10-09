@@ -5,7 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Activity, ArrowRight, BarChart3, Bot, Copy, Crown, Users } from "lucide-react";
+import { Activity, ArrowRight, BarChart3, Copy, Crown, Users } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useHomeMt5Trades } from "@/hooks/useHomeMt5Trades";
+import { closedTradeResult, tradeFeedForSymbol } from "@/lib/liveTrading";
 
 type FeedTab = "deriv" | "syntx" | "weltrade" | "copy";
 
@@ -18,6 +21,7 @@ type LiveTrade = {
   pnl: number | null;
   openedAt: string;
   source: FeedTab;
+  environment?: string;
 };
 
 const DERIV_SYMBOLS = [
@@ -30,10 +34,7 @@ const DERIV_SYMBOLS = [
 const SYNTX_SYMBOLS = ["GainX 600", "FlipX 1", "SwitchX 600", "PainX 600"];
 
 function sourceForSymbol(symbol: string): FeedTab {
-  const s = symbol.toUpperCase();
-  if (s.includes("GAINX") || s.includes("PAINX") || s.includes("FLIPX") || s.includes("SWITCHX") || s.includes("BREAKX") || s.includes("TRENDX") || s.includes("VOL ")) return "syntx";
-  if (s.includes("BOOM") || s.includes("CRASH") || s.startsWith("R_") || s.includes("VOLATILITY")) return "deriv";
-  return "weltrade";
+  return tradeFeedForSymbol(symbol);
 }
 
 function marketLabel(symbol: string) {
@@ -44,48 +45,53 @@ function marketLabel(symbol: string) {
 }
 
 export const HomeLiveTrading = () => {
-  const [tab, setTab] = useState<FeedTab>("deriv");
+  const [tab, setTab] = useState<FeedTab>("syntx");
+  const [view, setView] = useState<"running" | "results">("running");
+  const { user, loading: authLoading } = useAuth();
+  const mt5 = useHomeMt5Trades(tab);
 
-  const { data: providerTrades = [] } = useQuery({
-    queryKey: ["home-live-provider-trades"],
+  const providerQuery = useQuery({
+    queryKey: ["home-live-provider-trades", user?.id, tab, view],
+    enabled: !!user && tab === "deriv",
     queryFn: async () => {
       const { data, error } = await supabase
         .from("provider_trades")
         .select("id,symbol,direction,status,profit_loss,created_at,broker")
-        .eq("status", "open")
+        .in("status", view === "running" ? ["open"] : ["closed", "won", "lost", "win", "loss"])
         .order("created_at", { ascending: false })
         .limit(20);
-      if (error) return [];
-      return (data ?? []).map((t: any): LiveTrade => ({
+      if (error) throw new Error("Unable to load provider trades.");
+      return (data ?? []).map((t): LiveTrade => ({
         id: t.id,
         market: marketLabel(t.symbol),
         symbol: t.symbol,
         direction: t.direction,
-        status: "Running",
+        status: t.status === "open" ? "Running" : closedTradeResult(t.profit_loss == null ? null : Number(t.profit_loss)),
         pnl: t.profit_loss == null ? null : Number(t.profit_loss),
         openedAt: t.created_at,
-        source: String(t.broker).toLowerCase() === "weltrade" ? "weltrade" : sourceForSymbol(t.symbol),
+        source: tradeFeedForSymbol(t.symbol, String(t.broker)),
       }));
     },
     refetchInterval: 15_000,
   });
 
-  const { data: copyTrades = [] } = useQuery({
-    queryKey: ["home-live-copy-trades"],
+  const copyQuery = useQuery({
+    queryKey: ["home-live-copy-trades", user?.id, tab, view],
+    enabled: !!user && tab === "copy",
     queryFn: async () => {
       const { data, error } = await supabase
         .from("copied_trades")
         .select("id,symbol,direction,status,profit_loss,opened_at")
-        .eq("status", "open")
+        .in("status", view === "running" ? ["open"] : ["closed", "won", "lost", "win", "loss"])
         .order("opened_at", { ascending: false })
         .limit(20);
-      if (error) return [];
-      return (data ?? []).map((t: any): LiveTrade => ({
+      if (error) throw new Error("Unable to load copied trades.");
+      return (data ?? []).map((t): LiveTrade => ({
         id: t.id,
         market: marketLabel(t.symbol),
         symbol: t.symbol,
         direction: t.direction,
-        status: "Running",
+        status: t.status === "open" ? "Running" : closedTradeResult(t.profit_loss == null ? null : Number(t.profit_loss)),
         pnl: t.profit_loss == null ? null : Number(t.profit_loss),
         openedAt: t.opened_at,
         source: "copy",
@@ -95,9 +101,14 @@ export const HomeLiveTrading = () => {
   });
 
   const trades = useMemo(() => {
-    if (tab === "copy") return copyTrades;
-    return providerTrades.filter((t) => t.source === tab);
-  }, [copyTrades, providerTrades, tab]);
+    const brokerTrades = (mt5.data?.trades ?? []).filter((trade) => (trade.status === "Running") === (view === "running"));
+    const legacyTrades = tab === "copy" ? copyQuery.data ?? [] : tab === "deriv" ? providerQuery.data ?? [] : [];
+    return [...brokerTrades, ...legacyTrades.filter((trade) => trade.source === tab)]
+      .sort((a, b) => b.openedAt.localeCompare(a.openedAt));
+  }, [copyQuery.data, providerQuery.data, mt5.data, tab, view]);
+  const pending = authLoading || (!!user && (mt5.isLoading || (tab === "deriv" && providerQuery.isLoading) || (tab === "copy" && copyQuery.isLoading)));
+  const unavailable = mt5.isError || (mt5.data?.unavailable ?? 0) > 0 || (tab === "deriv" && providerQuery.isError) || (tab === "copy" && copyQuery.isError);
+  const runningCount = (mt5.data?.trades ?? []).filter((trade) => trade.status === "Running").length;
 
   const tabs = [
     { id: "deriv" as const, label: "Deriv Synthetic Indices", icon: BarChart3 },
@@ -115,11 +126,13 @@ export const HomeLiveTrading = () => {
               <div className="flex flex-wrap items-center gap-2">
                 <h2 id="home-live-trading" className="flex items-center gap-2 text-lg font-black sm:text-xl">
                   <Activity className="h-5 w-5 text-success" />
-                  Live Trading — Real Trades Running Now
+                  Live Trading — Running Trades & Results
                 </h2>
-                <Badge className="bg-success/15 text-success border-success/30"><span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-success inline-block" />LIVE</Badge>
+                <Badge variant="outline" className={user && !mt5.isFetching && !unavailable && !mt5.data?.simulated && runningCount > 0 ? "border-success/30 text-success" : "text-muted-foreground"}>
+                  {!user ? "SIGN IN" : pending ? "CHECKING" : unavailable ? "UNAVAILABLE" : mt5.data?.simulated ? "MOCK" : runningCount > 0 ? "LIVE" : "NO OPEN TRADES"}
+                </Badge>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">Live positions only — no signal cards and no entry prices shown.</p>
+              <p className="mt-1 text-xs text-muted-foreground">MT5 positions and closed results from the last 24 hours. Demo accounts are labelled.</p>
             </div>
             <div className="flex shrink-0 gap-2">
               <Button asChild size="sm" variant="outline" className="text-xs"><Link to="/marketplace">Copy Trading <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link></Button>
@@ -129,15 +142,24 @@ export const HomeLiveTrading = () => {
 
           <div className="mt-4 flex gap-1.5 overflow-x-auto pb-1">
             {tabs.map(({ id, label, icon: Icon }) => (
-              <button
+              <Button
                 key={id}
                 onClick={() => setTab(id)}
+                variant="outline"
+                size="sm"
+                aria-pressed={tab === id}
                 className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-bold transition-colors ${tab === id ? "border-primary/50 bg-primary/10 text-primary" : "border-border/50 bg-background/30 text-muted-foreground hover:text-foreground"}`}
               >
                 <Icon className="h-3 w-3" />{label}
-              </button>
+              </Button>
             ))}
           </div>
+
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant={view === "running" ? "default" : "outline"} aria-pressed={view === "running"} onClick={() => setView("running")}>Running</Button>
+            <Button size="sm" variant={view === "results" ? "default" : "outline"} aria-pressed={view === "results"} onClick={() => setView("results")}>Results</Button>
+          </div>
+          {user && unavailable && <p role="status" className="mt-2 text-xs text-destructive">Some account trades could not be verified. <Link className="underline" to="/connections">Check MT5 connections</Link></p>}
 
           <div className="mt-3 overflow-hidden rounded-xl border border-border/50 bg-background/40">
             {trades.length > 0 ? (
@@ -152,7 +174,7 @@ export const HomeLiveTrading = () => {
                       <p className="truncate font-mono text-[9px] text-muted-foreground">{trade.symbol}</p>
                     </div>
                     <span className={trade.direction === "BUY" ? "font-bold text-success" : "font-bold text-destructive"}>{trade.direction}</span>
-                    <Badge variant="outline" className="w-fit border-success/30 text-[9px] text-success">Running</Badge>
+                    <div className="min-w-0"><Badge variant="outline" className={`w-fit text-[9px] ${trade.status === "Loss" ? "text-destructive" : "text-success"}`}>{trade.status}</Badge>{trade.environment && <p className="mt-1 text-[9px] text-muted-foreground">{trade.environment}</p>}</div>
                     <span className={`text-right font-mono font-bold ${trade.pnl != null && trade.pnl < 0 ? "text-destructive" : "text-success"}`}>
                       {trade.pnl == null ? "—" : `${trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}`}
                     </span>
@@ -162,10 +184,11 @@ export const HomeLiveTrading = () => {
             ) : (
               <div className="px-4 py-5 text-center">
                 <Users className="mx-auto h-5 w-5 text-muted-foreground" />
-                <p className="mt-1 text-xs font-bold">No live trades in this feed right now</p>
+                <p className="mt-1 text-xs font-bold">{pending ? "Checking trades…" : !user ? "Sign in to view authorized trades" : unavailable ? "Trade feed unavailable" : mt5.data?.simulated ? "TradeCopy is in MOCK mode — no verified trades" : view === "results" ? "No verified closed results in this feed" : "No verified running trades in this feed"}</p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">
-                  Botvio will show actual running positions here when they are active.
+                  {!user ? "Private trading accounts are not shown to guests." : "Only broker-confirmed positions and recorded trade results appear here."}
                 </p>
+                {user && <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/connections">MT5 connections <ArrowRight className="ml-1 h-3 w-3" /></Link></Button>}
               </div>
             )}
           </div>
