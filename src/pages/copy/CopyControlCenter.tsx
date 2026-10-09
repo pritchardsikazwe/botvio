@@ -114,19 +114,25 @@ export const ProviderCommandCenter = () => (
   </div>
 );
 
+const errorText = (error: unknown) => (error instanceof Error ? error.message : "Request failed");
+
 export const BotvioRobotDashboard = () => {
+  const { user, loading: authLoading } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
   const { data: entitlements, isLoading: entitlementsLoading, isError: entitlementsError, refetch: refetchEntitlements } = useEntitlements();
-  const { data: tradingAccounts, isLoading: tradingAccountsLoading } = useTradingAccounts();
+  const { data: tradingAccounts, isLoading: tradingAccountsLoading, isError: tradingAccountsError, error: tradingAccountsErr, refetch: refetchTradingAccounts } = useTradingAccounts();
   const { data: copySubscriptions } = useMyCopySubscriptions();
   const followerAccounts = useTradeCopyAccounts("slave");
+  const masterAccounts = useTradeCopyAccounts("master");
   const activeEntitlements = (entitlements ?? []).filter(isEntitlementActive);
   const activeCopySubscriptions = (copySubscriptions ?? []).filter((item) => item.status === "active");
-  const accountsWithTradeCopy = (followerAccounts.data ?? []).filter((account) => !!account.tradecopy_user_id);
+  const accountsWithTradeCopy = [...(followerAccounts.data ?? []), ...(masterAccounts.data ?? [])].filter((account) => !!account.tradecopy_user_id);
   const positionQueries = useQueries({
     queries: accountsWithTradeCopy.map((account) => ({
       queryKey: ["botvio-dashboard-open-orders", account.id],
       queryFn: () => tradecopy<{ orders: Record<string, unknown>[] }>("open_orders", { account_id: account.id }),
-      refetchInterval: 10_000,
+      enabled: !!user,
+      refetchInterval: 15_000,
       staleTime: 5_000,
       retry: false,
     })),
@@ -134,19 +140,22 @@ export const BotvioRobotDashboard = () => {
   const positions = accountsWithTradeCopy.flatMap((account, index) => {
     const query = positionQueries[index];
     return (query?.data?.orders ?? []).map((order, orderIndex) => ({
-      key: String(order.ticket ?? order.order_id ?? order.id ?? `${account.id}-${orderIndex}`),
+      key: `${account.id}-${String(order.ticket ?? order.order_id ?? order.id ?? orderIndex)}`,
       account: account.label || account.broker || "MT5 account",
-      broker: account.broker || "MT5",
+      broker: `${account.broker || "MT5"} · ${account.account_role === "master" ? "Master" : "Follower"}`,
       symbol: String(order.symbol ?? order.symbol_name ?? "—"),
-      side: String(order.type ?? order.side ?? order.action ?? "—").toUpperCase(),
-      volume: String(order.volume ?? order.lots ?? order.lot ?? "—"),
-      entry: order.open_price ?? order.openPrice ?? order.price_open ?? order.entry_price,
-      current: order.current_price ?? order.currentPrice ?? order.price_current,
-      pnl: order.profit ?? order.pnl ?? order.profit_loss,
+      side: String(order.side ?? order.type ?? order.action ?? "—").toUpperCase(),
+      volume: order.lots ?? order.volume ?? order.lot ?? null,
+      entry: order.openPrice ?? order.open_price ?? order.price_open ?? order.entry_price ?? null,
+      pnl: order.profit ?? order.pnl ?? order.profit_loss ?? null,
+      mock: query?.data?.mode === "mock",
     }));
   });
-  const positionErrors = positionQueries.some((query) => query.isError);
-  const positionLoading = followerAccounts.isLoading || positionQueries.some((query) => query.isLoading);
+  const failedAccounts = accountsWithTradeCopy.flatMap((account, index) => positionQueries[index]?.isError ? [{ name: account.label || account.broker || "MT5 account", message: errorText(positionQueries[index].error) }] : []);
+  const positionErrors = failedAccounts.length > 0;
+  const anyMock = positionQueries.some((query) => query.data?.mode === "mock");
+  const retryPositions = () => { followerAccounts.refetch(); masterAccounts.refetch(); positionQueries.forEach((query) => query.refetch()); };
+  const positionLoading = followerAccounts.isLoading || masterAccounts.isLoading || positionQueries.some((query) => query.isLoading);
   const metrics = [
     { label: "Active subscriptions", value: entitlementsLoading ? "…" : String(activeEntitlements.length), tone: "text-emerald-300", icon: Layers3 },
     { label: "Linked accounts", value: tradingAccountsLoading ? "…" : String(tradingAccounts?.length ?? 0), tone: "text-cyan-300", icon: Wallet },
