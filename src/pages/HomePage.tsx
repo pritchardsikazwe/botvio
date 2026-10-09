@@ -88,7 +88,7 @@ const HomePage = () => {
         {mobileOpen && (
           <nav className="border-t border-border/60 bg-background px-4 py-3 lg:hidden">
             <div className="grid grid-cols-2 gap-2">
-              {[['Markets','/markets'],['AI Analysis','/chart/XAUUSD'],['Signals','/signals'],['Copy Trading','/copy-trading'],['Bots','/bots'],['Brokers','/brokers'],['Learn','/learn']].map(([label,to]) => (
+              {[['Markets','/markets'],['AI Analysis','/chart/XAUUSD'],['Weltrade Charts','/weltrade'],['Deriv Synthetic','/synthetic-hub'],['Copy Trading','/copy-trading'],['Bots','/bots'],['Brokers','/brokers'],['Learn','/learn']].map(([label,to]) => (
                 <Link key={to} onClick={() => setMobileOpen(false)} to={to} className="rounded-lg border border-border/60 px-3 py-3 text-sm font-semibold">{label}</Link>
               ))}
             </div>
