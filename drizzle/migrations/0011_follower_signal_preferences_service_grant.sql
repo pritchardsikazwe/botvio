@@ -1,0 +1,1 @@
+grant all on public.follower_signal_preferences to service_role;
