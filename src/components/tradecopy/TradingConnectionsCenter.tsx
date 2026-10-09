@@ -38,6 +38,10 @@ export function TradingConnectionsCenter() {
               </div>
             ))}
           </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button asChild><Link to="/botvio-robot">Open robot dashboard <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            <Button asChild variant="outline"><Link to="/signals">View live signals</Link></Button>
+          </div>
         </CardHeader>
       </Card>
 
