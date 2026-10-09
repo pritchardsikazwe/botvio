@@ -18,9 +18,11 @@ import {
   Sparkles,
   Star,
   Quote,
+  Target,
 } from "lucide-react";
 import { blogContent } from "@/content/blogPosts";
 import { BotvioPricing } from "@/components/home/BotvioPricing";
+import { useStrategies } from "@/hooks/useStrategies";
 
 /**
  * Premium editorial home sections (Phase 1 of the AdSense/Helpful-Content
@@ -366,7 +368,7 @@ export function FeaturedBrokers() {
 }
 
 export function LatestArticles() {
-  const posts = latestArticles(6);
+  const posts = latestArticles(4);
   if (posts.length === 0) return null;
   return (
     <section aria-labelledby="latest-articles-title">
@@ -392,11 +394,71 @@ export function LatestArticles() {
                 <p className="text-[10px] text-muted-foreground mt-2">
                   {new Date(p.date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                 </p>
+                <p className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                  Read more <ArrowRight className="h-3 w-3" />
+                </p>
               </CardContent>
             </Card>
           </Link>
         ))}
       </div>
+    </section>
+  );
+}
+
+export function FeaturedHomeStrategies() {
+  const { data: strategies = [], isLoading } = useStrategies();
+
+  // Only feature strategies that are public and actually returned by the marketplace.
+  const featured = strategies.slice(0, 4);
+  if (isLoading || featured.length === 0) return null;
+
+  return (
+    <section aria-labelledby="home-strategies-title">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h2 id="home-strategies-title" className="text-lg md:text-xl font-extrabold flex items-center gap-2">
+          <Target className="h-5 w-5 text-primary" /> Featured Trading Strategies
+        </h2>
+        <Link to="/strategies" className="text-sm text-primary hover:underline flex items-center gap-1">
+          Explore all strategies <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {featured.map((strategy) => (
+          <Card key={strategy.id} className="h-full transition-colors hover:border-primary/50">
+            {strategy.cover_image_url && (
+              <img
+                src={strategy.cover_image_url}
+                alt=""
+                loading="lazy"
+                className="h-36 w-full rounded-t-lg object-cover"
+              />
+            )}
+            <CardContent className="p-4 flex h-full flex-col">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="text-[10px]">{strategy.market}</Badge>
+                <Badge variant={strategy.pricing_type === "free" ? "secondary" : "default"} className="text-[10px]">
+                  {strategy.pricing_type === "free" ? "Free" : `${strategy.price_usd ?? 0}`}
+                </Badge>
+              </div>
+              <h3 className="text-sm font-extrabold leading-snug text-foreground line-clamp-2">{strategy.title}</h3>
+              <p className="mt-1.5 flex-1 text-xs leading-relaxed text-muted-foreground line-clamp-3">
+                {strategy.description || "Open this strategy to review its approach, market and available configuration."}
+              </p>
+              <Link
+                to={`/${strategy.slug}`}
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                aria-label={`Read more about ${strategy.title}`}
+              >
+                Read more <ArrowRight className="h-3 w-3" />
+              </Link>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        Strategies are educational tools, not guarantees of performance. Test on a demo account and apply risk limits before trading live.
+      </p>
     </section>
   );
 }
@@ -466,6 +528,7 @@ export function PremiumHomeSections() {
       <FeaturedBrokers />
       <BotvioPricing />
       <LatestArticles />
+      <FeaturedHomeStrategies />
       <HomeTestimonials />
       <HomeFAQ />
     </>
