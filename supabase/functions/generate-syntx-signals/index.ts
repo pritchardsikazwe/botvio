@@ -1,3 +1,5 @@
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { studioCandles, studioSymbols, studioSymbolCandidates, studioOffset, unwrapStudio } from "../_shared/weltradeHistory.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assertAutomationKey } from "../_shared/automationAuth.ts";import { loadPerformanceIndex, performanceGate } from "../_shared/performanceGate.ts";
 async function decryptSecret(enc:string,secret:string):Promise<string>{const bytes=Uint8Array.from(atob(enc.replace(/^v1:/,"")),(c)=>c.charCodeAt(0));const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:bytes.slice(0,12)},k,bytes.slice(12));return new TextDecoder().decode(pt)}
@@ -127,21 +129,45 @@ async function workerConfluence(db:any,symbol:string,direction:"BUY"|"SELL"){
  const avg=confirms.length?Math.round(confirms.reduce((s,x)=>s+Number(x.confidence||0),0)/confirms.length):0;
  return {allow:!conflict&&(!confirms.length||aligned>0),bonus:aligned*4+(avg>=80?4:avg>=70?2:0)-(conflict?12:0),avg,regime:latest.get("1H")?.market_regime??latest.get("1D")?.market_regime??"UNKNOWN"};
 }
-function unwrap(x:unknown):unknown{if(x&&typeof x==="object"){const o=x as Record<string,unknown>;return o.data??x}return x}
-function bars(x:unknown):Candle[]{const r=unwrap(x);const list=Array.isArray(r)?r:(r&&typeof r==="object"?Object.values(r as Record<string,unknown>).find(Array.isArray)??[]:[]);return(list as unknown[]).map(v=>{const b=v as Record<string,unknown>;const tv=b.time??b.Time??b.timestamp??b.Timestamp??0;let t=Number(tv);if(!Number.isFinite(t)||t===0)t=Date.parse(String(tv))||0;return{time:t>1e12?Math.floor(t/1000):t,open:Number(b.open??b.Open??b.openPrice??b.OpenPrice),high:Number(b.high??b.High??b.highPrice??b.HighPrice),low:Number(b.low??b.Low??b.lowPrice??b.LowPrice),close:Number(b.close??b.Close??b.closePrice??b.ClosePrice)}}).filter(x=>Number.isFinite(x.time)&&[x.open,x.high,x.low,x.close].every(Number.isFinite))}
-async function api(base:string,key:string,path:string,q:Record<string,string|number|undefined>){const u=new URL(base+path);for(const[k,v]of Object.entries(q))if(v!==undefined)u.searchParams.set(k,String(v));const r=await fetch(u,{headers:{ApiKey:key,Accept:"application/json, text/plain"},signal:AbortSignal.timeout(20000)});const t=await r.text();let b:unknown=t;try{b=JSON.parse(t)}catch{}if(!r.ok)throw new Error(`API Studio ${r.status}`);return b}
-Deno.serve(async(req)=>{if(req.method!=="POST")return new Response("POST required",{status:405});try{const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-if (!(await assertAutomationKey(req))) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } }); const performanceIndex = await loadPerformanceIndex(db);const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];const diag:any[]=[];const tStart=Date.now();for(const c of (connections??[]).filter((x:any)=>x.connection_status!=="error"&&/weltrade/i.test(String(x.server||""))).slice(0,1)){let session=String(c.session_id||"");if(session){try{const chk=await api(base,key,"/Symbols",{id:session});const t=JSON.stringify(chk).slice(0,300);if(/INVALID_TOKEN|not found/i.test(t))session=""}catch{session=""}}try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
-let brokerSymbols:string[]=[];try{const sr=unwrap(await api(base,key,"/Symbols",{id:session}));const arr=Array.isArray(sr)?sr:[];brokerSymbols=arr.map((x:any)=>typeof x==="string"?x:String(x?.symbol??x?.name??"")).filter(Boolean)}catch(e){diag.push({login:c.login,error:"Symbols: "+String(e)})}
-try{const probe=await api(base,key,"/PriceHistory",{id:session,symbol:brokerSymbols.find(x=>/gainx\s*400/i.test(x))??"GainX 400",from:new Date(Date.now()-6*3600000).toISOString().slice(0,19),to:new Date().toISOString().slice(0,19),timeFrame:5});diag.unshift({probe:true,brokerSymbols:brokerSymbols.length,sample:brokerSymbols.filter(x=>/x/i.test(x)).slice(0,8),raw:JSON.stringify(probe).slice(0,200)})}catch(e){diag.unshift({probe:true,error:String(e)})}
-const nk=(v:string)=>v.toLowerCase().replace(/[^a-z0-9]/g,"");const resolve=(r:string)=>brokerSymbols.find(s=>s.toLowerCase()===r.toLowerCase())??brokerSymbols.find(s=>nk(s)===nk(r))??r;
-const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;const allSyms=families.flatMap(f=>f.symbols);const slot=Math.floor(Date.now()/300000)%4;const pick=new Set(wanted?allSyms:allSyms.filter((_,i)=>i%4===slot));const t0=Date.now();for(const f of families)for(const symbol of f.symbols){if(!pick.has(symbol))continue;if(Date.now()-t0>60000)break;const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};const frames:any[]=(await Promise.all(Object.entries(TF).map(async([name,mins])=>{const out:any[]=[];try{
+async function api(base:string,key:string,path:string,q:Record<string,string|number|undefined>){
+ const u=new URL(base+path);for(const[k,v]of Object.entries(q))if(v!==undefined)u.searchParams.set(k,String(v));
+ const r=await fetch(u,{headers:{ApiKey:key,Accept:"application/json, text/plain"},signal:AbortSignal.timeout(20000)});
+ const t=await r.text();let body:unknown=t;try{body=JSON.parse(t)}catch{}
+ const raw=unwrapStudio(body);
+ if(!r.ok)throw new Error(`API Studio HTTP ${r.status}`);
+ if(raw&&typeof raw==="object"&&!Array.isArray(raw)){
+   const e=raw as Record<string,unknown>;
+   if(e.code||e.message)throw new Error(`API Studio ${String(e.code??"error")}: ${String(e.message??"Request failed").slice(0,180)}`);
+ }
+ return body;
+}
+Deno.serve(async(req)=>{if(req.method==="OPTIONS")return new Response("ok",{headers:corsHeaders});if(req.method!=="POST")return new Response("POST required",{status:405,headers:corsHeaders});try{const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+if (!(await assertAutomationKey(req))) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }); const performanceIndex = await loadPerformanceIndex(db);const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;if(wanted&&!FAMILIES.some(f=>f.symbols.includes(wanted)))return new Response(JSON.stringify({success:false,error:"Unsupported Weltrade symbol"}),{status:400,headers:{...corsHeaders,"Content-Type":"application/json"}});const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];const diag:any[]=[];const tStart=Date.now();for(const c of (connections??[]).filter((x:any)=>/weltrade/i.test(String(x.server||""))).slice(0,1)){let session=String(c.session_id||"");if(session){try{const chk=await api(base,key,"/Symbols",{id:session});const t=JSON.stringify(chk).slice(0,300);if(/INVALID_TOKEN|not found/i.test(t))session=""}catch{session=""}}try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await api(base,key,"/Symbols",{id:session});await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
+let brokerSymbols:string[]=[];try{brokerSymbols=studioSymbols(await api(base,key,"/Symbols",{id:session}));if(!brokerSymbols.length)throw new Error("Broker Symbols returned no instruments")}catch{diag.push({error:"Weltrade broker symbol list unavailable"});continue}
+const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;
+const allSyms=families.flatMap(f=>f.symbols);const slot=Math.floor(Date.now()/300000)%4;
+// Prioritize the requested three families every run; rotate the other families.
+const priority=new Set(FAMILIES.slice(0,3).flatMap(f=>f.symbols));
+const pick=new Set(wanted?[wanted]:allSyms.filter((symbol,i)=>priority.has(symbol)||i%4===slot));
+const t0=Date.now();for(const f of families)for(const symbol of f.symbols){if(!pick.has(symbol))continue;if(Date.now()-t0>100000)break;
+const candidates=studioSymbolCandidates(symbol,brokerSymbols);if(!candidates.length){diag.push({symbol,error:"No matching symbol in broker Symbols"});continue}
+let offsetSec=0;try{offsetSec=studioOffset(await api(base,key,"/GetQuote",{id:session,symbol:candidates[0]}),Date.now())}catch{}
+const shift=(ms:number)=>new Date(ms+offsetSec*1000).toISOString().slice(0,19);
+const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};const frames:any[]=(await Promise.all(Object.entries(TF).map(async([name,mins])=>{const out:any[]=[];try{
   const fetchMinutes=name==="D3"?1440:mins;
   const fetchBars=name==="D3"?300:500;
-  const raw=bars(await api(base,key,"/PriceHistory",{id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString().slice(0,19),to:new Date().toISOString().slice(0,19),timeFrame:fetchMinutes}));
+  let raw:Candle[]=[];let resolved=candidates[0];
+  for(const candidate of candidates){
+    for(const windowMinutes of [...new Set([fetchBars*fetchMinutes,1440,10080])]){
+      raw=studioCandles(await api(base,key,"/PriceHistory",{id:session,symbol:candidate,from:shift(Date.now()-windowMinutes*60000),to:shift(Date.now()),timeFrame:fetchMinutes}),offsetSec)
+        .filter(bar=>bar.time+fetchMinutes*60<=Math.floor(Date.now()/1000));
+      resolved=candidate;if(raw.length>=60)break;
+    }
+    if(raw.length>=60)break;
+  }
   const data=name==="D3"?aggregateDays(raw,3):raw;
-  if(data.length<60&&diag.length<40)diag.push({symbol,resolved:resolve(symbol),tf:name,error:`only ${data.length} usable candles`});out.push({n:name,data,sig:frameSignal(data,f.bias,profile)});
-}catch(e){if(diag.length<40)diag.push({symbol,resolved:resolve(symbol),tf:name,error:String(e)});out.push({n:name,sig:null})}return out}))).flat();
+  if(data.length<60&&diag.length<40)diag.push({symbol,resolved:candidates[0],tf:name,error:`only ${data.length} usable candles`});out.push({n:name,data,sig:frameSignal(data,f.bias,profile)});
+}catch(e){if(diag.length<40)diag.push({symbol,resolved:candidates[0],tf:name,error:String(e)});out.push({n:name,sig:null})}return out}))).flat();
 
 const get=(name:string)=>frames.find(x=>x.n===name)?.sig??null;
 const bias15=get("M15"), biasH1=get("H1"), biasD1=get("D1"), biasD3=get("D3"), scalp=get("M1"), scalp5=get("M5");
@@ -173,14 +199,14 @@ for(const plan of setups){
   const required=plan.tf==="1m"?1:plan.tf==="15m"?1:plan.tf==="1H"?1:plan.tf==="3D"?1:0;
   if(same<required || plan.setup.score<plan.min) continue;
   const entry=plan.setup.entry;
-  const sourceFrame=frames.find((x:any)=>x.n===plan.tf);
-  const sourceCandle=sourceFrame?.data?.at(-1)??null;
+  const sourceFrame=frames.find((x:any)=>x.n===({"1m":"M1","5m":"M5","15m":"M15","1H":"H1","1D":"D1","3D":"D3"} as Record<string,string>)[plan.tf]);
+  const sourceCandle=sourceFrame?.data?.at(-1)??null;if(!sourceCandle)continue;
   const candleTime=Number(sourceCandle?.time??0);
   const tfSeconds=plan.tf==="1m"?60:plan.tf==="5m"?300:plan.tf==="15m"?900:plan.tf==="1H"?3600:plan.tf==="1D"?86400:259200;
   const candleClosed=Boolean(candleTime>0 && candleTime+tfSeconds<=Math.floor(Date.now()/1000));
   const levels=moderateLevels(sourceFrame?.data??sourceFrame?.candles??[],plan.setup.direction,plan.tf);
   const sl=levels.sl,tp=levels.tp;
-  const detectedStrategies=strategyTypes(frames.find((x:any)=>x.n===plan.tf)?.data??[],plan.setup.direction,plan.tf);
+  const detectedStrategies=strategyTypes(frames.find((x:any)=>x.n===({"1m":"M1","5m":"M5","15m":"M15","1H":"H1","1D":"D1","3D":"D3"} as Record<string,string>)[plan.tf])?.data??[],plan.setup.direction,plan.tf);
   const strategyLabels=detectedStrategies.length?detectedStrategies:["TREND"];
   const strategyLabel=`${profile.label} · ${plan.label} · ${strategyLabels.join(" + ")}`;
   const gate=performanceGate(performanceIndex,symbol,plan.tf,strategyLabel);
@@ -201,5 +227,5 @@ for(const plan of setups){
       feed_audit:{source:"Weltrade SyntX API Studio",symbol,requested_timeframe:plan.tf,candle_time:candleTime,candle_closed:candleClosed,candle_ohlc:sourceCandle?{open:sourceCandle.open,high:sourceCandle.high,low:sourceCandle.low,close:sourceCandle.close}:null,entry_price:entry}
     }
   }).select("id,symbol,direction,confidence,timeframe").single();
-  if(!ins&&row)published.push(row);
-}}}console.log("syntx run",JSON.stringify({conns:(connections??[]).length,published:published.length,diag:diag.slice(0,6)}));return new Response(JSON.stringify({success:true,published,count:published.length,diagnostics:diag,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{"Content-Type":"application/json"}})}});
+  if(ins)diag.push({symbol,tf:plan.tf,error:`Signal save failed: ${ins.message}`});else if(row)published.push(row);
+}}}console.log("syntx run",JSON.stringify({conns:(connections??[]).length,published:published.length,diag:diag.slice(0,6)}));return new Response(JSON.stringify({success:true,published,count:published.length,diagnostics:diag,generated_at:new Date().toISOString(),source:"Weltrade SyntX API Studio"}),{headers:{...corsHeaders,"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:String(e)}),{status:500,headers:{...corsHeaders,"Content-Type":"application/json"}})}});
