@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, ExternalLink } from "lucide-react";
+import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, ExternalLink, House, Smartphone } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -164,16 +164,16 @@ export const BotvioRobotDashboard = () => {
   return (
     <div className="min-h-screen bg-[#080d16] text-slate-100">
       <Header />
-      <main className="mx-auto max-w-[1440px] space-y-6 px-3 py-5 sm:px-5 lg:px-8">
+      <main className="mx-auto max-w-[1440px] space-y-5 px-3 pb-24 pt-4 sm:space-y-6 sm:px-5 sm:py-5 md:pb-8 lg:px-8">
         <section className="relative isolate overflow-hidden rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-[#102d2a] via-[#101d2a] to-[#101522] p-5 shadow-2xl shadow-black/20 sm:p-8">
           <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-amber-300/10 blur-3xl" />
           <div className="relative grid gap-6 lg:grid-cols-[1.5fr_.8fr] lg:items-center">
             <div>
               <Badge variant="outline" className="mb-3 border-emerald-300/30 bg-emerald-300/10 text-emerald-200">BOTVIO TRADING WORKSPACE</Badge>
-              <h1 className="max-w-3xl text-3xl font-black tracking-tight sm:text-4xl">Your trading, connected in one place.</h1>
+              <h1 className="max-w-3xl text-2xl font-black tracking-tight sm:text-4xl">Your trading, connected in one place.</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">Review your access, connect your preferred trading platform, follow providers and monitor verified open positions from your connected accounts.</p>
-              <div className="mt-6 flex flex-wrap gap-2">
+              <div className="mt-5 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                 <Button asChild className="bg-emerald-300 text-slate-950 hover:bg-emerald-200"><Link to="/connections">Connect trading account <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                 <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10"><Link to="/marketplace">Explore plans <ExternalLink className="ml-2 h-4 w-4" /></Link></Button>
               </div>
@@ -192,22 +192,22 @@ export const BotvioRobotDashboard = () => {
           </div>
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
           {metrics.map(({ label, value, tone, icon: Icon }) => (
-            <Card key={label} className="border-white/10 bg-[#111a28] text-slate-100 shadow-lg shadow-black/10">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between"><div className="rounded-xl border border-white/10 bg-white/5 p-2"><Icon className={`h-5 w-5 ${tone}`} /></div><span className="h-2 w-2 rounded-full bg-emerald-400" /></div>
-                <p className="mt-4 text-xs font-medium text-slate-400">{label}</p>
-                <p className="mt-1 text-2xl font-bold tracking-tight">{value}</p>
+            <Card key={label} className="min-w-0 border-white/10 bg-[#111a28] text-slate-100 shadow-lg shadow-black/10">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center justify-between"><div className="rounded-lg border border-white/10 bg-white/5 p-1.5 sm:rounded-xl sm:p-2"><Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${tone}`} /></div><span className="h-2 w-2 rounded-full bg-emerald-400" /></div>
+                <p className="mt-3 break-words text-[11px] font-medium leading-4 text-slate-400 sm:mt-4 sm:text-xs">{label}</p>
+                <p className="mt-1 text-xl font-bold tracking-tight sm:text-2xl">{value}</p>
               </CardContent>
             </Card>
           ))}
         </section>
 
-        <section className="grid gap-5 xl:grid-cols-[1.35fr_.8fr]">
+        <section className="grid min-w-0 gap-4 sm:gap-5 xl:grid-cols-[1.35fr_.8fr]">
           <div className="space-y-5">
-            <Card className="border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <Card className="min-w-0 border-white/10 bg-[#111a28] text-slate-100">
+              <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-3 p-4 sm:p-6">
                 <div><CardTitle className="text-lg">Your access</CardTitle><CardDescription className="text-slate-400">Subscriptions and products linked to your account</CardDescription></div>
                 <Button asChild variant="outline" size="sm" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/marketplace">View plans</Link></Button>
               </CardHeader>
@@ -226,21 +226,21 @@ export const BotvioRobotDashboard = () => {
             </Card>
 
             <Card className="border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-lg">Open trades</CardTitle><CardDescription className="text-slate-400">Positions returned by your connected TradeCopy follower accounts</CardDescription></div><Badge variant="outline" className="border-emerald-300/20 text-emerald-200"><Activity className="mr-1 h-3 w-3" /> Live lookup</Badge></div></CardHeader>
-              <CardContent>
+              <CardHeader className="p-4 sm:p-6"><div className="flex flex-wrap items-center justify-between gap-3"><div><CardTitle className="text-lg">Open trades</CardTitle><CardDescription className="text-slate-400">Positions returned by your connected TradeCopy follower accounts</CardDescription></div><Badge variant="outline" className="border-emerald-300/20 text-emerald-200"><Activity className="mr-1 h-3 w-3" /> Live lookup</Badge></div></CardHeader>
+              <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
                 {positionLoading ? <div className="space-y-2"><div className="h-10 animate-pulse rounded-lg bg-white/5" /><div className="h-10 animate-pulse rounded-lg bg-white/5" /></div> :
                   positionErrors || followerAccounts.isError ? <div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100">Open positions could not be verified for one or more accounts. Check your connection status or open Trading Connections.</div> :
-                  positions.length ? <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-white/10 text-xs text-slate-400"><th className="py-3 pr-3 font-medium">Account</th><th className="py-3 pr-3 font-medium">Market</th><th className="py-3 pr-3 font-medium">Side</th><th className="py-3 pr-3 font-medium">Volume</th><th className="py-3 pr-3 font-medium">Entry</th><th className="py-3 font-medium">Floating P/L</th></tr></thead><tbody>{positions.map((position) => <tr key={position.key} className="border-b border-white/5 last:border-0"><td className="py-3 pr-3"><p className="font-medium">{position.account}</p><p className="text-xs text-slate-500">{position.broker}</p></td><td className="py-3 pr-3 font-semibold">{position.symbol}</td><td className={`py-3 pr-3 font-semibold ${position.side.includes("BUY") ? "text-emerald-300" : position.side.includes("SELL") ? "text-rose-300" : "text-slate-300"}`}>{position.side}</td><td className="py-3 pr-3">{position.volume}</td><td className="py-3 pr-3">{position.entry == null ? "—" : String(position.entry)}</td><td className={`py-3 font-semibold ${Number(position.pnl) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{position.pnl == null ? "—" : Number(position.pnl).toFixed(2)}</td></tr>)}</tbody></table><p className="mt-3 text-xs text-slate-500">Prices and P/L are shown only when returned by the connected TradeCopy account.</p></div> :
+                  positions.length ? <><div className="space-y-3 md:hidden">{positions.map((position) => <article key={position.key} className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="break-words font-semibold">{position.symbol}</p><p className="mt-1 break-words text-xs text-slate-400">{position.account} · {position.broker}</p></div><Badge variant="outline" className={position.side.includes("BUY") ? "shrink-0 border-emerald-300/30 text-emerald-200" : position.side.includes("SELL") ? "shrink-0 border-rose-300/30 text-rose-200" : "shrink-0 border-white/15 text-slate-300"}>{position.side}</Badge></div><div className="mt-3 grid grid-cols-2 gap-3"><div><p className="text-[11px] text-slate-500">Volume</p><p className="mt-1 text-sm font-medium">{position.volume}</p></div><div><p className="text-[11px] text-slate-500">Entry price</p><p className="mt-1 break-all font-mono text-sm">{position.entry == null ? "—" : String(position.entry)}</p></div><div className="col-span-2 rounded-lg bg-black/20 p-2.5"><p className="text-[11px] text-slate-500">Floating P/L</p><p className={`mt-1 text-lg font-bold ${position.pnl == null ? "text-slate-300" : Number(position.pnl) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{position.pnl == null ? "—" : Number(position.pnl).toFixed(2)}</p></div></div></article>)}</div><div className="hidden overflow-x-auto md:block"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-white/10 text-xs text-slate-400"><th className="py-3 pr-3 font-medium">Account</th><th className="py-3 pr-3 font-medium">Market</th><th className="py-3 pr-3 font-medium">Side</th><th className="py-3 pr-3 font-medium">Volume</th><th className="py-3 pr-3 font-medium">Entry</th><th className="py-3 font-medium">Floating P/L</th></tr></thead><tbody>{positions.map((position) => <tr key={position.key} className="border-b border-white/5 last:border-0"><td className="py-3 pr-3"><p className="font-medium">{position.account}</p><p className="text-xs text-slate-500">{position.broker}</p></td><td className="py-3 pr-3 font-semibold">{position.symbol}</td><td className={`py-3 pr-3 font-semibold ${position.side.includes("BUY") ? "text-emerald-300" : position.side.includes("SELL") ? "text-rose-300" : "text-slate-300"}`}>{position.side}</td><td className="py-3 pr-3">{position.volume}</td><td className="py-3 pr-3">{position.entry == null ? "—" : String(position.entry)}</td><td className={`py-3 font-semibold ${Number(position.pnl) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{position.pnl == null ? "—" : Number(position.pnl).toFixed(2)}</td></tr>)}</tbody></table><p className="mt-3 text-xs text-slate-500">Prices and P/L are shown only when returned by the connected TradeCopy account.</p></div></> :
                   <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Activity className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No trades currently running</p><p className="mt-1 text-sm text-slate-400">No open positions were returned by your connected TradeCopy follower accounts.</p></div>}
-                <div className="mt-4 flex flex-wrap gap-2"><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/trade-history">Trade history <ArrowRight className="ml-2 h-4 w-4" /></Link></Button><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/connections">Manage connections <Wallet className="ml-2 h-4 w-4" /></Link></Button></div>
+                <div className="mt-4 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap"><Button asChild variant="outline" className="min-h-11 border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/trade-history">Trade history <ArrowRight className="ml-2 h-4 w-4" /></Link></Button><Button asChild variant="outline" className="min-h-11 border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/connections">Manage connections <Wallet className="ml-2 h-4 w-4" /></Link></Button></div>
               </CardContent>
             </Card>
           </div>
 
           <aside className="space-y-5">
-            <Card className="border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader><CardTitle className="text-lg">Trading platforms</CardTitle><CardDescription className="text-slate-400">Choose the workflow you want to open</CardDescription></CardHeader>
-              <CardContent className="space-y-3">{workflows.map(({ title, description, icon: Icon, href, action, accent }) => <div key={title} className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="flex items-start gap-3"><div className="rounded-lg bg-white/5 p-2"><Icon className={`h-5 w-5 ${accent}`} /></div><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{title}</p><p className="mt-1 text-xs leading-5 text-slate-400">{description}</p><Button asChild variant="link" className="mt-1 h-auto p-0 text-emerald-300"><Link to={href}>{action} <ArrowRight className="ml-1 h-3 w-3" /></Link></Button></div></div></div>)}</CardContent>
+            <Card className="min-w-0 border-white/10 bg-[#111a28] text-slate-100">
+              <CardHeader className="p-4 sm:p-6"><CardTitle className="text-lg">Trading platforms</CardTitle><CardDescription className="text-slate-400">Choose the workflow you want to open</CardDescription></CardHeader>
+              <CardContent className="space-y-3 px-4 pb-4 sm:px-6 sm:pb-6">{workflows.map(({ title, description, icon: Icon, href, action, accent }) => <div key={title} className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="flex items-start gap-3"><div className="rounded-lg bg-white/5 p-2"><Icon className={`h-5 w-5 ${accent}`} /></div><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{title}</p><p className="mt-1 text-xs leading-5 text-slate-400">{description}</p><Button asChild variant="link" className="mt-1 min-h-11 h-auto justify-start p-0 text-emerald-300"><Link to={href}>{action} <ArrowRight className="ml-1 h-3 w-3" /></Link></Button></div></div></div>)}</CardContent>
             </Card>
             <Card className="border-white/10 bg-[#111a28] text-slate-100">
               <CardHeader><CardTitle className="text-lg">Robot execution master</CardTitle><CardDescription className="text-slate-400">Existing Botvio Robot master account and controls</CardDescription></CardHeader>
@@ -250,6 +250,17 @@ export const BotvioRobotDashboard = () => {
           </aside>
         </section>
       </main>
+      <nav aria-label="Mobile dashboard navigation" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080d16]/95 px-1 pb-[env(safe-area-inset-bottom)] pt-1.5 shadow-[0_-8px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl md:hidden">
+        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
+          {[
+            { label: "Home", href: "/botvio-robot", icon: House },
+            { label: "Accounts", href: "/connections", icon: Wallet },
+            { label: "Signals", href: "/signals", icon: Radio },
+            { label: "Copy", href: "/copy-trading/my", icon: Users },
+            { label: "AI Bots", href: "/bots", icon: Bot },
+          ].map(({ label, href, icon: Icon }) => <Link key={label} to={href} aria-label={label} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg px-1 text-[10px] font-medium transition-colors ${href === "/botvio-robot" ? "text-emerald-300" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}><Icon className="h-5 w-5" aria-hidden="true" /><span>{label}</span></Link>)}
+        </div>
+      </nav>
     </div>
   );
 };
