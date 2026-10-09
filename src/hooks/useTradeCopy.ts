@@ -85,7 +85,7 @@ export function useFollowerSignalPreferences(tradingAccountId?: string) {
     queryKey: ["tradecopy", "signal-preferences", tradingAccountId, user?.id],
     enabled: !!user && !!tradingAccountId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("follower_signal_preferences")
         .select("id,user_id,trading_account_id,mode,allowed_symbols,updated_at,created_at")
         .eq("trading_account_id", tradingAccountId!)
@@ -109,7 +109,7 @@ export function useSaveFollowerSignalPreferences() {
     mutationFn: async (input: { tradingAccountId: string; mode: "all" | "selected"; allowedSymbols: string[] }) => {
       if (!user) throw new TradeCopyClientError("Sign in required", "auth_required");
       const allowedSymbols = [...new Set(input.allowedSymbols.map((s) => s.toUpperCase().trim()).filter(Boolean))];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("follower_signal_preferences")
         .upsert({
           user_id: user.id,
