@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FollowerTradeCopyPanel } from "@/components/tradecopy/FollowerTradeCopyPanel";
-import { TradeCopyCloudSignalPanel } from "@/components/tradecopy/TradeCopyCloudSignalPanel";
 import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradingAccountCard";
 import { TradeCopyAccountDashboard } from "@/components/tradecopy/TradeCopyAccountDashboard";
 import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
@@ -24,8 +23,8 @@ import { toast } from "sonner";
 const money = (value: number) => `${value >= 0 ? "+" : "-"}$${Math.abs(value).toFixed(2)}`;
 
 export const FollowerDashboard = () => {
-  const { data: subscriptions } = useMyCopySubscriptions();
-  const { data: copiedTrades } = useMyCopiedTrades();
+  const { data: subscriptions, isLoading: subscriptionsLoading } = useMyCopySubscriptions();
+  const { data: copiedTrades, isLoading: tradesLoading } = useMyCopiedTrades();
   const active = (subscriptions ?? []).filter((s) => s.status === "active");
   const pnl = (copiedTrades ?? []).reduce((sum, trade) => sum + Number(trade.profit_loss ?? 0), 0);
 
@@ -34,59 +33,86 @@ export const FollowerDashboard = () => {
       <Header />
       <main className="container mx-auto max-w-7xl space-y-5 px-4 py-6">
         <section className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-5 sm:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <Badge variant="outline" className="mb-2 border-primary/30 text-primary">FOLLOWER CONTROL CENTER</Badge>
+              <Badge variant="outline" className="mb-2 border-primary/30 text-primary">YOUR COPY TRADING</Badge>
               <h1 className="text-2xl font-bold">My Copy Trading</h1>
-              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                Manage Deriv copy subscriptions and MT5 TradeCopy relationships from one place.
-                Your connected account and risk controls remain separate from each provider.
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                Connect the account that will receive trades, choose Botvio Robot or an approved provider, then review your settings and status below.
               </p>
             </div>
-            <Button asChild><Link to="/copy-trading">Discover providers <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            <Button asChild><Link to="/copy-trading">Find a provider <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-border/60 bg-background/70 p-3">
+              <p className="text-xs text-muted-foreground">Active Deriv subscriptions</p>
+              <p className="mt-1 text-2xl font-bold">{subscriptionsLoading ? "…" : active.length}</p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-background/70 p-3">
+              <p className="text-xs text-muted-foreground">Recorded copied trades</p>
+              <p className="mt-1 text-2xl font-bold">{tradesLoading ? "…" : copiedTrades?.length ?? 0}</p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-background/70 p-3">
+              <p className="text-xs text-muted-foreground">Recorded P/L</p>
+              <p className={`mt-1 text-2xl font-bold ${pnl >= 0 ? "text-success" : "text-destructive"}`}>{tradesLoading ? "…" : money(pnl)}</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Based on recorded copied trades, not a live account balance.</p>
+            </div>
           </div>
         </section>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Card className="glass-card"><CardContent className="p-4"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Users className="h-4 w-4 text-primary" /> Active Deriv copies</div><div className="mt-1 text-2xl font-bold">{active.length}</div></CardContent></Card>
-          <Card className="glass-card"><CardContent className="p-4"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Copy className="h-4 w-4 text-primary" /> Recorded copied trades</div><div className="mt-1 text-2xl font-bold">{copiedTrades?.length ?? 0}</div></CardContent></Card>
-          <Card className="glass-card"><CardContent className="p-4"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Activity className="h-4 w-4 text-primary" /> Recorded P/L</div><div className={`mt-1 text-2xl font-bold ${pnl >= 0 ? "text-success" : "text-destructive"}`}>{money(pnl)}</div></CardContent></Card>
-        </div>
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold">1. Connect and manage your follower account</h2>
+            <p className="text-sm text-muted-foreground">Connect MT5, choose what to copy, adjust settings, and use Start, Pause or Emergency Stop. Demo testing is recommended first.</p>
+          </div>
+          <FollowerTradeCopyPanel />
+        </section>
 
-        <CopyTradingRoleGuide role="follower" />
+        <details className="group rounded-xl border border-border/60 bg-card p-4">
+          <summary className="cursor-pointer list-none text-sm font-semibold">
+            <span className="flex items-center justify-between gap-3">
+              Account connection status and open orders
+              <span className="text-xs font-normal text-muted-foreground group-open:hidden">Show details</span>
+              <span className="hidden text-xs font-normal text-muted-foreground group-open:inline">Hide details</span>
+            </span>
+          </summary>
+          <div className="mt-4">
+            <TradeCopyAccountDashboard role="slave" />
+          </div>
+        </details>
 
-        <TradeCopyCloudSignalPanel />
-
-        <TradeCopyAccountDashboard role="slave" />
-
-        <FollowerTradeCopyPanel />
-
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="text-sm">Deriv copy subscriptions</CardTitle>
-            <CardDescription>Existing Deriv provider subscriptions remain available here.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {active.length === 0 ? (
-              <div className="rounded-lg border border-border/60 p-4 text-center text-sm text-muted-foreground">
-                No active Deriv subscriptions.
-              </div>
-            ) : active.map((sub) => (
-              <div key={sub.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
-                <div>
-                  <p className="text-sm font-semibold">{sub.provider?.display_name ?? "Provider"}</p>
-                  <p className="text-xs text-muted-foreground">{sub.copy_mode ?? "fixed"} copy · {sub.subscriber_trading_account?.label ?? "Connected account"}</p>
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold">2. Existing Deriv copy subscriptions</h2>
+            <p className="text-sm text-muted-foreground">These are separate from MT5 TradeCopy connections.</p>
+          </div>
+          <Card className="glass-card">
+            <CardContent className="space-y-2 pt-4">
+              {subscriptionsLoading ? (
+                <p className="text-sm text-muted-foreground">Loading subscriptions…</p>
+              ) : active.length === 0 ? (
+                <div className="rounded-lg border border-border/60 p-4 text-center">
+                  <p className="text-sm font-medium">No active Deriv copy subscriptions</p>
+                  <p className="mt-1 text-xs text-muted-foreground">To follow a Deriv provider, browse the marketplace and complete its setup.</p>
+                  <Button className="mt-3" size="sm" asChild><Link to="/copy-trading">Browse providers</Link></Button>
                 </div>
-                <Badge variant="outline" className="border-success/30 bg-success/10 text-success">Active</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ) : active.map((sub) => (
+                <div key={sub.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
+                  <div>
+                    <p className="text-sm font-semibold">{sub.provider?.display_name ?? "Provider"}</p>
+                    <p className="text-xs text-muted-foreground">{sub.copy_mode ?? "fixed"} copy · {sub.subscriber_trading_account?.label ?? "Connected account"}</p>
+                  </div>
+                  <Badge variant="outline" className="border-success/30 bg-success/10 text-success">Active</Badge>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
 
         <Card className="border-warning/30 bg-warning/5">
           <CardContent className="flex items-start gap-3 p-4 text-xs text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-            Copy trading involves risk. Test on demo first and verify your risk controls before using a live account.
+            Copy trading involves risk. Start with a Demo account and check the selected account, lot size and risk limits before enabling copying.
           </CardContent>
         </Card>
       </main>

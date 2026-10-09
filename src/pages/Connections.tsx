@@ -21,9 +21,9 @@ const Connections = () => {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
               <ShieldCheck className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="mb-3 text-3xl font-bold">Trading Connections</h1>
+            <h1 className="mb-3 text-3xl font-bold">Connect Trading Accounts</h1>
             <p className="text-muted-foreground">
-              Connect your Deriv account for Deriv copy trading, or connect MT5 through TradeCopy Cloud
+              Connect your Deriv account for Deriv copy trading, or connect MT5 through MT5 TradeCopy
               for MT5 copy trading.
             </p>
           </div>
@@ -67,8 +67,8 @@ const Connections = () => {
           <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative">
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="border-primary/30 text-primary">BOTVIO CONNECT</Badge>
-              <Badge variant="secondary">2 supported copy routes</Badge>
+              <Badge variant="outline" className="border-primary/30 text-primary">ACCOUNT SETUP</Badge>
+              <Badge variant="secondary">Choose your connection</Badge>
             </div>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Trading Connections</h1>
             <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
@@ -80,15 +80,15 @@ const Connections = () => {
               <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-background/50 p-3">
                 <div className="rounded-lg bg-primary/10 p-2"><Wallet className="h-5 w-5 text-primary" /></div>
                 <div>
-                  <p className="text-sm font-semibold">Deriv Copy Trading</p>
-                  <p className="text-xs text-muted-foreground">Connect once with Deriv OAuth, then follow Botvio providers or Botvio Robot.</p>
+                  <p className="text-sm font-semibold">Deriv account</p>
+                  <p className="text-xs text-muted-foreground">Connect your Deriv account for supported Deriv features and account access.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-background/50 p-3">
                 <div className="rounded-lg bg-primary/10 p-2"><Monitor className="h-5 w-5 text-primary" /></div>
                 <div>
-                  <p className="text-sm font-semibold">MT5 Copy Trading · TradeCopy</p>
-                  <p className="text-xs text-muted-foreground">Connect an MT5 master or follower directly to TradeCopy Cloud. No Bridge EA required.</p>
+                  <p className="text-sm font-semibold">MT5 Copy Trading</p>
+                  <p className="text-xs text-muted-foreground">Choose Provider to publish trades or Follower to receive copied trades.</p>
                 </div>
               </div>
             </div>
@@ -99,19 +99,19 @@ const Connections = () => {
           <Card className="glass-card">
             <CardContent className="flex items-start gap-3 p-4">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" />
-              <div><p className="text-sm font-medium">Credentials protected</p><p className="text-xs text-muted-foreground">Secrets stay server-side.</p></div>
+              <div><p className="text-sm font-medium">Secure connection</p><p className="text-xs text-muted-foreground">Use the supported sign-in or connection flow.</p></div>
             </CardContent>
           </Card>
           <Card className="glass-card">
             <CardContent className="flex items-start gap-3 p-4">
               <Cloud className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-              <div><p className="text-sm font-medium">TradeCopy Cloud</p><p className="text-xs text-muted-foreground">MT5 copying without the legacy bridge flow.</p></div>
+              <div><p className="text-sm font-medium">TradeCopy Cloud</p><p className="text-xs text-muted-foreground">MT5 Provider and Follower copying.</p></div>
             </CardContent>
           </Card>
           <Card className="glass-card">
             <CardContent className="flex items-start gap-3 p-4">
               <Zap className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
-              <div><p className="text-sm font-medium">Pause / Stop / Emergency</p><p className="text-xs text-muted-foreground">Controls are available before live copying.</p></div>
+              <div><p className="text-sm font-medium">Copy controls</p><p className="text-xs text-muted-foreground">Review risk settings before starting.</p></div>
             </CardContent>
           </Card>
         </div>

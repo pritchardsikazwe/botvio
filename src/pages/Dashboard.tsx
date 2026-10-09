@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
 import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCircle, BarChart3, Signal, CandlestickChart } from "lucide-react";
 import { Header } from "@/components/trading/Header";
-import { MarketDataPanel } from "@/components/trading/MarketDataPanel";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { BotvioRobotSignalShortcut } from "@/components/dashboard/BotvioRobotSignalShortcut";
 import { useEntitlements, isEntitlementActive } from "@/hooks/useEntitlements";
@@ -69,7 +68,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Trading Dashboard" description="Monitor your active Botvio robots, MT5 connections, copy trading and portfolio performance in one workspace." noIndex />
+      <SEOHead title="My Dashboard" description="Monitor your active Botvio robots, MT5 connections, copy trading and portfolio performance in one workspace." noIndex />
       <Header />
       
       <main className="container mx-auto px-3 py-4 md:px-4">
@@ -77,7 +76,7 @@ const Dashboard = () => {
         <div className="mb-4">
           <h1 className="text-xl font-bold mb-1">Trading Dashboard</h1>
           <p className="text-muted-foreground">
-            Your Botvio access, MT5 connection, signals and activity in one place.
+            Your account, connected trading accounts, active products and next steps.
           </p>
         </div>
 
@@ -114,7 +113,7 @@ const Dashboard = () => {
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Hubs & Access</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Hubs</CardTitle>
               <BarChart3 className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent className="pt-1 pb-3"><div className="text-xl font-bold">{activeHubs}</div><p className="text-xs text-muted-foreground">active hub access</p></CardContent>
@@ -122,7 +121,7 @@ const Dashboard = () => {
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Connected Accounts</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Connected Trading Accounts</CardTitle>
               <Wallet className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
@@ -137,7 +136,7 @@ const Dashboard = () => {
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Copy Trading</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Copy Trading Subscriptions</CardTitle>
               <Users className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
@@ -153,13 +152,13 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Current Botvio Access */}
+        {/* My Products & Access */}
         <Card className="glass-card mb-4">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Current Botvio Access</CardTitle>
-                <CardDescription>Your active Store products</CardDescription>
+                <CardDescription>Your active subscriptions and product access</CardDescription>
               </div>
               <Button variant="outline" asChild>
                 <Link to="/marketplace">Open Botvio Store</Link>
@@ -176,10 +175,26 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Live Market Data Panel */}
-        <div className="mb-4">
-          <MarketDataPanel />
-        </div>
+        <Card className="glass-card mb-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Getting started</CardTitle>
+            <CardDescription>Follow these steps in order. You can explore signals without connecting an account.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-3">
+            <Link to="/connections" className="rounded-xl border border-border/60 p-3 hover:border-primary/40">
+              <p className="text-sm font-semibold">1. Connect an account</p>
+              <p className="mt-1 text-xs text-muted-foreground">Choose Deriv or MT5 TradeCopy based on what you want to do.</p>
+            </Link>
+            <Link to="/bots" className="rounded-xl border border-border/60 p-3 hover:border-primary/40">
+              <p className="text-sm font-semibold">2. Choose a robot</p>
+              <p className="mt-1 text-xs text-muted-foreground">Review available robots and access before activating anything.</p>
+            </Link>
+            <Link to="/signals" className="rounded-xl border border-border/60 p-3 hover:border-primary/40">
+              <p className="text-sm font-semibold">3. Review signals</p>
+              <p className="mt-1 text-xs text-muted-foreground">Check the setup and risk levels before making a trading decision.</p>
+            </Link>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Bot Instances */}
@@ -187,8 +202,8 @@ const Dashboard = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Legacy Bot Instances</CardTitle>
-                  <CardDescription>Your current bot instances</CardDescription>
+                  <CardTitle>My Bots & Robots</CardTitle>
+                  <CardDescription>Manage your configured robots</CardDescription>
                 </div>
                 <Button size="sm" asChild>
                   <Link to="/bots">
@@ -370,11 +385,12 @@ const Dashboard = () => {
         <div className="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">{[
           { path: "/signals", icon: Signal, label: "Live Signals" },
           { path: "/markets", icon: CandlestickChart, label: "Trading Workspace" },
-          { path: "/accounts", icon: Wallet, label: "Connect Account" },
+          { path: "/connections", icon: Wallet, label: "Connections & Copy Trading" },
           { path: "/bots", icon: Bot, label: "Activate Bot" },
           { path: "/copy-trading", icon: Users, label: "Copy Traders" },
           ...(myProvider ? [{ path: "/provider-dashboard", icon: TrendingUp, label: "Provider Panel" }] : []),
-        ].filter(action => !isRestrictedOnStore(action.path)).map(({ path, icon: Icon, label }) => <Button key={path} variant="outline" className="h-auto py-3 flex-col" asChild><Link to={path}><Icon className="h-6 w-6 mb-2" /><span>{label}</span></Link></Button>)}</div>\n    </main>
+        ].filter(action => !isRestrictedOnStore(action.path)).map(({ path, icon: Icon, label }) => <Button key={path} variant="outline" className="h-auto py-3 flex-col" asChild><Link to={path}><Icon className="h-6 w-6 mb-2" /><span>{label}</span></Link></Button>)}</div>
+    </main>
     </div>
   );
 };
