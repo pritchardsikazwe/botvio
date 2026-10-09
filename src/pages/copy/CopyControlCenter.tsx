@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, ExternalLink } from "lucide-react";
+import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -165,10 +168,33 @@ export const BotvioRobotDashboard = () => {
   const workflows = [
     { title: "Deriv Options", description: "Options contracts and supported synthetic markets", icon: Zap, href: "/options", action: "Open Options", accent: "text-amber-300" },
     { title: "Deriv Synthetic MT5 & Currencies", description: "Synthetic indices and supported currency pairs", icon: ChartNoAxesCombined, href: "/connections", action: "Manage MT5", accent: "text-emerald-300" },
-    { title: "Weltrade MT5", description: "Supported Forex, Gold, indices and SyntX markets", icon: Cloud, href: "/connections", action: "Manage account", accent: "text-cyan-300" },
+    { title: "Weltrade MT5", description: "Supported Forex, Gold, indices and SyntX markets", icon: Cloud, href: "/weltrade", action: "Open Weltrade hub", accent: "text-cyan-300" },
     { title: "Botvio Provider Signals", description: "Provider setup, signal delivery and execution status", icon: Radio, href: "/provider-dashboard", action: "Provider centre", accent: "text-violet-300" },
     { title: "Follow Providers", description: "Manage copy relationships and follower settings", icon: Users, href: "/copy-trading/my", action: "Manage follows", accent: "text-amber-300" },
   ];
+
+  if (authLoading) {
+    return <div className="min-h-screen bg-[#080d16] text-slate-100"><Header /><div className="flex items-center justify-center gap-2 py-24 text-sm text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /> Checking your session…</div></div>;
+  }
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#080d16] text-slate-100">
+        <Header />
+        <main className="mx-auto max-w-md px-4 py-20">
+          <Card className="border-white/10 bg-[#111a28] text-slate-100">
+            <CardContent className="p-6 text-center">
+              <Bot className="mx-auto h-10 w-10 text-emerald-300" />
+              <h1 className="mt-3 text-xl font-bold">Sign in to open Botvio Robot</h1>
+              <p className="mt-2 text-sm text-slate-400">Your subscriptions, trading accounts and open trades are private to your account.</p>
+              <Button className="mt-5 w-full bg-emerald-300 text-slate-950 hover:bg-emerald-200" onClick={() => setAuthOpen(true)}>Sign in</Button>
+              <Button asChild variant="link" className="mt-2 text-emerald-300"><Link to="/signup">Create a free account</Link></Button>
+            </CardContent>
+          </Card>
+        </main>
+        <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#080d16] text-slate-100">
