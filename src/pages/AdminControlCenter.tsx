@@ -11,13 +11,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { PaymentRequestsPanel } from "@/components/admin/PaymentRequestsPanel";
 import { AdminMonetizationTab } from "@/components/admin/AdminMonetizationTab";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
 import { AdminTradeCopyTab } from "@/components/admin/AdminTradeCopyTab";
 import { AdminSignalPerformancePanel } from "@/components/admin/AdminSignalPerformancePanel";
-import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Globe2, LayoutDashboard, Mail, Menu, MoreVertical, RefreshCw, Search, Send, Settings, ShieldCheck, Signal, Sparkles, TrendingUp, UserCheck, DollarSign, Users, WalletCards, Phone } from "lucide-react";
+import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Globe2, LayoutDashboard, Mail, Menu, MoreVertical, RefreshCw, Search, Send, Settings, ShieldCheck, Signal, Sparkles, TrendingUp, UserCheck, DollarSign, Users, WalletCards, Phone, KeyRound, Ban, CheckCircle2 } from "lucide-react";
 
 type AdminUser = { user_id:string; email:string|null; display_name:string|null; country:string|null; whatsapp_number:string|null; created_at:string|null; plan:string; status:"Active"|"Inactive"; online:boolean; last_seen_at:string|null; current_path:string|null; device_type:string|null };
 const PAGE_SIZE=10;
@@ -29,6 +30,7 @@ export default function AdminControlCenter(){
   const [onlineCount,setOnlineCount]=useState(0),[onlineUsers,setOnlineUsers]=useState<AdminUser[]>([]);
   const [planFilter,setPlanFilter]=useState("all"),[statusFilter,setStatusFilter]=useState("all"),[countryFilter,setCountryFilter]=useState("all");
   const [page,setPage]=useState(1),[selected,setSelected]=useState<string[]>([]),[promotionOpen,setPromotionOpen]=useState(false),[sending,setSending]=useState(false),[mobileMenuOpen,setMobileMenuOpen]=useState(false);
+  const [accessUser,setAccessUser]=useState<AdminUser|null>(null),[accessDialogOpen,setAccessDialogOpen]=useState(false),[accessProducts,setAccessProducts]=useState<Array<{id:string;name:string;type:string;slug:string}>>([]),[accessRows,setAccessRows]=useState<Array<{id:string;product_id:string;status:string;ends_at:string|null;product?:{name:string}}>>([]),[accessLoading,setAccessLoading]=useState(false),[accessBusy,setAccessBusy]=useState(false),[accessProductId,setAccessProductId]=useState(""),[accessExpiry,setAccessExpiry]=useState("");
   const [subject,setSubject]=useState("New AI Signals & Trading Update 🚀");
   const [message,setMessage]=useState("Hi {{name}},\n\nWe’ve just released new AI trading signals and market analysis on Botvio.\n\nLog in to your dashboard to see the latest updates.\n\nTrade smarter with Botvio.");
 
@@ -77,6 +79,51 @@ export default function AdminControlCenter(){
   const filtered=useMemo(()=>{const q=search.toLowerCase().trim();return users.filter(u=>(!q||[u.email,u.display_name,u.country].some(v=>v?.toLowerCase().includes(q)))&&(planFilter==="all"||u.plan===planFilter)&&(statusFilter==="all"||u.status.toLowerCase()===statusFilter)&&(countryFilter==="all"||u.country===countryFilter))},[users,search,planFilter,statusFilter,countryFilter]);
   const pageCount=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE)),visible=filtered.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
   useEffect(()=>{if(page>pageCount)setPage(pageCount)},[page,pageCount]);
+
+  const openUserAccess=async(u:AdminUser)=>{
+    setAccessUser(u);setAccessDialogOpen(true);setAccessLoading(true);setAccessProductId("");setAccessExpiry(new Date(Date.now()+30*86400000).toISOString().slice(0,10));
+    try{
+      const [products,grants]=await Promise.all([
+        (supabase as any).from("products").select("id,name,type,slug").eq("is_active",true).order("name"),
+        (supabase as any).from("entitlements").select("id,product_id,status,ends_at,products(name)").eq("user_id",u.user_id).order("started_at",{ascending:false})
+      ]);
+      if(products.error)throw products.error;if(grants.error)throw grants.error;
+      setAccessProducts(products.data||[]);
+      setAccessRows((grants.data||[]).map((r:any)=>({...r,product:{name:r.products?.name||"Feature"}})));
+    }catch(e:any){toast.error(e?.message||"Could not load feature access");}
+    finally{setAccessLoading(false);}
+  };
+  const grantUserAccess=async()=>{
+    if(!accessUser||!accessProductId)return toast.error("Choose a feature first");
+    let endsAt:string|null=null;
+    if(accessExpiry){endsAt=new Date(accessExpiry+"T23:59:59").toISOString();if(new Date(endsAt).getTime()<=Date.now())return toast.error("Expiry must be in the future");}
+    setAccessBusy(true);
+    try{
+      const {data:existing,error:lookupError}=await (supabase as any).from("entitlements").select("id").eq("user_id",accessUser.user_id).eq("product_id",accessProductId).maybeSingle();
+      if(lookupError)throw lookupError;
+      const payload={status:"active",started_at:new Date().toISOString(),ends_at:endsAt,source_order_id:null};
+      const result=existing?await (supabase as any).from("entitlements").update(payload).eq("id",existing.id):await (supabase as any).from("entitlements").insert({...payload,user_id:accessUser.user_id,product_id:accessProductId});
+      if(result.error)throw result.error;
+      const product=accessProducts.find(p=>p.id===accessProductId);
+      const notice=await (supabase as any).from("notifications").insert({user_id:accessUser.user_id,type:"success",title:"Feature Access Approved",message:`Access to ${product?.name||"a Botvio feature"} has been approved by an administrator.${endsAt?" Access ends "+new Date(endsAt).toLocaleDateString()+".":" Access has no expiry date."}`});
+      if(notice.error)console.warn("Access enabled but user notification failed",notice.error.message);
+      toast.success("Feature access approved and enabled");await openUserAccess(accessUser);
+    }catch(e:any){toast.error(e?.message||"Could not grant feature access");}
+    finally{setAccessBusy(false);}
+  };
+  const disableUserAccess=async(row:{id:string;product_id:string})=>{
+    if(!accessUser||!window.confirm("Disable this feature for the selected user?"))return;
+    setAccessBusy(true);
+    try{
+      const {error}=await (supabase as any).from("entitlements").update({status:"revoked",ends_at:new Date().toISOString()}).eq("id",row.id);
+      if(error)throw error;
+      const product=accessProducts.find(p=>p.id===row.product_id);
+      const notice=await (supabase as any).from("notifications").insert({user_id:accessUser.user_id,type:"warning",title:"Feature Access Updated",message:`Access to ${product?.name||"a Botvio feature"} has been disabled by an administrator.`});
+      if(notice.error)console.warn("Access disabled but user notification failed",notice.error.message);
+      toast.success("Feature access disabled");await openUserAccess(accessUser);
+    }catch(e:any){toast.error(e?.message||"Could not disable feature access");}
+    finally{setAccessBusy(false);}
+  };
 
   const sendPromotion=async()=>{
     const recipients=users.filter(u=>selected.includes(u.user_id)&&u.email).map(u=>({user_id:u.user_id,email:u.email,name:u.display_name}));
@@ -151,7 +198,7 @@ export default function AdminControlCenter(){
               <Button variant="ghost" onClick={()=>{setSearch("");setPlanFilter("all");setCountryFilter("all");setStatusFilter("all");setPage(1)}}>Clear</Button>
             </div>
             <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-slate-50 border-b"><tr><th className="p-3 text-left"><Checkbox checked={visible.length>0&&visible.every(u=>selected.includes(u.user_id))} onCheckedChange={v=>setSelected(prev=>v?Array.from(new Set([...prev,...visible.map(u=>u.user_id)])):prev.filter(id=>!visible.some(u=>u.user_id===id)))}/></th><th className="p-3 text-left">User</th><th className="p-3 text-left">Country</th><th className="p-3 text-left">Plan</th><th className="p-3 text-left">Status</th><th className="p-3 text-left">Presence</th><th className="p-3 text-left">Joined</th><th/></tr></thead><tbody>
-              {loading?Array.from({length:6}).map((_,i)=><tr key={i} className="border-b"><td colSpan={8} className="p-5"><div className="h-4 bg-slate-100 rounded animate-pulse"/></td></tr>):visible.map(u=><tr key={u.user_id} className="border-b hover:bg-slate-50"><td className="p-3"><Checkbox checked={selected.includes(u.user_id)} onCheckedChange={v=>setSelected(prev=>v?Array.from(new Set([...prev,u.user_id])):prev.filter(id=>id!==u.user_id))}/></td><td className="p-3"><div className="font-medium">{u.display_name||"Unnamed user"}</div><div className="text-xs text-muted-foreground">{u.email||"No email"}</div></td><td className="p-3">{u.country||"—"}</td><td className="p-3"><Badge variant={u.plan.toLowerCase()==="free"?"secondary":"default"}>{u.plan}</Badge></td><td className="p-3"><Badge className={u.status==="Active"?"bg-emerald-600":"bg-slate-400"}>{u.status}</Badge></td><td className="p-3"><div className="flex items-center gap-2"><span className={u.online?"h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse":"h-2.5 w-2.5 rounded-full bg-slate-300"}/><span className={u.online?"text-emerald-700 font-medium":"text-slate-400"}>{u.online?"Online":"Offline"}</span></div>{u.online&&<div className="text-[11px] text-muted-foreground mt-1 truncate max-w-40">{u.current_path||"Active session"}{u.device_type?" · "+u.device_type:""}</div>}</td><td className="p-3 text-muted-foreground">{u.created_at?new Date(u.created_at).toLocaleDateString():"—"}</td><td className="p-3"><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></td></tr>)}
+              {loading?Array.from({length:6}).map((_,i)=><tr key={i} className="border-b"><td colSpan={8} className="p-5"><div className="h-4 bg-slate-100 rounded animate-pulse"/></td></tr>):visible.map(u=><tr key={u.user_id} className="border-b hover:bg-slate-50"><td className="p-3"><Checkbox checked={selected.includes(u.user_id)} onCheckedChange={v=>setSelected(prev=>v?Array.from(new Set([...prev,u.user_id])):prev.filter(id=>id!==u.user_id))}/></td><td className="p-3"><button type="button" onClick={()=>openUserAccess(u)} className="text-left rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary hover:text-primary"><div className="font-medium flex items-center gap-2">{u.display_name||"Unnamed user"}<KeyRound className="h-3.5 w-3.5 opacity-50"/></div><div className="text-xs text-muted-foreground">{u.email||"No email"}</div><div className="text-[11px] text-primary mt-1">Manage access</div></button></td><td className="p-3">{u.country||"—"}</td><td className="p-3"><Badge variant={u.plan.toLowerCase()==="free"?"secondary":"default"}>{u.plan}</Badge></td><td className="p-3"><Badge className={u.status==="Active"?"bg-emerald-600":"bg-slate-400"}>{u.status}</Badge></td><td className="p-3"><div className="flex items-center gap-2"><span className={u.online?"h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse":"h-2.5 w-2.5 rounded-full bg-slate-300"}/><span className={u.online?"text-emerald-700 font-medium":"text-slate-400"}>{u.online?"Online":"Offline"}</span></div>{u.online&&<div className="text-[11px] text-muted-foreground mt-1 truncate max-w-40">{u.current_path||"Active session"}{u.device_type?" · "+u.device_type:""}</div>}</td><td className="p-3 text-muted-foreground">{u.created_at?new Date(u.created_at).toLocaleDateString():"—"}</td><td className="p-3"><Button type="button" variant="ghost" size="icon" title="Manage user access" aria-label={"Manage access for "+(u.display_name||u.email||"user")} onClick={()=>openUserAccess(u)}><MoreVertical className="h-4 w-4"/></Button></td></tr>)}
               {!loading&&!visible.length&&<tr><td colSpan={7} className="p-10 text-center text-muted-foreground">No users match your filters.</td></tr>}
             </tbody></table></div>
             <div id="live-users-panel" className="p-4 border-t bg-slate-50"><div className="flex items-center justify-between"><div><div className="font-semibold text-sm flex items-center gap-2"><Activity className="h-4 w-4 text-emerald-600"/>Live users</div><div className="text-xs text-muted-foreground mt-1">Logged-in users with a heartbeat in the last 90 seconds.</div></div><Badge className="bg-emerald-600">{onlineCount} online</Badge></div>{onlineUsers.length>0&&<div className="mt-3 flex flex-wrap gap-2">{onlineUsers.slice(0,12).map(u=><div key={u.user_id} className="rounded-full bg-white border px-3 py-1.5 text-xs flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500"/><span>{u.display_name||u.email||"User"}</span></div>)}{onlineUsers.length>12&&<span className="text-xs text-muted-foreground self-center">+{onlineUsers.length-12} more</span>}</div>}</div><div className="p-4 flex justify-between text-sm text-muted-foreground"><span>Showing {filtered.length?((page-1)*PAGE_SIZE)+1:0}–{Math.min(page*PAGE_SIZE,filtered.length)} of {filtered.length}</span><div className="flex items-center gap-1"><Button variant="outline" size="icon" disabled={page<=1} onClick={()=>setPage(p=>p-1)}><ChevronLeft/></Button><span className="px-2">{page}/{pageCount}</span><Button variant="outline" size="icon" disabled={page>=pageCount} onClick={()=>setPage(p=>p+1)}><ChevronRight/></Button></div></div>
@@ -161,6 +208,11 @@ export default function AdminControlCenter(){
       </div>
     </main>
 
+    <Dialog open={accessDialogOpen} onOpenChange={setAccessDialogOpen}><DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto"><DialogHeader><DialogTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5"/>Manage User Access</DialogTitle><DialogDescription>Approve features, grant time-limited access, or disable a user's existing feature access.</DialogDescription></DialogHeader>
+      {accessUser&&<div className="space-y-5"><div className="rounded-lg border bg-slate-50 p-4"><div className="font-semibold">{accessUser.display_name||"Unnamed user"}</div><div className="text-sm text-muted-foreground">{accessUser.email||"No email"} · {accessUser.plan}</div><div className="text-xs text-muted-foreground mt-1">User ID: {accessUser.user_id}</div></div>
+      <section className="space-y-3"><h3 className="font-semibold">Add / approve feature access</h3><div className="grid sm:grid-cols-[1fr_180px] gap-3"><div className="space-y-1"><Label>Feature / product</Label><Select value={accessProductId} onValueChange={setAccessProductId}><SelectTrigger><SelectValue placeholder="Choose a feature"/></SelectTrigger><SelectContent>{accessProducts.map(p=><SelectItem key={p.id} value={p.id}>{p.name} ({p.type})</SelectItem>)}</SelectContent></Select></div><div className="space-y-1"><Label>Access expiry</Label><Input type="date" value={accessExpiry} onChange={e=>setAccessExpiry(e.target.value)}/></div></div><p className="text-xs text-muted-foreground">Clear the expiry date for ongoing access. This does not change the user's subscription plan.</p><Button onClick={grantUserAccess} disabled={accessBusy||accessLoading||!accessProductId}><CheckCircle2 className="h-4 w-4 mr-2"/>Approve & enable access</Button></section>
+      <section className="space-y-3"><h3 className="font-semibold">Existing feature access</h3>{accessLoading?<p className="text-sm text-muted-foreground">Loading access…</p>:accessRows.length===0?<p className="text-sm text-muted-foreground">No feature entitlements found for this user.</p>:<div className="space-y-2">{accessRows.map(r=><div key={r.id} className="flex flex-wrap items-center gap-3 justify-between rounded-lg border p-3"><div><div className="font-medium">{r.product?.name||accessProducts.find(p=>p.id===r.product_id)?.name||"Feature"}</div><div className="text-xs text-muted-foreground">Status: {r.status}{r.ends_at?" · Ends "+new Date(r.ends_at).toLocaleDateString():""}</div></div>{r.status==="active"&&(!r.ends_at||new Date(r.ends_at).getTime()>Date.now())&&<Button variant="destructive" size="sm" disabled={accessBusy} onClick={()=>disableUserAccess(r)}><Ban className="h-4 w-4 mr-1"/>Disable access</Button>}</div>)}</div>}</section></div>}
+      <DialogFooter><Button variant="outline" onClick={()=>setAccessDialogOpen(false)}>Close</Button></DialogFooter></DialogContent></Dialog>
     <Dialog open={promotionOpen} onOpenChange={setPromotionOpen}><DialogContent className="max-w-2xl"><DialogHeader><DialogTitle>Send Botvio Promotion</DialogTitle><DialogDescription>Review before queueing the promotion.</DialogDescription></DialogHeader><div className="space-y-4"><div className="rounded-lg bg-slate-50 p-4"><div className="text-xs text-muted-foreground">Recipients</div><div className="font-semibold">{selected.length} selected users</div><div className="text-xs text-muted-foreground mt-1">Suppressed/unsubscribed addresses are skipped by the server.</div></div><div><label className="text-sm font-medium">Subject</label><Input className="mt-1" value={subject} onChange={e=>setSubject(e.target.value)}/></div><div><label className="text-sm font-medium">Message</label><Textarea className="mt-1 min-h-48" value={message} onChange={e=>setMessage(e.target.value)}/></div></div><DialogFooter><Button variant="outline" onClick={()=>setPromotionOpen(false)} disabled={sending}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600 text-slate-950" onClick={sendPromotion} disabled={sending}>{sending?<><RefreshCw className="h-4 w-4 mr-2 animate-spin"/>Queueing…</>:<><Send className="h-4 w-4 mr-2"/>Send Promotion</>}</Button></DialogFooter></DialogContent></Dialog>
   </div>
 }
