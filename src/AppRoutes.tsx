@@ -250,7 +250,7 @@ export const AppRoutes = () => {
     <Route path="apps/synthetic-robot" element={<StandaloneApp appId="synthetic-robot" />} />
     <Route path="apps/weltrade-robot" element={<StandaloneApp appId="weltrade-robot" />} />
     <Route path="apps/deriv-copy" element={<StandaloneApp appId="deriv-copy" />} />
-    <Route path="dashboard" element={<Dashboard />} />
+    <Route path="dashboard" element={<BotvioRobotDashboard />} />
     <Route path="accounts" element={<Navigate to="/connections" replace />} />
     <Route path="connections" element={<Connections />} />
     <Route path="bridge-request" element={<Navigate to="/connections" replace />} />
@@ -263,7 +263,7 @@ export const AppRoutes = () => {
     <Route path="copy-trading/my" element={<FollowerDashboard />} />
     <Route path="copy-trading/become-provider" element={<BecomeProvider />} />
     <Route path="provider-dashboard" element={<ProviderCommandCenter />} />
-    <Route path="botvio-robot" element={<BotvioRobotDashboard />} />
+    <Route path="botvio-robot" element={<Navigate to="/dashboard" replace />} />
     <Route path="bots" element={<Paid><Bots /></Paid>} />
     <Route path="billing" element={<Navigate to="/marketplace" replace />} />
     <Route path="signup" element={<Signup />} />
