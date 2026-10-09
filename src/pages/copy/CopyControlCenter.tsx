@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity } from "lucide-react";
+import { useQueries } from "@tanstack/react-query";
+import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, RefreshCw, ExternalLink } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,10 @@ import { ProviderTradingAccountCard } from "@/components/tradecopy/ProviderTradi
 import { TradeCopyAccountDashboard } from "@/components/tradecopy/TradeCopyAccountDashboard";
 import { BotvioRobotPromo } from "@/components/robot/BotvioRobotPromo";
 import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
-import { useMyCopySubscriptions, useMyCopiedTrades } from "@/hooks/useBotvio";
+import { useMyCopySubscriptions, useMyCopiedTrades, useTradingAccounts } from "@/hooks/useBotvio";
+import { useEntitlements, isEntitlementActive } from "@/hooks/useEntitlements";
+import { useTradeCopyAccounts, tradecopy } from "@/hooks/useTradeCopy";
+import { useAuth } from "@/contexts/AuthContext";
 import { CopyTradingRoleGuide } from "@/components/tradecopy/CopyTradingRoleGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -113,166 +117,138 @@ export const ProviderCommandCenter = () => (
 );
 
 export const BotvioRobotDashboard = () => {
+  const { user } = useAuth();
+  const { data: entitlements, isLoading: entitlementsLoading, isError: entitlementsError, refetch: refetchEntitlements } = useEntitlements();
+  const { data: tradingAccounts, isLoading: tradingAccountsLoading } = useTradingAccounts();
+  const { data: copySubscriptions } = useMyCopySubscriptions();
+  const followerAccounts = useTradeCopyAccounts("slave");
+  const activeEntitlements = (entitlements ?? []).filter(isEntitlementActive);
+  const activeCopySubscriptions = (copySubscriptions ?? []).filter((item) => item.status === "active");
+  const positionQueries = useQueries({
+    queries: (followerAccounts.data ?? []).filter((account) => !!account.tradecopy_user_id).map((account) => ({
+      queryKey: ["botvio-dashboard-open-orders", account.id],
+      queryFn: () => tradecopy<{ orders: Record<string, unknown>[] }>("open_orders", { account_id: account.id }),
+      refetchInterval: 10_000,
+      staleTime: 5_000,
+      retry: false,
+    })),
+  });
+  const positions = (followerAccounts.data ?? []).flatMap((account, index) => {
+    const query = positionQueries[index];
+    return (query?.data?.orders ?? []).map((order, orderIndex) => ({
+      key: String(order.ticket ?? order.order_id ?? order.id ?? `${account.id}-${orderIndex}`),
+      account: account.label || account.broker || "MT5 account",
+      broker: account.broker || "MT5",
+      symbol: String(order.symbol ?? order.symbol_name ?? "—"),
+      side: String(order.type ?? order.side ?? order.action ?? "—").toUpperCase(),
+      volume: String(order.volume ?? order.lots ?? order.lot ?? "—"),
+      entry: order.open_price ?? order.openPrice ?? order.price_open ?? order.entry_price,
+      current: order.current_price ?? order.currentPrice ?? order.price_current,
+      pnl: order.profit ?? order.pnl ?? order.profit_loss,
+    }));
+  });
+  const positionErrors = positionQueries.some((query) => query.isError);
+  const positionLoading = followerAccounts.isLoading || positionQueries.some((query) => query.isLoading);
   const metrics = [
-    { label: "Robot", value: "Server-side AI", tone: "text-success", icon: Bot },
-    { label: "Signals", value: "Auto generated", tone: "text-primary", icon: Activity },
-    { label: "Execution", value: "TradeCopy Cloud", tone: "text-primary", icon: Cloud },
-    { label: "Safety", value: "User controlled", tone: "text-success", icon: ShieldCheck },
+    { label: "Active subscriptions", value: entitlementsLoading ? "…" : String(activeEntitlements.length), tone: "text-emerald-300", icon: Layers3 },
+    { label: "Linked accounts", value: tradingAccountsLoading ? "…" : String(tradingAccounts?.length ?? 0), tone: "text-cyan-300", icon: Wallet },
+    { label: "Open positions", value: positionLoading ? "…" : positionErrors ? "—" : String(positions.length), tone: "text-emerald-300", icon: Activity },
+    { label: "Provider follows", value: String(activeCopySubscriptions.length), tone: "text-amber-300", icon: Users },
+  ];
+  const workflows = [
+    { title: "Deriv Options", description: "Options contracts and supported synthetic markets", icon: Zap, href: "/options", action: "Open Options", accent: "text-amber-300" },
+    { title: "Deriv Synthetic MT5 & Currencies", description: "Synthetic indices and supported currency pairs", icon: ChartNoAxesCombined, href: "/connections", action: "Manage MT5", accent: "text-emerald-300" },
+    { title: "Weltrade MT5", description: "Supported Forex, Gold, indices and SyntX markets", icon: Cloud, href: "/connections", action: "Manage account", accent: "text-cyan-300" },
+    { title: "Botvio Provider Signals", description: "Provider setup, signal delivery and execution status", icon: Radio, href: "/provider-dashboard", action: "Provider centre", accent: "text-violet-300" },
+    { title: "Follow Providers", description: "Manage copy relationships and follower settings", icon: Users, href: "/copy-trading/my", action: "Manage follows", accent: "text-amber-300" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa] text-foreground">
+    <div className="min-h-screen bg-[#080d16] text-slate-100">
       <Header />
-      <main className="container mx-auto max-w-7xl space-y-6 px-4 py-6 pb-20">
-        <section className="relative overflow-hidden rounded-3xl border border-emerald-500/15 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-950 p-6 text-white shadow-xl sm:p-8">
-          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
-          <div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
-          <div className="relative grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+      <main className="mx-auto max-w-[1440px] space-y-6 px-3 py-5 sm:px-5 lg:px-8">
+        <section className="relative isolate overflow-hidden rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-[#102d2a] via-[#101d2a] to-[#101522] p-5 shadow-2xl shadow-black/20 sm:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-amber-300/10 blur-3xl" />
+          <div className="relative grid gap-6 lg:grid-cols-[1.5fr_.8fr] lg:items-center">
             <div>
-              <Badge className="mb-3 border-white/15 bg-white/10 text-emerald-200 hover:bg-white/10">BOTVIO AI ROBOT</Badge>
-              <h1 className="max-w-2xl text-3xl font-black tracking-tight sm:text-4xl">
-                AI trading intelligence, connected to your MT5.
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
-                Botvio scans supported markets, builds structured BUY/SELL setups and publishes eligible signals through the TradeCopy Cloud master used for follower copying.
-              </p>
+              <Badge variant="outline" className="mb-3 border-emerald-300/30 bg-emerald-300/10 text-emerald-200">BOTVIO TRADING WORKSPACE</Badge>
+              <h1 className="max-w-3xl text-3xl font-black tracking-tight sm:text-4xl">Your trading, connected in one place.</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">Review your access, connect your preferred trading platform, follow providers and monitor verified open positions from your connected accounts.</p>
               <div className="mt-6 flex flex-wrap gap-2">
-                <Button asChild className="bg-white text-emerald-950 hover:bg-white/90">
-                  <Link to="/connections">Connect MT5 <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                </Button>
-                <Button asChild variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10">
-                  <Link to="/bots">Open AI Bots</Link>
-                </Button>
+                <Button asChild className="bg-emerald-300 text-slate-950 hover:bg-emerald-200"><Link to="/connections">Connect trading account <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+                <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10"><Link to="/marketplace">Explore plans <ExternalLink className="ml-2 h-4 w-4" /></Link></Button>
               </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Robot status</p>
-                  <p className="mt-1 text-lg font-bold">AI engine ready</p>
-                </div>
-                <span className="flex h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,.8)]" />
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4 backdrop-blur">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-300/10"><Bot className="h-6 w-6 text-emerald-300" /></div>
+                <div className="min-w-0"><p className="text-xs uppercase tracking-[.18em] text-slate-400">Botvio Robot</p><p className="mt-1 text-lg font-bold">Trading command centre</p></div>
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                {metrics.map(({ label, value, tone }) => (
-                  <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-3">
-                    <p className="text-[10px] uppercase tracking-wider text-white/45">{label}</p>
-                    <p className={`mt-1 text-xs font-semibold ${tone}`}>{value}</p>
-                  </div>
-                ))}
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3"><p className="text-xs text-slate-400">Signal engine</p><p className="mt-1 text-sm font-semibold text-emerald-300">Existing integration</p></div>
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3"><p className="text-xs text-slate-400">Execution route</p><p className="mt-1 text-sm font-semibold text-cyan-300">TradeCopy Cloud</p></div>
               </div>
+              <p className="mt-3 text-xs leading-5 text-slate-400">Execution and connection health are shown only when confirmed by existing system data.</p>
             </div>
           </div>
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {metrics.map(({ label, value, icon: Icon, tone }) => (
-            <Card key={label} className="border-border/60 bg-white shadow-sm">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {metrics.map(({ label, value, tone, icon: Icon }) => (
+            <Card key={label} className="border-white/10 bg-[#111a28] text-slate-100 shadow-lg shadow-black/10">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="rounded-xl bg-muted p-2"><Icon className={`h-4 w-4 ${tone}`} /></div>
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                </div>
-                <p className="mt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className={`mt-1 text-sm font-bold ${tone}`}>{value}</p>
+                <div className="flex items-center justify-between"><div className="rounded-xl border border-white/10 bg-white/5 p-2"><Icon className={`h-5 w-5 ${tone}`} /></div><span className="h-2 w-2 rounded-full bg-emerald-400" /></div>
+                <p className="mt-4 text-xs font-medium text-slate-400">{label}</p>
+                <p className="mt-1 text-2xl font-bold tracking-tight">{value}</p>
               </CardContent>
             </Card>
           ))}
         </section>
 
-        <section className="grid gap-5 xl:grid-cols-[1.4fr_.8fr]">
+        <section className="grid gap-5 xl:grid-cols-[1.35fr_.8fr]">
           <div className="space-y-5">
-            <Card className="border-border/60 bg-white shadow-sm">
-              <CardHeader>
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <Badge variant="outline" className="mb-2">EXECUTION MASTER</Badge>
-                    <CardTitle className="text-lg">Botvio Robot MT5</CardTitle>
-                    <CardDescription>Official Botvio master account used for MT5 copy execution.</CardDescription>
-                  </div>
-                  <Bot className="h-7 w-7 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent><TradeCopyAccountDashboard role="master" robot /></CardContent>
-            </Card>
-
-            <Card className="border-border/60 bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">MT5 Auto-Execute</CardTitle>
-                <CardDescription>Use TradeCopy Cloud as the MT5 execution/copy layer. Botvio Robot is the master signal account; follower accounts are copied in TradeCopy Cloud.</CardDescription>
-              </CardHeader>
-              <CardContent><Mt5AutoExecuteCard /></CardContent>
-            </Card>
-
-            <Card className="border-border/60 bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">How a signal reaches MT5</CardTitle>
-                <CardDescription>Four clear stages instead of a long technical explanation.</CardDescription>
+            <Card className="border-white/10 bg-[#111a28] text-slate-100">
+              <CardHeader className="flex flex-row items-center justify-between gap-3">
+                <div><CardTitle className="text-lg">Your access</CardTitle><CardDescription className="text-slate-400">Subscriptions and products linked to your account</CardDescription></div>
+                <Button asChild variant="outline" size="sm" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/marketplace">View plans</Link></Button>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 sm:grid-cols-4">
-                  {[
-                    ["01", "Scan", "AI evaluates supported markets."],
-                    ["02", "Setup", "BUY/SELL with entry, SL and TP."],
-                    ["03", "Queue", "Eligible signal enters the MT5 route."],
-                    ["04", "Execute", "TradeCopy Cloud copies the master order to follower MT5 accounts."],
-                  ].map(([n, title, description]) => (
-                    <div key={n} className="rounded-2xl border border-border/60 bg-muted/30 p-4">
-                      <span className="text-[10px] font-bold text-primary">{n}</span>
-                      <p className="mt-2 text-sm font-bold">{title}</p>
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+                {entitlementsLoading ? <div className="rounded-xl border border-white/10 p-4 text-sm text-slate-400">Loading your subscriptions…</div> :
+                  entitlementsError ? <div className="rounded-xl border border-red-400/20 p-4 text-sm text-red-300">Your access could not be loaded. <Button size="sm" variant="outline" onClick={() => refetchEntitlements()}>Retry</Button></div> :
+                  activeEntitlements.length ? <div className="grid gap-3 sm:grid-cols-2">{activeEntitlements.map((item) => (
+                    <div key={item.id} className="rounded-xl border border-emerald-300/15 bg-emerald-300/[0.04] p-4">
+                      <div className="flex items-start justify-between gap-2"><div className="flex min-w-0 items-center gap-2"><Layers3 className="h-4 w-4 shrink-0 text-emerald-300" /><p className="truncate text-sm font-semibold">{item.products?.name ?? "Active product"}</p></div><Badge className="border-emerald-300/20 bg-emerald-300/10 text-emerald-200">Active</Badge></div>
+                      <p className="mt-2 text-xs text-slate-400">{item.ends_at ? `Access until ${new Date(item.ends_at).toLocaleDateString()}` : "No expiry recorded"}</p>
+                      <Button asChild variant="link" className="mt-2 h-auto p-0 text-emerald-300"><Link to={item.products?.slug === "synthetic-hub" ? "/synthetic" : item.products?.slug === "weltrade-hub" ? "/weltrade" : item.products?.slug === "mt5-direct" ? "/connections" : "/botvio-robot"}>Open product <ArrowRight className="ml-1 h-3 w-3" /></Link></Button>
                     </div>
-                  ))}
-                </div>
+                  ))}</div> :
+                  <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Layers3 className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No active subscriptions yet</p><p className="mt-1 text-sm text-slate-400">Explore the available hubs and signal products to choose what suits you.</p><Button asChild className="mt-4 bg-emerald-300 text-slate-950 hover:bg-emerald-200"><Link to="/marketplace">Explore products</Link></Button></div>}
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/10 bg-[#111a28] text-slate-100">
+              <CardHeader><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-lg">Open trades</CardTitle><CardDescription className="text-slate-400">Positions returned by your connected TradeCopy follower accounts</CardDescription></div><Badge variant="outline" className="border-emerald-300/20 text-emerald-200"><Activity className="mr-1 h-3 w-3" /> Live lookup</Badge></div></CardHeader>
+              <CardContent>
+                {positionLoading ? <div className="space-y-2"><div className="h-10 animate-pulse rounded-lg bg-white/5" /><div className="h-10 animate-pulse rounded-lg bg-white/5" /></div> :
+                  positionErrors || followerAccounts.isError ? <div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100">Open positions could not be verified for one or more accounts. Check your connection status or open Trading Connections.</div> :
+                  positions.length ? <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-white/10 text-xs text-slate-400"><th className="py-3 pr-3 font-medium">Account</th><th className="py-3 pr-3 font-medium">Market</th><th className="py-3 pr-3 font-medium">Side</th><th className="py-3 pr-3 font-medium">Volume</th><th className="py-3 pr-3 font-medium">Entry</th><th className="py-3 font-medium">Floating P/L</th></tr></thead><tbody>{positions.map((position) => <tr key={position.key} className="border-b border-white/5 last:border-0"><td className="py-3 pr-3"><p className="font-medium">{position.account}</p><p className="text-xs text-slate-500">{position.broker}</p></td><td className="py-3 pr-3 font-semibold">{position.symbol}</td><td className={`py-3 pr-3 font-semibold ${position.side.includes("BUY") ? "text-emerald-300" : position.side.includes("SELL") ? "text-rose-300" : "text-slate-300"}`}>{position.side}</td><td className="py-3 pr-3">{position.volume}</td><td className="py-3 pr-3">{position.entry == null ? "—" : String(position.entry)}</td><td className={`py-3 font-semibold ${Number(position.pnl) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{position.pnl == null ? "—" : Number(position.pnl).toFixed(2)}</td></tr>)}</tbody></table><p className="mt-3 text-xs text-slate-500">Prices and P/L are shown only when returned by the connected TradeCopy account.</p></div> :
+                  <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Activity className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No trades currently running</p><p className="mt-1 text-sm text-slate-400">No open positions were returned by your connected TradeCopy follower accounts.</p></div>}
+                <div className="mt-4 flex flex-wrap gap-2"><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/trade-history">Trade history <ArrowRight className="ml-2 h-4 w-4" /></Link></Button><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/connections">Manage connections <Wallet className="ml-2 h-4 w-4" /></Link></Button></div>
               </CardContent>
             </Card>
           </div>
 
           <aside className="space-y-5">
-            <Card className="border-border/60 bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">Robot connection</CardTitle>
-                <CardDescription>Keep Deriv and MT5 connections clearly separated.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="rounded-2xl border border-border/60 p-4">
-                  <div className="flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">Deriv</p></div>
-                  <p className="mt-1 text-xs text-muted-foreground">Used for Deriv trading and market/signals connections.</p>
-                </div>
-                <div className="rounded-2xl border border-border/60 p-4">
-                  <div className="flex items-center gap-2"><Cloud className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">MT5 Master</p></div>
-                  <p className="mt-1 text-xs text-muted-foreground">Uses MT5 login, trader password and exact broker server.</p>
-                </div>
-                <div className="rounded-2xl border border-border/60 bg-amber-50 p-4">
-                  <p className="text-xs font-semibold text-amber-900">Important</p>
-                  <p className="mt-1 text-xs leading-5 text-amber-800">Do not enter a Deriv token into an MT5 connection. They are separate connection types.</p>
-                </div>
-              </CardContent>
+            <Card className="border-white/10 bg-[#111a28] text-slate-100">
+              <CardHeader><CardTitle className="text-lg">Trading platforms</CardTitle><CardDescription className="text-slate-400">Choose the workflow you want to open</CardDescription></CardHeader>
+              <CardContent className="space-y-3">{workflows.map(({ title, description, icon: Icon, href, action, accent }) => <div key={title} className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="flex items-start gap-3"><div className="rounded-lg bg-white/5 p-2"><Icon className={`h-5 w-5 ${accent}`} /></div><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{title}</p><p className="mt-1 text-xs leading-5 text-slate-400">{description}</p><Button asChild variant="link" className="mt-1 h-auto p-0 text-emerald-300"><Link to={href}>{action} <ArrowRight className="ml-1 h-3 w-3" /></Link></Button></div></div></div>)}</CardContent>
             </Card>
-
-            <Card className="border-border/60 bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">Robot controls</CardTitle>
-                <CardDescription>Quick access to the operational areas.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-2">
-                <Button asChild className="justify-between"><Link to="/connections">Trading Connections <ArrowRight className="h-4 w-4" /></Link></Button>
-                <Button asChild variant="outline" className="justify-between"><Link to="/bots">AI Bots <ArrowRight className="h-4 w-4" /></Link></Button>
-                <Button asChild variant="outline" className="justify-between"><Link to="/copy-trading/my">My Copy Trading <ArrowRight className="h-4 w-4" /></Link></Button>
-              </CardContent>
+            <Card className="border-white/10 bg-[#111a28] text-slate-100">
+              <CardHeader><CardTitle className="text-lg">Robot execution master</CardTitle><CardDescription className="text-slate-400">Existing Botvio Robot master account and controls</CardDescription></CardHeader>
+              <CardContent className="space-y-4"><TradeCopyAccountDashboard role="master" robot /><div className="grid gap-2"><Button asChild className="justify-between bg-emerald-300 text-slate-950 hover:bg-emerald-200"><Link to="/connections">Trading connections <ArrowRight className="h-4 w-4" /></Link></Button><Button asChild variant="outline" className="justify-between border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/bots">AI Bots <ArrowRight className="h-4 w-4" /></Link></Button><Button asChild variant="outline" className="justify-between border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/copy-trading/my">My Copy Trading <ArrowRight className="h-4 w-4" /></Link></Button></div></CardContent>
             </Card>
-
-            <Card className="border-emerald-500/20 bg-emerald-50/60 shadow-sm">
-              <CardContent className="p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 text-emerald-600" />
-                  <div>
-                    <p className="text-sm font-bold text-emerald-950">User-controlled risk</p>
-                    <p className="mt-1 text-xs leading-5 text-emerald-900/70">You control sizing, confidence thresholds, stop-loss and take-profit; TradeCopy Cloud handles follower replication.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Card className="border-amber-300/20 bg-amber-300/[0.04] text-slate-100"><CardContent className="flex items-start gap-3 p-4"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" /><div><p className="text-sm font-semibold">Risk remains user-controlled</p><p className="mt-1 text-xs leading-5 text-slate-400">Review account mode, position sizing and copy settings before enabling live trading. A signal is not a guarantee of execution or profit.</p></div></CardContent></Card>
           </aside>
         </section>
       </main>
