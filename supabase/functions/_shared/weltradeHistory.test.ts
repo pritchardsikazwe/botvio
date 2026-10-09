@@ -6,6 +6,7 @@ describe("automatic Weltrade history", () => {
     const symbols = studioSymbols({ data: { symbols: [{ Symbol: "GainX 400.m" }, { name: "FlipX 1" }] } });
     expect(studioSymbolCandidates("GainX 400", symbols)).toEqual(["GainX 400.m"]);
     expect(studioSymbolCandidates("PainX 999", symbols)).toEqual([]);
+    expect(studioSymbols({ "GainX 400": { digits: 3 }, "MAX GainX 1000": { digits: 3 } })).toEqual(["GainX 400", "MAX GainX 1000"]);
   });
   it("normalizes broker local dates and price fields without inventing candles", () => {
     const candles = studioCandles({ data: [{ Date: "2026-10-09T12:00:00", OpenPrice: 10, HighPrice: 12, LowPrice: 9, ClosePrice: 11 }] }, 7200);

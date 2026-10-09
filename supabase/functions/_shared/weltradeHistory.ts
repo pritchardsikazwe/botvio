@@ -26,6 +26,9 @@ export function studioSymbols(value: unknown): string[] {
     }
     const nested = Object.values(record).find(Array.isArray);
     if (nested) return studioSymbols(nested);
+    // MT5 API Studio /Symbols returns a map keyed by broker symbol name.
+    const values = Object.values(record);
+    if (values.length && values.every((v) => v && typeof v === "object")) return Object.keys(record);
   }
   return [];
 }
