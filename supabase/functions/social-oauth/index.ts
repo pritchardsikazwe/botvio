@@ -68,7 +68,20 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: "Authentication required" }, 401);
 
     const body = await req.json().catch(() => ({}));
+    const { data: roles } = await admin().from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "super_admin"]);
+    if (!roles?.length) return json({ error: "Admin access required" }, 403);
     const platform = body.platform;
+    if (body.action === "status") {
+      const { data: roles } = await admin().from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "super_admin"]);
+      if (!roles?.length) return json({ error: "Admin access required" }, 403);
+      return json({
+        platform: "linkedin",
+        clientIdConfigured: Boolean(env("LINKEDIN_CLIENT_ID")),
+        clientSecretConfigured: Boolean(env("LINKEDIN_CLIENT_SECRET")),
+        redirectUri: `${env("SOCIAL_OAUTH_REDIRECT_BASE") || url.origin}/functions/v1/social-oauth/callback`,
+        requiredScopes: ["openid", "profile", "w_member_social"],
+      });
+    }
     if (body.action !== "start") return json({ error: "Unsupported OAuth action" }, 400);
 
     const redirect = `${env("SOCIAL_OAUTH_REDIRECT_BASE") || url.origin}/functions/v1/social-oauth/callback`;
