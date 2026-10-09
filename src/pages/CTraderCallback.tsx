@@ -34,6 +34,7 @@ export default function CTraderCallback() {
   const [busy, setBusy] = useState(true);
   const started = useRef(false);
   const code = params.get("code");
+  const returnedState = params.get("state");
   const oauthError = params.get("error_description") || params.get("error");
 
   useEffect(() => {
@@ -51,6 +52,13 @@ export default function CTraderCallback() {
       }
       if (oauthError) {
         setResult({ ok: false, error: oauthError });
+        setBusy(false);
+        return;
+      }
+      const expectedState = sessionStorage.getItem("ctrader_oauth_state");
+      sessionStorage.removeItem("ctrader_oauth_state");
+      if (!returnedState || !expectedState || returnedState !== expectedState) {
+        setResult({ ok: false, error: "The authorization state check failed. Return to Connections and start again." });
         setBusy(false);
         return;
       }
