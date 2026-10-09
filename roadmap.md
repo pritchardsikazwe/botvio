@@ -1,5 +1,8 @@
 # Current tasks
 
+- [x] Deploy repairs to the existing five-minute Weltrade maker: prioritize GainX/PainX/FlipX, validate sessions, match broker symbols/time, use closed candles and correct timeframe metadata; preserve Home and MT5 routes.
+- [ ] Confirm scheduled Weltrade publication and MT5 orders (blocked: 09:25 run returned no broker symbols; Weltrade provider copying remains inactive). No successful signal or trade claimed.
+
 - [x] Fix Home Live Trading Weltrade classification, actual MT5 running/results feed, and honest loading/error states; verify guest display and family/result tests without changing execution.
 - [ ] Verify Home running positions and closed results with a signed-in registered Weltrade TradeCopy account (blocked: no connected account session available in this preview).
 

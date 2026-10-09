@@ -12,8 +12,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  ORDER_FILTER_LABELS, RISK_TYPE_LABELS, SCALPER_MODE_LABELS, TcAccount, TcRelationship,
+  ORDER_FILTER_LABELS, RISK_TYPE_LABELS, SCALPER_MODE_LABELS, BOTVIO_FOLLOWER_MARKETS, TcAccount, TcRelationship,
   useExecutionEvents, useMyRelationships, useSymbolMappings, useTradeCopyAccounts, useTradeCopyAction, useTradeCopyAudit, useRemoveTradeCopyAccount,
+  useFollowerSignalPreferences, useSaveFollowerSignalPreferences,
 } from "@/hooks/useTradeCopy";
 import { ConnectMt5Dialog } from "./ConnectMt5Dialog";
 import { DiagnosticButton } from "./DiagnosticButton";
@@ -123,6 +124,96 @@ function SymbolMappings({ followerAccountId }: { followerAccountId: string }) {
   );
 }
 
+
+function FollowerSignalPreferences({ followerAccountId }: { followerAccountId: string }) {
+  const preferences = useFollowerSignalPreferences(followerAccountId);
+  const save = useSaveFollowerSignalPreferences();
+  const current = preferences.data;
+  const [mode, setMode] = useState<"all" | "selected">("all");
+  const [selected, setSelected] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!current) return;
+    setMode(current.mode);
+    setSelected(current.allowed_symbols ?? []);
+  }, [current?.mode, JSON.stringify(current?.allowed_symbols ?? [])]);
+
+  const toggle = (symbol: string, checked: boolean) => {
+    setSelected((items) => checked ? [...new Set([...items, symbol])] : items.filter((item) => item !== symbol));
+  };
+
+  const submit = async () => {
+    try {
+      await save.mutateAsync({ tradingAccountId: followerAccountId, mode, allowedSymbols: selected });
+      toast.success("Signal preferences saved");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  return (
+    <div className="space-y-3 rounded-xl border border-border/50 p-4">
+      <div>
+        <div className="font-semibold">Signals I want to copy</div>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          Choose the markets this follower is allowed to receive from Botvio. “All markets” keeps the default.
+        </p>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => setMode("all")}
+          className={`rounded-lg border p-3 text-left transition ${mode === "all" ? "border-primary bg-primary/5" : "border-border/50"}`}
+        >
+          <div className="text-sm font-semibold">All Botvio signals</div>
+          <div className="text-xs text-muted-foreground">Receive every supported market.</div>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("selected")}
+          className={`rounded-lg border p-3 text-left transition ${mode === "selected" ? "border-primary bg-primary/5" : "border-border/50"}`}
+        >
+          <div className="text-sm font-semibold">Selected markets</div>
+          <div className="text-xs text-muted-foreground">Only the markets switched ON below.</div>
+        </button>
+      </div>
+
+      {mode === "selected" && (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {BOTVIO_FOLLOWER_MARKETS.map((market) => (
+            <div key={market.symbol} className="flex items-center justify-between rounded-lg border border-border/40 px-3 py-2">
+              <div>
+                <div className="text-xs font-semibold">{market.label}</div>
+                <div className="text-[10px] text-muted-foreground">{market.group}</div>
+              </div>
+              <Switch
+                checked={selected.includes(market.symbol)}
+                onCheckedChange={(checked) => toggle(market.symbol, checked)}
+                aria-label={`Copy ${market.label}`}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-3 border-t border-border/50 pt-3">
+        <p className="text-[10px] leading-4 text-muted-foreground">
+          {mode === "all" ? "All supported Botvio markets are allowed." : `${selected.length} market${selected.length === 1 ? "" : "s"} selected.`}
+        </p>
+        <Button size="sm" onClick={submit} disabled={save.isPending || preferences.isLoading}>
+          {save.isPending ? "Saving…" : "Save signal preferences"}
+        </Button>
+      </div>
+
+      <p className="text-[10px] leading-4 text-muted-foreground">
+        These preferences are enforced for Botvio-managed direct signal delivery. For a TradeCopy Cloud copy relationship,
+        TradeCopy’s own disabled-symbol setting remains authoritative until a supported TradeCopy symbol-settings API is verified.
+      </p>
+    </div>
+  );
+}
+
 function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcAccount }) {
   const act = useTradeCopyAction();
   const s = rel.copy_settings;
@@ -182,6 +273,8 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
         <div className="space-y-1.5"><Label>Close all if equity below</Label><Input type="number" min="0" step="1" placeholder="Off" value={form.equityUnderLow} onChange={(e) => set("equityUnderLow", e.target.value)} /></div>
       </div>
       <Button variant="outline" onClick={save} disabled={act.isPending}>Save settings</Button>
+
+      <FollowerSignalPreferences followerAccountId={rel.follower_account_id} />
 
       <SymbolMappings followerAccountId={rel.follower_account_id} />
 
@@ -258,6 +351,14 @@ export function FollowerTradeCopyPanel() {
           </div>
         ))}
         {accounts.data?.length === 0 && user && <p className="text-sm text-muted-foreground">Connect an MT5 account to start. A connected Weltrade follower can also be attached as the Botvio signal DATA FEED without enabling copy trading.</p>}
+
+        {rels.data?.map((rel) => (
+          <RelationshipCard
+            key={rel.id}
+            rel={rel}
+            account={accounts.data?.find((account) => account.id === rel.follower_account_id)}
+          />
+        ))}
 
         {user && (
           <div className="space-y-4">

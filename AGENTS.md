@@ -1,5 +1,7 @@
 # Project architecture rules
 
+- Scheduled Weltrade generation reuses the existing SyntX schedule and trading_signals publication/MT5 webhook; broker-returned symbols, broker-time windows and closed UTC candles are required before publishing, preserving quality and execution gates.
+
 - Home MT5 running trades and results use the existing account-authorized TradeCopy execution_status action; mock snapshots and signal executions are never presented as broker positions, and anonymous visitors never receive private account data.
 
 - Home chart uploads reuse the existing ChartUpload screen so modes, history, usage checks and results stay consistent with the Signals and Trading pages.
