@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { calculateSignalHistoryStats } from "@/lib/signalHistoryStats";
 
 interface SignalHistoryRow {
   id: string;
@@ -44,24 +45,16 @@ const SignalsHistory = () => {
     refetchInterval: 60000,
   });
 
-  const stats = useMemo(() => {
-    const rows = data || [];
-    const closed = rows.filter((r) => ["WIN", "LOSS"].includes(r.result?.toUpperCase()));
-    const wins = closed.filter((r) => r.result?.toUpperCase() === "WIN").length;
-    const losses = closed.filter((r) => r.result?.toUpperCase() === "LOSS").length;
-    const winRate = closed.length ? Math.round((wins / closed.length) * 100) : 0;
-    const totalPips = rows.reduce((sum, r) => sum + (Number(r.profit_pips) || 0), 0);
-    return { total: rows.length, closed: closed.length, wins, losses, winRate, totalPips };
-  }, [data]);
+  const stats = useMemo(() => calculateSignalHistoryStats(data || []), [data]);
 
   const itemListJsonLd = useMemo(() => {
     const rows = (data || []).slice(0, 50);
     return {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      name: "Botvio Signals Track Record",
+      name: "Botvio Signals History",
       description:
-        "Public archive of Botvio trading signals with WIN/LOSS outcomes, pip results, entry, stop-loss and take-profit levels.",
+        "Public archive of Botvio signal records. Outcome settlement is subject to verification.",
       numberOfItems: rows.length,
       itemListElement: rows.map((r, i) => ({
         "@type": "ListItem",
@@ -83,7 +76,7 @@ const SignalsHistory = () => {
       <SEOHead
         seoKey="signalsHistory"
         title="Signals History & Track Record"
-        description="Verified Botvio trading signals track record. Browse past forex, gold and synthetic indices signals with WIN/LOSS results, pips, entry, SL/TP and screenshots."
+        description="Botvio signal history for the latest 300 records fetched, with recorded outcomes and pips. Settlement verification is ongoing."
         jsonLd={itemListJsonLd}
       />
       <Header />
@@ -95,16 +88,16 @@ const SignalsHistory = () => {
             <Activity className="h-3 w-3 mr-1" /> Fresh Track Record
           </Badge>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-            Botvio Signals — Fresh Verified Track Record
+            Botvio Signals — Recent History
           </h1>
           <p className="text-muted-foreground">
-            Fresh verified track record for Botvio forex, gold (XAU/USD), synthetic indices and crypto signals.
-            The archive starts from the current signal engine and is updated live as new signals close.
+            Recent Botvio forex, gold (XAU/USD), synthetic indices and crypto signal records.
+            Results are shown as recorded; settlement verification is ongoing. Statistics cover the latest 300 records fetched.
           </p>
         </header>
 
         {/* Stats grid */}
-        <section aria-label="Performance summary" className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <section aria-label="Signal history summary" className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2 text-muted-foreground text-xs">
@@ -116,9 +109,9 @@ const SignalsHistory = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                <Target className="h-3.5 w-3.5" /> Closed
+                <Target className="h-3.5 w-3.5" /> Settled
               </div>
-              <p className="text-2xl font-bold mt-1">{stats.closed}</p>
+              <p className="text-2xl font-bold mt-1">{stats.settled}</p>
             </CardContent>
           </Card>
           <Card>
@@ -142,10 +135,22 @@ const SignalsHistory = () => {
               <div className="flex items-center gap-2 text-primary text-xs">
                 <TrendingUp className="h-3.5 w-3.5" /> Win rate
               </div>
-              <p className="text-2xl font-bold mt-1 text-primary">{stats.winRate}%</p>
+              <p className="text-2xl font-bold mt-1 text-primary">{stats.winRate === null ? "—" : `${stats.winRate.toFixed(2)}%`}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">
-                Net pips: {stats.totalPips.toFixed(1)}
+                Net pips (WIN/LOSS rows): {stats.netPips.toFixed(1)}
               </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-muted-foreground text-xs">Expired</div>
+              <p className="text-2xl font-bold mt-1">{stats.expired}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-muted-foreground text-xs">Unresolved / unknown</div>
+              <p className="text-2xl font-bold mt-1">{stats.unresolved}</p>
             </CardContent>
           </Card>
         </section>
@@ -291,12 +296,12 @@ const SignalsHistory = () => {
         <section aria-label="About our track record" className="grid md:grid-cols-2 gap-4">
           <Card>
             <CardContent className="p-5 space-y-2">
-              <h3 className="font-semibold text-foreground">How we track signal results</h3>
+              <h3 className="font-semibold text-foreground">About these results</h3>
               <p className="text-sm text-muted-foreground">
-                Every signal we publish is automatically settled by our live evaluator using real Deriv
-                tick data. WIN / LOSS / EXPIRED outcomes and pip results are written to this archive
-                within seconds of price hitting the take-profit or stop-loss — nothing is edited after
-                the fact.
+                This page displays recorded signal outcomes. The settlement evaluator, source price feed and
+                historical records have not yet been independently verified. Net pips includes only rows
+                marked WIN or LOSS with finite numeric pip values; this does not prove those outcomes
+                were settled correctly. Expired and unresolved records are displayed separately.
               </p>
             </CardContent>
           </Card>
