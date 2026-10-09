@@ -79,7 +79,7 @@ export default function CTraderCallback() {
     };
 
     void run();
-  }, [authLoading, user, code, oauthError]);
+  }, [authLoading, user, code, returnedState, oauthError]);
 
   return (
     <div className="min-h-screen bg-background">
