@@ -288,6 +288,8 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
 
   let masterExecuted = 0, directExecuted = 0, skipped = 0;
   const failures: Array<{ account: string; symbol: string; reason: string }> = [];
+  const isPositionLimitError = (reason: string) => /TRADE_RETCODE_LIMIT_POSITIONS|limit[_ ]positions|maximum.*position|position.*limit|too many positions/i.test(reason);
+  const isInvalidVolumeError = (reason: string) => /invalid volume|volume.*invalid|invalid.*lot|lot.*invalid/i.test(reason);
 
   for (const m of masters) {
     const isDeriv = /deriv/i.test(String(m.server ?? m.broker ?? ""));
@@ -348,9 +350,6 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   // Prevent duplicate trades: if a follower is already actively copying the
   // Botvio Robot or the configured Botvio Signal Master, TradeCopy itself will
   // deliver the signal. Do not also send the same signal directly to the slave.
-  const isPositionLimitError = (reason: string) => /TRADE_RETCODE_LIMIT_POSITIONS|limit[_ ]positions|maximum.*position|position.*limit|too many positions/i.test(reason);
-const isInvalidVolumeError = (reason: string) => /invalid volume|volume.*invalid|invalid.*lot|lot.*invalid/i.test(reason);
-
 const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
   const copyManagedFollowerIds = new Set<string>();
   if (directIds.length) {
