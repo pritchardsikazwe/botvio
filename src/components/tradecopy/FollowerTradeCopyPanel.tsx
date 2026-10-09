@@ -312,6 +312,7 @@ export function FollowerTradeCopyPanel() {
                 {errors.data.map((x) => <div key={x.id} className="rounded-lg bg-destructive/10 p-2 text-xs text-destructive">{x.action}: {String((x.details as { error?: string })?.error ?? "failed")} · {new Date(x.created_at).toLocaleString()}</div>)}
               </>
             )}
+            </div>
           </div>
         )}
         <p className="text-[11px] text-muted-foreground">Botvio manages the robot connection for you. Trading carries real risk of loss, and copied execution can differ from the source trade.</p>
