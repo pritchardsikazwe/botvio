@@ -87,6 +87,22 @@ serve(async (req) => {
       isGuest = true;
     }
 
+    // Chart analysis is metered per authenticated account. Guest requests used to
+    // bypass claim_chart_upload_slot entirely, enabling unlimited unmetered AI use.
+    // Require a valid session before any job state changes or AI-provider calls.
+    if (!userId) {
+      await logError(supabase, "analyze-chart", null, ERROR_CODES.UNAUTHORIZED,
+        "Authentication required for metered chart analysis", { symbol }, 401);
+      return new Response(
+        JSON.stringify({
+          error: "Sign in to use your included chart analysis. Your available usage is checked against your account.",
+          error_code: ERROR_CODES.UNAUTHORIZED,
+          redirect: "/?authRequired=1&next=/chart/XAUUSD",
+        }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // If jobId provided, update job status to running
     if (jobId) {
       await supabase

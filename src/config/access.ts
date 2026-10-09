@@ -1,13 +1,10 @@
 /**
- * OPEN_ACCESS master switch: when true, every page and feature is unlocked for
- * everyone (signed in or not, any plan). Set to false to re-enable the normal
- * paid + trial gating.
+ * Global access bypass is intentionally disabled.
+ * Access is granted only by a valid subscription, the 24-hour new-user trial,
+ * or an explicitly authorized admin/super-admin role.
  */
-export const OPEN_ACCESS = true;
-
-/** Legacy dated preview window (kept for reference). */
-export const PUBLIC_PREVIEW_UNTIL = new Date("2026-08-06T23:59:59Z");
+export const OPEN_ACCESS = false;
 
 export function isPublicPreviewActive(): boolean {
-  return OPEN_ACCESS || Date.now() < PUBLIC_PREVIEW_UNTIL.getTime();
+  return false;
 }

@@ -5,16 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { OPEN_ACCESS } from "@/config/access";
 import { useNativeStoreAccess } from "@/hooks/useNativeStoreAccess";
 
-/**
- * Central access gate for premium/paid areas of Botvio (hubs, signals, bots).
- *
- * Rules:
- * - Admins / super_admins / signal_managers → always allowed.
- * - Users on a paid plan (basic / standard / vip) → allowed.
- * - Free / starter users → allowed only during the free-trial window
- *   (chart_limit_settings.free_trial_days, default 7 days from signup).
- * - Everyone else → blocked (must be activated by admin via a paid plan).
- */
 export interface AccessGate {
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -27,30 +17,37 @@ export interface AccessGate {
   planCode: string | null;
 }
 
+const TRIAL_DURATION_DAYS = 1;
+
 export function useAccessGate(): AccessGate {
-  const { user, isAdmin, isSuperAdmin, isSignalManager, loading: authLoading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
   const sub = useSubscriptionGate();
   const nativeStore = useNativeStoreAccess();
 
   const { data: trialInfo, isLoading: trialLoading } = useQuery({
-    queryKey: ["access-gate-trial", user?.id],
+    queryKey: ["access-gate-trial", user?.id, user?.created_at],
     queryFn: async () => {
+      // Auth's immutable created_at is the fallback source of truth. Do not
+      // start a fresh trial at the current time if a profile row is missing.
       const [{ data: profile }, { data: settings }] = await Promise.all([
         supabase.from("profiles").select("created_at").eq("user_id", user!.id).maybeSingle(),
         supabase.from("chart_limit_settings").select("free_trial_days").limit(1).maybeSingle(),
       ]);
-      const trialDays = settings?.free_trial_days ?? 7;
-      const signup = profile?.created_at ? new Date(profile.created_at) : new Date();
+      const configuredDays = settings?.free_trial_days;
+      const trialDays = typeof configuredDays === "number" ? Math.min(1, Math.max(0, configuredDays)) : TRIAL_DURATION_DAYS;
+      const signup = profile?.created_at ? new Date(profile.created_at) : new Date(user!.created_at);
       const trialEnd = new Date(signup.getTime() + trialDays * 24 * 60 * 60 * 1000);
       const msLeft = trialEnd.getTime() - Date.now();
       const daysLeft = Math.max(0, Math.ceil(msLeft / (24 * 60 * 60 * 1000)));
       return { trialDays, daysLeft, expired: msLeft <= 0 };
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
   });
 
-  const adminBypass = isAdmin || isSuperAdmin || isSignalManager;
+  const adminBypass = isAdmin || isSuperAdmin;
   const isPaid = sub.isPaid || !!nativeStore.data?.isPaid;
   const isTrial = !isPaid && !!trialInfo && !trialInfo.expired;
   const trialDaysLeft = trialInfo?.daysLeft ?? 0;

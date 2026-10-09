@@ -45,15 +45,22 @@ export function useSubscriptionGate(): SubscriptionGate {
       return data;
     },
     enabled: !!user,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
+    staleTime: 15_000,
   });
 
   const plan = data?.pricing_plans as any;
   const code = plan?.code || "free";
   const tier = PLAN_TIER[code] ?? 0;
+  const privileged = !!user && (isAdmin || isSuperAdmin);
 
-  if (OPEN_ACCESS || (user && (isAdmin || isSuperAdmin))) {
+  // Only explicit admin roles may bypass plan entitlements. Account age never
+  // grants premium access automatically.
+  if (OPEN_ACCESS || privileged) {
     return {
-      planCode: code, planName: plan?.name || "Free",
+      planCode: code,
+      planName: plan?.name || "Free",
       isPaid: true, isBasicOrAbove: true, isStandardOrAbove: true, isVIP: true,
       canCopyTrade: true, canUsePremiumBots: true, canBeProvider: true,
       canAccessPremiumSignals: true, canAccessSportsBetting: true, canAccessAllCourses: true,
