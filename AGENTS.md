@@ -1,5 +1,7 @@
 # Project architecture rules
 
+- Home MT5 running trades and results use the existing account-authorized TradeCopy execution_status action; mock snapshots and signal executions are never presented as broker positions, and anonymous visitors never receive private account data.
+
 - Home chart uploads reuse the existing ChartUpload screen so modes, history, usage checks and results stay consistent with the Signals and Trading pages.
 
 - Classify Weltrade SyntX instruments by family before analysis; ordinary Forex, metals, crypto and stocks retain the generic market engine because SyntX mechanics are family-specific.

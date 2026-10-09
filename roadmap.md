@@ -1,5 +1,8 @@
 # Current tasks
 
+- [x] Fix Home Live Trading Weltrade classification, actual MT5 running/results feed, and honest loading/error states; verify guest display and family/result tests without changing execution.
+- [ ] Verify Home running positions and closed results with a signed-in registered Weltrade TradeCopy account (blocked: no connected account session available in this preview).
+
 - [x] Restore the existing full AI chart upload on Home, preserve H4 → M15/M5 guidance, and verify screen controls.
 
 - [x] Fix every visible Signals navigation/card control to open the intended existing signals route.
