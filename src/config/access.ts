@@ -1,13 +1,19 @@
 /**
- * OPEN_ACCESS master switch: when true, every page and feature is unlocked for
- * everyone (signed in or not, any plan). Set to false to re-enable the normal
- * paid + trial gating.
+ * OPEN_ACCESS is intentionally disabled for the subscription rollout.
+ * Access is controlled by active plan entitlements, the new-user trial, or
+ * grandfathered accounts created before the rollout cutoff.
  */
-export const OPEN_ACCESS = true;
+export const OPEN_ACCESS = false;
 
-/** Legacy dated preview window (kept for reference). */
-export const PUBLIC_PREVIEW_UNTIL = new Date("2026-08-06T23:59:59Z");
+/** Accounts created before this rollout retain their previous access. */
+export const LEGACY_ACCESS_CUTOFF = new Date("2026-10-09T00:00:00Z");
 
 export function isPublicPreviewActive(): boolean {
-  return OPEN_ACCESS || Date.now() < PUBLIC_PREVIEW_UNTIL.getTime();
+  return false;
+}
+
+export function isLegacyAccessAccount(createdAt?: string | null): boolean {
+  if (!createdAt) return false;
+  const created = new Date(createdAt).getTime();
+  return Number.isFinite(created) && created < LEGACY_ACCESS_CUTOFF.getTime();
 }
