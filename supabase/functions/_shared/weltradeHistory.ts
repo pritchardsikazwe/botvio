@@ -21,9 +21,11 @@ export function studioSymbols(value: unknown): string[] {
   }).filter(Boolean);
   if (raw && typeof raw === "object") {
     const record = raw as Record<string, unknown>;
-    for (const key of ["symbols", "Symbols", "items", "result"]) {
+    for (const key of ["symbols", "Symbols", "items", "Items", "result", "Result"]) {
       if (record[key] !== undefined) return studioSymbols(record[key]);
     }
+    const nested = Object.values(record).find(Array.isArray);
+    if (nested) return studioSymbols(nested);
   }
   return [];
 }
