@@ -259,8 +259,8 @@ export const AppRoutes = () => {
     <Route path="providers" element={<Navigate to="/copy-trading" replace />} />
     <Route path="copy-trading" element={<CopyMarketplace />} />
     <Route path="copy-trading/provider/:providerId" element={<CopyProviderProfile />} />
-    <Route path="copy-trading/start/:providerId" element={<CopyStart />} />
-    <Route path="copy-trading/onboarding" element={<CopyTradingOnboarding />} />
+    <Route path="copy-trading/start/:providerId" element={<Paid><CopyStart /></Paid>} />
+    <Route path="copy-trading/onboarding" element={<Paid><CopyTradingOnboarding /></Paid>} />
     <Route path="copy-trading/my" element={<Paid><FollowerDashboard /></Paid>} />
     <Route path="copy-trading/become-provider" element={<Paid><BecomeProvider /></Paid>} />
     <Route path="provider-dashboard" element={<Paid><ProviderCommandCenter /></Paid>} />
@@ -385,7 +385,7 @@ export const AppRoutes = () => {
 
     {/* Current Weltrade Hub is the canonical SyntX workspace. Legacy Weltrade pages redirect here. */}
     <Route path="weltrade" element={<Paid><WeltradeHub /></Paid>} />
-    <Route path="weltrade/signals" element={<WeltradeSyntxPage />} />
+    <Route path="weltrade/signals" element={<Paid><WeltradeSyntxPage /></Paid>} />
     {/* Canonical SEO URLs use compact slugs such as /weltrade/gainx600 and /weltrade/flipx1. */}
     <Route path="weltrade/:symbol" element={<WeltradeSyntxPage />} />
     <Route path="weltrade/synthetic" element={<Navigate to="/weltrade" replace />} />
@@ -417,7 +417,7 @@ export const AppRoutes = () => {
     <Route path="markets/crypto" element={<CryptoMarket />} />
     <Route path="markets/africa" element={<AfricaMarket />} />
     <Route path="trade-modes" element={<Navigate to="/options" replace />} />
-    <Route path="deriv/options" element={<DerivOptionsTerminalPage />} />
+    <Route path="deriv/options" element={<Paid><DerivOptionsTerminalPage /></Paid>} />
     <Route path="deriv-options-terminal" element={<Navigate to="/deriv/options" replace />} />
     <Route path="deriv-options" element={<Navigate to="/options" replace />} />
     <Route path="deriv-app" element={<Navigate to="/options" replace />} />
