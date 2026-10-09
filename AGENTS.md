@@ -1,5 +1,7 @@
 # Project architecture rules
 
+- Botvio Robot overview presentation lives in TradingOverview with locally scoped semantic theme tokens; CopyControlCenter retains account queries, authentication gates and execution controls so appearance changes do not alter trading behavior.
+
 - Scheduled Weltrade generation reuses the existing SyntX schedule and trading_signals publication/MT5 webhook; broker-returned symbols, broker-time windows and closed UTC candles are required before publishing, preserving quality and execution gates.
 
 - Home MT5 running trades and results use the existing account-authorized TradeCopy execution_status action; mock snapshots and signal executions are never presented as broker positions, and anonymous visitors never receive private account data.
