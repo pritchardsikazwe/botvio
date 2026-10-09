@@ -10,9 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Settings as SettingsIcon, User, Bell, Shield, Globe } from "lucide-react";
+import { Settings as SettingsIcon, User, Bell, Shield, Globe, Wallet, Monitor, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const { user } = useAuth();
@@ -149,6 +149,28 @@ const Settings = () => {
           <div className="text-center py-12">Loading...</div>
         ) : (
           <div className="space-y-6">
+            <Card className="glass-card border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-primary" />
+                  Connected Trading Accounts
+                </CardTitle>
+                <CardDescription>
+                  Manage Deriv connections, MT5 Provider/Follower accounts, and the Weltrade SyntX data connection from the trading control center.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 sm:flex-row">
+                <Button asChild className="w-full sm:w-auto">
+                  <Link to="/connections">Manage connected accounts <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link to="/dashboard">Open trading dashboard</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link to="/my-products">View subscriptions</Link>
+                </Button>
+              </CardContent>
+            </Card>
             {/* Profile Settings */}
             <Card className="glass-card">
               <CardHeader>
