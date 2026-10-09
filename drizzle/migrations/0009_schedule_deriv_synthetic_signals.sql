@@ -1,0 +1,2 @@
+-- lovable-cron-fallback-reviewed: market scans are time-based; no row event exists to trigger them
+select cron.schedule('botvio-deriv-synthetic-signals','*/5 * * * *', $$select net.http_post(url:='https://tqqkzeblmjapgbnsbtgw.supabase.co/functions/v1/generate-deriv-synthetic-signals', headers:=jsonb_build_object('Content-Type','application/json','x-botvio-automation-secret',public.get_botvio_automation_secret()), body:='{}'::jsonb, timeout_milliseconds:=150000)$$);
