@@ -82,6 +82,7 @@ export const useChartUsageGate = () => {
   };
 
   const planCode = gate.planCode || "free";
+  const uploadEntitled = gate.canUploadAiCharts;
 
   // Resolve max + period from admin settings
   let maxUploads = settings.free_daily_uploads;
@@ -144,14 +145,21 @@ export const useChartUsageGate = () => {
     refetchInterval: 30000,
   });
 
-  const remaining = trialExpired ? 0 : Math.max(0, maxUploads - usageCount);
-  const limitReached = trialExpired || usageCount >= maxUploads;
+  const remaining = !uploadEntitled || trialExpired ? 0 : Math.max(0, maxUploads - usageCount);
+  const limitReached = !uploadEntitled || trialExpired || usageCount >= maxUploads;
   const periodLabel = periodLabelFor(planCode, settings);
 
   // Structured block reason for the UI to render specific copy + CTA
   const blockInfo = (() => {
     if (!user) {
       return { reason: "guest" as const, title: "Sign in required", detail: "Create a free account to start analyzing charts." };
+    }
+    if (!uploadEntitled) {
+      return {
+        reason: "feature_not_included" as const,
+        title: "AI chart upload not included",
+        detail: "Your current subscription does not include AI chart uploads. Choose a plan with AI Chart Upload enabled or ask an administrator to update your subscription.",
+      };
     }
     if (trialExpired) {
       return {
