@@ -29,7 +29,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin + "/" },
+        options: { redirectTo: window.location.origin + "/botvio-robot" },
       });
       if (error) {
         toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
@@ -54,7 +54,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       toast({ title: "Welcome back!", description: "You have been signed in successfully." });
       onOpenChange(false);
       setEmail(""); setPassword("");
-      navigate("/deriv-app");
+      navigate("/botvio-robot");
     }
     setLoading(false);
   };
