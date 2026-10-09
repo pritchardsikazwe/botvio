@@ -130,7 +130,7 @@ const Dashboard = () => {
               ) : (
                 <div className="text-xl font-bold">{connectedAccounts}</div>
               )}
-              <p className="text-xs text-muted-foreground">{connectedBrokerNames}</p>
+              <p className="text-xs text-muted-foreground">{connectedBrokerNames}</p><Button asChild variant="link" size="sm" className="h-auto p-0 mt-1"><Link to="/connections">Manage connected accounts <ArrowRight className="ml-1 h-3 w-3" /></Link></Button>
             </CardContent>
           </Card>
 
@@ -168,7 +168,7 @@ const Dashboard = () => {
           <CardContent className="pt-1 pb-3">
             <div className="flex flex-wrap items-center gap-2">
               {entitlementsLoading ? <Skeleton className="h-8 w-full" /> : entitlementsError ? <div className="text-sm text-destructive">Could not load access. <Button size="sm" variant="outline" onClick={() => refetchEntitlements()}>Retry</Button></div> : entitlements?.filter(isEntitlementActive).length ? entitlements.filter(isEntitlementActive).map((e) => (
-                <Button key={e.id} asChild variant="secondary" className="h-auto text-sm px-3 py-1.5"><Link to={e.products?.slug === "synthetic-hub" ? "/synthetic" : e.products?.slug === "weltrade-hub" ? "/weltrade" : e.products?.slug === "mt5-direct" ? "/connections" : "/botvio-robot"}>{e.products?.name || "Active product"} · {e.ends_at ? new Date(e.ends_at).toLocaleDateString() : "No expiry"}</Link></Button>
+                <Button key={e.id} asChild variant="secondary" className="h-auto text-sm px-3 py-1.5"><Link to={(() => { const slug = e.products?.slug || ""; if (slug === "synthetic-hub") return "/synthetic-hub"; if (slug === "weltrade-hub") return "/weltrade"; if (slug === "mt5-direct" || slug === "mt5-direct-signals") return "/connections"; if (slug === "botvio-gold-robot") return "/apps/gold-robot"; if (slug === "botvio-synthetic-robot") return "/apps/synthetic-robot"; if (slug === "botvio-ai-robot" || slug === "botvio-robot") return "/dashboard"; return "/my-products"; })()}>{e.products?.name || "Active product"} · {e.ends_at ? new Date(e.ends_at).toLocaleDateString() : "No expiry"}</Link></Button>
               )) : <span className="text-sm text-muted-foreground">No active Store products yet.</span>}
             </div>
             {entitlements && entitlements.some(e => !isEntitlementActive(e)) && <div className="mt-2 text-xs text-muted-foreground">Expired: {entitlements.filter(e => !isEntitlementActive(e)).map(e => e.products?.name || "Product").join(", ")}</div>}
