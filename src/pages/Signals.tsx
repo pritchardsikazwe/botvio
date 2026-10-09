@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasProductType } from "@/hooks/useEntitlements";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { trackBotvioEvent } from "@/components/analytics/analytics";
 import { SignalModesGuide } from "@/components/signals/SignalModesGuide";
 
@@ -134,6 +135,8 @@ const Signals = () => {
   });
 
   const isPremium = useHasProductType("signal_pack");
+  const subscription = useSubscriptionGate();
+  const canUploadAiChart = isPremium || subscription.canUploadAiCharts;
   const { permission, requestPermission } = usePushNotifications();
 
   useEffect(() => {
@@ -224,7 +227,7 @@ const Signals = () => {
           </TabsList>
 
           <TabsContent value="chart-analysis" className="mt-6">
-            <ChartUpload isPremium={isPremium} />
+            <ChartUpload isPremium={canUploadAiChart} />
           </TabsContent>
 
           {isSignalManager && (
