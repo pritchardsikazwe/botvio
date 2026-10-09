@@ -1,3 +1,4 @@
+import { TradingOverview } from "@/components/dashboard/TradingOverview";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -177,6 +178,7 @@ export const BotvioRobotDashboard = () => {
       volume: order.lots ?? order.volume ?? order.lot ?? null,
       entry: order.openPrice ?? order.open_price ?? order.price_open ?? order.entry_price ?? null,
       pnl: order.profit ?? order.pnl ?? order.profit_loss ?? null,
+      current: order.currentPrice ?? order.current_price ?? order.price_current ?? null,
       mock: query?.data?.mode === "mock",
     }));
   });
@@ -185,35 +187,22 @@ export const BotvioRobotDashboard = () => {
   const anyMock = positionQueries.some((query) => query.data?.mode === "mock");
   const retryPositions = () => { followerAccounts.refetch(); masterAccounts.refetch(); positionQueries.forEach((query) => query.refetch()); };
   const positionLoading = followerAccounts.isLoading || masterAccounts.isLoading || positionQueries.some((query) => query.isLoading);
-  const metrics = [
-    { label: "Active subscriptions", value: entitlementsLoading ? "…" : String(activeEntitlements.length), tone: "text-emerald-300", icon: Layers3 },
-    { label: "Linked accounts", value: tradingAccountsLoading ? "…" : String(tradingAccounts?.length ?? 0), tone: "text-cyan-300", icon: Wallet },
-    { label: "Open positions", value: positionLoading ? "…" : positionErrors ? "—" : String(positions.length), tone: "text-emerald-300", icon: Activity },
-    { label: "Provider follows", value: String(activeCopySubscriptions.length), tone: "text-amber-300", icon: Users },
-  ];
-  const workflows = [
-    { title: "Deriv Options", description: "Options contracts and supported synthetic markets", icon: Zap, href: "/options", action: "Open Options", accent: "text-amber-300" },
-    { title: "Deriv Synthetic MT5 & Currencies", description: "Synthetic indices and supported currency pairs", icon: ChartNoAxesCombined, href: "/connections", action: "Manage MT5", accent: "text-emerald-300" },
-    { title: "Weltrade MT5", description: "Supported Forex, Gold, indices and SyntX markets", icon: Cloud, href: "/weltrade", action: "Open Weltrade hub", accent: "text-cyan-300" },
-    { title: "Botvio Provider Signals", description: "Provider setup, signal delivery and execution status", icon: Radio, href: "/provider-dashboard", action: "Provider centre", accent: "text-violet-300" },
-    { title: "Follow Providers", description: "Manage copy relationships and follower settings", icon: Users, href: "/copy-trading/my", action: "Manage follows", accent: "text-amber-300" },
-  ];
 
   if (authLoading) {
-    return <div className="min-h-screen bg-[#080d16] text-slate-100"><Header /><div className="flex items-center justify-center gap-2 py-24 text-sm text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /> Checking your session…</div></div>;
+    return <div className="min-h-screen bg-background text-foreground"><Header /><div className="flex items-center justify-center gap-2 py-24 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking your session…</div></div>;
   }
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#080d16] text-slate-100">
+      <div className="min-h-screen bg-background text-foreground">
         <Header />
         <main className="mx-auto max-w-md px-4 py-20">
-          <Card className="border-white/10 bg-[#111a28] text-slate-100">
+          <Card className="border-border bg-card text-card-foreground">
             <CardContent className="p-6 text-center">
-              <Bot className="mx-auto h-10 w-10 text-emerald-300" />
+              <Bot className="mx-auto h-10 w-10 text-success" />
               <h1 className="mt-3 text-xl font-bold">Sign in to open Botvio Robot</h1>
-              <p className="mt-2 text-sm text-slate-400">Your subscriptions, trading accounts and open trades are private to your account.</p>
-              <Button className="mt-5 w-full bg-emerald-300 text-slate-950 hover:bg-emerald-200" onClick={() => setAuthOpen(true)}>Sign in</Button>
-              <Button asChild variant="link" className="mt-2 text-emerald-300"><Link to="/signup">Create a free account</Link></Button>
+              <p className="mt-2 text-sm text-muted-foreground">Your subscriptions, trading accounts and open trades are private to your account.</p>
+              <Button className="mt-5 w-full bg-success text-success-foreground hover:bg-success/90" onClick={() => setAuthOpen(true)}>Sign in</Button>
+              <Button asChild variant="link" className="mt-2 text-success"><Link to="/signup">Create a free account</Link></Button>
             </CardContent>
           </Card>
         </main>
@@ -222,124 +211,19 @@ export const BotvioRobotDashboard = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#080d16] text-slate-100">
-      <Header />
-      <main className="mx-auto max-w-[1440px] space-y-5 px-3 pb-24 pt-4 sm:space-y-6 sm:px-5 sm:py-5 md:pb-8 lg:px-8">
-        <section className="relative isolate overflow-hidden rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-[#102d2a] via-[#101d2a] to-[#101522] p-5 shadow-2xl shadow-black/20 sm:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-amber-300/10 blur-3xl" />
-          <div className="relative grid gap-6 lg:grid-cols-[1.5fr_.8fr] lg:items-center">
-            <div>
-              <Badge variant="outline" className="mb-3 border-emerald-300/30 bg-emerald-300/10 text-emerald-200">BOTVIO TRADING WORKSPACE</Badge>
-              <h1 className="max-w-3xl text-2xl font-black tracking-tight sm:text-4xl">Your trading, connected in one place.</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">Review your access, connect your preferred trading platform, follow providers and monitor verified open positions from your connected accounts.</p>
-              <div className="mt-5 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
-                <Button asChild className="bg-emerald-300 text-slate-950 hover:bg-emerald-200"><Link to="/connections">Connect trading account <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-                <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10"><Link to="/marketplace">Explore plans <ExternalLink className="ml-2 h-4 w-4" /></Link></Button>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-300/10"><Bot className="h-6 w-6 text-emerald-300" /></div>
-                <div className="min-w-0"><p className="text-xs uppercase tracking-[.18em] text-slate-400">Botvio Robot</p><p className="mt-1 text-lg font-bold">Trading command centre</p></div>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3"><p className="text-xs text-slate-400">Signal engine</p><p className="mt-1 text-sm font-semibold text-emerald-300">Existing integration</p></div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3"><p className="text-xs text-slate-400">Execution route</p><p className="mt-1 text-sm font-semibold text-cyan-300">TradeCopy Cloud</p></div>
-              </div>
-              <p className="mt-3 text-xs leading-5 text-slate-400">Execution and connection health are shown only when confirmed by existing system data.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
-          {metrics.map(({ label, value, tone, icon: Icon }) => (
-            <Card key={label} className="min-w-0 border-white/10 bg-[#111a28] text-slate-100 shadow-lg shadow-black/10">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between"><div className="rounded-lg border border-white/10 bg-white/5 p-1.5 sm:rounded-xl sm:p-2"><Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${tone}`} /></div><span className="h-2 w-2 rounded-full bg-emerald-400" /></div>
-                <p className="mt-3 break-words text-[11px] font-medium leading-4 text-slate-400 sm:mt-4 sm:text-xs">{label}</p>
-                <p className="mt-1 text-xl font-bold tracking-tight sm:text-2xl">{value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </section>
-
-        <section className="grid min-w-0 gap-4 sm:gap-5 xl:grid-cols-[1.35fr_.8fr]">
-          <div className="space-y-5">
-            <Card className="min-w-0 border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-3 p-4 sm:p-6">
-                <div><CardTitle className="text-lg">Your access</CardTitle><CardDescription className="text-slate-400">Subscriptions and products linked to your account</CardDescription></div>
-                <Button asChild variant="outline" size="sm" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/marketplace">View plans</Link></Button>
-              </CardHeader>
-              <CardContent>
-                {entitlementsLoading ? <div className="rounded-xl border border-white/10 p-4 text-sm text-slate-400">Loading your subscriptions…</div> :
-                  entitlementsError ? <div className="rounded-xl border border-red-400/20 p-4 text-sm text-red-300">Your access could not be loaded. <Button size="sm" variant="outline" onClick={() => refetchEntitlements()}>Retry</Button></div> :
-                  activeEntitlements.length ? <div className="grid gap-3 sm:grid-cols-2">{activeEntitlements.map((item) => (
-                    <div key={item.id} className="rounded-xl border border-emerald-300/15 bg-emerald-300/[0.04] p-4">
-                      <div className="flex items-start justify-between gap-2"><div className="flex min-w-0 items-center gap-2"><Layers3 className="h-4 w-4 shrink-0 text-emerald-300" /><p className="truncate text-sm font-semibold">{item.products?.name ?? "Active product"}</p></div><Badge className="border-emerald-300/20 bg-emerald-300/10 text-emerald-200">Active</Badge></div>
-                      <p className="mt-2 text-xs text-slate-400">{item.ends_at ? `Access until ${new Date(item.ends_at).toLocaleDateString()}` : "No expiry recorded"}</p>
-                      <Button asChild variant="link" className="mt-2 h-auto p-0 text-emerald-300"><Link to={item.products?.slug === "synthetic-hub" ? "/synthetic" : item.products?.slug === "weltrade-hub" ? "/weltrade" : item.products?.slug === "mt5-direct" ? "/connections" : "/botvio-robot"}>Open product <ArrowRight className="ml-1 h-3 w-3" /></Link></Button>
-                    </div>
-                  ))}</div> :
-                  <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Layers3 className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No active subscriptions yet</p><p className="mt-1 text-sm text-slate-400">Explore the available hubs and signal products to choose what suits you.</p><Button asChild className="mt-4 bg-emerald-300 text-slate-950 hover:bg-emerald-200"><Link to="/marketplace">Explore products</Link></Button></div>}
-              </CardContent>
-            </Card>
-
-            <Card className="border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><div><CardTitle className="text-lg">Open trades</CardTitle><CardDescription className="text-slate-400">Positions returned by your connected TradeCopy accounts · refreshes every 15s</CardDescription></div><div className="flex items-center gap-2">{anyMock ? <Badge variant="outline" className="border-amber-300/30 text-amber-200">TEST MODE — not broker data</Badge> : <Badge variant="outline" className="border-emerald-300/20 text-emerald-200"><Activity className="mr-1 h-3 w-3" /> Live lookup</Badge>}<Button size="sm" variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10" onClick={retryPositions} aria-label="Refresh open trades"><RefreshCw className="h-3.5 w-3.5" /></Button></div></div></CardHeader>
-              <CardContent className="space-y-3">
-                {positionErrors && <div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100"><p className="font-semibold">Open positions could not be checked for {failedAccounts.length} account{failedAccounts.length > 1 ? "s" : ""}.</p><ul className="mt-1 space-y-0.5 text-xs">{failedAccounts.map((f) => <li key={f.name}>{f.name}: {f.message}</li>)}</ul><Button size="sm" variant="outline" className="mt-3 border-amber-300/30 bg-transparent text-amber-100" onClick={retryPositions}>Retry</Button></div>}
-                {followerAccounts.isError || masterAccounts.isError ? <div className="rounded-xl border border-red-400/20 p-4 text-sm text-red-300">Your TradeCopy accounts could not be loaded. <Button size="sm" variant="outline" onClick={retryPositions}>Retry</Button></div> :
-                  positionLoading ? <div className="space-y-2"><div className="h-10 animate-pulse rounded-lg bg-white/5" /><div className="h-10 animate-pulse rounded-lg bg-white/5" /></div> :
-                  accountsWithTradeCopy.length === 0 ? <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Wallet className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No TradeCopy account connected</p><p className="mt-1 text-sm text-slate-400">Connect an MT5 account in Trading Connections to see its open trades here.</p></div> :
-                  positions.length ? <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-white/10 text-xs text-slate-400"><th className="py-3 pr-3 font-medium">Account</th><th className="py-3 pr-3 font-medium">Market</th><th className="py-3 pr-3 font-medium">Side</th><th className="py-3 pr-3 font-medium">Lots</th><th className="py-3 pr-3 font-medium">Entry</th><th className="py-3 font-medium">Floating P/L</th></tr></thead><tbody>{positions.map((position) => <tr key={position.key} className="border-b border-white/5 last:border-0"><td className="py-3 pr-3"><p className="font-medium">{position.account}</p><p className="text-xs text-slate-500">{position.broker}{position.mock ? " · test" : ""}</p></td><td className="py-3 pr-3 font-semibold">{position.symbol}</td><td className={`py-3 pr-3 font-semibold ${position.side.includes("BUY") ? "text-emerald-300" : position.side.includes("SELL") ? "text-rose-300" : "text-slate-300"}`}>{position.side}</td><td className="py-3 pr-3">{position.volume == null ? "—" : String(position.volume)}</td><td className="py-3 pr-3">{position.entry == null ? "—" : String(position.entry)}</td><td className={`py-3 font-semibold ${position.pnl == null ? "text-slate-400" : Number(position.pnl) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{position.pnl == null || !Number.isFinite(Number(position.pnl)) ? "—" : Number(position.pnl).toFixed(2)}</td></tr>)}</tbody></table><p className="mt-3 text-xs text-slate-500">Prices and P/L are shown only when returned by the connected TradeCopy account.</p></div> :
-                  !positionErrors && <div className="rounded-xl border border-dashed border-white/15 p-6 text-center"><Activity className="mx-auto h-8 w-8 text-slate-500" /><p className="mt-2 font-semibold">No trades currently running</p><p className="mt-1 text-sm text-slate-400">No open positions were returned by your connected TradeCopy accounts.</p></div>}
-                <div className="mt-4 flex flex-wrap gap-2"><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/trade-history">Trade history <ArrowRight className="ml-2 h-4 w-4" /></Link></Button><Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/connections">Manage connections <Wallet className="ml-2 h-4 w-4" /></Link></Button></div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader><CardTitle className="text-lg">Linked trading accounts</CardTitle><CardDescription className="text-slate-400">Accounts saved to your Botvio profile and their connection status</CardDescription></CardHeader>
-              <CardContent>
-                {tradingAccountsLoading ? <div className="h-10 animate-pulse rounded-lg bg-white/5" /> :
-                  tradingAccountsError ? <div className="rounded-xl border border-red-400/20 p-4 text-sm text-red-300">Accounts could not be loaded: {errorText(tradingAccountsErr)} <Button size="sm" variant="outline" onClick={() => refetchTradingAccounts()}>Retry</Button></div> :
-                  !(tradingAccounts?.length) ? <div className="rounded-xl border border-dashed border-white/15 p-6 text-center text-sm text-slate-400">No trading accounts linked yet. <Link to="/connections" className="text-emerald-300 underline">Connect one</Link></div> :
-                  <div className="space-y-2">{(tradingAccounts as unknown as { id: string; label?: string | null; broker?: string | null; server?: string | null; login_id?: string | null; account_role?: string | null; environment?: string | null; connection_status?: string | null; tradecopy_active?: boolean | null }[]).map((a) => {
-                    const connected = !!a.tradecopy_active || a.connection_status === "connected";
-                    return <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{a.label || a.broker || "Trading account"}</p><p className="text-xs text-slate-400">{[a.broker, a.server, a.login_id ? `#${a.login_id}` : null, a.account_role, a.environment].filter(Boolean).join(" · ")}</p></div><Badge variant="outline" className={connected ? "border-emerald-300/30 text-emerald-200" : "border-white/15 text-slate-300"}>{connected ? "Connected" : (a.connection_status || "Not connected")}</Badge></div>;
-                  })}</div>}
-              </CardContent>
-            </Card>
-          </div>
-
-          <aside className="space-y-5">
-            <Card className="min-w-0 border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader className="p-4 sm:p-6"><CardTitle className="text-lg">Trading platforms</CardTitle><CardDescription className="text-slate-400">Choose the workflow you want to open</CardDescription></CardHeader>
-              <CardContent className="space-y-3 px-4 pb-4 sm:px-6 sm:pb-6">{workflows.map(({ title, description, icon: Icon, href, action, accent }) => <div key={title} className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><div className="flex items-start gap-3"><div className="rounded-lg bg-white/5 p-2"><Icon className={`h-5 w-5 ${accent}`} /></div><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{title}</p><p className="mt-1 text-xs leading-5 text-slate-400">{description}</p><Button asChild variant="link" className="mt-1 min-h-11 h-auto justify-start p-0 text-emerald-300"><Link to={href}>{action} <ArrowRight className="ml-1 h-3 w-3" /></Link></Button></div></div></div>)}</CardContent>
-            </Card>
-            <Card className="border-white/10 bg-[#111a28] text-slate-100">
-              <CardHeader><CardTitle className="text-lg">Robot execution master</CardTitle><CardDescription className="text-slate-400">Existing Botvio Robot master account and controls</CardDescription></CardHeader>
-              <CardContent className="space-y-4"><TradeCopyAccountDashboard role="master" robot /><div className="grid gap-2"><Button asChild className="justify-between bg-emerald-300 text-slate-950 hover:bg-emerald-200"><Link to="/connections">Trading connections <ArrowRight className="h-4 w-4" /></Link></Button><Button asChild variant="outline" className="justify-between border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/bots">AI Bots <ArrowRight className="h-4 w-4" /></Link></Button><Button asChild variant="outline" className="justify-between border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"><Link to="/copy-trading/my">My Copy Trading <ArrowRight className="h-4 w-4" /></Link></Button></div></CardContent>
-            </Card>
-            <Card className="border-amber-300/20 bg-amber-300/[0.04] text-slate-100"><CardContent className="flex items-start gap-3 p-4"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" /><div><p className="text-sm font-semibold">Risk remains user-controlled</p><p className="mt-1 text-xs leading-5 text-slate-400">Review account mode, position sizing and copy settings before enabling live trading. A signal is not a guarantee of execution or profit.</p></div></CardContent></Card>
-          </aside>
-        </section>
-      </main>
-      <nav aria-label="Mobile dashboard navigation" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080d16]/95 px-1 pb-[env(safe-area-inset-bottom)] pt-1.5 shadow-[0_-8px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl md:hidden">
-        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
-          {[
-            { label: "Home", href: "/botvio-robot", icon: House },
-            { label: "Accounts", href: "/connections", icon: Wallet },
-            { label: "Signals", href: "/signals", icon: Radio },
-            { label: "Copy", href: "/copy-trading/my", icon: Users },
-            { label: "AI Bots", href: "/bots", icon: Bot },
-          ].map(({ label, href, icon: Icon }) => <Link key={label} to={href} aria-label={label} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg px-1 text-[10px] font-medium transition-colors ${href === "/botvio-robot" ? "text-emerald-300" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}><Icon className="h-5 w-5" aria-hidden="true" /><span>{label}</span></Link>)}
-        </div>
-      </nav>
-    </div>
-  );
+  return <TradingOverview
+    access={activeEntitlements.map(item => ({ id: item.id, name: item.products?.name ?? "Active product", slug: item.products?.slug, endsAt: item.ends_at, href: item.products?.slug === "synthetic-hub" ? "/synthetic" : item.products?.slug === "weltrade-hub" ? "/weltrade" : item.products?.slug === "mt5-direct" ? "/connections" : "/botvio-robot" }))}
+    accounts={(tradingAccounts ?? []) as unknown as import("@/components/dashboard/TradingOverview").OverviewAccount[]}
+    positions={positions}
+    accessLoading={entitlementsLoading} accountsLoading={tradingAccountsLoading} positionLoading={positionLoading}
+    accessError={entitlementsError} accountsError={tradingAccountsError ? errorText(tradingAccountsErr) : null}
+    anyMock={anyMock}
+    positionError={positionErrors || followerAccounts.isError || masterAccounts.isError ? <div className="overview-state"><div><p>Open positions could not be checked.</p>{failedAccounts.map(f => <p key={f.name}>{f.name}: {f.message}</p>)}{followerAccounts.isError && <p>{errorText(followerAccounts.error)}</p>}{masterAccounts.isError && <p>{errorText(masterAccounts.error)}</p>}</div><Button size="sm" variant="outline" onClick={retryPositions}>Retry</Button></div> : null}
+    retryAccess={() => { refetchEntitlements(); }} retryAccounts={() => { refetchTradingAccounts(); }} retryPositions={retryPositions}
+    robotControls={<><TradeCopyAccountDashboard role="master" robot /><div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link to="/connections">Trading connections</Link></Button><Button asChild variant="outline"><Link to="/bots">AI Bots</Link></Button><Button asChild variant="outline"><Link to="/copy-trading/my">My Copy Trading</Link></Button></div><p className="text-xs text-muted-foreground">Review account mode, position sizing and copy settings before enabling live trading. A signal is not a guarantee of execution or profit.</p></>}
+  />;
 };
+
 export const CopyTradingAdmin = () => {
   const providers = useQuery({
     queryKey: ["admin", "copy-trading", "providers"],
