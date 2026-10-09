@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar, ShieldAlert, Eye, EyeOff, BarChart3, KeyRound } from "lucide-react";
+import { Users, Search, RefreshCw, Phone, Globe, Mail, Crown, Calendar, ShieldAlert, Eye, EyeOff, BarChart3, KeyRound, Key } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -53,6 +53,9 @@ export const AdminProfilesTab = () => {
   });
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
+  const [featureDialog, setFeatureDialog] = useState<{ open: boolean; userId: string; userName: string; email: string | null }>({ open: false, userId: "", userName: "", email: null });
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [featureExpiresAt, setFeatureExpiresAt] = useState("");
 
   const { data: profiles, isLoading, refetch } = useQuery({
     queryKey: ["admin_profiles"],
@@ -83,6 +86,62 @@ export const AdminProfilesTab = () => {
       return data as SubscriptionInfo[];
     },
   });
+
+  const { data: featureProducts } = useQuery({
+    queryKey: ["admin-manual-access-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("id, name, type, slug").eq("is_active", true).order("name");
+      if (error) throw error;
+      return data as Array<{ id: string; name: string; type: string; slug: string }>;
+    },
+    enabled: isSuperAdmin,
+  });
+
+  const grantFeatureAccess = useMutation({
+    mutationFn: async () => {
+      if (!featureDialog.userId || !selectedProductId) throw new Error("Select a feature first.");
+      const endsAt = featureExpiresAt ? new Date(`${featureExpiresAt}T23:59:59`).toISOString() : null;
+      if (endsAt && new Date(endsAt).getTime() <= Date.now()) throw new Error("Expiry must be in the future.");
+
+      const { data: existing, error: lookupError } = await supabase
+        .from("entitlements")
+        .select("id")
+        .eq("user_id", featureDialog.userId)
+        .eq("product_id", selectedProductId)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
+
+      const payload = { status: "active", started_at: new Date().toISOString(), ends_at: endsAt, source_order_id: null };
+      const result = existing
+        ? await supabase.from("entitlements").update(payload).eq("id", existing.id)
+        : await supabase.from("entitlements").insert({ ...payload, user_id: featureDialog.userId, product_id: selectedProductId });
+      if (result.error) throw result.error;
+
+      const product = featureProducts?.find(p => p.id === selectedProductId);
+      const { error: notificationError } = await supabase.from("notifications").insert({
+        user_id: featureDialog.userId,
+        type: "success",
+        title: "Feature Access Granted",
+        message: `Access to ${product?.name || "a Botvio feature"} has been enabled by the admin.${endsAt ? ` Access ends on ${new Date(endsAt).toLocaleDateString()}.` : " Access has no expiry date."}`,
+      });
+      if (notificationError) console.warn("Feature access granted, but notification failed:", notificationError.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entitlements"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-manual-access-products"] });
+      toast.success("Feature access granted.");
+      setFeatureDialog({ open: false, userId: "", userName: "", email: null });
+      setSelectedProductId("");
+      setFeatureExpiresAt("");
+    },
+    onError: (e: any) => toast.error(e.message || "Could not grant feature access"),
+  });
+
+  const openFeatureDialog = (profile: ProfileRow) => {
+    setFeatureDialog({ open: true, userId: profile.user_id, userName: profile.display_name || profile.email || "User", email: profile.email });
+    setSelectedProductId("");
+    setFeatureExpiresAt(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
+  };
 
   // Fetch AI chart analysis usage counts per user — paginate to beat 1000-row limit
   const { data: aiUsageCounts } = useQuery({
@@ -413,6 +472,9 @@ export const AdminProfilesTab = () => {
                               <Button size="sm" variant="outline" onClick={() => openPlanDialog(p)}>
                                 <Crown className="h-4 w-4 mr-1" /> Plan
                               </Button>
+                              <Button size="sm" variant="outline" onClick={() => openFeatureDialog(p)}>
+                                <Key className="h-4 w-4 mr-1" /> Access
+                              </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -448,6 +510,46 @@ export const AdminProfilesTab = () => {
           </div>
         )}
       </CardContent>
+
+      {/* Manual feature access for customers who paid outside the website - Super Admin only */}
+      {isSuperAdmin && (
+        <Dialog open={featureDialog.open} onOpenChange={(open) => setFeatureDialog({ ...featureDialog, open })}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Key className="h-5 w-5" /> Grant Feature Access</DialogTitle>
+              <DialogDescription>
+                Manually activate a specific product for <strong>{featureDialog.userName}</strong>
+                {featureDialog.email ? <> ({featureDialog.email})</> : null}. Use this when payment was received outside Botvio.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Feature / Product</Label>
+                <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                  <SelectTrigger><SelectValue placeholder="Choose feature to unlock..." /></SelectTrigger>
+                  <SelectContent>
+                    {featureProducts?.map(product => (
+                      <SelectItem key={product.id} value={product.id}>{product.name} ({product.type})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Only active products are listed. Granting access does not change the user's subscription plan.</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Access expiry (optional)</Label>
+                <Input type="date" value={featureExpiresAt} onChange={e => setFeatureExpiresAt(e.target.value)} />
+                <p className="text-xs text-muted-foreground">Clear the date for access with no expiry. The access will be attached to this user's account, not just the email address.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setFeatureDialog({ ...featureDialog, open: false })}>Cancel</Button>
+              <Button onClick={() => grantFeatureAccess.mutate()} disabled={grantFeatureAccess.isPending || !selectedProductId}>
+                {grantFeatureAccess.isPending ? "Granting..." : "Grant Access"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Change Plan Dialog - Super Admin only */}
       {isSuperAdmin && (
