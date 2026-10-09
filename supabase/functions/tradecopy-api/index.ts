@@ -233,10 +233,10 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       }
       if (acct.account_role === "master") {
         await adapter.deactivateMaster(acct.tradecopy_user_id).catch(() => null);
-        await adapter.removeSource(acct.tradecopy_user_id);
+        await adapter.removeSource(acct.tradecopy_user_id).catch(() => null);
       } else {
         await adapter.deactivateFollower(acct.tradecopy_user_id).catch(() => null);
-        await adapter.unfollow(acct.tradecopy_user_id);
+        await adapter.unfollow(acct.tradecopy_user_id).catch(() => null);
       }
       await admin.from("copy_relationships").delete()
         .or(`follower_account_id.eq.${acct.id},master_account_id.eq.${acct.id}`);
