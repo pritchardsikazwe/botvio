@@ -137,6 +137,25 @@ const Signals = () => {
   const isPremium = useHasProductType("signal_pack");
   const subscription = useSubscriptionGate();
   const canUploadAiChart = isPremium || subscription.canUploadAiCharts;
+
+  if (!subscription.isLoading && !subscription.canAccessSignalsCenter && !isSignalManager) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SEOHead seoKey="signals" title="Signals Center Access — Botvio" description="Manage your Botvio subscription to unlock the Signals Center." />
+        <Header />
+        <main className="container mx-auto max-w-2xl px-4 py-16">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Crown className="mx-auto h-12 w-12 text-primary" />
+              <h1 className="mt-4 text-2xl font-black">Signals Center is not included in your current plan</h1>
+              <p className="mt-2 text-sm text-muted-foreground">Upgrade your subscription or contact an administrator if you believe this access should be included.</p>
+              <Button asChild className="mt-5"><Link to="/marketplace">View subscription plans</Link></Button>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
   const { permission, requestPermission } = usePushNotifications();
 
   useEffect(() => {
