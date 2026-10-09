@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, TrendingUp, ShieldAlert, Sparkles, Plus, LayoutDashboard } from "lucide-react";
+import { Users, TrendingUp, ShieldAlert, Sparkles, Plus, LayoutDashboard, Bot, ArrowRight } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { PageBanner } from "@/components/layout/PageBanner";
@@ -163,6 +163,28 @@ const CopyMarketplace = () => {
               Copy trading involves risk. Past performance does not guarantee future results. All
               figures shown are historical results from completed trades — never projections.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden border-emerald-500/25 bg-gradient-to-r from-emerald-500/10 via-background to-primary/5">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600">
+                <Bot className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg font-bold">Botvio Master</h2>
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">Official Botvio Robot</span>
+                </div>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Follow Botvio’s official automated strategy on your own MT5 follower account. Choose your risk settings, test on demo first, and pause or stop copying whenever you want.
+                </p>
+              </div>
+            </div>
+            <Button asChild className="min-h-11 shrink-0">
+              <Link to="/copy-trading/onboarding">Follow Botvio Master <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
           </CardContent>
         </Card>
 
