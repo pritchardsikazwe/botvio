@@ -496,7 +496,8 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                     key={type.value}
                     variant={analysisType === type.value ? "default" : "outline"}
                     size="sm"
-                    className="h-auto py-2 flex flex-col items-start"
+                    className="h-auto min-w-0 py-2 flex flex-col items-start whitespace-normal text-left"
+                    aria-pressed={analysisType === type.value}
                     onClick={() => setAnalysisType(type.value)}
                   >
                     <span className="font-medium">{type.label}</span>
@@ -561,7 +562,7 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 />
                 {previewUrl ? (
                   <div className="space-y-3">
-                    <img src={previewUrl} alt="Chart preview" className="max-h-64 mx-auto rounded-lg shadow-lg" />
+                    <img src={previewUrl} alt="Chart preview" className="max-h-64 max-w-full mx-auto rounded-lg object-contain shadow-lg" />
                     <p className="text-sm text-muted-foreground">Click to change image</p>
                   </div>
                 ) : (
@@ -606,22 +607,22 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                   ⚠️ BOTVIO AI – SIGNAL GUIDELINES
                 </h4>
 
-                <div className="flex items-start gap-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 p-2.5">
-                  <Info className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 rounded-lg bg-warning/10 border border-warning/30 p-2.5">
+                  <Info className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <p className="text-xs text-foreground leading-relaxed">
-                    <span className="font-bold text-yellow-400">📌 Chart Setup:</span> Make sure the instrument symbol is clearly visible on your chart before uploading or sharing any signal.
+                    <span className="font-bold text-warning">📌 Chart Setup:</span> Make sure the instrument symbol is clearly visible on your chart before uploading or sharing any signal.
                   </p>
                 </div>
 
-                <div className="flex items-start gap-2 rounded-lg bg-blue-500/10 border border-blue-500/30 p-2.5">
-                  <BarChart3 className="h-4 w-4 text-blue-400 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 rounded-lg bg-primary/10 border border-primary/30 p-2.5">
+                  <BarChart3 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                   <div className="text-xs text-foreground leading-relaxed">
-                    <span className="font-bold text-blue-400">📊 Timeframe Strategy:</span>
+                    <span className="font-bold text-primary">📊 Timeframe Strategy:</span>
                     <ul className="mt-1 ml-1 space-y-0.5 text-muted-foreground">
                       <li>✅ Use <span className="font-semibold text-foreground">H4</span> to identify overall trend & key levels</li>
                       <li>✅ Switch to <span className="font-semibold text-foreground">M15 / M5</span> to refine entries & exits</li>
                     </ul>
-                    <p className="mt-1 text-[10px] text-primary italic">👉 Higher accuracy and better timing guaranteed.</p>
+                    <p className="mt-1 text-[10px] text-primary italic">Confirm both timeframes before entry; an uploaded chart alone cannot confirm an unseen timeframe. No accuracy or profit guarantee.</p>
                   </div>
                 </div>
 
@@ -650,8 +651,8 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                 <Button
                   onClick={handleAnalyze}
                   disabled={!selectedFile || isUploading || isAnalyzing}
-                  className="flex-1 text-base font-semibold bg-black text-white hover:bg-black/90 border-none"
-                  variant="outline"
+                  className="flex-1 text-base font-semibold"
+                  variant="default"
                 >
                   {isUploading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</>
@@ -689,19 +690,19 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                         <Target className="h-5 w-5 mx-auto mb-1" />
                         <p className="text-xs font-medium">{structuredResult.recommendation || "HOLD"}</p>
                       </div>
-                      <div className="p-3 rounded-lg border bg-primary/10 border-primary/30 text-center">
-                        <Shield className="h-5 w-5 mx-auto mb-1 text-primary" />
-                        <p className="text-xs font-medium text-primary">{structuredResult.risk_level || "Medium"} Risk</p>
+                      <div className="p-3 rounded-lg border bg-warning/10 border-warning/30 text-center">
+                        <Shield className="h-5 w-5 mx-auto mb-1 text-warning" />
+                        <p className="text-xs font-medium text-warning">{structuredResult.risk_level ? `${structuredResult.risk_level} Risk` : "Risk unavailable"}</p>
                       </div>
                       <div className="p-3 rounded-lg border bg-secondary text-center">
                         <BarChart3 className="h-5 w-5 mx-auto mb-1" />
-                        <p className="text-xs font-medium">{structuredResult.confidence || "75"}% Confidence</p>
+                        <p className="text-xs font-medium">{structuredResult.confidence != null ? `${structuredResult.confidence}% Confidence` : "Confidence unavailable"}</p>
                       </div>
                     </div>
                   )}
 
                   {structuredResult?.entry_price && (
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-2 [&>div]:min-w-0 [&_p]:break-words">
                       <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
                         <p className="text-xs text-muted-foreground">Entry</p>
                         <p className="font-mono font-bold text-primary">{structuredResult.entry_price}</p>
@@ -747,9 +748,9 @@ export const ChartUpload = ({ isPremium = false }: ChartUploadProps) => {
                         imageUrl={previewUrl || undefined}
                       />
                     </div>
-                    <div className="p-4 rounded-lg bg-muted/30 border border-border/50 max-h-80 overflow-y-auto">
+                    <div className="p-4 rounded-lg bg-muted/30 border border-border/50 max-h-96 overflow-y-auto min-w-0">
                       <div className="prose prose-sm prose-invert max-w-none">
-                        <pre className="whitespace-pre-wrap text-sm font-sans text-foreground/90">{analysisResult}</pre>
+                        <pre className="whitespace-pre-wrap break-words text-sm font-sans text-foreground/90">{analysisResult}</pre>
                       </div>
                     </div>
                   </div>
