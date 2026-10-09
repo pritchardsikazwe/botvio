@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,28 @@ const labels:Record<string,string>={market_open:"Market opens",signal_view:"Sign
 
 export function AdminAnalyticsPanel(){
  const [days,setDays]=useState(30); const [data,setData]=useState<Summary|null>(null); const [live,setLive]=useState<any[]>([]); const [countries,setCountries]=useState<{country:string;users:number}[]>([]); const [loading,setLoading]=useState(true);
- const load=async()=>{setLoading(true); const {data,error}=await (supabase as any).rpc("admin_analytics_summary",{p_days:days}); if(!error)setData(data as Summary); const cutoff=new Date(Date.now()-90000).toISOString(); const {data:presence}=await (supabase as any).from("user_presence").select("user_id,last_seen_at,current_path,device_type").gte("last_seen_at",cutoff).order("last_seen_at",{ascending:false}).limit(20); if(presence)setLive(presence); const {data:profiles}=await (supabase as any).from("profiles").select("country").not("country","is",null).neq("country",""); const counts:Record<string,number>={}; (profiles||[]).forEach((p:any)=>{const key=String(p.country).trim(); if(key) counts[key]=(counts[key]||0)+1;}); setCountries(Object.entries(counts).map(([country,users])=>({country,users})).sort((a,b)=>b.users-a.users).slice(0,10)); setLoading(false);};
+ const load=async()=>{
+  setLoading(true);
+  try {
+   const {data:summary,error:summaryError}=await (supabase as any).rpc("admin_analytics_summary",{p_days:days});
+   if(summaryError) throw summaryError;
+   setData(summary as Summary);
+   const cutoff=new Date(Date.now()-90000).toISOString();
+   const {data:presence,error:presenceError}=await (supabase as any).from("user_presence").select("user_id,last_seen_at,current_path,device_type").gte("last_seen_at",cutoff).order("last_seen_at",{ascending:false}).limit(20);
+   if(presenceError) throw presenceError;
+   setLive(presence||[]);
+   const {data:profiles,error:profilesError}=await (supabase as any).from("profiles").select("country").not("country","is",null).neq("country","");
+   if(profilesError) throw profilesError;
+   const counts:Record<string,number>={};
+   (profiles||[]).forEach((p:any)=>{const key=String(p.country).trim();if(key)counts[key]=(counts[key]||0)+1;});
+   setCountries(Object.entries(counts).map(([country,users])=>({country,users})).sort((a,b)=>b.users-a.users).slice(0,10));
+  } catch(e:any) {
+   console.error("Admin analytics failed to load",e);
+   toast.error(e?.message||"Analytics could not be loaded. Check the analytics RPC and table permissions.");
+  } finally {
+   setLoading(false);
+  }
+ }
  useEffect(()=>{load()},[days]);
  const Stat=({title,value,icon:Icon,sub}:{title:string;value:string|number;icon:any;sub?:string})=><Card><CardContent className="p-4 flex items-center justify-between"><div><p className="text-xs text-muted-foreground">{title}</p><p className="mt-1 text-2xl font-black">{value}</p>{sub&&<p className="mt-1 text-[10px] text-muted-foreground">{sub}</p>}</div><Icon className="h-5 w-5 text-primary"/></CardContent></Card>;
  return <section id="analytics-panel" className="space-y-4">
