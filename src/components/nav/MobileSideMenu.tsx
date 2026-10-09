@@ -19,6 +19,7 @@ import {
   UserRound,
   Users,
   WalletCards,
+  ShieldCheck,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -55,7 +56,7 @@ const trading: Item[] = [
 
 export const MobileSideMenu = ({ className, trigger }: { className?: string; trigger?: ReactNode }) => {
   const { pathname } = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
 
   const isActive = (to: string) =>
@@ -169,6 +170,37 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
 
               <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Trading & Account</p>
               <div className="space-y-1">{renderItems(trading)}</div>
+
+              <div className="my-5 border-t border-border/50" />
+              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">More</p>
+              <div className="space-y-1">
+                {renderItems([
+                  { label: "Trading Workspace", to: "/trading", icon: LineChart },
+                  { label: "Market & News Trader Hub", to: "/news-trader-hub", icon: Radio },
+                  { label: "Economic Calendar", to: "/news-calendar", icon: BarChart3 },
+                  { label: "Marketplace", to: "/marketplace", icon: Coins },
+                  { label: "Performance Transparency", to: "/performance-transparency", icon: Signal },
+                  { label: "Connections", to: "/connections", icon: Copy },
+                  { label: "About Botvio", to: "/about", icon: UserRound },
+                  { label: "Contact & Support", to: "/contact", icon: Users },
+                  { label: "FAQ", to: "/faq", icon: Sparkles },
+                  { label: "Install App", to: "/install", icon: Settings },
+                  { label: "Risk Disclosure", to: "/disclaimer", icon: ShieldCheck },
+                  { label: "Terms & Privacy", to: "/terms", icon: ShieldCheck },
+                ])}
+              </div>
+              {isAdmin && (
+                <>
+                  <div className="my-5 border-t border-border/50" />
+                  <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-primary">Admin</p>
+                  <div className="space-y-1">
+                    {renderItems([
+                      { label: "Admin Dashboard", to: "/admin", icon: ShieldCheck },
+                      { label: "Users & Visitors", to: "/admin", icon: Users },
+                    ])}
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="border-t border-border/60 bg-card/50 p-3">

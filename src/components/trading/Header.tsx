@@ -123,7 +123,7 @@ export const Header = () => {
                     More
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 glass-card" align="end">
+                <DropdownMenuContent className="w-72 glass-card max-h-[80vh] overflow-y-auto overscroll-contain" align="end" sideOffset={8}>
                   {MORE_NAV.map((group, gi) => (
                     <div key={group.label}>
                       {gi > 0 && <DropdownMenuSeparator />}
@@ -138,6 +138,21 @@ export const Header = () => {
                       ))}
                     </div>
                   ))}
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Admin shortcuts</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => navigate("/admin")}>
+                        <Shield className="w-4 h-4 mr-2" /> Admin Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/admin?tab=users")}>
+                        <Users className="w-4 h-4 mr-2" /> Users
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/admin?tab=visitors")}>
+                        <BarChart3 className="w-4 h-4 mr-2" /> Visitors & Analytics
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   {user && (
                     <>
                       <DropdownMenuSeparator />
@@ -176,7 +191,7 @@ export const Header = () => {
                     <Menu className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 glass-card max-h-[80vh] overflow-y-auto">
+                <DropdownMenuContent className="w-[min(92vw,360px)] glass-card max-h-[80dvh] overflow-y-auto overscroll-contain" align="start" sideOffset={8}>
                   <DropdownMenuItem asChild><Link to="/">Home</Link></DropdownMenuItem>
                   {PRIMARY_NAV.map((group) => (
                     <div key={group.label}>
