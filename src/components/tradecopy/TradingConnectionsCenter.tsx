@@ -33,7 +33,7 @@ export function TradingConnectionsCenter() {
             <Badge variant="outline" className="border-primary/30 text-primary">BOTVIO CONTROL CENTER</Badge>
             <Badge variant="secondary">Deriv + MT5 TradeCopy</Badge>
           </div>
-          <CardTitle className="text-2xl sm:text-3xl">Connections & Copy Trading</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl">Connect an account or set up copying</CardTitle>
           <CardDescription className="max-w-3xl text-sm sm:text-base">
             One place to understand every trading connection. Deriv is used for Deriv trading and signals.
             MT5 uses TradeCopy Cloud for master/follower copy trading. These are separate connections.
@@ -63,7 +63,7 @@ export function TradingConnectionsCenter() {
         <CardContent className="flex items-start gap-3 p-4">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
           <div className="text-sm">
-            <p className="font-semibold">Account structure: one Deriv ownership, separate trading connections</p>
+            <p className="font-semibold">Keep account types separate</p>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               Your Deriv login can own multiple trading accounts, including Demo and Real. Botvio still keeps
               Deriv Options credentials separate from MT5 TradeCopy credentials. A Deriv Demo account and an
@@ -74,36 +74,12 @@ export function TradingConnectionsCenter() {
         </CardContent>
       </Card>
 
-      <Card className="glass-card overflow-hidden border-primary/15">
-        <CardHeader className="pb-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-base">BOTVIO connection map</CardTitle>
-              <CardDescription>See exactly what each account is used for before you activate copying.</CardDescription>
-            </div>
-            <Badge variant="outline" className="border-primary/25 text-primary">DEMO-FIRST</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-          {[
-            { n: "01", title: "Deriv", sub: "Options / Deriv trading", meta: "Demo + Real", icon: Wallet },
-            { n: "02", title: "MT5 Provider", sub: "Publishes master trades", meta: "TradeCopy", icon: Monitor },
-            { n: "03", title: "MT5 Follower", sub: "Receives copied trades", meta: "TradeCopy", icon: Users },
-            { n: "04", title: "Botvio Robot", sub: "Official Botvio master", meta: "Admin source", icon: Bot },
-            { n: "05", title: "Weltrade SyntX", sub: "Market data only", meta: "Quotes + candles", icon: Activity },
-          ].map(({ n, title, sub, meta, icon: Icon }) => (
-            <div key={n} className="group rounded-2xl border border-border/60 bg-background/70 p-3 transition-colors hover:border-primary/30">
-              <div className="flex items-start justify-between gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-[10px] font-bold text-primary">{n}</span>
-                <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-              </div>
-              <p className="mt-3 text-sm font-semibold">{title}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
-              <Badge variant="secondary" className="mt-3 text-[10px]">{meta}</Badge>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+        <h2 className="font-semibold">Choose your task</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Use Deriv connection for Deriv accounts. Use MT5 TradeCopy to publish trades from a Provider account or copy trades into a Follower account. Weltrade SyntX data is a separate market-data feed, not a copy-trading account.
+        </p>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-5">
         <Card className="glass-card border-primary/20">
@@ -208,8 +184,8 @@ export function TradingConnectionsCenter() {
       <section id="mt5-connections" className="scroll-mt-6 space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-lg font-semibold">MT5 TradeCopy connections</h2>
-            <p className="text-sm text-muted-foreground">MT5 accounts use one canonical TradeCopy Cloud route: connect a Provider master or Follower, then configure copying below. Direct legacy MT5 signal execution is no longer exposed here.</p>
+            <h2 className="text-lg font-semibold">MT5 copy trading</h2>
+            <p className="text-sm text-muted-foreground">Choose Provider to share trades, or Follower to receive copied trades. Both use TradeCopy Cloud.</p>
           </div>
           <Badge variant="outline">TradeCopy Cloud</Badge>
         </div>
@@ -241,7 +217,7 @@ export function TradingConnectionsCenter() {
       <section id="provider-mt5" className="scroll-mt-6 space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-lg font-semibold">4. MT5 provider master</h2>
+            <h2 className="text-lg font-semibold">MT5 Provider</h2>
             <p className="text-sm text-muted-foreground">Connect the exact MT5 login whose trades should be published. It may belong to the same Deriv ownership as your Deriv Demo, but it remains a separate MT5 connection.</p>
           </div>
           <Badge variant="outline">Master</Badge>
