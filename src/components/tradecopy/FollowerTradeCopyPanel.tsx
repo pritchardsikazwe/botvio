@@ -433,22 +433,31 @@ export function FollowerTradeCopyPanel() {
               </div>
             </div>
 
-            {accounts.data?.[0]?.tradecopy_user_id ? (
-              <div className="overflow-hidden rounded-xl border border-border/60 bg-background">
-                <iframe
-                  title="Botvio Robot trade activity"
-                  src={`https://tradecopy.online/profile/order-history/slave/${accounts.data[0].tradecopy_user_id}/server_1`}
-                  className="h-[520px] w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
-              </div>
+            {accounts.data?.some((a) => !!a.tradecopy_user_id) ? (
+              <section className="space-y-3">
+                <div>
+                  <Label>Open trades · live</Label>
+                  <p className="mt-1 text-xs text-muted-foreground">Positions currently reported by TradeCopy. This list refreshes automatically every 10 seconds.</p>
+                </div>
+                {accounts.data.filter((a) => !!a.tradecopy_user_id).map((account) => <AccountOpenTrades key={account.id} account={account} />)}
+                <details className="rounded-xl border border-border/50">
+                  <summary className="cursor-pointer p-3 text-sm font-semibold">TradeCopy order history · closed and past orders</summary>
+                  <div className="overflow-hidden border-t border-border/50 bg-background">
+                    <iframe
+                      title="Botvio Robot trade history"
+                      src={`https://tradecopy.online/profile/order-history/slave/${accounts.data.find((a) => !!a.tradecopy_user_id)!.tradecopy_user_id}/server_1`}
+                      className="h-[520px] w-full border-0"
+                      loading="lazy"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                    />
+                  </div>
+                </details>
+              </section>
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-                Connect your MT5 account to display Botvio Robot activity.
+                Connect your MT5 account to display live trades and order history.
               </div>
             )}
-
             <div className="space-y-2">
               <Label>Recent Botvio execution events</Label>
             {events.data?.length === 0 && <p className="text-xs text-muted-foreground">No copied trades yet.</p>}
