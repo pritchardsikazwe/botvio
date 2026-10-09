@@ -192,7 +192,20 @@ serve(async (req) => {
     const timeframeInstruction = `
 **Timeframe**: <detected timeframe from chart, e.g. M1, M5, M15, M30, H1, H4, D1, W1. Look at the chart's time axis, candle spacing, or any timeframe label visible on the chart. This is REQUIRED.>`;
 
-    const analysisPrompt = resolvedSymbol
+    const modeInstructions: Record<string, string> = {
+      full: "Full Analysis: provide a complete breakdown of trend, market structure, support/resistance, visible patterns and risk, followed by an entry confirmation plan.",
+      quick: "Quick Scan: keep the report concise, prioritizing visible direction, nearest key levels and the main risk. Keep all structured labels.",
+      entry: "Entry Points: prioritize the entry trigger, retest/rejection confirmation, invalidation, stop loss and targets with risk/reward. Do not chase an unconfirmed breakout.",
+      support_resistance: "S/R Levels: prioritize visible support and resistance zones, touches, breakouts and rejection evidence. Separate observed levels from conditional trade ideas.",
+    };
+    const strategyInstruction = `
+Apply Botvio's timeframe strategy: H4 establishes overall trend and key levels; M15/M5 refine entries and exits using visible rejection or breakout-and-retest confirmation.
+Only analyze timeframes actually visible in the uploaded image. Never pretend to have H4 or M15/M5 confirmation when it is not shown; state which additional chart is needed.
+Use only readable chart evidence, not invented prices or candles. If no clear setup exists, output **Direction**: WAIT and leave unavailable entry/stop/targets as N/A.
+Do not guarantee accuracy or profit. Explain lot-size adjustment for wide stops; treat 1–3% risk per trade as a maximum-risk guideline, not a required allocation.
+${modeInstructions[typeof analysisType === "string" ? analysisType : "full"] || modeInstructions.full}
+`;
+    const analysisPrompt = strategyInstruction + (resolvedSymbol
       ? `You are an expert trading chart analyst. The user has uploaded a chart for **${resolvedSymbol}**. This is confirmed — do NOT identify or guess a different instrument. The instrument IS ${resolvedSymbol}.
 
 **Instrument**: ${resolvedSymbol}
@@ -238,7 +251,7 @@ ${timeframeInstruction}
 4. **Risk Assessment**: Low, Medium, or High
 ${timeframe ? `Current Timeframe: ${timeframe}` : ""}
 
-Keep the response structured and actionable.`;
+Keep the response structured and actionable.`);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120000);
@@ -382,7 +395,7 @@ Keep the response structured and actionable.`;
                   || analysisText.match(/TP\s*3[:\s]*\$?([\d,]+\.?\d*)/i);
     const confMatch = analysisText.match(/\*\*Confidence\*\*[:\s]*(\d+)/i)
                    || analysisText.match(/Confidence[:\s]*(\d+)/i);
-    const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL)/i);
+    const dirMatch = analysisText.match(/\*\*Direction\*\*[:\s]*(BUY|SELL|WAIT|HOLD|AVOID)/i);
     const tfMatch = analysisText.match(/\*\*Timeframe\*\*[:\s]*(M1|M5|M15|M30|H1|H4|D1|W1|MN)/i)
                  || analysisText.match(/Timeframe[:\s]*(M1|M5|M15|M30|H1|H4|D1|W1|MN)/i);
     const detectedTimeframe = tfMatch ? tfMatch[1].toUpperCase() : null;
@@ -496,8 +509,9 @@ Keep the response structured and actionable.`;
       raw_analysis: analysisText,
       instrument: detectedInstrument,
       broker_symbols: brokerMeta,
-      trend: analysisText.toLowerCase().includes("bullish") ? "BULLISH" : 
-             analysisText.toLowerCase().includes("bearish") ? "BEARISH" : "RANGING",
+      trend: /(?:\*\*)?Trend Analysis(?:\*\*)?[:\s]*(?:\*\*)?bullish/i.test(analysisText) ? "BULLISH" :
+             /(?:\*\*)?Trend Analysis(?:\*\*)?[:\s]*(?:\*\*)?bearish/i.test(analysisText) ? "BEARISH" : "RANGING",
+      risk_level: analysisText.match(/(?:\*\*)?Risk Assessment(?:\*\*)?[:\s]*(?:\*\*)?(Low|Medium|High)/i)?.[1] || null,
       recommendation: dirMatch ? dirMatch[1].toUpperCase() :
                       analysisText.includes("BUY") ? "BUY" : 
                       analysisText.includes("SELL") ? "SELL" : "WAIT",
