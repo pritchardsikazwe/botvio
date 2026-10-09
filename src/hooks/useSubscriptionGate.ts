@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { OPEN_ACCESS, isLegacyAccessAccount } from "@/config/access";
+import { OPEN_ACCESS } from "@/config/access";
 
 export interface SubscriptionGate {
   planCode: string | null;
@@ -54,12 +54,13 @@ export function useSubscriptionGate(): SubscriptionGate {
   const code = plan?.code || "free";
   const tier = PLAN_TIER[code] ?? 0;
   const privileged = !!user && (isAdmin || isSuperAdmin);
-  const grandfathered = !!user && isLegacyAccessAccount(user.created_at);
 
-  if (OPEN_ACCESS || privileged || grandfathered) {
+  // Only explicit admin roles may bypass plan entitlements. Account age never
+  // grants premium access automatically.
+  if (OPEN_ACCESS || privileged) {
     return {
-      planCode: grandfathered && !privileged && !data ? "legacy" : code,
-      planName: grandfathered && !privileged && !data ? "Legacy access" : (plan?.name || "Free"),
+      planCode: code,
+      planName: plan?.name || "Free",
       isPaid: true, isBasicOrAbove: true, isStandardOrAbove: true, isVIP: true,
       canCopyTrade: true, canUsePremiumBots: true, canBeProvider: true,
       canAccessPremiumSignals: true, canAccessSportsBetting: true, canAccessAllCourses: true,
