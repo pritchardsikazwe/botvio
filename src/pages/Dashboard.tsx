@@ -175,10 +175,26 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Live Market Data Panel */}
-        <div className="mb-4">
-          <MarketDataPanel />
-        </div>
+        <Card className="glass-card mb-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Getting started</CardTitle>
+            <CardDescription>Follow these steps in order. You can explore signals without connecting an account.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-3">
+            <Link to="/connections" className="rounded-xl border border-border/60 p-3 hover:border-primary/40">
+              <p className="text-sm font-semibold">1. Connect an account</p>
+              <p className="mt-1 text-xs text-muted-foreground">Choose Deriv or MT5 TradeCopy based on what you want to do.</p>
+            </Link>
+            <Link to="/bots" className="rounded-xl border border-border/60 p-3 hover:border-primary/40">
+              <p className="text-sm font-semibold">2. Choose a robot</p>
+              <p className="mt-1 text-xs text-muted-foreground">Review available robots and access before activating anything.</p>
+            </Link>
+            <Link to="/signals" className="rounded-xl border border-border/60 p-3 hover:border-primary/40">
+              <p className="text-sm font-semibold">3. Review signals</p>
+              <p className="mt-1 text-xs text-muted-foreground">Check the setup and risk levels before making a trading decision.</p>
+            </Link>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Bot Instances */}
