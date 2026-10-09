@@ -10,8 +10,22 @@ import {
   Bot, Signal, GraduationCap, Package, Zap, 
   Check, Clock, XCircle, ShoppingCart
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+
+const productDestination = (slug?: string) => {
+  switch (slug) {
+    case "synthetic-hub": return "/synthetic-hub";
+    case "weltrade-hub": return "/weltrade";
+    case "mt5-direct":
+    case "mt5-direct-signals": return "/connections";
+    case "botvio-gold-robot": return "/apps/gold-robot";
+    case "botvio-synthetic-robot": return "/apps/synthetic-robot";
+    case "botvio-ai-robot":
+    case "botvio-robot": return "/dashboard";
+    default: return "/marketplace";
+  }
+};
 
 const MyProducts = () => {
   const { user } = useAuth();
@@ -94,7 +108,7 @@ const MyProducts = () => {
         ) : filtered && filtered.length > 0 ? (
           <div className="space-y-4">
             {filtered.map((ent) => (
-              <Card key={ent.id} className="glass-card">
+              <Link key={ent.id} to={productDestination(ent.products?.slug)} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><Card className="glass-card transition-colors hover:border-primary/40">
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -120,7 +134,7 @@ const MyProducts = () => {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card></Link>
             ))}
           </div>
         ) : (
