@@ -20,7 +20,6 @@ import {
   Users,
   WalletCards,
   ShieldCheck,
-  BarChart3,
   X,
   type LucideIcon,
 } from "lucide-react";
