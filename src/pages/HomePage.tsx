@@ -66,7 +66,7 @@ const HomePage = () => {
           </Link>
 
           <nav className="mx-auto hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
-            {[['Markets','/markets'],['AI Analysis','/chart/XAUUSD'],['Signals','/signals'],['Copy Trading','/copy-trading'],['Bots','/bots'],['Brokers','/brokers'],['Learn','/learn']].map(([label,to]) => (
+            {[['Markets','/markets'],['AI Analysis','/chart/XAUUSD'],['Weltrade Charts','/weltrade'],['Deriv Synthetic','/synthetic-hub'],['Copy Trading','/copy-trading'],['Bots','/bots'],['Brokers','/brokers'],['Learn','/learn']].map(([label,to]) => (
               <Link key={to} to={to} className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground">{label}</Link>
             ))}
           </nav>
