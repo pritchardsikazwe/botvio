@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { SEOHead } from "@/components/seo/SEOHead";
-import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
 import { HomeMarketCharts } from "@/components/home/HomeMarketCharts";
 import { BotvioPricingSection } from "@/components/home/BotvioPricingSection";
@@ -11,7 +10,7 @@ import { GoldPriceHeader } from "@/components/gold/GoldPriceHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowRight, BarChart3, Bell, Bot, Check, ChevronRight, Globe2,
+  ArrowRight, BarChart3, Bot, Check, ChevronRight, Globe2,
   LineChart, Menu, ShieldCheck, Sparkles, TrendingUp, Users, Zap,
 } from "lucide-react";
 
@@ -27,7 +26,7 @@ const markets = [
 const capabilities = [
   { icon: LineChart, title: "Live Markets", text: "Research forex, gold, crypto, indices and synthetic markets in one place.", to: "/markets" },
   { icon: Sparkles, title: "AI Chart Analysis", text: "Turn a chart into a structured market read with trend, levels and risk context.", to: "/chart/XAUUSD" },
-  { icon: Bell, title: "Trading Signals", text: "Discover live opportunities and review signal history before taking action.", to: "/signals" },
+  { icon: BarChart3, title: "Chart Hubs", text: "Open dedicated live chart workspaces for Weltrade markets and Deriv synthetic indices.", to: "/weltrade" },
   { icon: Users, title: "Copy Trading", text: "Explore providers and strategies designed for traders who want automation.", to: "/copy-trading" },
   { icon: Bot, title: "AI Trading Bots", text: "Explore automated strategies and connect supported trading workflows.", to: "/bots" },
   { icon: Globe2, title: "Broker Hub", text: "Compare brokers and choose the account that fits your market and strategy.", to: "/brokers" },
@@ -51,8 +50,8 @@ const HomePage = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <SEOHead
-        title="Botvio | AI Trading Intelligence, Signals, Copy Trading & Bots"
-        description="Botvio combines live market research, AI chart analysis, trading signals, copy trading and automated trading tools for forex, gold, crypto, indices and synthetic markets."
+        title="Botvio | AI Trading Intelligence, Live Chart Hubs & Bots"
+        description="Botvio combines live market research, AI chart analysis, dedicated Weltrade and Deriv synthetic chart hubs, copy trading and automated trading tools."
       />
       <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
 
@@ -112,14 +111,14 @@ const HomePage = () => {
                 <span className="block">Trade with a plan.</span>
               </h1>
               <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-                Botvio brings live markets, AI chart analysis, signals, copy trading and automated trading tools into one trader workflow.
+                Botvio brings live markets, dedicated chart workspaces, AI analysis, copy trading and automated trading tools into one trader workflow.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button size="lg" onClick={start} className="h-12 px-7 font-bold">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Button>
                 <Button size="lg" variant="outline" asChild className="h-12 px-7 font-semibold"><Link to="/markets">Explore Live Markets</Link></Button>
               </div>
               <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
-                {['Market research','AI analysis','Signals','Copy trading','Trading bots'].map(x => <span key={x} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" />{x}</span>)}
+                {['Market research','AI chart hubs','Copy trading','Trading bots'].map(x => <span key={x} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" />{x}</span>)}
               </div>
             </div>
 
@@ -153,7 +152,7 @@ const HomePage = () => {
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2">
-                {[['AI Analyze','/chart/XAUUSD'],['Signals','/signals'],['Copy Trade','/copy-trading']].map(([label,to]) => <Button key={to} variant="outline" size="sm" asChild className="text-xs font-bold"><Link to={to}>{label}</Link></Button>)}
+                {[['AI Analyze','/chart/XAUUSD'],['Weltrade Charts','/weltrade'],['Deriv Synthetic','/synthetic-hub']].map(([label,to]) => <Button key={to} variant="outline" size="sm" asChild className="text-xs font-bold"><Link to={to}>{label}</Link></Button>)}
               </div>
             </div>
           </div>
@@ -184,15 +183,14 @@ const HomePage = () => {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-12 sm:py-16">
-          <div className="mb-6 flex items-end justify-between gap-4"><div><Badge variant="outline" className="mb-2">LIVE</Badge><h2 className="text-2xl font-black sm:text-3xl">Signals worth researching</h2><p className="mt-1 text-xs text-muted-foreground">Review the setup before you trade. Past performance does not guarantee future results.</p></div><Link to="/signals" className="hidden text-xs font-bold text-primary sm:block">View all signals <ArrowRight className="inline h-3 w-3" /></Link></div>
-          <HomeSignalsWidget />
-        </section>
-
         <section className="border-y border-border/50 bg-card/20">
           <div className="container mx-auto px-4 py-12 sm:py-16">
-            <div className="mx-auto max-w-2xl text-center"><Badge variant="outline" className="mb-3">TRADING WORKFLOWS</Badge><h2 className="text-3xl font-black">Choose how you want to trade</h2><p className="mt-3 text-sm text-muted-foreground">Research manually, follow signals, copy a provider or explore automation.</p></div>
-            <div className="mt-8 grid gap-4 md:grid-cols-3"><Link to="/signals" className="rounded-2xl border border-border/60 bg-card p-5"><Bell className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">Signals</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Track opportunities and signal history.</p></Link><Link to="/copy-trading" className="rounded-2xl border border-border/60 bg-card p-5"><Users className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">Copy Trading</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Compare providers and follow strategies.</p></Link><Link to="/bots" className="rounded-2xl border border-border/60 bg-card p-5"><Bot className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">AI Bots</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Explore supported automated strategies.</p></Link></div>
+            <div className="mx-auto max-w-2xl text-center"><Badge variant="outline" className="mb-3">TRADING WORKFLOWS</Badge><h2 className="text-3xl font-black">Choose how you want to trade</h2><p className="mt-3 text-sm text-muted-foreground">Start with charts and market research, then choose the workflow that fits you.</p></div>
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              <Link to="/weltrade" className="rounded-2xl border border-warning/30 bg-card p-5 transition hover:border-warning/60"><BarChart3 className="h-6 w-6 text-warning" /><h3 className="mt-4 font-bold">Weltrade Chart Hub</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Open the dedicated Weltrade chart workspace for GainX, PainX, FlipX, SwitchX and supported MT5 markets.</p><span className="mt-4 inline-flex items-center text-xs font-bold text-primary">Open charts <ArrowRight className="ml-1 h-3 w-3" /></span></Link>
+              <Link to="/synthetic-hub" className="rounded-2xl border border-primary/30 bg-card p-5 transition hover:border-primary/60"><Zap className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">Deriv Synthetic Chart Hub</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Open the dedicated chart workspace for Boom, Crash, Volatility and other supported synthetic indices.</p><span className="mt-4 inline-flex items-center text-xs font-bold text-primary">Open charts <ArrowRight className="ml-1 h-3 w-3" /></span></Link>
+              <Link to="/copy-trading" className="rounded-2xl border border-border/60 bg-card p-5 transition hover:border-primary/50"><Users className="h-6 w-6 text-primary" /><h3 className="mt-4 font-bold">Copy Trading</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">Compare providers and configure supported copy-trading workflows.</p><span className="mt-4 inline-flex items-center text-xs font-bold text-primary">Explore <ArrowRight className="ml-1 h-3 w-3" /></span></Link>
+            </div>
           </div>
         </section>
 
