@@ -3,16 +3,14 @@ import { assertAutomationKey } from "../_shared/automationAuth.ts";import { load
 async function decryptSecret(enc:string,secret:string):Promise<string>{const bytes=Uint8Array.from(atob(enc.replace(/^v1:/,"")),(c)=>c.charCodeAt(0));const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:bytes.slice(0,12)},k,bytes.slice(12));return new TextDecoder().decode(pt)}
 type Candle={time:number;open:number;high:number;low:number;close:number};
 const FAMILIES=[
-{symbols:["Boom 300 Index","Boom 500 Index","Boom 600 Index","Boom 900 Index","Boom 1000 Index"],family:"Boom",bias:"BUY"},
-{symbols:["Crash 300 Index","Crash 500 Index","Crash 600 Index","Crash 900 Index","Crash 1000 Index"],family:"Crash",bias:"SELL"},
-{symbols:["Volatility 10 Index","Volatility 25 Index","Volatility 50 Index","Volatility 75 Index","Volatility 100 Index","Volatility 150 Index","Volatility 250 Index"],family:"Volatility",bias:"BOTH"},
-{symbols:["Volatility 10 (1s) Index","Volatility 15 (1s) Index","Volatility 30 (1s) Index","Volatility 50 (1s) Index","Volatility 75 (1s) Index","Volatility 90 (1s) Index","Volatility 100 (1s) Index"],family:"Volatility 1s",bias:"BOTH"},
-{symbols:["Range Break 100 Index","Range Break 200 Index"],family:"Range Break",bias:"BOTH"},
-{symbols:["GainX 400","GainX 600","GainX 800"],family:"GainX",bias:"SELL"},
-{symbols:["PainX 400","PainX 600","PainX 800"],family:"PainX",bias:"BUY"},
+{symbols:["GainX 400","GainX 600","GainX 800","GainX 999","GainX 1200"],family:"GainX",bias:"SELL"},
+{symbols:["PainX 400","PainX 600","PainX 800","PainX 999","PainX 1200"],family:"PainX",bias:"BUY"},
 {symbols:["FlipX 1","FlipX 2","FlipX 3","FlipX 4","FlipX 5"],family:"FlipX",bias:"BOTH"},
 {symbols:["SwitchX 600","SwitchX 1200","SwitchX 1800"],family:"SwitchX",bias:"BOTH"},
-{symbols:["FX VOL 20","FX VOL 40","FX VOL 80"],family:"FX Vol.",bias:"BOTH"}
+{symbols:["BreakX 600","BreakX 1200","BreakX 1800"],family:"BreakX",bias:"BOTH"},
+{symbols:["TrendX 600","TrendX 1200","TrendX 1800"],family:"TrendX",bias:"BOTH"},
+{symbols:["FX VOL 20","FX VOL 40","FX VOL 60","FX VOL 80","FX VOL 99"],family:"FX Vol.",bias:"BOTH"},
+{symbols:["SFX VOL 20","SFX VOL 40","SFX VOL 60","SFX VOL 80","SFX VOL 99"],family:"SFX Vol.",bias:"BOTH"}
 ];
 const STRATEGY_BY_SYMBOL:Record<string,{min:number;stop:number;target:number;label:string}>={
   "Boom 300 Index":{min:77,stop:1.15,target:2.35,label:"Boom 300 Spike Hunter"},
@@ -136,7 +134,7 @@ Deno.serve(async(req)=>{if(req.method!=="POST")return new Response("POST require
 if (!(await assertAutomationKey(req))) return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), { status: 401, headers: { "Content-Type": "application/json" } }); const performanceIndex = await loadPerformanceIndex(db);const key=Deno.env.get("MT5_API_STUDIO_API_KEY")||Deno.env.get("TRADECOPY_API_KEY");if(!key)throw new Error("MT5 API Studio API key is not configured");const base=(Deno.env.get("MT5_API_STUDIO_BASE_URL")||"https://mt5full3.mtapi.io").replace(/\/+$/,"");const body=await req.json().catch(()=>({}));const wanted=body?.symbol?String(body.symbol):null;const{data:connections,error}=await db.from("syntx_api_connections").select("*").eq("broker","Weltrade");if(error)throw new Error(error.message);const published:any[]=[];const diag:any[]=[];const tStart=Date.now();for(const c of (connections??[]).filter((x:any)=>x.connection_status!=="error"&&/weltrade/i.test(String(x.server||""))).slice(0,1)){let session=String(c.session_id||"");try{if(!session){const pw=await decryptSecret(c.password_encrypted,Deno.env.get("TOKEN_ENCRYPTION_KEY")!);const id=crypto.randomUUID();const raw=await api(base,key,"/ConnectEx",{user:c.login,password:pw,server:c.server,id,connectTimeoutSeconds:60,connectTimeoutClusterMemberSeconds:20});session=typeof raw==="string"?raw.replace(/"/g,""):id;await db.from("syntx_api_connections").update({session_id:session,connection_status:"connected",last_error:null,last_connected_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",c.id)}}catch(e){await db.from("syntx_api_connections").update({connection_status:"error",last_error:String(e),updated_at:new Date().toISOString()}).eq("id",c.id);continue}
 let brokerSymbols:string[]=[];try{const sr=unwrap(await api(base,key,"/Symbols",{id:session}));const arr=Array.isArray(sr)?sr:[];brokerSymbols=arr.map((x:any)=>typeof x==="string"?x:String(x?.symbol??x?.name??"")).filter(Boolean)}catch(e){diag.push({login:c.login,error:"Symbols: "+String(e)})}
 const nk=(v:string)=>v.toLowerCase().replace(/[^a-z0-9]/g,"");const resolve=(r:string)=>brokerSymbols.find(s=>s.toLowerCase()===r.toLowerCase())??brokerSymbols.find(s=>nk(s)===nk(r))??r;
-const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;const allSyms=families.flatMap(f=>f.symbols);const slot=Math.floor(Date.now()/300000)%8;const pick=new Set(wanted?allSyms:allSyms.filter((_,i)=>i%8===slot));const t0=Date.now();for(const f of families)for(const symbol of f.symbols){if(!pick.has(symbol))continue;if(Date.now()-t0>60000)break;const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};const frames:any[]=(await Promise.all(Object.entries(TF).map(async([name,mins])=>{const out:any[]=[];try{
+const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;const allSyms=families.flatMap(f=>f.symbols);const slot=Math.floor(Date.now()/300000)%4;const pick=new Set(wanted?allSyms:allSyms.filter((_,i)=>i%4===slot));const t0=Date.now();for(const f of families)for(const symbol of f.symbols){if(!pick.has(symbol))continue;if(Date.now()-t0>60000)break;const profile=STRATEGY_BY_SYMBOL[symbol]??{min:74,stop:1.4,target:2.2,label:`${f.family} Adaptive MTF`};const frames:any[]=(await Promise.all(Object.entries(TF).map(async([name,mins])=>{const out:any[]=[];try{
   const fetchMinutes=name==="D3"?1440:mins;
   const fetchBars=name==="D3"?300:500;
   const raw=bars(await api(base,key,"/PriceHistory",{id:session,symbol:resolve(symbol),from:new Date(Date.now()-fetchBars*fetchMinutes*60000).toISOString(),to:new Date().toISOString(),timeFrame:fetchMinutes}));
