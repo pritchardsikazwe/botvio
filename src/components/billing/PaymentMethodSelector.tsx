@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import { Bitcoin, Check, ArrowRight, Wallet, Copy, Upload, MessageCircle, Mail } from "lucide-react";
 
 const CRYPTO_WALLETS = [
-  { key: "bitcoin", label: "Bitcoin (BTC)", network: "Bitcoin", address: "bc1q7r2ahssecmldf960gc4dklapfe5nkph2fh5etx", icon: "₿" },
-  { key: "usdt", label: "Tether (USDT)", network: "ERC20", address: "0x4CdDb5A96d2c9c2A2B1c97878F74126e11C616a6", icon: "₮" },
+  { key: "bitcoin", label: "Bitcoin (BTC)", network: "Bitcoin", address: "bc1qte02lasgsv9xvwwkajmqjr3vutk3zj4y87w3z8", icon: "₿" },
+  { key: "trx_trc20", label: "TRX — Tron (TRC-20)", network: "Tron (TRC-20)", address: "TTWQLipw3QzvWX6Ah42hkDw9T5zCUkYPsp", icon: "₮" },
 ];
 
 interface PaymentMethodSelectorProps {
@@ -41,7 +41,7 @@ export const PaymentMethodSelector = ({
   };
 
   const handleCompleteOrder = () => {
-    if (!selectedMethod) return toast.error("Please select Bitcoin or USDT");
+    if (!selectedMethod) return toast.error("Please select Bitcoin or TRX (Tron TRC-20)");
     if (!proofFile) return toast.error("Please attach your payment confirmation screenshot");
     onOfflinePayment?.(selectedMethod, proofFile);
     toast.success("Payment submitted. Botvio will verify it before activation.");
