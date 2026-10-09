@@ -68,6 +68,8 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: "Authentication required" }, 401);
 
     const body = await req.json().catch(() => ({}));
+    const { data: roles } = await admin().from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "super_admin"]);
+    if (!roles?.length) return json({ error: "Admin access required" }, 403);
     const platform = body.platform;
     if (body.action === "status") {
       const { data: roles } = await admin().from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "super_admin"]);
