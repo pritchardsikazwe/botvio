@@ -240,7 +240,8 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       }
       await admin.from("copy_relationships").delete()
         .or(`follower_account_id.eq.${acct.id},master_account_id.eq.${acct.id}`);
-      await admin.from("tradecopy_credentials").delete().eq("trading_account_id", acct.id);
+      // Keep tradecopy_credentials: the stored password is needed to re-register
+      // the account in its new role.
       const { error: upErr } = await admin.from("trading_accounts")
         .update({ tradecopy_user_id: null, tradecopy_active: false })
         .eq("id", acct.id);
