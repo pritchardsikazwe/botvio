@@ -1,6 +1,6 @@
 # Current tasks
 
-- [ ] Restore the existing full AI chart upload on Home, preserve H4 → M15/M5 guidance, and verify screen controls.
+- [x] Restore the existing full AI chart upload on Home, preserve H4 → M15/M5 guidance, and verify screen controls.
 
 - [x] Fix every visible Signals navigation/card control to open the intended existing signals route.
 - [x] Fix every visible Trader/Trading navigation/card control to open the intended existing trading route.
