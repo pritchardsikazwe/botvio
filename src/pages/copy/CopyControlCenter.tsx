@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQueries } from "@tanstack/react-query";
-import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, RefreshCw, ExternalLink } from "lucide-react";
+import { Bot, Copy, Settings, ShieldCheck, Users, Wallet, ArrowRight, Cloud, Activity, Zap, Radio, ChartNoAxesCombined, Layers3, ExternalLink } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -117,15 +117,15 @@ export const ProviderCommandCenter = () => (
 );
 
 export const BotvioRobotDashboard = () => {
-  const { user } = useAuth();
   const { data: entitlements, isLoading: entitlementsLoading, isError: entitlementsError, refetch: refetchEntitlements } = useEntitlements();
   const { data: tradingAccounts, isLoading: tradingAccountsLoading } = useTradingAccounts();
   const { data: copySubscriptions } = useMyCopySubscriptions();
   const followerAccounts = useTradeCopyAccounts("slave");
   const activeEntitlements = (entitlements ?? []).filter(isEntitlementActive);
   const activeCopySubscriptions = (copySubscriptions ?? []).filter((item) => item.status === "active");
+  const accountsWithTradeCopy = (followerAccounts.data ?? []).filter((account) => !!account.tradecopy_user_id);
   const positionQueries = useQueries({
-    queries: (followerAccounts.data ?? []).filter((account) => !!account.tradecopy_user_id).map((account) => ({
+    queries: accountsWithTradeCopy.map((account) => ({
       queryKey: ["botvio-dashboard-open-orders", account.id],
       queryFn: () => tradecopy<{ orders: Record<string, unknown>[] }>("open_orders", { account_id: account.id }),
       refetchInterval: 10_000,
@@ -133,7 +133,7 @@ export const BotvioRobotDashboard = () => {
       retry: false,
     })),
   });
-  const positions = (followerAccounts.data ?? []).flatMap((account, index) => {
+  const positions = accountsWithTradeCopy.flatMap((account, index) => {
     const query = positionQueries[index];
     return (query?.data?.orders ?? []).map((order, orderIndex) => ({
       key: String(order.ticket ?? order.order_id ?? order.id ?? `${account.id}-${orderIndex}`),
