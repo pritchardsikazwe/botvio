@@ -28,9 +28,9 @@ export const PRIMARY_NAV: NavGroup[] = [
       { label: "Forex", to: "/eur-usd", icon: LineChart },
       { label: "Indices", to: "/us30", icon: BarChart3 },
       { label: "Bitcoin & Crypto", to: "/bitcoin", icon: Coins },
-      { label: "Synthetic Indices", to: "/synthetic", icon: Layers },
+      { label: "Deriv Synthetic Chart Hub", to: "/synthetic-hub", icon: Layers },
       { label: "Weltrade SyntX Hub", to: "/weltrade/synthetic", icon: Layers },
-      { label: "Weltrade Markets", to: "/weltrade", icon: Layers },
+      { label: "Weltrade Chart Hub", to: "/weltrade", icon: Layers },
     ],
   },
   {
