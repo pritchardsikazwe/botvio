@@ -57,6 +57,7 @@ const normalizeDirection = (value: unknown): "BUY" | "SELL" | null => {
 };
 
 const normalSymbol = (s: string) => s.toUpperCase().replace(/\s+/g, "");
+const preferenceSymbol = (s: string) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 
 // Botvio signal names -> standard Deriv MT5 symbol names. Markets not listed
 // (e.g. Weltrade SyntX) are never sent to a Deriv master.
@@ -370,22 +371,46 @@ const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
     }
   }
 
+  const { data: followerPreferences } = directIds.length
+    ? await admin.from("follower_signal_preferences")
+      .select("trading_account_id,mode,allowed_symbols")
+      .in("trading_account_id", directIds)
+    : { data: [] };
+  const preferenceByAccount = new Map(
+    (followerPreferences ?? []).map((p: any) => [
+      p.trading_account_id,
+      {
+        mode: p.mode === "selected" ? "selected" : "all",
+        allowed: new Set((p.allowed_symbols ?? []).map((s: string) => preferenceSymbol(s))),
+      },
+    ]),
+  );
+
   let directSkippedByCopy = 0;
+  let directSkippedByPreference = 0;
   for (const account of (directAccounts ?? []) as Record<string, any>[]) {
     if (copyManagedFollowerIds.has(account.id)) {
       directSkippedByCopy++;
       continue;
     }
     const map = (account.direct_symbol_map ?? {}) as Record<string, string>;
+    const preference = preferenceByAccount.get(account.id);
     for (const signal of signals as Record<string, any>[]) {
       const rawSymbol = String(signal.symbol);
       const mapped = map[rawSymbol] ?? map[normalSymbol(rawSymbol)] ?? rawSymbol;
+      if (preference?.mode === "selected") {
+        const allowed = preference.allowed;
+        if (!allowed.has(preferenceSymbol(rawSymbol)) && !allowed.has(preferenceSymbol(mapped))) {
+          directSkippedByPreference++;
+          continue;
+        }
+      }
       const result = await executeForAccount(admin, account, signal, "slave", Number(account.direct_lot ?? 0.01), mapped, globalLive);
       if (result.ok) directExecuted++; else if (result.skipped) skipped++;
     }
   }
 
-  return { signals: signals.length, masters: masters.length, failures, signalMasterConfigured: !!master, signalMasterFallback, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, directSkippedByCopy, skipped };
+  return { signals: signals.length, masters: masters.length, failures, signalMasterConfigured: !!master, signalMasterFallback, masterExecuted, directAccounts: directAccounts?.length ?? 0, directExecuted, directSkippedByCopy, directSkippedByPreference, skipped };
 }
 
 Deno.serve(async (req) => {

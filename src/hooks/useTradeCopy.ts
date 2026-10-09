@@ -54,6 +54,80 @@ export interface TcAccount {
 }
 const ACCOUNT_COLS = "id,label,login_id,broker,server,account_role,tradecopy_user_id,environment,connection_status,tradecopy_active,is_botvio_robot,last_diagnostic,last_diagnostic_at";
 
+export const BOTVIO_FOLLOWER_MARKETS = [
+  { symbol: "XAUUSD", label: "Gold / XAUUSD", group: "Metals" },
+  { symbol: "XAGUSD", label: "Silver / XAGUSD", group: "Metals" },
+  { symbol: "EURUSD", label: "EURUSD", group: "Forex" },
+  { symbol: "GBPUSD", label: "GBPUSD", group: "Forex" },
+  { symbol: "USDJPY", label: "USDJPY", group: "Forex" },
+  { symbol: "AUDUSD", label: "AUDUSD", group: "Forex" },
+  { symbol: "USDCHF", label: "USDCHF", group: "Forex" },
+  { symbol: "USDCAD", label: "USDCAD", group: "Forex" },
+  { symbol: "BTCUSD", label: "BTCUSD", group: "Crypto" },
+  { symbol: "ETHUSD", label: "ETHUSD", group: "Crypto" },
+  { symbol: "US30", label: "US30", group: "Indices" },
+  { symbol: "NAS100", label: "NAS100", group: "Indices" },
+] as const;
+
+export interface FollowerSignalPreferences {
+  id?: string;
+  user_id: string;
+  trading_account_id: string;
+  mode: "all" | "selected";
+  allowed_symbols: string[];
+  updated_at?: string;
+  created_at?: string;
+}
+
+export function useFollowerSignalPreferences(tradingAccountId?: string) {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["tradecopy", "signal-preferences", tradingAccountId, user?.id],
+    enabled: !!user && !!tradingAccountId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("follower_signal_preferences")
+        .select("id,user_id,trading_account_id,mode,allowed_symbols,updated_at,created_at")
+        .eq("trading_account_id", tradingAccountId!)
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as FollowerSignalPreferences | null) ?? {
+        user_id: user!.id,
+        trading_account_id: tradingAccountId!,
+        mode: "all" as const,
+        allowed_symbols: [],
+      };
+    },
+  });
+}
+
+export function useSaveFollowerSignalPreferences() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (input: { tradingAccountId: string; mode: "all" | "selected"; allowedSymbols: string[] }) => {
+      if (!user) throw new TradeCopyClientError("Sign in required", "auth_required");
+      const allowedSymbols = [...new Set(input.allowedSymbols.map((s) => s.toUpperCase().trim()).filter(Boolean))];
+      const { data, error } = await supabase
+        .from("follower_signal_preferences")
+        .upsert({
+          user_id: user.id,
+          trading_account_id: input.tradingAccountId,
+          mode: input.mode,
+          allowed_symbols: allowedSymbols,
+        }, { onConflict: "trading_account_id" })
+        .select("id,user_id,trading_account_id,mode,allowed_symbols,updated_at,created_at")
+        .single();
+      if (error) throw error;
+      return data as FollowerSignalPreferences;
+    },
+    onSuccess: (_data, input) => {
+      qc.invalidateQueries({ queryKey: ["tradecopy", "signal-preferences", input.tradingAccountId] });
+    },
+  });
+}
+
 export function useTradeCopyStatus() {
   const { user } = useAuth();
   return useQuery({
