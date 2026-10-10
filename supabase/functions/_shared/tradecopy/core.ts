@@ -125,7 +125,8 @@ export function passesOrderFilter(filter: OrderFilter, side: Side): boolean {
 
 // ---------- Symbol mapping ----------
 
-const SYMBOL_RE = /^[A-Za-z0-9._#+\-]{1,32}$/;
+// MT5 broker symbols may contain spaces and parentheses (e.g. Deriv "Volatility 75 (1s) Index").
+const SYMBOL_RE = /^[A-Za-z0-9._#+\-]([A-Za-z0-9._#+\-() ]{0,46}[A-Za-z0-9._#+\-)])?$/;
 
 export function normalizeSymbol(s: unknown): string {
   const v = String(s ?? "").trim();
