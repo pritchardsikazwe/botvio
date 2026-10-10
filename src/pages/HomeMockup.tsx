@@ -18,6 +18,7 @@ import { SignalModesGuide } from "@/components/signals/SignalModesGuide";
 import { BotvioPricingSection } from "@/components/home/BotvioPricingSection";
 import { DerivOptionsHome } from "@/components/home/DerivOptionsHome";
 import { HomeLiveTrading } from "@/components/home/HomeLiveTrading";
+import { HomeTradingPathways } from "@/components/home/HomeTradingPathways";
 
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -174,6 +175,8 @@ const HomeMockup = () => {
         </section>
 
         <section data-reveal="capabilities" className={`container mx-auto px-4 py-12 sm:py-16 transition-all duration-700 ${visibleSections.capabilities ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}><div className="mx-auto max-w-2xl text-center"><Badge variant="outline" className="mb-3 border-primary/30 text-primary">ONE WORKFLOW</Badge><h2 className="text-3xl font-black sm:text-4xl">From market research to action</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">Start with information. Validate the setup. Then choose the trading workflow that fits you.</p></div><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{capabilities.map(({icon: Icon,title,text,to}) => <Link key={title} to={to} className="group rounded-2xl border border-border/60 bg-card/60 p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"><div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div><h3 className="text-base font-bold">{title}</h3><p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">{text}</p><span className="mt-4 inline-flex items-center text-xs font-bold text-primary">Explore <ArrowRight className="ml-1 h-3 w-3 transition group-hover:translate-x-1" /></span></Link>)}</div></section>
+
+        <HomeTradingPathways />
 
         <section data-reveal="analysis" className={`border-y border-border/50 bg-card/20 transition-all duration-700 ${visibleSections.analysis ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}><div className="container mx-auto grid gap-8 px-4 py-12 sm:py-16 lg:grid-cols-[.7fr_1.3fr] lg:items-center"><div><Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">AI CHART ANALYSIS</Badge><h2 className="text-3xl font-black">Turn charts into a clearer trading plan.</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">Use Botvio to inspect market structure, trend, support and resistance and risk context before deciding what to do next.</p><ul className="mt-5 space-y-2 text-xs text-muted-foreground">{['Multi-timeframe market context','Trend and market structure','Key support and resistance','Entry, target and risk context'].map(x => <li key={x} className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-success" />{x}</li>)}</ul><Button asChild className="mt-6 font-bold"><Link to="/chart/XAUUSD">Open AI Chart Analysis <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div><div className="rounded-2xl border border-border/60 bg-card/70 p-4"><HomeChartAnalyzer /></div></div></section>
 
