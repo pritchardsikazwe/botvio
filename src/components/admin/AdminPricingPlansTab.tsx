@@ -70,7 +70,8 @@ export const AdminPricingPlansTab = () => {
   // Create plan mutation
   const createPlan = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { error } = await supabase.from("pricing_plans").insert([data]);
+      const { allow_ai_chart_upload: _a, ...row } = data;
+      const { error } = await supabase.from("pricing_plans").insert([row]);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -89,7 +90,7 @@ export const AdminPricingPlansTab = () => {
     mutationFn: async ({ id, ...data }: { id: string } & typeof formData) => {
       const { error } = await supabase
         .from("pricing_plans")
-        .update(data)
+        .update((({ allow_ai_chart_upload: _a, ...row }) => row)(data))
         .eq("id", id);
       if (error) throw error;
     },
