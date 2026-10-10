@@ -20,8 +20,8 @@ Deno.serve(async (req) => {
     const match = authHeader.match(/^Bearer\s+(.+)$/i);
     if (!match?.[1]) {
       return new Response(
-        JSON.stringify({ ok: false, error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ ok: false, code: "sign_in_required", error: "Please sign in to Botvio to connect Deriv." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -39,8 +39,8 @@ Deno.serve(async (req) => {
     if (claimsError || !claimsData?.user) {
       console.error("deriv-get-otp auth validation failed:", claimsError?.message ?? "no user");
       return new Response(
-        JSON.stringify({ ok: false, error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ ok: false, code: "sign_in_required", error: "Please sign in to Botvio to connect Deriv." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
