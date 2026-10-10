@@ -6,6 +6,22 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const cache = new Map<string, { at: number; data: any }>();
+const CACHE_MS = 10 * 60 * 1000;
+
+async function requestDerivCached(symbol: string) {
+  const hit = cache.get(symbol);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
+  try {
+    const data = await requestDerivCached(symbol);
+    cache.set(symbol, { at: Date.now(), data });
+    return data;
+  } catch (e) {
+    if (hit) return hit.data; // serve stale data when Deriv is rate limiting
+    throw e;
+  }
+}
+
 async function requestDeriv(symbol: string) {
   const ws = new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
   return await new Promise<any>((resolve, reject) => {
@@ -42,7 +58,7 @@ Deno.serve(async (req: Request) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const data = await requestDeriv(symbol);
+    const data = await requestDerivCached(symbol);
     const contracts = data?.contracts_for ?? {};
     const available = Array.isArray(contracts.available) ? contracts.available : [];
     const grouped: Record<string, any[]> = {};
@@ -79,8 +95,9 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Contracts lookup failed";
     console.error("[deriv-contracts-for-symbol]", message);
-    return new Response(JSON.stringify({ error: message }), {
-      status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const rateLimited = /rate limit/i.test(message);
+    return new Response(JSON.stringify({ error: rateLimited ? "Deriv is busy right now. Please try again in a minute." : message, rate_limited: rateLimited }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
