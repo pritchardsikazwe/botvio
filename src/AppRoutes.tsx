@@ -17,7 +17,8 @@ import Learn from "./pages/Learn";
 import Lesson from "./pages/Lesson";
 import BeginnerGuide from "./pages/BeginnerGuide";
 import Dashboard from "./pages/Dashboard";
-import Connections from "./pages/Connections";\nimport CTraderCallback from "./pages/CTraderCallback";
+import Connections from "./pages/Connections";
+import CTraderCallback from "./pages/CTraderCallback";
 import TradeHistory from "./pages/TradeHistory";
 import CopyMarketplace from "./pages/copy/CopyMarketplace";
 import CopyProviderProfile from "./pages/copy/CopyProviderProfile";
@@ -319,7 +320,8 @@ export const AppRoutes = () => {
     <Route path="learn/:category/:slug" element={<Lesson />} />
     <Route path="forex-beginner-guide" element={<BeginnerGuide />} />
     <Route path="beginner-guide" element={<BeginnerGuide />} />
-    <Route path="auth/deriv/callback" element={<DerivCallback />} />\n    <Route path="ctrader/callback" element={<CTraderCallback />} />
+    <Route path="auth/deriv/callback" element={<DerivCallback />} />
+    <Route path="ctrader/callback" element={<CTraderCallback />} />
     <Route path="callback" element={<DerivCallback />} />
     <Route path="trading" element={<Navigate to="/markets" replace />} />
     {/* Gold uses the dedicated gold terminal everywhere, matching /gold. */}
