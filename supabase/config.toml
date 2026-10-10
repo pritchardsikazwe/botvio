@@ -101,3 +101,7 @@ project_id = "tqqkzeblmjapgbnsbtgw"
 
   [functions.signal-performance-audit]
     verify_jwt = false
+
+# cTrader account-read-only demo connection test; requires a valid signed-in user JWT.
+[functions.ctrader-test-connection]
+  verify_jwt = true
