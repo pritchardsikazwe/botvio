@@ -320,9 +320,9 @@ export const HomeSignalsWidget = () => {
                 <Crown className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-sm font-bold text-foreground">🔓 Unlock All Signals & AI Chart Analysis</p>
+                <p className="text-sm font-bold text-foreground">🔓 Free Trial: Limited to 3 Signals Per Day</p>
                 <p className="text-xs text-muted-foreground">
-                  Subscribe to get unlimited signals, premium AI chart uploads, and advanced market intelligence.
+                  Want more trading opportunities? Subscribe to a paid plan for unlimited signals, plus premium AI chart analysis and advanced market intelligence.
                 </p>
               </div>
             </div>
