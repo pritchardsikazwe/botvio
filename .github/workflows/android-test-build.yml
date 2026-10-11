@@ -99,19 +99,19 @@ jobs:
       - name: Prepare Gradle
         shell: pwsh
         run: |
-          if (Test-Path android/gradlew.bat) {
+          if (Test-Path android/gradlew) {
             Write-Host "Gradle wrapper ready"
           } else {
-            throw "android/gradlew.bat was not generated"
+            throw "android/gradlew was not generated"
           }
 
       - name: Build debug APK for phone testing
         working-directory: android
-        run: .\gradlew.bat assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Build release AAB
         working-directory: android
-        run: .\gradlew.bat bundleRelease --stacktrace
+        run: ./gradlew bundleRelease --stacktrace
 
       - name: Upload installable APK
         uses: actions/upload-artifact@v7
