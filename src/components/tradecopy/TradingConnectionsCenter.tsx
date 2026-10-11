@@ -49,7 +49,16 @@ export function TradingConnectionsCenter() {
         </a>
       </div>
 
-      <section id="ctrader-open-api" className="scroll-mt-6 space-y-3 border-t border-border/60 pt-5">\n        <div>\n          <h2 className="text-lg font-semibold">3. cTrader connection test</h2>\n          <p className="text-sm text-muted-foreground">Independent cTrader Open API setup. This does not connect to or modify MT5 TradeCopy.</p>\n        </div>\n        <CTraderConnectionCard />\n      </section>\n\n      <section id="mt5-copy-trading" className="scroll-mt-6 space-y-3">
+      <section id="ctrader-open-api" className="scroll-mt-6 space-y-3 border-t border-border/60 pt-5">
+      <div>
+      <h2 className="text-lg font-semibold">3. cTrader connection test</h2>
+      <p className="text-sm text-muted-foreground">Independent cTrader Open API setup. This does not connect to or modify MT5 TradeCopy.</p>
+      </div>
+      <CTraderConnectionCard />
+      </section>
+      
+      <section id="mt5-copy-trading" className="scroll-mt-6 space-y-3">
+      
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-lg font-semibold">1. MT5 robot and copy trading</h2>
           <Badge variant="outline"><Cloud className="mr-1 h-3 w-3" /> TradeCopy Cloud</Badge>
