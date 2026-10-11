@@ -229,7 +229,7 @@ export const AdminProfilesTab = () => {
       const matchName = p.display_name?.toLowerCase().includes(s);
       const matchEmail = p.email?.toLowerCase().includes(s);
       const matchCountry = p.country?.toLowerCase().includes(s);
-      const matchWhatsApp = isSuperAdmin && p.whatsapp_number?.includes(s);
+      const matchWhatsApp = p.whatsapp_number?.includes(s);
       if (!matchName && !matchEmail && !matchCountry && !matchWhatsApp) return false;
     }
     if (countryFilter !== "all" && p.country !== countryFilter) return false;
@@ -320,7 +320,7 @@ export const AdminProfilesTab = () => {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={isSuperAdmin ? "Search by name, email, country, WhatsApp..." : "Search by name, email, country..."}
+              placeholder="Search by name, email, country, WhatsApp..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -393,9 +393,7 @@ export const AdminProfilesTab = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  {isSuperAdmin && (
-                    <TableHead><Phone className="h-3 w-3 inline mr-1" />WhatsApp</TableHead>
-                  )}
+                  <TableHead><Phone className="h-3 w-3 inline mr-1" />WhatsApp</TableHead>
                   <TableHead><Globe className="h-3 w-3 inline mr-1" />Country</TableHead>
                    <TableHead>Current Plan</TableHead>
                    <TableHead><BarChart3 className="h-3 w-3 inline mr-1" />AI Usage</TableHead>
@@ -418,8 +416,7 @@ export const AdminProfilesTab = () => {
                           </p>
                         </div>
                       </TableCell>
-                      {isSuperAdmin && (
-                        <TableCell>
+                      <TableCell>
                           {p.whatsapp_number ? (
                             <a href={`https://wa.me/${p.whatsapp_number.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline text-sm font-mono">
                               {p.whatsapp_number}
@@ -428,7 +425,6 @@ export const AdminProfilesTab = () => {
                             <span className="text-muted-foreground text-sm">—</span>
                           )}
                         </TableCell>
-                      )}
                       <TableCell>
                         {p.country ? (
                           <Badge variant="outline" className="text-xs">{p.country}</Badge>
