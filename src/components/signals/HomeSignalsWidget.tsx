@@ -51,7 +51,7 @@ function timeframeLabel(timeframe?: string | null): string {
   switch (normTf(timeframe)) {
     case "M1": return "1M · SCALPING";
     case "M5": return "5M · MOMENTUM";
-    case "M15": return "15M · INTRADAY";
+    case "M15": return "15M · INTRADAY";\n    case "D1": return "1D · DAILY";
     case "H1": return "1H · SWING";
     case "D1": return "1D · POSITION";
     default: return (timeframe || "M5").toUpperCase();
@@ -59,7 +59,7 @@ function timeframeLabel(timeframe?: string | null): string {
 }
 
 function selectHomeSignalsByHorizon(items: ManualSignal[], limit = 6): ManualSignal[] {
-  const horizons = ["M1", "M5", "M15", "H1", "D1"];
+  const horizons = ["M1", "M15", "H1", "D1"];
   const weltrade = items.filter(signal => {
     const brokers = (signal as any).broker as string[] | null;
     return Array.isArray(brokers) && brokers.includes("weltrade");
@@ -126,29 +126,63 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
   return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
 }
 
-// Scheduled homepage batches use Zambia time (CAT, UTC+2). Selection windows are fixed.
+// Homepage publishes one batch of exactly three signals at 09:00 and 18:00 Zambia time.
+// The previous batch is replaced at the next publication. Prioritize the requested
+// 1M scalping, 15M intraday and 1D position horizons; use 1H swing as a fallback.
 const CAT_OFFSET_MS = 2 * 60 * 60 * 1000;
+const HOME_HORIZON_PRIORITY = ["M1", "M15", "D1", "H1"];
 function selectPublishedHomeSignals(items: ManualSignal[], now = new Date()): ManualSignal[] {
   const cat = new Date(now.getTime() + CAT_OFFSET_MS);
-  const y = cat.getUTCFullYear(), m = cat.getUTCMonth(), d = cat.getUTCDate();
-  const boundary = (day: number, hour: number) => Date.UTC(y, m, day, hour) - CAT_OFFSET_MS;
-  const morningStart = boundary(d - 1, 21);
-  const morningEnd = boundary(d, 9);
-  const eveningStart = morningEnd;
-  const eveningEnd = boundary(d, 18);
-  const newest = (x: ManualSignal, y: ManualSignal) =>
-    new Date(y.created_at).getTime() - new Date(x.created_at).getTime();
-  const morning = items.filter(s => {
-    const t = new Date(s.created_at).getTime();
-    return t >= morningStart && t < morningEnd;
-  }).sort(newest).slice(0, 3);
-  const evening = now.getTime() >= eveningEnd
-    ? items.filter(s => {
-        const t = new Date(s.created_at).getTime();
-        return t >= eveningStart && t < eveningEnd;
-      }).sort(newest).slice(0, 3)
-    : [];
-  return [...morning, ...evening];
+  const year = cat.getUTCFullYear();
+  const month = cat.getUTCMonth();
+  const day = cat.getUTCDate();
+  const catBoundary = (dayOffset: number, hour: number) =>
+    Date.UTC(year, month, day + dayOffset, hour) - CAT_OFFSET_MS;
+  const morningAt = catBoundary(0, 9);
+  const eveningAt = catBoundary(0, 18);
+
+  // Choose only the latest scheduled batch window; never combine morning and evening.
+  let windowStart: number;
+  let windowEnd: number;
+  if (now.getTime() >= eveningAt) {
+    windowStart = morningAt;
+    windowEnd = eveningAt;
+  } else if (now.getTime() >= morningAt) {
+    windowStart = catBoundary(-1, 18);
+    windowEnd = morningAt;
+  } else {
+    windowStart = catBoundary(-1, 9);
+    windowEnd = catBoundary(-1, 18);
+  }
+
+  const candidates = items.filter(signal => {
+    const created = new Date(signal.created_at).getTime();
+    const tf = normTf(signal.timeframe);
+    return created >= windowStart && created < windowEnd &&
+      ["M1", "M5", "M15", "M30", "H1", "H4", "D1"].includes(tf);
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const selected: ManualSignal[] = [];
+  const used = new Set<string>();
+  // Try to represent short-term, intraday and daily horizons in each three-signal batch.
+  for (const tf of HOME_HORIZON_PRIORITY) {
+    const match = candidates.find(signal => normTf(signal.timeframe) === tf && !used.has(signal.id));
+    if (match) {
+      selected.push(match);
+      used.add(match.id);
+    }
+    if (selected.length === 3) return selected;
+  }
+
+  // Fill remaining slots with newest signals from any supported horizon.
+  for (const signal of candidates) {
+    if (!used.has(signal.id)) {
+      selected.push(signal);
+      used.add(signal.id);
+    }
+    if (selected.length === 3) break;
+  }
+  return selected;
 }
 function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
 function marketLabel(signal: any): string {
