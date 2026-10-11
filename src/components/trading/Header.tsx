@@ -43,8 +43,8 @@ export const Header = () => {
   return (
     <>
       <header className="sticky top-0 z-50 glass-card border-b border-border/50 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto flex min-h-16 items-center justify-between gap-2 px-3 sm:px-4">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-4">
             <Link
               to="/"
               className="flex items-center gap-3"
