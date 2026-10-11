@@ -126,63 +126,20 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
   return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
 }
 
-// Homepage publishes one batch of exactly three signals at 09:00 and 18:00 Zambia time.
-// The previous batch is replaced at the next publication. Prioritize the requested
-// 1M scalping, 15M intraday and 1D position horizons; use 1H swing as a fallback.
-const CAT_OFFSET_MS = 2 * 60 * 60 * 1000;
-const HOME_HORIZON_PRIORITY = ["M1", "M15", "D1", "H1"];
+// Homepage trial: show at most four recent signals for a rolling 12-hour window.
+// Signals are fetched from the existing database; this is display selection, not a scheduler.
+const HOME_TRIAL_LIMIT = 4;
+const HOME_TRIAL_LIFETIME_MS = 12 * 60 * 60 * 1000;
 function selectPublishedHomeSignals(items: ManualSignal[], now = new Date()): ManualSignal[] {
-  const cat = new Date(now.getTime() + CAT_OFFSET_MS);
-  const year = cat.getUTCFullYear();
-  const month = cat.getUTCMonth();
-  const day = cat.getUTCDate();
-  const catBoundary = (dayOffset: number, hour: number) =>
-    Date.UTC(year, month, day + dayOffset, hour) - CAT_OFFSET_MS;
-  const morningAt = catBoundary(0, 9);
-  const eveningAt = catBoundary(0, 18);
-
-  // Choose only the latest scheduled batch window; never combine morning and evening.
-  let windowStart: number;
-  let windowEnd: number;
-  if (now.getTime() >= eveningAt) {
-    windowStart = morningAt;
-    windowEnd = eveningAt;
-  } else if (now.getTime() >= morningAt) {
-    windowStart = catBoundary(-1, 18);
-    windowEnd = morningAt;
-  } else {
-    windowStart = catBoundary(-1, 9);
-    windowEnd = catBoundary(-1, 18);
-  }
-
-  const candidates = items.filter(signal => {
-    const created = new Date(signal.created_at).getTime();
-    const tf = normTf(signal.timeframe);
-    return created >= windowStart && created < windowEnd &&
-      ["M1", "M5", "M15", "M30", "H1", "H4", "D1"].includes(tf);
-  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  const selected: ManualSignal[] = [];
-  const used = new Set<string>();
-  // Try to represent short-term, intraday and daily horizons in each three-signal batch.
-  for (const tf of HOME_HORIZON_PRIORITY) {
-    const match = candidates.find(signal => normTf(signal.timeframe) === tf && !used.has(signal.id));
-    if (match) {
-      selected.push(match);
-      used.add(match.id);
-    }
-    if (selected.length === 3) return selected;
-  }
-
-  // Fill remaining slots with newest signals from any supported horizon.
-  for (const signal of candidates) {
-    if (!used.has(signal.id)) {
-      selected.push(signal);
-      used.add(signal.id);
-    }
-    if (selected.length === 3) break;
-  }
-  return selected;
+  const cutoff = now.getTime() - HOME_TRIAL_LIFETIME_MS;
+  return items
+    .filter(signal => {
+      const created = new Date(signal.created_at).getTime();
+      return created <= now.getTime() && created > cutoff &&
+        ["M1", "M5", "M15", "M30", "H1", "H4", "D1"].includes(normTf(signal.timeframe));
+    })
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, HOME_TRIAL_LIMIT);
 }
 function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
 function marketLabel(signal: any): string {
@@ -203,15 +160,7 @@ function riskReward(signal: any): string {
 }
 
 function homeExpiresAt(signal: { created_at: string }): Date {
-  const createdAt = new Date(signal.created_at).getTime();
-  const catCreated = new Date(createdAt + CAT_OFFSET_MS);
-  const year = catCreated.getUTCFullYear();
-  const month = catCreated.getUTCMonth();
-  const day = catCreated.getUTCDate();
-  const hour = catCreated.getUTCHours();
-  const nextPublishHour = hour < 9 ? 9 : hour < 18 ? 18 : 9;
-  const nextPublishDay = hour < 18 ? day : day + 1;
-  return new Date(Date.UTC(year, month, nextPublishDay, nextPublishHour) - CAT_OFFSET_MS);
+  return new Date(new Date(signal.created_at).getTime() + HOME_TRIAL_LIFETIME_MS);
 }
 
 function isSignalExpired(signal: { created_at: string }): boolean {
@@ -223,8 +172,7 @@ function getTimeRemaining(signal: { created_at: string }): string {
   if (diffMs <= 0) return "Expired";
   const hours = Math.floor(diffMs / 3_600_000);
   const minutes = Math.floor((diffMs % 3_600_000) / 60_000);
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
 
@@ -237,7 +185,7 @@ export const HomeSignalsWidget = () => {
   const { data: signals, isLoading } = useQuery({
     queryKey: ["home-signals-with-wins"],
     queryFn: async () => {
-      const lookback = new Date(Date.now() - 36 * 60 * 60 * 1000);
+      const lookback = new Date(Date.now() - HOME_TRIAL_LIFETIME_MS);
       const { data, error } = await supabase
         .from("trading_signals")
         .select("*")
@@ -343,7 +291,7 @@ export const HomeSignalsWidget = () => {
             <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {brokerFilter !== "all"
                 ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Select “All” or check the next publication.`
-                : "Three signals are scheduled for 09:00 and three for 18:00 Zambia time. Signal access is available to paid members only. Subscribe to unlock signals when the next batch is published."}
+                : "The homepage offers up to four trial signals for 12 hours. Subscribe to a paid plan to receive unlimited signals every day."}
             </p>
             {brokerFilter === "all" && (
               <div className="mx-auto mt-6 max-w-xl">
@@ -354,8 +302,8 @@ export const HomeSignalsWidget = () => {
                       <Crown className="h-7 w-7 text-primary-foreground" />
                     </div>
                     <div className="flex-1 text-center sm:text-left">
-                      <p className="text-lg font-extrabold sm:text-xl">Signals are for paid members</p>
-                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-base">Subscribe to a paid plan to unlock signal access. Featured batches are scheduled at 09:00 and 18:00 CAT (Zambia time).</p>
+                      <p className="text-lg font-extrabold sm:text-xl">Get unlimited signals every day</p>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-base">Enjoy up to four homepage trial signals for 12 hours. Subscribe for unlimited signals every day.</p>
                     </div>
                     <Button asChild size="lg" className="w-full shrink-0 text-base font-bold shadow-md transition-transform hover:scale-105 sm:w-auto motion-safe:animate-[pulse_2.5s_ease-in-out_infinite]">
                       <Link to="/billing">
