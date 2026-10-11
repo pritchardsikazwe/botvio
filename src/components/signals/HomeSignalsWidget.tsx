@@ -311,24 +311,28 @@ export const HomeSignalsWidget = () => {
       {headerSection}
       {brokerTabs}
 
-      {/* Subscribe CTA Banner */}
+      {/* Animated subscription CTA: motion is decorative and respects reduced-motion preferences. */}
       {!isBasicOrAbove && (
-        <Card className="mb-4 border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-warning/5 to-transparent overflow-hidden">
-          <CardContent className="py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <Card className="group relative mb-4 overflow-hidden border-2 border-primary/40 bg-gradient-to-r from-primary/15 via-warning/10 to-transparent transition-all duration-500 hover:border-primary hover:shadow-lg hover:shadow-primary/10 motion-safe:animate-[pulse_4s_ease-in-out_infinite]">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-12 h-32 w-32 rounded-full bg-warning/20 blur-3xl transition-all duration-700 group-hover:scale-150 group-hover:bg-warning/30 motion-safe:animate-pulse" />
+          <CardContent className="relative z-10 flex flex-col items-center justify-between gap-3 py-4 sm:flex-row">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-warning flex items-center justify-center shrink-0">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-warning shadow-md transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110 motion-safe:animate-bounce">
                 <Crown className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-sm font-bold text-foreground">🔓 Free Trial: Limited to 3 Signals Per Day</p>
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-bold text-foreground">🔓 Free Trial: Limited to 3 Signals Per Day</p>
+                  <Badge className="border-warning/40 bg-warning/15 text-warning motion-safe:animate-pulse">LIMITED</Badge>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Want more trading opportunities? Subscribe to a paid plan for unlimited signals, plus premium AI chart analysis and advanced market intelligence.
                 </p>
               </div>
             </div>
-            <Button asChild className="shrink-0">
+            <Button asChild className="shrink-0 shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg motion-safe:animate-[pulse_2.5s_ease-in-out_infinite]">
               <Link to="/billing">
-                <Sparkles className="h-4 w-4 mr-1" /> Subscribe Now
+                <Sparkles className="mr-1 h-4 w-4 motion-safe:animate-spin" /> Subscribe Now <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
           </CardContent>
