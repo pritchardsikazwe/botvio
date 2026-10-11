@@ -62,7 +62,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-border sm:max-w-md">
+      <DialogContent className="glass-card border-border w-[calc(100vw-1rem)] max-w-md max-h-[85dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <User className="w-5 h-5 text-primary" />
