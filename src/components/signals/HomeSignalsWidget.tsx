@@ -209,7 +209,7 @@ export const HomeSignalsWidget = () => {
 
   const headerSection = (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-xl font-bold flex items-center gap-2">
+      <h2 className="text-2xl sm:text-3xl font-extrabold flex items-center gap-2">
         <Signal className="h-5 w-5 text-primary" />
         Latest Trading Signals
       </h2>
@@ -292,7 +292,7 @@ export const HomeSignalsWidget = () => {
         {headerSection}
         {brokerTabs}
         <Card className="glass-card">
-          <CardContent className="py-12 text-center">
+          <CardContent className="py-10 sm:py-14 text-center">
             <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
             <h3 className="font-semibold mb-1">No Active Signals</h3>
             <p className="text-sm text-muted-foreground">
