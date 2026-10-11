@@ -293,13 +293,36 @@ export const HomeSignalsWidget = () => {
         {brokerTabs}
         <Card className="glass-card">
           <CardContent className="py-10 sm:py-14 text-center">
-            <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <h3 className="font-semibold mb-1">No Active Signals</h3>
-            <p className="text-sm text-muted-foreground">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary shadow-lg shadow-primary/10 motion-safe:animate-[pulse_2.5s_ease-in-out_infinite]">
+              <Signal className="h-8 w-8 motion-safe:animate-bounce" />
+            </div>
+            <h3 className="mb-3 text-2xl font-extrabold tracking-tight sm:text-3xl">No Active Signals</h3>
+            <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {brokerFilter !== "all"
-                ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Try "All" or check back soon.`
-                : "Three signals are featured at 09:00 and three at 18:00 Zambia time. Check back at the next scheduled publication."}
+                ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Select “All” or check the next publication.`
+                : "Three signals are scheduled for 09:00 and three for 18:00 Zambia time. Signal access is available to paid members only. Subscribe to unlock signals when the next batch is published."}
             </p>
+            {brokerFilter === "all" && (
+              <div className="mx-auto mt-6 max-w-xl">
+                <Card className="group relative overflow-hidden border-2 border-primary/40 bg-gradient-to-r from-primary/15 via-warning/10 to-primary/5 text-left shadow-lg shadow-primary/10 motion-safe:animate-[pulse_4s_ease-in-out_infinite]">
+                  <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-12 h-36 w-36 rounded-full bg-warning/20 blur-3xl motion-safe:animate-pulse" />
+                  <CardContent className="relative flex flex-col items-center gap-4 p-5 sm:flex-row sm:p-6">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-warning shadow-md motion-safe:animate-bounce">
+                      <Crown className="h-7 w-7 text-primary-foreground" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left">
+                      <p className="text-lg font-extrabold sm:text-xl">Signals are for paid members</p>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-base">Subscribe to a paid plan to unlock signal access. Featured batches are scheduled at 09:00 and 18:00 CAT (Zambia time).</p>
+                    </div>
+                    <Button asChild size="lg" className="w-full shrink-0 text-base font-bold shadow-md transition-transform hover:scale-105 sm:w-auto motion-safe:animate-[pulse_2.5s_ease-in-out_infinite]">
+                      <Link to="/billing">
+                        <Crown className="mr-2 h-4 w-4" /> Subscribe Now <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
