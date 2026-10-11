@@ -126,10 +126,30 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
   return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
 }
 
-// Home live-feed retention is intentionally fixed at 15 minutes for every signal.
-// This only controls visibility on Home; signals remain stored in history and
-// any MT5/copy-trading execution is unaffected.
-const HOME_SIGNAL_LIVE_MS = 15 * 60 * 1000;
+// Scheduled homepage batches use Zambia time (CAT, UTC+2). Selection windows are fixed.
+const CAT_OFFSET_MS = 2 * 60 * 60 * 1000;
+function selectPublishedHomeSignals(items: ManualSignal[], now = new Date()): ManualSignal[] {
+  const cat = new Date(now.getTime() + CAT_OFFSET_MS);
+  const y = cat.getUTCFullYear(), m = cat.getUTCMonth(), d = cat.getUTCDate();
+  const boundary = (day: number, hour: number) => Date.UTC(y, m, day, hour) - CAT_OFFSET_MS;
+  const morningStart = boundary(d - 1, 21);
+  const morningEnd = boundary(d, 9);
+  const eveningStart = morningEnd;
+  const eveningEnd = boundary(d, 18);
+  const newest = (x: ManualSignal, y: ManualSignal) =>
+    new Date(y.created_at).getTime() - new Date(x.created_at).getTime();
+  const morning = items.filter(s => {
+    const t = new Date(s.created_at).getTime();
+    return t >= morningStart && t < morningEnd;
+  }).sort(newest).slice(0, 3);
+  const evening = now.getTime() >= eveningEnd
+    ? items.filter(s => {
+        const t = new Date(s.created_at).getTime();
+        return t >= eveningStart && t < eveningEnd;
+      }).sort(newest).slice(0, 3)
+    : [];
+  return [...morning, ...evening];
+}
 function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
 function marketLabel(signal: any): string {
   const category = String(signal?.category || "").toLowerCase();
@@ -174,18 +194,17 @@ export const HomeSignalsWidget = () => {
   const { data: signals, isLoading } = useQuery({
     queryKey: ["home-signals-with-wins"],
     queryFn: async () => {
-      const now = new Date();
-      const fifteenMinutesAgo = new Date(now.getTime() - HOME_SIGNAL_LIVE_MS);
+      const lookback = new Date(Date.now() - 36 * 60 * 60 * 1000);
       const { data, error } = await supabase
         .from("trading_signals")
         .select("*")
-        .gte("created_at", fifteenMinutesAgo.toISOString())
+        .gte("created_at", lookback.toISOString())
         .order("created_at", { ascending: false })
-        .limit(100);
+        .limit(500);
       if (error) throw error;
       return (data || []) as ManualSignal[];
     },
-    refetchInterval: 15000,
+    refetchInterval: 60000,
   });
 
   const headerSection = (
@@ -250,8 +269,8 @@ export const HomeSignalsWidget = () => {
     );
   }
 
-  // Home is a live 15-minute feed. Do not delete or alter the underlying signal.
-  let displaySignals = (signals || []).filter(s => !isSignalExpired(s));
+  // The homepage only displays signals from the scheduled publication windows.
+  let displaySignals = selectPublishedHomeSignals(signals || []);
 
   // Apply broker filter
   if (brokerFilter !== "all") {
@@ -262,14 +281,9 @@ export const HomeSignalsWidget = () => {
     });
   }
 
-  // The ALL view deliberately rotates through the four engine horizons while
-  // keeping every displayed signal inside the 15-minute Home retention window.
+  // Filters only narrow the already-published set; they never introduce new signals.
   if (timeframeFilter !== "all") {
-    displaySignals = displaySignals
-      .filter(s => normTf(s.timeframe) === timeframeFilter)
-      .slice(0, 6);
-  } else {
-    displaySignals = selectHomeSignalsByHorizon(displaySignals, 6);
+    displaySignals = displaySignals.filter(s => normTf(s.timeframe) === timeframeFilter);
   }
 
   if (displaySignals.length === 0) {
@@ -284,7 +298,7 @@ export const HomeSignalsWidget = () => {
             <p className="text-sm text-muted-foreground">
               {brokerFilter !== "all"
                 ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Try "All" or check back soon.`
-                : "Signals remain on Home for 15 minutes. Check back soon for new signals."}
+                : "Three signals are featured at 09:00 and three at 18:00 Zambia time. Check back at the next scheduled publication."}
             </p>
           </CardContent>
         </Card>
@@ -339,14 +353,14 @@ export const HomeSignalsWidget = () => {
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-success">LIVE</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-success">PUBLISHED</span>
                     <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-5">{marketLabel(signal)}</Badge>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">{getTimeRemaining(signal)}</span>
+                  <span className="text-[10px] text-muted-foreground">Scheduled batch</span>
                 </div>
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                    <div className="min-w-0"><CardTitle className="text-lg truncate">{signal.symbol}</CardTitle><div className="flex items-center gap-1.5 mt-0.5"><span className="inline-flex h-1.5 w-1.5 rounded-full bg-success animate-pulse" /><span className="text-[9px] uppercase tracking-wider text-success font-bold">Live Posted</span><Badge variant="outline" className="text-[8px] h-4">{signalCategory}</Badge></div></div>
+                    <div className="min-w-0"><CardTitle className="text-lg truncate">{signal.symbol}</CardTitle><div className="flex items-center gap-1.5 mt-0.5"><span className="inline-flex h-1.5 w-1.5 rounded-full bg-success animate-pulse" /><span className="text-[9px] uppercase tracking-wider text-success font-bold">Featured</span><Badge variant="outline" className="text-[8px] h-4">{signalCategory}</Badge></div></div>
                     <Badge
                       variant={signal.direction === "BUY" ? "default" : "destructive"}
                       className={signal.direction === "BUY" ? "bg-success text-success-foreground" : ""}
