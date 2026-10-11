@@ -51,7 +51,7 @@ function timeframeLabel(timeframe?: string | null): string {
   switch (normTf(timeframe)) {
     case "M1": return "1M · SCALPING";
     case "M5": return "5M · MOMENTUM";
-    case "M15": return "15M · INTRADAY";\n    case "D1": return "1D · DAILY";
+    case "M15": return "15M · INTRADAY";
     case "H1": return "1H · SWING";
     case "D1": return "1D · POSITION";
     default: return (timeframe || "M5").toUpperCase();

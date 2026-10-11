@@ -338,7 +338,9 @@ const BlogPost = () => {
             <div className="mt-5">
               <AffiliateAccountGuide broker="deriv" affiliateUrl={AFFILIATE_LINKS.deriv.url} compact />
             </div>
-          )}\n\n          <div className="flex flex-wrap items-center gap-3">
+          )}
+
+          <div className="flex flex-wrap items-center gap-3">
             <SocialShareButtons title={post.title} description={post.excerpt} label="Share research" />
             <p className="text-xs text-muted-foreground">{ARTICLE_TYPE_NOTE[articleType]}</p>
           </div>

@@ -180,7 +180,8 @@ export default function CopyTradingOnboarding() {
                           </div>
                         ))}
                       </div>
-                    </div>\n<div className="mt-8 grid gap-4 sm:grid-cols-3">
+                    </div>
+<div className="mt-8 grid gap-4 sm:grid-cols-3">
                       {[
                         ["Account", "One Botvio login"],
                         ["Security", "Encrypted MT5 credentials"],
