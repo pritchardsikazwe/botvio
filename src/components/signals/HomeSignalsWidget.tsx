@@ -203,7 +203,15 @@ function riskReward(signal: any): string {
 }
 
 function homeExpiresAt(signal: { created_at: string }): Date {
-  return new Date(new Date(signal.created_at).getTime() + HOME_SIGNAL_LIVE_MS);
+  const createdAt = new Date(signal.created_at).getTime();
+  const catCreated = new Date(createdAt + CAT_OFFSET_MS);
+  const year = catCreated.getUTCFullYear();
+  const month = catCreated.getUTCMonth();
+  const day = catCreated.getUTCDate();
+  const hour = catCreated.getUTCHours();
+  const nextPublishHour = hour < 9 ? 9 : hour < 18 ? 18 : 9;
+  const nextPublishDay = hour < 18 ? day : day + 1;
+  return new Date(Date.UTC(year, month, nextPublishDay, nextPublishHour) - CAT_OFFSET_MS);
 }
 
 function isSignalExpired(signal: { created_at: string }): boolean {
@@ -213,9 +221,10 @@ function isSignalExpired(signal: { created_at: string }): boolean {
 function getTimeRemaining(signal: { created_at: string }): string {
   const diffMs = homeExpiresAt(signal).getTime() - Date.now();
   if (diffMs <= 0) return "Expired";
-  const minutes = Math.floor(diffMs / 60_000);
-  const seconds = Math.floor((diffMs % 60_000) / 1000);
-  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  const hours = Math.floor(diffMs / 3_600_000);
+  const minutes = Math.floor((diffMs % 3_600_000) / 60_000);
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 
