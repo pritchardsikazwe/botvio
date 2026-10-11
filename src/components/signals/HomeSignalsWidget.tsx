@@ -51,7 +51,7 @@ function timeframeLabel(timeframe?: string | null): string {
   switch (normTf(timeframe)) {
     case "M1": return "1M · SCALPING";
     case "M5": return "5M · MOMENTUM";
-    case "M15": return "15M · INTRADAY";
+    case "M15": return "15M · INTRADAY";\n    case "D1": return "1D · DAILY";
     case "H1": return "1H · SWING";
     case "D1": return "1D · POSITION";
     default: return (timeframe || "M5").toUpperCase();
@@ -59,7 +59,7 @@ function timeframeLabel(timeframe?: string | null): string {
 }
 
 function selectHomeSignalsByHorizon(items: ManualSignal[], limit = 6): ManualSignal[] {
-  const horizons = ["M1", "M5", "M15", "H1", "D1"];
+  const horizons = ["M1", "M15", "H1", "D1"];
   const weltrade = items.filter(signal => {
     const brokers = (signal as any).broker as string[] | null;
     return Array.isArray(brokers) && brokers.includes("weltrade");
@@ -126,29 +126,63 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
   return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
 }
 
-// Scheduled homepage batches use Zambia time (CAT, UTC+2). Selection windows are fixed.
+// Homepage publishes one batch of exactly three signals at 09:00 and 18:00 Zambia time.
+// The previous batch is replaced at the next publication. Prioritize the requested
+// 1M scalping, 15M intraday and 1D position horizons; use 1H swing as a fallback.
 const CAT_OFFSET_MS = 2 * 60 * 60 * 1000;
+const HOME_HORIZON_PRIORITY = ["M1", "M15", "D1", "H1"];
 function selectPublishedHomeSignals(items: ManualSignal[], now = new Date()): ManualSignal[] {
   const cat = new Date(now.getTime() + CAT_OFFSET_MS);
-  const y = cat.getUTCFullYear(), m = cat.getUTCMonth(), d = cat.getUTCDate();
-  const boundary = (day: number, hour: number) => Date.UTC(y, m, day, hour) - CAT_OFFSET_MS;
-  const morningStart = boundary(d - 1, 21);
-  const morningEnd = boundary(d, 9);
-  const eveningStart = morningEnd;
-  const eveningEnd = boundary(d, 18);
-  const newest = (x: ManualSignal, y: ManualSignal) =>
-    new Date(y.created_at).getTime() - new Date(x.created_at).getTime();
-  const morning = items.filter(s => {
-    const t = new Date(s.created_at).getTime();
-    return t >= morningStart && t < morningEnd;
-  }).sort(newest).slice(0, 3);
-  const evening = now.getTime() >= eveningEnd
-    ? items.filter(s => {
-        const t = new Date(s.created_at).getTime();
-        return t >= eveningStart && t < eveningEnd;
-      }).sort(newest).slice(0, 3)
-    : [];
-  return [...morning, ...evening];
+  const year = cat.getUTCFullYear();
+  const month = cat.getUTCMonth();
+  const day = cat.getUTCDate();
+  const catBoundary = (dayOffset: number, hour: number) =>
+    Date.UTC(year, month, day + dayOffset, hour) - CAT_OFFSET_MS;
+  const morningAt = catBoundary(0, 9);
+  const eveningAt = catBoundary(0, 18);
+
+  // Choose only the latest scheduled batch window; never combine morning and evening.
+  let windowStart: number;
+  let windowEnd: number;
+  if (now.getTime() >= eveningAt) {
+    windowStart = morningAt;
+    windowEnd = eveningAt;
+  } else if (now.getTime() >= morningAt) {
+    windowStart = catBoundary(-1, 18);
+    windowEnd = morningAt;
+  } else {
+    windowStart = catBoundary(-1, 9);
+    windowEnd = catBoundary(-1, 18);
+  }
+
+  const candidates = items.filter(signal => {
+    const created = new Date(signal.created_at).getTime();
+    const tf = normTf(signal.timeframe);
+    return created >= windowStart && created < windowEnd &&
+      ["M1", "M5", "M15", "M30", "H1", "H4", "D1"].includes(tf);
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const selected: ManualSignal[] = [];
+  const used = new Set<string>();
+  // Try to represent short-term, intraday and daily horizons in each three-signal batch.
+  for (const tf of HOME_HORIZON_PRIORITY) {
+    const match = candidates.find(signal => normTf(signal.timeframe) === tf && !used.has(signal.id));
+    if (match) {
+      selected.push(match);
+      used.add(match.id);
+    }
+    if (selected.length === 3) return selected;
+  }
+
+  // Fill remaining slots with newest signals from any supported horizon.
+  for (const signal of candidates) {
+    if (!used.has(signal.id)) {
+      selected.push(signal);
+      used.add(signal.id);
+    }
+    if (selected.length === 3) break;
+  }
+  return selected;
 }
 function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
 function marketLabel(signal: any): string {
@@ -169,7 +203,15 @@ function riskReward(signal: any): string {
 }
 
 function homeExpiresAt(signal: { created_at: string }): Date {
-  return new Date(new Date(signal.created_at).getTime() + HOME_SIGNAL_LIVE_MS);
+  const createdAt = new Date(signal.created_at).getTime();
+  const catCreated = new Date(createdAt + CAT_OFFSET_MS);
+  const year = catCreated.getUTCFullYear();
+  const month = catCreated.getUTCMonth();
+  const day = catCreated.getUTCDate();
+  const hour = catCreated.getUTCHours();
+  const nextPublishHour = hour < 9 ? 9 : hour < 18 ? 18 : 9;
+  const nextPublishDay = hour < 18 ? day : day + 1;
+  return new Date(Date.UTC(year, month, nextPublishDay, nextPublishHour) - CAT_OFFSET_MS);
 }
 
 function isSignalExpired(signal: { created_at: string }): boolean {
@@ -179,9 +221,10 @@ function isSignalExpired(signal: { created_at: string }): boolean {
 function getTimeRemaining(signal: { created_at: string }): string {
   const diffMs = homeExpiresAt(signal).getTime() - Date.now();
   if (diffMs <= 0) return "Expired";
-  const minutes = Math.floor(diffMs / 60_000);
-  const seconds = Math.floor((diffMs % 60_000) / 1000);
-  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  const hours = Math.floor(diffMs / 3_600_000);
+  const minutes = Math.floor((diffMs % 3_600_000) / 60_000);
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 
@@ -209,7 +252,7 @@ export const HomeSignalsWidget = () => {
 
   const headerSection = (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-xl font-bold flex items-center gap-2">
+      <h2 className="text-2xl sm:text-3xl font-extrabold flex items-center gap-2">
         <Signal className="h-5 w-5 text-primary" />
         Latest Trading Signals
       </h2>
@@ -292,14 +335,37 @@ export const HomeSignalsWidget = () => {
         {headerSection}
         {brokerTabs}
         <Card className="glass-card">
-          <CardContent className="py-12 text-center">
-            <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <h3 className="font-semibold mb-1">No Active Signals</h3>
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="py-10 sm:py-14 text-center">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary shadow-lg shadow-primary/10 motion-safe:animate-[pulse_2.5s_ease-in-out_infinite]">
+              <Signal className="h-8 w-8 motion-safe:animate-bounce" />
+            </div>
+            <h3 className="mb-3 text-2xl font-extrabold tracking-tight sm:text-3xl">No Active Signals</h3>
+            <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {brokerFilter !== "all"
-                ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Try "All" or check back soon.`
-                : "Three signals are featured at 09:00 and three at 18:00 Zambia time. Check back at the next scheduled publication."}
+                ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Select “All” or check the next publication.`
+                : "Three signals are scheduled for 09:00 and three for 18:00 Zambia time. Signal access is available to paid members only. Subscribe to unlock signals when the next batch is published."}
             </p>
+            {brokerFilter === "all" && (
+              <div className="mx-auto mt-6 max-w-xl">
+                <Card className="group relative overflow-hidden border-2 border-primary/40 bg-gradient-to-r from-primary/15 via-warning/10 to-primary/5 text-left shadow-lg shadow-primary/10 motion-safe:animate-[pulse_4s_ease-in-out_infinite]">
+                  <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-12 h-36 w-36 rounded-full bg-warning/20 blur-3xl motion-safe:animate-pulse" />
+                  <CardContent className="relative flex flex-col items-center gap-4 p-5 sm:flex-row sm:p-6">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-warning shadow-md motion-safe:animate-bounce">
+                      <Crown className="h-7 w-7 text-primary-foreground" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left">
+                      <p className="text-lg font-extrabold sm:text-xl">Signals are for paid members</p>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-base">Subscribe to a paid plan to unlock signal access. Featured batches are scheduled at 09:00 and 18:00 CAT (Zambia time).</p>
+                    </div>
+                    <Button asChild size="lg" className="w-full shrink-0 text-base font-bold shadow-md transition-transform hover:scale-105 sm:w-auto motion-safe:animate-[pulse_2.5s_ease-in-out_infinite]">
+                      <Link to="/billing">
+                        <Crown className="mr-2 h-4 w-4" /> Subscribe Now <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import { BASE_URL } from "@/config/domain";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, User } from "lucide-react";
@@ -29,7 +30,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin + "/botvio-robot" },
+        options: { redirectTo: `${BASE_URL}/botvio-robot` },
       });
       if (error) {
         toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
@@ -61,7 +62,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-border sm:max-w-md">
+      <DialogContent className="glass-card border-border w-[calc(100vw-1rem)] max-w-md max-h-[85dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <User className="w-5 h-5 text-primary" />
@@ -126,7 +127,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                     return;
                   }
                   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: `${window.location.origin}/reset-password`,
+                    redirectTo: `${BASE_URL}/reset-password`,
                   });
                   if (error) {
                     toast({ title: "Failed to send reset email", description: error.message, variant: "destructive" });
