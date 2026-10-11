@@ -6,6 +6,7 @@ on:
     branches:
       - botvio-independent-sep13
       - fix/android-linux-gradle
+      - fix/mobile-auth-and-navigation
 
 permissions:
   contents: read
