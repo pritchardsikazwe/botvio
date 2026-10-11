@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - botvio-independent-sep13
+      - fix/android-linux-gradle
 
 permissions:
   contents: read
