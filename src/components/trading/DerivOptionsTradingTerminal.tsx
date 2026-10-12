@@ -37,7 +37,7 @@ const fmt = (n: number) => Number.isFinite(n) ? n.toLocaleString(undefined, { mi
 
 export function DerivOptionsTradingTerminal() {
   const [quotes, setQuotes] = useState<Record<string, { price:number; previous:number; ticks:number[] }>>({});
-  const [selected, setSelected] = useState("R_10");
+  const [selected, setSelected] = useState("R_75");
   const [trades, setTrades] = useState<any[]>([]);
   const [loadingTrades, setLoadingTrades] = useState(true);
 
@@ -99,17 +99,17 @@ export function DerivOptionsTradingTerminal() {
   }, [quote.ticks]);
   const totalPnl = trades.reduce((a,t) => a + Number(t.pnl || 0), 0);
 
-  return <section className="rounded-2xl border border-white/10 bg-[#070b10] text-white overflow-hidden shadow-2xl">
-    <div className="px-5 py-4 border-b border-white/10 bg-[#0a1017] flex flex-wrap justify-between gap-3">
+  return <section className="w-full rounded-2xl border border-[#123047] bg-[#020b13] text-white overflow-hidden shadow-2xl">
+    <div className="px-5 py-4 border-b border-[#123047] bg-[#071421] flex flex-wrap justify-between gap-3">
       <div><div className="font-black text-lg">BOTVIO <span className="text-primary">Deriv Options</span></div><p className="text-xs text-slate-500">Live synthetic markets · strategy automation · verified running trades</p></div>
       <div className="flex gap-2 items-center"><Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">● LIVE</Badge><Button size="sm" variant="outline" className="border-white/10" onClick={loadTrades}><RefreshCw className="h-3.5 w-3.5 mr-1"/>Refresh</Button></div>
     </div>
-    <div className="p-4 space-y-4">
+    <div className="p-3 md:p-4 space-y-4">
       <div className="flex gap-2 overflow-x-auto pb-1 snap-x">{MARKETS.map(m => { const q = quotes[m.symbol]; const pct = q?.previous ? ((q.price-q.previous)/q.previous)*100 : 0; const up = pct >= 0; return <button key={m.symbol} onClick={()=>setSelected(m.symbol)} className={"text-left rounded-xl border p-3 min-w-[150px] snap-start " + (selected===m.symbol ? "border-primary bg-primary/10" : "border-white/10 bg-white/[.02]")}><div className="flex justify-between"><span className="text-xs font-semibold">{m.name}</span><span className={up?"text-emerald-400":"text-red-400"}>{up?"↑":"↓"}</span></div><div className="mt-1 text-base font-black">{q?fmt(q.price):"—"}</div><div className={up?"text-[11px] text-emerald-400":"text-[11px] text-red-400"}>{q?(up?"+":"")+pct.toFixed(3)+"%":"Connecting…"}</div><div className="text-[10px] text-slate-500 mt-1">{bias===null?"Waiting for ticks":"Bias "+bias+"%"}</div></button>; })}</div>
 
-      <div className="grid xl:grid-cols-[1fr_320px] gap-4">
-        <div className="space-y-4">
-          <Card className="bg-[#0b1119] border-white/10 text-white"><CardContent className="p-4">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_370px] gap-4 items-start">
+        <div className="space-y-4 min-w-0">
+          <Card className="bg-[#071421] border-[#17364b] text-white"><CardContent className="p-4">
             <div className="flex justify-between gap-3"><div><div className="text-xs text-slate-400">{market.name} · Deriv Synthetic Index</div><div className="text-3xl font-black mt-1">{fmt(quote.price)}</div><div className={change>=0?"text-sm text-emerald-400":"text-sm text-red-400"}>{change>=0?"+":""}{change.toFixed(3)}% · realtime</div></div><div className="flex gap-1">{["1m","5m","15m","1h"].map(x=><button key={x} className={"px-3 py-1.5 rounded-lg text-xs "+(x==="5m"?"bg-primary text-primary-foreground":"bg-white/5 text-slate-300")}>{x}</button>)}</div></div>
             <div className="mt-4 h-52 rounded-xl bg-black/20 border border-white/5 p-3 flex items-end gap-1">{(quote.ticks.length?quote.ticks:Array(28).fill(quote.price)).map((v,i)=>{const min=Math.min(...(quote.ticks.length?quote.ticks:[quote.price]));const max=Math.max(...(quote.ticks.length?quote.ticks:[quote.price]));const h=max===min?25:10+((v-min)/(max-min))*80;return <div key={i} className={"flex-1 rounded-t "+(i>0&&v>quote.ticks[i-1]?"bg-emerald-400":"bg-red-400")} style={{height:h+"%",opacity:.4+i/45}}/>;})}</div>
           </CardContent></Card>
