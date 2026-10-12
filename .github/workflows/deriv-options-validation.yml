@@ -1,0 +1,39 @@
+name: Deriv Options Validation
+
+on:
+  push:
+    branches:
+      - fix/deriv-proposal-request-validation
+  pull_request:
+    branches:
+      - botvio-independent-sep13
+    paths:
+      - "src/components/deriv-app/DerivTradePanel.tsx"
+      - "src/hooks/useDerivAPI.ts"
+      - "src/services/deriv/derivSymbols.ts"
+      - "supabase/functions/deriv-trade-execute/**"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/deriv-options-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: TypeScript check
+        run: bunx tsc -b
+      - name: Unit tests
+        run: bun run test
+      - name: Production build
+        run: bun run build
