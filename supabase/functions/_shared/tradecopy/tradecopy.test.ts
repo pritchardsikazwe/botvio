@@ -66,7 +66,9 @@ describe("provider/follower relationship", () => {
     expect(() => validateRelationship({ ...base, masterRole: "slave" })).toThrow();
     expect(() => validateRelationship({ ...base, followerRole: "master" })).toThrow();
     expect(() => validateRelationship({ ...base, masterTradecopyId: null })).toThrow();
-    expect(() => validateRelationship({ ...base, followerEnvironment: "LIVE" })).toThrow();
+    // Demo providers may feed live followers; live providers must not feed demo followers.
+    expect(() => validateRelationship({ ...base, masterEnvironment: "LIVE", followerEnvironment: "DEMO" })).toThrow();
+    expect(() => validateRelationship({ ...base, followerEnvironment: "LIVE" })).not.toThrow();
   });
 });
 
