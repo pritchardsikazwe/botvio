@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 type TourStep = {
   id: string;
@@ -88,6 +89,7 @@ const getTarget = (step: TourStep) =>
   );
 
 export const FirstVisitTour = () => {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -115,12 +117,15 @@ export const FirstVisitTour = () => {
   }, [currentStep]);
 
   useEffect(() => {
+    // Do not place a full-screen tour over the public landing page. Start the
+    // tour only after sign-in, when the account navigation it explains exists.
+    if (!user) return;
     const seen = window.localStorage.getItem(STORAGE_KEY);
     if (!seen) {
       const timer = window.setTimeout(() => setOpen(true), 700);
       return () => window.clearTimeout(timer);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!open) return;
