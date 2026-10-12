@@ -373,6 +373,14 @@ export const useDerivAPI = () => {
       growth_rate?: number;
       limit_order?: Record<string, number>;
     }): Promise<DerivProposal> => {
+      if (!state.authorized || !service.socketOpen) {
+        throw new Error("Your Deriv account is not connected. Reconnect and wait for authorization before requesting a quote.");
+      }
+      if (!params.symbol?.trim()) throw new Error("Choose a market before requesting a quote.");
+      if (!Number.isFinite(params.amount) || params.amount <= 0) throw new Error("Enter a valid stake amount.");
+      if (params.duration !== undefined && (!Number.isFinite(params.duration) || params.duration <= 0)) {
+        throw new Error("Choose a valid contract duration.");
+      }
       const symbol = toDerivSymbol(params.symbol);
       const request: Record<string, unknown> = {
         proposal: 1,
@@ -420,7 +428,7 @@ export const useDerivAPI = () => {
         // Retry the legacy symbol field only when Deriv explicitly says the
         // current API does not accept underlying_symbol. Do not retry arbitrary
         // contract errors, which can mask unsupported contracts.
-        if (/properties not allowed:\\s*underlying_symbol/i.test(message)) {
+        if (/properties not allowed:\s*underlying_symbol/i.test(message)) {
           const legacy = { ...request };
           delete legacy.underlying_symbol;
           legacy.symbol = symbol;
@@ -447,11 +455,14 @@ export const useDerivAPI = () => {
         longcode: String(proposal.longcode ?? ""),
       };
     },
-    [service, toDerivSymbol],
+    [service, toDerivSymbol, state.authorized],
   );
 
   const buyContract = useCallback(
     async (proposalId: string, price: number): Promise<DerivContract> => {
+      if (!state.authorized || !service.socketOpen) {
+        throw new Error("Your Deriv account is not connected. Reconnect before placing a trade.");
+      }
       if (!proposalId?.trim()) {
         throw new Error("No valid Deriv proposal ID was received. Request a fresh quote before buying.");
       }
@@ -481,7 +492,7 @@ export const useDerivAPI = () => {
         longcode: String(bought.longcode ?? ""),
       };
     },
-    [service],
+    [service, state.authorized],
   );
 
   const sellContract = useCallback(
