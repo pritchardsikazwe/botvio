@@ -456,7 +456,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
                   {signal?.reasons?.[0] ?? "Collecting enough live ticks for the signal engine…"}
                 </p>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className={cn("mt-3 grid gap-2", isMultipliers || isAccumulator ? "grid-cols-1" : "grid-cols-2")}>
                 <div className="rounded-lg border border-border/60 p-2.5">
                   <p className="text-[9px] uppercase text-muted-foreground">RSI 14</p>
                   <p className="mt-1 text-lg font-black tabular-nums">{rsiValue != null ? rsiValue.toFixed(1) : "—"}</p>
@@ -555,12 +555,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
               <p className="mt-1 text-sm font-black">{currency} {recommendedStake.toFixed(2)}</p>
               <p className="text-[9px] text-muted-foreground">≈ 1% balance · tap to use</p>
             </button>
-            <button type="button" className="rounded-lg border border-border/60 bg-background/70 p-2 text-left hover:border-primary/40"
+            {!isMultipliers && !isAccumulator && <button type="button" className="rounded-lg border border-border/60 bg-background/70 p-2 text-left hover:border-primary/40"
               onClick={() => { setDuration(String(recommendedDuration)); setQuote(null); }}>
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Suggested duration</p>
               <p className="mt-1 text-sm font-black">{recommendedDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</p>
               <p className="text-[9px] text-muted-foreground">based on this contract</p>
-            </button>
+            </button>}
           </div>
 
           {isRiseFall && (
