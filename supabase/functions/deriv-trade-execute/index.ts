@@ -266,9 +266,9 @@ Deno.serve(async (req) => {
           if (payload.barrier !== undefined) proposalRequest.barrier = String(payload.barrier);
           break;
         case 'ACCU':
+          // Accumulators are growth-rate contracts, not fixed-duration options.
+          // Omitting duration fields avoids sending unsupported expiry properties.
           proposalRequest.contract_type = 'ACCU';
-          proposalRequest.duration = payload.duration;
-          proposalRequest.duration_unit = payload.duration_unit || 'm';
           proposalRequest.growth_rate = payload.growth_rate ?? 2;
           if (payload.limit_order) proposalRequest.limit_order = payload.limit_order;
           break;
@@ -282,9 +282,17 @@ Deno.serve(async (req) => {
         .update({ status: 'SENT' })
         .eq('id', tradeIntent.id);
 
-      // Get proposal
-      const proposalResponse = await sendAndReceive(ws, proposalRequest);
-      
+      // Get proposal. Retry only the quote request (never the purchase) when
+      // Deriv explicitly rejects the new underlying_symbol field and requests
+      // the legacy symbol field.
+      let proposalResponse = await sendAndReceive(ws, proposalRequest);
+      const proposalError = String(proposalResponse?.error?.message || "");
+      if (/properties not allowed:\\s*underlying_symbol/i.test(proposalError)) {
+        const legacyRequest = { ...proposalRequest, symbol: proposalRequest.underlying_symbol };
+        delete (legacyRequest as any).underlying_symbol;
+        proposalResponse = await sendAndReceive(ws, legacyRequest);
+      }
+
       if (proposalResponse.error) {
         await supabase
           .from('trade_intents')
