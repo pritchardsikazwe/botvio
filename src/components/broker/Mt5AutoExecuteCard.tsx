@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Power, RefreshCw, Zap, ShieldCheck, Link2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { directAction, useMyMt5Accounts } from "@/hooks/useDirectExecution";
 
 /**
@@ -18,6 +19,7 @@ export function Mt5AutoExecuteCard() {
   const { user } = useAuth();
   const { data: accounts, isLoading, refetch } = useMyMt5Accounts();
   const [busy, setBusy] = useState<string | null>(null);
+  const [marketBusy, setMarketBusy] = useState<string | null>(null);
   const openConnections = () => window.location.assign("/connections");
 
   if (!user) return null;
@@ -42,6 +44,39 @@ export function Mt5AutoExecuteCard() {
       toast({ title: "TradeCopy update failed", description: (e as Error).message, variant: "destructive" });
     } finally {
       setBusy(null);
+    }
+  };
+
+  const allowAllMarkets = async (account: any) => {
+    if (!user?.id) return;
+    setMarketBusy(account.id);
+    try {
+      const { data: existing, error: readError } = await supabase
+        .from("follower_signal_preferences")
+        .select("id")
+        .eq("trading_account_id", account.id)
+        .maybeSingle();
+      if (readError) throw readError;
+      if (existing?.id) {
+        const { error } = await supabase
+          .from("follower_signal_preferences")
+          .update({ mode: "all", allowed_symbols: [] })
+          .eq("trading_account_id", account.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("follower_signal_preferences")
+          .insert({ user_id: user.id, trading_account_id: account.id, mode: "all", allowed_symbols: [] });
+        if (error) throw error;
+      }
+      toast({
+        title: "All supported markets enabled",
+        description: `${account.label || "Your Deriv MT5 account"} can receive eligible synthetic-index, forex and metals signals. Broker and risk checks still apply.`,
+      });
+    } catch (e) {
+      toast({ title: "Could not update market preferences", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setMarketBusy(null);
     }
   };
 
@@ -118,7 +153,16 @@ export function Mt5AutoExecuteCard() {
                 onCheckedChange={(value) => toggle(account, value)}
                 aria-label={account.direct_signal_enabled ? "Disable Botvio signals" : "Enable Botvio signals"}
               />
-              <Button variant="ghost" size="sm" onClick={openConnections} disabled={!!busy}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => allowAllMarkets(account)}
+                disabled={marketBusy === account.id || !!busy}
+                title="Clear any selected-symbol restriction and allow all supported markets"
+              >
+                {marketBusy === account.id ? "Updating…" : "All supported markets"}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={openConnections} disabled={!!busy || !!marketBusy}>
                 <Link2 className="mr-1.5 h-3.5 w-3.5" />Manage
               </Button>
               <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={!!busy}>
