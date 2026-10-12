@@ -262,6 +262,29 @@ async function executeForAccount(
   }
 }
 
+// Deriv MT5 minimum lot per symbol (broker contract spec). Lots are clamped UP
+// to this minimum so orders are not rejected with "Invalid volume".
+const DERIV_MIN_LOT: Record<string, number> = {
+  "boom 300 index": 1, "boom 500 index": 0.2, "boom 600 index": 0.2, "boom 900 index": 0.2, "boom 1000 index": 0.2,
+  "crash 300 index": 0.5, "crash 500 index": 0.2, "crash 600 index": 0.2, "crash 900 index": 0.2, "crash 1000 index": 0.2,
+  "volatility 10 index": 0.5, "volatility 25 index": 0.5, "volatility 50 index": 4, "volatility 75 index": 0.001, "volatility 100 index": 0.5,
+  "volatility 10 (1s) index": 0.5, "volatility 25 (1s) index": 0.005, "volatility 50 (1s) index": 0.005,
+  "volatility 75 (1s) index": 0.05, "volatility 100 (1s) index": 0.2,
+};
+function clampLot(symbol: string, lot: number): number {
+  const min = DERIV_MIN_LOT[symbol.trim().toLowerCase()] ?? 0;
+  return Math.max(Number.isFinite(lot) && lot > 0 ? lot : 0.01, min);
+}
+
+async function hasOpenPosition(admin: SupabaseClient, accountId: string, mt5Symbol: string): Promise<boolean> {
+  // One open position per market: any non-failed order in the last 4h blocks new orders (either direction).
+  const { data } = await admin.from("direct_executions").select("id")
+    .eq("trading_account_id", accountId).eq("mt5_symbol", mt5Symbol)
+    .in("status", ["pending", "sent", "simulated"])
+    .gte("created_at", new Date(Date.now() - 4 * 3600_000).toISOString()).limit(1);
+  return !!data?.length;
+}
+
 async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
   const { data: signals, error: signalError } = await admin.from("trading_signals")
@@ -302,6 +325,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
   const isPositionLimitError = (reason: string) => /TRADE_RETCODE_LIMIT_POSITIONS|limit[_ ]positions|maximum.*position|position.*limit|too many positions/i.test(reason);
   const isInvalidVolumeError = (reason: string) => /invalid volume|volume.*invalid|invalid.*lot|lot.*invalid/i.test(reason);
 
+  const cycleSymbols = new Set<string>();
   for (const m of masters) {
     const isDeriv = /deriv/i.test(String(m.server ?? m.broker ?? ""));
     const isWeltrade = /weltrade/i.test(String(m.server ?? m.broker ?? ""));
@@ -318,13 +342,16 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
       // Deriv master: only exact Deriv MT5 mappings. Weltrade master: never Deriv-only symbols.
       const mt5Symbol = isDeriv ? derivSym : (isWeltrade && derivSym && /index/i.test(derivSym) ? null : sig);
       if (!mt5Symbol) { skipped++; continue; }
+      const cycleKey = `${m.id}:${mt5Symbol.toLowerCase()}`;
+      if (cycleSymbols.has(cycleKey) || await hasOpenPosition(admin, m.id, mt5Symbol)) { skipped++; continue; }
+      cycleSymbols.add(cycleKey);
       // Cooldown: 30 min after a sent trade, 10 min after a failure (stops retry storms).
       const { data: recentTrade } = await admin.from("direct_executions").select("id,status,created_at")
         .eq("trading_account_id", m.id).eq("mt5_symbol", mt5Symbol)
         .gte("created_at", new Date(Date.now() - 30 * 60_000).toISOString()).order("created_at", { ascending: false }).limit(1);
       const last = recentTrade?.[0];
       if (last && (last.status !== "failed" || Date.parse(last.created_at) > Date.now() - 10 * 60_000)) { skipped++; continue; }
-      const result = await executeForAccount(admin, m, signal, "master", Number(m.botvio_signal_master_lot ?? 0.01), mt5Symbol, globalLive);
+      const result = await executeForAccount(admin, m, signal, "master", clampLot(mt5Symbol, Number(m.botvio_signal_master_lot ?? 0.01)), mt5Symbol, globalLive);
       if (result.ok) {
         masterExecuted++;
       } else if (result.skipped) {
@@ -415,7 +442,10 @@ const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
           continue;
         }
       }
-      const result = await executeForAccount(admin, account, signal, "slave", Number(account.direct_lot ?? 0.01), mapped, globalLive);
+      const key = `${account.id}:${mapped.toLowerCase()}`;
+      if (cycleSymbols.has(key) || await hasOpenPosition(admin, account.id, mapped)) { skipped++; continue; }
+      cycleSymbols.add(key);
+      const result = await executeForAccount(admin, account, signal, "slave", clampLot(mapped, Number(account.direct_lot ?? 0.01)), mapped, globalLive);
       if (result.ok) directExecuted++; else if (result.skipped) skipped++;
     }
   }
