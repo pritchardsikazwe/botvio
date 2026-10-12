@@ -144,6 +144,41 @@ Deno.serve(async (req) => {
       throw new Error('Missing required fields: connection_id, idempotency_key, contract_family, payload');
     }
 
+    const stake = Number(payload.stake);
+    if (!Number.isFinite(stake) || stake <= 0) {
+      throw new Error('Stake must be a positive number.');
+    }
+    const familyTypes: Record<string, string[]> = {
+      MULTIPLIERS: ['MULTUP', 'MULTDOWN'],
+      DIGITS: ['DIGITEVEN', 'DIGITODD', 'DIGITOVER', 'DIGITUNDER', 'DIGITMATCH', 'DIGITDIFF'],
+      RISEFALL: ['CALL', 'PUT', 'CALLE', 'PUTE'],
+      HIGHER_LOWER: ['HIGHER', 'LOWER'],
+      TOUCH_NO_TOUCH: ['ONETOUCH', 'NOTOUCH'],
+      ACCU: ['ACCU'],
+    };
+    const allowedTypes = familyTypes[String(contract_family)];
+    if (!allowedTypes || !allowedTypes.includes(String(payload.contract_type))) {
+      throw new Error('Unsupported contract type for the selected Deriv contract family.');
+    }
+    if (contract_family === 'DIGITS' && ['DIGITOVER', 'DIGITUNDER', 'DIGITMATCH', 'DIGITDIFF'].includes(String(payload.contract_type))) {
+      const digit = Number(payload.barrier);
+      if (!Number.isInteger(digit) || digit < 0 || digit > 9) {
+        throw new Error('Digits contracts require a last digit from 0 to 9.');
+      }
+    }
+    if (contract_family === 'MULTIPLIERS') {
+      const multiplier = Number(payload.multiplier);
+      if (!Number.isFinite(multiplier) || multiplier <= 0) {
+        throw new Error('Multiplier must be a positive number.');
+      }
+    }
+    if (contract_family === 'ACCU') {
+      const growthRate = Number(payload.growth_rate ?? 2);
+      if (!Number.isFinite(growthRate) || growthRate <= 0) {
+        throw new Error('Accumulator growth rate must be a positive number.');
+      }
+    }
+
     // Check kill switch
     const { data: killSwitch } = await supabase
       .from('app_settings')
