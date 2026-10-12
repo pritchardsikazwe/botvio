@@ -69,6 +69,11 @@
 }
 
 @layer base {
+  /* Keep the layout width stable when the tour locks page scrolling. */
+  html {
+    scrollbar-gutter: stable;
+  }
+
   * {
     @apply border-border;
   }
