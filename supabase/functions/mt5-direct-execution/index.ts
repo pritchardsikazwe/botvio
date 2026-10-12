@@ -68,11 +68,13 @@ const DERIV_MT5: Record<string, string> = {
   "BTC/USD": "BTCUSD", "ETH/USD": "ETHUSD", "US30": "US 30", "NAS100": "US Tech 100", "UK100": "UK 100",
   // Deriv Synthetic CFDs. Keep these explicit so a Deriv master receives
   // Synthetic Hub signals instead of silently skipping them.
+  "BOOM150": "Boom 150 Index", "BOOM 150 INDEX": "Boom 150 Index",
   "BOOM300": "Boom 300 Index", "BOOM 300 INDEX": "Boom 300 Index",
   "BOOM500": "Boom 500 Index", "BOOM 500 INDEX": "Boom 500 Index", "BOOM 500 INDEX MT5": "Boom 500 Index",
   "BOOM600": "Boom 600 Index", "BOOM 600 INDEX": "Boom 600 Index",
   "BOOM900": "Boom 900 Index", "BOOM 900 INDEX": "Boom 900 Index",
   "BOOM1000": "Boom 1000 Index", "BOOM 1000 INDEX": "Boom 1000 Index",
+  "CRASH75": "Crash 75 Index", "CRASH 75 INDEX": "Crash 75 Index",
   "CRASH150": "Crash 150 Index", "CRASH 150 INDEX": "Crash 150 Index",
   "CRASH300": "Crash 300 Index", "CRASH 300 INDEX": "Crash 300 Index",
   "CRASH500": "Crash 500 Index", "CRASH 500 INDEX": "Crash 500 Index",
@@ -95,7 +97,17 @@ const DERIV_MT5: Record<string, string> = {
   "1HZ30V": "Volatility 30 (1s) Index", "VOLATILITY 30 (1S) INDEX": "Volatility 30 (1s) Index",
   "1HZ90V": "Volatility 90 (1s) Index", "VOLATILITY 90 (1S) INDEX": "Volatility 90 (1s) Index",
 };
-const derivMt5Symbol = (s: string) => DERIV_MT5[String(s).toUpperCase()] ?? DERIV_MT5[String(s)] ?? null;
+// Match common signal aliases even when a source includes different spaces,
+ // separators, or punctuation (e.g. "Boom 500", "BOOM500", "Boom 500 Index").
+const normalizeDerivAlias = (s: string) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+const DERIV_MT5_NORMALIZED: Record<string, string> = Object.fromEntries(
+  Object.entries(DERIV_MT5).map(([alias, symbol]) => [normalizeDerivAlias(alias), symbol]),
+);
+const derivMt5Symbol = (s: string) =>
+  DERIV_MT5[String(s).toUpperCase()] ??
+  DERIV_MT5[String(s)] ??
+  DERIV_MT5_NORMALIZED[normalizeDerivAlias(s)] ??
+  null;
 
 // Validate the mapped symbol against the account's real MT5 symbol list before
 // any order is sent. Only possible against the live TradeCopy API; mock mode
