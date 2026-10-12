@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
       // the legacy symbol field.
       let proposalResponse = await sendAndReceive(ws, proposalRequest);
       const proposalError = String(proposalResponse?.error?.message || "");
-      if (/properties not allowed:\\s*underlying_symbol/i.test(proposalError)) {
+      if (/properties not allowed:\s*underlying_symbol/i.test(proposalError)) {
         const legacyRequest = { ...proposalRequest, symbol: proposalRequest.underlying_symbol };
         delete (legacyRequest as any).underlying_symbol;
         proposalResponse = await sendAndReceive(ws, legacyRequest);
