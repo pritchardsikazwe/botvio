@@ -452,16 +452,33 @@ export const useDerivAPI = () => {
 
   const buyContract = useCallback(
     async (proposalId: string, price: number): Promise<DerivContract> => {
-      const response = await service.send<DerivBuyResponse>({
-        buy: proposalId,
-        price,
-      });
+      if (!proposalId?.trim()) {
+        throw new Error("No valid Deriv proposal ID was received. Request a fresh quote before buying.");
+      }
+      if (!Number.isFinite(price) || price <= 0) {
+        throw new Error("The Deriv quote has an invalid price. Request a fresh quote before buying.");
+      }
 
+      let response: DerivBuyResponse;
+      try {
+        response = await service.send<DerivBuyResponse>({ buy: proposalId, price });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err ?? "Unknown buy error");
+        if (/unknown contract proposal|contract proposal.*unknown/i.test(message)) {
+          throw new Error("Deriv rejected the quote as expired or unknown. No retry was sent automatically. Request a fresh quote, confirm the displayed price, then try again.");
+        }
+        throw err;
+      }
+
+      const bought = (response as any)?.buy ?? (response as any)?.data?.buy;
+      if (!bought || !Number.isFinite(Number(bought.contract_id)) || Number(bought.contract_id) <= 0) {
+        throw new Error("Deriv did not confirm a contract ID. Check Deriv trade history before submitting again to avoid duplicate trades.");
+      }
       return {
-        contract_id: response.buy.contract_id,
-        buy_price: response.buy.buy_price,
-        payout: response.buy.payout,
-        longcode: response.buy.longcode,
+        contract_id: Number(bought.contract_id),
+        buy_price: Number(bought.buy_price),
+        payout: Number(bought.payout),
+        longcode: String(bought.longcode ?? ""),
       };
     },
     [service],
