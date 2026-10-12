@@ -22,13 +22,25 @@ interface DerivTradePanelProps {
 }
 interface TradeLog { id: number; time: string; message: string; tone: "info" | "success" | "error"; }
 interface PriceQuote { id: string; ask: number; payout: number; longcode: string; createdAt: number; fingerprint: string; }
+type DerivTradeParams = {
+  symbol: string;
+  contract_type: string;
+  amount: number;
+  currency: string;
+  basis: "stake";
+  duration?: number;
+  duration_unit?: "t" | "s" | "m" | "h" | "d";
+  barrier?: string;
+  multiplier?: number;
+  growth_rate?: number;
+};
 
 const UNIT_LABELS: Record<string, string> = { t: "ticks", s: "seconds", m: "minutes", h: "hours", d: "days" };
 
 export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const {
     authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
-    placeTrade, getProposal, buyContract, subscribeContract, sellContract, onContractUpdate, accountInfo,
+    getProposal, buyContract, subscribeContract, sellContract, onContractUpdate, accountInfo,
     derivTokens, activeDerivToken, switchDerivToken, initializing,
   } = useDeriv();
 
@@ -211,7 +223,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
   const buildParams = useCallback((ct: string) => {
     const amount = Number(stake);
-    const params: Record<string, unknown> = {
+    const params: DerivTradeParams = {
       symbol, contract_type: effectiveContractType(ct), amount,
       currency, basis: "stake",
     };
@@ -219,7 +231,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     // duration fields can cause Deriv to reject an otherwise valid proposal.
     if (!isMultipliers && !isAccumulator) {
       params.duration = Number(duration);
-      params.duration_unit = durationUnit;
+      params.duration_unit = durationUnit as DerivTradeParams["duration_unit"];
     }
     if (needsBarrier) params.barrier = barrier;
     if (isMultipliers) params.multiplier = Number(multiplier);
@@ -260,7 +272,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     }
   };
 
-  const quoteFingerprint = (params: Record<string, unknown>) => JSON.stringify(params);
+  const quoteFingerprint = (params: DerivTradeParams) => JSON.stringify(params);
 
   const handlePrice = async () => {
     if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
