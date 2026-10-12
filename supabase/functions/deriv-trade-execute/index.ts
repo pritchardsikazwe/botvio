@@ -152,6 +152,8 @@ Deno.serve(async (req) => {
       MULTIPLIERS: ['MULTUP', 'MULTDOWN'],
       DIGITS: ['DIGITEVEN', 'DIGITODD', 'DIGITOVER', 'DIGITUNDER', 'DIGITMATCH', 'DIGITDIFF'],
       RISEFALL: ['CALL', 'PUT', 'CALLE', 'PUTE'],
+      TURBO: ['CALL', 'PUT'],
+      TICKS: ['CALL', 'PUT'],
       HIGHER_LOWER: ['HIGHER', 'LOWER'],
       TOUCH_NO_TOUCH: ['ONETOUCH', 'NOTOUCH'],
       ACCU: ['ACCU'],
@@ -293,6 +295,8 @@ Deno.serve(async (req) => {
           break;
           
         case 'RISEFALL':
+        case 'TURBO':
+        case 'TICKS':
         case 'HIGHER_LOWER':
         case 'TOUCH_NO_TOUCH':
           proposalRequest.contract_type = payload.contract_type;
