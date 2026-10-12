@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Activity, BarChart3, RefreshCw, Shield, Target } from "lucide-react";
 import { AutoTradePanel } from "@/components/trading/AutoTradePanel";
+import { useAuth } from "@/contexts/AuthContext";
 
 const WS_URL = "wss://api.derivws.com/trading/v1/options/ws/public";
 const MARKETS = [
@@ -36,7 +37,11 @@ const MARKETS = [
 const fmt = (n: number) => Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : "—";
 
 export function DerivOptionsTradingTerminal() {
+  const { user } = useAuth();
   const [quotes, setQuotes] = useState<Record<string, { price:number; previous:number; ticks:number[] }>>({});
+  const [marketStatus, setMarketStatus] = useState<"connecting" | "live" | "stale" | "disconnected">("connecting");
+  const [lastTickAt, setLastTickAt] = useState<number | null>(null);
+  const lastTickAtRef = useRef<number | null>(null);
   const [selected, setSelected] = useState("R_75");
   const [trades, setTrades] = useState<any[]>([]);
   const [loadingTrades, setLoadingTrades] = useState(true);
@@ -46,7 +51,9 @@ export function DerivOptionsTradingTerminal() {
     let closed = false;
     try {
       ws = new WebSocket(WS_URL);
-      ws.onopen = () => { ws?.send(JSON.stringify({ active_symbols: "brief" })); MARKETS.forEach(m => ws?.send(JSON.stringify({ ticks: m.symbol, subscribe: 1 }))); };
+      ws.onopen = () => { setMarketStatus("live"); ws?.send(JSON.stringify({ active_symbols: "brief" })); MARKETS.forEach(m => ws?.send(JSON.stringify({ ticks: m.symbol, subscribe: 1 }))); };
+      ws.onerror = () => setMarketStatus("disconnected");
+      ws.onclose = () => setMarketStatus("disconnected");
       ws.onmessage = e => {
         try {
           const d = JSON.parse(e.data);
@@ -54,6 +61,8 @@ export function DerivOptionsTradingTerminal() {
           const symbol = String(d.tick?.underlying_symbol || d.tick?.symbol || "");
           const price = Number(d.tick?.quote);
           if (!symbol || !Number.isFinite(price) || closed) return;
+          setLastTickAt(Date.now());
+          setMarketStatus("live");
           setQuotes(prev => {
             const old = prev[symbol];
             return { ...prev, [symbol]: { price, previous: old?.price ?? price, ticks: [...(old?.ticks || []), price].slice(-28) } };
@@ -86,7 +95,7 @@ export function DerivOptionsTradingTerminal() {
     setTrades(mapped);
     setLoadingTrades(false);
   };
-  useEffect(() => { loadTrades(); const id = window.setInterval(loadTrades, 10000); return () => window.clearInterval(id); }, []);
+  useEffect(() => { loadTrades(); const id = window.setInterval(loadTrades, 10000); return () => window.clearInterval(id); }, [user?.id]);
 
   const quote = quotes[selected] || { price: 0, previous: 0, ticks: [] };
   const market = MARKETS.find(m => m.symbol === selected) || MARKETS[0];
@@ -102,7 +111,7 @@ export function DerivOptionsTradingTerminal() {
   return <section className="w-full rounded-2xl border border-[#123047] bg-[#020b13] text-white overflow-hidden shadow-2xl">
     <div className="px-5 py-4 border-b border-[#123047] bg-[#071421] flex flex-wrap justify-between gap-3">
       <div><div className="font-black text-lg">BOTVIO <span className="text-primary">Deriv Options</span></div><p className="text-xs text-slate-500">Live synthetic markets · strategy automation · verified running trades</p></div>
-      <div className="flex gap-2 items-center"><Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">● LIVE</Badge><Button size="sm" variant="outline" className="border-white/10" onClick={loadTrades}><RefreshCw className="h-3.5 w-3.5 mr-1"/>Refresh</Button></div>
+      <div className="flex gap-2 items-center"><Badge className={marketStatus === "live" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : marketStatus === "stale" ? "bg-amber-500/15 text-amber-300 border-amber-500/30" : "bg-red-500/15 text-red-300 border-red-500/30"}>● {marketStatus === "live" ? "LIVE DATA" : marketStatus === "stale" ? "STALE DATA" : marketStatus === "connecting" ? "CONNECTING" : "OFFLINE"}</Badge><Button size="sm" variant="outline" className="border-white/10" onClick={loadTrades}><RefreshCw className="h-3.5 w-3.5 mr-1"/>Refresh</Button></div>
     </div>
     <div className="p-3 md:p-4 space-y-4">
       <div className="flex gap-2 overflow-x-auto pb-1 snap-x">{MARKETS.map(m => { const q = quotes[m.symbol]; const pct = q?.previous ? ((q.price-q.previous)/q.previous)*100 : 0; const up = pct >= 0; return <button key={m.symbol} onClick={()=>setSelected(m.symbol)} className={"text-left rounded-xl border p-3 min-w-[150px] snap-start " + (selected===m.symbol ? "border-primary bg-primary/10" : "border-white/10 bg-white/[.02]")}><div className="flex justify-between"><span className="text-xs font-semibold">{m.name}</span><span className={up?"text-emerald-400":"text-red-400"}>{up?"↑":"↓"}</span></div><div className="mt-1 text-base font-black">{q?fmt(q.price):"—"}</div><div className={up?"text-[11px] text-emerald-400":"text-[11px] text-red-400"}>{q?(up?"+":"")+pct.toFixed(3)+"%":"Connecting…"}</div><div className="text-[10px] text-slate-500 mt-1">{bias===null?"Waiting for ticks":"Bias "+bias+"%"}</div></button>; })}</div>
