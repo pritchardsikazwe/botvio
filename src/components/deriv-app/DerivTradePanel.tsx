@@ -51,10 +51,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const contractType = contractTypes.find(c => c.id === contractId) ?? contractTypes[0];
   const buyButtons = contractType?.buyButtons ?? [];
   const [allowEquals, setAllowEquals] = useState(false);
-  const requiredContractTypes = useMemo(() => {
-    const types = buyButtons.map(b => b.contractType);
-    return styleId === "rise-fall-scalping" ? [...types, "PUTE", "CALLE"] : types;
-  }, [buyButtons, styleId]);
+  const requiredContractTypes = useMemo(
+    // Only require the buttons shown in the UI. PUTE/CALLE are an optional
+    // Rise/Fall enhancement and must not hide a market that supports CALL/PUT.
+    () => buyButtons.map(b => b.contractType),
+    [buyButtons],
+  );
   const liveSymbols = useDerivSymbols(instruments, requiredContractTypes, authorized && instruments.length > 0);
   const tradableInstruments = liveSymbols.tradableAssets.map(a => ({ symbol: a.symbol, displayName: a.displayName }));
   const [symbol, setSymbol] = useState(instruments[0]?.symbol ?? "R_75");
