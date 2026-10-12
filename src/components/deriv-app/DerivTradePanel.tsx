@@ -312,8 +312,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       const params = buildParams(contract);
       const fingerprint = quoteFingerprint(params);
       const reusableQuote = quote && quote.fingerprint === fingerprint && Date.now() - quote.createdAt <= 15000;
-      const proposal = reusableQuote ? quote : await getProposal(params);
-      const result = await buyContract(proposal.id, proposal.ask);
+      const proposal = reusableQuote
+        ? { id: quote.id, ask_price: quote.ask }
+        : await getProposal(params);
+      const result = await buyContract(proposal.id, proposal.ask_price);
       await subscribeContract(result.contract_id).catch((e: unknown) => {
         const message = e instanceof Error ? e.message : "Contract subscription failed";
         addLog(`Trade placed, but live status subscription failed: ${message}`, "error");
