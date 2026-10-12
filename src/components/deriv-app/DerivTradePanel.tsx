@@ -235,7 +235,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     }
     if (needsBarrier) params.barrier = barrier;
     if (isMultipliers) params.multiplier = Number(multiplier);
-    if (isAccumulator) params.growth_rate = Number(growthRate);
+    if (isAccumulator) params.growth_rate = Number(growthRate) / 100;
     return params;
   }, [stake, symbol, currency, duration, durationUnit, needsBarrier, barrier, isMultipliers, multiplier, isAccumulator, growthRate, effectiveContractType]);
 
@@ -268,7 +268,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     }
     if (isAccumulator) {
       const growth = Number(growthRate);
-      if (!Number.isFinite(growth) || growth <= 0) throw new Error("Growth rate must be greater than zero.");
+      if (!Number.isFinite(growth) || growth < 1 || growth > 5) throw new Error("Accumulator growth rate must be between 1% and 5%.");
     }
   };
 
