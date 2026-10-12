@@ -7,6 +7,7 @@ on:
       - botvio-independent-sep13
       - fix/android-linux-gradle
       - fix/mobile-auth-and-navigation
+      - fix/synthetic-mt5-symbol-routing
 
 permissions:
   contents: read

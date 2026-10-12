@@ -95,7 +95,17 @@ const DERIV_MT5: Record<string, string> = {
   "1HZ30V": "Volatility 30 (1s) Index", "VOLATILITY 30 (1S) INDEX": "Volatility 30 (1s) Index",
   "1HZ90V": "Volatility 90 (1s) Index", "VOLATILITY 90 (1S) INDEX": "Volatility 90 (1s) Index",
 };
-const derivMt5Symbol = (s: string) => DERIV_MT5[String(s).toUpperCase()] ?? DERIV_MT5[String(s)] ?? null;
+// Match common signal aliases even when a source includes different spaces,
+ // separators, or punctuation (e.g. "Boom 500", "BOOM500", "Boom 500 Index").
+const normalizeDerivAlias = (s: string) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+const DERIV_MT5_NORMALIZED: Record<string, string> = Object.fromEntries(
+  Object.entries(DERIV_MT5).map(([alias, symbol]) => [normalizeDerivAlias(alias), symbol]),
+);
+const derivMt5Symbol = (s: string) =>
+  DERIV_MT5[String(s).toUpperCase()] ??
+  DERIV_MT5[String(s)] ??
+  DERIV_MT5_NORMALIZED[normalizeDerivAlias(s)] ??
+  null;
 
 // Validate the mapped symbol against the account's real MT5 symbol list before
 // any order is sent. Only possible against the live TradeCopy API; mock mode
