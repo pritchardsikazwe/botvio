@@ -58,6 +58,27 @@ export type DerivProfitTransaction = {
   status?: string;
 };
 
+
+function classifyProposalError(message: string, params: { contract_type: string; duration?: number; duration_unit?: string; amount: number }, symbol: string): string {
+  const m = message.toLowerCase();
+  if (/unknown contract proposal|contract proposal.*unknown/.test(m)) {
+    return "Deriv could not match this quote to a valid contract. Refresh the quote and try once more. If it repeats, this contract type may not be available for the selected market.";
+  }
+  if (/contract.*unavailable|market.*closed|symbol.*not found|invalid symbol/.test(m)) {
+    return `Deriv does not currently offer this contract for ${symbol}. Choose another available market or refresh the market list.`;
+  }
+  if (/duration|expiry/.test(m)) {
+    return `Deriv rejected the selected duration (${params.duration ?? "?"}${params.duration_unit ?? ""}). Choose a duration supported by this contract.`;
+  }
+  if (/amount|stake|minimum|maximum/.test(m)) {
+    return "Deriv rejected the stake amount. Check the minimum and maximum stake shown for this contract.";
+  }
+  if (/currency/.test(m)) {
+    return "The selected contract does not accept this account currency. Check the connected Deriv account and try again.";
+  }
+  return `Deriv could not price ${params.contract_type} on ${symbol}: ${message}`;
+}
+
 export const useDerivAPI = () => {
   const [state, setState] = useState<DerivAPIState>({
     connected: false,
@@ -381,27 +402,49 @@ export const useDerivAPI = () => {
         request.limit_order = params.limit_order;
       }
 
-      console.log("[Deriv] getProposal request:", JSON.stringify(request));
+      // Log only non-sensitive contract fields. Never log credentials or account tokens.
+      console.info("[Deriv][proposal] requesting quote", {
+        symbol,
+        contract_type: request.contract_type,
+        amount: request.amount,
+        basis: request.basis,
+        currency: request.currency,
+        duration: request.duration,
+        duration_unit: request.duration_unit,
+      });
       let response: DerivProposalResponse;
       try {
         response = await service.send<DerivProposalResponse>(request);
-      } catch (err: any) {
-        // Legacy endpoint: retry with the old `symbol` property.
-        if (/properties not allowed:\s*underlying_symbol/i.test(err?.message || "")) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err ?? "Unknown proposal error");
+        // Retry the legacy symbol field only when Deriv explicitly says the
+        // current API does not accept underlying_symbol. Do not retry arbitrary
+        // contract errors, which can mask unsupported contracts.
+        if (/properties not allowed:\\s*underlying_symbol/i.test(message)) {
           const legacy = { ...request };
           delete legacy.underlying_symbol;
           legacy.symbol = symbol;
           response = await service.send<DerivProposalResponse>(legacy);
         } else {
-          throw err;
+          throw new Error(classifyProposalError(message, params, symbol));
         }
       }
 
+      const proposal = (response as any)?.proposal ?? (response as any)?.data?.proposal;
+      if (!proposal || typeof proposal.id !== "string" || !proposal.id.trim()) {
+        throw new Error("Deriv did not return a valid contract proposal. Refresh the market, confirm the contract type and duration, then request a new quote.");
+      }
+      const askPrice = Number(proposal.ask_price);
+      const payout = Number(proposal.payout);
+      if (!Number.isFinite(askPrice) || askPrice <= 0 || !Number.isFinite(payout) || payout <= 0) {
+        throw new Error("Deriv returned an incomplete price quote. No trade was placed. Request a fresh quote.");
+      }
+
       return {
-        id: response.proposal.id,
-        ask_price: response.proposal.ask_price,
-        payout: response.proposal.payout,
-        longcode: response.proposal.longcode,
+        id: proposal.id,
+        ask_price: askPrice,
+        payout,
+        longcode: String(proposal.longcode ?? ""),
       };
     },
     [service, toDerivSymbol],
@@ -409,16 +452,33 @@ export const useDerivAPI = () => {
 
   const buyContract = useCallback(
     async (proposalId: string, price: number): Promise<DerivContract> => {
-      const response = await service.send<DerivBuyResponse>({
-        buy: proposalId,
-        price,
-      });
+      if (!proposalId?.trim()) {
+        throw new Error("No valid Deriv proposal ID was received. Request a fresh quote before buying.");
+      }
+      if (!Number.isFinite(price) || price <= 0) {
+        throw new Error("The Deriv quote has an invalid price. Request a fresh quote before buying.");
+      }
 
+      let response: DerivBuyResponse;
+      try {
+        response = await service.send<DerivBuyResponse>({ buy: proposalId, price });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err ?? "Unknown buy error");
+        if (/unknown contract proposal|contract proposal.*unknown/i.test(message)) {
+          throw new Error("Deriv rejected the quote as expired or unknown. No retry was sent automatically. Request a fresh quote, confirm the displayed price, then try again.");
+        }
+        throw err;
+      }
+
+      const bought = (response as any)?.buy ?? (response as any)?.data?.buy;
+      if (!bought || !Number.isFinite(Number(bought.contract_id)) || Number(bought.contract_id) <= 0) {
+        throw new Error("Deriv did not confirm a contract ID. Check Deriv trade history before submitting again to avoid duplicate trades.");
+      }
       return {
-        contract_id: response.buy.contract_id,
-        buy_price: response.buy.buy_price,
-        payout: response.buy.payout,
-        longcode: response.buy.longcode,
+        contract_id: Number(bought.contract_id),
+        buy_price: Number(bought.buy_price),
+        payout: Number(bought.payout),
+        longcode: String(bought.longcode ?? ""),
       };
     },
     [service],
