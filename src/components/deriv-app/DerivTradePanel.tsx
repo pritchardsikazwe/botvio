@@ -21,14 +21,14 @@ interface DerivTradePanelProps {
   engine: EngineType;
 }
 interface TradeLog { id: number; time: string; message: string; tone: "info" | "success" | "error"; }
-interface PriceQuote { ask: number; payout: number; longcode: string; }
+interface PriceQuote { id: string; ask: number; payout: number; longcode: string; createdAt: number; fingerprint: string; }
 
 const UNIT_LABELS: Record<string, string> = { t: "ticks", s: "seconds", m: "minutes", h: "hours", d: "days" };
 
 export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const {
     authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
-    placeTrade, getProposal, sellContract, onContractUpdate, accountInfo,
+    placeTrade, getProposal, buyContract, subscribeContract, sellContract, onContractUpdate, accountInfo,
     derivTokens, activeDerivToken, switchDerivToken, initializing,
   } = useDeriv();
 
@@ -239,17 +239,22 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     if (s.maxDuration != null && d > s.maxDuration) throw new Error(`Maximum duration is ${s.maxDuration} ${UNIT_LABELS[durationUnit] ?? durationUnit}.`);
   };
 
+  const quoteFingerprint = (params: Record<string, unknown>) => JSON.stringify(params);
+
   const handlePrice = async () => {
     if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
-    try { validateTrade(buyButtons[0]?.contractType ?? ""); } catch (e) {
+    const contract = buyButtons[0]?.contractType ?? "";
+    try { validateTrade(contract); } catch (e) {
       const message = e instanceof Error ? e.message : "Trade parameters are not allowed by Deriv.";
       toast.error(message); addLog(message, "error"); return;
     }
     setPricing(true);
+    setQuote(null);
     try {
-      const p = await getProposal(buildParams(buyButtons[0]?.contractType ?? ""));
-      setQuote({ ask: Number(p.ask_price), payout: Number(p.payout), longcode: p.longcode });
-      addLog(`Price ${Number(p.ask_price).toFixed(2)} → payout ${Number(p.payout).toFixed(2)}`, "success");
+      const params = buildParams(contract);
+      const p = await getProposal(params);
+      setQuote({ id: p.id, ask: Number(p.ask_price), payout: Number(p.payout), longcode: p.longcode, createdAt: Date.now(), fingerprint: quoteFingerprint(params) });
+      addLog(`Fresh quote ${Number(p.ask_price).toFixed(2)} → payout ${Number(p.payout).toFixed(2)}`, "success");
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unable to price contract";
       setQuote(null); addLog(message, "error"); toast.error(message);
@@ -269,13 +274,22 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     setBusy(true);
     addLog(`Buying ${label} on ${symbol} for ${currency} ${Number(stake).toFixed(2)}...`);
     try {
-      const result = await placeTrade(buildParams(contract));
+      const params = buildParams(contract);
+      const fingerprint = quoteFingerprint(params);
+      const reusableQuote = quote && quote.fingerprint === fingerprint && Date.now() - quote.createdAt <= 15000;
+      const proposal = reusableQuote ? quote : await getProposal(params);
+      const result = await buyContract(proposal.id, proposal.ask);
+      await subscribeContract(result.contract_id).catch((e: unknown) => {
+        const message = e instanceof Error ? e.message : "Contract subscription failed";
+        addLog(`Trade placed, but live status subscription failed: ${message}`, "error");
+      });
       setQuote(null);
       setActiveContract({ id: result.contract_id, buy: Number(result.buy_price), payout: Number(result.payout), profit: 0, validToSell: true, status: "open" });
       addLog(`${label} filled — #${result.contract_id} @ ${Number(result.buy_price).toFixed(2)}`, "success");
       toast.success(`${label} placed on ${symbolLabel}`);
     } catch (e) {
       const message = e instanceof Error ? e.message : "Trade failed";
+      setQuote(null);
       addLog(message, "error"); toast.error(message);
     } finally { setBusy(false); }
   };
