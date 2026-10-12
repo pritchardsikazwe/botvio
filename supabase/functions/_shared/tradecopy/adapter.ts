@@ -225,7 +225,8 @@ export const TRADECOPY_DEFAULT_TIMEOUT_MS = 30000;
  */
 export function createAdapter(env: { apiKey?: string | null; mode?: string | null; baseUrl?: string | null }): ExecutionAdapter {
   if (env.apiKey && (env.mode ?? "").toLowerCase() === "live") {
-    const configuredTimeout = Number(Deno.env.get("TRADECOPY_TIMEOUT_MS") ?? TRADECOPY_DEFAULT_TIMEOUT_MS);
+    const runtimeTimeout = typeof Deno !== "undefined" ? Deno.env.get("TRADECOPY_TIMEOUT_MS") : undefined;
+    const configuredTimeout = Number(runtimeTimeout ?? TRADECOPY_DEFAULT_TIMEOUT_MS);
     const timeoutMs = Number.isFinite(configuredTimeout)
       ? Math.min(Math.max(Math.trunc(configuredTimeout), 10000), 60000)
       : TRADECOPY_DEFAULT_TIMEOUT_MS;
