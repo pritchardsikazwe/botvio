@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ export function DerivOptionsTradingTerminal() {
   const [quotes, setQuotes] = useState<Record<string, { price:number; previous:number; ticks:number[] }>>({});
   const [marketStatus, setMarketStatus] = useState<"connecting" | "live" | "stale" | "disconnected">("connecting");
   const [lastTickAt, setLastTickAt] = useState<number | null>(null);
+  const lastTickAtRef = useRef<number | null>(null);
   const [selected, setSelected] = useState("R_75");
   const [trades, setTrades] = useState<any[]>([]);
   const [loadingTrades, setLoadingTrades] = useState(true);
