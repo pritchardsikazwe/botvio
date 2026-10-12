@@ -212,8 +212,11 @@ export async function getSymbolCapability(symbol: string, force = false): Promis
 
 /** Does Deriv confirm this exact contract type for this symbol? */
 export const supportsContract = (cap: SymbolCapability | null, contractTypes: string[]): boolean => {
-  if (!cap) return false;
-  return contractTypes.some((t) => !!cap.contracts[t]);
+  if (!cap || contractTypes.length === 0) return false;
+  // The UI displays all requested sides (e.g. Rise AND Fall). A market must
+  // confirm every displayed side; partial support must not enable a broken
+  // button that can never receive a valid proposal.
+  return contractTypes.every((t) => !!cap.contracts[t]);
 };
 
 /**

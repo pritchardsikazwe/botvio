@@ -21,14 +21,26 @@ interface DerivTradePanelProps {
   engine: EngineType;
 }
 interface TradeLog { id: number; time: string; message: string; tone: "info" | "success" | "error"; }
-interface PriceQuote { ask: number; payout: number; longcode: string; }
+interface PriceQuote { id: string; ask: number; payout: number; longcode: string; createdAt: number; fingerprint: string; }
+type DerivTradeParams = {
+  symbol: string;
+  contract_type: string;
+  amount: number;
+  currency: string;
+  basis: "stake";
+  duration?: number;
+  duration_unit?: "t" | "s" | "m" | "h" | "d";
+  barrier?: string;
+  multiplier?: number;
+  growth_rate?: number;
+};
 
 const UNIT_LABELS: Record<string, string> = { t: "ticks", s: "seconds", m: "minutes", h: "hours", d: "days" };
 
 export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const {
     authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
-    placeTrade, getProposal, sellContract, onContractUpdate, accountInfo,
+    getProposal, buyContract, subscribeContract, sellContract, onContractUpdate, accountInfo,
     derivTokens, activeDerivToken, switchDerivToken, initializing,
   } = useDeriv();
 
@@ -39,10 +51,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   const contractType = contractTypes.find(c => c.id === contractId) ?? contractTypes[0];
   const buyButtons = contractType?.buyButtons ?? [];
   const [allowEquals, setAllowEquals] = useState(false);
-  const requiredContractTypes = useMemo(() => {
-    const types = buyButtons.map(b => b.contractType);
-    return styleId === "rise-fall-scalping" ? [...types, "PUTE", "CALLE"] : types;
-  }, [buyButtons, styleId]);
+  const requiredContractTypes = useMemo(
+    // Only require the buttons shown in the UI. PUTE/CALLE are an optional
+    // Rise/Fall enhancement and must not hide a market that supports CALL/PUT.
+    () => buyButtons.map(b => b.contractType),
+    [buyButtons],
+  );
   const liveSymbols = useDerivSymbols(instruments, requiredContractTypes, authorized && instruments.length > 0);
   const tradableInstruments = liveSymbols.tradableAssets.map(a => ({ symbol: a.symbol, displayName: a.displayName }));
   const [symbol, setSymbol] = useState(instruments[0]?.symbol ?? "R_75");
@@ -69,7 +83,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
   const isMultipliers = contractType?.buyButtons.some(b => ["MULTUP", "MULTDOWN"].includes(b.contractType)) ?? false;
   const isAccumulator = contractType?.buyButtons.some(b => b.contractType === "ACCU") ?? false;
-  const needsBarrier = contractType?.needsDigit || contractType?.buyButtons.some(b => ["CALL", "PUT", "ONETOUCH", "NOTOUCH", "HIGHER", "LOWER"].includes(b.contractType)) && ["higher-lower", "touch-no-touch"].includes(styleId);
+  const needsBarrier = !!contractType?.needsDigit || !!contractType?.needsBarrier || (contractType?.buyButtons.some(b => ["ONETOUCH", "NOTOUCH", "HIGHER", "LOWER"].includes(b.contractType)) && ["higher-lower", "touch-no-touch"].includes(styleId));
   const symbolLabel = tradableInstruments.find(i => i.symbol === symbol)?.displayName ?? symbol;
   const capability = liveSymbols.bySymbol.get(symbol)?.capability;
   const contractSpecs = useMemo(
@@ -211,14 +225,19 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
   const buildParams = useCallback((ct: string) => {
     const amount = Number(stake);
-    const params: any = {
+    const params: DerivTradeParams = {
       symbol, contract_type: effectiveContractType(ct), amount,
       currency, basis: "stake",
-      duration: Number(duration), duration_unit: durationUnit,
     };
+    // Multipliers and Accumulators are not time-expiry contracts. Sending
+    // duration fields can cause Deriv to reject an otherwise valid proposal.
+    if (!isMultipliers && !isAccumulator) {
+      params.duration = Number(duration);
+      params.duration_unit = durationUnit as DerivTradeParams["duration_unit"];
+    }
     if (needsBarrier) params.barrier = barrier;
     if (isMultipliers) params.multiplier = Number(multiplier);
-    if (isAccumulator) params.growth_rate = Number(growthRate);
+    if (isAccumulator) params.growth_rate = Number(growthRate) / 100;
     return params;
   }, [stake, symbol, currency, duration, durationUnit, needsBarrier, barrier, isMultipliers, multiplier, isAccumulator, growthRate, effectiveContractType]);
 
@@ -233,23 +252,44 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     if (durationUnit && s.durationUnits.length > 0 && !s.durationUnits.includes(durationUnit)) {
       throw new Error(`Deriv does not allow ${UNIT_LABELS[durationUnit] ?? durationUnit} for this contract.`);
     }
-    const d = Number(duration);
-    if (!Number.isFinite(d) || d <= 0) throw new Error("Enter a valid duration.");
-    if (s.minDuration != null && d < s.minDuration) throw new Error(`Minimum duration is ${s.minDuration} ${UNIT_LABELS[durationUnit] ?? durationUnit}.`);
-    if (s.maxDuration != null && d > s.maxDuration) throw new Error(`Maximum duration is ${s.maxDuration} ${UNIT_LABELS[durationUnit] ?? durationUnit}.`);
+    if (!isMultipliers && !isAccumulator) {
+      const d = Number(duration);
+      if (!Number.isFinite(d) || d <= 0) throw new Error("Enter a valid duration.");
+      if (s.minDuration != null && d < s.minDuration) throw new Error(`Minimum duration is ${s.minDuration} ${UNIT_LABELS[durationUnit] ?? durationUnit}.`);
+      if (s.maxDuration != null && d > s.maxDuration) throw new Error(`Maximum duration is ${s.maxDuration} ${UNIT_LABELS[durationUnit] ?? durationUnit}.`);
+    }
+    if (contractType?.needsDigit) {
+      const digit = Number(barrier);
+      if (!Number.isInteger(digit) || digit < 0 || digit > 9) {
+        throw new Error("Choose a last digit from 0 to 9 for this Digits contract.");
+      }
+    }
+    if (isMultipliers) {
+      const m = Number(multiplier);
+      if (!Number.isFinite(m) || m <= 0) throw new Error("Choose a valid multiplier.");
+    }
+    if (isAccumulator) {
+      const growth = Number(growthRate);
+      if (!Number.isFinite(growth) || growth < 1 || growth > 5) throw new Error("Accumulator growth rate must be between 1% and 5%.");
+    }
   };
+
+  const quoteFingerprint = (params: DerivTradeParams) => JSON.stringify(params);
 
   const handlePrice = async () => {
     if (!isDerivConnected) { toast.error("Connect your Deriv account first"); return; }
-    try { validateTrade(buyButtons[0]?.contractType ?? ""); } catch (e) {
+    const contract = buyButtons[0]?.contractType ?? "";
+    try { validateTrade(contract); } catch (e) {
       const message = e instanceof Error ? e.message : "Trade parameters are not allowed by Deriv.";
       toast.error(message); addLog(message, "error"); return;
     }
     setPricing(true);
+    setQuote(null);
     try {
-      const p = await getProposal(buildParams(buyButtons[0]?.contractType ?? ""));
-      setQuote({ ask: Number(p.ask_price), payout: Number(p.payout), longcode: p.longcode });
-      addLog(`Price ${Number(p.ask_price).toFixed(2)} → payout ${Number(p.payout).toFixed(2)}`, "success");
+      const params = buildParams(contract);
+      const p = await getProposal(params);
+      setQuote({ id: p.id, ask: Number(p.ask_price), payout: Number(p.payout), longcode: p.longcode, createdAt: Date.now(), fingerprint: quoteFingerprint(params) });
+      addLog(`Fresh quote ${Number(p.ask_price).toFixed(2)} → payout ${Number(p.payout).toFixed(2)}`, "success");
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unable to price contract";
       setQuote(null); addLog(message, "error"); toast.error(message);
@@ -269,13 +309,24 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     setBusy(true);
     addLog(`Buying ${label} on ${symbol} for ${currency} ${Number(stake).toFixed(2)}...`);
     try {
-      const result = await placeTrade(buildParams(contract));
+      const params = buildParams(contract);
+      const fingerprint = quoteFingerprint(params);
+      const reusableQuote = quote && quote.fingerprint === fingerprint && Date.now() - quote.createdAt <= 15000;
+      const proposal = reusableQuote
+        ? { id: quote.id, ask_price: quote.ask }
+        : await getProposal(params);
+      const result = await buyContract(proposal.id, proposal.ask_price);
+      await subscribeContract(result.contract_id).catch((e: unknown) => {
+        const message = e instanceof Error ? e.message : "Contract subscription failed";
+        addLog(`Trade placed, but live status subscription failed: ${message}`, "error");
+      });
       setQuote(null);
       setActiveContract({ id: result.contract_id, buy: Number(result.buy_price), payout: Number(result.payout), profit: 0, validToSell: true, status: "open" });
       addLog(`${label} filled — #${result.contract_id} @ ${Number(result.buy_price).toFixed(2)}`, "success");
       toast.success(`${label} placed on ${symbolLabel}`);
     } catch (e) {
       const message = e instanceof Error ? e.message : "Trade failed";
+      setQuote(null);
       addLog(message, "error"); toast.error(message);
     } finally { setBusy(false); }
   };
@@ -421,7 +472,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
                   {signal?.reasons?.[0] ?? "Collecting enough live ticks for the signal engine…"}
                 </p>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className={cn("mt-3 grid gap-2", isMultipliers || isAccumulator ? "grid-cols-1" : "grid-cols-2")}>
                 <div className="rounded-lg border border-border/60 p-2.5">
                   <p className="text-[9px] uppercase text-muted-foreground">RSI 14</p>
                   <p className="mt-1 text-lg font-black tabular-nums">{rsiValue != null ? rsiValue.toFixed(1) : "—"}</p>
@@ -483,7 +534,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
             </div>
           </div>
           {isMultipliers ? <div className="space-y-1.5"><Label className="text-xs">Multiplier</Label><Select value={multiplier} onValueChange={setMultiplier}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50">{["10","20","30","50","100","200","400"].map(m => <SelectItem key={m} value={m}>{m}x</SelectItem>)}</SelectContent></Select></div>
-          : <div className="space-y-1.5">
+          : !isAccumulator ? <div className="space-y-1.5">
               <Label className="text-xs">Duration</Label>
               <div className="flex gap-2">
                 <Input className="min-w-0" type="number" inputMode="numeric" value={duration} min={minimumDuration} max={maximumDuration} onChange={e => { setDuration(e.target.value); setQuote(null); }} placeholder={minimumDuration != null ? String(minimumDuration) : "Duration"} />
@@ -499,7 +550,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
                 {minimumDuration != null ? "Minimum " + minimumDuration + " " + (UNIT_LABELS[durationUnit] ?? durationUnit) : "Deriv duration limits apply"}
                 {maximumDuration != null ? " · Maximum " + maximumDuration + " " + (UNIT_LABELS[durationUnit] ?? durationUnit) : ""}
               </p>
-            </div>}
+            </div> : <div className="space-y-1.5"><Label className="text-xs">Contract lifetime</Label><p className="text-sm text-muted-foreground">{isMultipliers ? "Managed by the multiplier contract and its stop/limit settings." : "Accumulator remains active according to Deriv contract rules."}</p></div>}
         </div>
 
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
@@ -520,12 +571,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
               <p className="mt-1 text-sm font-black">{currency} {recommendedStake.toFixed(2)}</p>
               <p className="text-[9px] text-muted-foreground">≈ 1% balance · tap to use</p>
             </button>
-            <button type="button" className="rounded-lg border border-border/60 bg-background/70 p-2 text-left hover:border-primary/40"
+            {!isMultipliers && !isAccumulator && <button type="button" className="rounded-lg border border-border/60 bg-background/70 p-2 text-left hover:border-primary/40"
               onClick={() => { setDuration(String(recommendedDuration)); setQuote(null); }}>
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Suggested duration</p>
               <p className="mt-1 text-sm font-black">{recommendedDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</p>
               <p className="text-[9px] text-muted-foreground">based on this contract</p>
-            </button>
+            </button>}
           </div>
 
           {isRiseFall && (
@@ -545,7 +596,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
             </div>
           )}
 
-          {durationPresets.length > 0 && !isMultipliers && (
+          {durationPresets.length > 0 && !isMultipliers && !isAccumulator && (
             <div className="mt-3">
               <p className="mb-1.5 text-[9px] uppercase tracking-wider text-muted-foreground">Quick duration</p>
               <div className="flex flex-wrap gap-1.5">
@@ -576,8 +627,8 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
           <div className="mt-2 flex flex-wrap gap-1.5 text-[9px] text-muted-foreground">
             {minimumStake != null && minimumStake > 0 && <Badge variant="outline">Deriv min {currency} {minimumStake}</Badge>}
             {maximumStake != null && <Badge variant="outline">Deriv max {currency} {maximumStake}</Badge>}
-            {minimumDuration != null && <Badge variant="outline">Min {minimumDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</Badge>}
-            {maximumDuration != null && <Badge variant="outline">Max {maximumDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</Badge>}
+            {!isMultipliers && !isAccumulator && minimumDuration != null && <Badge variant="outline">Min {minimumDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</Badge>}
+            {!isMultipliers && !isAccumulator && maximumDuration != null && <Badge variant="outline">Max {maximumDuration} {UNIT_LABELS[durationUnit] ?? durationUnit}</Badge>}
           </div>
         </div>
 
@@ -597,7 +648,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
           {buyButtons.map(btn => <Button key={btn.contractType} size="lg" disabled={busy || autoBusy || isAutoMode || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length || !contractSpecs[btn.contractType]} onClick={() => handleBuy(btn.contractType, btn.label)} className={cn("h-16 text-base font-bold", btn.variant === "destructive" ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : btn.variant === "success" ? "bg-success hover:bg-success/90 text-success-foreground" : "")}>
             <span className="flex flex-col items-center leading-tight">
               <span className="flex items-center gap-1.5">{btn.variant === "destructive" ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}<span>{btn.label} {symbolLabel}</span></span>
-              <span className="text-[10px] opacity-80">{currency} {stake} · {duration} {UNIT_LABELS[durationUnit] ?? durationUnit}</span>
+              <span className="text-[10px] opacity-80">{currency} {stake}{isMultipliers ? ` · ${multiplier}x` : isAccumulator ? ` · Growth ${growthRate}%` : ` · ${duration} ${UNIT_LABELS[durationUnit] ?? durationUnit}`}</span>
             </span>
           </Button>)}
         </div>

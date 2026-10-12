@@ -144,6 +144,43 @@ Deno.serve(async (req) => {
       throw new Error('Missing required fields: connection_id, idempotency_key, contract_family, payload');
     }
 
+    const stake = Number(payload.stake);
+    if (!Number.isFinite(stake) || stake <= 0) {
+      throw new Error('Stake must be a positive number.');
+    }
+    const familyTypes: Record<string, string[]> = {
+      MULTIPLIERS: ['MULTUP', 'MULTDOWN'],
+      DIGITS: ['DIGITEVEN', 'DIGITODD', 'DIGITOVER', 'DIGITUNDER', 'DIGITMATCH', 'DIGITDIFF'],
+      RISEFALL: ['CALL', 'PUT', 'CALLE', 'PUTE'],
+      TURBO: ['CALL', 'PUT'],
+      TICKS: ['CALL', 'PUT'],
+      HIGHER_LOWER: ['HIGHER', 'LOWER'],
+      TOUCH_NO_TOUCH: ['ONETOUCH', 'NOTOUCH'],
+      ACCU: ['ACCU'],
+    };
+    const allowedTypes = familyTypes[String(contract_family)];
+    if (!allowedTypes || !allowedTypes.includes(String(payload.contract_type))) {
+      throw new Error('Unsupported contract type for the selected Deriv contract family.');
+    }
+    if (contract_family === 'DIGITS' && ['DIGITOVER', 'DIGITUNDER', 'DIGITMATCH', 'DIGITDIFF'].includes(String(payload.contract_type))) {
+      const digit = Number(payload.barrier);
+      if (!Number.isInteger(digit) || digit < 0 || digit > 9) {
+        throw new Error('Digits contracts require a last digit from 0 to 9.');
+      }
+    }
+    if (contract_family === 'MULTIPLIERS') {
+      const multiplier = Number(payload.multiplier);
+      if (!Number.isFinite(multiplier) || multiplier <= 0) {
+        throw new Error('Multiplier must be a positive number.');
+      }
+    }
+    if (contract_family === 'ACCU') {
+      const growthRate = Number(payload.growth_rate ?? 0.02);
+      if (!Number.isFinite(growthRate) || growthRate < 0.01 || growthRate > 0.05) {
+        throw new Error('Accumulator growth rate must be between 0.01 and 0.05 (1% to 5%).');
+      }
+    }
+
     // Check kill switch
     const { data: killSwitch } = await supabase
       .from('app_settings')
@@ -258,6 +295,8 @@ Deno.serve(async (req) => {
           break;
           
         case 'RISEFALL':
+        case 'TURBO':
+        case 'TICKS':
         case 'HIGHER_LOWER':
         case 'TOUCH_NO_TOUCH':
           proposalRequest.contract_type = payload.contract_type;
@@ -266,10 +305,10 @@ Deno.serve(async (req) => {
           if (payload.barrier !== undefined) proposalRequest.barrier = String(payload.barrier);
           break;
         case 'ACCU':
+          // Accumulators are growth-rate contracts, not fixed-duration options.
+          // Omitting duration fields avoids sending unsupported expiry properties.
           proposalRequest.contract_type = 'ACCU';
-          proposalRequest.duration = payload.duration;
-          proposalRequest.duration_unit = payload.duration_unit || 'm';
-          proposalRequest.growth_rate = payload.growth_rate ?? 2;
+          proposalRequest.growth_rate = payload.growth_rate ?? 0.02;
           if (payload.limit_order) proposalRequest.limit_order = payload.limit_order;
           break;
         default:
@@ -282,9 +321,17 @@ Deno.serve(async (req) => {
         .update({ status: 'SENT' })
         .eq('id', tradeIntent.id);
 
-      // Get proposal
-      const proposalResponse = await sendAndReceive(ws, proposalRequest);
-      
+      // Get proposal. Retry only the quote request (never the purchase) when
+      // Deriv explicitly rejects the new underlying_symbol field and requests
+      // the legacy symbol field.
+      let proposalResponse = await sendAndReceive(ws, proposalRequest);
+      const proposalError = String(proposalResponse?.error?.message || "");
+      if (/properties not allowed:\s*underlying_symbol/i.test(proposalError)) {
+        const legacyRequest = { ...proposalRequest, symbol: proposalRequest.underlying_symbol };
+        delete (legacyRequest as any).underlying_symbol;
+        proposalResponse = await sendAndReceive(ws, legacyRequest);
+      }
+
       if (proposalResponse.error) {
         await supabase
           .from('trade_intents')
