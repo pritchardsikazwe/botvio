@@ -173,9 +173,9 @@ Deno.serve(async (req) => {
       }
     }
     if (contract_family === 'ACCU') {
-      const growthRate = Number(payload.growth_rate ?? 2);
-      if (!Number.isFinite(growthRate) || growthRate <= 0) {
-        throw new Error('Accumulator growth rate must be a positive number.');
+      const growthRate = Number(payload.growth_rate ?? 0.02);
+      if (!Number.isFinite(growthRate) || growthRate < 0.01 || growthRate > 0.05) {
+        throw new Error('Accumulator growth rate must be between 0.01 and 0.05 (1% to 5%).');
       }
     }
 
@@ -304,7 +304,7 @@ Deno.serve(async (req) => {
           // Accumulators are growth-rate contracts, not fixed-duration options.
           // Omitting duration fields avoids sending unsupported expiry properties.
           proposalRequest.contract_type = 'ACCU';
-          proposalRequest.growth_rate = payload.growth_rate ?? 2;
+          proposalRequest.growth_rate = payload.growth_rate ?? 0.02;
           if (payload.limit_order) proposalRequest.limit_order = payload.limit_order;
           break;
         default:
