@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { PaymentRequestsPanel } from "@/components/admin/PaymentRequestsPanel";
 import { AdminMonetizationTab } from "@/components/admin/AdminMonetizationTab";
 import { AdminGlobalAccessCard } from "@/components/admin/AdminGlobalAccessCard";
+import { AdminMasterMarketsCard } from "@/components/admin/AdminMasterMarketsCard";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
 import { AdminTradeCopyTab } from "@/components/admin/AdminTradeCopyTab";
 import { AdminSignalPerformancePanel } from "@/components/admin/AdminSignalPerformancePanel";
@@ -187,6 +188,7 @@ export default function AdminControlCenter(){
         <div className="grid grid-cols-2 xl:grid-cols-6 gap-4"><Stat label="Total Users" value={users.length} icon={<Users/>}/><Stat label="Active Users" value={users.filter(u=>u.status==="Active").length} icon={<UserCheck/>}/><Stat label="Online Now" value={onlineCount} icon={<Activity/>}/><Stat label="Missing WhatsApp" value={users.filter(u=>!u.whatsapp_number?.trim()).length} icon={<Phone/>}/><Stat label="Premium Users" value={users.filter(u=>u.plan.toLowerCase()!=="free").length} icon={<Sparkles/>}/><Stat label="Live Signals" value="Online" icon={<Signal/>}/><Stat label="AI Bots" value="Online" icon={<Bot/>}/><Stat label="Selected" value={selected.length} icon={<Send/>}/></div>
 
         <AdminGlobalAccessCard />
+        <AdminMasterMarketsCard />
         <AdminMonetizationTab />
 
         <PaymentRequestsPanel />

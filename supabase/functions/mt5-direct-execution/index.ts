@@ -296,6 +296,11 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
 
   const globalLive = await liveGlobal(admin);
 
+  // Admin-selected markets that must never be auto-sent to master accounts.
+  const blockKey = (s: string) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const { data: blockRow } = await admin.from("app_settings").select("value").eq("key", "master_auto_send_blocked").maybeSingle();
+  const masterBlocked = new Set<string>(((blockRow?.value as any)?.blocked ?? []).map((s: string) => blockKey(s)));
+
   // Prefer the explicitly configured Botvio Signal Master.
   // If none is configured, use the existing provider master only when there is
   // exactly one active non-Robot TradeCopy master. This makes the existing
@@ -342,6 +347,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
       // Deriv master: only exact Deriv MT5 mappings. Weltrade master: never Deriv-only symbols.
       const mt5Symbol = isDeriv ? derivSym : (isWeltrade && derivSym && /index/i.test(derivSym) ? null : sig);
       if (!mt5Symbol) { skipped++; continue; }
+      if (masterBlocked.has(blockKey(sig)) || masterBlocked.has(blockKey(mt5Symbol))) { skipped++; continue; }
       const cycleKey = `${m.id}:${mt5Symbol.toLowerCase()}`;
       if (cycleSymbols.has(cycleKey) || await hasOpenPosition(admin, m.id, mt5Symbol)) { skipped++; continue; }
       cycleSymbols.add(cycleKey);
