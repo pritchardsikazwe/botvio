@@ -1,32 +1,45 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Phone, X } from "lucide-react";
+import { Phone } from "lucide-react";
+import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
+const phoneSchema = z.string().trim().regex(/^\+?[0-9][0-9\s-]{7,18}$/, "Enter a valid WhatsApp number with country code");
+
+/** Mandatory: signed-in users without a WhatsApp number must add one before continuing. */
 export function WhatsAppProfileNotice() {
-  const { user, profile } = useAuth();
-  const [dismissed, setDismissed] = useState(false);
+  const { user, profile, updateProfile } = useAuth();
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  if (!user || dismissed || profile?.whatsapp_number?.trim()) return null;
+  if (!user || !profile || profile.whatsapp_number?.trim()) return null;
+
+  const save = async () => {
+    const parsed = phoneSchema.safeParse(value);
+    if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+    setSaving(true);
+    try {
+      await updateProfile({ whatsapp_number: parsed.data } as any);
+      toast.success("WhatsApp number saved");
+    } catch (e: any) {
+      toast.error(e?.message || "Could not save number");
+    } finally { setSaving(false); }
+  };
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[80] w-[calc(100%-2rem)] max-w-2xl rounded-2xl border border-amber-300 bg-amber-50/95 p-4 shadow-2xl backdrop-blur">
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 rounded-full bg-amber-100 p-2 text-amber-700"><Phone className="h-5 w-5" /></div>
-        <div className="min-w-0 flex-1">
-          <p className="font-semibold text-slate-900">Please update your WhatsApp number</p>
-          <p className="mt-1 text-sm text-slate-600">
-            Your Botvio account does not have a WhatsApp number. Please update your profile so we can contact you about important account and trading-platform updates.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button asChild size="sm" className="bg-amber-500 text-slate-950 hover:bg-amber-600">
-              <Link to="/settings">Add WhatsApp number</Link>
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setDismissed(true)}>Remind me later</Button>
-          </div>
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-background/80 p-4 backdrop-blur" role="dialog" aria-modal="true">
+      <div className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-2xl">
+        <div className="mb-3 flex items-center gap-3">
+          <div className="rounded-full bg-primary/10 p-2 text-primary"><Phone className="h-5 w-5" /></div>
+          <h2 className="text-lg font-semibold">Add your WhatsApp number</h2>
         </div>
-        <button aria-label="Dismiss" onClick={() => setDismissed(true)} className="rounded-full p-1 text-slate-500 hover:bg-amber-100"><X className="h-4 w-4" /></button>
+        <p className="mb-4 text-sm text-muted-foreground">
+          A WhatsApp number is required to use Botvio so we can contact you about your account, MT5 setup and trading updates.
+        </p>
+        <Input type="tel" placeholder="+260 97 1234567" value={value} onChange={(e) => setValue(e.target.value)} maxLength={20} />
+        <Button className="mt-4 w-full" onClick={save} disabled={saving}>{saving ? "Saving..." : "Save and continue"}</Button>
       </div>
     </div>
   );

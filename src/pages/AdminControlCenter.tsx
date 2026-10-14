@@ -17,6 +17,7 @@ import { PaymentRequestsPanel } from "@/components/admin/PaymentRequestsPanel";
 import { AdminMonetizationTab } from "@/components/admin/AdminMonetizationTab";
 import { AdminGlobalAccessCard } from "@/components/admin/AdminGlobalAccessCard";
 import { AdminMasterMarketsCard } from "@/components/admin/AdminMasterMarketsCard";
+import { AdminMt5LeadsCard } from "@/components/admin/AdminMt5LeadsCard";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
 import { AdminTradeCopyTab } from "@/components/admin/AdminTradeCopyTab";
 import { AdminSignalPerformancePanel } from "@/components/admin/AdminSignalPerformancePanel";
@@ -189,6 +190,7 @@ export default function AdminControlCenter(){
 
         <AdminGlobalAccessCard />
         <AdminMasterMarketsCard />
+        <AdminMt5LeadsCard />
         <AdminMonetizationTab />
 
         <PaymentRequestsPanel />
