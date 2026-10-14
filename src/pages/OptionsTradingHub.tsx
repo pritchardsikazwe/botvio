@@ -97,6 +97,7 @@ const OptionsTradingHub = () => (
             </Button>
             <Button size="lg" variant="outline" asChild><a href="#connect-deriv">Connect Existing Account <Wallet className="ml-2 h-4 w-4" /></a></Button>
             <Button size="lg" variant="outline" asChild><Link to="/trade/style/rise-fall-scalping">Open Momentum Workspace <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            <Button size="lg" variant="secondary" asChild><Link to="/deriv/options">Open Options Terminal <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">Affiliate disclosure: BOTVIO may receive a commission from qualifying partner activity.</p>
         </div>
