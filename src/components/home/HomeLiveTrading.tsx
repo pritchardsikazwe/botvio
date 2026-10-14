@@ -145,7 +145,7 @@ export const HomeLiveTrading = () => {
                   {!user ? "SIGN IN" : pending ? "CHECKING" : unavailable ? "UNAVAILABLE" : mt5.data?.simulated ? "MOCK" : runningCount > 0 ? "LIVE" : "NO OPEN TRADES"}
                 </Badge>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">MT5 positions and closed results from the last 24 hours. Demo accounts are labelled.</p>
+              <p className="mt-1 text-xs text-muted-foreground">MT5 positions and closed results from the last 24 hours.</p>
             </div>
             <div className="flex shrink-0 gap-2">
               <Button asChild size="sm" variant="outline" className="text-xs"><Link to="/marketplace">Copy Trading <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link></Button>
@@ -187,7 +187,7 @@ export const HomeLiveTrading = () => {
                       <p className="truncate font-mono text-[9px] text-muted-foreground">{trade.symbol}</p>
                     </div>
                     <span className={trade.direction === "BUY" ? "font-bold text-success" : "font-bold text-destructive"}>{trade.direction}</span>
-                    <div className="min-w-0"><Badge variant="outline" className={`w-fit text-[9px] ${trade.status === "Loss" ? "text-destructive" : "text-success"}`}>{trade.status}</Badge>{trade.environment && <p className="mt-1 text-[9px] text-muted-foreground">{trade.environment}</p>}</div>
+                    <div className="min-w-0"><Badge variant="outline" className={`w-fit text-[9px] ${trade.status === "Loss" ? "text-destructive" : "text-success"}`}>{trade.status}</Badge></div>
                     <span className={`text-right font-mono font-bold ${trade.pnl != null && trade.pnl < 0 ? "text-destructive" : "text-success"}`}>
                       {trade.pnl == null ? "—" : `${trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}`}
                     </span>
