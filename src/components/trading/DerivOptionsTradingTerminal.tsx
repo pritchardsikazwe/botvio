@@ -34,6 +34,19 @@ const MARKETS = [
   { symbol: "CRASH900", name: "Crash 900" },
   { symbol: "CRASH1000", name: "Crash 1000" },
 ];
+const isBC = (s: string) => /^(BOOM|CRASH)/.test(s);
+const is1s = (s: string) => /^1HZ/.test(s);
+const isVol = (s: string) => /^R_/.test(s);
+const CONTRACT_LAUNCHERS = [
+  { id: "rise-fall-scalping", label: "Rise / Fall", hint: "Up or down", supports: (s: string) => !isBC(s) },
+  { id: "digit-contracts", label: "Digits", hint: "Match, Over/Under, Even/Odd", supports: (s: string) => !isBC(s) },
+  { id: "ticks", label: "Ticks", hint: "1–5 tick contracts", supports: (s: string) => isVol(s) || is1s(s) },
+  { id: "higher-lower", label: "Higher / Lower", hint: "Barrier & Touch", supports: (s: string) => !isBC(s) },
+  { id: "multipliers", label: "Multipliers", hint: "Up / Down with SL/TP", supports: () => true },
+  { id: "accumulators", label: "Accumulators", hint: "Steady growth", supports: (s: string) => isVol(s) || is1s(s) || isBC(s) },
+  { id: "turbo", label: "Turbo", hint: "Short breakouts", supports: (s: string) => isVol(s) || is1s(s) },
+  { id: "boom-crash", label: "Boom / Crash", hint: "Spike strategy", supports: (s: string) => isBC(s) },
+];
 const fmt = (n: number) => Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : "—";
 
 export function DerivOptionsTradingTerminal() {
@@ -121,6 +134,14 @@ export function DerivOptionsTradingTerminal() {
           <Card className="bg-[#071421] border-[#17364b] text-white"><CardContent className="p-4">
             <div className="flex justify-between gap-3"><div><div className="text-xs text-slate-400">{market.name} · Deriv Synthetic Index</div><div className="text-3xl font-black mt-1">{fmt(quote.price)}</div><div className={change>=0?"text-sm text-emerald-400":"text-sm text-red-400"}>{change>=0?"+":""}{change.toFixed(3)}% · realtime</div></div><div className="flex gap-1">{["1m","5m","15m","1h"].map(x=><button key={x} className={"px-3 py-1.5 rounded-lg text-xs "+(x==="5m"?"bg-primary text-primary-foreground":"bg-white/5 text-slate-300")}>{x}</button>)}</div></div>
             <div className="mt-4 h-52 rounded-xl bg-black/20 border border-white/5 p-3 flex items-end gap-1">{(quote.ticks.length?quote.ticks:Array(28).fill(quote.price)).map((v,i)=>{const min=Math.min(...(quote.ticks.length?quote.ticks:[quote.price]));const max=Math.max(...(quote.ticks.length?quote.ticks:[quote.price]));const h=max===min?25:10+((v-min)/(max-min))*80;return <div key={i} className={"flex-1 rounded-t "+(i>0&&v>quote.ticks[i-1]?"bg-emerald-400":"bg-red-400")} style={{height:h+"%",opacity:.4+i/45}}/>;})}</div>
+          </CardContent></Card>
+
+          <Card className="bg-[#0b1119] border-white/10 text-white"><CardContent className="p-4">
+            <div className="font-bold mb-1">Place a trade on {market.name}</div>
+            <p className="text-xs text-slate-400 mb-3">Pick a contract type. Trades open on your connected Deriv account and stay on screen while they run.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">{CONTRACT_LAUNCHERS.map(c => { const ok = c.supports(selected); return ok
+              ? <Link key={c.id} to={`/trade/style/${c.id}?symbol=${encodeURIComponent(selected)}`} className="rounded-xl border border-white/10 bg-white/[.03] p-3 hover:border-primary transition-colors"><div className="text-sm font-bold">{c.label}</div><div className="text-[11px] text-slate-400">{c.hint}</div></Link>
+              : <div key={c.id} className="rounded-xl border border-white/5 p-3 opacity-40"><div className="text-sm font-bold">{c.label}</div><div className="text-[11px] text-slate-500">Not offered on {market.name}</div></div>; })}</div>
           </CardContent></Card>
 
           <Card className="bg-[#0b1119] border-white/10 text-white"><CardContent className="p-4">
