@@ -4,7 +4,7 @@ import { LineChart } from "lucide-react";
 
 /** One canonical Deriv Options surface. Legacy binary-option pages redirect into this workspace. */
 export const TRADING_SURFACES = [
-  { to: "/options", label: "Deriv Options", icon: LineChart },
+  { to: "/deriv/options", label: "Deriv Options", icon: LineChart },
 ] as const;
 
 export const TradingNav = ({ className }: { className?: string }) => {
