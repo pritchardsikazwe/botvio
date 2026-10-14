@@ -241,6 +241,20 @@ export const HomeLiveTrading = () => {
                 <p className="flex items-center gap-1.5 text-xs font-bold"><BookOpen className="h-3.5 w-3.5 text-primary" />Read & research more</p>
                 <Link to="/blog" className="text-[10px] font-bold text-primary">All articles →</Link>
               </div>
+              {researchCategories.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {researchCategories.map((c) => (
+                    <Link
+                      key={c.slug}
+                      to={`/blog/category/${c.slug}`}
+                      className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-background/40 px-2.5 py-1 text-[10px] font-bold text-foreground hover:border-primary/50 hover:text-primary"
+                    >
+                      {c.label}
+                      <span className="text-[9px] font-normal text-muted-foreground">{c.count}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
               <div className="grid gap-2 sm:grid-cols-3">
                 {articles.slice(0, 3).map((a) => (
                   <Link key={a.slug} to={`/blog/${a.slug}`} className="rounded-lg border border-border/50 bg-background/40 p-3 text-xs font-semibold hover:border-primary/50">
