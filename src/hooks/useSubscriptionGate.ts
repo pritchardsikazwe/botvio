@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { OPEN_ACCESS } from "@/config/access";
+import { useGlobalAccess } from "@/hooks/useGlobalAccess";
 
 export interface SubscriptionGate {
   planCode: string | null;
@@ -34,6 +34,7 @@ const PLAN_TIER: Record<string, number> = {
 
 export function useSubscriptionGate(): SubscriptionGate {
   const { user, isAdmin, isSuperAdmin } = useAuth();
+  const globalAccess = useGlobalAccess();
 
   const { data, isLoading } = useQuery({
     queryKey: ["subscription-gate", user?.id],
@@ -61,7 +62,7 @@ export function useSubscriptionGate(): SubscriptionGate {
 
   // Only explicit admin roles may bypass plan entitlements. Account age never
   // grants premium access automatically.
-  if (OPEN_ACCESS || privileged) {
+  if (globalAccess || privileged) {
     return {
       planCode: code,
       planName: plan?.name || "Free",

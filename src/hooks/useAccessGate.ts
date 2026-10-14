@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { supabase } from "@/integrations/supabase/client";
-import { OPEN_ACCESS } from "@/config/access";
 import { useNativeStoreAccess } from "@/hooks/useNativeStoreAccess";
+import { useGlobalAccess } from "@/hooks/useGlobalAccess";
 
 export interface AccessGate {
   isLoading: boolean;
@@ -23,6 +23,7 @@ export function useAccessGate(): AccessGate {
   const { user, isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
   const sub = useSubscriptionGate();
   const nativeStore = useNativeStoreAccess();
+  const globalAccess = useGlobalAccess();
 
   const { data: trialInfo, isLoading: trialLoading } = useQuery({
     queryKey: ["access-gate-trial", user?.id, user?.created_at],
@@ -55,14 +56,14 @@ export function useAccessGate(): AccessGate {
   const nativePlanCode = nativeStore.data?.planCode ?? null;
 
   return {
-    isLoading: OPEN_ACCESS ? false : authLoading || sub.isLoading || nativeStore.isLoading || (!!user && trialLoading),
+    isLoading: globalAccess ? false : authLoading || sub.isLoading || nativeStore.isLoading || (!!user && trialLoading),
     isAuthenticated: !!user,
     isAdmin: adminBypass,
     isPaid,
     isTrial,
     trialDaysLeft,
     trialExpired,
-    hasAccess: OPEN_ACCESS || adminBypass || isPaid || isTrial,
+    hasAccess: globalAccess || adminBypass || isPaid || isTrial,
     planCode: nativePlanCode ?? sub.planCode,
   };
 }
