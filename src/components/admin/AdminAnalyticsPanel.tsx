@@ -16,11 +16,12 @@ export function AdminAnalyticsPanel(){
   setLoading(true);
   try {
    const {data:summary,error:summaryError}=await (supabase as any).rpc("admin_analytics_summary",{p_days:days});
-   if(summaryError) throw summaryError;
-   setData(summary as Summary);
+   const missing=(e:any)=>e&&(e.code==="PGRST202"||e.code==="42P01"||e.code==="PGRST205"||/schema cache|does not exist/i.test(e.message||""));
+   if(summaryError&&!missing(summaryError)) throw summaryError;
+   setData(summaryError?null:summary as Summary);
    const cutoff=new Date(Date.now()-90000).toISOString();
    const {data:presence,error:presenceError}=await (supabase as any).from("user_presence").select("user_id,last_seen_at,current_path,device_type").gte("last_seen_at",cutoff).order("last_seen_at",{ascending:false}).limit(20);
-   if(presenceError) throw presenceError;
+   if(presenceError&&!missing(presenceError)) throw presenceError;
    setLive(presence||[]);
    const {data:profiles,error:profilesError}=await (supabase as any).from("profiles").select("country").not("country","is",null).neq("country","");
    if(profilesError) throw profilesError;

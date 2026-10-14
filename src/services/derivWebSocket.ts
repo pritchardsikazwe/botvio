@@ -407,6 +407,17 @@ export class DerivWebSocketService {
     this.lastMessageAt = Date.now();
     if (data?.msg_type) this.lastResponseSummary = String(data.msg_type);
 
+    // "Already subscribed" is harmless: the existing stream keeps delivering.
+    if (data?.error?.code === "AlreadySubscribed" || /already subscribed/i.test(String(data?.error?.message ?? ""))) {
+      if (typeof data.req_id === "number" && this.pending.has(data.req_id)) {
+        const p = this.pending.get(data.req_id)!;
+        window.clearTimeout(p.timeout);
+        this.pending.delete(data.req_id);
+        p.resolve({ ...data, error: undefined, already_subscribed: true });
+      }
+      return;
+    }
+
     if (data?.error?.message) {
       this.emitError(normalizeDerivError(data.error.message));
     }

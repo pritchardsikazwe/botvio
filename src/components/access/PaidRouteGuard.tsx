@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAccessGate } from "@/hooks/useAccessGate";
 import { useGlobalAccess } from "@/hooks/useGlobalAccess";
@@ -121,8 +121,13 @@ export function PaidRouteGuard({ children }: Props) {
   const location = useLocation();
   const gate = useAccessGate();
   const globalAccess = useGlobalAccess();
+  // Once access is granted on a path, keep the page mounted during background
+  // re-checks (token refresh, focus refetch) so open trades never get unmounted.
+  const grantedRef = useRef<string | null>(null);
+  if (globalAccess || gate.hasAccess) grantedRef.current = location.pathname;
+  const stillGranted = grantedRef.current === location.pathname && (gate.isLoading || gate.hasAccess || globalAccess);
 
-  if (globalAccess) return <>{children}</>;
+  if (globalAccess || stillGranted) return <>{children}</>;
 
   if (isFreeOnStore(location.pathname)) return <>{children}</>;
 

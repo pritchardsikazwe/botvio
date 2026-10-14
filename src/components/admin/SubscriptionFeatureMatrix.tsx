@@ -36,7 +36,7 @@ export function SubscriptionFeatureMatrix() {
     setLoading(true);
     try {
       const { data, error } = await (supabase as any).from("pricing_plans")
-        .select("id,name,code,allow_copy_trading,allow_premium_bots,allow_provider_listing,allow_premium_signals,allow_sports_betting,allow_all_courses,allow_signals_center,allow_ai_chart_upload,allow_trading_hubs,allow_legacy_bots");
+        .select("*");
       if (error) throw error;
       setPlans((data ?? []).map((p: any) => ({
         ...p,
