@@ -52,6 +52,13 @@ export const HomeLiveTrading = () => {
   const { user, loading: authLoading } = useAuth();
   const mt5 = useHomeMt5Trades(tab);
   const { articles } = useResearchArticles();
+  const researchCategories = useMemo(() => {
+    const rows = RESEARCH_TOPICS
+      .map((t) => ({ slug: t.slug, label: t.label, count: byTopic(articles, t.slug).length }))
+      .filter((r) => r.count > 0)
+      .sort((a, b) => b.count - a.count);
+    return rows.slice(0, Math.max(6, Math.min(10, rows.length)));
+  }, [articles]);
   const syntxSignals = useQuery({
     queryKey: ["home-syntx-latest-signals"],
     queryFn: async () => {
