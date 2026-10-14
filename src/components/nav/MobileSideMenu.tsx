@@ -1,4 +1,5 @@
-import { cloneElement, isValidElement, useState, type ReactNode } from "react";
+import { cloneElement, isValidElement, useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -64,6 +65,16 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
 
   const close = () => setOpen(false);
 
+  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
+  }, [open]);
+
   const renderItems = (items: Item[]) =>
     items.map(({ label, to, icon: Icon, live }) => (
       <Link
@@ -113,16 +124,16 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
         </button>
       )}
 
-      {open && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
+      {open && createPortal(
+        <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true">
           <button
             type="button"
             aria-label="Close Botvio menu"
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             onClick={close}
           />
           <aside
-            className="absolute inset-y-0 left-0 flex w-[min(88vw,360px)] flex-col border-r border-primary/15 bg-[hsl(220_20%_6%)] shadow-2xl animate-in slide-in-from-left duration-200"
+            className="absolute inset-y-0 left-0 flex h-[100dvh] w-[min(88vw,360px)] flex-col border-r border-primary/15 bg-card shadow-2xl animate-in slide-in-from-left duration-200"
             aria-label="Botvio mobile navigation"
           >
             <div className="border-b border-border/60 px-4 pb-4 pt-5">
@@ -162,7 +173,7 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-3 py-4">
+            <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-4">
               <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Main</p>
               <div className="space-y-1">{renderItems(primary)}</div>
 
@@ -203,7 +214,7 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
               )}
             </div>
 
-            <div className="border-t border-border/60 bg-card/50 p-3">
+            <div className="border-t border-border/60 bg-card/50 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   to="/settings"
@@ -232,7 +243,8 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
               </div>
             </div>
           </aside>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
