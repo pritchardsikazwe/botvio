@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Activity, ArrowRight, BarChart3, Copy, Crown, Users } from "lucide-react";
+import { Activity, ArrowRight, BarChart3, BookOpen, Copy, Crown, Users } from "lucide-react";
+import { useResearchArticles } from "@/lib/research/useResearchArticles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHomeMt5Trades } from "@/hooks/useHomeMt5Trades";
 import { closedTradeResult, tradeFeedForSymbol } from "@/lib/liveTrading";
@@ -49,6 +50,18 @@ export const HomeLiveTrading = () => {
   const [view, setView] = useState<"running" | "results">("running");
   const { user, loading: authLoading } = useAuth();
   const mt5 = useHomeMt5Trades(tab);
+  const { articles } = useResearchArticles();
+  const syntxSignals = useQuery({
+    queryKey: ["home-syntx-latest-signals"],
+    queryFn: async () => {
+      const { data } = await supabase.from("trading_signals")
+        .select("id,symbol,direction,entry_price,timeframe,status,outcome,created_at")
+        .or("symbol.ilike.%GainX%,symbol.ilike.%PainX%,symbol.ilike.%FlipX%,symbol.ilike.%SwitchX%,symbol.ilike.%BreakX%,symbol.ilike.%TrendX%,symbol.ilike.%FX Vol%,symbol.ilike.%SFX Vol%,symbol.ilike.%PlusX%,symbol.ilike.%FiboX%,symbol.ilike.%QuadX%")
+        .order("created_at", { ascending: false }).limit(4);
+      return data ?? [];
+    },
+    refetchInterval: 60_000,
+  });
 
   const providerQuery = useQuery({
     queryKey: ["home-live-provider-trades", user?.id, tab, view],
@@ -193,6 +206,26 @@ export const HomeLiveTrading = () => {
             )}
           </div>
 
+          {(syntxSignals.data?.length ?? 0) > 0 && (
+            <div className="mt-3 rounded-xl border border-border/50 bg-background/40">
+              <div className="flex items-center justify-between px-3 py-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Latest Weltrade SyntX signals</p>
+                <Link to="/signals" className="text-[10px] font-bold text-primary">All signals →</Link>
+              </div>
+              <div className="divide-y divide-border/40">
+                {syntxSignals.data!.map((s: any) => (
+                  <div key={s.id} className="grid grid-cols-[1.4fr_.7fr_1fr_.9fr] items-center gap-2 px-3 py-2 text-xs">
+                    <div className="min-w-0"><p className="truncate font-bold">{s.symbol}</p><p className="text-[9px] text-muted-foreground">{s.timeframe ?? ""} · {new Date(s.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p></div>
+                    <span className={String(s.direction).toUpperCase() === "BUY" ? "font-bold text-success" : "font-bold text-destructive"}>{String(s.direction).toUpperCase()}</span>
+                    <span className="font-mono text-[10px]">@ {s.entry_price ?? "—"}</span>
+                    <Badge variant="outline" className="w-fit text-[9px]">{s.outcome || s.status}</Badge>
+                  </div>
+                ))}
+              </div>
+              <p className="px-3 pb-2 text-[9px] text-muted-foreground">These are published signals, not broker positions.</p>
+            </div>
+          )}
+
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
             <span className="font-bold text-foreground">Synthetic markets:</span>
             <span>Deriv: Boom 500 · Volatility 75</span>
@@ -201,6 +234,23 @@ export const HomeLiveTrading = () => {
             <span>•</span>
             <span>Copy Trading</span>
           </div>
+
+          {articles.length > 0 && (
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-xs font-bold"><BookOpen className="h-3.5 w-3.5 text-primary" />Read & research more</p>
+                <Link to="/blog" className="text-[10px] font-bold text-primary">All articles →</Link>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {articles.slice(0, 3).map((a) => (
+                  <Link key={a.slug} to={`/blog/${a.slug}`} className="rounded-lg border border-border/50 bg-background/40 p-3 text-xs font-semibold hover:border-primary/50">
+                    <span className="line-clamp-2">{a.title}</span>
+                    <span className="mt-1 block text-[10px] font-normal text-primary">Read more →</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </section>
