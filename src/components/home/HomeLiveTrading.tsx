@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Activity, ArrowRight, BarChart3, BookOpen, Copy, Crown, Users } from "lucide-react";
-import { useResearchArticles } from "@/lib/research/useResearchArticles";
+import { byTopic, useResearchArticles } from "@/lib/research/useResearchArticles";
+import { RESEARCH_TOPICS } from "@/lib/research/taxonomy";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHomeMt5Trades } from "@/hooks/useHomeMt5Trades";
 import { closedTradeResult, tradeFeedForSymbol } from "@/lib/liveTrading";
@@ -51,6 +52,13 @@ export const HomeLiveTrading = () => {
   const { user, loading: authLoading } = useAuth();
   const mt5 = useHomeMt5Trades(tab);
   const { articles } = useResearchArticles();
+  const researchCategories = useMemo(() => {
+    const rows = RESEARCH_TOPICS
+      .map((t) => ({ slug: t.slug, label: t.label, count: byTopic(articles, t.slug).length }))
+      .filter((r) => r.count > 0)
+      .sort((a, b) => b.count - a.count);
+    return rows.slice(0, Math.max(6, Math.min(10, rows.length)));
+  }, [articles]);
   const syntxSignals = useQuery({
     queryKey: ["home-syntx-latest-signals"],
     queryFn: async () => {
@@ -241,6 +249,20 @@ export const HomeLiveTrading = () => {
                 <p className="flex items-center gap-1.5 text-xs font-bold"><BookOpen className="h-3.5 w-3.5 text-primary" />Read & research more</p>
                 <Link to="/blog" className="text-[10px] font-bold text-primary">All articles →</Link>
               </div>
+              {researchCategories.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {researchCategories.map((c) => (
+                    <Link
+                      key={c.slug}
+                      to={`/blog/category/${c.slug}`}
+                      className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-background/40 px-2.5 py-1 text-[10px] font-bold text-foreground hover:border-primary/50 hover:text-primary"
+                    >
+                      {c.label}
+                      <span className="text-[9px] font-normal text-muted-foreground">{c.count}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
               <div className="grid gap-2 sm:grid-cols-3">
                 {articles.slice(0, 3).map((a) => (
                   <Link key={a.slug} to={`/blog/${a.slug}`} className="rounded-lg border border-border/50 bg-background/40 p-3 text-xs font-semibold hover:border-primary/50">
