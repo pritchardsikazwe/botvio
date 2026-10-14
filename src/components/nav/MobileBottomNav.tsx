@@ -24,7 +24,7 @@ export const MobileBottomNav = () => {
     <>
       <nav
         aria-label="Primary mobile navigation"
-        className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-6 border-t border-primary/10 bg-[hsl(220_18%_8%_/_0.96)] backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-6 border-t border-primary/10 bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
         {NAV.map(({ label, to, icon: Icon, external }) => (
           <Link
@@ -32,7 +32,7 @@ export const MobileBottomNav = () => {
             to={to}
             {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             className={cn(
-              "flex min-h-14 flex-col items-center justify-center gap-1 text-[9px] font-bold transition-colors",
+              "flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-bold transition-colors active:scale-95",
               isActive(to) ? "text-primary" : "text-muted-foreground hover:text-foreground"
             )}
             aria-current={isActive(to) ? "page" : undefined}
@@ -50,7 +50,7 @@ export const MobileBottomNav = () => {
           trigger={
             <button
               type="button"
-              className="flex min-h-14 flex-col items-center justify-center gap-1 text-[9px] font-bold text-muted-foreground transition-colors hover:text-primary"
+              className="flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-bold text-muted-foreground transition-colors hover:text-primary active:scale-95"
               aria-label="Open Botvio menu"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-secondary/70">

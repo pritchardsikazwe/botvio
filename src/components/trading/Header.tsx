@@ -100,7 +100,7 @@ export const Header = () => {
                         <ChevronDown className="w-3 h-3 ml-1 opacity-60" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-64 glass-card" align="start">
+                    <DropdownMenuContent className="z-[60] w-64 bg-popover" align="start">
                       <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {group.items.map((item) => (
@@ -118,12 +118,12 @@ export const Header = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button data-tour="nav-more" variant="ghost" size="sm" className="px-2.5 text-xs">
+                  <Button data-tour="nav-more" variant="outline" size="sm" className="px-3 text-xs">
                     <Menu className="w-3.5 h-3.5 mr-1" />
                     More
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-72 glass-card max-h-[80vh] overflow-y-auto overscroll-contain" align="end" sideOffset={8}>
+                <DropdownMenuContent className="z-[60] w-72 bg-popover max-h-[80vh] overflow-y-auto overscroll-contain" align="end" sideOffset={8}>
                   {MORE_NAV.map((group, gi) => (
                     <div key={group.label}>
                       {gi > 0 && <DropdownMenuSeparator />}
@@ -187,11 +187,11 @@ export const Header = () => {
             <nav className="xl:hidden flex items-center" aria-label="Primary navigation">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" aria-label="Open navigation menu">
-                    <Menu className="w-4 h-4" />
+                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl" aria-label="Open navigation menu">
+                    <Menu className="w-5 h-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[min(92vw,360px)] glass-card max-h-[80dvh] overflow-y-auto overscroll-contain" align="start" sideOffset={8}>
+                <DropdownMenuContent className="z-[60] w-[min(92vw,360px)] bg-popover max-h-[80dvh] overflow-y-auto overscroll-contain" align="start" sideOffset={8}>
                   <DropdownMenuItem asChild><Link to="/">Home</Link></DropdownMenuItem>
                   {PRIMARY_NAV.map((group) => (
                     <div key={group.label}>
