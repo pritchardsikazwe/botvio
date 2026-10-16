@@ -181,8 +181,8 @@ export const seoPages: Record<string, SEOPage> = {
 
   "how-to-automate-deriv-trading": {
     slug: "how-to-automate-deriv-trading",
-    metaTitle: "How to Automate Deriv Trading | Step-by-Step",
-    metaDescription: "Complete guide to automating your Deriv trading with AI bots. Learn setup, strategy selection, risk management, and execution.",
+    metaTitle: "How to Automate Deriv Trading: Setup, API & Risk Guide",
+    metaDescription: "Learn how Deriv automation works, how to connect a bot, test on demo, compare API and MT5 workflows, and set practical risk limits before trading live.",
     h1: "How to Automate Deriv Trading: Complete Guide",
     sections: [
       {
@@ -216,7 +216,7 @@ export const seoPages: Record<string, SEOPage> = {
     ],
     faqs: [
       { q: "How do I automate Deriv trading?", a: "Connect your Deriv account to an automation platform like Botvio via OAuth, select a trading mode, configure risk settings, and enable auto-execution. Start with a demo account first." },
-      { q: "Is automated trading on Deriv legal?", a: "Yes, Deriv supports automated trading through its official API. Platforms that use Deriv's OAuth system are authorized to place trades on your behalf." },
+      { q: "Can I use any third-party bot with Deriv?", a: "Not automatically. Verify the platform's current integration, requested permissions, terms and regional availability. Never share your password or API token with an untrusted service." },
       { q: "Do I need coding skills to automate trading?", a: "No, platforms like Botvio provide pre-built strategies that can be configured without coding. For custom strategies, some platforms support scripting or Expert Advisors on MT5." },
     ],
     keywords: [
@@ -263,13 +263,13 @@ export const seoPages: Record<string, SEOPage> = {
   },
   "gold-trading-signals": {
     slug: "gold-trading-signals",
-    metaTitle: "Gold Trading Signals | XAUUSD AI Analysis",
-    metaDescription: "Explore Botvio gold (XAUUSD) signal research, chart-analysis workflow, key price levels and risk-management guidance. Trading signals are educational, can be wrong and are not guaranteed.",
+    metaTitle: "Gold Trading Signals & XAUUSD Analysis | Botvio",
+    metaDescription: "Explore gold trading signals for XAUUSD, chart-analysis steps, support and resistance, London/New York session planning and risk controls. Signals can be wrong.",
     h1: "Gold Trading Signals: AI-Powered XAUUSD Analysis",
     sections: [
       {
         heading: "Why Trade Gold (XAUUSD)?",
-        content: `<p>Gold (XAUUSD) is one of the most traded commodities globally. It serves as a safe-haven asset during economic uncertainty and offers high volatility suitable for both short-term and long-term trading strategies.</p>
+        content: `<p>Gold (XAUUSD) is widely followed during changes in interest-rate expectations, U.S. dollar strength, inflation expectations and risk sentiment. It can move sharply in either direction; no session or strategy makes a trade inherently safe.</p>
 <p>Gold trading is available through brokers like Deriv, Exness, and Weltrade via MetaTrader 5 (MT5). Tools such as Botvio can help traders review gold charts and organize signal research. Check which features are available to your account before relying on any workflow.</p>`
       },
       {
@@ -289,15 +289,15 @@ export const seoPages: Record<string, SEOPage> = {
       {
         heading: "Best Brokers for Gold Trading",
         content: `<ul>
-<li><strong>Deriv</strong> — Offers gold CFDs and multipliers with competitive spreads</li>
-<li><strong>Exness</strong> — Popular for gold trading with tight spreads and fast execution</li>
-<li><strong>Weltrade</strong> — Supports MT5 gold trading with various account types</li>
+<li><strong>Deriv</strong> — Review the instruments and account types currently available to your region</li>
+<li><strong>Exness</strong> — Check the contracting entity, XAUUSD specifications, fees and leverage for your account</li>
+<li><strong>Weltrade</strong> — Confirm the current MT5 symbol, contract size, trading hours and account conditions</li>
 </ul>
 <p>Broker features and Botvio connection options vary. Confirm the supported connection method for your broker and account before attempting automation. Broker mentions are informational and do not guarantee suitability or trading results.</p>`
       }
     ],
     faqs: [
-      { q: "What is the best platform for gold trading signals?", a: "Botvio provides AI-powered gold (XAUUSD) trading signals with automated chart analysis. Signals include entry price, stop loss, and take profit levels for informed decision-making." },
+      { q: "What is the best platform for gold trading signals?", a: "Compare platforms by data quality, transparent methodology, update frequency, risk controls and verifiable historical records. Botvio provides gold research tools, but signals are probabilistic and should be independently checked." },
       { q: "Can I automate gold trading?", a: "Yes, using platforms like Botvio with MT5 copy trading, you can automate gold trading. Connect your broker account and follow experienced gold traders or use AI signals." },
       { q: "What is the best time to trade gold?", a: "Gold is most active during London (08:00-16:00 GMT) and New York (13:00-21:00 GMT) sessions. The overlap period offers highest liquidity and volatility." },
       { q: "How much money do I need to trade gold?", a: "Minimum deposits vary by broker. Exness allows accounts from $10, while other brokers may require $50-$100. Use leverage responsibly and only trade what you can afford to lose." },
