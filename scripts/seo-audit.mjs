@@ -46,12 +46,6 @@ async function get(path) {
   return { response, body: await response.text() };
 }
 
-function metaContent(html, name) {
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = html.match(new RegExp(`<meta[^>]+(?:name|property)=["']${escaped}["'][^>]+content=["']([^"']*)["']|<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["']${escaped}["']`, "i"));
-  return match?.[1] || match?.[2] || "";
-}
-
 function canonicalHref(html) {
   return html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)?.[1]
     || html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)?.[1]
@@ -60,14 +54,11 @@ function canonicalHref(html) {
 
 async function main() {
   console.log(`Botvio SEO smoke audit: ${ORIGIN}`);
-  let robots = "";
-  let sitemap = "";
 
   try {
     const { response, body } = await get("/robots.txt");
     if (!response.ok) fail(`robots.txt returned HTTP ${response.status}`);
     else {
-      robots = body;
       if (/Sitemap:\s*https:\/\/botvio\.live\/sitemap\.xml/i.test(body)) pass("robots.txt references the canonical sitemap");
       else fail("robots.txt does not reference https://botvio.live/sitemap.xml");
       if (/User-agent:\s*Googlebot[\s\S]*?Disallow:\s*\/install(?:\s|$)/i.test(body)) {
@@ -84,7 +75,6 @@ async function main() {
     const { response, body } = await get("/sitemap.xml");
     if (!response.ok) fail(`sitemap.xml returned HTTP ${response.status}`);
     else {
-      sitemap = body;
       const locations = [...body.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)].map(m => m[1].trim());
       const duplicates = locations.filter((url, i) => locations.indexOf(url) !== i);
       const offHost = locations.filter(url => {
