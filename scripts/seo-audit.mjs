@@ -14,6 +14,9 @@ const TARGET_PATHS = [
   "/",
   "/brokers",
   "/brokers/pocket-option",
+  "/brokers/deriv",
+  "/how-to-automate-deriv-trading",
+  "/start-trading",
   "/gold-trading-signals",
   "/gold",
   "/signals",
@@ -72,6 +75,15 @@ async function main() {
   }
 
   try {
+    const { response, body } = await get("/sitemap");
+    if (!response.ok) fail(`/sitemap legacy URL returned HTTP ${response.status}`);
+    else if (!/xml|urlset/i.test(body) && !/sitemap\\.xml/i.test(response.url)) warn(`/sitemap did not clearly resolve to the canonical sitemap (final URL: ${response.url})`);
+    else pass(`/sitemap legacy URL resolves successfully (final URL: ${response.url})`);
+  } catch (error) {
+    fail(`/sitemap legacy URL request failed: ${error.message}`);
+  }
+
+  try {
     const { response, body } = await get("/sitemap.xml");
     if (!response.ok) fail(`sitemap.xml returned HTTP ${response.status}`);
     else {
@@ -86,7 +98,7 @@ async function main() {
       else pass("sitemap.xml contains no duplicate URLs");
       if (offHost.length) warn(`sitemap.xml contains ${offHost.length} URL(s) outside https://botvio.live`);
       else pass("sitemap URLs use the canonical host");
-      for (const required of ["/", "/brokers/pocket-option", "/gold-trading-signals", "/install"]) {
+      for (const required of ["/", "/brokers/pocket-option", "/brokers/deriv", "/how-to-automate-deriv-trading", "/gold-trading-signals", "/start-trading", "/install"]) {
         if (locations.includes(`${ORIGIN}${required}`)) pass(`sitemap includes ${required}`);
         else warn(`sitemap does not include ${required}`);
       }
