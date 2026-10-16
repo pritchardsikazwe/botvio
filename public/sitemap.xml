@@ -1552,4 +1552,9 @@
   <url><loc>https://botvio.live/ai-trading/trading-bot-risk-management</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/ai-trading/best-ai-trading-platform</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/ai-trading/botvio-ai-trading</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://botvio.live/markets/qatar</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/ar/markets/qatar</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/switzerland</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/switzerland-fr</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/switzerland-it</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
