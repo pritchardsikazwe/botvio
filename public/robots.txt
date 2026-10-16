@@ -67,7 +67,6 @@ Disallow: /r/
 Disallow: /.lovable/
 Disallow: /home-preview
 Disallow: /home-classic
-Disallow: /install
 Disallow: /*?token=
 Disallow: /*?session=
 
@@ -106,7 +105,6 @@ Disallow: /r/
 Disallow: /.lovable/
 Disallow: /home-preview
 Disallow: /home-classic
-Disallow: /install
 
 User-agent: Mediapartners-Google
 Allow: /
