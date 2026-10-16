@@ -126,63 +126,40 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
   return { name: "Trade on Exness", link: EXNESS_LINK, color: "bg-warning/15 text-warning border-warning/30 hover:bg-warning/25" };
 }
 
-// Homepage publishes one batch of exactly three signals at 09:00 and 18:00 Zambia time.
-// The previous batch is replaced at the next publication. Prioritize the requested
-// 1M scalping, 15M intraday and 1D position horizons; use 1H swing as a fallback.
-const CAT_OFFSET_MS = 2 * 60 * 60 * 1000;
+// Homepage shows up to 15 of the newest published signals from the last 36 hours,
+// mixing short-term, intraday and daily horizons first.
+const HOME_SIGNAL_LIMIT = 15;
+const HOME_LOOKBACK_MS = 36 * 60 * 60 * 1000;
 const HOME_HORIZON_PRIORITY = ["M1", "M15", "D1", "H1"];
 function selectPublishedHomeSignals(items: ManualSignal[], now = new Date()): ManualSignal[] {
-  const cat = new Date(now.getTime() + CAT_OFFSET_MS);
-  const year = cat.getUTCFullYear();
-  const month = cat.getUTCMonth();
-  const day = cat.getUTCDate();
-  const catBoundary = (dayOffset: number, hour: number) =>
-    Date.UTC(year, month, day + dayOffset, hour) - CAT_OFFSET_MS;
-  const morningAt = catBoundary(0, 9);
-  const eveningAt = catBoundary(0, 18);
-
-  // Choose only the latest scheduled batch window; never combine morning and evening.
-  let windowStart: number;
-  let windowEnd: number;
-  if (now.getTime() >= eveningAt) {
-    windowStart = morningAt;
-    windowEnd = eveningAt;
-  } else if (now.getTime() >= morningAt) {
-    windowStart = catBoundary(-1, 18);
-    windowEnd = morningAt;
-  } else {
-    windowStart = catBoundary(-1, 9);
-    windowEnd = catBoundary(-1, 18);
-  }
+  const windowStart = now.getTime() - HOME_LOOKBACK_MS;
 
   const candidates = items.filter(signal => {
     const created = new Date(signal.created_at).getTime();
     const tf = normTf(signal.timeframe);
-    return created >= windowStart && created < windowEnd &&
+    return created >= windowStart &&
       ["M1", "M5", "M15", "M30", "H1", "H4", "D1"].includes(tf);
   }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const selected: ManualSignal[] = [];
   const used = new Set<string>();
-  // Try to represent short-term, intraday and daily horizons in each three-signal batch.
+  // Lead with one signal per priority horizon, then fill with the newest rest.
   for (const tf of HOME_HORIZON_PRIORITY) {
     const match = candidates.find(signal => normTf(signal.timeframe) === tf && !used.has(signal.id));
     if (match) {
       selected.push(match);
       used.add(match.id);
     }
-    if (selected.length === 3) return selected;
   }
 
-  // Fill remaining slots with newest signals from any supported horizon.
   for (const signal of candidates) {
+    if (selected.length >= HOME_SIGNAL_LIMIT) break;
     if (!used.has(signal.id)) {
       selected.push(signal);
       used.add(signal.id);
     }
-    if (selected.length === 3) break;
   }
-  return selected;
+  return selected.slice(0, HOME_SIGNAL_LIMIT);
 }
 function isSyntx(signal: any): boolean { return signal?.category === "syntx"; }
 function marketLabel(signal: any): string {
