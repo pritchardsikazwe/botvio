@@ -35,8 +35,8 @@ check("UAE eligibility caution is visible", /Confirm directly with the broker|Co
 check("UAE sitemap is valid XML shape", sitemap.trim().startsWith("<?xml") && sitemap.includes("</urlset>"));
 check("UAE sitemap contains broker page", sitemap.includes("https://botvio.live/start-trading"));
 check("Canonical sitemap includes broker page", canonicalSitemap.includes("https://botvio.live/start-trading"));
-check("Legacy /sitemap path redirects to sitemap.xml", /^\\/sitemap\\s+\\/sitemap\\.xml\\s+301/m.test(redirects));
-const sitemapBlogSlugs = [...sitemap.matchAll(/<loc>https:\/\/botvio\\.live\/blog\/([^<]+)<\\/loc>/g)].map((match) => match[1]);
+check("Legacy /sitemap path redirects to sitemap.xml", /^\/sitemap\s+\/sitemap\.xml\s+301/m.test(redirects));
+const sitemapBlogSlugs = [...sitemap.matchAll(/<loc>https:\/\/botvio\.live\/blog\/([^<]+)<\/loc>/g)].map((match) => match[1]);
 check("UAE sitemap blog URLs exist in Dubai article source", sitemapBlogSlugs.length > 0 && sitemapBlogSlugs.every((slug) => dubaiPosts.includes(`"${slug}":`)));
 check("robots.txt references UAE conversion sitemap", robots.includes("Sitemap: https://botvio.live/sitemap-uae-conversion.xml"));
 
