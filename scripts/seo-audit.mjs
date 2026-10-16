@@ -133,7 +133,7 @@ async function main() {
     }
   }
 
-  console.log("\nSummary: ${failures} failure(s), ${warnings} warning(s).");
+  console.log(`\nSummary: ${failures} failure(s), ${warnings} warning(s).`);
   if (failures) process.exitCode = 1;
 }
 
