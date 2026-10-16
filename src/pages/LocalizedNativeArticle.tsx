@@ -3,11 +3,12 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { LOCALIZED_NATIVE_POSTS } from "@/content/localizedNativePosts";
+import { LOCALIZED_COUNTRY_ARTICLES } from "@/content/localizedCountryArticles";
 import { LOCALIZED_MARKETS } from "@/content/localizedMarkets";
 
 export default function LocalizedNativeArticle(){
  const {country,slug}=useParams<{country:string;slug:string}>(); const location=useLocation();
- const post=slug?LOCALIZED_NATIVE_POSTS[slug]:undefined;
+ const post=slug?(LOCALIZED_COUNTRY_ARTICLES[slug] ?? LOCALIZED_NATIVE_POSTS[slug]):undefined;
  const market=country?Object.values(LOCALIZED_MARKETS).find(m=>m.slug===country):undefined;
  if(!post||!market) return <div className="min-h-screen bg-background"><Header/><main className="container mx-auto px-4 py-12 text-center"><h1 className="text-2xl font-bold">Article not found</h1><Link to="/"><Button className="mt-5">Home</Button></Link></main></div>;
  const nativePath=location.pathname.startsWith("/ar/") ? `/ar/markets/${market.slug}/blog/${slug}` : `/markets/${market.slug}/blog/${slug}`;
