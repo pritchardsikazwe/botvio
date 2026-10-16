@@ -1571,4 +1571,17 @@
   <url><loc>https://botvio.live/markets/egypt</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/markets/kenya</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/markets/south-africa</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/congo-drc/blog/trading-beginners-congo-drc</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/congo-brazzaville/blog/trading-beginners-congo-brazzaville</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/angola/blog/trading-beginners-angola</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/nigeria/blog/trading-beginners-nigeria</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/sudan/blog/trading-beginners-sudan</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/mali/blog/trading-beginners-mali</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/senegal/blog/trading-beginners-senegal</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/ghana/blog/trading-beginners-ghana</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/burkina-faso/blog/trading-beginners-burkina-faso</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/egypt/blog/trading-beginners-egypt</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/morocco/blog/trading-beginners-morocco</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/kenya/blog/trading-beginners-kenya</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://botvio.live/markets/south-africa/blog/trading-beginners-south-africa</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
 </urlset>
