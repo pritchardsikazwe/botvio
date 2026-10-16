@@ -33,8 +33,8 @@ const GoldTradingHub = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead seoKey="gold"
-        title="Gold Trading Hub – Live XAUUSD Charts, Signals & Strategies"
-        description="Your complete gold trading terminal. Real-time XAUUSD charts with Botvio AI strategies, AI-powered signals, expert analysis, risk management tips, and a community of gold traders."
+        title="Gold Trading Hub: XAUUSD Charts, Signals & Risk Guide"
+        description="Explore XAUUSD chart tools, gold signal research, support and resistance, market-session context and risk-management guides. Signals are educational and not guaranteed."
       />
       <Header />
 
@@ -58,6 +58,22 @@ const GoldTradingHub = () => {
         <GoldSentimentGauge />
         <GoldChartSection />
         <TradingFunnel asset="XAUUSD" />
+
+        <section className="grid gap-4 rounded-xl border border-border bg-card p-5 md:grid-cols-3" aria-labelledby="gold-research-guides">
+          <div className="md:col-span-3">
+            <h2 id="gold-research-guides" className="text-xl font-bold">Gold research and trading guides</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Use these guides to check market context, compare connection types and plan risk before acting on a signal.</p>
+          </div>
+          <Link to="/gold-trading-signals" className="rounded-lg border border-border p-4 hover:border-primary/50">
+            <h3 className="font-semibold">Gold trading signals</h3><p className="mt-1 text-sm text-muted-foreground">XAUUSD analysis, key levels and signal limitations.</p>
+          </Link>
+          <Link to="/how-to-automate-deriv-trading" className="rounded-lg border border-border p-4 hover:border-primary/50">
+            <h3 className="font-semibold">Deriv automation guide</h3><p className="mt-1 text-sm text-muted-foreground">Understand API contracts, demo validation and risk controls.</p>
+          </Link>
+          <Link to="/brokers/deriv" className="rounded-lg border border-border p-4 hover:border-primary/50">
+            <h3 className="font-semibold">Deriv broker guide</h3><p className="mt-1 text-sm text-muted-foreground">Review connection options and account eligibility.</p>
+          </Link>
+        </section>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid h-auto w-full grid-cols-3 gap-1 border border-border/50 bg-card p-1 md:grid-cols-6">
