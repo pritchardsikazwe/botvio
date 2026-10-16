@@ -37,7 +37,7 @@ export class DerivWebSocketService {
   private reqId = 1;
   private pending = new Map<
     number,
-    { resolve: (v: any) => void; reject: (e: Error) => void; timeout: number }
+    { resolve: (v: any) => void; reject: (e: Error) => void; timeout: number; requestType: string }
   >();
 
   private reconnectAttempt = 0;
@@ -419,6 +419,10 @@ export class DerivWebSocketService {
     }
 
     if (data?.error?.message) {
+      const pendingRequest = typeof data.req_id === "number" ? this.pending.get(data.req_id) : undefined;
+      if (pendingRequest?.requestType === "proposal_open_contract") {
+        console.error("[Deriv][proposal_open_contract] WebSocket error response:", data);
+      }
       this.emitError(normalizeDerivError(data.error.message));
     }
 
@@ -467,10 +471,12 @@ export class DerivWebSocketService {
       const t = (data as any).tick as any;
       const subId = (data as any).subscription?.id as string | undefined;
       if (subId) this.tickSubscriptionBySymbol.set(t.symbol, subId);
+      const quote = Number(t.quote);
+      if (!Number.isFinite(quote) || !t.symbol) return;
       const tick: DerivTick = {
-        symbol: t.symbol,
-        quote: t.quote,
-        epoch: t.epoch,
+        symbol: String(t.symbol),
+        quote,
+        epoch: Number(t.epoch ?? 0),
         subscription_id: subId,
       };
       this.tickListeners.forEach((l) => l(tick));
@@ -479,28 +485,44 @@ export class DerivWebSocketService {
     // Handle proposal_open_contract stream updates (settlement detection)
     if (data.msg_type === "proposal_open_contract" && (data as any).proposal_open_contract) {
       const c = (data as any).proposal_open_contract as any;
-      const isSettled = c.is_sold === 1 || c.is_expired === 1 || 
-                        ["won", "lost", "sold"].includes(c.status);
-      const update: DerivContractUpdate = {
-        contract_id: c.contract_id,
-        buy_price: c.buy_price,
-        sell_price: c.sell_price,
-        current_spot: c.current_spot,
-        current_spot_time: c.current_spot_time,
-        profit: c.profit,
-        profit_percentage: c.profit_percentage || 0,
-        status: c.is_sold ? "sold" : c.is_expired ? (c.profit >= 0 ? "won" : "lost") : "open",
-        is_expired: !!c.is_expired,
-        is_sold: !!c.is_sold,
-        is_valid_to_sell: !!c.is_valid_to_sell,
-        entry_spot: c.entry_spot,
-        exit_tick: c.exit_tick,
-        payout: c.payout,
-        longcode: c.longcode,
-        underlying: c.underlying || "",
-        contract_type: c.contract_type || "",
+      const contractId = Number(c.contract_id);
+      if (!Number.isFinite(contractId) || contractId <= 0 || !c.contract_type || !c.currency) {
+        console.error("[Deriv][proposal_open_contract] Invalid contract update shape:", data);
+        return;
+      }
+      const numeric = (value: unknown, fallback = 0) => {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
       };
-      this.contractListeners.forEach((l) => l(update));
+      const profit = numeric(c.profit);
+      const isSold = c.is_sold === 1 || c.is_sold === true;
+      const isExpired = c.is_expired === 1 || c.is_expired === true;
+      const reportedStatus = ["won", "lost", "sold"].includes(String(c.status)) ? String(c.status) : null;
+      const status = isSold ? "sold" : isExpired ? (profit >= 0 ? "won" : "lost") : (reportedStatus ?? "open");
+      const isSettled = isSold || isExpired || ["won", "lost", "sold"].includes(String(c.status));
+      const update: DerivContractUpdate = {
+        contract_id: contractId,
+        buy_price: numeric(c.buy_price),
+        sell_price: c.sell_price == null ? undefined : numeric(c.sell_price),
+        current_spot: numeric(c.current_spot),
+        current_spot_time: numeric(c.current_spot_time),
+        profit,
+        profit_percentage: numeric(c.profit_percentage),
+        status,
+        is_expired: isExpired,
+        is_sold: isSold,
+        is_valid_to_sell: !!c.is_valid_to_sell,
+        entry_spot: numeric(c.entry_spot),
+        exit_tick: c.exit_tick == null ? undefined : numeric(c.exit_tick),
+        payout: numeric(c.payout),
+        longcode: String(c.longcode ?? ""),
+        underlying: String(c.underlying ?? ""),
+        contract_type: String(c.contract_type),
+        currency: String(c.currency),
+      };
+      this.contractListeners.forEach((l) => {
+        try { l(update); } catch (error) { console.error("[Deriv][proposal_open_contract] Contract listener failed:", error, data); }
+      });
 
       // Auto-forget subscription on settlement and force balance refresh
       if (isSettled) {
@@ -563,7 +585,7 @@ export class DerivWebSocketService {
         this.emitError(errorMsg);
         reject(new Error(errorMsg));
       }, timeoutMs);
-      this.pending.set(req_id, { resolve, reject, timeout });
+      this.pending.set(req_id, { resolve, reject, timeout, requestType: Object.keys(payload)[0] ?? "unknown" });
       try {
         this.ws!.send(JSON.stringify(message));
       } catch (e: any) {

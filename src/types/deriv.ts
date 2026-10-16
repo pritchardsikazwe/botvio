@@ -94,6 +94,7 @@ export type DerivContractUpdate = {
   longcode: string;
   underlying: string;
   contract_type: string;
+  currency: string;
 };
 
 export type DerivMessage =

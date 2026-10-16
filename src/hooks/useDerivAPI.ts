@@ -518,7 +518,7 @@ export const useDerivAPI = () => {
       service.trackContractSubscription(contractId);
       const response = await service.send({
         proposal_open_contract: 1,
-        contract_id: contractId,
+        contract_id: Number(contractId),
         subscribe: 1,
       });
       return response;
