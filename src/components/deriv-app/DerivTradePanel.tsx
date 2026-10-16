@@ -310,11 +310,18 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
     addLog(`Buying ${label} on ${symbol} for ${currency} ${Number(stake).toFixed(2)}...`);
     try {
       const params = buildParams(contract);
-      const fingerprint = quoteFingerprint(params);
-      const reusableQuote = quote && quote.fingerprint === fingerprint && Date.now() - quote.createdAt <= 15000;
-      const proposal = reusableQuote
-        ? { id: quote.id, ask_price: quote.ask }
-        : await getProposal(params);
+      // Always request a new proposal immediately before buying. Deriv can
+      // invalidate a previously displayed proposal before its local 15s timer,
+      // so a quote shown in the UI must never be treated as a buy token.
+      const proposal = await getProposal(params);
+      setQuote({
+        id: proposal.id,
+        ask: Number(proposal.ask_price),
+        payout: Number(proposal.payout),
+        longcode: proposal.longcode,
+        createdAt: Date.now(),
+        fingerprint: quoteFingerprint(params),
+      });
       const result = await buyContract(proposal.id, proposal.ask_price);
       await subscribeContract(result.contract_id).catch((e: unknown) => {
         const message = e instanceof Error ? e.message : "Contract subscription failed";
