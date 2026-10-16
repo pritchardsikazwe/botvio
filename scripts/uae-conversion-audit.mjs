@@ -20,6 +20,9 @@ const page = read("src/pages/StartTrading.tsx");
 const routes = read("src/AppRoutes.tsx");
 const robots = read("public/robots.txt");
 const sitemap = read("public/sitemap-uae-conversion.xml");
+const canonicalSitemap = read("public/sitemap.xml");
+const redirects = read("public/_redirects");
+const dubaiPosts = read("src/content/dubaiBlogPosts.ts");
 
 check("StartTrading route is imported", /import StartTrading from ["']\.\/pages\/StartTrading["']/.test(routes));
 check("StartTrading path is registered", /path=["']start-trading["'][\s\S]{0,100}<StartTrading\s*\/>/.test(routes));
@@ -31,6 +34,10 @@ check("Campaign metadata is recorded", page.includes("utm_campaign") && page.inc
 check("UAE eligibility caution is visible", /Confirm directly with the broker|Confirm that the broker accepts residents/.test(page));
 check("UAE sitemap is valid XML shape", sitemap.trim().startsWith("<?xml") && sitemap.includes("</urlset>"));
 check("UAE sitemap contains broker page", sitemap.includes("https://botvio.live/start-trading"));
+check("Canonical sitemap includes broker page", canonicalSitemap.includes("https://botvio.live/start-trading"));
+check("Legacy /sitemap path redirects to sitemap.xml", /^\\/sitemap\\s+\\/sitemap\\.xml\\s+301/m.test(redirects));
+const sitemapBlogSlugs = [...sitemap.matchAll(/<loc>https:\/\/botvio\\.live\/blog\/([^<]+)<\\/loc>/g)].map((match) => match[1]);
+check("UAE sitemap blog URLs exist in Dubai article source", sitemapBlogSlugs.length > 0 && sitemapBlogSlugs.every((slug) => dubaiPosts.includes(`"${slug}":`)));
 check("robots.txt references UAE conversion sitemap", robots.includes("Sitemap: https://botvio.live/sitemap-uae-conversion.xml"));
 
 const failed = checks.filter((x) => !x.passed);
