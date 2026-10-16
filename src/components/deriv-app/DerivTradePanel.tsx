@@ -192,8 +192,8 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   }, [authorized, symbol, subscribeTicks, unsubscribeTicks, addLog]);
 
   useEffect(() => {
-    if (!lastTick?.quote) return;
-    ticks.current = [...ticks.current, lastTick.quote].slice(-200);
+    if (lastTick?.quote == null || !Number.isFinite(Number(lastTick.quote))) return;
+    ticks.current = [...ticks.current, Number(lastTick.quote)].slice(-200);
     setChartTicks([...ticks.current]);
     if (ticks.current.length >= 15) { try { setRsiValue(rsi(ticks.current, 14)); } catch {} }
     if (ticks.current.length >= 30) { try { setSignal(runEngine(engine, ticks.current)); } catch {} }
@@ -205,13 +205,14 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       setActiveContract(prev => prev?.id === update.contract_id ? {
         id: update.contract_id,
         buy: Number(update.buy_price),
-        payout: Number(update.payout),
-        profit: Number(update.profit),
+        payout: Number.isFinite(Number(update.payout)) ? Number(update.payout) : 0,
+        profit: Number.isFinite(Number(update.profit)) ? Number(update.profit) : 0,
         validToSell: !!update.is_valid_to_sell,
         status: update.status,
       } : prev);
       if (["won", "lost", "sold"].includes(update.status)) {
-        addLog(`Contract #${update.contract_id} ${update.status} — P/L ${Number(update.profit).toFixed(2)}`, update.status === "won" ? "success" : update.status === "lost" ? "error" : "info");
+        const profit = Number.isFinite(Number(update.profit)) ? Number(update.profit) : 0;
+        addLog(`Contract #${update.contract_id} ${update.status} — P/L ${profit.toFixed(2)}`, update.status === "won" ? "success" : update.status === "lost" ? "error" : "info");
       }
     });
   }, [authorized, onContractUpdate, addLog]);
