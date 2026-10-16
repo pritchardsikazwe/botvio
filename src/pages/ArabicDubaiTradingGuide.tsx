@@ -43,6 +43,13 @@ export default function ArabicDubaiTradingGuide() {
           </div>
         </section>
 
+        <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-7">
+          <p className="text-xs font-semibold text-primary">الخطوة التالية · مقارنة الوسطاء</p>
+          <h2 className="mt-2 text-xl font-bold">قارن بين Deriv وExness حسب السوق الذي تدرسه</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">إذا كنت تبحث عن الذهب XAUUSD أو الفوركس أو المؤشرات الاصطناعية، فراجع فئة المنتج والمخاطر وتحقق من أهلية فتح الحساب داخل الإمارات قبل التسجيل.</p>
+          <div className="mt-4"><Link to="/start-trading?utm_source=dubai_ar_hub&utm_medium=internal&utm_campaign=uae_broker_choice"><Button>مقارنة خيارات الوسطاء <ArrowRight className="ml-2 h-4 w-4" /></Button></Link></div>
+        </section>
+
         <section className="mt-10">
           <div className="mb-5">
             <p className="text-[10px] font-semibold text-primary">دليل دبي العربي</p>
