@@ -276,6 +276,34 @@ export const LOCALIZED_MARKETS: Record<string, LocalizedMarket> = {
     localContext:["Singapore English","Singapore Time (SGT)","Singapore dollar (SGD)","Singapore traders"],
     articleTopics:["How to start trading in Singapore","Asian session trading guide","Gold XAUUSD Singapore","MT5 Singapore guide","Risk management"]
   },
+
+  CH: {
+    country:"CH", countryName:"Schweiz", lang:"de", hreflang:"de-CH", slug:"switzerland",
+    nativeMarketName:"Schweizer Markt",
+    title:"Trading in der Schweiz: Forex, Gold, MT5 und Risikomanagement",
+    description:"Deutschsprachige Trading-Lernhilfen für die Schweiz zu Forex, Gold XAUUSD, MT5, Gebühren, Risiken und Anbieterprüfung.",
+    searchTerms:["Trading Schweiz","Forex Schweiz","Gold XAUUSD Schweiz","MT5 Schweiz","Trading Risikomanagement"],
+    localContext:["Schweizer Hochdeutsch","Schweizer Zeitzone (CET/CEST)","Schweizer Franken (CHF)","Anbieter-Verfügbarkeit in der Schweiz prüfen"],
+    articleTopics:["Trading in der Schweiz: Grundlagen für Einsteiger","Forex und Handelszeiten in Schweizer Zeit","Gold XAUUSD verstehen","MT5 sicher einrichten","Risikomanagement und Anbieterprüfung"]
+  },
+  "CH-FR": {
+    country:"CH-FR", countryName:"Suisse romande", lang:"fr", hreflang:"fr-CH", slug:"switzerland-fr",
+    nativeMarketName:"Marché suisse romand",
+    title:"Trading en Suisse : Forex, or, MT5 et gestion du risque",
+    description:"Guides en français pour la Suisse sur le forex, l'or XAUUSD, MT5, les frais, les risques et la vérification des prestataires.",
+    searchTerms:["trading Suisse","forex Suisse","or XAUUSD Suisse","MT5 Suisse","gestion du risque trading"],
+    localContext:["Français de Suisse","Fuseau horaire suisse (CET/CEST)","Franc suisse (CHF)","Vérifier la disponibilité et les règles applicables"],
+    articleTopics:["Débuter le trading en Suisse","Forex et horaires de marché en heure suisse","Comprendre l'or XAUUSD","Configurer MT5 avec prudence","Gestion du risque et vérification des prestataires"]
+  },
+  "CH-IT": {
+    country:"CH-IT", countryName:"Svizzera italiana", lang:"it", hreflang:"it-CH", slug:"switzerland-it",
+    nativeMarketName:"Mercato della Svizzera italiana",
+    title:"Trading in Svizzera: Forex, oro, MT5 e gestione del rischio",
+    description:"Guide in italiano per la Svizzera su forex, oro XAUUSD, MT5, costi, rischi e verifica dei fornitori.",
+    searchTerms:["trading Svizzera","forex Svizzera","oro XAUUSD Svizzera","MT5 Svizzera","gestione del rischio trading"],
+    localContext:["Italiano svizzero","Fuso orario svizzero (CET/CEST)","Franco svizzero (CHF)","Verificare disponibilità e requisiti locali"],
+    articleTopics:["Come iniziare a fare trading in Svizzera","Forex e orari di mercato in ora svizzera","Capire l'oro XAUUSD","Configurare MT5 con prudenza","Gestione del rischio e verifica dei fornitori"]
+  },
   QA: {
     country:"QA", countryName:"قطر", lang:"ar", hreflang:"ar-QA", slug:"qatar",
     nativeMarketName:"السوق القطري", title:"التداول في قطر: الفوركس والذهب وMT5 وإدارة المخاطر",
