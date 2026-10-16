@@ -1557,4 +1557,18 @@
   <url><loc>https://botvio.live/markets/switzerland</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/markets/switzerland-fr</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/markets/switzerland-it</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/congo-drc</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/congo-brazzaville</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/angola</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/sudan</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/mali</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/senegal</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/ghana</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/burkina-faso</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/morocco</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/morocco-fr</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/nigeria</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/egypt</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/kenya</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://botvio.live/markets/south-africa</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
