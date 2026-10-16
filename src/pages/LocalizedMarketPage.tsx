@@ -128,11 +128,11 @@ export default function LocalizedMarketPage() {
         <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">{copy.education} · Botvio Academy</p>
           <h2 className="mt-2 text-xl font-bold">{copy.start}</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{market.articleTopics[0]}. Continue with structured lessons, practise risk management, then review whether any trading product is available and suitable in your jurisdiction.</p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{copy.intro(market.countryName)}</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link to="/learn"><Button>{copy.education}</Button></Link>
             <Link to="/learning-paths"><Button variant="outline">{copy.start}</Button></Link>
-            <Link to={`/start-trading?utm_source=localized_market&utm_medium=internal&utm_campaign=${market.slug}`}><Button variant="outline">{copy.local}</Button></Link>
+            <Link to="/signup"><Button variant="outline">{copy.start}</Button></Link>
           </div>
           <p className="mt-3 text-xs leading-5 text-muted-foreground">Educational content only. Trading can result in losses. Broker links may be affiliate links; verify product access, fees and local requirements before opening an account.</p>
         </section>
@@ -150,7 +150,7 @@ export default function LocalizedMarketPage() {
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link to="/learn" className="text-sm font-semibold text-primary underline underline-offset-4">{copy.start} →</Link>
-                  <Link to={`/start-trading?utm_source=localized_topic&utm_medium=internal&utm_campaign=${market.slug}&utm_content=${i + 1}`} className="text-sm font-semibold text-primary underline underline-offset-4">{copy.local} →</Link>
+                  <Link to="/learning-paths" className="text-sm font-semibold text-primary underline underline-offset-4">{copy.risk} →</Link>
                 </div>
               </article>
             ))}
