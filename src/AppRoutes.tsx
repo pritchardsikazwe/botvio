@@ -135,6 +135,7 @@ import CryptoMarket from "./pages/markets/CryptoMarket";
 import AfricaMarket from "./pages/markets/AfricaMarket";
 import BrokerPage from "./pages/BrokerPage";
 import StartTrading from "./pages/StartTrading";
+import BrokerOnboarding from "./pages/BrokerOnboarding";
 import BrokersIndex from "./pages/BrokersIndex";
 import BinaryOptions from "./pages/BinaryOptions";
 import DerivOptionsTerminalPage from "./pages/DerivOptionsTerminalPage";
@@ -247,6 +248,7 @@ export const AppRoutes = () => {
     <Route path=".lovable/oauth/consent" element={<OAuthConsent />} />
     <Route path="landing" element={<Landing />} />
     <Route path="start-trading" element={<StartTrading />} />
+    <Route path="broker-onboarding" element={<BrokerOnboarding />} />
     <Route path="install" element={<Install />} />
     <Route path="apps" element={<StandaloneAppsHub />} />
     <Route path="apps/gold-robot" element={<StandaloneApp appId="gold-robot" />} />
