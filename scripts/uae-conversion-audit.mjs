@@ -22,7 +22,7 @@ const robots = read("public/robots.txt");
 const sitemap = read("public/sitemap-uae-conversion.xml");
 
 check("StartTrading route is imported", /import StartTrading from ["']\.\/pages\/StartTrading["']/.test(routes));
-check("StartTrading path is registered", /path=["']start-trading["'][^>]*StartTrading|StartTrading[^>]*path=["']start-trading["']/.test(routes));
+check("StartTrading path is registered", /path=["']start-trading["'][\s\S]{0,100}<StartTrading\s*\/>/.test(routes));
 check("Deriv affiliate URL is configured", page.includes("https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/"));
 check("Exness affiliate URL is configured", page.includes("https://one.exness-track.com/a/ts1kvs1k"));
 check("Outbound click event is present", page.includes('event_name: "affiliate_outbound_click"'));
