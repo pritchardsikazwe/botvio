@@ -211,7 +211,8 @@ export const seoPages: Record<string, SEOPage> = {
 <li>Maximum simultaneous trades</li>
 <li>Cool-down periods after consecutive losses</li>
 </ul>
-<p>Always start with a demo account and only trade with funds you can afford to lose.</p>`
+<p>Always start with a demo account and only trade with funds you can afford to lose.</p>
+<p>Keep the execution path clear: Deriv Options contracts use the Deriv API, while conventional CFD trading may use MT5 and a separate trade-copy connection. They are not interchangeable. Review the <a href="/brokers/deriv">Deriv broker guide</a>, the <a href="/gold">gold/XAUUSD hub</a> and the <a href="/synthetic-hub">synthetic-indices hub</a> before selecting a workflow.</p>`
       }
     ],
     faqs: [
