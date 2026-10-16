@@ -85,6 +85,13 @@
       "when": 1791542213842,
       "tag": "0011_follower_signal_preferences_service_grant",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792128061232,
+      "tag": "0012_allow_public_read_global_access_setting",
+      "breakpoints": true
     }
   ]
 }
