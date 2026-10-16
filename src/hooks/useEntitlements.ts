@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { OPEN_ACCESS } from "@/config/access";
 
 export interface Entitlement {
   id: string;
@@ -67,6 +68,7 @@ export function useHasEntitlement(productId: string | undefined) {
   const { data: entitlements } = useEntitlements();
 
   if (!productId) return false;
+  if (OPEN_ACCESS) return true;
 
   // Staff/admin roles can inspect all premium products without purchasing each one.
   if (user && (isAdmin || isSuperAdmin || isSignalManager)) return true;
@@ -84,6 +86,7 @@ export function useHasProductType(type: string) {
   const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const { data: entitlements } = useEntitlements();
 
+  if (OPEN_ACCESS) return true;
   if (user && (isAdmin || isSuperAdmin || isSignalManager)) return true;
   if (!user && hasVisitorPreview()) return true;
 
@@ -97,5 +100,5 @@ export function useMyProducts(type?: string) {
   const filtered = type
     ? entitlements?.filter((e) => e.products?.type === type)
     : entitlements;
-  return { data: filtered, isLoading };
+  return { data: entitlements ? filtered : entitlements, isLoading };
 }
