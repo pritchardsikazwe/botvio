@@ -128,6 +128,7 @@ function getBrokerForSymbol(symbol: string): { name: string; link: string; color
 
 // Homepage shows up to 15 of the newest published signals from the last 36 hours,
 // mixing short-term, intraday and daily horizons first.
+const CAT_OFFSET_MS = 2 * 60 * 60 * 1000;
 const HOME_SIGNAL_LIMIT = 15;
 const HOME_LOOKBACK_MS = 36 * 60 * 60 * 1000;
 const HOME_HORIZON_PRIORITY = ["M1", "M15", "D1", "H1"];
