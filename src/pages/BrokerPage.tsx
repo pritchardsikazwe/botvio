@@ -67,8 +67,8 @@ const BROKER_META: Record<string, {
   pros: string[]; cons: string[];
 }> = {
   "pocket-option": {
-    title: "Pocket Option Signals Guide | Botvio Trading Research",
-    description: "Explore Botvio Pocket Option signal research, compare assets and expiry times, test setups on demo, and manage risk. Signals are educational and are not guaranteed.",
+    title: "Pocket Option Signal Bot & Free Signals Guide | Botvio",
+    description: "Explore Pocket Option signal-bot research, free signal options, asset and expiry comparisons, demo testing and risk controls. Signals can be wrong and are not guaranteed.",
     features: ["Check execution and payout terms on the broker platform", "OTC market availability may vary", "Demo account available", "Review minimum deposit and withdrawal terms", "Social trading features may vary"],
     bestFor: ["OTC asset research", "Expiry-time comparisons", "Demo testing", "Risk-aware trading"],
     color: "text-blue-400", gradient: "from-blue-600 to-blue-400",
