@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useHasEntitlement } from "@/hooks/useEntitlements";
+import { useGlobalAccess } from "@/hooks/useGlobalAccess";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +9,8 @@ import { Lock, ArrowRight } from "lucide-react";
 
 export function ProductGate({ slug, title, description, children }: { slug: string; title: string; description: string; children: ReactNode }) {
   const allowed = useHasEntitlement(slug);
-  if (allowed) return <>{children}</>;
+  const globalAccess = useGlobalAccess();
+  if (allowed || globalAccess) return <>{children}</>;
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-6">
