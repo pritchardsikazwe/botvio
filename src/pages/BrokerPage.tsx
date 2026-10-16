@@ -26,38 +26,38 @@ import { brokerReviews } from "@/data/brokerReviews";
 // ── Broker-specific strategies ──
 const BROKER_STRATEGIES: Record<string, Array<{
   name: string; icon: string; description: string; bestExpiry: string;
-  winRate: string; markets: string[]; difficulty: string;
+  markets: string[]; difficulty: string;
 }>> = {
   "pocket-option": [
-    { name: "Momentum Continuation", icon: "🔥", description: "Ride strong OTC breakout candles with EMA alignment. Enter on pullback confirmation for 60s expiry.", bestExpiry: "60s", winRate: "72%", markets: ["EURUSD_otc", "GBPUSD_otc", "USDJPY_otc"], difficulty: "Beginner" },
-    { name: "S/R Rejection Scalp", icon: "🛡️", description: "Identify key support/resistance levels on OTC pairs. Trade rejection wicks with tight 30–60s entries.", bestExpiry: "30-60s", winRate: "68%", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Intermediate" },
-    { name: "Exhaustion Reversal", icon: "♻️", description: "3–5 consecutive candles in one direction signal exhaustion. Enter reverse on wick confirmation.", bestExpiry: "60s", winRate: "65%", markets: ["GBPUSD_otc", "EURJPY_otc"], difficulty: "Intermediate" },
-    { name: "OTC Range Fade", icon: "📊", description: "Trade edges of compressed OTC ranges. Fade support/resistance touches during low-volatility windows.", bestExpiry: "120s", winRate: "70%", markets: ["EURUSD_otc", "USDJPY_otc"], difficulty: "Beginner" },
-    { name: "News Spike Recovery", icon: "📰", description: "After major news spikes, wait for reversion to mean. Enter with trend alignment post-cooldown.", bestExpiry: "300s", winRate: "62%", markets: ["XAUUSD", "GBPUSD"], difficulty: "Advanced" },
+    { name: "Momentum Continuation", icon: "🔥", description: "Ride strong OTC breakout candles with EMA alignment. Enter on pullback confirmation for 60s expiry.", bestExpiry: "60s", markets: ["EURUSD_otc", "GBPUSD_otc", "USDJPY_otc"], difficulty: "Beginner" },
+    { name: "S/R Rejection Scalp", icon: "🛡️", description: "Identify key support/resistance levels on OTC pairs. Trade rejection wicks with tight 30–60s entries.", bestExpiry: "30-60s", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Intermediate" },
+    { name: "Exhaustion Reversal", icon: "♻️", description: "3–5 consecutive candles in one direction signal exhaustion. Enter reverse on wick confirmation.", bestExpiry: "60s", markets: ["GBPUSD_otc", "EURJPY_otc"], difficulty: "Intermediate" },
+    { name: "OTC Range Fade", icon: "📊", description: "Trade edges of compressed OTC ranges. Fade support/resistance touches during low-volatility windows.", bestExpiry: "120s", markets: ["EURUSD_otc", "USDJPY_otc"], difficulty: "Beginner" },
+    { name: "News Spike Recovery", icon: "📰", description: "After major news spikes, wait for reversion to mean. Enter with trend alignment post-cooldown.", bestExpiry: "300s", markets: ["XAUUSD", "GBPUSD"], difficulty: "Advanced" },
   ],
   "quotex": [
-    { name: "EMA Crossover Entry", icon: "📈", description: "Use 5/20 EMA cross on 1-min chart. Enter CALL on bullish cross, PUT on bearish. Clean signals on Quotex charts.", bestExpiry: "60s", winRate: "69%", markets: ["EURUSD", "GBPUSD", "BTCUSD"], difficulty: "Beginner" },
-    { name: "Bollinger Bounce", icon: "🎯", description: "Enter when price touches outer Bollinger Band and reverses. Best during ranging sessions.", bestExpiry: "60-120s", winRate: "71%", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Beginner" },
-    { name: "Breakout Retest", icon: "🚀", description: "Wait for a key level to break, then enter on the retest. Continuation candle confirms direction.", bestExpiry: "120s", winRate: "67%", markets: ["GBPJPY", "EURJPY"], difficulty: "Intermediate" },
-    { name: "Micro Pullback", icon: "⚡", description: "In strong trends, enter on small 1–2 candle pullbacks. Use momentum indicators for confirmation.", bestExpiry: "60s", winRate: "73%", markets: ["XAUUSD", "EURUSD"], difficulty: "Intermediate" },
+    { name: "EMA Crossover Entry", icon: "📈", description: "Use 5/20 EMA cross on 1-min chart. Enter CALL on bullish cross, PUT on bearish. Clean signals on Quotex charts.", bestExpiry: "60s", markets: ["EURUSD", "GBPUSD", "BTCUSD"], difficulty: "Beginner" },
+    { name: "Bollinger Bounce", icon: "🎯", description: "Enter when price touches outer Bollinger Band and reverses. Best during ranging sessions.", bestExpiry: "60-120s", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Beginner" },
+    { name: "Breakout Retest", icon: "🚀", description: "Wait for a key level to break, then enter on the retest. Continuation candle confirms direction.", bestExpiry: "120s", markets: ["GBPJPY", "EURJPY"], difficulty: "Intermediate" },
+    { name: "Micro Pullback", icon: "⚡", description: "In strong trends, enter on small 1–2 candle pullbacks. Use momentum indicators for confirmation.", bestExpiry: "60s", markets: ["XAUUSD", "EURUSD"], difficulty: "Intermediate" },
   ],
   "deriv": [
-    { name: "Boom & Crash Sniper", icon: "💥", description: "Detect spike patterns on Boom 500/1000 and Crash indices. Enter after spike confirmation with tight SL.", bestExpiry: "5 ticks", winRate: "74%", markets: ["Boom 500", "Boom 1000", "Crash 500", "Crash 1000"], difficulty: "Advanced" },
-    { name: "V75 Momentum Rider", icon: "🌊", description: "Volatility 75 Index trending strategy. Use EMA 9/20 alignment with RSI confirmation for direction.", bestExpiry: "1-5 min", winRate: "70%", markets: ["Volatility 75", "Volatility 100"], difficulty: "Intermediate" },
-    { name: "Step Index Range", icon: "📏", description: "Step Index moves in fixed increments. Trade range boundaries with high probability reversals.", bestExpiry: "10 ticks", winRate: "76%", markets: ["Step Index"], difficulty: "Beginner" },
-    { name: "Multiplier Trend Follow", icon: "✖️", description: "Use Deriv multipliers to ride trends. AI detects trend start, sets multiplier + stop out level.", bestExpiry: "Open", winRate: "66%", markets: ["EURUSD", "BTCUSD", "XAUUSD"], difficulty: "Advanced" },
-    { name: "Accumulator Edge", icon: "📐", description: "Trade accumulators on low-volatility pairs. AI picks optimal growth rate and barrier distance.", bestExpiry: "Open", winRate: "68%", markets: ["EURUSD", "GBPUSD", "AUDUSD"], difficulty: "Intermediate" },
+    { name: "Boom & Crash Sniper", icon: "💥", description: "Detect spike patterns on Boom 500/1000 and Crash indices. Enter after spike confirmation with tight SL.", bestExpiry: "5 ticks", markets: ["Boom 500", "Boom 1000", "Crash 500", "Crash 1000"], difficulty: "Advanced" },
+    { name: "V75 Momentum Rider", icon: "🌊", description: "Volatility 75 Index trending strategy. Use EMA 9/20 alignment with RSI confirmation for direction.", bestExpiry: "1-5 min", markets: ["Volatility 75", "Volatility 100"], difficulty: "Intermediate" },
+    { name: "Step Index Range", icon: "📏", description: "Step Index moves in fixed increments. Trade range boundaries with high probability reversals.", bestExpiry: "10 ticks", markets: ["Step Index"], difficulty: "Beginner" },
+    { name: "Multiplier Trend Follow", icon: "✖️", description: "Use Deriv multipliers to ride trends. AI detects trend start, sets multiplier + stop out level.", bestExpiry: "Open", markets: ["EURUSD", "BTCUSD", "XAUUSD"], difficulty: "Advanced" },
+    { name: "Accumulator Edge", icon: "📐", description: "Trade accumulators on low-volatility pairs. AI picks optimal growth rate and barrier distance.", bestExpiry: "Open", markets: ["EURUSD", "GBPUSD", "AUDUSD"], difficulty: "Intermediate" },
   ],
   "iq-option": [
-    { name: "Alligator Trend Entry", icon: "🐊", description: "Use Bill Williams Alligator indicator for trend detection. Enter when jaws open with momentum confirmation.", bestExpiry: "3-5 min", winRate: "67%", markets: ["EURUSD", "GBPUSD", "USDJPY"], difficulty: "Intermediate" },
-    { name: "RSI Divergence", icon: "📉", description: "Spot bullish/bearish RSI divergence for reversal entries. Works best on higher timeframes.", bestExpiry: "5 min", winRate: "64%", markets: ["XAUUSD", "EURUSD", "GBPJPY"], difficulty: "Advanced" },
-    { name: "Stock Binary Scalp", icon: "🏢", description: "Trade stock binaries during market hours. Use pre-market data for directional bias.", bestExpiry: "5 min", winRate: "62%", markets: ["AAPL", "TSLA", "AMZN"], difficulty: "Advanced" },
-    { name: "Crypto Breakout", icon: "₿", description: "Trade crypto binaries on breakout from consolidation. Use volume proxy for confirmation.", bestExpiry: "3 min", winRate: "65%", markets: ["BTCUSD", "ETHUSD"], difficulty: "Intermediate" },
+    { name: "Alligator Trend Entry", icon: "🐊", description: "Use Bill Williams Alligator indicator for trend detection. Enter when jaws open with momentum confirmation.", bestExpiry: "3-5 min", markets: ["EURUSD", "GBPUSD", "USDJPY"], difficulty: "Intermediate" },
+    { name: "RSI Divergence", icon: "📉", description: "Spot bullish/bearish RSI divergence for reversal entries. Works best on higher timeframes.", bestExpiry: "5 min", markets: ["XAUUSD", "EURUSD", "GBPJPY"], difficulty: "Advanced" },
+    { name: "Stock Binary Scalp", icon: "🏢", description: "Trade stock binaries during market hours. Use pre-market data for directional bias.", bestExpiry: "5 min", markets: ["AAPL", "TSLA", "AMZN"], difficulty: "Advanced" },
+    { name: "Crypto Breakout", icon: "₿", description: "Trade crypto binaries on breakout from consolidation. Use volume proxy for confirmation.", bestExpiry: "3 min", markets: ["BTCUSD", "ETHUSD"], difficulty: "Intermediate" },
   ],
   "binomo": [
-    { name: "Simple Trend Follow", icon: "📈", description: "Follow the dominant 5-min trend with 1-min entries. Best for beginners learning directional trading.", bestExpiry: "60s", winRate: "70%", markets: ["EURUSD", "GBPUSD"], difficulty: "Beginner" },
-    { name: "Candle Pattern Entry", icon: "🕯️", description: "Identify basic patterns like engulfing, doji, hammer. Enter on confirmation candle close.", bestExpiry: "60-120s", winRate: "66%", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Beginner" },
-    { name: "Tournament Scalp", icon: "🏆", description: "Quick aggressive entries for Binomo tournaments. High frequency, low risk per trade.", bestExpiry: "30s", winRate: "58%", markets: ["EURUSD_otc", "GBPUSD_otc"], difficulty: "Intermediate" },
+    { name: "Simple Trend Follow", icon: "📈", description: "Follow the dominant 5-min trend with 1-min entries. Best for beginners learning directional trading.", bestExpiry: "60s", markets: ["EURUSD", "GBPUSD"], difficulty: "Beginner" },
+    { name: "Candle Pattern Entry", icon: "🕯️", description: "Identify basic patterns like engulfing, doji, hammer. Enter on confirmation candle close.", bestExpiry: "60-120s", markets: ["EURUSD_otc", "AUDUSD_otc"], difficulty: "Beginner" },
+    { name: "Tournament Scalp", icon: "🏆", description: "Quick aggressive entries for Binomo tournaments. High frequency, low risk per trade.", bestExpiry: "30s", markets: ["EURUSD_otc", "GBPUSD_otc"], difficulty: "Intermediate" },
   ],
 };
 
@@ -67,13 +67,13 @@ const BROKER_META: Record<string, {
   pros: string[]; cons: string[];
 }> = {
   "pocket-option": {
-    title: "Pocket Option Signals — AI Trading Signals for Binary Options",
-    description: "Get real-time AI-powered trading signals optimized for Pocket Option. 1-minute binary options, OTC signals, and high-confidence setups.",
-    features: ["Fast execution (< 1s)", "High payouts up to 92%", "OTC market access 24/7", "Demo account available", "$5 minimum deposit", "Social trading"],
-    bestFor: ["OTC binary options", "1-minute expiry signals", "Quick scalping", "Weekend trading"],
+    title: "Pocket Option Signal Bot & Free Signals Guide | Botvio",
+    description: "Explore Pocket Option signal-bot research, free signal options, asset and expiry comparisons, demo testing and risk controls. Signals can be wrong and are not guaranteed.",
+    features: ["Check execution and payout terms on the broker platform", "OTC market availability may vary", "Demo account available", "Review minimum deposit and withdrawal terms", "Social trading features may vary"],
+    bestFor: ["OTC asset research", "Expiry-time comparisons", "Demo testing", "Risk-aware trading"],
     color: "text-blue-400", gradient: "from-blue-600 to-blue-400",
     signalTypes: ["CALL/PUT", "OTC Forex", "1-min Expiry", "Turbo Trades"],
-    pros: ["Fastest OTC execution", "Highest payout rates", "24/7 OTC availability", "Copy trading built-in"],
+    pros: ["Demo account available", "OTC assets may be available outside standard market hours", "Platform includes social trading features"],
     cons: ["No official API", "Limited automation", "Manual execution required"],
   },
   "quotex": {
@@ -87,14 +87,14 @@ const BROKER_META: Record<string, {
     cons: ["Newer platform", "Limited education", "No API access"],
   },
   "deriv": {
-    title: "Deriv Signals — AI Signals for Synthetics, Forex & Binary",
-    description: "Botvio AI signals for Deriv platform. Trade synthetic indices, Boom & Crash, multipliers, and forex.",
-    features: ["Official API for automation", "Synthetic indices 24/7", "Boom & Crash indices", "Multipliers & Accumulators", "$5 minimum deposit", "DTrader + DBot"],
+    title: "Deriv Trading Bot & Signals Guide | API and Synthetic Indices",
+    description: "Learn about Deriv signal research, synthetic indices, Boom & Crash, API automation and demo testing. Check account availability, fees and contract risks before trading.",
+    features: ["Deriv API tools for supported workflows", "Synthetic indices availability varies by product", "Boom & Crash indices", "Multipliers and Accumulators where available", "Demo account for practice", "DTrader and DBot features vary by account"],
     bestFor: ["Synthetic indices", "Automated trading", "Boom & Crash", "API-based execution"],
     color: "text-red-400", gradient: "from-red-600 to-red-400",
     signalTypes: ["Synthetics", "Boom/Crash", "Multipliers", "Accumulators", "Rise/Fall"],
-    pros: ["Full API automation", "Unique synthetic markets", "24/7 trading", "Regulated & trusted"],
-    cons: ["Complex for beginners", "Synthetic-only unique", "Higher learning curve"],
+    pros: ["API options for supported contracts", "Synthetic-market research tools", "Some synthetic markets quote outside standard exchange hours"],
+    cons: ["Contract types have distinct risks", "API integration requires careful permission checks", "Product availability varies by region and account"],
   },
   "iq-option": {
     title: "IQ Option Signals — Professional Binary Options Signals",
@@ -122,7 +122,7 @@ const BROKER_TIPS: Record<string, { dos: string[]; donts: string[]; proTip: stri
   "pocket-option": {
     dos: ["Use demo first to master OTC timing", "Focus on 60s expiry for best payout", "Trade during high-volume OTC sessions", "Follow Botvio signals for entry confirmation"],
     donts: ["Don't trade all assets at once", "Avoid Martingale money management", "Don't chase losses with bigger stakes", "Never skip your trading plan"],
-    proTip: "OTC markets on Pocket Option are available 24/7 — trade weekends when Forex is closed for consistent opportunities.",
+    proTip: "Availability, payouts and trading conditions can vary by asset and account. Check the broker platform and test any setup on demo before risking funds.",
     steps: ["Open Pocket Option account (free demo)", "Connect to Botvio signals page", "Wait for a CALL/PUT signal alert", "Match the asset & expiry on your broker", "Execute the trade within 30 seconds"],
   },
   "quotex": {
@@ -559,9 +559,9 @@ const BrokerPage = () => {
                           <span className="text-muted-foreground">Best Expiry</span>
                           <p className="font-bold mt-0.5">{s.bestExpiry}</p>
                         </div>
-                        <div className="p-2 rounded bg-success/10 border border-success/20">
-                          <span className="text-success">Win Rate</span>
-                          <p className="font-bold text-success mt-0.5">{s.winRate}</p>
+                        <div className="p-2 rounded bg-background/50 border border-border/50">
+                          <span className="text-muted-foreground">Validation</span>
+                          <p className="font-bold mt-0.5">Test on demo</p>
                         </div>
                       </div>
 
@@ -582,8 +582,7 @@ const BrokerPage = () => {
               {/* Strategy disclaimer */}
               <div className="p-4 rounded-lg bg-muted/30 border border-border">
                 <p className="text-xs text-muted-foreground">
-                  ⚠️ Win rates are based on historical backtesting and may vary. Past performance does not guarantee future results.
-                  Always practice on a demo account before trading live.
+                  ⚠️ No independently verified win-rate figures are presented here. Test strategies on a demo account and account for payout, spread, expiry and execution conditions. Past performance does not guarantee future results.
                 </p>
               </div>
             </div>

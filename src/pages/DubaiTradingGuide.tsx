@@ -23,6 +23,12 @@ export default function DubaiTradingGuide() {
         <div className="rounded-2xl border border-border p-4"><ShieldCheck className="h-5 w-5 text-primary" /><h2 className="mt-2 font-semibold">Research first</h2><p className="mt-1 text-sm text-muted-foreground">No guaranteed profits, fabricated performance figures or hidden affiliate relationships.</p></div>
       </div>
     </section>
+    <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-7">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Next step · Broker research</p>
+      <h2 className="mt-2 text-xl font-bold">Compare Deriv and Exness for your market</h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Researching gold/XAUUSD, forex or synthetic indices? Compare the product categories, review risks and verify UAE account eligibility before registering.</p>
+      <div className="mt-4"><Link to="/start-trading?utm_source=dubai_hub&utm_medium=internal&utm_campaign=uae_broker_choice"><Button>Compare broker options <ArrowRight className="ml-2 h-4 w-4" /></Button></Link></div>
+    </section>
     <section className="mt-10"><div className="mb-5 flex items-end justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">Dubai content cluster</p><h2 className="text-2xl font-bold">69 UAE research topics</h2></div><BookOpen className="h-5 w-5 text-primary" /></div>
       <div className="grid gap-4 md:grid-cols-2">{topics.map(([slug,title,desc]) => <article key={slug} className="rounded-2xl border border-border bg-card p-5"><h3 className="text-lg font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{desc}</p><Link to={`/blog/${slug}`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">Read guide <ArrowRight className="h-4 w-4" /></Link></article>)}</div>
     </section>

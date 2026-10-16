@@ -181,8 +181,8 @@ export const seoPages: Record<string, SEOPage> = {
 
   "how-to-automate-deriv-trading": {
     slug: "how-to-automate-deriv-trading",
-    metaTitle: "How to Automate Deriv Trading | Step-by-Step",
-    metaDescription: "Complete guide to automating your Deriv trading with AI bots. Learn setup, strategy selection, risk management, and execution.",
+    metaTitle: "How to Automate Deriv Trading: Setup, API & Risk Guide",
+    metaDescription: "Learn how Deriv automation works, how to connect a bot, test on demo, compare API and MT5 workflows, and set practical risk limits before trading live.",
     h1: "How to Automate Deriv Trading: Complete Guide",
     sections: [
       {
@@ -211,12 +211,13 @@ export const seoPages: Record<string, SEOPage> = {
 <li>Maximum simultaneous trades</li>
 <li>Cool-down periods after consecutive losses</li>
 </ul>
-<p>Always start with a demo account and only trade with funds you can afford to lose.</p>`
+<p>Always start with a demo account and only trade with funds you can afford to lose.</p>
+<p>Keep the execution path clear: Deriv Options contracts use the Deriv API, while conventional CFD trading may use MT5 and a separate trade-copy connection. They are not interchangeable. Review the <a href="/brokers/deriv">Deriv broker guide</a>, the <a href="/gold">gold/XAUUSD hub</a> and the <a href="/synthetic-hub">synthetic-indices hub</a> before selecting a workflow.</p>`
       }
     ],
     faqs: [
       { q: "How do I automate Deriv trading?", a: "Connect your Deriv account to an automation platform like Botvio via OAuth, select a trading mode, configure risk settings, and enable auto-execution. Start with a demo account first." },
-      { q: "Is automated trading on Deriv legal?", a: "Yes, Deriv supports automated trading through its official API. Platforms that use Deriv's OAuth system are authorized to place trades on your behalf." },
+      { q: "Can I use any third-party bot with Deriv?", a: "Not automatically. Verify the platform's current integration, requested permissions, terms and regional availability. Never share your password or API token with an untrusted service." },
       { q: "Do I need coding skills to automate trading?", a: "No, platforms like Botvio provide pre-built strategies that can be configured without coding. For custom strategies, some platforms support scripting or Expert Advisors on MT5." },
     ],
     keywords: [
@@ -263,24 +264,24 @@ export const seoPages: Record<string, SEOPage> = {
   },
   "gold-trading-signals": {
     slug: "gold-trading-signals",
-    metaTitle: "Gold Trading Signals | XAUUSD AI Analysis",
-    metaDescription: "Get AI-powered gold (XAUUSD) trading signals. Real-time analysis, entry/exit levels, and risk management for gold traders worldwide.",
+    metaTitle: "Gold Trading Signals & XAUUSD Analysis | Botvio",
+    metaDescription: "Explore gold trading signals for XAUUSD, chart-analysis steps, support and resistance, London/New York session planning and risk controls. Signals can be wrong.",
     h1: "Gold Trading Signals: AI-Powered XAUUSD Analysis",
     sections: [
       {
         heading: "Why Trade Gold (XAUUSD)?",
-        content: `<p>Gold (XAUUSD) is one of the most traded commodities globally. It serves as a safe-haven asset during economic uncertainty and offers high volatility suitable for both short-term and long-term trading strategies.</p>
-<p>Gold trading is available through brokers like Deriv, Exness, and Weltrade via MetaTrader 5 (MT5). AI-powered platforms like Botvio provide automated gold signal analysis and copy trading capabilities.</p>`
+        content: `<p>Gold (XAUUSD) is widely followed during changes in interest-rate expectations, U.S. dollar strength, inflation expectations and risk sentiment. It can move sharply in either direction; no session or strategy makes a trade inherently safe.</p>
+<p>Gold trading is available through brokers like Deriv, Exness, and Weltrade via MetaTrader 5 (MT5). Tools such as Botvio can help traders review gold charts and organize signal research. Check which features are available to your account before relying on any workflow.</p>`
       },
       {
         heading: "How AI Gold Trading Signals Work",
         content: `<p>AI gold trading signals use technical analysis indicators including Moving Averages, RSI, Fibonacci retracements, and support/resistance levels to identify potential trade entries.</p>
-<p>Botvio's AI chart analysis engine can scan gold charts, identify key levels (Entry, Stop Loss, Take Profit), and post signals to the community feed automatically. This removes emotional bias and provides consistent, data-driven trade ideas.</p>`
+<p>Botvio's AI chart analysis engine can scan gold charts, identify key levels (Entry, Stop Loss, Take Profit), and post signals to the community feed automatically. These tools can help structure a trading plan, but they do not remove risk or guarantee consistent results. Validate every setup and account for spreads, slippage and market conditions.</p>`
       },
       {
         heading: "Gold Trading Strategies",
         content: `<h3>Scalping Gold</h3>
-<p>Scalping involves taking quick trades on small price movements. Gold's high liquidity makes it ideal for scalping during major sessions (London, New York). AI bots can execute scalps faster than manual traders.</p>
+<p>Scalping involves taking quick trades on small price movements. Gold's high liquidity makes it ideal for scalping during major sessions (London, New York). Automation may change execution speed, but results depend on broker connectivity, latency, spread, slippage and the strategy used.</p>
 <h3>Swing Trading Gold</h3>
 <p>Swing trading captures larger moves over days or weeks. AI analysis identifies key support/resistance zones and trend changes for optimal swing entries.</p>
 <h3>News-Based Trading</h3>
@@ -289,15 +290,15 @@ export const seoPages: Record<string, SEOPage> = {
       {
         heading: "Best Brokers for Gold Trading",
         content: `<ul>
-<li><strong>Deriv</strong> — Offers gold CFDs and multipliers with competitive spreads</li>
-<li><strong>Exness</strong> — Popular for gold trading with tight spreads and fast execution</li>
-<li><strong>Weltrade</strong> — Supports MT5 gold trading with various account types</li>
+<li><strong>Deriv</strong> — Review the instruments and account types currently available to your region</li>
+<li><strong>Exness</strong> — Check the contracting entity, XAUUSD specifications, fees and leverage for your account</li>
+<li><strong>Weltrade</strong> — Confirm the current MT5 symbol, contract size, trading hours and account conditions</li>
 </ul>
-<p>All three brokers integrate with Botvio's copy trading system via MT5 bridge for automated gold trading.</p>`
+<p>Broker features and Botvio connection options vary. Confirm the supported connection method for your broker and account before attempting automation. Broker mentions are informational and do not guarantee suitability or trading results.</p>`
       }
     ],
     faqs: [
-      { q: "What is the best platform for gold trading signals?", a: "Botvio provides AI-powered gold (XAUUSD) trading signals with automated chart analysis. Signals include entry price, stop loss, and take profit levels for informed decision-making." },
+      { q: "What is the best platform for gold trading signals?", a: "Compare platforms by data quality, transparent methodology, update frequency, risk controls and verifiable historical records. Botvio provides gold research tools, but signals are probabilistic and should be independently checked." },
       { q: "Can I automate gold trading?", a: "Yes, using platforms like Botvio with MT5 copy trading, you can automate gold trading. Connect your broker account and follow experienced gold traders or use AI signals." },
       { q: "What is the best time to trade gold?", a: "Gold is most active during London (08:00-16:00 GMT) and New York (13:00-21:00 GMT) sessions. The overlap period offers highest liquidity and volatility." },
       { q: "How much money do I need to trade gold?", a: "Minimum deposits vary by broker. Exness allows accounts from $10, while other brokers may require $50-$100. Use leverage responsibly and only trade what you can afford to lose." },
