@@ -118,14 +118,24 @@ export default function LocalizedMarketPage() {
 
   const copy = languageCopy[market.lang] || languageCopy.en;
   const rtl = market.lang === "ar" || market.lang === "ur";
-  const isArabicMarketUrl = location.pathname.startsWith("/ar/markets/") && market.lang === "ar";
-  const canonical = isArabicMarketUrl ? `https://botvio.live/ar/markets/${market.slug}` : `https://botvio.live/markets/${market.slug}`;
-  const englishCanonical = `https://botvio.live/markets/${market.slug}`;
+  // Arabic country hubs have one canonical Arabic URL; avoid indexing a duplicate
+  // Arabic page at both /markets/... and /ar/markets/....
+  const canonical = market.lang === "ar"
+    ? `https://botvio.live/ar/markets/${market.slug}`
+    : `https://botvio.live/markets/${market.slug}`;
+  const swissAlternates = [
+    { code: "de-CH", href: "https://botvio.live/markets/switzerland" },
+    { code: "fr-CH", href: "https://botvio.live/markets/switzerland-fr" },
+    { code: "it-CH", href: "https://botvio.live/markets/switzerland-it" },
+  ];
+  const alternateLocales = ["CH", "CH-FR", "CH-IT"].includes(market.country)
+    ? swissAlternates
+    : [{ code: market.hreflang, href: canonical }];
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="min-h-screen bg-background">
       <SEOHead title={market.title} description={market.description} canonicalUrlOverride={canonical}
-        alternateLocales={market.lang === "ar" ? [{ code: market.hreflang, href: canonical }, { code: "en", href: englishCanonical }] : [{ code: "en", href: canonical }]}
+        alternateLocales={alternateLocales}
         jsonLd={{"@context":"https://schema.org","@type":"CollectionPage",name:market.title,description:market.description,url:canonical,inLanguage:market.lang}} />
       <Header />
       <main className="container mx-auto px-4 py-8">

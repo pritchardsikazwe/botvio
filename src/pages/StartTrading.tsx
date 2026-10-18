@@ -30,6 +30,25 @@ const BROKERS = {
 type BrokerKey = keyof typeof BROKERS;
 type TradingGoal = "synthetics" | "forex" | "unsure";
 
+function getOrCreateTrackingId(storage: Storage, key: string) {
+  try {
+    const existing = storage.getItem(key);
+    if (existing) return existing;
+    const created = crypto.randomUUID();
+    storage.setItem(key, created);
+    return created;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
+function trackingIdentity() {
+  return {
+    visitor_id: getOrCreateTrackingId(window.localStorage, "botvio_visitor_id"),
+    session_id: getOrCreateTrackingId(window.sessionStorage, "botvio_session_id"),
+  };
+}
+
 function campaignContext() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -43,6 +62,7 @@ function campaignContext() {
 function recordAffiliateClick(broker: BrokerKey) {
   const params = campaignContext();
   void (supabase as any).from("analytics_events").insert({
+    ...trackingIdentity(),
     event_name: "affiliate_outbound_click",
     path: window.location.pathname,
     referrer: document.referrer || "",
@@ -69,6 +89,7 @@ function recordAffiliateClick(broker: BrokerKey) {
 function recordMarketPreference(goal: TradingGoal) {
   const params = campaignContext();
   void (supabase as any).from("analytics_events").insert({
+    ...trackingIdentity(),
     event_name: "broker_market_preference",
     path: window.location.pathname,
     referrer: document.referrer || "",
