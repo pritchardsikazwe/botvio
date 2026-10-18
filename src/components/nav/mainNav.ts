@@ -1,7 +1,7 @@
 /** Botvio 2026 customer-facing information architecture. Keep underlying routes and engines intact; expose simple product entry points. */
 import {
   BarChart3, Bot, BookOpen, ChartCandlestick, Coins, GraduationCap, Layers,
-  LineChart, Newspaper, ScanSearch, Shield, Signal, Sparkles, Users,
+  LineChart, Newspaper, ScanSearch, Shield, Signal, Sparkles, Users, Globe,
   Zap, Wrench, type LucideIcon,
 } from "lucide-react";
 
@@ -101,6 +101,19 @@ export const MORE_NAV: { label: string; items: NavItem[] }[] = [
       { label: "Marketplace", to: "/marketplace", icon: Layers },
       { label: "Performance Transparency", to: "/performance-transparency", icon: BarChart3 },
       { label: "Connections", to: "/connections", icon: Shield },
+    ],
+  },
+  {
+    label: "International Markets",
+    items: [
+      { label: "Saudi Arabia — العربية", to: "/ar/markets/saudi-arabia", icon: Globe },
+      { label: "Pakistan — اردو", to: "/markets/pakistan", icon: Globe },
+      { label: "India — हिन्दी", to: "/markets/india", icon: Globe },
+      { label: "Indonesia — Bahasa Indonesia", to: "/markets/indonesia", icon: Globe },
+      { label: "Qatar — العربية", to: "/ar/markets/qatar", icon: Globe },
+      { label: "Switzerland — Deutsch", to: "/markets/switzerland", icon: Globe },
+      { label: "Switzerland — Français", to: "/markets/switzerland-fr", icon: Globe },
+      { label: "Switzerland — Italiano", to: "/markets/switzerland-it", icon: Globe },
     ],
   },
   {
