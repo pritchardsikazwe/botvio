@@ -276,6 +276,124 @@ export const LOCALIZED_MARKETS: Record<string, LocalizedMarket> = {
     localContext:["Singapore English","Singapore Time (SGT)","Singapore dollar (SGD)","Singapore traders"],
     articleTopics:["How to start trading in Singapore","Asian session trading guide","Gold XAUUSD Singapore","MT5 Singapore guide","Risk management"]
   },
+
+  CH: {
+    country:"CH", countryName:"Schweiz", lang:"de", hreflang:"de-CH", slug:"switzerland",
+    nativeMarketName:"Schweizer Markt",
+    title:"Trading in der Schweiz: Forex, Gold, MT5 und Risikomanagement",
+    description:"Deutschsprachige Trading-Lernhilfen für die Schweiz zu Forex, Gold XAUUSD, MT5, Gebühren, Risiken und Anbieterprüfung.",
+    searchTerms:["Trading Schweiz","Forex Schweiz","Gold XAUUSD Schweiz","MT5 Schweiz","Trading Risikomanagement"],
+    localContext:["Schweizer Hochdeutsch","Schweizer Zeitzone (CET/CEST)","Schweizer Franken (CHF)","Anbieter-Verfügbarkeit in der Schweiz prüfen"],
+    articleTopics:["Trading in der Schweiz: Grundlagen für Einsteiger","Forex und Handelszeiten in Schweizer Zeit","Gold XAUUSD verstehen","MT5 sicher einrichten","Risikomanagement und Anbieterprüfung"]
+  },
+  "CH-FR": {
+    country:"CH-FR", countryName:"Suisse romande", lang:"fr", hreflang:"fr-CH", slug:"switzerland-fr",
+    nativeMarketName:"Marché suisse romand",
+    title:"Trading en Suisse : Forex, or, MT5 et gestion du risque",
+    description:"Guides en français pour la Suisse sur le forex, l'or XAUUSD, MT5, les frais, les risques et la vérification des prestataires.",
+    searchTerms:["trading Suisse","forex Suisse","or XAUUSD Suisse","MT5 Suisse","gestion du risque trading"],
+    localContext:["Français de Suisse","Fuseau horaire suisse (CET/CEST)","Franc suisse (CHF)","Vérifier la disponibilité et les règles applicables"],
+    articleTopics:["Débuter le trading en Suisse","Forex et horaires de marché en heure suisse","Comprendre l'or XAUUSD","Configurer MT5 avec prudence","Gestion du risque et vérification des prestataires"]
+  },
+  "CH-IT": {
+    country:"CH-IT", countryName:"Svizzera italiana", lang:"it", hreflang:"it-CH", slug:"switzerland-it",
+    nativeMarketName:"Mercato della Svizzera italiana",
+    title:"Trading in Svizzera: Forex, oro, MT5 e gestione del rischio",
+    description:"Guide in italiano per la Svizzera su forex, oro XAUUSD, MT5, costi, rischi e verifica dei fornitori.",
+    searchTerms:["trading Svizzera","forex Svizzera","oro XAUUSD Svizzera","MT5 Svizzera","gestione del rischio trading"],
+    localContext:["Italiano svizzero","Fuso orario svizzero (CET/CEST)","Franco svizzero (CHF)","Verificare disponibilità e requisiti locali"],
+    articleTopics:["Come iniziare a fare trading in Svizzera","Forex e orari di mercato in ora svizzera","Capire l'oro XAUUSD","Configurare MT5 con prudenza","Gestione del rischio e verifica dei fornitori"]
+  },
+  CD: {
+    country:"CD", countryName:"République démocratique du Congo", lang:"fr", hreflang:"fr-CD", slug:"congo-drc",
+    nativeMarketName:"marché de la RDC",
+    title:"Trading en RDC : Forex, or, MT5 et gestion des risques",
+    description:"Guides éducatifs en français pour la République démocratique du Congo sur le forex, l’or XAUUSD, MT5, les risques et la vérification des prestataires.",
+    searchTerms:["trading RDC","forex Congo Kinshasa","or XAUUSD RDC","MT5 Congo","gestion des risques trading"],
+    localContext:["Français de la RDC","Heure de Kinshasa (WAT)","Franc congolais (CDF)","Vérifier la disponibilité locale des produits"],
+    articleTopics:["Débuter le trading en RDC","Comprendre le forex et les sessions de marché","Comprendre l’or XAUUSD","Guide pratique de MT5","Gestion des risques et vérification des prestataires"]
+  },
+  CG: {
+    country:"CG", countryName:"République du Congo", lang:"fr", hreflang:"fr-CG", slug:"congo-brazzaville",
+    nativeMarketName:"marché congolais",
+    title:"Trading au Congo-Brazzaville : Forex, or, MT5 et risques",
+    description:"Guides en français sur le forex, l’or XAUUSD, MT5 et la gestion des risques pour les lecteurs de la République du Congo.",
+    searchTerms:["trading Congo Brazzaville","forex Congo","or XAUUSD Congo","MT5 Congo-Brazzaville","gestion des risques"],
+    localContext:["Français","Heure de Brazzaville (WAT)","Franc CFA d’Afrique centrale (XAF)","Vérifier les conditions des prestataires"],
+    articleTopics:["Comment débuter le trading au Congo","Comprendre les marchés forex","Notions essentielles sur l’or XAUUSD","Configurer MT5 avec prudence","Gestion des risques avant toute transaction"]
+  },
+  AO: {
+    country:"AO", countryName:"Angola", lang:"pt", hreflang:"pt-AO", slug:"angola",
+    nativeMarketName:"mercado angolano",
+    title:"Trading em Angola: Forex, ouro, MT5 e gestão de risco",
+    description:"Guias educativos em português para Angola sobre forex, ouro XAUUSD, MT5, riscos e verificação de corretoras.",
+    searchTerms:["trading Angola","forex Angola","ouro XAUUSD Angola","MT5 Angola","gestão de risco trading"],
+    localContext:["Português de Angola","Hora de Luanda (WAT)","Kwanza angolano (AOA)","Verificar disponibilidade e regras locais"],
+    articleTopics:["Como começar no trading em Angola","Noções básicas de forex e sessões de mercado","Como funciona o ouro XAUUSD","Guia de configuração do MT5","Gestão de risco e verificação de corretoras"]
+  },
+  SD: {
+    country:"SD", countryName:"السودان", lang:"ar", hreflang:"ar-SD", slug:"sudan",
+    nativeMarketName:"السوق السوداني",
+    title:"التداول في السودان: الفوركس والذهب وMT5 وإدارة المخاطر",
+    description:"أدلة تعليمية باللغة العربية عن الفوركس والذهب XAUUSD وMT5 وإدارة المخاطر والتحقق من شروط مزودي الخدمات في السودان.",
+    searchTerms:["التداول في السودان","الفوركس السودان","الذهب XAUUSD السودان","MT5 السودان","إدارة مخاطر التداول"],
+    localContext:["العربية","توقيت الخرطوم (CAT)","الجنيه السوداني (SDG)","تحقق من إتاحة المنتجات والمتطلبات المحلية"],
+    articleTopics:["كيف تبدأ تعلم التداول في السودان","أساسيات الفوركس وجلسات السوق","فهم تداول الذهب XAUUSD","دليل MT5 للمبتدئين","إدارة المخاطر والتحقق من مزودي الخدمات"]
+  },
+  ML: {
+    country:"ML", countryName:"Mali", lang:"fr", hreflang:"fr-ML", slug:"mali",
+    nativeMarketName:"marché malien",
+    title:"Trading au Mali : Forex, or, MT5 et gestion des risques",
+    description:"Guides en français pour apprendre le forex, l’or XAUUSD, MT5 et la gestion des risques au Mali.",
+    searchTerms:["trading Mali","forex Mali","or XAUUSD Mali","MT5 Mali","gestion des risques trading"],
+    localContext:["Français","Heure de Bamako (GMT)","Franc CFA ouest-africain (XOF)","Vérifier les règles et produits disponibles"],
+    articleTopics:["Débuter le trading au Mali","Les bases du forex et des sessions de marché","Comprendre l’or XAUUSD","Guide MT5 pour débutants","Gestion des risques et contrôle des prestataires"]
+  },
+  SN: {
+    country:"SN", countryName:"Sénégal", lang:"fr", hreflang:"fr-SN", slug:"senegal",
+    nativeMarketName:"marché sénégalais",
+    title:"Trading au Sénégal : Forex, or, MT5 et gestion des risques",
+    description:"Guides éducatifs en français sur le forex, l’or XAUUSD, MT5 et la gestion des risques pour le Sénégal.",
+    searchTerms:["trading Sénégal","forex Sénégal","or XAUUSD Sénégal","MT5 Sénégal","gestion des risques trading"],
+    localContext:["Français","Heure de Dakar (GMT)","Franc CFA ouest-africain (XOF)","Vérifier les conditions et la disponibilité des produits"],
+    articleTopics:["Comment débuter le trading au Sénégal","Comprendre le forex et les sessions de marché","Notions de base sur l’or XAUUSD","Configurer MT5 avec prudence","Gestion des risques et vérification des prestataires"]
+  },
+  GH: {
+    country:"GH", countryName:"Ghana", lang:"en", hreflang:"en-GH", slug:"ghana",
+    nativeMarketName:"Ghanaian market",
+    title:"Trading in Ghana: Forex, Gold, MT5 and Risk Management",
+    description:"Practical trading education for Ghana covering forex, gold XAUUSD, MT5, risk management and broker due diligence.",
+    searchTerms:["trading Ghana","forex Ghana","gold XAUUSD Ghana","MT5 Ghana","trading risk management"],
+    localContext:["Ghanaian English","Ghana time (GMT)","Ghanaian cedi (GHS)","Check local product access and provider terms"],
+    articleTopics:["How to start learning trading in Ghana","Forex basics and market sessions","Understanding gold XAUUSD","MT5 setup for beginners","Risk management and broker due diligence"]
+  },
+  BF: {
+    country:"BF", countryName:"Burkina Faso", lang:"fr", hreflang:"fr-BF", slug:"burkina-faso",
+    nativeMarketName:"marché burkinabè",
+    title:"Trading au Burkina Faso : Forex, or, MT5 et gestion des risques",
+    description:"Guides en français pour comprendre le forex, l’or XAUUSD, MT5 et la gestion des risques au Burkina Faso.",
+    searchTerms:["trading Burkina Faso","forex Burkina Faso","or XAUUSD Burkina Faso","MT5 Burkina Faso","gestion des risques"],
+    localContext:["Français","Heure de Ouagadougou (GMT)","Franc CFA ouest-africain (XOF)","Vérifier la disponibilité des services"],
+    articleTopics:["Débuter le trading au Burkina Faso","Bases du forex et horaires de marché","Comprendre l’or XAUUSD","Guide MT5 pour débutants","Gestion des risques et vérification des prestataires"]
+  },
+  MA: {
+    country:"MA", countryName:"المغرب", lang:"ar", hreflang:"ar-MA", slug:"morocco",
+    nativeMarketName:"السوق المغربي",
+    title:"التداول في المغرب: الفوركس والذهب وMT5 وإدارة المخاطر",
+    description:"أدلة تعليمية بالعربية حول الفوركس والذهب XAUUSD وMT5 وإدارة المخاطر والتحقق من شروط الخدمات المتاحة في المغرب.",
+    searchTerms:["التداول في المغرب","الفوركس المغرب","الذهب XAUUSD المغرب","MT5 المغرب","إدارة مخاطر التداول"],
+    localContext:["العربية والدارجة المغربية","توقيت المغرب","الدرهم المغربي (MAD)","تحقق من القواعد المحلية وإتاحة المنتجات"],
+    articleTopics:["كيف تبدأ تعلم التداول في المغرب","أساسيات الفوركس وجلسات السوق","فهم الذهب XAUUSD","دليل MT5 للمبتدئين","إدارة المخاطر والتحقق من مزودي الخدمات"]
+  },
+  "MA-FR": {
+    country:"MA-FR", countryName:"Maroc", lang:"fr", hreflang:"fr-MA", slug:"morocco-fr",
+    nativeMarketName:"marché marocain",
+    title:"Trading au Maroc : Forex, or, MT5 et gestion des risques",
+    description:"Guides en français sur le forex, l’or XAUUSD, MT5, les risques et la vérification des prestataires pour le public marocain.",
+    searchTerms:["trading Maroc","forex Maroc","or XAUUSD Maroc","MT5 Maroc","gestion des risques trading"],
+    localContext:["Français du Maroc","Heure du Maroc","Dirham marocain (MAD)","Vérifier la réglementation et les produits disponibles"],
+    articleTopics:["Comment débuter le trading au Maroc","Comprendre le forex et les horaires de marché","Comprendre l’or XAUUSD","Guide MT5 pour débutants","Gestion des risques et vérification des prestataires"]
+  },
   QA: {
     country:"QA", countryName:"قطر", lang:"ar", hreflang:"ar-QA", slug:"qatar",
     nativeMarketName:"السوق القطري", title:"التداول في قطر: الفوركس والذهب وMT5 وإدارة المخاطر",

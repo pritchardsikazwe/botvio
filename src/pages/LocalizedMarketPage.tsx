@@ -47,6 +47,22 @@ const languageCopy: Record<string, {
 
 
 
+const COUNTRY_LONGFORM_ARTICLE: Record<string, string> = {
+  "congo-drc": "trading-beginners-congo-drc",
+  "congo-brazzaville": "trading-beginners-congo-brazzaville",
+  "angola": "trading-beginners-angola",
+  "nigeria": "trading-beginners-nigeria",
+  "sudan": "trading-beginners-sudan",
+  "mali": "trading-beginners-mali",
+  "senegal": "trading-beginners-senegal",
+  "ghana": "trading-beginners-ghana",
+  "burkina-faso": "trading-beginners-burkina-faso",
+  "egypt": "trading-beginners-egypt",
+  "morocco": "trading-beginners-morocco",
+  "kenya": "trading-beginners-kenya",
+  "south-africa": "trading-beginners-south-africa",
+};
+
 const FALLBACK_LOCALIZED_TEXT: Record<string, { title:(country:string)=>string; description:(country:string)=>string; topics:string[] }> = {
   en:{title:c=>`Trading in ${c}: Forex, Synthetic Indices, MT5 and Gold`,description:c=>`Localized trading education for traders in ${c}: forex, synthetic indices, MT5, gold XAUUSD and risk management.`,topics:["How to start trading","Synthetic indices guide","MT5 trading guide","Gold XAUUSD guide","Risk management"]},
   pt:{title:c=>`Trading em ${c}: Forex, índices sintéticos, MT5 e ouro`,description:c=>`Guias de trading para ${c} sobre forex, índices sintéticos, MT5, ouro XAUUSD e gestão de risco.`,topics:["Como começar no trading","Guia de índices sintéticos","Guia de MT5","Guia de ouro XAUUSD","Gestão de risco"]},
@@ -74,6 +90,8 @@ const FALLBACK_LOCALIZED_TEXT: Record<string, { title:(country:string)=>string; 
 function getMarket(countryCode: string): LocalizedMarket | undefined {
   const code = countryCode.toUpperCase();
   if (LOCALIZED_MARKETS[code]) return LOCALIZED_MARKETS[code];
+  const slugMatch = Object.values(LOCALIZED_MARKETS).find(m => m.slug.toLowerCase() === countryCode.toLowerCase());
+  if (slugMatch) return slugMatch;
   const lang = countryToLanguage[code] || "en";
   const text = FALLBACK_LOCALIZED_TEXT[lang] || FALLBACK_LOCALIZED_TEXT.en;
   const countryName = new Intl.DisplayNames([lang], { type: "region" }).of(code) || code;
@@ -100,14 +118,24 @@ export default function LocalizedMarketPage() {
 
   const copy = languageCopy[market.lang] || languageCopy.en;
   const rtl = market.lang === "ar" || market.lang === "ur";
-  const isArabicMarketUrl = location.pathname.startsWith("/ar/markets/") && market.lang === "ar";
-  const canonical = isArabicMarketUrl ? `https://botvio.live/ar/markets/${market.slug}` : `https://botvio.live/markets/${market.slug}`;
-  const englishCanonical = `https://botvio.live/markets/${market.slug}`;
+  // Arabic country hubs have one canonical Arabic URL; avoid indexing a duplicate
+  // Arabic page at both /markets/... and /ar/markets/....
+  const canonical = market.lang === "ar"
+    ? `https://botvio.live/ar/markets/${market.slug}`
+    : `https://botvio.live/markets/${market.slug}`;
+  const swissAlternates = [
+    { code: "de-CH", href: "https://botvio.live/markets/switzerland" },
+    { code: "fr-CH", href: "https://botvio.live/markets/switzerland-fr" },
+    { code: "it-CH", href: "https://botvio.live/markets/switzerland-it" },
+  ];
+  const alternateLocales = ["CH", "CH-FR", "CH-IT"].includes(market.country)
+    ? swissAlternates
+    : [{ code: market.hreflang, href: canonical }];
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="min-h-screen bg-background">
       <SEOHead title={market.title} description={market.description} canonicalUrlOverride={canonical}
-        alternateLocales={market.lang === "ar" ? [{ code: market.hreflang, href: canonical }, { code: "en", href: englishCanonical }] : [{ code: "en", href: canonical }]}
+        alternateLocales={alternateLocales}
         jsonLd={{"@context":"https://schema.org","@type":"CollectionPage",name:market.title,description:market.description,url:canonical,inLanguage:market.lang}} />
       <Header />
       <main className="container mx-auto px-4 py-8">
@@ -123,6 +151,18 @@ export default function LocalizedMarketPage() {
           </div>
         </section>
 
+        <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-7">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">{copy.education} · Botvio Academy</p>
+          <h2 className="mt-2 text-xl font-bold">{copy.start}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{copy.intro(market.countryName)}</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link to="/learn"><Button>{copy.education}</Button></Link>
+            <Link to="/learning-paths"><Button variant="outline">{copy.start}</Button></Link>
+            <Link to="/signup"><Button variant="outline">{copy.start}</Button></Link>
+          </div>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">Educational content only. Trading can result in losses. Broker links may be affiliate links; verify product access, fees and local requirements before opening an account.</p>
+        </section>
+
         <section className="mt-10">
           <h2 className="text-2xl font-bold">{copy.education}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{market.searchTerms.join(" · ")}</p>
@@ -134,11 +174,27 @@ export default function LocalizedMarketPage() {
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
                   {copy.intro(market.countryName)}
                 </p>
-                <p className="mt-4 text-xs font-medium text-primary">{copy.start} →</p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link to="/learn" className="text-sm font-semibold text-primary underline underline-offset-4">{copy.start} →</Link>
+                  <Link to="/learning-paths" className="text-sm font-semibold text-primary underline underline-offset-4">{copy.risk} →</Link>
+                </div>
               </article>
             ))}
           </div>
         </section>
+
+        {COUNTRY_LONGFORM_ARTICLE[market.slug] && (
+          <section className="mt-10 rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">In-depth local guide</p>
+            <h2 className="mt-2 text-2xl font-bold">{market.articleTopics[0]}</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
+              A full beginner article covering market mechanics, trading costs, demo practice, provider verification and a risk-first checklist, with links to official regulatory resources where available.
+            </p>
+            <Link to={`/markets/${market.slug}/blog/${COUNTRY_LONGFORM_ARTICLE[market.slug]}`} className="mt-5 inline-flex items-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
+              Read the complete local guide →
+            </Link>
+          </section>
+        )}
 
         <section className="mt-10">
           <h2 className="text-2xl font-bold">Localized research articles</h2>
