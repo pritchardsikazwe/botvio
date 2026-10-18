@@ -1556,7 +1556,6 @@
   <url><loc>https://botvio.live/markets/pakistan</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/markets/india</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://botvio.live/markets/indonesia</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://botvio.live/markets/qatar</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/ar/markets/qatar</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/markets/switzerland</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://botvio.live/markets/switzerland-fr</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
