@@ -1,7 +1,7 @@
 /** Botvio 2026 customer-facing information architecture. Keep underlying routes and engines intact; expose simple product entry points. */
 import {
   BarChart3, Bot, BookOpen, ChartCandlestick, Coins, GraduationCap, Layers,
-  LineChart, Newspaper, ScanSearch, Shield, Signal, Sparkles, Users,
+  LineChart, Newspaper, ScanSearch, Shield, Signal, Sparkles, Users, Globe,
   Zap, Wrench, type LucideIcon,
 } from "lucide-react";
 
@@ -106,6 +106,7 @@ export const MORE_NAV: { label: string; items: NavItem[] }[] = [
   {
     label: "Company & Support",
     items: [
+      { label: "Dubai & UAE Trading Guide", to: "/dubai", icon: Globe },
       { label: "About Botvio", to: "/about", icon: BookOpen },
       { label: "Contact", to: "/contact", icon: BookOpen },
       { label: "FAQ", to: "/faq", icon: BookOpen },
