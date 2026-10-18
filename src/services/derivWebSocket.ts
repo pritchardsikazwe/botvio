@@ -497,7 +497,8 @@ export class DerivWebSocketService {
       const profit = numeric(c.profit);
       const isSold = c.is_sold === 1 || c.is_sold === true;
       const isExpired = c.is_expired === 1 || c.is_expired === true;
-      const reportedStatus = ["won", "lost", "sold"].includes(String(c.status)) ? String(c.status) : null;
+      const reportedStatus: DerivContractUpdate["status"] | null =
+        c.status === "won" || c.status === "lost" || c.status === "sold" ? c.status : null;
       const status = isSold ? "sold" : isExpired ? (profit >= 0 ? "won" : "lost") : (reportedStatus ?? "open");
       const isSettled = isSold || isExpired || ["won", "lost", "sold"].includes(String(c.status));
       const update: DerivContractUpdate = {
