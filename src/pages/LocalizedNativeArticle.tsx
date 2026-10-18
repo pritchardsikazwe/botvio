@@ -3,17 +3,19 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { LOCALIZED_NATIVE_POSTS } from "@/content/localizedNativePosts";
+import { LOCALIZED_COUNTRY_ARTICLES } from "@/content/localizedCountryArticles";
 import { LOCALIZED_MARKETS } from "@/content/localizedMarkets";
 
 export default function LocalizedNativeArticle(){
  const {country,slug}=useParams<{country:string;slug:string}>(); const location=useLocation();
- const post=slug?LOCALIZED_NATIVE_POSTS[slug]:undefined;
+ const post=slug?(LOCALIZED_COUNTRY_ARTICLES[slug] ?? LOCALIZED_NATIVE_POSTS[slug]):undefined;
  const market=country?Object.values(LOCALIZED_MARKETS).find(m=>m.slug===country):undefined;
  if(!post||!market) return <div className="min-h-screen bg-background"><Header/><main className="container mx-auto px-4 py-12 text-center"><h1 className="text-2xl font-bold">Article not found</h1><Link to="/"><Button className="mt-5">Home</Button></Link></main></div>;
  const nativePath=location.pathname.startsWith("/ar/") ? `/ar/markets/${market.slug}/blog/${slug}` : `/markets/${market.slug}/blog/${slug}`;
+ const publishedDate = slug && LOCALIZED_COUNTRY_ARTICLES[slug] ? "2026-10-16" : "2026-10-02";
  const canonical=`https://botvio.live${nativePath}`;
  const english=`https://botvio.live/blog/${slug}`;
  return <div dir={market.lang==="ar"||market.lang==="ur"?"rtl":"ltr"} className="min-h-screen bg-background">
-  <SEOHead title={post.metaTitle} description={post.metaDescription} canonicalUrlOverride={canonical} alternateLocales={market.lang==="ar" ? [{code:market.hreflang,href:canonical},{code:"en",href:english}] : [{code:"en",href:canonical}]} jsonLd={{"@context":"https://schema.org","@type":"Article",headline:post.title,description:post.excerpt,url:canonical,inLanguage:market.lang,datePublished:"2026-10-02",dateModified:"2026-10-02",author:{"@type":"Organization",name:"Botvio",url:"https://botvio.live/"},publisher:{"@type":"Organization",name:"Botvio",url:"https://botvio.live/"}}}/>
+  <SEOHead title={post.metaTitle} description={post.metaDescription} canonicalUrlOverride={canonical} alternateLocales={market.lang==="ar" ? [{code:market.hreflang,href:canonical},{code:"en",href:english}] : [{code:"en",href:canonical}]} jsonLd={{"@context":"https://schema.org","@type":"Article",headline:post.title,description:post.excerpt,url:canonical,inLanguage:market.lang,datePublished:publishedDate,dateModified:publishedDate,author:{"@type":"Organization",name:"Botvio",url:"https://botvio.live/"},publisher:{"@type":"Organization",name:"Botvio",url:"https://botvio.live/"}}}/>
   <Header/><main className="container mx-auto max-w-4xl px-4 py-8"><nav className="mb-6 text-sm text-muted-foreground"><Link to={`/markets/${market.slug}`}>{market.countryName}</Link></nav><article><h1 className="text-3xl font-extrabold leading-tight sm:text-5xl">{post.title}</h1><p className="mt-5 text-lg leading-8 text-muted-foreground">{post.excerpt}</p><div className="mt-5 rounded-2xl border border-border bg-card/60 p-4 text-sm leading-6 text-muted-foreground"><strong className="text-foreground">Research note:</strong> Educational material prepared by Botvio. Product availability, trading conditions and local requirements can change; verify current information with the relevant provider or regulator. This page does not promise returns or trading outcomes.</div><div className="prose prose-sm sm:prose-base dark:prose-invert mt-8 max-w-none" dangerouslySetInnerHTML={{__html:post.content}}/><div className="mt-10 flex flex-wrap gap-3"><Link to={english}><Button variant="outline">English version</Button></Link><Link to={`/markets/${market.slug}`}><Button>More local guides</Button></Link></div></article></main></div>;
 }

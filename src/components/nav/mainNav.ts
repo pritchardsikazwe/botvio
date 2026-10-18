@@ -104,6 +104,19 @@ export const MORE_NAV: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
+    label: "International Markets",
+    items: [
+      { label: "Saudi Arabia — العربية", to: "/ar/markets/saudi-arabia", icon: Globe },
+      { label: "Pakistan — اردو", to: "/markets/pakistan", icon: Globe },
+      { label: "India — हिन्दी", to: "/markets/india", icon: Globe },
+      { label: "Indonesia — Bahasa Indonesia", to: "/markets/indonesia", icon: Globe },
+      { label: "Qatar — العربية", to: "/ar/markets/qatar", icon: Globe },
+      { label: "Switzerland — Deutsch", to: "/markets/switzerland", icon: Globe },
+      { label: "Switzerland — Français", to: "/markets/switzerland-fr", icon: Globe },
+      { label: "Switzerland — Italiano", to: "/markets/switzerland-it", icon: Globe },
+    ],
+  },
+  {
     label: "Company & Support",
     items: [
       { label: "Dubai & UAE Trading Guide", to: "/dubai", icon: Globe },

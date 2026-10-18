@@ -448,6 +448,7 @@ export const AppRoutes = () => {
     <Route path="markets/:country/blog/:slug" element={<LocalizedNativeArticle />} />
     <Route path="ar/blog/:slug" element={<ArabicDubaiBlogPost />} />
     <Route path="markets/saudi-arabia" element={<SaudiTradingGuide />} />
+    <Route path="ar/markets/:country" element={<LocalizedMarketPage />} />
     <Route path="markets/:country" element={<LocalizedMarketPage />} />
     <Route path="dubai" element={<DubaiTradingGuide />} />
     <Route path="dubai/tools" element={<DubaiTradingTools />} />
