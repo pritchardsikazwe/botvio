@@ -38,6 +38,7 @@ function getOrCreateTrackingId(storage: Storage, key: string) {
     storage.setItem(key, created);
     return created;
   } catch {
+    // Storage can be disabled in private browsing; keep the event usable for this visit.
     return crypto.randomUUID();
   }
 }

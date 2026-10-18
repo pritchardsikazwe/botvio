@@ -119,6 +119,7 @@ export const MORE_NAV: { label: string; items: NavItem[] }[] = [
   {
     label: "Company & Support",
     items: [
+      { label: "Dubai & UAE Trading Guide", to: "/dubai", icon: Globe },
       { label: "About Botvio", to: "/about", icon: BookOpen },
       { label: "Contact", to: "/contact", icon: BookOpen },
       { label: "FAQ", to: "/faq", icon: BookOpen },
