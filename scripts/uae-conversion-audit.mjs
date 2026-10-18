@@ -52,6 +52,8 @@ check("Canonical sitemap includes broker page", canonicalSitemap.includes("https
 check("All requested market pages have localized source records", targetMarkets.every(({ key, slug }) => localizedMarkets.includes(`  ${key}:`) || localizedMarkets.includes(`  "${key}":`)) && targetMarkets.every(({ slug }) => localizedMarkets.includes(`slug:"${slug}"`) || localizedMarkets.includes(`slug: "${slug}"`)));
 check("All requested market pages are included in canonical sitemap", targetMarkets.every(({ url }) => canonicalSitemap.includes(`<loc>${url}</loc>`)));
 check("International Markets navigation exposes all six countries", mainNav.includes('label: "International Markets"') && targetMarkets.every(({ slug }) => mainNav.includes(slug)));
+check("Arabic hubs use one canonical Arabic URL", /const canonical = market\.lang === "ar"[\s\S]{0,120}https:\/\/botvio\.live\/ar\/markets\//.test(read("src/pages/LocalizedMarketPage.tsx")));
+check("Swiss German, French and Italian hreflang alternates are linked", ["de-CH", "fr-CH", "it-CH"].every((code) => read("src/pages/LocalizedMarketPage.tsx").includes(`code: "${code}"`)));
 check("Canonical sitemap has no duplicate URL entries", (() => { const urls = [...canonicalSitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]); return urls.length === new Set(urls).size; })());
 check("Legacy /sitemap path redirects to sitemap.xml", /^\/sitemap\s+\/sitemap\.xml\s+301/m.test(redirects));
 const sitemapBlogSlugs = [...sitemap.matchAll(/<loc>https:\/\/botvio\.live\/blog\/([^<]+)<\/loc>/g)].map((match) => match[1]);
