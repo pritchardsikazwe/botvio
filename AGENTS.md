@@ -1,5 +1,8 @@
 # Project architecture rules
 
+- Copy-risk calculations and strategy intentions live in shared pure TradeCopy helpers; broker submission/activation fail closed until authoritative account/contracts and atomic cloud follower admission are verified, because polling or client settings cannot enforce pre-entry risk.
+- Emergency copy controls persist account-wide relationship latches before upstream calls and read remaining broker tickets before reporting closure; adapter mocks must mutate positions for meaningful recovery tests.
+
 - Botvio Robot overview presentation lives in TradingOverview with locally scoped semantic theme tokens; CopyControlCenter retains account queries, authentication gates and execution controls so appearance changes do not alter trading behavior.
 
 - Scheduled Weltrade generation reuses the existing SyntX schedule and trading_signals publication/MT5 webhook; broker-returned symbols, broker-time windows and closed UTC candles are required before publishing, preserving quality and execution gates.

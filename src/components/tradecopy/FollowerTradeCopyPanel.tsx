@@ -19,6 +19,7 @@ import {
 import { ConnectMt5Dialog } from "./ConnectMt5Dialog";
 import { DiagnosticButton } from "./DiagnosticButton";
 import { AdapterModeNotice, EnvBadge, StatusBadge } from "./ModeBadges";
+import { CopyRiskCentre } from "./CopyRiskCentre";
 
 const ROBOT = "__botvio_robot__";
 
@@ -285,8 +286,13 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
   };
 
   const emergency = async () => {
-    const closeAll = window.confirm("EMERGENCY STOP: pause copying now.\n\nPress OK to ALSO close all open positions on this follower account, or Cancel to only pause.");
-    try { await act.mutateAsync({ action: "emergency_stop", payload: { relationship_id: rel.id, close_all: closeAll } }); toast.success(closeAll ? "Stopped and closed all positions" : "Copying stopped"); }
+    if (!window.confirm("EMERGENCY STOP: block new entries and attempt to close ALL positions on this follower account, including manual positions? Cancel makes no changes.")) return;
+    try {
+      const result = await act.mutateAsync({ action: "emergency_stop", payload: { relationship_id: rel.id, close_all: true } });
+      if (result.simulated) toast.info("Simulated emergency stop; no broker closure verified.");
+      else if (result.closureStatus === "confirmed" && result.deactivated === true) toast.success("Copying deactivated; no remaining positions reported.");
+      else toast.warning("Emergency stop requested. Closures or copy deactivation remain unverified; check your MT5 account.");
+    }
     catch (e) { toast.error((e as Error).message); }
   };
 
@@ -316,7 +322,7 @@ function RelationshipCard({ rel, account }: { rel: TcRelationship; account?: TcA
           <Select value={String(form.scalper_mode)} onValueChange={(v) => set("scalper_mode", Number(v))}><SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{Object.entries(SCALPER_MODE_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select></div>
         {form.scalper_mode === 2 && <div className="space-y-1.5"><Label>Scalper rollover value</Label><Input type="number" min="0" step="1" value={form.scalper_value} onChange={(e) => set("scalper_value", Number(e.target.value))} /></div>}
-        <div className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-2"><Label htmlFor={`sltp-${rel.id}`}>Copy SL/TP</Label><Switch id={`sltp-${rel.id}`} checked={form.copy_sltp} onCheckedChange={(v) => set("copy_sltp", v)} /></div>
+        <div className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-2"><Label htmlFor={`sltp-${rel.id}`}>Copy SL/TP required</Label><Switch id={`sltp-${rel.id}`} checked={form.copy_sltp} disabled={form.copy_sltp} onCheckedChange={(v) => set("copy_sltp", v)} /></div>
         <div className="space-y-1.5"><Label>Close all at total loss</Label><Input type="number" min="0" step="1" placeholder="Off" value={form.lossForAllOrder} onChange={(e) => set("lossForAllOrder", e.target.value)} /></div>
         <div className="space-y-1.5"><Label>Close all if equity below</Label><Input type="number" min="0" step="1" placeholder="Off" value={form.equityUnderLow} onChange={(e) => set("equityUnderLow", e.target.value)} /></div>
       </div>
@@ -439,13 +445,13 @@ export function FollowerTradeCopyPanel() {
                   <Label>Open trades · live</Label>
                   <p className="mt-1 text-xs text-muted-foreground">Positions currently reported by TradeCopy. This list refreshes automatically every 10 seconds.</p>
                 </div>
-                {accounts.data.filter((a) => !!a.tradecopy_user_id).map((account) => <AccountOpenTrades key={account.id} account={account} />)}
+                {accounts.data.filter((a) => !!a.tradecopy_user_id).map((account) => <div key={account.id}><AccountOpenTrades account={account} /><CopyRiskCentre account={account} /></div>)}
                 <details className="rounded-xl border border-border/50">
                   <summary className="cursor-pointer p-3 text-sm font-semibold">TradeCopy order history · closed and past orders</summary>
                   <div className="overflow-hidden border-t border-border/50 bg-background">
                     <iframe
                       title="Botvio Robot trade history"
-                      src={`https://tradecopy.online/profile/order-history/slave/${accounts.data.find((a) => !!a.tradecopy_user_id)!.tradecopy_user_id}/server_1`}
+                      src={`https://tradecopy.online/profile/order-history/slave/${accounts.data.find((a) => !!a.tradecopy_user_id)?.tradecopy_user_id}/server_1`}
                       className="h-[520px] w-full border-0"
                       loading="lazy"
                       referrerPolicy="strict-origin-when-cross-origin"

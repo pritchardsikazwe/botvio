@@ -1,6 +1,8 @@
 # Current tasks
 
-- [ ] Audit and upgrade the existing Copy Trading Risk Engine per the uploaded specification: validated SL/TP, atomic account risk, strategy exits, reconciliation, Risk Centre and demo acceptance tests; no deployment or live activation. Staged plan pending review; specified Git branch is not the sandbox-managed branch.
+- [x] Audit Copy Trading Risk Engine and public TradeCopy capabilities; preserve current execution architecture and feed.
+- [x] Add staged fail-closed entry protections, remove stop-stripping/upward lots, test pure risk/strategy calculations, improve emergency readback and add honest Risk Centre observations; no deployment.
+- [ ] Complete persistent atomic risk, strategy execution and broker follower acceptance (blocked: TradeCopy pre-entry admission/account contract capabilities undocumented; no authenticated DEMO follower evidence). No protected/live claim; specified branch unavailable in managed sandbox.
 
 - [ ] Match the Botvio user dashboard to the supplied dark overview reference; preserve account/auth/trading behavior and verify the appearance.
 - [x] Add responsive AI Signals & Market Analysis and Copy Trading to MT5 sections to the existing public landing page; preserve all access rules and verify links/build.
