@@ -9,6 +9,8 @@ import {
   normalizeSymbol, redact, TradeCopyError, validateRelationship, AccountRole, Environment,
 } from "../_shared/tradecopy/core.ts";
 import { decryptSecret, encryptSecret } from "../_shared/tradecopy/crypto.ts";
+import { assertRiskSubmissionReady } from "../_shared/tradecopy/capabilities.ts";
+import { emergencyClose } from "../_shared/tradecopy/emergency.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -36,6 +38,7 @@ Deno.serve(async (req) => {
     apiKey: Deno.env.get("TRADECOPY_API_KEY"),
     mode: Deno.env.get("TRADECOPY_MODE"),
     baseUrl: Deno.env.get("TRADECOPY_BASE_URL"),
+    timeoutMs: Deno.env.get("TRADECOPY_TIMEOUT_MS"),
   });
   let userId: string | null = null;
   let action = "unknown";
@@ -516,6 +519,7 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       const follower = await loadAccount(ctx, rel.follower_account_id, { allowAdmin: true });
       const risk = normalizeRisk({ riskType: body.risk_type, multiplier: body.multiplier });
       const cs = normalizeCopySettings({ copySLTP: body.copy_sltp, scalperMode: body.scalper_mode, orderFilter: body.order_filter, scalperValue: body.scalper_value });
+      if (!cs.copySLTP) throw new TradeCopyError("Disabling copied SL/TP is blocked until an alternative protective policy is verified", "validation");
       const oc = normalizeOrderControl((body.order_control as Record<string, unknown>) ?? {});
       if (follower.tradecopy_user_id) {
         await adapter.updateRisk(follower.tradecopy_user_id, risk);
@@ -545,8 +549,7 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
     case "delete_mapping": {
       const { data: m } = await admin.from("symbol_mappings").select("id,user_id").eq("id", String(body.mapping_id)).maybeSingle();
       if (!m || m.user_id !== ctx.userId) throw new TradeCopyError("Mapping not found", "not_found", 404);
-      await admin.from("symbol_mappings").delete().eq("id", m.id);
-      return { data: {} };
+      throw new TradeCopyError("TradeCopy mapping removal is not documented; the mapping was preserved to avoid disagreement with the broker copier", "validation");
     }
 
     case "attach_market_feed": {
@@ -862,6 +865,7 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       const status = z.enum(["active", "paused", "stopped"]).parse(body.status);
       if (!follower.tradecopy_user_id) throw new TradeCopyError("Follower is not registered with TradeCopy", "validation");
       if (status === "active") {
+        assertRiskSubmissionReady(adapter.mode);
         let liveConfirmedAt = rel.live_confirmed_at;
         if (rel.environment === "LIVE" && body.confirm_live === true && body.confirm_text === "START LIVE COPYING") {
           liveConfirmedAt = new Date().toISOString();
@@ -883,18 +887,22 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       const rel = await loadRelationship(ctx, String(body.relationship_id));
       const follower = await loadAccount(ctx, rel.follower_account_id, { allowAdmin: true });
       const now = new Date().toISOString();
-      await admin.from("copy_relationships").update({ status: "paused", emergency_stopped_at: now }).eq("id", rel.id);
-      if (follower.tradecopy_user_id) {
-        await adapter.deactivateFollower(follower.tradecopy_user_id);
-        if (body.close_all === true) await adapter.closeAll(follower.tradecopy_user_id, "slave");
-      }
-      await admin.from("trading_accounts").update({ tradecopy_active: false }).eq("id", follower.id);
-      return { data: { stoppedAt: now }, accountId: follower.id, auditDetails: { close_all: body.close_all === true } };
+      // Latch every relationship on this account before network operations; upstream controls are account-scoped.
+      const latch = await admin.from("copy_relationships").update({ status: "paused", emergency_stopped_at: now }).eq("follower_account_id", follower.id);
+      if (latch.error) throw new TradeCopyError("Could not persist emergency stop", "upstream");
+      const blocked = await admin.from("trading_accounts").update({ tradecopy_active: false }).eq("id", follower.id);
+      if (blocked.error) throw new TradeCopyError("Could not persist account entry block", "upstream");
+      const recovery = follower.tradecopy_user_id
+        ? await emergencyClose(adapter, follower.tradecopy_user_id, body.close_all === true)
+        : { closureStatus: "unknown", remainingTickets: null, deactivated: false, errors: ["Follower is not registered"], simulated: adapter.mode === "mock" };
+      await admin.from("copy_relationships").update({ last_error: recovery.errors.length ? recovery.errors.join("; ") : recovery.closureStatus === "remaining" ? "Positions remain after emergency close" : null }).eq("follower_account_id", follower.id);
+      return { data: { stoppedAt: now, ...recovery }, accountId: follower.id, auditDetails: { close_all: body.close_all === true, ...recovery } };
     }
 
     case "robot_order": {
       // Botvio Robot → TradeCopy master. Admin only, guarded by live mode.
       if (!ctx.isAdmin) throw new TradeCopyError("Admins only", "auth", 403);
+      assertRiskSubmissionReady(adapter.mode);
       const master = await robotMaster(ctx);
       if (!master?.tradecopy_user_id) throw new TradeCopyError("Botvio Robot master is not connected", "validation");
       if (!master.tradecopy_active) throw new TradeCopyError("Botvio Robot master is inactive", "validation");

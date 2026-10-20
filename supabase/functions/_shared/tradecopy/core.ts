@@ -57,8 +57,8 @@ export function normalizeRisk(input: { riskType: unknown; multiplier: unknown })
   if (!Number.isFinite(m) || m <= 0) throw new TradeCopyError("multiplier must be a positive number", "validation");
   if (rt === 2 && m > 50) throw new TradeCopyError("Fixed lot cannot exceed 50 lots", "validation");
   if (rt !== 2 && m > 100) throw new TradeCopyError("Multiplier cannot exceed 100", "validation");
-  // fixed lot → 2 decimal lot precision; others → 4 decimals
-  const multiplier = rt === 2 ? Math.round(m * 100) / 100 : Math.round(m * 10000) / 10000;
+  // Never increase a fixed lot or discard broker-supported sub-cent volumes.
+  const multiplier = rt === 2 ? m : Math.floor(m * 10000) / 10000;
   if (multiplier <= 0) throw new TradeCopyError("multiplier rounds to zero", "validation");
   return { riskType: rt as RiskType, multiplier };
 }
@@ -229,8 +229,8 @@ export function normalizeMarketOrder(input: Record<string, unknown>): MarketOrde
   const sl = num(input.stopLoss);
   const tp = num(input.takeProfit);
   const reference = num(input.referencePrice);
-  if (sl !== null && sl < 0) throw new TradeCopyError("stopLoss must be ≥ 0", "validation");
-  if (tp !== null && tp < 0) throw new TradeCopyError("takeProfit must be ≥ 0", "validation");
+  if (sl === null || sl <= 0) throw new TradeCopyError("A positive protective stopLoss is required", "validation");
+  if (tp === null || tp <= 0) throw new TradeCopyError("A positive takeProfit is required", "validation");
   if (reference !== null && reference > 0) {
     if (side === "BUY") {
       if (sl !== null && sl >= reference) throw new TradeCopyError("BUY stop loss must be below the reference entry price", "validation");
@@ -240,7 +240,7 @@ export function normalizeMarketOrder(input: Record<string, unknown>): MarketOrde
       if (tp !== null && tp >= reference) throw new TradeCopyError("SELL take profit must be below the reference entry price", "validation");
     }
   }
-  return { symbol: normalizeSymbol(input.symbol), side, lots: Math.round(lots * 100) / 100, stopLoss: sl, takeProfit: tp };
+  return { symbol: normalizeSymbol(input.symbol), side, lots, stopLoss: sl, takeProfit: tp };
 }
 
 // ---------- Idempotency ----------

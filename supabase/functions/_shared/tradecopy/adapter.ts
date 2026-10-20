@@ -187,12 +187,22 @@ export class MockTradeCopyAdapter implements ExecutionAdapter {
   }
   async createPendingOrder(userId: number, _r: AccountRole, o: unknown) { return this.log("createPendingOrder", userId, o); }
   async getOpenOrders(userId: number) { this.log("getOpenOrders", userId); return [...(this.orders.get(userId) ?? [])]; }
-  async modifyOrder(userId: number, _r: AccountRole, ticket: number, sl: number, tp: number) { return this.log("modifyOrder", userId, ticket, sl, tp); }
+  async modifyOrder(userId: number, _r: AccountRole, ticket: number, sl: number, tp: number) {
+    const order = (this.orders.get(userId) ?? []).find((o) => o.ticket === String(ticket));
+    if (!order) throw new TradeCopyError("Mock position not found", "not_found");
+    order.stopLoss = sl; order.takeProfit = tp;
+    return this.log("modifyOrder", userId, ticket, sl, tp);
+  }
   async closeOrder(userId: number, _r: AccountRole, ticket: number) {
     this.orders.set(userId, (this.orders.get(userId) ?? []).filter((o) => o.ticket !== String(ticket)));
     return this.log("closeOrder", userId, ticket);
   }
-  async partialClose(userId: number, _r: AccountRole, ticket: number, lots: number) { return this.log("partialClose", userId, ticket, lots); }
+  async partialClose(userId: number, _r: AccountRole, ticket: number, lots: number) {
+    const order = (this.orders.get(userId) ?? []).find((o) => o.ticket === String(ticket));
+    if (!order || order.lots === null || !Number.isFinite(lots) || lots <= 0 || lots >= order.lots) throw new TradeCopyError("Invalid mock partial close", "validation");
+    order.lots -= lots;
+    return this.log("partialClose", userId, ticket, lots);
+  }
   async closeAll(userId: number) { this.orders.set(userId, []); return this.log("closeAll", userId); }
   async closeAllBySymbol(userId: number, _r: AccountRole, symbol: string) {
     this.orders.set(userId, (this.orders.get(userId) ?? []).filter((o) => o.symbol !== symbol));
@@ -223,9 +233,9 @@ export const TRADECOPY_DEFAULT_TIMEOUT_MS = 30000;
  * Mock unless BOTH the API key is set AND TRADECOPY_MODE=live. This keeps
  * development/testing from ever hitting the real API by accident.
  */
-export function createAdapter(env: { apiKey?: string | null; mode?: string | null; baseUrl?: string | null }): ExecutionAdapter {
+export function createAdapter(env: { apiKey?: string | null; mode?: string | null; baseUrl?: string | null; timeoutMs?: string | number | null }): ExecutionAdapter {
   if (env.apiKey && (env.mode ?? "").toLowerCase() === "live") {
-    const configuredTimeout = Number(Deno.env.get("TRADECOPY_TIMEOUT_MS") ?? TRADECOPY_DEFAULT_TIMEOUT_MS);
+    const configuredTimeout = Number(env.timeoutMs ?? TRADECOPY_DEFAULT_TIMEOUT_MS);
     const timeoutMs = Number.isFinite(configuredTimeout)
       ? Math.min(Math.max(Math.trunc(configuredTimeout), 10000), 60000)
       : TRADECOPY_DEFAULT_TIMEOUT_MS;

@@ -10,6 +10,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { createAdapter } from "../_shared/tradecopy/adapter.ts";
 import { TradeCopyError, normalizeMarketOrder, redact } from "../_shared/tradecopy/core.ts";
+import { assertRiskSubmissionReady } from "../_shared/tradecopy/capabilities.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -18,6 +19,7 @@ const adapter = createAdapter({
   apiKey: Deno.env.get("TRADECOPY_API_KEY"),
   mode: Deno.env.get("TRADECOPY_MODE"),
   baseUrl: Deno.env.get("TRADECOPY_BASE_URL"),
+  timeoutMs: Deno.env.get("TRADECOPY_TIMEOUT_MS"),
 });
 
 const LIVE_PHRASE = "START LIVE SIGNALS";
@@ -205,50 +207,21 @@ async function executeForAccount(
   }
 
   try {
+    // Live adapter includes real broker DEMO accounts: no order until risk capabilities are proven.
+    assertRiskSubmissionReady(adapter.mode);
     const order = normalizeMarketOrder({
       symbol, side: direction, lots: volume,
       stopLoss: signal.stop_loss, takeProfit: signal.take_profit,
       referencePrice: signal.entry_price,
     });
-    let result: unknown;
-    let stopsStrippedForDemo = false;
-    let stopDiagnostic: unknown = null;
-    try {
-      result = await adapter.createMarketOrder(account.tradecopy_user_id, role, order);
-    } catch (firstError) {
-      const firstMsg = String((firstError as Error)?.message ?? firstError);
-      const invalidStops = /invalid stops|invalid stop|stops in the request/i.test(firstMsg);
-      if (!invalidStops) throw firstError;
-
-      // Capture the broker/TradeCopy account diagnostic when MT5 rejects SL/TP.
-      // This is read-only and gives us the actual account-side evidence needed
-      // for the permanent stop-distance fix; never fabricate a stop level.
-      try {
-        stopDiagnostic = await adapter.diagnostic(account.tradecopy_user_id);
-        console.warn("[mt5-direct-execution] TradeCopy diagnostic after Invalid stops:", redact(stopDiagnostic));
-      } catch (diagnosticError) {
-        console.warn("[mt5-direct-execution] Could not retrieve TradeCopy diagnostic:", String((diagnosticError as Error)?.message ?? diagnosticError));
-      }
-
-      // DEMO-only diagnostic fallback: prove the market-order path works without
-      // silently weakening LIVE risk controls. LIVE accounts fail closed.
-      if (String(account.environment ?? "DEMO").toUpperCase() !== "DEMO") throw firstError;
-      console.warn("[mt5-direct-execution] DEMO TradeCopy rejected signal stops; retrying market order without SL/TP for execution-path validation");
-      result = await adapter.createMarketOrder(account.tradecopy_user_id, role, {
-        ...order,
-        stopLoss: null,
-        takeProfit: null,
-      });
-      stopsStrippedForDemo = true;
-    }
+    // Exactly one attempt. Never strip stops or retry an uncertain broker response.
+    const result = await adapter.createMarketOrder(account.tradecopy_user_id, role, order);
     const r = result as any;
     const ticket = r?.ticket ?? r?.orderId ?? r?.order ?? r?.data?.ticket ?? r?.data?.order ?? r?.data?.orderId ?? "";
     await admin.from("direct_executions").update({
       status: adapter.mode === "live" ? "sent" : "simulated",
       ticket: String(ticket),
-      error: stopsStrippedForDemo
-        ? `DEMO diagnostic: TradeCopy rejected the supplied SL/TP as invalid; market order was accepted without stops. Diagnostic: ${JSON.stringify(redact(stopDiagnostic)).slice(0, 900)}. Do not use this fallback for LIVE.`
-        : (adapter.mode === "live" ? null : "Simulated (TradeCopy mock mode) — no real order sent"),
+      error: adapter.mode === "live" ? "Broker protection readback pending" : "Simulated (TradeCopy mock mode) — no real order sent",
     }).eq("id", claim.id);
     await admin.from("trading_accounts").update({
       last_direct_execution_at: now, last_direct_error: null, direct_signal_status: "on",
@@ -260,20 +233,6 @@ async function executeForAccount(
     await admin.from("trading_accounts").update({ last_direct_error: msg, direct_signal_status: "error" }).eq("id", account.id);
     return { ok: false, skipped: false, reason: msg };
   }
-}
-
-// Deriv MT5 minimum lot per symbol (broker contract spec). Lots are clamped UP
-// to this minimum so orders are not rejected with "Invalid volume".
-const DERIV_MIN_LOT: Record<string, number> = {
-  "boom 300 index": 1, "boom 500 index": 0.2, "boom 600 index": 0.2, "boom 900 index": 0.2, "boom 1000 index": 0.2,
-  "crash 300 index": 0.5, "crash 500 index": 0.2, "crash 600 index": 0.2, "crash 900 index": 0.2, "crash 1000 index": 0.2,
-  "volatility 10 index": 0.5, "volatility 25 index": 0.5, "volatility 50 index": 4, "volatility 75 index": 0.001, "volatility 100 index": 0.5,
-  "volatility 10 (1s) index": 0.5, "volatility 25 (1s) index": 0.005, "volatility 50 (1s) index": 0.005,
-  "volatility 75 (1s) index": 0.05, "volatility 100 (1s) index": 0.2,
-};
-function clampLot(symbol: string, lot: number): number {
-  const min = DERIV_MIN_LOT[symbol.trim().toLowerCase()] ?? 0;
-  return Math.max(Number.isFinite(lot) && lot > 0 ? lot : 0.01, min);
 }
 
 async function hasOpenPosition(admin: SupabaseClient, accountId: string, mt5Symbol: string): Promise<boolean> {
@@ -357,7 +316,7 @@ async function deliver(admin: SupabaseClient, onlyAccountId?: string) {
         .gte("created_at", new Date(Date.now() - 30 * 60_000).toISOString()).order("created_at", { ascending: false }).limit(1);
       const last = recentTrade?.[0];
       if (last && (last.status !== "failed" || Date.parse(last.created_at) > Date.now() - 10 * 60_000)) { skipped++; continue; }
-      const result = await executeForAccount(admin, m, signal, "master", clampLot(mt5Symbol, Number(m.botvio_signal_master_lot ?? 0.01)), mt5Symbol, globalLive);
+      const result = await executeForAccount(admin, m, signal, "master", Number(m.botvio_signal_master_lot ?? 0.01), mt5Symbol, globalLive);
       if (result.ok) {
         masterExecuted++;
       } else if (result.skipped) {
@@ -408,7 +367,7 @@ const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
     const masterById = new Map((linkMasters ?? []).map((m: any) => [m.id, m]));
     for (const link of (activeLinks ?? []) as any[]) {
       const master = masterById.get(link.master_account_id);
-      if (link.is_botvio_robot === true || master?.is_botvio_robot === true || master?.botvio_signal_master_enabled === true) {
+      if (link.is_botvio_robot === true || master?.is_botvio_robot === true || master?.botvio_signal_master_enabled === true || masters.some((destination) => destination.id === link.master_account_id)) {
         copyManagedFollowerIds.add(link.follower_account_id);
       }
     }
@@ -451,7 +410,7 @@ const directIds = (directAccounts ?? []).map((a: any) => a.id).filter(Boolean);
       const key = `${account.id}:${mapped.toLowerCase()}`;
       if (cycleSymbols.has(key) || await hasOpenPosition(admin, account.id, mapped)) { skipped++; continue; }
       cycleSymbols.add(key);
-      const result = await executeForAccount(admin, account, signal, "slave", clampLot(mapped, Number(account.direct_lot ?? 0.01)), mapped, globalLive);
+      const result = await executeForAccount(admin, account, signal, "slave", Number(account.direct_lot ?? 0.01), mapped, globalLive);
       if (result.ok) directExecuted++; else if (result.skipped) skipped++;
     }
   }
@@ -561,6 +520,7 @@ Deno.serve(async (req) => {
       }
 
       case "send_order": {
+        assertRiskSubmissionReady(adapter.mode);
         const p = z.object({
           account_id: z.string().uuid(),
           symbol: z.string().min(1).max(32),
