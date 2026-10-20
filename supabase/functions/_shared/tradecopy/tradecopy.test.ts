@@ -15,8 +15,9 @@ describe("risk mapping", () => {
     expect(() => normalizeRisk({ riskType: 1, multiplier: 0 })).toThrow();
     expect(() => normalizeRisk({ riskType: 2, multiplier: 60 })).toThrow();
   });
-  it("rounds fixed lot to 2dp", () => {
-    expect(normalizeRisk({ riskType: 2, multiplier: 0.123 }).multiplier).toBe(0.12);
+  it("preserves fixed lots without increasing exposure", () => {
+    expect(normalizeRisk({ riskType: 2, multiplier: 0.123 }).multiplier).toBe(0.123);
+    expect(normalizeRisk({ riskType: 2, multiplier: 0.001 }).multiplier).toBe(0.001);
   });
 });
 
@@ -66,7 +67,8 @@ describe("provider/follower relationship", () => {
     expect(() => validateRelationship({ ...base, masterRole: "slave" })).toThrow();
     expect(() => validateRelationship({ ...base, followerRole: "master" })).toThrow();
     expect(() => validateRelationship({ ...base, masterTradecopyId: null })).toThrow();
-    expect(() => validateRelationship({ ...base, followerEnvironment: "LIVE" })).toThrow();
+    expect(() => validateRelationship({ ...base, masterEnvironment: "LIVE" })).toThrow();
+    expect(() => validateRelationship({ ...base, followerEnvironment: "LIVE" })).not.toThrow();
   });
 });
 
@@ -79,7 +81,7 @@ describe("order normalization", () => {
     expect(normalizeOrders({ data: [{ symbol: "X" }] })).toEqual([]); // no ticket → dropped
   });
   it("validates market orders", () => {
-    expect(normalizeMarketOrder({ side: "buy", lots: 0.105, symbol: "EURUSD" })).toMatchObject({ side: "BUY", lots: 0.11 });
+    expect(normalizeMarketOrder({ side: "buy", lots: 0.105, symbol: "EURUSD", stopLoss: 1, takeProfit: 1.2, referencePrice: 1.1 })).toMatchObject({ side: "BUY", lots: 0.105 });
     expect(() => normalizeMarketOrder({ side: "HOLD", lots: 1, symbol: "EURUSD" })).toThrow();
     expect(() => normalizeMarketOrder({ side: "BUY", lots: 0, symbol: "EURUSD" })).toThrow();
     expect(() => normalizeMarketOrder({ side: "BUY", lots: 1, symbol: "bad symbol;" })).toThrow();
@@ -118,7 +120,7 @@ describe("API error handling & adapter selection", () => {
   it("builds documented query params", async () => {
     const f = vi.fn(async () => new Response(JSON.stringify({ success: true })));
     const a = new TradeCopyMt5Adapter("s", "http://x", f as unknown as typeof fetch);
-    await a.createMarketOrder(7, "slave", { symbol: "EURUSD", side: "BUY", lots: 0.1 });
+    await a.createMarketOrder(7, "slave", { symbol: "EURUSD", side: "BUY", lots: 0.1, stopLoss: 1, takeProfit: 1.2 });
     const url = new URL((f.mock.calls[0] as unknown as [string])[0]);
     expect(url.pathname).toBe("/api/v1/send_order_mt5");
     expect(url.searchParams.get("accountStatus")).toBe("1");
