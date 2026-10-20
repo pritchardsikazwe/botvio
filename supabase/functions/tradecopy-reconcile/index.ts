@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
   }
   if (!allowed) return json({ ok: false, error: "Forbidden" }, 403);
 
-  const adapter = createAdapter({ apiKey: Deno.env.get("TRADECOPY_API_KEY"), mode: Deno.env.get("TRADECOPY_MODE"), baseUrl: Deno.env.get("TRADECOPY_BASE_URL") });
+  const adapter = createAdapter({ apiKey: Deno.env.get("TRADECOPY_API_KEY"), mode: Deno.env.get("TRADECOPY_MODE"), baseUrl: Deno.env.get("TRADECOPY_BASE_URL"), timeoutMs: Deno.env.get("TRADECOPY_TIMEOUT_MS") });
 
   const { data: accounts } = await admin.from("trading_accounts")
     .select("id,user_id,account_role,tradecopy_user_id,environment")
