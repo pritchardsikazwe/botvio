@@ -1,0 +1,10 @@
+DROP POLICY IF EXISTS "participants read" ON public.live_stream_participants;
+DROP POLICY IF EXISTS "participants insert own" ON public.live_stream_participants;
+DROP POLICY IF EXISTS "participants update own" ON public.live_stream_participants;
+REVOKE ALL ON public.live_stream_participants FROM anon, authenticated;
+GRANT ALL ON public.live_stream_participants TO service_role;
+DROP POLICY IF EXISTS "Service can insert ai signals" ON public.ai_signals;
+REVOKE INSERT, UPDATE, DELETE ON public.ai_signals FROM anon, authenticated;
+GRANT ALL ON public.ai_signals TO service_role;
+COMMENT ON TABLE public.live_stream_participants IS 'Private viewer identities and watch time. Access through authorized server-side stream actions only.';
+COMMENT ON TABLE public.ai_signals IS 'Public market analysis; automated writes restricted to trusted server-side service role.';

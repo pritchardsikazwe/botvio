@@ -92,6 +92,13 @@
       "when": 1792128061232,
       "tag": "0012_allow_public_read_global_access_setting",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792651427100,
+      "tag": "0013_protect_stream_participants_and_signal_writes",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,7 @@
 # Project architecture rules
 
+- Stream participant identities and watch-time rows are accessed only through authorized server-side stream actions; public market analysis remains readable but AI signal creation is service-role only, preventing viewer-data disclosure and client-inserted signals.
+
 - Copy-risk calculations and strategy intentions live in shared pure TradeCopy helpers; broker submission/activation fail closed until authoritative account/contracts and atomic cloud follower admission are verified, because polling or client settings cannot enforce pre-entry risk.
 - Emergency copy controls persist account-wide relationship latches before upstream calls and read remaining broker tickets before reporting closure; adapter mocks must mutate positions for meaningful recovery tests.
 
