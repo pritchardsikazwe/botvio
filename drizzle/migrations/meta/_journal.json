@@ -134,6 +134,13 @@
       "when": 1792653979661,
       "tag": "0018_broker_vip_claims",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792654007531,
+      "tag": "0019_fix_broker_vip_review_audit",
+      "breakpoints": true
     }
   ]
 }
