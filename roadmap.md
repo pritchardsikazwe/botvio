@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Deploy request: confirm safety-only release scope because staged capability gates block new broker orders and copy activation; full risk-engine acceptance still blocked.
+
 - [x] Audit Copy Trading Risk Engine and public TradeCopy capabilities; preserve current execution architecture and feed.
 - [x] Add staged fail-closed entry protections, remove stop-stripping/upward lots, test pure risk/strategy calculations, improve emergency readback and add honest Risk Centre observations; no deployment.
 - [ ] Complete persistent atomic risk, strategy execution and broker follower acceptance (blocked: TradeCopy pre-entry admission/account contract capabilities undocumented; no authenticated DEMO follower evidence). No protected/live claim; specified branch unavailable in managed sandbox.
