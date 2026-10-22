@@ -503,8 +503,10 @@ const Admin = () => {
         .in("user_id", userIds);
 
       if (profilesError) {
+        // Profile details enrich subscription rows but are not required to load
+        // the rest of the admin dashboard. Keep the exact error in the console
+        // for diagnosis, while allowing the other admin sections to render.
         console.error("[Admin] Profiles fetch error:", profilesError);
-        errors.push(`Profiles: ${profilesError.message}`);
       }
 
       const mergedSubs = subsData.map(sub => ({
