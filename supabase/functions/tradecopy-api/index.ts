@@ -416,7 +416,7 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
         // confirms activation and the diagnostic reports the account reachable.
         const isWeltrade = /weltrade/i.test(String(source.broker ?? source.server ?? ""));
         let weltradeVerified = false;
-        if (isWeltrade && reg.tradecopyUserId) {
+        if (isWeltrade && reg.tradecopyUserId && adapter.mode === "mock") {
           await adapter.activateMaster(reg.tradecopyUserId);
           const diag = redact(await adapter.diagnostic(reg.tradecopyUserId)) as Record<string, unknown>;
           const txt = JSON.stringify(diag ?? {}).toLowerCase();
@@ -841,6 +841,7 @@ async function handle(action: string, body: Record<string, unknown>, ctx: Ctx): 
       if (acct.account_role !== "master" || !acct.tradecopy_user_id) throw new TradeCopyError("Not a connected master account", "validation");
       if (acct.is_botvio_robot && !ctx.isAdmin) throw new TradeCopyError("Admins only", "auth", 403);
       const active = body.active === true;
+      if (active) assertRiskSubmissionReady(adapter.mode);
       if (active) assertLiveAllowed({ environment: acct.environment, liveConfirmedAt: body.confirm_live === true ? "now" : null, globalLiveEnabled: await globalLiveEnabled(ctx), adapterMode: adapter.mode });
       await (active ? adapter.activateMaster(acct.tradecopy_user_id) : adapter.deactivateMaster(acct.tradecopy_user_id));
       await admin.from("trading_accounts").update({ tradecopy_active: active }).eq("id", acct.id);
