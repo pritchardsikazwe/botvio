@@ -215,6 +215,13 @@ const Billing = () => {
                           )}
                         </div>
 
+                        {Array.isArray((plan as any).features) && (plan as any).features.length > 0 ? (
+                          <ul className="space-y-3 mb-6 text-left">
+                            {((plan as any).features as string[]).map((f) => (
+                              <li key={f} className="flex items-center gap-2"><div className="p-1 rounded-full bg-success/10"><Check className="h-3 w-3 text-success" /></div><span className="text-sm">{f}</span></li>
+                            ))}
+                          </ul>
+                        ) : (
                         <ul className="space-y-3 mb-6 text-left">
                           {/* Chart Analyses */}
                           <li className="flex items-center gap-2">
@@ -275,6 +282,7 @@ const Billing = () => {
                             </span>
                           </li>
                         </ul>
+                        )}
 
                         {isCurrentPlan ? (
                           <Button className="w-full" variant="outline" disabled>
