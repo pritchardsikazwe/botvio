@@ -1,6 +1,6 @@
 # Current tasks
 
-- [ ] Deploy request: confirm safety-only release scope because staged capability gates block new broker orders and copy activation; full risk-engine acceptance still blocked.
+- [ ] Publish safety-only release with broker entry gates retained; first address flagged public data access, then rescan and publish. Existing cloud copying may continue; full risk-engine acceptance still blocked.
 
 - [x] Audit Copy Trading Risk Engine and public TradeCopy capabilities; preserve current execution architecture and feed.
 - [x] Add staged fail-closed entry protections, remove stop-stripping/upward lots, test pure risk/strategy calculations, improve emergency readback and add honest Risk Centre observations; no deployment.
