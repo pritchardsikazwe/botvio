@@ -46,6 +46,7 @@ export const AdminProfilesTab = () => {
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [whatsAppFilter, setWhatsAppFilter] = useState<"all" | "has" | "missing">("all");
   const [sortBy, setSortBy] = useState<"recent" | "ai_total_desc" | "ai_today_desc" | "ai_total_asc">("recent");
   const [minUsage, setMinUsage] = useState("");
   const [planDialog, setPlanDialog] = useState<{ open: boolean; userId: string; userName: string; currentPlanId: string | null; subId: string | null }>({
@@ -57,7 +58,7 @@ export const AdminProfilesTab = () => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [featureExpiresAt, setFeatureExpiresAt] = useState("");
 
-  const { data: profiles, isLoading, refetch } = useQuery({
+  const { data: profiles, isLoading, isError: profilesError, error: profilesQueryError, refetch } = useQuery({
     queryKey: ["admin_profiles"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -229,10 +230,12 @@ export const AdminProfilesTab = () => {
       const matchName = p.display_name?.toLowerCase().includes(s);
       const matchEmail = p.email?.toLowerCase().includes(s);
       const matchCountry = p.country?.toLowerCase().includes(s);
-      const matchWhatsApp = p.whatsapp_number?.includes(s);
+      const matchWhatsApp = p.whatsapp_number?.replace(/\\D/g, "").includes(s.replace(/\\D/g, "")) || p.whatsapp_number?.toLowerCase().includes(s);
       if (!matchName && !matchEmail && !matchCountry && !matchWhatsApp) return false;
     }
     if (countryFilter !== "all" && p.country !== countryFilter) return false;
+    if (whatsAppFilter === "has" && !p.whatsapp_number?.trim()) return false;
+    if (whatsAppFilter === "missing" && p.whatsapp_number?.trim()) return false;
     if (statusFilter === "active") {
       const sub = getUserSub(p.user_id);
       if (!sub || sub.status !== "active") return false;
@@ -502,7 +505,7 @@ export const AdminProfilesTab = () => {
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            {search || countryFilter !== "all" || statusFilter !== "all" ? "No profiles match your filters" : "No user profiles found"}
+            {search || countryFilter !== "all" || statusFilter !== "all" || planFilter !== "all" || whatsAppFilter !== "all" || minUsage ? "No profiles match your filters" : "No user profiles found"}
           </div>
         )}
       </CardContent>
