@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { Phone } from "lucide-react";
-import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-
-const phoneSchema = z.string().trim().regex(/^\+?[0-9][0-9\s-]{7,18}$/, "Enter a valid WhatsApp number with country code");
+import { normalizeWhatsApp } from "@/lib/profileContact";
 
 /** Mandatory: signed-in users without a WhatsApp number must add one before continuing. */
 export function WhatsAppProfileNotice() {
@@ -17,11 +15,11 @@ export function WhatsAppProfileNotice() {
   if (!user || !profile || profile.whatsapp_number?.trim()) return null;
 
   const save = async () => {
-    const parsed = phoneSchema.safeParse(value);
-    if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+    const number = normalizeWhatsApp(value);
+    if (!number) { toast.error("Enter a valid WhatsApp number with country code"); return; }
     setSaving(true);
     try {
-      await updateProfile({ whatsapp_number: parsed.data } as any);
+      await updateProfile({ whatsapp_number: number });
       toast.success("WhatsApp number saved");
     } catch (e: any) {
       toast.error(e?.message || "Could not save number");
@@ -38,7 +36,7 @@ export function WhatsAppProfileNotice() {
         <p className="mb-4 text-sm text-muted-foreground">
           A WhatsApp number is required to use Botvio so we can contact you about your account, MT5 setup and trading updates.
         </p>
-        <Input type="tel" placeholder="+260 97 1234567" value={value} onChange={(e) => setValue(e.target.value)} maxLength={20} />
+        <Input aria-label="WhatsApp number with country code" type="tel" autoComplete="tel" placeholder="+260 97 1234567" value={value} onChange={(e) => setValue(e.target.value)} maxLength={20} />
         <Button className="mt-4 w-full" onClick={save} disabled={saving}>{saving ? "Saving..." : "Save and continue"}</Button>
       </div>
     </div>
