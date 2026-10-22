@@ -520,12 +520,20 @@ export const HomeSignalsWidget = () => {
                       View Chart
                     </Button>
                   </Link>
-                  <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
-                      <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
-                      Weltrade
-                    </Button>
-                  </a>
+                  {(() => {
+                    const isSynthetic = /(^R_|1HZ|BOOM|CRASH|STEP|JUMP|RANGE|VOLATILITY|GAINX|PAINX|FLIPX|SWITCHX|BREAKX|TRENDX|FX VOL|SFX|PLUSX|FIBOX|QUADX)/i.test(signal.symbol || "") || (signal as any).category === "syntx";
+                    const b = isSynthetic
+                      ? { name: "Deriv", link: DERIV_LINK }
+                      : { name: "Exness", link: EXNESS_LINK };
+                    return (
+                      <a href={b.link} target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
+                          <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                          {b.name}
+                        </Button>
+                      </a>
+                    );
+                  })()}
                 </div>
 
               </CardContent>
