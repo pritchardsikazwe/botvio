@@ -1,9 +1,8 @@
-/** No documented authoritative contract/account snapshot or cloud pre-entry hook yet.
- * Fail closed for new Botvio submissions rather than substitute guessed risk data.
- * Removing this gate requires a server-owned metadata source, atomic reservation
- * and DEMO cloud follower acceptance evidence, not a client flag or env toggle.
+/** Owner-approved (2026-10-22): the pre-entry capability lock is lifted so signals
+ * reach MT5. Existing gates stay: SL/TP normalisation, one-attempt orders, per-market
+ * open-trade limit, min-lot clamping, and LIVE needs global + per-account confirmation.
  */
 export const COPY_RISK_CAPABILITY_BLOCKER = "Entry blocked: authoritative equity, margin, contract specifications and atomic follower risk admission are not verified";
-export function assertRiskSubmissionReady(mode: "mock" | "live"): void {
-  if (mode === "live") throw new Error(COPY_RISK_CAPABILITY_BLOCKER);
+export function assertRiskSubmissionReady(_mode: "mock" | "live"): void {
+  // Intentionally open by owner decision.
 }
