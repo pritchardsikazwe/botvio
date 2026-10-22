@@ -30,6 +30,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { PremiumHomeSections } from "@/components/home/PremiumHomeSections";
 import { DerivOptionsHome } from "@/components/home/DerivOptionsHome";
 import { HomeLiveTrading } from "@/components/home/HomeLiveTrading";
+import { BotvioRobotPromo } from "@/components/home/BotvioRobotPromo";
 
 const Index = () => {
   const { user } = useAuth();
@@ -105,6 +106,7 @@ const Index = () => {
             education + brokers + latest articles + testimonials + FAQ).
             Contains the sole <h1> for the page. */}
         <PremiumHomeSections />
+        <BotvioRobotPromo />
         {/* Start Here — free learning paths band */}
         <section aria-label="Start Here" className="rounded-xl border border-primary/30 bg-primary/5 p-4 md:p-5">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
