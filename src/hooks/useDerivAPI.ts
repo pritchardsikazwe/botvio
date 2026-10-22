@@ -569,6 +569,9 @@ export const useDerivAPI = () => {
     }
   }, [service, updateState]);
 
+  // Prevent rapid double-clicks from sending overlapping buy requests.
+  const tradeInFlightRef = useRef(false);
+
   const placeTrade = useCallback(async (params: {
     symbol: string;
     contract_type: string;
@@ -580,19 +583,48 @@ export const useDerivAPI = () => {
     growth_rate?: number;
     limit_order?: Record<string, number>;
   }): Promise<DerivContract> => {
-    const proposal = await getProposal(params);
-    const contract = await buyContract(proposal.id, proposal.ask_price);
-    
-    console.log(`[BUY] ${params.symbol} ${params.contract_type} stake=${params.amount} contract_id=${contract.contract_id} buy_price=${contract.buy_price}`);
-    
-    // Immediately refresh balance after buy (stake deducted)
-    refreshBalance().catch(() => {});
-    
-    // Auto-subscribe to contract for settlement tracking
-    await subscribeContract(contract.contract_id);
-    
-    return contract;
-  }, [getProposal, buyContract, subscribeContract, refreshBalance]);
+    if (tradeInFlightRef.current) {
+      throw new Error("A trade request is already in progress. Wait for its result before placing another trade.");
+    }
+    tradeInFlightRef.current = true;
+    try {
+      if (!state.authorized || !service.socketOpen) {
+        throw new Error("Your Deriv account is disconnected. Reconnect and confirm the account status before trading.");
+      }
+      if (!Number.isFinite(params.amount) || params.amount <= 0) {
+        throw new Error("Enter a valid positive stake before placing a trade.");
+      }
+
+      // Quote immediately before purchase so stale proposals are less likely.
+      const proposal = await getProposal(params);
+      const contract = await buyContract(proposal.id, proposal.ask_price);
+
+      console.info("[Deriv][trade] buy confirmed", {
+        symbol: params.symbol,
+        contract_type: params.contract_type,
+        contract_id: contract.contract_id,
+        buy_price: contract.buy_price,
+      });
+
+      // The purchase is already confirmed. Tracking/balance refresh failures must
+      // never turn a successful purchase into a reported failed trade (which can
+      // prompt a dangerous duplicate purchase).
+      void refreshBalance().catch(() => {});
+      try {
+        await subscribeContract(contract.contract_id);
+      } catch (trackingError) {
+        console.error("[Deriv][trade] purchase succeeded but contract stream setup failed", {
+          contract_id: contract.contract_id,
+          error: trackingError instanceof Error ? trackingError.message : String(trackingError),
+        });
+        // Keep the confirmed contract result; provider-level reconnect logic can
+        // retry subscription, and the user must not submit the same trade again.
+      }
+      return contract;
+    } finally {
+      tradeInFlightRef.current = false;
+    }
+  }, [getProposal, buyContract, subscribeContract, refreshBalance, state.authorized, service]);
 
   useEffect(() => {
     return () => {
