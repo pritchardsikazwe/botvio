@@ -63,7 +63,7 @@ export const AdminPricingPlansTab = () => {
         .select("*")
         .order("price_usd", { ascending: true });
       if (error) throw error;
-      return data as PricingPlan[];
+      return data as unknown as PricingPlan[];
     },
   });
 
