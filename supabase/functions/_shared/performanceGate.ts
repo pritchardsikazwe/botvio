@@ -75,11 +75,14 @@ export async function loadPerformanceIndex(db: SupabaseClient, limit = 5000): Pr
   return index;
 }
 
+const EMPTY: SignalPerformance = { total: 0, wins: 0, losses: 0, winRate: 0, profitFactor: 0, expectancyR: 0, recentLosses: 0 };
+
+/** Most specific bucket that has a meaningful sample (>=20 settled), so varying strategy labels cannot dodge the gate. */
 export function getPerformance(index: PerformanceIndex, symbol: string, timeframe: string, strategy?: string): SignalPerformance {
-  return index.get(keyOf(symbol, timeframe, strategy))
-    ?? index.get(keyOf(symbol, timeframe, "*"))
-    ?? index.get(keyOf(symbol, "*", "*"))
-    ?? { total: 0, wins: 0, losses: 0, winRate: 0, profitFactor: 0, expectancyR: 0, recentLosses: 0 };
+  const chain = [keyOf(symbol, timeframe, strategy), keyOf(symbol, timeframe, "*"), keyOf(symbol, "*", "*")]
+    .map((k) => index.get(k))
+    .filter((p): p is SignalPerformance => !!p);
+  return chain.find((p) => p.total >= 20) ?? chain[0] ?? EMPTY;
 }
 
 /**
@@ -99,6 +102,10 @@ export function performanceGate(index: PerformanceIndex, symbol: string, timefra
   }
   if (p.winRate < 40 && p.expectancyR <= 0) {
     return { allowed: false, scoreBoost: 7, pauseMinutes: 60, reason: "low win rate with negative expectancy" as const, performance: p };
+  }
+
+  if (p.total >= 20 && p.expectancyR < -0.05) {
+    return { allowed: false, scoreBoost: 8, pauseMinutes: 60, reason: "negative expectancy" as const, performance: p };
   }
 
   let scoreBoost = 0;
