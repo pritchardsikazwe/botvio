@@ -230,7 +230,7 @@ export const AdminProfilesTab = () => {
       const matchName = p.display_name?.toLowerCase().includes(s);
       const matchEmail = p.email?.toLowerCase().includes(s);
       const matchCountry = p.country?.toLowerCase().includes(s);
-      const matchWhatsApp = p.whatsapp_number?.replace(/\\D/g, "").includes(s.replace(/\\D/g, "")) || p.whatsapp_number?.toLowerCase().includes(s);
+      const matchWhatsApp = p.whatsapp_number?.replace(/[^0-9]/g, "").includes(s.replace(/[^0-9]/g, "")) || p.whatsapp_number?.toLowerCase().includes(s);
       if (!matchName && !matchEmail && !matchCountry && !matchWhatsApp) return false;
     }
     if (countryFilter !== "all" && p.country !== countryFilter) return false;
@@ -341,6 +341,17 @@ export const AdminProfilesTab = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={whatsAppFilter} onValueChange={(v) => setWhatsAppFilter(v as "all" | "has" | "missing")}>
+            <SelectTrigger className="w-[170px]">
+              <Phone className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="WhatsApp" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All WhatsApp</SelectItem>
+              <SelectItem value="has">Has WhatsApp</SelectItem>
+              <SelectItem value="missing">Missing WhatsApp</SelectItem>
+            </SelectContent>
+          </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Status" />
@@ -375,6 +386,7 @@ export const AdminProfilesTab = () => {
               <SelectItem value="ai_total_asc">AI Usage: Low → High</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setCountryFilter("all"); setStatusFilter("all"); setPlanFilter("all"); setWhatsAppFilter("all"); setMinUsage(""); setSortBy("recent"); }}>Clear filters</Button>
           <Input
             type="number"
             min={0}
@@ -386,7 +398,16 @@ export const AdminProfilesTab = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span>{filtered?.length ?? 0} matching users{profiles ? ` • ${profiles.length} total` : ""}</span>
+          {profilesError && <span className="text-destructive">Could not load users: {(profilesQueryError as Error)?.message || "Unknown error"}</span>}
+        </div>
+        {profilesError ? (
+          <div className="py-8 text-center space-y-3">
+            <p className="text-destructive">Users could not be loaded. Check the admin permissions and profiles query; data has not been changed.</p>
+            <Button variant="outline" onClick={() => refetch()}><RefreshCw className="h-4 w-4 mr-2" /> Retry</Button>
+          </div>
+        ) : isLoading ? (
           <div className="space-y-3">
             {[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
           </div>
