@@ -61,12 +61,13 @@ export const AdminProfilesTab = () => {
   const { data: profiles, isLoading, isError: profilesError, error: profilesQueryError, refetch } = useQuery({
     queryKey: ["admin_profiles"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("user_id, email, display_name, country, whatsapp_number, onboarding_complete, created_at, language")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as ProfileRow[];
+      // Use the server-side admin endpoint so registered Auth accounts are still
+      // listed when an older signup flow failed to create a matching profile row.
+      const { data, error } = await supabase.functions.invoke("admin-list-users", { body: {} });
+      if (error) throw new Error(error.message || "Could not load registered users");
+      if (data?.error) throw new Error(data.error);
+      if (!Array.isArray(data?.users)) throw new Error("Admin users endpoint returned an invalid response");
+      return data.users as ProfileRow[];
     },
   });
 
