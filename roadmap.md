@@ -1,6 +1,7 @@
 # Current tasks
 
-- [ ] Publish safety-only release with broker entry gates retained; first address flagged public data access, then rescan and publish. Existing cloud copying may continue; full risk-engine acceptance still blocked.
+- [x] Address security findings: stream participant access is server-only; public AI signal writes revoked; database privilege readback verified. Public market signals/history and SEO metadata remain intentional; no privacy-sensitive settings columns found.
+- [ ] Request safety-only publishing with broker entry gates retained after 86 passing tests and clean preview build; deployment completion not yet verified. Existing cloud copying may continue; full risk-engine acceptance still blocked.
 
 - [x] Audit Copy Trading Risk Engine and public TradeCopy capabilities; preserve current execution architecture and feed.
 - [x] Add staged fail-closed entry protections, remove stop-stripping/upward lots, test pure risk/strategy calculations, improve emergency readback and add honest Risk Centre observations; no deployment.
