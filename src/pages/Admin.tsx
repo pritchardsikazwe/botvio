@@ -499,7 +499,7 @@ const Admin = () => {
       const userIds = subsData.map(s => s.user_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("user_id, email, display_name, whatsapp_number, country")
+        .select("user_id, email, display_name, country")
         .in("user_id", userIds);
 
       if (profilesError) {
@@ -509,7 +509,10 @@ const Admin = () => {
 
       const mergedSubs = subsData.map(sub => ({
         ...sub,
-        profiles: profilesData?.find(p => p.user_id === sub.user_id) || null
+        profiles: (() => {
+          const profile = profilesData?.find(p => p.user_id === sub.user_id);
+          return profile ? { ...profile, whatsapp_number: null } : null;
+        })()
       }));
 
       setSubscriptions(mergedSubs as UserSubscription[]);
