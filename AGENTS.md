@@ -1,5 +1,7 @@
 # Project architecture rules
 
+- Signup contact metadata is persisted by the existing profile-creation trigger before email confirmation; profile edits require saved-row readback, and WhatsApp validation is shared across signup and completion to prevent false success.
+
 - Stream participant identities and watch-time rows are accessed only through authorized server-side stream actions; public market analysis remains readable but AI signal creation is service-role only, preventing viewer-data disclosure and client-inserted signals.
 
 - Copy-risk calculations and strategy intentions live in shared pure TradeCopy helpers; the pre-entry capability lock was lifted by the owner, so remaining order gates (stops, per-market limit, LIVE confirmations) must not be weakened further.

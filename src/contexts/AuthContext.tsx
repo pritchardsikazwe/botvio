@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { trackBotvioEvent } from "@/components/analytics/analytics";
+import { normalizeWhatsApp, requireSavedProfile } from "@/lib/profileContact";
 
 interface Profile {
   id: string;
@@ -10,6 +11,7 @@ interface Profile {
   display_name: string | null;
   avatar_url: string | null;
   whatsapp_number?: string | null;
+  country?: string | null;
 }
 
 interface UserSettings {
@@ -198,31 +200,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, country?: string, whatsapp?: string, planCode?: string, displayName?: string) => {
-    if (!whatsapp?.trim()) {
-      return { error: new Error("WhatsApp number is required to create a Botvio account.") };
+    const normalizedNumber = normalizeWhatsApp(whatsapp || "");
+    if (!normalizedNumber) {
+      return { error: new Error("A valid WhatsApp number with country code is required to create a Botvio account.") };
     }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { country: country || undefined, whatsapp_number: whatsapp || undefined, selected_plan: planCode || 'free', display_name: displayName || undefined },
+        data: { country: country?.trim() || undefined, whatsapp_number: normalizedNumber, selected_plan: planCode || 'free', display_name: displayName?.trim() || undefined },
       },
     });
 
-    // Update profile with country, whatsapp, and display name if provided
+    // The signup trigger stores contact metadata transactionally, even before email
+    // confirmation. Do not issue an anonymous profile write without a session.
     if (!error && data?.user) {
-      const updates: Record<string, string> = {};
-      if (country) updates.country = country;
-      if (whatsapp) updates.whatsapp_number = whatsapp;
-      if (displayName) updates.display_name = displayName;
-      if (Object.keys(updates).length > 0) {
-        supabase
-          .from("profiles")
-          .update(updates as never)
-          .eq("user_id", data.user.id)
-          .then(() => {});
-      }
 
       // Assign selected plan subscription
       if (planCode && planCode !== 'free') {
@@ -295,16 +288,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateProfile = async (data: Partial<Profile>) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from("profiles")
-      .update(data)
-      .eq("user_id", user.id);
-
-    if (!error) {
-      setProfile((prev) => (prev ? { ...prev, ...data } : null));
+    if (!user) throw new Error("Please sign in to save your profile.");
+    const updates = { ...data };
+    if (updates.whatsapp_number !== undefined) {
+      const number = normalizeWhatsApp(updates.whatsapp_number || "");
+      if (!number) throw new Error("Enter a valid WhatsApp number with country code.");
+      updates.whatsapp_number = number;
     }
+    const result = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("user_id", user.id)
+      .select("id,user_id,email,display_name,avatar_url,whatsapp_number,country")
+      .single();
+    setProfile(requireSavedProfile(result));
   };
 
   const updateSettings = async (data: Partial<UserSettings>) => {
