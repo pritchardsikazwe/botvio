@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { BrokerVipOffer } from "@/components/vip/BrokerVipOffer";
 
 const BROKERS = {
   exness: {
@@ -72,6 +73,7 @@ export default function BrokerOnboarding() {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto max-w-5xl space-y-8 px-4 py-8 md:py-12">
+        <BrokerVipOffer />
         <div className="mx-auto max-w-3xl space-y-3 text-center">
           <Badge variant="outline">Botvio onboarding · Step 2 of 8</Badge>
           <h1 className="text-3xl font-black tracking-tight md:text-5xl">Unlock your free Botvio tools</h1>

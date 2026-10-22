@@ -12,12 +12,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { BASE_URL } from "@/config/domain";
+import { BrokerVipOffer } from "@/components/vip/BrokerVipOffer";
 
 const PLANS = [
   { code: "free", name: "Free Trial", price: "$0/mo", icon: Gift, description: "5 chart analyses/day" },
-  { code: "basic", name: "Basic", price: "$10/mo", icon: Star, description: "50 analyses/week + signals" },
-  { code: "standard", name: "Standard", price: "$25/mo", icon: Zap, description: "100 analyses/month + copy trade" },
-  { code: "vip", name: "VIP", price: "$49/mo", icon: Crown, description: "Unlimited + all strategies" },
+  { code: "starter", name: "Starter", price: "$9/mo", icon: Star, description: "Signals + chart analysis" },
+  { code: "basic", name: "Basic", price: "$19/mo", icon: Zap, description: "More analyses + copy trading" },
+  { code: "vip", name: "VIP", price: "$39/mo", icon: Crown, description: "Unlimited + all strategies · or free via Exness/Deriv" },
 ];
 const COUNTRIES = [["ZM","Zambia"],["KE","Kenya"],["NG","Nigeria"],["ZA","South Africa"],["GH","Ghana"],["TZ","Tanzania"],["UG","Uganda"],["RW","Rwanda"],["MW","Malawi"],["ZW","Zimbabwe"],["BW","Botswana"],["MZ","Mozambique"],["ET","Ethiopia"],["CD","DR Congo"],["CM","Cameroon"],["SN","Senegal"],["CI","Côte d’Ivoire"],["US","United States"],["GB","United Kingdom"],["CA","Canada"],["AU","Australia"],["IN","India"],["PK","Pakistan"],["BD","Bangladesh"],["MY","Malaysia"],["ID","Indonesia"],["PH","Philippines"],["AE","UAE"],["SA","Saudi Arabia"],["BR","Brazil"],["MX","Mexico"],["CO","Colombia"],["FR","France"],["DE","Germany"],["IT","Italy"],["ES","Spain"],["PT","Portugal"],["NL","Netherlands"],["JP","Japan"],["CN","China"],["RU","Russia"]].sort((a,b)=>a[1].localeCompare(b[1]));
 
@@ -40,5 +41,5 @@ export default function Signup() {
       <div className="space-y-3"><Label><Crown className="mr-2 inline h-4 w-4"/>Choose your starting plan</Label><RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="grid gap-3 sm:grid-cols-2">{PLANS.map(p=>{const Icon=p.icon;return <Label key={p.code} htmlFor={"plan-"+p.code} className={"flex cursor-pointer items-center gap-3 rounded-xl border p-4 "+(selectedPlan===p.code?"border-primary bg-primary/5":"border-border hover:border-primary/40")}><RadioGroupItem value={p.code} id={"plan-"+p.code} className="sr-only"/><Icon className="h-5 w-5 text-primary"/><span><span className="block font-semibold">{p.name}</span><span className="text-xs text-muted-foreground">{p.price} · {p.description}</span></span></Label>})}</RadioGroup></div>
       <Button type="submit" disabled={loading} className="w-full" variant="gold">{loading?<><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Creating account...</>:<>Create Account <ArrowRight className="ml-2 h-4 w-4"/></>}</Button></form>
       <p className="mt-5 text-center text-sm text-muted-foreground">Already have an account? <Link to="/" className="font-semibold text-primary">Sign in from the header</Link></p>
-    </CardContent></Card></main></div>;
+    </CardContent></Card><div className="mx-auto mt-6 max-w-2xl"><BrokerVipOffer compact /></div></main></div>;
 }

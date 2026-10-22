@@ -1337,6 +1337,51 @@ export type Database = {
         }
         Relationships: []
       }
+      broker_vip_claims: {
+        Row: {
+          admin_note: string | null
+          broker: string
+          broker_account_id: string
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          screenshot_path: string
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          broker: string
+          broker_account_id: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          broker?: string
+          broker_account_id?: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       brokers: {
         Row: {
           code: string
@@ -7474,6 +7519,10 @@ export type Database = {
       }
       admin_analytics_summary: { Args: { p_days?: number }; Returns: Json }
       admin_monetization_summary: { Args: never; Returns: Json }
+      admin_review_broker_vip_claim: {
+        Args: { p_action: string; p_claim_id: string; p_note?: string }
+        Returns: Json
+      }
       admin_upsert_app_setting: {
         Args: { p_description?: string; p_key: string; p_value: Json }
         Returns: Json
