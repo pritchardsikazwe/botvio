@@ -53,12 +53,11 @@ export function AdminMasterMarketsCard() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("app_settings").upsert({
-        key: MASTER_BLOCKED_KEY,
-        value: { blocked },
-        description: "Markets that are never auto-sent to MT5 master accounts",
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "key" });
+      const { error } = await supabase.rpc("admin_upsert_app_setting", {
+        p_key: MASTER_BLOCKED_KEY,
+        p_value: { blocked },
+        p_description: "Markets that are never auto-sent to MT5 master accounts",
+      });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-master-blocked"] }); toast.success("Master markets saved"); },
@@ -86,7 +85,7 @@ export function AdminMasterMarketsCard() {
           <Input placeholder="Block another market, e.g. XAGUSD" value={custom} onChange={(e) => setCustom(e.target.value)} />
           <Button variant="outline" onClick={() => { if (custom.trim() && !isBlocked(custom)) setBlocked((p) => [...p, custom.trim()]); setCustom(""); }}>Block</Button>
         </div>
-        <Button onClick={() => save.mutate()} disabled={save.isPending}>Save</Button>
+        <Button onClick={() => save.mutate()} disabled={save.isPending || isLoading}>{save.isPending ? "Saving…" : "Save"}</Button>
       </CardContent>
     </Card>
   );
