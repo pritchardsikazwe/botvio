@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "live.botvio.app",
-        "sha256_cert_fingerprints": ["59:4B:73:24:91:7F:8C:F3:8C:0B:19:C0:9E:07:10:68:C9:A6:D5:37:3D:30:41:47:03:69:BB:73:A2:92:77:D3"]
+        "package_name": "ai.botvio.live",
+        "sha256_cert_fingerprints": ["5D:AD:35:EA:34:8D:0A:09:70:B2:79:40:81:E8:98:01:D0:D5:15:3C:58:09:4E:EA:CE:67:96:EC:41:68:75:EC"]
       }
     }]
