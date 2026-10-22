@@ -441,14 +441,26 @@ export const AdminProfilesTab = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                          {p.whatsapp_number ? (
-                            <a href={`https://wa.me/${p.whatsapp_number.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline text-sm font-mono">
-                              {p.whatsapp_number}
-                            </a>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">—</span>
-                          )}
-                        </TableCell>
+                        {p.whatsapp_number?.trim() ? (() => {
+                          const digits = p.whatsapp_number.replace(/[^0-9]/g, "");
+                          const valid = digits.length >= 8 && digits.length <= 15;
+                          return (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {valid ? (
+                                <a href={`https://wa.me/${digits}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline text-sm font-mono">
+                                  {p.whatsapp_number}
+                                </a>
+                              ) : <span className="text-sm font-mono">{p.whatsapp_number}</span>}
+                              <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={async () => {
+                                try { await navigator.clipboard.writeText(p.whatsapp_number || ""); toast.success("WhatsApp number copied"); }
+                                catch { toast.error("Could not copy number"); }
+                              }}>Copy</Button>
+                            </div>
+                          );
+                        })() : (
+                          <span className="text-muted-foreground text-sm">Not provided</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {p.country ? (
                           <Badge variant="outline" className="text-xs">{p.country}</Badge>
