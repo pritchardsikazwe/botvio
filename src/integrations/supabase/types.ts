@@ -7388,6 +7388,10 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_upsert_app_setting: {
+        Args: { p_description?: string; p_key: string; p_value: Json }
+        Returns: Json
+      }
       auto_expire_signals: { Args: never; Returns: undefined }
       claim_chart_upload_slot: {
         Args: { _user_id: string }

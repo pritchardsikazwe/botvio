@@ -99,6 +99,13 @@
       "when": 1792651427100,
       "tag": "0013_protect_stream_participants_and_signal_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792652239245,
+      "tag": "0014_admin_upsert_app_setting",
+      "breakpoints": true
     }
   ]
 }
