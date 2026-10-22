@@ -22,6 +22,8 @@ import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
 import { AdminTradeCopyTab } from "@/components/admin/AdminTradeCopyTab";
 import { AdminSignalPerformancePanel } from "@/components/admin/AdminSignalPerformancePanel";
 import { SubscriptionFeatureMatrix } from "@/components/admin/SubscriptionFeatureMatrix";
+import { AdminMonetizationSummary } from "@/components/admin/AdminMonetizationSummary";
+import { ADMIN_SECTIONS, sectionForAnchor, type AdminSection } from "@/components/admin/adminSections";
 import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Globe2, LayoutDashboard, Mail, Menu, MoreVertical, RefreshCw, Search, Send, Settings, ShieldCheck, Signal, Sparkles, TrendingUp, UserCheck, DollarSign, Users, WalletCards, Phone, KeyRound, Ban, CheckCircle2 } from "lucide-react";
 
 type AdminUser = { user_id:string; email:string|null; display_name:string|null; country:string|null; whatsapp_number:string|null; created_at:string|null; plan:string; status:"Active"|"Inactive"; online:boolean; last_seen_at:string|null; current_path:string|null; device_type:string|null };
@@ -30,6 +32,8 @@ const PAGE_SIZE=10;
 export default function AdminControlCenter(){
   const { user, isSuperAdmin, isAdmin }=useAuth();
   const navigate=useNavigate();
+  const [section,setSection]=useState<AdminSection>("overview");
+  const goTo=(id:string)=>{setSection(sectionForAnchor(id));window.setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"}),60);};
   const [users,setUsers]=useState<AdminUser[]>([]),[loading,setLoading]=useState(true),[search,setSearch]=useState("");
   const [onlineCount,setOnlineCount]=useState(0),[onlineUsers,setOnlineUsers]=useState<AdminUser[]>([]);
   const [planFilter,setPlanFilter]=useState("all"),[statusFilter,setStatusFilter]=useState("all"),[countryFilter,setCountryFilter]=useState("all");
@@ -146,14 +150,14 @@ export default function AdminControlCenter(){
       <ScrollArea className="flex-1"><nav className="p-3 space-y-1 text-sm">
         <button type="button" onClick={()=>navigate("/admin")} className="w-full text-left px-3 py-2.5 rounded-lg bg-amber-500 text-slate-950 font-semibold flex gap-3 items-center hover:bg-amber-400 transition-colors"><LayoutDashboard className="h-4 w-4"/>Dashboard</button>
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Users & Community</p>
-        {[[Users,"Users",()=>document.getElementById("users-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[UserCheck,"User Segments",()=>document.getElementById("users-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Send,"Send Promotions",()=>document.getElementById("promotion-panel")?.scrollIntoView({behavior:"smooth",block:"center"})],[WalletCards,"Subscriptions",()=>document.getElementById("payment-requests-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[ShieldCheck,"Feature Access",()=>document.getElementById("subscription-feature-matrix")?.scrollIntoView({behavior:"smooth",block:"start"})],[DollarSign,"Monetization",()=>document.getElementById("monetization-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Activity,"Activity Logs",()=>document.getElementById("live-users-panel")?.scrollIntoView({behavior:"smooth",block:"center"})]].map(([I,l,action]: any)=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        {[[Users,"Users",()=>goTo("users-panel")],[UserCheck,"User Segments",()=>goTo("users-panel")],[Send,"Send Promotions",()=>goTo("promotion-panel")],[WalletCards,"Subscriptions",()=>goTo("payment-requests-panel")],[ShieldCheck,"Feature Access",()=>goTo("subscription-feature-matrix")],[DollarSign,"Monetization",()=>goTo("monetization-panel")],[Activity,"Activity Logs",()=>goTo("live-users-panel")]].map(([I,l,action]: any)=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Trading Intelligence</p>
-        {[[Signal,"Signals","/signals"],[BarChart3,"Signal Performance",()=>document.getElementById("signal-performance-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Bot,"AI Bots","/bots"],[TrendingUp,"Copy Trading","/copy-trading"],[ShieldCheck,"Providers","/providers"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
-        <button type="button" onClick={()=>document.getElementById("tradecopy-panel")?.scrollIntoView({behavior:"smooth",block:"start"})} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
+        {[[Signal,"Signals","/signals"],[BarChart3,"Signal Performance",()=>goTo("signal-performance-panel")],[Bot,"AI Bots","/bots"],[TrendingUp,"Copy Trading","/copy-trading"],[ShieldCheck,"Providers","/providers"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        <button type="button" onClick={()=>goTo("tradecopy-panel")} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">Content & SEO</p>
         {[[FileText,"Blog & Articles","/admin/legacy"],[Globe2,"Pages","/admin/legacy"],[Sparkles,"SEO & Content Tools","/admin/legacy"]].map(([I,l,path]: any)=><button type="button" key={l as string} onClick={()=>navigate(path as string)} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
         <p className="px-3 pt-5 pb-2 text-[10px] uppercase tracking-widest text-slate-500">System</p>
-        {[[BarChart3,"Analytics",()=>document.getElementById("analytics-panel")?.scrollIntoView({behavior:"smooth",block:"start"})],[Settings,"Admin Settings",()=>navigate("/admin/legacy")]].map(([I,l,action]: any)=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
+        {[[BarChart3,"Analytics",()=>goTo("analytics-panel")],[Settings,"Admin Settings",()=>navigate("/admin/legacy")]].map(([I,l,action]: any)=><button type="button" key={l as string} onClick={action as ()=>void} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors"><I className="h-4 w-4"/>{l}</button>)}
       </nav></ScrollArea>
       <div className="p-4 border-t border-white/10 text-xs text-slate-400">{user?.email||"Admin"}<div className="text-slate-600">{isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : "Access restricted"}</div></div>
     </aside>
@@ -164,16 +168,16 @@ export default function AdminControlCenter(){
         <div className="p-5 border-b border-white/10 flex items-center justify-between"><div><div className="text-2xl font-black">▮▮ Botvio</div><div className="text-[11px] text-amber-300 tracking-widest">ADMIN PANEL</div></div><Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={()=>setMobileMenuOpen(false)}>×</Button></div>
         <ScrollArea className="flex-1"><nav className="p-3 space-y-1 text-sm">
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/admin")}} className="w-full text-left px-3 py-2.5 rounded-lg bg-amber-500 text-slate-950 font-semibold flex gap-3 items-center"><LayoutDashboard className="h-4 w-4"/>Dashboard</button>
-          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("users-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Users className="h-4 w-4"/>Users</button>
-          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("promotion-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Send className="h-4 w-4"/>Send Promotions</button>
-          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("live-users-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Activity className="h-4 w-4"/>Live Users</button>
-          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("subscription-feature-matrix")?.scrollIntoView({behavior:"smooth",block:"start"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><ShieldCheck className="h-4 w-4"/>Feature Access</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);goTo("users-panel")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Users className="h-4 w-4"/>Users</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);goTo("promotion-panel")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Send className="h-4 w-4"/>Send Promotions</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);goTo("live-users-panel")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Activity className="h-4 w-4"/>Live Users</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);goTo("subscription-feature-matrix")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><ShieldCheck className="h-4 w-4"/>Feature Access</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/billing")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><WalletCards className="h-4 w-4"/>Subscriptions</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/signals")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Signal className="h-4 w-4"/>Signals</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/bots")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Bot className="h-4 w-4"/>AI Bots</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/copy-trading")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><TrendingUp className="h-4 w-4"/>Copy Trading</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/providers")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><ShieldCheck className="h-4 w-4"/>Providers</button>
-          <button type="button" onClick={()=>{setMobileMenuOpen(false);document.getElementById("tradecopy-panel")?.scrollIntoView({behavior:"smooth"})}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
+          <button type="button" onClick={()=>{setMobileMenuOpen(false);goTo("tradecopy-panel")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><WalletCards className="h-4 w-4"/>TradeCopy Accounts</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/admin/legacy")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><FileText className="h-4 w-4"/>Blog & Articles</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/admin/social-worker")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Send className="h-4 w-4"/>Social Worker</button>
           <button type="button" onClick={()=>{setMobileMenuOpen(false);navigate("/settings")}} className="w-full text-left px-3 py-2.5 rounded-lg flex gap-3 items-center text-slate-300 hover:bg-white/10"><Settings className="h-4 w-4"/>Settings</button>
@@ -181,23 +185,16 @@ export default function AdminControlCenter(){
       </aside>
     </div>}
     <main className="flex-1 min-w-0">
-      <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden" onClick={()=>setMobileMenuOpen(true)} aria-label="Open admin menu"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon" aria-label="View live users" title="View live users" onClick={()=>document.getElementById("live-users-panel")?.scrollIntoView({behavior:"smooth",block:"start"})}><Bell/></Button><Button variant="ghost" size="icon" aria-label="Admin settings" title="Admin settings" onClick={()=>navigate("/admin/legacy")}><Settings/></Button></header>
+      <header className="h-16 bg-white border-b flex items-center gap-3 px-4 lg:px-7 sticky top-0 z-20"><Button variant="ghost" size="icon" className="lg:hidden" onClick={()=>setMobileMenuOpen(true)} aria-label="Open admin menu"><Menu/></Button><div className="relative flex-1 max-w-xl"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="Search users, signals, content, analytics..." className="pl-9 bg-slate-50 border-0"/></div><Button variant="ghost" size="icon" aria-label="View live users" title="View live users" onClick={()=>goTo("live-users-panel")}><Bell/></Button><Button variant="ghost" size="icon" aria-label="Admin settings" title="Admin settings" onClick={()=>navigate("/admin/legacy")}><Settings/></Button></header>
       <div className="p-4 lg:p-7 space-y-6 max-w-[1600px] mx-auto">
-        <div id="visitors-panel"><AdminAnalyticsPanel /></div>
-        <AdminSignalPerformancePanel />
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h1 className="text-3xl font-bold">Dashboard</h1><p className="text-muted-foreground">Manage Botvio users, promotions and platform activity.</p></div><div className="flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={()=>document.getElementById("users-panel")?.scrollIntoView({behavior:"smooth",block:"start"})}><Users className="h-4 w-4 mr-2"/>Users</Button><Button type="button" variant="outline" onClick={()=>document.getElementById("visitors-panel")?.scrollIntoView({behavior:"smooth",block:"start"})}><BarChart3 className="h-4 w-4 mr-2"/>Visitors</Button><Button variant="outline" onClick={loadUsers}><RefreshCw className="h-4 w-4 mr-2"/>Refresh</Button></div></div>
+        <nav aria-label="Admin sections" className="sticky top-16 z-10 -mx-4 lg:mx-0 overflow-x-auto bg-slate-50/95 backdrop-blur px-4 lg:px-0 py-2"><div className="flex gap-2 w-max">{ADMIN_SECTIONS.map(s=><Button key={s.id} size="sm" variant={section===s.id?"default":"outline"} className="whitespace-nowrap" onClick={()=>setSection(s.id)}>{s.label}</Button>)}</div></nav>
+        {section==="overview"&&<>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h1 className="text-3xl font-bold">Dashboard</h1><p className="text-muted-foreground">Manage Botvio users, promotions and platform activity.</p></div><div className="flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={()=>goTo("users-panel")}><Users className="h-4 w-4 mr-2"/>Users</Button><Button type="button" variant="outline" onClick={()=>goTo("visitors-panel")}><BarChart3 className="h-4 w-4 mr-2"/>Visitors</Button><Button variant="outline" onClick={loadUsers}><RefreshCw className="h-4 w-4 mr-2"/>Refresh</Button></div></div>
         <div className="grid grid-cols-2 xl:grid-cols-6 gap-4"><Stat label="Total Users" value={users.length} icon={<Users/>}/><Stat label="Active Users" value={users.filter(u=>u.status==="Active").length} icon={<UserCheck/>}/><Stat label="Online Now" value={onlineCount} icon={<Activity/>}/><Stat label="Missing WhatsApp" value={users.filter(u=>!u.whatsapp_number?.trim()).length} icon={<Phone/>}/><Stat label="Premium Users" value={users.filter(u=>u.plan.toLowerCase()!=="free").length} icon={<Sparkles/>}/><Stat label="Live Signals" value="Online" icon={<Signal/>}/><Stat label="AI Bots" value="Online" icon={<Bot/>}/><Stat label="Selected" value={selected.length} icon={<Send/>}/></div>
-
-        <AdminGlobalAccessCard />
-        <AdminMasterMarketsCard />
-        <AdminMt5LeadsCard />
-        <AdminMonetizationTab />
-
-        <PaymentRequestsPanel />
-        <SubscriptionFeatureMatrix />
-
-        <div id="tradecopy-panel"><AdminTradeCopyTab /></div>
-
+          <AdminMonetizationSummary />
+          <div id="visitors-panel"><AdminAnalyticsPanel /></div>
+        </>}
+        {section==="users"&&<>
         <div className="grid xl:grid-cols-[1fr_360px] gap-6 items-start">
           <Card id="users-panel" className="overflow-hidden"><div className="p-5 border-b flex flex-wrap justify-between gap-3"><div><h2 className="text-lg font-semibold">Users</h2><p className="text-sm text-muted-foreground">Search, filter and select users for promotions. Online status updates every 15 seconds.</p></div><Button className="bg-amber-500 hover:bg-amber-600 text-slate-950" onClick={()=>setPromotionOpen(true)} disabled={!selected.length}><Send className="h-4 w-4 mr-2"/>Send Promotion ({selected.length})</Button></div>
             <div className="p-4 border-b bg-slate-50 flex flex-wrap gap-2">
@@ -214,6 +211,24 @@ export default function AdminControlCenter(){
           </Card>
           <Card id="promotion-panel" className="sticky top-24"><CardContent className="p-0"><div className="p-5 border-b"><h2 className="font-semibold flex items-center gap-2"><Mail className="h-5 w-5 text-primary"/>Send Promotion</h2><p className="text-sm text-muted-foreground mt-1">Select users and compose a campaign.</p></div><div className="p-5 space-y-4"><div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"><strong>{selected.length}</strong> recipients selected</div><div><label className="text-sm font-medium">Subject</label><Input className="mt-1" value={subject} onChange={e=>setSubject(e.target.value)}/></div><div><label className="text-sm font-medium">Message</label><Textarea className="mt-1 min-h-44" value={message} onChange={e=>setMessage(e.target.value)}/><p className="text-xs text-muted-foreground mt-1">Use {"{{name}}"} for the user's display name.</p></div><Button className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950" disabled={!selected.length} onClick={()=>setPromotionOpen(true)}><Send className="h-4 w-4 mr-2"/>Review & Send</Button></div></CardContent></Card>
         </div>
+          <AdminMt5LeadsCard />
+        </>}
+        {section==="monetization"&&<>
+          <AdminMonetizationSummary />
+          <AdminMonetizationTab />
+          <PaymentRequestsPanel />
+          <SubscriptionFeatureMatrix />
+        </>}
+        {section==="signals"&&<>
+          <AdminSignalPerformancePanel />
+          <AdminMasterMarketsCard />
+        </>}
+        {section==="robots"&&<div id="tradecopy-panel"><AdminTradeCopyTab /></div>}
+        {section==="content"&&<Card><CardContent className="p-5 space-y-3"><h2 className="text-lg font-semibold">Content Library</h2><p className="text-sm text-muted-foreground">Courses, articles, pages, SEO, products and training videos.</p><div className="grid gap-2 sm:grid-cols-2">{[["Blog & articles","/admin/legacy?tab=editorial"],["SEO pages","/admin/legacy?tab=seo_pages"],["Products & courses","/admin/legacy?tab=products"],["Training videos","/admin/legacy?tab=training_videos"],["Social worker","/admin/social-worker"]].map(([l,h])=><Button key={h} variant="outline" className="justify-start" onClick={()=>navigate(h)}><FileText className="h-4 w-4 mr-2"/>{l}</Button>)}</div></CardContent></Card>}
+        {section==="settings"&&<>
+          <AdminGlobalAccessCard />
+          <Card><CardContent className="p-5 flex flex-wrap gap-2"><Button variant="outline" onClick={()=>navigate("/admin/legacy")}><Settings className="h-4 w-4 mr-2"/>All legacy admin tools</Button><Button variant="outline" onClick={()=>navigate("/settings")}>Account settings</Button></CardContent></Card>
+        </>}
       </div>
     </main>
 

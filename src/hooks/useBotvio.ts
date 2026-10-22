@@ -477,6 +477,8 @@ export function usePricingPlans() {
         .from("pricing_plans")
         .select("*")
         .eq("is_active", true)
+        .eq("customer_visible", true)
+        .order("display_order")
         .order("price_usd");
       
       if (error) throw error;
