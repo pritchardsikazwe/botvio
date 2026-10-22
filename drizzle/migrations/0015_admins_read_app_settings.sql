@@ -1,0 +1,1 @@
+CREATE POLICY "Admins and super admins can read settings" ON public.app_settings FOR SELECT TO authenticated USING (public.is_admin());
