@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Repair admin contact visibility, recover supplied countries, and verify required WhatsApp saves and signup validation.
+
 - [x] Address security findings: stream participant access is server-only; public AI signal writes revoked; database privilege readback verified. Public market signals/history and SEO metadata remain intentional; no privacy-sensitive settings columns found.
 - [ ] Request safety-only publishing with broker entry gates retained after 86 passing tests and clean preview build; deployment completion not yet verified. Existing cloud copying may continue; full risk-engine acceptance still blocked.
 
