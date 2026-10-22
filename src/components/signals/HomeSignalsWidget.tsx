@@ -12,7 +12,7 @@ import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 const DERIV_LINK = "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
-const WELTRADE_LINK = "https://gowt.net/ib67505";
+// Weltrade link intentionally not used on home signal cards (owner preference).
 
 const BROKER_FILTERS = [
   { value: "all", label: "All" },
@@ -512,7 +512,7 @@ export const HomeSignalsWidget = () => {
                   </span>
                 </div>
 
-                {/* Home keeps only two actions per signal: open the matching chart and trade on Weltrade. */}
+                {/* Home keeps only two actions per signal: open the matching chart and trade on Deriv (synthetics) or Exness. */}
                 <div className="flex gap-1.5 mt-1">
                   <Link to={`/chart/${encodeURIComponent(signal.symbol)}?signal=${encodeURIComponent(signal.id)}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7">
