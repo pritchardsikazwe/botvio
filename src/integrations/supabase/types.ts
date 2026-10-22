@@ -355,6 +355,54 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          campaign: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          medium: string | null
+          metadata: Json
+          path: string | null
+          referrer: string | null
+          session_id: string | null
+          source: string | null
+          user_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          campaign?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name: string
+          id?: string
+          medium?: string | null
+          metadata?: Json
+          path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          campaign?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          medium?: string | null
+          metadata?: Json
+          path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           description: string | null
@@ -4664,6 +4712,7 @@ export type Database = {
       }
       pricing_plans: {
         Row: {
+          ai_chart_daily_quota: number | null
           allow_all_courses: boolean | null
           allow_copy_trading: boolean | null
           allow_premium_bots: boolean | null
@@ -4672,8 +4721,12 @@ export type Database = {
           allow_sports_betting: boolean | null
           code: string
           created_at: string
+          customer_visible: boolean
+          display_order: number
+          features: Json
           id: string
           is_active: boolean | null
+          maps_to_tier: string | null
           max_accounts: number | null
           max_bot_instances: number | null
           name: string
@@ -4681,6 +4734,7 @@ export type Database = {
           price_zmw: number | null
         }
         Insert: {
+          ai_chart_daily_quota?: number | null
           allow_all_courses?: boolean | null
           allow_copy_trading?: boolean | null
           allow_premium_bots?: boolean | null
@@ -4689,8 +4743,12 @@ export type Database = {
           allow_sports_betting?: boolean | null
           code: string
           created_at?: string
+          customer_visible?: boolean
+          display_order?: number
+          features?: Json
           id?: string
           is_active?: boolean | null
+          maps_to_tier?: string | null
           max_accounts?: number | null
           max_bot_instances?: number | null
           name: string
@@ -4698,6 +4756,7 @@ export type Database = {
           price_zmw?: number | null
         }
         Update: {
+          ai_chart_daily_quota?: number | null
           allow_all_courses?: boolean | null
           allow_copy_trading?: boolean | null
           allow_premium_bots?: boolean | null
@@ -4706,8 +4765,12 @@ export type Database = {
           allow_sports_betting?: boolean | null
           code?: string
           created_at?: string
+          customer_visible?: boolean
+          display_order?: number
+          features?: Json
           id?: string
           is_active?: boolean | null
+          maps_to_tier?: string | null
           max_accounts?: number | null
           max_bot_instances?: number | null
           name?: string
@@ -7192,6 +7255,27 @@ export type Database = {
           },
         ]
       }
+      user_presence: {
+        Row: {
+          current_path: string | null
+          device_type: string | null
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          current_path?: string | null
+          device_type?: string | null
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          current_path?: string | null
+          device_type?: string | null
+          last_seen_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -7388,6 +7472,8 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_analytics_summary: { Args: { p_days?: number }; Returns: Json }
+      admin_monetization_summary: { Args: never; Returns: Json }
       admin_upsert_app_setting: {
         Args: { p_description?: string; p_key: string; p_value: Json }
         Returns: Json
@@ -7439,6 +7525,7 @@ export type Database = {
           total_volume: number
         }[]
       }
+      get_user_plan_tier: { Args: { _user_id: string }; Returns: string }
       has_open_auto_trade: {
         Args: { _display_symbol: string; _user_id: string }
         Returns: boolean
@@ -7523,6 +7610,10 @@ export type Database = {
           _server_name: string
         }
         Returns: string
+      }
+      touch_user_presence: {
+        Args: { p_current_path: string; p_device_type: string }
+        Returns: undefined
       }
     }
     Enums: {
