@@ -57,7 +57,7 @@ describe("strategy intentions", () => {
 });
 
 describe("mock recovery and capability barrier", () => {
-  it("blocks real submissions including broker demo until capability evidence exists", () => expect(() => assertRiskSubmissionReady("live")).toThrow("Entry blocked"));
+  it("allows submissions after owner unlocked the capability gate", () => expect(() => assertRiskSubmissionReady("live")).not.toThrow());
   it("allows network-free mock tests", () => expect(() => assertRiskSubmissionReady("mock")).not.toThrow());
   it("mock modifications and partial fills read back", async () => {
     const adapter = new MockTradeCopyAdapter();

@@ -2,7 +2,7 @@
 
 - Stream participant identities and watch-time rows are accessed only through authorized server-side stream actions; public market analysis remains readable but AI signal creation is service-role only, preventing viewer-data disclosure and client-inserted signals.
 
-- Copy-risk calculations and strategy intentions live in shared pure TradeCopy helpers; broker submission/activation fail closed until authoritative account/contracts and atomic cloud follower admission are verified, because polling or client settings cannot enforce pre-entry risk.
+- Copy-risk calculations and strategy intentions live in shared pure TradeCopy helpers; the pre-entry capability lock was lifted by the owner, so remaining order gates (stops, per-market limit, LIVE confirmations) must not be weakened further.
 - Emergency copy controls persist account-wide relationship latches before upstream calls and read remaining broker tickets before reporting closure; adapter mocks must mutate positions for meaningful recovery tests.
 
 - Botvio Robot overview presentation lives in TradingOverview with locally scoped semantic theme tokens; CopyControlCenter retains account queries, authentication gates and execution controls so appearance changes do not alter trading behavior.
