@@ -144,6 +144,16 @@ function selectPublishedHomeSignals(items: ManualSignal[], now = new Date()): Ma
 
   const selected: ManualSignal[] = [];
   const used = new Set<string>();
+  // Reserve up to 4 slots for the newest Weltrade SyntX signals so busier
+  // markets never crowd them off the homepage.
+  const isWeltrade = (signal: ManualSignal) => {
+    const brokers = (signal as any).broker as string[] | null;
+    return (Array.isArray(brokers) && brokers.includes("weltrade")) || (signal as any).category === "syntx";
+  };
+  for (const signal of candidates.filter(isWeltrade).slice(0, 4)) {
+    selected.push(signal);
+    used.add(signal.id);
+  }
   // Lead with one signal per priority horizon, then fill with the newest rest.
   for (const tf of HOME_HORIZON_PRIORITY) {
     const match = candidates.find(signal => normTf(signal.timeframe) === tf && !used.has(signal.id));

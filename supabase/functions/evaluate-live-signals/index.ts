@@ -1,7 +1,7 @@
 // Evaluates ACTIVE auto-posted signals using the correct broker feed.
 // Outcome integrity rules:
 // 1. Deriv CFD / Synthetic signals use Deriv candles/ticks.
-// 2. Weltrade SyntX signals use real bridge_ticks from the connected MT5 feed.
+// 2. Weltrade SyntX signals use MT5 API Studio M1 candles (bridge_ticks fallback).
 // 3. We inspect the signal window, not only the latest price, so TP/SL ordering
 //    is determined from observed candles/ticks where possible.
 // 4. If the correct feed is unavailable, the signal is NOT fabricated as a loss.
@@ -13,6 +13,48 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { assertAutomationKey } from "../_shared/automationAuth.ts";
+import { studioCandles, studioSymbols, studioSymbolCandidates, studioOffset, unwrapStudio } from "../_shared/weltradeHistory.ts";
+
+// Weltrade results come from the same MT5 API Studio session the SyntX
+// generator uses (closed M1 candles). bridge_ticks is only a legacy fallback.
+type Studio = { base: string; key: string; session: string; symbols: string[] };
+async function studioApi(st: { base: string; key: string }, path: string, q: Record<string, string | number>) {
+  const u = new URL(st.base + path);
+  for (const [k, v] of Object.entries(q)) u.searchParams.set(k, String(v));
+  const r = await fetch(u, { headers: { ApiKey: st.key, Accept: "application/json, text/plain" }, signal: AbortSignal.timeout(20000) });
+  const t = await r.text(); let body: unknown = t; try { body = JSON.parse(t); } catch { /* text */ }
+  if (!r.ok) throw new Error(`API Studio HTTP ${r.status}`);
+  const raw = unwrapStudio(body);
+  if (raw && typeof raw === "object" && !Array.isArray(raw) && ((raw as any).code || (raw as any).message)) throw new Error(`API Studio ${(raw as any).code ?? "error"}`);
+  return body;
+}
+async function openStudio(supabase: any): Promise<Studio | null> {
+  const key = Deno.env.get("MT5_API_STUDIO_API_KEY") || Deno.env.get("TRADECOPY_API_KEY");
+  if (!key) return null;
+  const base = (Deno.env.get("MT5_API_STUDIO_BASE_URL") || "https://mt5full3.mtapi.io").replace(/\/+$/, "");
+  const { data } = await supabase.from("syntx_api_connections").select("session_id,server").eq("broker", "Weltrade").not("session_id", "is", null);
+  for (const c of (data ?? []).filter((x: any) => /weltrade/i.test(String(x.server || "")))) {
+    try {
+      const symbols = studioSymbols(await studioApi({ base, key }, "/Symbols", { id: c.session_id }));
+      if (symbols.length) return { base, key, session: c.session_id, symbols };
+    } catch { /* try next stored session */ }
+  }
+  return null;
+}
+async function fetchStudioBars(st: Studio, symbol: string, startMs: number, endMs: number): Promise<PriceBar[]> {
+  const candidates = studioSymbolCandidates(symbol, st.symbols);
+  for (const candidate of candidates) {
+    let offsetSec = 0;
+    try { offsetSec = studioOffset(await studioApi(st, "/GetQuote", { id: st.session, symbol: candidate }), Date.now()); } catch { /* UTC */ }
+    const shift = (ms: number) => new Date(ms + offsetSec * 1000).toISOString().slice(0, 19);
+    const nowSec = Math.floor(Date.now() / 1000);
+    const bars = studioCandles(await studioApi(st, "/PriceHistory", { id: st.session, symbol: candidate, from: shift(startMs - 60000), to: shift(endMs), timeFrame: 1 }), offsetSec)
+      .filter((b) => b.time + 60 <= nowSec && b.time * 1000 >= startMs - 60000)
+      .map((b) => ({ epoch: b.time, open: b.open, high: b.high, low: b.low, close: b.close }));
+    if (bars.length) return bars;
+  }
+  return [];
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -287,7 +329,7 @@ async function settleHistory(
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (!assertAutomationKey(req)) {
+  if (!(await assertAutomationKey(req))) {
     return new Response(JSON.stringify({ success: false, error: "Unauthorized automation trigger" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -309,7 +351,7 @@ Deno.serve(async (req) => {
       .eq("status", "ACTIVE")
       .eq("is_manual", false)
       .order("created_at", { ascending: true })
-      .limit(80);
+      .limit(200);
 
     if (error) throw new Error(error.message);
 
@@ -337,6 +379,7 @@ Deno.serve(async (req) => {
     }
     const derivBarsCache = new Map<string, PriceBar[]>();
     const weltradeBarsCache = new Map<string, PriceBar[]>();
+    const studio = (signals ?? []).some((x: any) => isBroker(x, "weltrade")) ? await openStudio(supabase).catch(() => null) : null;
 
     for (const sig of signals ?? []) {
       summary.evaluated++;
@@ -350,7 +393,9 @@ Deno.serve(async (req) => {
         if (broker === "weltrade") {
           const key = `${sig.symbol}|${sig.created_at}|${endMs}`;
           if (!weltradeBarsCache.has(key)) {
-            weltradeBarsCache.set(key, await fetchWeltradeBars(
+            let wb: PriceBar[] = [];
+            if (studio) wb = await fetchStudioBars(studio, sig.symbol, createdMs, endMs).catch(() => []);
+            weltradeBarsCache.set(key, wb.length ? wb : await fetchWeltradeBars(
               supabase,
               sig.symbol,
               new Date(createdMs).toISOString(),
