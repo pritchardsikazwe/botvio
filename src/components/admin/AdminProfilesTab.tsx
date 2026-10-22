@@ -46,6 +46,7 @@ export const AdminProfilesTab = () => {
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [whatsAppFilter, setWhatsAppFilter] = useState<"all" | "has" | "missing">("all");
   const [sortBy, setSortBy] = useState<"recent" | "ai_total_desc" | "ai_today_desc" | "ai_total_asc">("recent");
   const [minUsage, setMinUsage] = useState("");
   const [planDialog, setPlanDialog] = useState<{ open: boolean; userId: string; userName: string; currentPlanId: string | null; subId: string | null }>({
@@ -57,7 +58,7 @@ export const AdminProfilesTab = () => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [featureExpiresAt, setFeatureExpiresAt] = useState("");
 
-  const { data: profiles, isLoading, refetch } = useQuery({
+  const { data: profiles, isLoading, isError: profilesError, error: profilesQueryError, refetch } = useQuery({
     queryKey: ["admin_profiles"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -229,10 +230,12 @@ export const AdminProfilesTab = () => {
       const matchName = p.display_name?.toLowerCase().includes(s);
       const matchEmail = p.email?.toLowerCase().includes(s);
       const matchCountry = p.country?.toLowerCase().includes(s);
-      const matchWhatsApp = p.whatsapp_number?.includes(s);
+      const matchWhatsApp = p.whatsapp_number?.replace(/[^0-9]/g, "").includes(s.replace(/[^0-9]/g, "")) || p.whatsapp_number?.toLowerCase().includes(s);
       if (!matchName && !matchEmail && !matchCountry && !matchWhatsApp) return false;
     }
     if (countryFilter !== "all" && p.country !== countryFilter) return false;
+    if (whatsAppFilter === "has" && !p.whatsapp_number?.trim()) return false;
+    if (whatsAppFilter === "missing" && p.whatsapp_number?.trim()) return false;
     if (statusFilter === "active") {
       const sub = getUserSub(p.user_id);
       if (!sub || sub.status !== "active") return false;
@@ -338,6 +341,17 @@ export const AdminProfilesTab = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={whatsAppFilter} onValueChange={(v) => setWhatsAppFilter(v as "all" | "has" | "missing")}>
+            <SelectTrigger className="w-[170px]">
+              <Phone className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="WhatsApp" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All WhatsApp</SelectItem>
+              <SelectItem value="has">Has WhatsApp</SelectItem>
+              <SelectItem value="missing">Missing WhatsApp</SelectItem>
+            </SelectContent>
+          </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Status" />
@@ -372,6 +386,7 @@ export const AdminProfilesTab = () => {
               <SelectItem value="ai_total_asc">AI Usage: Low → High</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setCountryFilter("all"); setStatusFilter("all"); setPlanFilter("all"); setWhatsAppFilter("all"); setMinUsage(""); setSortBy("recent"); }}>Clear filters</Button>
           <Input
             type="number"
             min={0}
@@ -383,7 +398,16 @@ export const AdminProfilesTab = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span>{filtered?.length ?? 0} matching users{profiles ? ` • ${profiles.length} total` : ""}</span>
+          {profilesError && <span className="text-destructive">Could not load users: {(profilesQueryError as Error)?.message || "Unknown error"}</span>}
+        </div>
+        {profilesError ? (
+          <div className="py-8 text-center space-y-3">
+            <p className="text-destructive">Users could not be loaded. Check the admin permissions and profiles query; data has not been changed.</p>
+            <Button variant="outline" onClick={() => refetch()}><RefreshCw className="h-4 w-4 mr-2" /> Retry</Button>
+          </div>
+        ) : isLoading ? (
           <div className="space-y-3">
             {[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
           </div>
@@ -417,14 +441,26 @@ export const AdminProfilesTab = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                          {p.whatsapp_number ? (
-                            <a href={`https://wa.me/${p.whatsapp_number.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline text-sm font-mono">
-                              {p.whatsapp_number}
-                            </a>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">—</span>
-                          )}
-                        </TableCell>
+                        {p.whatsapp_number?.trim() ? (() => {
+                          const digits = p.whatsapp_number.replace(/[^0-9]/g, "");
+                          const valid = digits.length >= 8 && digits.length <= 15;
+                          return (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {valid ? (
+                                <a href={`https://wa.me/${digits}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline text-sm font-mono">
+                                  {p.whatsapp_number}
+                                </a>
+                              ) : <span className="text-sm font-mono">{p.whatsapp_number}</span>}
+                              <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={async () => {
+                                try { await navigator.clipboard.writeText(p.whatsapp_number || ""); toast.success("WhatsApp number copied"); }
+                                catch { toast.error("Could not copy number"); }
+                              }}>Copy</Button>
+                            </div>
+                          );
+                        })() : (
+                          <span className="text-muted-foreground text-sm">Not provided</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {p.country ? (
                           <Badge variant="outline" className="text-xs">{p.country}</Badge>
@@ -502,7 +538,7 @@ export const AdminProfilesTab = () => {
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            {search || countryFilter !== "all" || statusFilter !== "all" ? "No profiles match your filters" : "No user profiles found"}
+            {search || countryFilter !== "all" || statusFilter !== "all" || planFilter !== "all" || whatsAppFilter !== "all" || minUsage ? "No profiles match your filters" : "No user profiles found"}
           </div>
         )}
       </CardContent>
