@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { BROKER_REVIEWS } from "@/data/brokerReviews";
+import { brokerReviews } from "@/data/brokerReviews";
 
 const BROKERS = [
-  { id: "exness" as const, name: "Exness", url: (BROKER_REVIEWS as any)?.exness?.affiliateUrl || "https://one.exness-track.com/a/ts1kvs1k" },
-  { id: "deriv" as const, name: "Deriv", url: (BROKER_REVIEWS as any)?.deriv?.affiliateUrl || "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" },
+  { id: "exness" as const, name: "Exness", url: brokerReviews.exness?.affiliateUrl || "https://one.exness-track.com/a/ts1kvs1k" },
+  { id: "deriv" as const, name: "Deriv", url: brokerReviews.deriv?.affiliateUrl || "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" },
 ];
 
 type Claim = { id: string; broker: string; broker_account_id: string; status: string; admin_note: string | null; created_at: string };

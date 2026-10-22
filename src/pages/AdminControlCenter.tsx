@@ -18,6 +18,7 @@ import { AdminMonetizationTab } from "@/components/admin/AdminMonetizationTab";
 import { AdminGlobalAccessCard } from "@/components/admin/AdminGlobalAccessCard";
 import { AdminMasterMarketsCard } from "@/components/admin/AdminMasterMarketsCard";
 import { AdminMt5LeadsCard } from "@/components/admin/AdminMt5LeadsCard";
+import { AdminBrokerVipClaimsCard } from "@/components/admin/AdminBrokerVipClaimsCard";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
 import { AdminTradeCopyTab } from "@/components/admin/AdminTradeCopyTab";
 import { AdminSignalPerformancePanel } from "@/components/admin/AdminSignalPerformancePanel";
@@ -211,6 +212,7 @@ export default function AdminControlCenter(){
           </Card>
           <Card id="promotion-panel" className="sticky top-24"><CardContent className="p-0"><div className="p-5 border-b"><h2 className="font-semibold flex items-center gap-2"><Mail className="h-5 w-5 text-primary"/>Send Promotion</h2><p className="text-sm text-muted-foreground mt-1">Select users and compose a campaign.</p></div><div className="p-5 space-y-4"><div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"><strong>{selected.length}</strong> recipients selected</div><div><label className="text-sm font-medium">Subject</label><Input className="mt-1" value={subject} onChange={e=>setSubject(e.target.value)}/></div><div><label className="text-sm font-medium">Message</label><Textarea className="mt-1 min-h-44" value={message} onChange={e=>setMessage(e.target.value)}/><p className="text-xs text-muted-foreground mt-1">Use {"{{name}}"} for the user's display name.</p></div><Button className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950" disabled={!selected.length} onClick={()=>setPromotionOpen(true)}><Send className="h-4 w-4 mr-2"/>Review & Send</Button></div></CardContent></Card>
         </div>
+          <AdminBrokerVipClaimsCard />
           <AdminMt5LeadsCard />
         </>}
         {section==="monetization"&&<>
