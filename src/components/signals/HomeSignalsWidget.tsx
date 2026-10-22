@@ -12,7 +12,7 @@ import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
 const DERIV_LINK = "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
-const WELTRADE_LINK = "https://gowt.net/ib67505";
+// Weltrade link intentionally not used on home signal cards (owner preference).
 
 const BROKER_FILTERS = [
   { value: "all", label: "All" },
@@ -512,7 +512,7 @@ export const HomeSignalsWidget = () => {
                   </span>
                 </div>
 
-                {/* Home keeps only two actions per signal: open the matching chart and trade on Weltrade. */}
+                {/* Home keeps only two actions per signal: open the matching chart and trade on Deriv (synthetics) or Exness. */}
                 <div className="flex gap-1.5 mt-1">
                   <Link to={`/chart/${encodeURIComponent(signal.symbol)}?signal=${encodeURIComponent(signal.id)}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7">
@@ -520,12 +520,20 @@ export const HomeSignalsWidget = () => {
                       View Chart
                     </Button>
                   </Link>
-                  <a href={WELTRADE_LINK} target="_blank" rel="noopener noreferrer" className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
-                      <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
-                      Weltrade
-                    </Button>
-                  </a>
+                  {(() => {
+                    const isSynthetic = /(^R_|1HZ|BOOM|CRASH|STEP|JUMP|RANGE|VOLATILITY|GAINX|PAINX|FLIPX|SWITCHX|BREAKX|TRENDX|FX VOL|SFX|PLUSX|FIBOX|QUADX)/i.test(signal.symbol || "") || (signal as any).category === "syntx";
+                    const b = isSynthetic
+                      ? { name: "Deriv", link: DERIV_LINK }
+                      : { name: "Exness", link: EXNESS_LINK };
+                    return (
+                      <a href={b.link} target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full font-bold text-[10px] px-1.5 py-1 h-7 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
+                          <ExternalLink className="h-2.5 w-2.5 mr-0.5 shrink-0" />
+                          {b.name}
+                        </Button>
+                      </a>
+                    );
+                  })()}
                 </div>
 
               </CardContent>
