@@ -120,6 +120,13 @@
       "when": 1792652425055,
       "tag": "0016_unified_plans_and_analytics",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792652678358,
+      "tag": "0017_save_signup_whatsapp_to_profile",
+      "breakpoints": true
     }
   ]
 }
