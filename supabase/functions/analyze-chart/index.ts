@@ -281,7 +281,7 @@ Keep the response structured and actionable.`);
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: OPENAI_API_KEY ? "gpt-4o" : "google/gemini-2.5-pro",
+          model: OPENAI_API_KEY ? "gpt-4o" : "google/gemini-3.1-pro-preview",
           messages: [
             {
               role: "user",

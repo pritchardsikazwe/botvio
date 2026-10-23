@@ -76,7 +76,7 @@ Format your response with clear headers, percentages, and actionable recommendat
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
         messages,
       }),
     });
