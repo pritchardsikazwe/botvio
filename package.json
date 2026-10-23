@@ -15,6 +15,7 @@
     "cap:android": "npm run build && npx cap sync android && npx cap open android",
     "cap:ios": "npm run build && npx cap sync ios && npx cap open ios",
     "seo:audit": "node scripts/seo-audit.mjs",
+    "seo:production-smoke": "node scripts/production-seo-smoke.mjs",
     "uae:conversion-audit": "node scripts/uae-conversion-audit.mjs"
   },
   "dependencies": {
