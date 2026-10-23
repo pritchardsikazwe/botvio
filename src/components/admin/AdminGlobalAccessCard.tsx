@@ -28,15 +28,11 @@ export function AdminGlobalAccessCard() {
 
   const toggle = useMutation({
     mutationFn: async (next: boolean) => {
-      const { error } = await supabase.from("app_settings").upsert(
-        {
-          key: GLOBAL_ACCESS_KEY,
-          value: { enabled: next },
-          description: "When enabled, all visitors get full access without a subscription",
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "key" },
-      );
+      const { error } = await supabase.rpc("admin_upsert_app_setting", {
+        p_key: GLOBAL_ACCESS_KEY,
+        p_value: { enabled: next },
+        p_description: "When enabled, all visitors get full access without a subscription",
+      });
       if (error) throw error;
       return next;
     },
