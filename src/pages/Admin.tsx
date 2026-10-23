@@ -496,25 +496,21 @@ const Admin = () => {
     }
 
     if (subsData && subsData.length > 0) {
-      const userIds = subsData.map(s => s.user_id);
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
-        .select("user_id, email, display_name, country")
-        .in("user_id", userIds);
-
-      if (profilesError) {
-        // Profile details enrich subscription rows but are not required to load
-        // the rest of the admin dashboard. Keep the exact error in the console
-        // for diagnosis, while allowing the other admin sections to render.
-        console.error("[Admin] Profiles fetch error:", profilesError);
+      const userIds = Array.from(new Set(subsData.map(s => s.user_id)));
+      // Hundreds of IDs in one request exceed the URL limit (400 Bad Request), so fetch in chunks.
+      const profilesData: { user_id: string; email: string | null; display_name: string | null; country: string | null; whatsapp_number: string | null }[] = [];
+      for (let i = 0; i < userIds.length; i += 100) {
+        const { data, error: profilesError } = await supabase
+          .from("profiles")
+          .select("user_id, email, display_name, country, whatsapp_number")
+          .in("user_id", userIds.slice(i, i + 100));
+        if (profilesError) console.error("[Admin] Profiles fetch error:", profilesError);
+        else if (data) profilesData.push(...data);
       }
 
       const mergedSubs = subsData.map(sub => ({
         ...sub,
-        profiles: (() => {
-          const profile = profilesData?.find(p => p.user_id === sub.user_id);
-          return profile ? { ...profile, whatsapp_number: null } : null;
-        })()
+        profiles: profilesData.find(p => p.user_id === sub.user_id) ?? null,
       }));
 
       setSubscriptions(mergedSubs as UserSubscription[]);
