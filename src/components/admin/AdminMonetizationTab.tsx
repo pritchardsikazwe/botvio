@@ -16,7 +16,7 @@ export function AdminMonetizationTab() {
     return (data?.value as any)?.enabled === true;
   }});
   const testModeMutation = useMutation({ mutationFn: async (enabled: boolean) => {
-    const { error } = await supabase.from("app_settings").upsert({ key: "marketplace_test_mode", value: { enabled }, description: "Controls free marketplace test activation", updated_at: new Date().toISOString() }, { onConflict: "key" });
+    const { error } = await supabase.rpc("admin_upsert_app_setting", { p_key: "marketplace_test_mode", p_value: { enabled }, p_description: "Controls free marketplace test activation" });
     if (error) throw error;
   }, onSuccess: () => { qc.invalidateQueries({ queryKey: ["marketplace-test-mode-admin"] }); toast.success("Marketplace test mode updated"); }, onError: (e:any) => toast.error(e.message || "Could not update test mode") });
   const { data, isLoading } = useQuery({ queryKey: ["admin-monetization-products"], queryFn: async () => {

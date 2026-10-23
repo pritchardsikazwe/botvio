@@ -148,6 +148,13 @@
       "when": 1792747046346,
       "tag": "0020_review_payment_plan_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792747327018,
+      "tag": "0021_admin_upsert_app_setting_more_keys",
+      "breakpoints": true
     }
   ]
 }
