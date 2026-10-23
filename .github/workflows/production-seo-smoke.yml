@@ -1,0 +1,23 @@
+name: Botvio production SEO smoke test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 5 * * 1-5"
+
+permissions:
+  contents: read
+
+jobs:
+  production-seo-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check production SEO endpoints
+        run: npm run seo:production-smoke
