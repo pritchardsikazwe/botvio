@@ -1,5 +1,7 @@
 # Current tasks
 
+- [x] Enhance Admin Users with mobile entries, explicit WhatsApp/country labels, shared contact presentation and Update list action; sample contact browser check and three validation tests pass.
+
 - [x] Repair admin contact visibility and refresh; recover 24 supplied countries; verify WhatsApp validation/save failure tests and browser signup rejection.
 - [ ] Verify admin contact display and successful profile-save readback in a signed-in session (blocked: requesting user's preview account unavailable; requires preview sign-in).
 

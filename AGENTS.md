@@ -1,6 +1,7 @@
 # Project architecture rules
 
 - Signup contact metadata is persisted by the existing profile-creation trigger before email confirmation; profile edits require saved-row readback, and WhatsApp validation is shared across signup and completion to prevent false success.
+- Admin user contact presentation is shared by mobile list entries and desktop rows, keeping WhatsApp and country visible without horizontal scrolling on phones.
 
 - Stream participant identities and watch-time rows are accessed only through authorized server-side stream actions; public market analysis remains readable but AI signal creation is service-role only, preventing viewer-data disclosure and client-inserted signals.
 
