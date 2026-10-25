@@ -1,25 +1,29 @@
-// Posts one Botvio blog/research article to LinkedIn per run (scheduled 3x/day).
+// Posts one Botvio educational post to LinkedIn per run (scheduled 3x/day).
+// Educational content only: no links, no promotions, no profit claims.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assertAutomationKey } from "../_shared/automationAuth.ts";
 import articles from "./articles.json" with { type: "json" };
 
 const GATEWAY = "https://connector-gateway.lovable.dev/linkedin";
-const SITE = "https://botvio.live";
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 type Article = { slug: string; title: string; excerpt: string; category?: string };
 
 const tagFor = (c = "") => {
-  const base = ["#Botvio", "#Trading", "#AITrading"];
+  const base = ["#TradingEducation", "#RiskManagement", "#LearnToTrade"];
   const k = c.toLowerCase();
   if (k.includes("forex")) base.push("#Forex");
-  if (k.includes("gold")) base.push("#Gold", "#XAUUSD");
+  if (k.includes("gold")) base.push("#Gold");
   if (k.includes("crypto") || k.includes("bitcoin")) base.push("#Crypto");
   if (k.includes("synthetic") || k.includes("deriv")) base.push("#SyntheticIndices");
   return base.join(" ");
 };
+
+// Strip any URLs or link-like text so posts stay educational and link-free.
+const stripLinks = (s: string) =>
+  s.replace(/https?:\/\/\S+/gi, "").replace(/www\.\S+/gi, "").replace(/\S+\.(com|net|org|live|io|app)\S*/gi, "").trim();
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -48,8 +52,15 @@ Deno.serve(async (req) => {
   }
   if (!pick) return json({ ok: true, message: "No articles available" });
 
-  const url = `${SITE}/blog/${pick.slug}`;
-  const text = `${pick.title}\n\n${pick.excerpt ?? ""}\n\nRead the full article on Botvio AI 👉 ${url}\n\nTrading involves risk. Educational content only.\n\n${tagFor(pick.category)}`;
+  // Self-contained educational post: lesson title, key idea, takeaway. No links, no promotions.
+  const title = stripLinks(pick.title);
+  const lesson = stripLinks(pick.excerpt ?? "");
+  const text =
+    `📚 Trading lesson: ${title}\n\n` +
+    `${lesson}\n\n` +
+    `Key takeaway: understand the concept before you trade it, and always size positions so a single loss never hurts your account.\n\n` +
+    `Educational content only — not financial advice. Trading involves risk of loss.\n\n` +
+    `${tagFor(pick.category)}`;
 
   const me = await fetch(`${GATEWAY}/v2/userinfo`, { headers });
   if (!me.ok) {
@@ -68,8 +79,7 @@ Deno.serve(async (req) => {
       specificContent: {
         "com.linkedin.ugc.ShareContent": {
           shareCommentary: { text },
-          shareMediaCategory: "ARTICLE",
-          media: [{ status: "READY", originalUrl: url, title: { text: pick.title.slice(0, 200) } }],
+          shareMediaCategory: "NONE",
         },
       },
       visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
@@ -80,12 +90,12 @@ Deno.serve(async (req) => {
   if (!ok) console.error(`LinkedIn post failed [${res.status}]: ${body}`);
 
   await db.from("linkedin_posts").upsert({
-    slug: pick.slug, title: pick.title, url,
+    slug: pick.slug, title: pick.title, url: null,
     status: ok ? "posted" : "failed",
     linkedin_post_id: ok ? (res.headers.get("x-restli-id") ?? (() => { try { return JSON.parse(body).id; } catch { return null; } })()) : null,
     error: ok ? null : `[${res.status}] ${body.slice(0, 500)}`,
     posted_at: new Date().toISOString(),
   }, { onConflict: "slug" });
 
-  return ok ? json({ ok: true, posted: pick.title, url }) : json({ error: "LinkedIn post failed", status: res.status, details: body }, 502);
+  return ok ? json({ ok: true, posted: pick.title }) : json({ error: "LinkedIn post failed", status: res.status, details: body }, 502);
 });

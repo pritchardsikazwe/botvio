@@ -6469,6 +6469,30 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_signal_posts: {
+        Row: {
+          error: string | null
+          posted_at: string
+          signal_id: string
+          status: string
+          telegram_message_id: number | null
+        }
+        Insert: {
+          error?: string | null
+          posted_at?: string
+          signal_id: string
+          status?: string
+          telegram_message_id?: number | null
+        }
+        Update: {
+          error?: string | null
+          posted_at?: string
+          signal_id?: string
+          status?: string
+          telegram_message_id?: number | null
+        }
+        Relationships: []
+      }
       top_asset_snapshots: {
         Row: {
           accuracy_today: number | null

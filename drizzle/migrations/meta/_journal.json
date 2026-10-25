@@ -169,6 +169,13 @@
       "when": 1792936807344,
       "tag": "0023_telegram_posts_log",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792937151499,
+      "tag": "0024_telegram_signal_autopost",
+      "breakpoints": true
     }
   ]
 }
