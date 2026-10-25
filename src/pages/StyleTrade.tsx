@@ -178,13 +178,15 @@ const StyleTrade = () => {
     if (!authorized) return;
     const unsub = onContractUpdate((update) => {
       const isSettled = update.is_sold || update.is_expired || ["won", "lost", "sold"].includes(update.status);
+      const rawProfit = Number((update as any).profit);
+      const hasProfit = Number.isFinite(rawProfit);
 
       // Update local trade records
       setTradeRecords(prev => prev.map(t => {
         if (t.contractId === update.contract_id) {
           if (isSettled) {
-            const won = update.status === "won" || (update.profit !== undefined && update.profit > 0);
-            const pnl = update.profit ?? (won ? (t.stake * 0.8) : -t.stake);
+            const won = update.status === "won" || (hasProfit && rawProfit > 0);
+            const pnl = hasProfit ? rawProfit : (won ? (Number(t.stake) * 0.8) : -Number(t.stake));
             return { ...t, status: won ? "won" as const : "lost" as const, pnl };
           }
         }
@@ -192,8 +194,8 @@ const StyleTrade = () => {
       }));
 
       if (isSettled) {
-        const won = update.status === "won" || (update.profit !== undefined && update.profit > 0);
-        const pnl = update.profit ?? 0;
+        const won = update.status === "won" || (hasProfit && rawProfit > 0);
+        const pnl = hasProfit ? rawProfit : 0;
         setRiskSession(prev => recordTradeResult(prev, won, pnl, styleIdRef.current || ""));
         addLogRef.current?.(
           won ? "success" : "error",
