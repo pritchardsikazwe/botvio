@@ -441,7 +441,7 @@ export const AppRoutes = () => {
     <Route path="reset-password" element={<ResetPassword />} />
     <Route path="sports-betting" element={<StoreRestrictedRoute><SportsBetting /></StoreRestrictedRoute>} />
     <Route path="unsubscribe" element={<Unsubscribe />} />
-    <Route path="trade/style/:styleId" element={<Paid><StyleTrade /></Paid>} />
+    <Route path="trade/style/:styleId" element={<ErrorBoundary><Paid><StyleTrade /></Paid></ErrorBoundary>} />
     <Route path="blog" element={<Blog />} />
     <Route path="ar/dubai" element={<ArabicDubaiTradingGuide />} />
     <Route path="ar/saudi-arabia" element={<SaudiArabicTradingGuide />} />

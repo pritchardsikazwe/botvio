@@ -21,7 +21,7 @@ interface TradeStatusPanelProps {
 export const TradeStatusPanel = ({ trades }: TradeStatusPanelProps) => {
   const running = trades.filter(t => t.status === "running");
   const closed = trades.filter(t => t.status !== "running");
-  const totalPnl = closed.reduce((sum, t) => sum + (t.pnl || 0), 0);
+  const totalPnl = closed.reduce((sum, t) => sum + (Number(t.pnl) || 0), 0);
   const wins = closed.filter(t => t.status === "won").length;
   const losses = closed.filter(t => t.status === "lost").length;
 
@@ -90,7 +90,7 @@ export const TradeStatusPanel = ({ trades }: TradeStatusPanelProps) => {
                       <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20">Running</Badge>
                     ) : (
                       <span className={`font-bold ${trade.status === "won" ? "text-success" : "text-destructive"}`}>
-                        {trade.pnl && trade.pnl >= 0 ? '+' : ''}${(trade.pnl || 0).toFixed(2)}
+                        {(Number(trade.pnl) || 0) >= 0 ? '+' : ''}${(Number(trade.pnl) || 0).toFixed(2)}
                       </span>
                     )}
                   </div>
