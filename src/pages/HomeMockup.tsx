@@ -22,7 +22,9 @@ import { HomeTradingPathways } from "@/components/home/HomeTradingPathways";
 import { FloatingWhatsAppSupport } from "@/components/support/FloatingWhatsAppSupport";
 
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, Send, ShieldCheck, Sparkles, Users } from "lucide-react";
+
+const TELEGRAM_URL = "https://t.me/botviolive";
 
 const markets = [
   { name: "Gold", symbol: "XAU/USD", to: "/gold", tag: "Popular" },
@@ -220,6 +222,27 @@ const HomeMockup = () => {
         <section className="container mx-auto px-4 py-12 sm:py-16"><div className="rounded-3xl border border-border/70 bg-card p-6 sm:p-8"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><Badge className="bg-primary/10 text-primary hover:bg-primary/10">BROKER HUB</Badge><h2 className="mt-3 text-2xl font-black">Choose the broker for your strategy</h2><p className="mt-2 max-w-2xl text-xs leading-5 text-muted-foreground">Compare broker features, markets and trading workflows before opening an account.</p></div><Link to="/brokers" className="text-xs font-bold text-primary">Compare all brokers <ArrowRight className="inline h-3 w-3" /></Link></div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{brokers.map(b => <Link key={b.name} to={b.to} className="rounded-xl border border-border/60 bg-background/60 p-4 transition hover:border-primary/50"><div className="flex items-center justify-between"><span className="font-bold">{b.name}</span><ChevronRight className="h-4 w-4 text-muted-foreground" /></div><p className="mt-2 text-[11px] leading-4 text-muted-foreground">{b.text}</p><span className="mt-3 block text-[10px] font-bold text-primary">Read review</span></Link>)}</div><p className="mt-5 text-[10px] leading-4 text-muted-foreground">Some broker links on Botvio may be affiliate links. If you open an account through an affiliate link, Botvio may receive compensation at no additional cost to you. Trading involves risk.</p></div></section>
 
         <BotvioPricingSection />
+
+        <section className="container mx-auto px-4 py-8 sm:py-10">
+          <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card p-6 sm:p-8">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+            <div className="relative flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary"><Send className="h-6 w-6" /></div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">One-on-one · fast replies</p>
+                  <h2 className="mt-1 text-2xl font-black">Join Botvio on Telegram</h2>
+                  <p className="mt-2 max-w-xl text-xs leading-5 text-muted-foreground sm:text-sm">Talk to the Botvio team directly for signal questions, account help or getting started — one-on-one, no waiting rooms.</p>
+                </div>
+              </div>
+              <Button size="lg" asChild className="shrink-0 px-7 font-bold">
+                <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Join Botvio on Telegram" onClick={() => trackBotvioEvent("telegram_join", { source: "home_cta" })}>
+                  Join Telegram <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </section>
 
         <section className="container mx-auto px-4 pb-14"><div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-primary/10 px-6 py-10 text-center sm:px-10"><div className="relative"><ShieldCheck className="mx-auto h-8 w-8 text-primary" /><h2 className="mt-3 text-3xl font-black">Build your trading workflow with Botvio</h2><p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">Create a free account, explore the markets and unlock the tools that fit your strategy.</p><Button size="lg" onClick={start} className="mt-6 px-8 font-bold">Start Free <ArrowRight className="ml-2 h-4 w-4" /></Button></div></div></section>
       </main>
