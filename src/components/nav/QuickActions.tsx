@@ -39,7 +39,7 @@ export const QuickActions = ({ variant = "bar", onNavigate, className }: { varia
           <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-xl", i === 0 ? "bg-primary-foreground/15" : "bg-primary/10 text-primary")}>
             <Icon className="h-[18px] w-[18px]" aria-hidden />
           </span>
-          <span className="whitespace-nowrap">{label}</span>
+          <span className={variant === "bar" ? "whitespace-nowrap" : "min-w-0"}>{label}</span>
         </>
       );
       return external ? (
