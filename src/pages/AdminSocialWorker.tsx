@@ -58,6 +58,30 @@ export default function AdminSocialWorker() {
   const [schedule, setSchedule] = useState("");
   const [autoWorker, setAutoWorker] = useState(false);
   const [linkedinConfig, setLinkedinConfig] = useState<{clientIdConfigured: boolean; clientSecretConfigured: boolean; redirectUri: string; requiredScopes: string[]} | null>(null);
+  const [ttTitle, setTtTitle] = useState("");
+  const [ttExcerpt, setTtExcerpt] = useState("");
+  const [ttResult, setTtResult] = useState<{ hook: string; script: string; caption: string; hashtags: string[] } | null>(null);
+  const [ttBusy, setTtBusy] = useState(false);
+
+  const generateTikTok = async () => {
+    if (!ttTitle.trim()) return toast.error("Enter the article title first");
+    setTtBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("tiktok-script", {
+        body: { title: ttTitle.trim(), excerpt: ttExcerpt.trim() },
+      });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Generation failed");
+      setTtResult({ hook: data.hook, script: data.script, caption: data.caption, hashtags: data.hashtags || [] });
+      toast.success("TikTok content ready — copy it into your video");
+    } catch (e: any) {
+      toast.error(e?.message || "Could not generate TikTok content");
+    } finally { setTtBusy(false); }
+  };
+
+  const copyText = (label: string, text: string) => {
+    navigator.clipboard?.writeText(text).then(() => toast.success(`${label} copied`)).catch(() => toast.error("Copy failed"));
+  };
 
   const load = async () => {
     setLoading(true);
