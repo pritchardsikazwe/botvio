@@ -58,6 +58,30 @@ export default function AdminSocialWorker() {
   const [schedule, setSchedule] = useState("");
   const [autoWorker, setAutoWorker] = useState(false);
   const [linkedinConfig, setLinkedinConfig] = useState<{clientIdConfigured: boolean; clientSecretConfigured: boolean; redirectUri: string; requiredScopes: string[]} | null>(null);
+  const [ttTitle, setTtTitle] = useState("");
+  const [ttExcerpt, setTtExcerpt] = useState("");
+  const [ttResult, setTtResult] = useState<{ hook: string; script: string; caption: string; hashtags: string[] } | null>(null);
+  const [ttBusy, setTtBusy] = useState(false);
+
+  const generateTikTok = async () => {
+    if (!ttTitle.trim()) return toast.error("Enter the article title first");
+    setTtBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("tiktok-script", {
+        body: { title: ttTitle.trim(), excerpt: ttExcerpt.trim() },
+      });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Generation failed");
+      setTtResult({ hook: data.hook, script: data.script, caption: data.caption, hashtags: data.hashtags || [] });
+      toast.success("TikTok content ready — copy it into your video");
+    } catch (e: any) {
+      toast.error(e?.message || "Could not generate TikTok content");
+    } finally { setTtBusy(false); }
+  };
+
+  const copyText = (label: string, text: string) => {
+    navigator.clipboard?.writeText(text).then(() => toast.success(`${label} copied`)).catch(() => toast.error("Copy failed"));
+  };
 
   const load = async () => {
     setLoading(true);
@@ -234,6 +258,38 @@ export default function AdminSocialWorker() {
             <Button onClick={createPost} disabled={busy}><Clock3 className="h-4 w-4 mr-2" />{mode === "scheduled" ? "Schedule post" : "Save draft"}</Button>
             <div className="ml-auto flex items-center gap-2 text-sm"><Switch checked={autoWorker} onCheckedChange={toggleWorker} /> Auto worker</div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>TikTok-ready content</CardTitle>
+          <CardDescription>TikTok does not allow automatic posting without their app review, so this turns any article into a short video script and caption you can record and post yourself in under a minute.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Input value={ttTitle} onChange={e => setTtTitle(e.target.value)} placeholder="Article title (e.g. Gold Price Forecast...)" />
+          <Textarea value={ttExcerpt} onChange={e => setTtExcerpt(e.target.value)} placeholder="Article summary (optional — paste the first paragraph)" rows={3} />
+          <Button onClick={generateTikTok} disabled={ttBusy}><RefreshCw className={`h-4 w-4 mr-2 ${ttBusy ? "animate-spin" : ""}`} />{ttBusy ? "Generating…" : "Generate TikTok script"}</Button>
+          {ttResult && (
+            <div className="space-y-3 rounded-xl border p-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Hook (first line)</p>
+                <p className="text-sm mt-1">{ttResult.hook}</p>
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => copyText("Hook", ttResult.hook)}>Copy</Button>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Video script (30–60s)</p>
+                <p className="text-sm mt-1 whitespace-pre-wrap">{ttResult.script}</p>
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => copyText("Script", ttResult.script)}>Copy</Button>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Caption + hashtags</p>
+                <p className="text-sm mt-1">{ttResult.caption}</p>
+                <p className="text-sm text-primary mt-1">{ttResult.hashtags.map(h => `#${h}`).join(" ")}</p>
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => copyText("Caption", `${ttResult.caption}\n\n${ttResult.hashtags.map(h => `#${h}`).join(" ")}`)}>Copy</Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
