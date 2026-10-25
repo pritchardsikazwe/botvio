@@ -18,6 +18,7 @@ import { AdminMonetizationTab } from "@/components/admin/AdminMonetizationTab";
 import { AdminGlobalAccessCard } from "@/components/admin/AdminGlobalAccessCard";
 import { AdminMasterMarketsCard } from "@/components/admin/AdminMasterMarketsCard";
 import { AdminUserContact } from "@/components/admin/AdminUserContact";
+import { normalizeWhatsApp, requireSavedProfile } from "@/lib/profileContact";
 import { AdminMt5LeadsCard } from "@/components/admin/AdminMt5LeadsCard";
 import { AdminBrokerVipClaimsCard } from "@/components/admin/AdminBrokerVipClaimsCard";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
@@ -41,6 +42,7 @@ export default function AdminControlCenter(){
   const [planFilter,setPlanFilter]=useState("all"),[statusFilter,setStatusFilter]=useState("all"),[countryFilter,setCountryFilter]=useState("all");
   const [page,setPage]=useState(1),[selected,setSelected]=useState<string[]>([]),[promotionOpen,setPromotionOpen]=useState(false),[sending,setSending]=useState(false),[mobileMenuOpen,setMobileMenuOpen]=useState(false);
   const [accessUser,setAccessUser]=useState<AdminUser|null>(null),[accessDialogOpen,setAccessDialogOpen]=useState(false),[accessProducts,setAccessProducts]=useState<Array<{id:string;name:string;type:string;slug:string}>>([]),[accessRows,setAccessRows]=useState<Array<{id:string;product_id:string;status:string;ends_at:string|null;product?:{name:string}}>>([]),[accessLoading,setAccessLoading]=useState(false),[accessBusy,setAccessBusy]=useState(false),[accessProductId,setAccessProductId]=useState(""),[accessExpiry,setAccessExpiry]=useState("");
+  const [accessWhatsApp,setAccessWhatsApp]=useState(""),[accessWhatsAppBusy,setAccessWhatsAppBusy]=useState(false);
   const [subject,setSubject]=useState("New AI Signals & Trading Update 🚀");
   const [message,setMessage]=useState("Hi {{name}},\n\nWe’ve just released new AI trading signals and market analysis on Botvio.\n\nLog in to your dashboard to see the latest updates.\n\nTrade smarter with Botvio.");
 
@@ -97,6 +99,7 @@ export default function AdminControlCenter(){
 
   const openUserAccess=async(u:AdminUser)=>{
     setAccessUser(u);setAccessDialogOpen(true);setAccessLoading(true);setAccessProductId("");setAccessExpiry(new Date(Date.now()+30*86400000).toISOString().slice(0,10));
+    setAccessWhatsApp(u.whatsapp_number||"");
     try{
       const [products,grants]=await Promise.all([
         (supabase as any).from("products").select("id,name,type,slug").eq("is_active",true).order("name"),
@@ -138,6 +141,22 @@ export default function AdminControlCenter(){
       toast.success("Feature access disabled");await openUserAccess(accessUser);
     }catch(e:any){toast.error(e?.message||"Could not disable feature access");}
     finally{setAccessBusy(false);}
+  };
+  const saveUserWhatsApp=async()=>{
+    if(!accessUser)return;
+    const raw=accessWhatsApp.trim();
+    const normalized=raw?normalizeWhatsApp(raw):null;
+    if(raw&&!normalized)return toast.error("Enter a valid WhatsApp number with country code, e.g. +260 97 1234567");
+    setAccessWhatsAppBusy(true);
+    try{
+      const saved=requireSavedProfile(await supabase.from("profiles").update({whatsapp_number:normalized}).eq("user_id",accessUser.user_id).select("user_id,whatsapp_number").maybeSingle());
+      const value=(saved as any)?.whatsapp_number??normalized;
+      setUsers(prev=>prev.map(u=>u.user_id===accessUser.user_id?{...u,whatsapp_number:value}:u));
+      setAccessUser(prev=>prev?{...prev,whatsapp_number:value}:prev);
+      setAccessWhatsApp(value||"");
+      toast.success(value?"WhatsApp number saved":"WhatsApp number cleared");
+    }catch(e:any){toast.error(e?.message||"Could not save WhatsApp number");}
+    finally{setAccessWhatsAppBusy(false);}
   };
 
   const sendPromotion=async()=>{
@@ -250,7 +269,8 @@ export default function AdminControlCenter(){
     </main>
 
     <Dialog open={accessDialogOpen} onOpenChange={setAccessDialogOpen}><DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto"><DialogHeader><DialogTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5"/>Manage User Access</DialogTitle><DialogDescription>Approve features, grant time-limited access, or disable a user's existing feature access.</DialogDescription></DialogHeader>
-      {accessUser&&<div className="space-y-5"><div className="rounded-lg border bg-slate-50 p-4"><div className="font-semibold">{accessUser.display_name||"Unnamed user"}</div><div className="text-sm text-muted-foreground">{accessUser.email||"No email"} · {accessUser.plan}</div><div className="text-xs text-muted-foreground mt-1">User ID: {accessUser.user_id}</div></div>
+      {accessUser&&<div className="space-y-5"><div className="rounded-lg border bg-slate-50 p-4"><div className="font-semibold">{accessUser.display_name||"Unnamed user"}</div><div className="text-sm text-muted-foreground">{accessUser.email||"No email"} · {accessUser.plan}</div><div className="mt-2"><AdminUserContact number={accessUser.whatsapp_number} country={accessUser.country}/></div><div className="text-xs text-muted-foreground mt-1">User ID: {accessUser.user_id}</div></div>
+      <section className="space-y-3"><h3 className="font-semibold flex items-center gap-2"><Phone className="h-4 w-4"/>WhatsApp number</h3><div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end"><div className="space-y-1"><Label>WhatsApp (with country code)</Label><Input value={accessWhatsApp} onChange={e=>setAccessWhatsApp(e.target.value)} placeholder="+260 97 1234567"/></div><Button onClick={saveUserWhatsApp} disabled={accessWhatsAppBusy}>{accessWhatsAppBusy?"Saving…":"Save number"}</Button></div><p className="text-xs text-muted-foreground">Saved to the user's profile and shown in the users list. Clear the field to remove the number.</p></section>
       <section className="space-y-3"><h3 className="font-semibold">Add / approve feature access</h3><div className="grid sm:grid-cols-[1fr_180px] gap-3"><div className="space-y-1"><Label>Feature / product</Label><Select value={accessProductId} onValueChange={setAccessProductId}><SelectTrigger><SelectValue placeholder="Choose a feature"/></SelectTrigger><SelectContent>{accessProducts.map(p=><SelectItem key={p.id} value={p.id}>{p.name} ({p.type})</SelectItem>)}</SelectContent></Select></div><div className="space-y-1"><Label>Access expiry</Label><Input type="date" value={accessExpiry} onChange={e=>setAccessExpiry(e.target.value)}/></div></div><p className="text-xs text-muted-foreground">Clear the expiry date for ongoing access. This does not change the user's subscription plan.</p><Button onClick={grantUserAccess} disabled={accessBusy||accessLoading||!accessProductId}><CheckCircle2 className="h-4 w-4 mr-2"/>Approve & enable access</Button></section>
       <section className="space-y-3"><h3 className="font-semibold">Existing feature access</h3>{accessLoading?<p className="text-sm text-muted-foreground">Loading access…</p>:accessRows.length===0?<p className="text-sm text-muted-foreground">No feature entitlements found for this user.</p>:<div className="space-y-2">{accessRows.map(r=><div key={r.id} className="flex flex-wrap items-center gap-3 justify-between rounded-lg border p-3"><div><div className="font-medium">{r.product?.name||accessProducts.find(p=>p.id===r.product_id)?.name||"Feature"}</div><div className="text-xs text-muted-foreground">Status: {r.status}{r.ends_at?" · Ends "+new Date(r.ends_at).toLocaleDateString():""}</div></div>{r.status==="active"&&(!r.ends_at||new Date(r.ends_at).getTime()>Date.now())&&<Button variant="destructive" size="sm" disabled={accessBusy} onClick={()=>disableUserAccess(r)}><Ban className="h-4 w-4 mr-1"/>Disable access</Button>}</div>)}</div>}</section></div>}
       <DialogFooter><Button variant="outline" onClick={()=>setAccessDialogOpen(false)}>Close</Button></DialogFooter></DialogContent></Dialog>
