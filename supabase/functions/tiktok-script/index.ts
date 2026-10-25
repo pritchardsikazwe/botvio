@@ -24,6 +24,38 @@ async function isAdmin(req: Request) {
   return !!roles?.length;
 }
 
+// Consume the SSE stream and return the final response payload.
+async function readResponsesStream(res: Response): Promise<any> {
+  const reader = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let completed: any = null;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const events = buffer.split("\n\n");
+    buffer = events.pop() ?? "";
+    for (const evt of events) {
+      const dataLine = evt.split("\n").find((l) => l.startsWith("data:"));
+      if (!dataLine) continue;
+      const data = dataLine.slice(5).trim();
+      if (data === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.type === "response.completed") completed = parsed.response;
+        if (parsed.type === "response.failed" || parsed.type === "error") {
+          throw new Error(JSON.stringify(parsed).slice(0, 400));
+        }
+      } catch (e) {
+        if (e instanceof SyntaxError) continue;
+        throw e;
+      }
+    }
+  }
+  return completed;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (!(await isAdmin(req))) return json({ error: "Admin authentication required" }, 401);
@@ -35,25 +67,56 @@ Deno.serve(async (req) => {
   const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!lovableApiKey) return json({ error: "AI gateway not configured" }, 500);
 
-  const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
     method: "POST",
-    headers: { Authorization: `Bearer ${lovableApiKey}`, "Content-Type": "application/json" },
+    headers: {
+      "Lovable-API-Key": lovableApiKey,
+      "Content-Type": "application/json",
+      "X-Lovable-AIG-SDK": "fetch",
+    },
     body: JSON.stringify({
-      model: "google/gemini-3.8-flash",
-      messages: [
+      model: "openai/gpt-6-astra",
+      stream: true,
+      store: false,
+      reasoning: { effort: "low", summary: "auto" },
+      include: ["reasoning.encrypted_content"],
+      input: [
         {
           role: "system",
-          content:
-            "You write TikTok content for Botvio, a trading-signals and market-education brand. " +
-            "Return ONLY a JSON object with keys: hook (one spoken opening line, max 12 words), " +
-            "script (30-60 second spoken video script, plain sentences, no stage directions beyond short [brackets]), " +
-            "caption (TikTok caption, max 150 chars, includes a soft call to read the article on botvio.live), " +
-            "hashtags (array of 5-8 hashtags without the # symbol). " +
-            "Never promise profits or guaranteed wins; keep it educational and mention that trading involves risk.",
+          content: [{
+            type: "input_text",
+            text:
+              "You write TikTok content for Botvio, a trading-signals and market-education brand. " +
+              "The hook is one spoken opening line of at most 12 words. " +
+              "The script is a 30-60 second spoken video script in plain sentences with only short [bracketed] visual cues. " +
+              "The caption is at most 150 characters with a soft call to read the article on botvio.live. " +
+              "Hashtags are 5-8 tags without the # symbol. " +
+              "Never promise profits or guaranteed wins; keep it educational and note that trading involves risk.",
+          }],
         },
-        { role: "user", content: `Article title: ${title}\nCategory: ${category}\nSummary: ${excerpt}` },
+        {
+          role: "user",
+          content: [{ type: "input_text", text: `Article title: ${title}\nCategory: ${category}\nSummary: ${excerpt}` }],
+        },
       ],
-      max_tokens: 900,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "tiktok_content",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              hook: { type: "string" },
+              script: { type: "string" },
+              caption: { type: "string" },
+              hashtags: { type: "array", items: { type: "string" } },
+            },
+            required: ["hook", "script", "caption", "hashtags"],
+            additionalProperties: false,
+          },
+        },
+      },
     }),
   });
 
@@ -63,15 +126,15 @@ Deno.serve(async (req) => {
     return json({ error: "AI generation failed", status: aiResponse.status }, 502);
   }
 
-  const aiData = await aiResponse.json();
-  const text: string = aiData.choices?.[0]?.message?.content || "";
-  const match = text.match(/```json\s*([\s\S]*?)```/) || text.match(/({[\s\S]*})/);
-  if (!match) return json({ error: "AI returned an unreadable response" }, 502);
-
   try {
-    const content = JSON.parse(match[1] || match[0]);
+    const completed = await readResponsesStream(aiResponse);
+    const message = completed?.output?.find((o: any) => o.type === "message");
+    const text: string = message?.content?.find((c: any) => c.type === "output_text")?.text ?? "";
+    if (!text) return json({ error: "AI returned an empty response" }, 502);
+    const content = JSON.parse(text);
     return json({ ok: true, ...content });
-  } catch {
-    return json({ error: "AI returned invalid JSON" }, 502);
+  } catch (e) {
+    console.error("AI parse failed:", e);
+    return json({ error: "AI returned an unreadable response" }, 502);
   }
 });
