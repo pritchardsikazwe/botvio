@@ -262,6 +262,38 @@ export default function AdminSocialWorker() {
       </Card>
 
       <Card>
+        <CardHeader>
+          <CardTitle>TikTok-ready content</CardTitle>
+          <CardDescription>TikTok does not allow automatic posting without their app review, so this turns any article into a short video script and caption you can record and post yourself in under a minute.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Input value={ttTitle} onChange={e => setTtTitle(e.target.value)} placeholder="Article title (e.g. Gold Price Forecast...)" />
+          <Textarea value={ttExcerpt} onChange={e => setTtExcerpt(e.target.value)} placeholder="Article summary (optional — paste the first paragraph)" rows={3} />
+          <Button onClick={generateTikTok} disabled={ttBusy}><RefreshCw className={`h-4 w-4 mr-2 ${ttBusy ? "animate-spin" : ""}`} />{ttBusy ? "Generating…" : "Generate TikTok script"}</Button>
+          {ttResult && (
+            <div className="space-y-3 rounded-xl border p-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Hook (first line)</p>
+                <p className="text-sm mt-1">{ttResult.hook}</p>
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => copyText("Hook", ttResult.hook)}>Copy</Button>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Video script (30–60s)</p>
+                <p className="text-sm mt-1 whitespace-pre-wrap">{ttResult.script}</p>
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => copyText("Script", ttResult.script)}>Copy</Button>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Caption + hashtags</p>
+                <p className="text-sm mt-1">{ttResult.caption}</p>
+                <p className="text-sm text-primary mt-1">{ttResult.hashtags.map(h => `#${h}`).join(" ")}</p>
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => copyText("Caption", `${ttResult.caption}\n\n${ttResult.hashtags.map(h => `#${h}`).join(" ")}`)}>Copy</Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader><CardTitle>Posting queue</CardTitle><CardDescription>Recent drafts, approvals, scheduled posts and publication results.</CardDescription></CardHeader>
         <CardContent>
           {loading ? <p className="text-sm text-muted-foreground">Loading queue...</p> : posts.length === 0 ? <p className="text-sm text-muted-foreground">No social posts yet.</p> : (
