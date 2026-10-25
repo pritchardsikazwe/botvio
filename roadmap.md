@@ -45,4 +45,4 @@
 - [x] User MT5 card: Send Botvio Signals / Copy a Provider / Copy Botvio Robot, direct-signal status.
 - [x] Admin MT5 control center: summary cards, role filters, badges, actions, detail drawer.
 - [x] Verify DATA FEED and direct execution never call TradeCopy link.
-- [ ] Fix legacy Admin dashboard "Profiles: Bad Request" so admins can load admin data again.
+- [x] Fix legacy Admin dashboard "Profiles: Bad Request" — verified working in preview as super_admin; live site was stale, publish required.
