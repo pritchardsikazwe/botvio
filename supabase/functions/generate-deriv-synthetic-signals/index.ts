@@ -124,9 +124,10 @@ function strategySignal(c:Candle[],strategy:{family:StrategyFamily;label:string;
  return{direction:d,score:Math.min(96,score),entry,sl,tp};
 }
 
-function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string){
+function moderateLevels(c:Candle[],direction:"BUY"|"SELL",tf:string,symbol=""){
  const a=atr(c)??0;
- const m=tf==="1m"?{sl:.80,tp:1.20}:tf==="15m"?{sl:.95,tp:1.50}:tf==="1H"?{sl:1.10,tp:1.75}:tf==="1D"?{sl:1.25,tp:1.90}:{sl:1.30,tp:2.00};
+ // Volatility scalps: tight stop, close target.
+ const m=/^Volatility/i.test(symbol)?(tf==="1m"?{sl:.60,tp:.75}:{sl:.70,tp:.90}):tf==="1m"?{sl:.80,tp:1.20}:tf==="15m"?{sl:.95,tp:1.50}:tf==="1H"?{sl:1.10,tp:1.75}:tf==="1D"?{sl:1.25,tp:1.90}:{sl:1.30,tp:2.00};
  const entry=c.at(-1)!.close;
  return {sl:direction==="BUY"?entry-a*m.sl:entry+a*m.sl,tp:direction==="BUY"?entry+a*m.tp:entry-a*m.tp};
 }
@@ -184,7 +185,7 @@ Deno.serve(async(req)=>{
       return directionalBias(frames.get(tf)??[]);
     }).filter(Boolean) as ("BUY"|"SELL")[];
     if(confDirections.some(x=>x!==setup.direction)||confDirections.filter(x=>x===setup.direction).length<(p.confirm.length?1:0)||setup.score<(p.tf==="15m"?76:p.tf==="1H"?77:p.tf==="3D"?77:76)+p.boost+gate.scoreBoost)continue;
-    const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf);
+    const levels=moderateLevels(frames.get(p.tf)??[],setup.direction,p.tf,s.name);
     setup.sl=levels.sl; setup.tp=levels.tp;
 
     // One live direction per synthetic symbol. Do not publish a BUY while a

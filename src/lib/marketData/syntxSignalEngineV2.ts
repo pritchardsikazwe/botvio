@@ -54,6 +54,7 @@ export function computeSyntxSignalsV2(candles:NormalizedCandle[],opts:SyntxEngin
   else if((opts.family==="fx-vol"||opts.family==="sfx-vol")&&!expanded&&(up||down)){d=up?"BUY":"SELL";score=66+structure(candles,i,d);reason=opts.family==="sfx-vol"?"SFX Vol · trend setup without spike expansion · regime aligned":"FX Vol · volatility trend structure confirmed · regime aligned"}
   if(!d||score<min)continue;
   const exitProfile =
+    opts.family==="flipx" ? { sl:0.8, tp:1.05 } :
     opts.timeframe==="1m" ? { sl:0.85, tp:1.25 } :
     opts.timeframe==="3m" ? { sl:0.9, tp:1.35 } :
     opts.timeframe==="5m" ? { sl:1.0, tp:1.5 } :
