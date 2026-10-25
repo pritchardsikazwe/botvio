@@ -427,8 +427,8 @@ export const AppRoutes = () => {
     <Route path="trade-modes" element={<Navigate to="/options" replace />} />
     <Route path="deriv/options" element={<Paid><DerivOptionsTerminalPage /></Paid>} />
     <Route path="deriv-options-terminal" element={<Navigate to="/deriv/options" replace />} />
-    <Route path="deriv-options" element={<Navigate to="/options" replace />} />
-    <Route path="deriv-app" element={<Navigate to="/options" replace />} />
+    <Route path="deriv-options" element={<Navigate to="/deriv/options" replace />} />
+    <Route path="deriv-app" element={<Navigate to="/deriv/options" replace />} />
     <Route path="rise-fall" element={<Navigate to="/options" replace />} />
     <Route path="options" element={<OptionsTradingHub />} />
     <Route path="options-trading" element={<OptionsTradingHub />} />
