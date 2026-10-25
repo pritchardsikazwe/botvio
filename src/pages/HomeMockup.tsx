@@ -19,6 +19,7 @@ import { BotvioPricingSection } from "@/components/home/BotvioPricingSection";
 import { DerivOptionsHome } from "@/components/home/DerivOptionsHome";
 import { HomeLiveTrading } from "@/components/home/HomeLiveTrading";
 import { HomeTradingPathways } from "@/components/home/HomeTradingPathways";
+import { FloatingWhatsAppSupport } from "@/components/support/FloatingWhatsAppSupport";
 
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, ShieldCheck, Sparkles, Users } from "lucide-react";
