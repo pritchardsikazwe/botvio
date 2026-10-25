@@ -21,6 +21,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { PRIMARY_NAV, MORE_NAV } from "@/components/nav/mainNav";
+import { QuickActions } from "@/components/nav/QuickActions";
 
 
 export const Header = () => {
@@ -335,6 +336,7 @@ export const Header = () => {
             )}
           </div>
         </div>
+        <div className="container mx-auto px-3 pb-2.5 sm:px-4"><QuickActions /></div>
       </header>
 
     <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
