@@ -142,6 +142,22 @@ export default function AdminControlCenter(){
     }catch(e:any){toast.error(e?.message||"Could not disable feature access");}
     finally{setAccessBusy(false);}
   };
+  const saveUserWhatsApp=async()=>{
+    if(!accessUser)return;
+    const raw=accessWhatsApp.trim();
+    const normalized=raw?normalizeWhatsApp(raw):null;
+    if(raw&&!normalized)return toast.error("Enter a valid WhatsApp number with country code, e.g. +260 97 1234567");
+    setAccessWhatsAppBusy(true);
+    try{
+      const saved=requireSavedProfile(await supabase.from("profiles").update({whatsapp_number:normalized}).eq("user_id",accessUser.user_id).select("user_id,whatsapp_number").maybeSingle());
+      const value=(saved as any)?.whatsapp_number??normalized;
+      setUsers(prev=>prev.map(u=>u.user_id===accessUser.user_id?{...u,whatsapp_number:value}:u));
+      setAccessUser(prev=>prev?{...prev,whatsapp_number:value}:prev);
+      setAccessWhatsApp(value||"");
+      toast.success(value?"WhatsApp number saved":"WhatsApp number cleared");
+    }catch(e:any){toast.error(e?.message||"Could not save WhatsApp number");}
+    finally{setAccessWhatsAppBusy(false);}
+  };
 
   const sendPromotion=async()=>{
     const recipients=users.filter(u=>selected.includes(u.user_id)&&u.email).map(u=>({user_id:u.user_id,email:u.email,name:u.display_name}));
