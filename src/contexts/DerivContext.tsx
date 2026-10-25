@@ -316,8 +316,8 @@ export const DerivProvider = ({ children }: { children: ReactNode }) => {
         if (token) {
           const outcome = update.status === "won" ? "WIN" : update.status === "lost" ? "LOSS" : "BREAKEVEN";
           derivTradesRef.current.settleTrade(update.contract_id, {
-            sell_price: update.sell_price ?? 0,
-            profit: update.profit ?? 0,
+            sell_price: Number(update.sell_price) || 0,
+            profit: Number(update.profit) || 0,
             payout: update.payout,
             status: update.status,
             outcome,
