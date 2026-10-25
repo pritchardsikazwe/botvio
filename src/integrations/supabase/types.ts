@@ -3244,6 +3244,39 @@ export type Database = {
           },
         ]
       }
+      linkedin_posts: {
+        Row: {
+          error: string | null
+          id: string
+          linkedin_post_id: string | null
+          posted_at: string
+          slug: string
+          status: string
+          title: string
+          url: string
+        }
+        Insert: {
+          error?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          posted_at?: string
+          slug: string
+          status?: string
+          title: string
+          url: string
+        }
+        Update: {
+          error?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          posted_at?: string
+          slug?: string
+          status?: string
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       live_comments: {
         Row: {
           body: string
