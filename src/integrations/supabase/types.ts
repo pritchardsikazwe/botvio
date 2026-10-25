@@ -6439,6 +6439,36 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_posts: {
+        Row: {
+          error: string | null
+          posted_at: string
+          slug: string
+          status: string
+          telegram_message_id: number | null
+          title: string
+          url: string
+        }
+        Insert: {
+          error?: string | null
+          posted_at?: string
+          slug: string
+          status?: string
+          telegram_message_id?: number | null
+          title: string
+          url: string
+        }
+        Update: {
+          error?: string | null
+          posted_at?: string
+          slug?: string
+          status?: string
+          telegram_message_id?: number | null
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       top_asset_snapshots: {
         Row: {
           accuracy_today: number | null
