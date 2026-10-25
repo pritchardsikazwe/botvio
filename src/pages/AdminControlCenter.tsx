@@ -18,6 +18,7 @@ import { AdminMonetizationTab } from "@/components/admin/AdminMonetizationTab";
 import { AdminGlobalAccessCard } from "@/components/admin/AdminGlobalAccessCard";
 import { AdminMasterMarketsCard } from "@/components/admin/AdminMasterMarketsCard";
 import { AdminUserContact } from "@/components/admin/AdminUserContact";
+import { normalizeWhatsApp, requireSavedProfile } from "@/lib/profileContact";
 import { AdminMt5LeadsCard } from "@/components/admin/AdminMt5LeadsCard";
 import { AdminBrokerVipClaimsCard } from "@/components/admin/AdminBrokerVipClaimsCard";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
@@ -41,6 +42,7 @@ export default function AdminControlCenter(){
   const [planFilter,setPlanFilter]=useState("all"),[statusFilter,setStatusFilter]=useState("all"),[countryFilter,setCountryFilter]=useState("all");
   const [page,setPage]=useState(1),[selected,setSelected]=useState<string[]>([]),[promotionOpen,setPromotionOpen]=useState(false),[sending,setSending]=useState(false),[mobileMenuOpen,setMobileMenuOpen]=useState(false);
   const [accessUser,setAccessUser]=useState<AdminUser|null>(null),[accessDialogOpen,setAccessDialogOpen]=useState(false),[accessProducts,setAccessProducts]=useState<Array<{id:string;name:string;type:string;slug:string}>>([]),[accessRows,setAccessRows]=useState<Array<{id:string;product_id:string;status:string;ends_at:string|null;product?:{name:string}}>>([]),[accessLoading,setAccessLoading]=useState(false),[accessBusy,setAccessBusy]=useState(false),[accessProductId,setAccessProductId]=useState(""),[accessExpiry,setAccessExpiry]=useState("");
+  const [accessWhatsApp,setAccessWhatsApp]=useState(""),[accessWhatsAppBusy,setAccessWhatsAppBusy]=useState(false);
   const [subject,setSubject]=useState("New AI Signals & Trading Update 🚀");
   const [message,setMessage]=useState("Hi {{name}},\n\nWe’ve just released new AI trading signals and market analysis on Botvio.\n\nLog in to your dashboard to see the latest updates.\n\nTrade smarter with Botvio.");
 
