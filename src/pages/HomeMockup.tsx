@@ -19,6 +19,7 @@ import { BotvioPricingSection } from "@/components/home/BotvioPricingSection";
 import { DerivOptionsHome } from "@/components/home/DerivOptionsHome";
 import { HomeLiveTrading } from "@/components/home/HomeLiveTrading";
 import { HomeTradingPathways } from "@/components/home/HomeTradingPathways";
+import { FloatingWhatsAppSupport } from "@/components/support/FloatingWhatsAppSupport";
 
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Bell, Bot, Check, ChevronRight, Globe2, LineChart, ScanSearch, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -224,6 +225,8 @@ const HomeMockup = () => {
       </main>
 
       <footer className="border-t border-border/60 bg-card/20"><div className="container mx-auto flex flex-col gap-4 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between"><div><span className="font-bold text-foreground">BOTVIO</span> · AI Trading Intelligence</div><div className="flex flex-wrap gap-4"><Link to="/about">About</Link><Link to="/affiliate-disclosure">Affiliate Disclosure</Link><Link to="/disclaimer">Risk Disclaimer</Link><Link to="/privacy">Privacy</Link><Link to="/contact">Contact</Link></div></div></footer>
+
+      <FloatingWhatsAppSupport />
     </div>
   );
 };
