@@ -25,6 +25,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { QuickActions } from "@/components/nav/QuickActions";
 
 type Item = {
   label: string;
@@ -174,6 +175,8 @@ export const MobileSideMenu = ({ className, trigger }: { className?: string; tri
             </div>
 
             <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-4">
+              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-primary">Quick actions</p>
+              <QuickActions variant="grid" onNavigate={close} className="mb-5" />
               <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Main</p>
               <div className="space-y-1">{renderItems(primary)}</div>
 

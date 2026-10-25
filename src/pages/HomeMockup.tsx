@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { MobileSideMenu } from "@/components/nav/MobileSideMenu";
+import { QuickActions } from "@/components/nav/QuickActions";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomeSignalsWidget } from "@/components/signals/HomeSignalsWidget";
 import { HomeChartAnalyzer } from "@/components/home/HomeChartAnalyzer";
@@ -91,6 +92,7 @@ const HomeMockup = () => {
             <MobileSideMenu className="lg:hidden" />
           </div>
         </div>
+        <div className="container mx-auto px-4 pb-2.5"><QuickActions /></div>
       </header>
 
       <main>
