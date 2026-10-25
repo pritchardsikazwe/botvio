@@ -30,6 +30,7 @@ import Bots from "./pages/Bots";
 import Signup from "./pages/Signup";
 import Admin from "./pages/Admin";
 import AdminControlCenter from "./pages/AdminControlCenter";
+import AdminUserContacts from "./pages/AdminUserContacts";
 import P2P from "./pages/P2P";
 import Affiliate from "./pages/Affiliate";
 import Strategies from "./pages/Strategies";
@@ -282,6 +283,7 @@ export const AppRoutes = () => {
     <Route path="admin" element={<ErrorBoundary><RequireSuperAdmin><AdminControlCenter /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/legacy" element={<ErrorBoundary><RequireSuperAdmin><Admin /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/copy-trading" element={<ErrorBoundary><RequireSuperAdmin><CopyTradingAdmin /></RequireSuperAdmin></ErrorBoundary>} />
+    <Route path="admin/user-contacts" element={<ErrorBoundary><RequireSuperAdmin><AdminUserContacts /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/social-worker" element={<ErrorBoundary><RequireSuperAdmin><AdminSocialWorker /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/*" element={<ErrorBoundary><RequireSuperAdmin><AdminControlCenter /></RequireSuperAdmin></ErrorBoundary>} />
 
