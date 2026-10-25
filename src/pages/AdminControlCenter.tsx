@@ -99,6 +99,7 @@ export default function AdminControlCenter(){
 
   const openUserAccess=async(u:AdminUser)=>{
     setAccessUser(u);setAccessDialogOpen(true);setAccessLoading(true);setAccessProductId("");setAccessExpiry(new Date(Date.now()+30*86400000).toISOString().slice(0,10));
+    setAccessWhatsApp(u.whatsapp_number||"");
     try{
       const [products,grants]=await Promise.all([
         (supabase as any).from("products").select("id,name,type,slug").eq("is_active",true).order("name"),
