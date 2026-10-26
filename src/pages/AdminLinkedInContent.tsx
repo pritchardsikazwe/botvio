@@ -153,6 +153,8 @@ export default function AdminLinkedInContent() {
         </Card>
       )}
 
+      <CompanyPageConnect />
+
       <Card>
         <CardHeader>
           <CardTitle>Publishing settings</CardTitle>
