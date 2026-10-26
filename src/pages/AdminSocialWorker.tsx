@@ -185,7 +185,10 @@ export default function AdminSocialWorker() {
           <h1 className="text-2xl font-bold flex items-center gap-2"><Bot className="h-6 w-6" /> Social Worker</h1>
           <p className="text-sm text-muted-foreground">Create, approve, schedule and publish Botvio content across social channels.</p>
         </div>
-        <Button onClick={runWorker} disabled={busy}><RefreshCw className="h-4 w-4 mr-2" />Run worker</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild><a href="/admin/linkedin-content"><Linkedin className="h-4 w-4 mr-2" />LinkedIn Content Engine</a></Button>
+          <Button onClick={runWorker} disabled={busy}><RefreshCw className="h-4 w-4 mr-2" />Run worker</Button>
+        </div>
       </div>
 
       <Card>
