@@ -1,5 +1,5 @@
-// Posts one Botvio educational post to LinkedIn per run (scheduled 3x/day).
-// Educational content only: no links, no promotions, no profit claims.
+// Posts one existing Botvio article to LinkedIn per run (scheduled 5x/day).
+// Each post promotes an already-published article and links back to botvio.live.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assertAutomationKey } from "../_shared/automationAuth.ts";
@@ -52,13 +52,14 @@ Deno.serve(async (req) => {
   }
   if (!pick) return json({ ok: true, message: "No articles available" });
 
-  // Self-contained educational post: lesson title, key idea, takeaway. No links, no promotions.
+  // Article promo post: title, excerpt, link back to the full article on botvio.live.
   const title = stripLinks(pick.title);
   const lesson = stripLinks(pick.excerpt ?? "");
+  const url = `https://botvio.live/blog/${pick.slug}`;
   const text =
-    `📚 Trading lesson: ${title}\n\n` +
+    `📚 ${title}\n\n` +
     `${lesson}\n\n` +
-    `Key takeaway: understand the concept before you trade it, and always size positions so a single loss never hurts your account.\n\n` +
+    `Read the full article on Botvio:\n${url}\n\n` +
     `Educational content only — not financial advice. Trading involves risk of loss.\n\n` +
     `${tagFor(pick.category)}`;
 
@@ -90,7 +91,7 @@ Deno.serve(async (req) => {
   if (!ok) console.error(`LinkedIn post failed [${res.status}]: ${body}`);
 
   await db.from("linkedin_posts").upsert({
-    slug: pick.slug, title: pick.title, url: null,
+    slug: pick.slug, title: pick.title, url,
     status: ok ? "posted" : "failed",
     linkedin_post_id: ok ? (res.headers.get("x-restli-id") ?? (() => { try { return JSON.parse(body).id; } catch { return null; } })()) : null,
     error: ok ? null : `[${res.status}] ${body.slice(0, 500)}`,
