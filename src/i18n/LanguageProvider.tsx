@@ -46,7 +46,13 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const hasStored = localStorage.getItem(STORAGE_KEY);
     const geoDone = localStorage.getItem(GEO_DONE_KEY);
-    if (hasStored || geoDone) return;
+
+    // An explicit locale in the incoming URL must win over IP-based detection.
+    // Otherwise the geo lookup can race LocalePrefixRouter and switch a visitor
+    // away from the language they explicitly requested (for example /tr/...).
+    const urlPrefix = window.location.pathname.split("/")[1]?.toLowerCase();
+    const hasExplicitLocale = languages.some((language) => language.code === urlPrefix);
+    if (hasStored || geoDone || hasExplicitLocale) return;
 
     let cancelled = false;
     detectLanguageFromIP().then((lang) => {
