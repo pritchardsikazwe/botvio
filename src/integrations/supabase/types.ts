@@ -3310,6 +3310,39 @@ export type Database = {
         }
         Relationships: []
       }
+      linkedin_org_connection: {
+        Row: {
+          access_token: string | null
+          expires_at: string | null
+          id: number
+          oauth_state: string | null
+          org_name: string | null
+          org_urn: string | null
+          refresh_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          expires_at?: string | null
+          id?: number
+          oauth_state?: string | null
+          org_name?: string | null
+          org_urn?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          expires_at?: string | null
+          id?: number
+          oauth_state?: string | null
+          org_name?: string | null
+          org_urn?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       linkedin_posts: {
         Row: {
           error: string | null
