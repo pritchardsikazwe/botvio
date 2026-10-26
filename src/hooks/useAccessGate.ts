@@ -48,11 +48,25 @@ export function useAccessGate(): AccessGate {
     refetchInterval: 60_000,
   });
 
+  // A device already used by an earlier account cannot start another free trial.
+  const { data: otherAccountsOnDevice = 0 } = useQuery({
+    queryKey: ["device-accounts", user?.id],
+    enabled: !!user,
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      let id = localStorage.getItem("botvio_device_id");
+      if (!id) { id = crypto.randomUUID(); localStorage.setItem("botvio_device_id", id); }
+      const { data } = await (supabase.rpc as any)("register_device", { p_device_id: id });
+      return typeof data === "number" ? data : 0;
+    },
+  });
+
   const adminBypass = isAdmin || isSuperAdmin;
   const isPaid = sub.isPaid || !!nativeStore.data?.isPaid;
-  const isTrial = !isPaid && !!trialInfo && !trialInfo.expired;
+  const sharedDevice = otherAccountsOnDevice > 0;
+  const isTrial = !isPaid && !sharedDevice && !!trialInfo && !trialInfo.expired;
   const trialDaysLeft = trialInfo?.daysLeft ?? 0;
-  const trialExpired = !!trialInfo?.expired;
+  const trialExpired = !!trialInfo?.expired || sharedDevice;
   const nativePlanCode = nativeStore.data?.planCode ?? null;
 
   return {
