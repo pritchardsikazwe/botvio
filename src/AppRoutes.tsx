@@ -91,6 +91,7 @@ import SaudiArabicBlogPost from "./pages/SaudiArabicBlogPost";
 import LocalizedNativeArticle from "./pages/LocalizedNativeArticle";
 import AITradingAnswers from "./pages/AITradingAnswers";
 import AdminSocialWorker from "./pages/AdminSocialWorker";
+import AdminLinkedInContent from "./pages/AdminLinkedInContent";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -285,6 +286,7 @@ export const AppRoutes = () => {
     <Route path="admin/copy-trading" element={<ErrorBoundary><RequireSuperAdmin><CopyTradingAdmin /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/user-contacts" element={<ErrorBoundary><RequireSuperAdmin><AdminUserContacts /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/social-worker" element={<ErrorBoundary><RequireSuperAdmin><AdminSocialWorker /></RequireSuperAdmin></ErrorBoundary>} />
+    <Route path="admin/linkedin-content" element={<ErrorBoundary><RequireSuperAdmin><AdminLinkedInContent /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/*" element={<ErrorBoundary><RequireSuperAdmin><AdminControlCenter /></RequireSuperAdmin></ErrorBoundary>} />
 
     <Route path="p2p" element={<P2P />} />
