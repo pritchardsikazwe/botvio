@@ -3244,6 +3244,72 @@ export type Database = {
           },
         ]
       }
+      linkedin_content_posts: {
+        Row: {
+          attempts: number
+          body: string
+          created_at: string
+          cta_url: string
+          error: string | null
+          excerpt: string | null
+          generation_date: string | null
+          hashtags: string[]
+          id: string
+          keywords: string[]
+          linkedin_post_id: string | null
+          published_at: string | null
+          scheduled_at: string | null
+          slug: string
+          status: string
+          target: string
+          title: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          created_at?: string
+          cta_url?: string
+          error?: string | null
+          excerpt?: string | null
+          generation_date?: string | null
+          hashtags?: string[]
+          id?: string
+          keywords?: string[]
+          linkedin_post_id?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          slug: string
+          status?: string
+          target?: string
+          title: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          created_at?: string
+          cta_url?: string
+          error?: string | null
+          excerpt?: string | null
+          generation_date?: string | null
+          hashtags?: string[]
+          id?: string
+          keywords?: string[]
+          linkedin_post_id?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          slug?: string
+          status?: string
+          target?: string
+          title?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       linkedin_posts: {
         Row: {
           error: string | null

@@ -176,6 +176,13 @@
       "when": 1792937151499,
       "tag": "0024_telegram_signal_autopost",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792987994159,
+      "tag": "0025_linkedin_content_engine",
+      "breakpoints": true
     }
   ]
 }
