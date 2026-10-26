@@ -32,25 +32,34 @@ export function VisitPopup() {
 
   useEffect(() => { const t = setTimeout(() => setOpen(true), 1500); return () => clearTimeout(t); }, []);
 
+  // Unsubscribed users whose free week has ended are signed out (web and installed app) until an admin approves them.
+  const [forcedOut, setForcedOut] = useState(false);
+  const mustLogout = !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");
+  useEffect(() => {
+    if (!mustLogout) return;
+    setForcedOut(true); setOpen(true);
+    supabase.auth.signOut().catch(() => {});
+  }, [mustLogout]);
+
   if (loading) return null;
-  if (!open && !(user && !gate.isLoading && !gate.hasAccess)) return null;
-  if (pathname.startsWith("/admin") || pathname.startsWith("/choose-plan") || pathname.startsWith("/payment")) return null;
+  if (!open && !forcedOut) return null;
+  if (!forcedOut && pathname.startsWith("/admin") || pathname.startsWith("/choose-plan") || pathname.startsWith("/payment")) return null;
   if (user && (isAdmin || isSuperAdmin || isLoading || hasPlan)) return null;
   if (user && profile && !profile.whatsapp_number?.trim()) return null; // WhatsApp prompt comes first
 
   const member = !!user;
-  const locked = member && !gate.isLoading && !gate.hasAccess;
+  const locked = forcedOut || (member && !gate.isLoading && !gate.hasAccess);
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 p-4 backdrop-blur" role="dialog" aria-modal="true">
       <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border bg-card p-6 shadow-2xl">
         {!locked && <button aria-label="Close" onClick={() => setOpen(false)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>}
         <div className="mb-3 flex items-center gap-3 pr-6">
           <div className="rounded-full bg-primary/10 p-2 text-primary">{member ? <Crown className="h-5 w-5" /> : <Gift className="h-5 w-5" />}</div>
-          <h2 className="text-lg font-semibold">{locked ? "Your free trial has ended — access is switched off" : member ? `Your free trial ends in ${gate.trialDaysLeft} day${gate.trialDaysLeft === 1 ? "" : "s"} — kindly subscribe` : "How to get access to Botvio"}</h2>
+          <h2 className="text-lg font-semibold">{locked ? "You have been logged out — free trial ended" : member ? `Your free trial ends in ${gate.trialDaysLeft} day${gate.trialDaysLeft === 1 ? "" : "s"} — kindly subscribe` : "How to get access to Botvio"}</h2>
         </div>
         <p className="mb-3 text-sm text-muted-foreground">
           {locked
-            ? "Your 7-day free trial is over. To keep using Botvio, meet one of the requirements below. An admin will approve your access once you send us your details."
+            ? "Your 7-day free trial is over. To keep using Botvio, meet one of the requirements below. You have been logged out. Once you subscribe or open an account with our Exness/Deriv links and send us the details on WhatsApp, an admin will approve your access and you can log in again."
             : member
             ? "Your account has no active plan. Your free trial will expire and you will no longer have access to Botvio unless you meet one of the requirements below."
             : "To use Botvio you need to meet one of these requirements:"}
