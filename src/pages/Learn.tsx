@@ -566,7 +566,7 @@ const Learn = () => {
                 </li>
               </ul>
               <a
-                href="https://one.exnesstrack.org/a/up2tpvqknx"
+                href="https://one.toexness.com/a/ts1kvs1k"
                 target="_blank"
                 rel="noopener noreferrer"
               >

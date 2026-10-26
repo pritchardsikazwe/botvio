@@ -29,7 +29,7 @@ import { Link } from "react-router-dom";
 
 const DERIV_URL =
   "https://t.deriv.link?t=Y8BMQZGW5HAE";
-const EXNESS_URL = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS_URL = "https://one.toexness.com/a/ts1kvs1k";
 const WELTRADE_URL = "https://gowt.net/ib67505";
 const BINANCE_URL = "https://accounts.binance.com/register?ref=42924116";
 const BYBIT_URL = "https://www.bybit.com/invite?ref=BOTVIO";

@@ -254,7 +254,7 @@ export function AssetTradingHub({ config }: { config: AssetTradingHubConfig }) {
                   <p className="text-xs text-muted-foreground">Open your broker account and execute when your setup is confirmed.</p>
                 </div>
                 <div className="flex gap-2">
-                  <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">
+                  <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">
                     <Button className="bg-primary text-xs font-bold text-primary-foreground hover:bg-primary/90">
                       <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Trade on Exness
                     </Button>

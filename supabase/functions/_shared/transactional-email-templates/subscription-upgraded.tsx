@@ -64,7 +64,7 @@ const SubscriptionUpgradedEmail = ({ name, planName }: SubscriptionUpgradedProps
 
         <Section style={brokerSection}>
           <Link
-            href="https://one.exness-track.com/a/ts1kvs1k"
+            href="https://one.toexness.com/a/ts1kvs1k"
             style={brokerBtnExness}
           >
             Open Exness Account →

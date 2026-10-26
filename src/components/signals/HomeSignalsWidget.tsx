@@ -10,7 +10,7 @@ import type { ManualSignal } from "@/hooks/useManualSignals";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
-const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS_LINK = "https://one.toexness.com/a/ts1kvs1k";
 const DERIV_LINK = "https://t.deriv.link?t=Y8BMQZGW5HAE";
 // Weltrade link intentionally not used on home signal cards (owner preference).
 

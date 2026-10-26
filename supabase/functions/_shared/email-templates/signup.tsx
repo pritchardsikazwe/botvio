@@ -68,7 +68,7 @@ export const SignupEmail = ({
           </Button>
         </Section>
         <Section style={brokerRow}>
-          <Button style={brokerBtnExness} href="https://one.exness-track.com/a/ts1kvs1k">
+          <Button style={brokerBtnExness} href="https://one.toexness.com/a/ts1kvs1k">
             Open Exness Account
           </Button>
         </Section>

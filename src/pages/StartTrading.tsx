@@ -19,7 +19,7 @@ const BROKERS = {
   },
   exness: {
     name: "Exness",
-    url: "https://one.exness-track.com/a/ts1kvs1k",
+    url: "https://one.toexness.com/a/ts1kvs1k",
     summary: "A starting point to research forex and CFD markets such as major currency pairs and gold, where available.",
     fit: ["Forex pairs", "Gold and CFDs", "MT4 / MT5 workflows"],
     color: "border-amber-500/40",

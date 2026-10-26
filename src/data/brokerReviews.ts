@@ -153,7 +153,7 @@ export const brokerReviews: Record<string, BrokerReview> = {
     withdrawal: "Same channels as deposit. Exness advertises automated withdrawal processing on most methods within minutes.",
     bonuses: "Limited — occasional regional cashback promotions. Exness leans on price rather than bonuses.",
     support: "24/7 multilingual live chat, email and phone support. Response quality is consistently high.",
-    affiliateUrl: "https://one.exness-track.com/a/ts1kvs1k",
+    affiliateUrl: "https://one.toexness.com/a/ts1kvs1k",
     sections: {
       overview: `<p>Exness has grown from a small Cyprus-based broker in 2008 to one of the highest-volume retail forex brokers in the world, regularly reporting monthly trading volumes above $4 trillion. It has built its reputation on two things: <strong>razor-tight spreads on gold and forex majors</strong>, and <strong>fast, reliable withdrawals</strong>.</p>
       <p>Exness is particularly popular in Africa, the Middle East and Southeast Asia, where its combination of local payment methods, high leverage and low friction has made it a default choice for scalpers and gold traders.</p>`,

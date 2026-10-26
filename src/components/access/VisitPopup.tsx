@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
-const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS_LINK = "https://one.toexness.com/a/ts1kvs1k";
 const WHATSAPP = "260777204440";
 const waLink = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hi Botvio, I want to subscribe / get free VIP access.")}`;
 

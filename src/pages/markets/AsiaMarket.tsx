@@ -7,7 +7,7 @@ import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
 import { VolatilityCard } from "@/components/markets/VolatilityCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS = "https://one.toexness.com/a/ts1kvs1k";
 
 const ASIA_SIGNALS = [
   { instrument: "Nikkei 225", symbol: "JP225", price: "39,850", change: "+180", changePercent: "+0.45%", signal: "BUY" as const, entry: "39800", stopLoss: "39550", takeProfit: "40200", strategy: "Trend Continuation", session: "Tokyo", confidence: 76, bias: "Bullish" as const },

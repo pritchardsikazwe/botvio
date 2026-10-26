@@ -7,7 +7,7 @@ import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
 import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS = "https://one.toexness.com/a/ts1kvs1k";
 
 const EU_SIGNALS = [
   { instrument: "DAX 40", symbol: "DE40", price: "18,450", change: "+92.0", changePercent: "+0.50%", signal: "BUY" as const, entry: "18420", stopLoss: "18320", takeProfit: "18600", strategy: "Trend Continuation", session: "London", confidence: 78, bias: "Bullish" as const },

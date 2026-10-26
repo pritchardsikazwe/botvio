@@ -2,7 +2,7 @@ import { SEOPage } from "./seoPages";
 
 // Affiliate links used in CTAs
 export const AFFILIATE_LINKS = {
-  exness: "https://one.exness-track.com/a/ts1kvs1k",
+  exness: "https://one.toexness.com/a/ts1kvs1k",
   deriv: "https://t.deriv.link?t=Y8BMQZGW5HAE",
   binance: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU",
 };

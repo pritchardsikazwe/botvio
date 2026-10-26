@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { brokerReviews } from "@/data/brokerReviews";
 
 const BROKERS = [
-  { id: "exness" as const, name: "Exness", url: brokerReviews.exness?.affiliateUrl || "https://one.exness-track.com/a/ts1kvs1k" },
+  { id: "exness" as const, name: "Exness", url: brokerReviews.exness?.affiliateUrl || "https://one.toexness.com/a/ts1kvs1k" },
   { id: "deriv" as const, name: "Deriv", url: brokerReviews.deriv?.affiliateUrl || "https://t.deriv.link?t=Y8BMQZGW5HAE" },
 ];
 
