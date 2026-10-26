@@ -17,7 +17,7 @@ export interface AccessGate {
   planCode: string | null;
 }
 
-const TRIAL_DURATION_DAYS = 1;
+const TRIAL_DURATION_DAYS = 7;
 
 export function useAccessGate(): AccessGate {
   const { user, isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
@@ -35,7 +35,7 @@ export function useAccessGate(): AccessGate {
         supabase.from("chart_limit_settings").select("free_trial_days").limit(1).maybeSingle(),
       ]);
       const configuredDays = settings?.free_trial_days;
-      const trialDays = typeof configuredDays === "number" ? Math.min(1, Math.max(0, configuredDays)) : TRIAL_DURATION_DAYS;
+      const trialDays = typeof configuredDays === "number" ? Math.min(7, Math.max(0, configuredDays)) : TRIAL_DURATION_DAYS;
       const signup = profile?.created_at ? new Date(profile.created_at) : new Date(user!.created_at);
       const trialEnd = new Date(signup.getTime() + trialDays * 24 * 60 * 60 * 1000);
       const msLeft = trialEnd.getTime() - Date.now();
