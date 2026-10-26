@@ -2349,6 +2349,27 @@ export type Database = {
           },
         ]
       }
+      device_accounts: {
+        Row: {
+          device_id: string
+          first_seen: string
+          last_seen: string
+          user_id: string
+        }
+        Insert: {
+          device_id: string
+          first_seen?: string
+          last_seen?: string
+          user_id: string
+        }
+        Update: {
+          device_id?: string
+          first_seen?: string
+          last_seen?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       direct_executions: {
         Row: {
           created_at: string
@@ -7825,6 +7846,7 @@ export type Database = {
         Args: { target_creator_id: string }
         Returns: undefined
       }
+      register_device: { Args: { p_device_id: string }; Returns: number }
       review_payment_atomic: {
         Args: {
           p_action: string
