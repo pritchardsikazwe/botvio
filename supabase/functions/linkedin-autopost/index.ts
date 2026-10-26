@@ -63,29 +63,46 @@ Deno.serve(async (req) => {
     `Educational content only — not financial advice. Trading involves risk of loss.\n\n` +
     `${tagFor(pick.category)}`;
 
-  const me = await fetch(`${GATEWAY}/v2/userinfo`, { headers });
-  if (!me.ok) {
-    const body = await me.text();
-    console.error(`LinkedIn userinfo failed [${me.status}]: ${body}`);
-    return json({ error: "LinkedIn profile lookup failed", status: me.status, details: body }, 502);
-  }
-  const { sub } = await me.json();
+  // Prefer the Botvio Company Page when connected via the owner's LinkedIn app.
+  const { data: org } = await db.from("linkedin_org_connection")
+    .select("access_token,org_urn,expires_at").eq("id", 1).maybeSingle();
+  const orgReady = !!org?.access_token && !!org?.org_urn && (!org.expires_at || new Date(org.expires_at) > new Date());
 
-  const res = await fetch(`${GATEWAY}/v2/ugcPosts`, {
-    method: "POST",
-    headers: { ...headers, "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0" },
-    body: JSON.stringify({
-      author: `urn:li:person:${sub}`,
-      lifecycleState: "PUBLISHED",
-      specificContent: {
-        "com.linkedin.ugc.ShareContent": {
-          shareCommentary: { text },
-          shareMediaCategory: "NONE",
-        },
+  let res: Response;
+  if (orgReady) {
+    res = await fetch("https://api.linkedin.com/rest/posts", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${org!.access_token}`, "Content-Type": "application/json",
+        "LinkedIn-Version": "202509", "X-Restli-Protocol-Version": "2.0.0",
       },
-      visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
-    }),
-  });
+      body: JSON.stringify({
+        author: org!.org_urn, commentary: text, visibility: "PUBLIC",
+        distribution: { feedDistribution: "MAIN_FEED", targetEntities: [], thirdPartyDistributionChannels: [] },
+        lifecycleState: "PUBLISHED", isReshareDisabledByAuthor: false,
+      }),
+    });
+  } else {
+    const me = await fetch(`${GATEWAY}/v2/userinfo`, { headers });
+    if (!me.ok) {
+      const body = await me.text();
+      console.error(`LinkedIn userinfo failed [${me.status}]: ${body}`);
+      return json({ error: "LinkedIn profile lookup failed", status: me.status, details: body }, 502);
+    }
+    const { sub } = await me.json();
+    res = await fetch(`${GATEWAY}/v2/ugcPosts`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0" },
+      body: JSON.stringify({
+        author: `urn:li:person:${sub}`,
+        lifecycleState: "PUBLISHED",
+        specificContent: {
+          "com.linkedin.ugc.ShareContent": { shareCommentary: { text }, shareMediaCategory: "NONE" },
+        },
+        visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
+      }),
+    });
+  }
   const body = await res.text();
   const ok = res.ok;
   if (!ok) console.error(`LinkedIn post failed [${res.status}]: ${body}`);
@@ -98,5 +115,5 @@ Deno.serve(async (req) => {
     posted_at: new Date().toISOString(),
   }, { onConflict: "slug" });
 
-  return ok ? json({ ok: true, posted: pick.title }) : json({ error: "LinkedIn post failed", status: res.status, details: body }, 502);
+  return ok ? json({ ok: true, posted: pick.title, target: orgReady ? "company_page" : "personal" }) : json({ error: "LinkedIn post failed", status: res.status, details: body }, 502);
 });

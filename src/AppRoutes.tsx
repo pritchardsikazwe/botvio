@@ -92,6 +92,7 @@ import LocalizedNativeArticle from "./pages/LocalizedNativeArticle";
 import AITradingAnswers from "./pages/AITradingAnswers";
 import AdminSocialWorker from "./pages/AdminSocialWorker";
 import AdminLinkedInContent from "./pages/AdminLinkedInContent";
+import AdminLinkedInCallback from "./pages/AdminLinkedInCallback";
 
 // Additional FX hubs
 import EurUsdHub from "./pages/forex-hubs/EurUsdHub";
@@ -287,6 +288,7 @@ export const AppRoutes = () => {
     <Route path="admin/user-contacts" element={<ErrorBoundary><RequireSuperAdmin><AdminUserContacts /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/social-worker" element={<ErrorBoundary><RequireSuperAdmin><AdminSocialWorker /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/linkedin-content" element={<ErrorBoundary><RequireSuperAdmin><AdminLinkedInContent /></RequireSuperAdmin></ErrorBoundary>} />
+    <Route path="admin/linkedin-callback" element={<ErrorBoundary><RequireSuperAdmin><AdminLinkedInCallback /></RequireSuperAdmin></ErrorBoundary>} />
     <Route path="admin/*" element={<ErrorBoundary><RequireSuperAdmin><AdminControlCenter /></RequireSuperAdmin></ErrorBoundary>} />
 
     <Route path="p2p" element={<P2P />} />

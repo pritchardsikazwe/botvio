@@ -153,6 +153,8 @@ export default function AdminLinkedInContent() {
         </Card>
       )}
 
+      <CompanyPageConnect />
+
       <Card>
         <CardHeader>
           <CardTitle>Publishing settings</CardTitle>
@@ -280,5 +282,39 @@ export default function AdminLinkedInContent() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function CompanyPageConnect() {
+  const [s, setS] = useState<{ credentialsConfigured: boolean; connected: boolean; orgName: string | null; orgUrn: string | null; expiresAt: string | null } | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    supabase.functions.invoke("linkedin-org-oauth", { body: { action: "status" } }).then(({ data }) => { if (data?.success) setS(data); });
+  }, []);
+  const connect = async () => {
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("linkedin-org-oauth", { body: { action: "start", origin: window.location.origin } });
+    setBusy(false);
+    if (error || !data?.url) { toast.error(data?.error || "Could not start LinkedIn sign-in"); return; }
+    window.location.href = data.url;
+  };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Botvio Company Page</CardTitle>
+        <CardDescription>
+          {s?.connected
+            ? `Connected to ${s.orgName || s.orgUrn}. The 5 daily article posts go to this page${s.expiresAt ? ` (sign-in valid until ${new Date(s.expiresAt).toLocaleDateString()})` : ""}.`
+            : "Not connected — daily posts currently go to your personal profile."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {s && !s.credentialsConfigured ? (
+          <p className="text-sm text-muted-foreground">Your LinkedIn Client ID and Secret are not saved yet.</p>
+        ) : (
+          <Button onClick={connect} disabled={busy || !s}><Linkedin className="h-4 w-4 mr-2" />{s?.connected ? "Reconnect Company Page" : "Connect Company Page"}</Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }
