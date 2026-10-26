@@ -7,10 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 const EXNESS_LINK = "https://one.toexness.com/a/ts1kvs1k";
+const DERIV_LINK = "https://t.deriv.link?t=Y8BMQZGW5HAE";
 const WHATSAPP = "260777204440";
-const waLink = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hi Botvio, I want to subscribe / get free VIP access.")}`;
+const waLink = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hi Botvio, I want to subscribe / get free access with my Exness or Deriv account.")}`;
 
-/** Shown on every visit (each page load): visitors get the Exness free-access offer, unsubscribed members get the subscribe notice. */
+/** Shown on every visit: explains the requirements to use Botvio (subscribe, or partner via Exness/Deriv links). */
 export function VisitPopup() {
   const { user, profile, isAdmin, isSuperAdmin, loading } = useAuth() as any;
   const { pathname } = useLocation();
@@ -37,24 +38,27 @@ export function VisitPopup() {
   const member = !!user;
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 p-4 backdrop-blur" role="dialog" aria-modal="true">
-      <div className="relative w-full max-w-md rounded-2xl border bg-card p-6 shadow-2xl">
+      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border bg-card p-6 shadow-2xl">
         <button aria-label="Close" onClick={() => setOpen(false)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
-        <div className="mb-3 flex items-center gap-3">
+        <div className="mb-3 flex items-center gap-3 pr-6">
           <div className="rounded-full bg-primary/10 p-2 text-primary">{member ? <Crown className="h-5 w-5" /> : <Gift className="h-5 w-5" />}</div>
-          <h2 className="text-lg font-semibold">{member ? "Subscribe to keep using Botvio" : "Get free Botvio access"}</h2>
+          <h2 className="text-lg font-semibold">{member ? "Your free trial will expire — kindly subscribe" : "How to get access to Botvio"}</h2>
         </div>
-        {member ? (
-          <p className="mb-4 text-sm text-muted-foreground">Your account does not have an active plan. You will no longer have access to Botvio unless you subscribe. Choose Starter, Basic or VIP — or message us on WhatsApp <b>+260 777 204 440</b> to subscribe.</p>
-        ) : (
-          <p className="mb-4 text-sm text-muted-foreground">Open a free Exness trading account with our partner link to get free Botvio access. After signing up, create your Botvio account and send us your Exness account number on WhatsApp <b>+260 777 204 440</b>.</p>
-        )}
+        <p className="mb-3 text-sm text-muted-foreground">
+          {member
+            ? "Your account has no active plan. Your free trial will expire and you will no longer have access to Botvio unless you meet one of the requirements below."
+            : "To use Botvio you need to meet one of these requirements:"}
+        </p>
+        <ol className="mb-4 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+          <li><b className="text-foreground">Subscribe</b> to one of our plans: Starter $9, Basic $19 or VIP $39 per month.</li>
+          <li><b className="text-foreground">Open a new Exness or Deriv account</b> using our partner links below for free access.</li>
+          <li><b className="text-foreground">Already have an Exness account?</b> Open Exness live support chat and ask them to tag (link) your account to our partner link: <span className="break-all font-medium text-foreground">{EXNESS_LINK}</span></li>
+        </ol>
+        <p className="mb-4 text-sm text-muted-foreground">Then send your Exness or Deriv account number to us on WhatsApp <b>+260 777 204 440</b> to activate your access.</p>
         <div className="space-y-2">
-          {member ? (
-            <Button asChild className="w-full" variant="gold"><Link to="/choose-plan" onClick={() => setOpen(false)}>Subscribe now</Link></Button>
-          ) : (
-            <Button asChild className="w-full" variant="gold"><a href={EXNESS_LINK} target="_blank" rel="noopener sponsored">Create Exness account — free access</a></Button>
-          )}
-          {member && <Button asChild variant="outline" className="w-full"><a href={EXNESS_LINK} target="_blank" rel="noopener sponsored">Or open Exness account for free VIP</a></Button>}
+          {member && <Button asChild className="w-full" variant="gold"><Link to="/choose-plan" onClick={() => setOpen(false)}>Subscribe now</Link></Button>}
+          <Button asChild className="w-full" variant={member ? "outline" : "gold"}><a href={EXNESS_LINK} target="_blank" rel="noopener sponsored">Create Exness account — free access</a></Button>
+          <Button asChild variant="outline" className="w-full"><a href={DERIV_LINK} target="_blank" rel="noopener sponsored">Create Deriv account — free access</a></Button>
           <Button asChild variant="outline" className="w-full"><a href={waLink} target="_blank" rel="noreferrer"><MessageCircle className="mr-2 h-4 w-4" />WhatsApp +260 777 204 440</a></Button>
           {!member && <Button asChild variant="ghost" className="w-full"><Link to="/signup" onClick={() => setOpen(false)}>Create Botvio account</Link></Button>}
         </div>
