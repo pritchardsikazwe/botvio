@@ -15,6 +15,7 @@ import { MobileBottomNav } from "@/components/nav/MobileBottomNav";
 import { WhatsAppProfileNotice } from "@/components/auth/WhatsAppProfileNotice";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { FirstVisitTour } from "@/components/onboarding/FirstVisitTour";
+import { VisitPopup } from "@/components/access/VisitPopup";
 
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
 
               <CookieConsent />
               <WhatsAppProfileNotice />
+              <VisitPopup />
               <FirstVisitTour />
             </BrowserRouter>
           </DerivProvider>
