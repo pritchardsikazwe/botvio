@@ -8,7 +8,7 @@ const NAV = [
   { label: "Connect", to: "/connections", icon: Users },
   { label: "Signals", to: "/signals", icon: Signal },
   { label: "AI Chart", to: "/chart/XAUUSD", icon: Sparkles },
-  { label: "Deriv", to: "https://t.deriv.link?t=8U3QNKP9UA9G", icon: Bot, external: true },
+  { label: "Deriv", to: "https://t.deriv.link?t=Y8BMQZGW5HAE", icon: Bot, external: true },
 ];
 
 export const MobileBottomNav = () => {

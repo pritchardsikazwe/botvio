@@ -18,7 +18,7 @@ const BROKERS = {
   deriv: {
     name: "Deriv",
     market: "Synthetic Indices",
-    url: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/",
+    url: "https://t.deriv.link?t=Y8BMQZGW5HAE",
     description: "Explore synthetic indices, Boom & Crash, and Deriv API tools.",
     accent: "border-rose-500/50",
   },

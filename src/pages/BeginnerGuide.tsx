@@ -28,7 +28,7 @@ import {
 import { Link } from "react-router-dom";
 
 const DERIV_URL =
-  "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
+  "https://t.deriv.link?t=Y8BMQZGW5HAE";
 const EXNESS_URL = "https://one.exness-track.com/a/ts1kvs1k";
 const WELTRADE_URL = "https://gowt.net/ib67505";
 const BINANCE_URL = "https://accounts.binance.com/register?ref=42924116";

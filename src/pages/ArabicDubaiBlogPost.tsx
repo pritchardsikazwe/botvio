@@ -60,7 +60,7 @@ export default function ArabicDubaiBlogPost() {
             <p className="mt-2 text-sm leading-7 text-muted-foreground">
               يمكنك مراجعة دليل فتح الحساب أولاً، ثم استخدام حساب تجريبي إذا كان متاحاً لك. رابط الإحالة أدناه رابط تابع لـBotvio، ولا يعني أن التداول مناسب لك أو أن الربح مضمون.
             </p>
-            <div className="mt-5"><AffiliateAccountGuide broker="deriv" affiliateUrl="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" compact /></div>
+            <div className="mt-5"><AffiliateAccountGuide broker="deriv" affiliateUrl="https://t.deriv.link?t=Y8BMQZGW5HAE" compact /></div>
           </section>
 
           <section className="mt-6 flex flex-wrap gap-3">

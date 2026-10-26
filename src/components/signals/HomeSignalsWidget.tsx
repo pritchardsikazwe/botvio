@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
-const DERIV_LINK = "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
+const DERIV_LINK = "https://t.deriv.link?t=Y8BMQZGW5HAE";
 // Weltrade link intentionally not used on home signal cards (owner preference).
 
 const BROKER_FILTERS = [

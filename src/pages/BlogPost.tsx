@@ -51,7 +51,7 @@ import { relatedArticles, sortArticles, useResearchArticles } from "@/lib/resear
 
 /* ── Affiliate links (unchanged) ── */
 const AFFILIATE_LINKS = {
-  deriv: { name: "Deriv", url: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/", cta: "Open Deriv Account" },
+  deriv: { name: "Deriv", url: "https://t.deriv.link?t=Y8BMQZGW5HAE", cta: "Open Deriv Account" },
   exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k", cta: "Open Exness Account" },
   weltrade: { name: "Weltrade", url: "https://gowt.net/ib67505", cta: "Open Weltrade Account" },
   iqoption: { name: "IQ Option", url: "https://iqoption.net/lp/pwa-new/en/?aff=818055&aff_model=revenue", cta: "Open IQ Option Account" },
