@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, MessageCircle, Copy, BarChart3, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 
-const EXNESS_LINK = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS_LINK = "https://one.toexness.com/a/ts1kvs1k";
 const WHATSAPP_LINK = "https://chat.whatsapp.com/botvio-signals";
 
 export function QuickActionsCard() {

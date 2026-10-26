@@ -11,7 +11,7 @@ const BROKERS = {
   exness: {
     name: "Exness",
     market: "Forex & Gold",
-    url: "https://one.exness-track.com/a/ts1kvs1k",
+    url: "https://one.toexness.com/a/ts1kvs1k",
     description: "Research forex, gold (XAUUSD), and available MT4/MT5 workflows.",
     accent: "border-amber-500/50",
   },

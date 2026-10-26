@@ -193,7 +193,7 @@ const P2P = () => {
                     Ultra-tight spreads and instant withdrawals. Perfect for scalping!
                   </p>
                   <a
-                    href="https://one.exnesstrack.org/a/up2tpvqknx"
+                    href="https://one.toexness.com/a/ts1kvs1k"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

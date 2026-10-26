@@ -17,8 +17,8 @@ const REFERRAL_STORAGE_KEY = "botvio_referral";
 
 const BROKER_LINKS: Record<string, { name: string; url: string }> = {
   deriv: { name: "Deriv", url: "https://t.deriv.link?t=Y8BMQZGW5HAE" },
-  exness: { name: "Exness", url: "https://one.exness-track.com/a/ts1kvs1k" },
-  mt5: { name: "Exness MT5", url: "https://one.exness-track.com/a/ts1kvs1k" },
+  exness: { name: "Exness", url: "https://one.toexness.com/a/ts1kvs1k" },
+  mt5: { name: "Exness MT5", url: "https://one.toexness.com/a/ts1kvs1k" },
   binance: { name: "Binance", url: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU" },
 };
 

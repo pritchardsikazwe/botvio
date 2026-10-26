@@ -8,7 +8,7 @@ import { VolatilityCard } from "@/components/markets/VolatilityCard";
 import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS = "https://one.toexness.com/a/ts1kvs1k";
 
 const US_SIGNALS = [
   { instrument: "NASDAQ", symbol: "NAS100", price: "22,733", change: "+36.4", changePercent: "+0.16%", signal: "BUY" as const, entry: "22710", stopLoss: "22640", takeProfit: "22920", strategy: "Tech Momentum Breakout", session: "New York", confidence: 82, bias: "Bullish" as const },

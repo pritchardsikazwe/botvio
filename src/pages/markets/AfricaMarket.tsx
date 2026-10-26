@@ -7,7 +7,7 @@ import { TradingTipsCard } from "@/components/markets/TradingTipsCard";
 import { InstitutionalFlowCard } from "@/components/markets/InstitutionalFlowCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS = "https://one.toexness.com/a/ts1kvs1k";
 
 const AFRICA_SIGNALS = [
   { instrument: "JSE Top 40", symbol: "JSE40", price: "74,820", change: "+486", changePercent: "+0.65%", signal: "BUY" as const, entry: "74700", stopLoss: "74100", takeProfit: "75800", strategy: "Mining Momentum", session: "Johannesburg", confidence: 74, bias: "Bullish" as const },

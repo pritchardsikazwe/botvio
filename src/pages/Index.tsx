@@ -143,7 +143,7 @@ const Index = () => {
                 <TrendingUp className="h-4 w-4" /> Trade on Deriv
               </Button>
             </a>
-            <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
+            <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
               <Button variant="outline" className="w-full h-12 font-extrabold text-sm gap-2 border-warning/40 text-warning hover:bg-warning/10">
                 <TrendingUp className="h-4 w-4" /> Trade on Exness
               </Button>
@@ -653,7 +653,7 @@ const Index = () => {
                 <CardContent><Badge variant="outline" className="text-xs">Open Account →</Badge></CardContent>
               </Card>
             </a>
-            <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
+            <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer" className="block">
               <Card className="glass-card hover:border-warning/50 transition-all hover:scale-[1.02] cursor-pointer h-full">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">

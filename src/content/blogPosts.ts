@@ -1143,7 +1143,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p><strong>Leverage:</strong> Up to 1:2000</p>
 <p><strong>Minimum Deposit:</strong> $1</p>
 <p><strong>Why Exness?</strong> Exness offers the tightest gold spreads in the industry, instant withdrawals, and no commission on Standard accounts. Their swap-free accounts are perfect for holding gold positions overnight. Exness is regulated by FCA, CySEC, and FSCA.</p>
-<p>👉 <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Open Exness Account — Trade Gold with 0 Commission</a></p>
+<p>👉 <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Open Exness Account — Trade Gold with 0 Commission</a></p>
 
 <h3>2. Deriv — Best for Binary Options on Gold</h3>
 <p><strong>Contract Types:</strong> Rise/Fall, Higher/Lower, Multipliers on gold</p>
@@ -1223,7 +1223,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h3>On Exness</h3>
 <p>Exness offers the tightest XAUUSD spreads (from 1.2 pips). Execute Botvio signals with minimal slippage. Instant deposits and withdrawals.</p>
-<p>👉 <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Open Exness Account</a></p>
+<p>👉 <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Open Exness Account</a></p>
 
 <h3>On Deriv</h3>
 <p>Trade gold using Multipliers on Deriv for leveraged exposure with controlled risk. Great for smaller accounts.</p>
@@ -1314,7 +1314,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <p>Create your free Deriv account to start receiving signals:</p>
 <p>👉 <a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer">Open Deriv Account — Free Signals</a></p>
 
-<p>Also available on <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Exness</a> and <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Weltrade</a> for forex and gold signals.</p>
+<p>Also available on <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Exness</a> and <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Weltrade</a> for forex and gold signals.</p>
 
 <p><strong>⚠️ Risk Warning:</strong> Trading involves risk. Signals are not financial advice. Trade responsibly.</p>
 
@@ -1377,7 +1377,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>How to Start</h2>
 <ol>
-<li>Open your Exness account: <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Register on Exness</a></li>
+<li>Open your Exness account: <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Register on Exness</a></li>
 <li>Deposit as little as $10</li>
 <li>Open Botvio and filter signals by "Exness"</li>
 <li>Execute signals on MT4/MT5</li>
@@ -1446,7 +1446,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>Get Started</h2>
 <p>👉 <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Open Weltrade Account — Get 100% Deposit Bonus</a></p>
-<p>Also trade on <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Exness</a> for tighter gold spreads or <a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer">Deriv</a> for binary options.</p>
+<p>Also trade on <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Exness</a> for tighter gold spreads or <a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer">Deriv</a> for binary options.</p>
 
 <p><strong>⚠️ Risk Warning:</strong> Trading involves risk. Past performance is not a guarantee of future results.</p>
 
@@ -1509,7 +1509,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <h2>Supported Brokers</h2>
 <p>Use Botvio's chart analysis with any broker:</p>
 <ul>
-<li><strong>Exness:</strong> <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Open Account</a> — Best for gold & forex</li>
+<li><strong>Exness:</strong> <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Open Account</a> — Best for gold & forex</li>
 <li><strong>Deriv:</strong> <a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer">Open Account</a> — Best for synthetics</li>
 <li><strong>Weltrade:</strong> <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Open Account</a> — MT5 with synthetics</li>
 </ul>
@@ -1594,7 +1594,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <h2>Recommended Brokers for Practice</h2>
 <p>Start with demo accounts on these brokers:</p>
 <ul>
-<li><strong>Exness:</strong> <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Free Demo Account</a> — Best spreads for learning gold</li>
+<li><strong>Exness:</strong> <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">Free Demo Account</a> — Best spreads for learning gold</li>
 <li><strong>Deriv:</strong> <a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer">Free Demo</a> — Practice binary options risk-free</li>
 <li><strong>Weltrade:</strong> <a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer">Free Demo</a> — Learn synthetics + forex on MT5</li>
 </ul>
@@ -2072,7 +2072,7 @@ export const blogContent: Record<string, BlogPostData> = {
 <h3>Trading & Investing</h3>
 <ul>
 <li><a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer sponsored">Deriv</a> — synthetic indices, forex, 24/7 markets</li>
-<li><a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer sponsored">Exness</a> — tightest spreads on gold &amp; forex</li>
+<li><a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer sponsored">Exness</a> — tightest spreads on gold &amp; forex</li>
 <li><a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer sponsored">Weltrade</a> — Syntx, PainX, GainX exclusive indices</li>
 <li><a href="https://accounts.binance.com/register?ref=42924116" target="_blank" rel="noopener noreferrer sponsored">Binance</a> — crypto spot, futures, Earn</li>
 <li>FTMO / MyForexFunds — prop-firm capital up to $200k</li>
@@ -2281,7 +2281,7 @@ export const blogContent: Record<string, BlogPostData> = {
 
 <h2>Recommended Brokers for Gold</h2>
 <ul>
-<li><a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer sponsored">Exness</a> — tightest XAUUSD spreads</li>
+<li><a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer sponsored">Exness</a> — tightest XAUUSD spreads</li>
 <li><a href="https://gowt.net/ib67505" target="_blank" rel="noopener noreferrer sponsored">Weltrade</a> — solid execution on metals</li>
 <li><a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer sponsored">Deriv</a> — gold available on MT5</li>
 </ul>

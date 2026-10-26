@@ -153,7 +153,7 @@ export function GoldCommunitySection() {
             <p className="text-sm text-muted-foreground mt-1">Open a broker account and start trading gold with tight spreads today.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="https://one.exness-track.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">
+            <a href="https://one.toexness.com/a/ts1kvs1k" target="_blank" rel="noopener noreferrer">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
                 <ExternalLink className="h-4 w-4 mr-2" /> Trade on Exness
               </Button>

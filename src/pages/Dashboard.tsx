@@ -366,7 +366,7 @@ const Dashboard = () => {
                       Ultra-tight spreads, instant withdrawals. Perfect for XAUUSD and NAS100 strategies!
                     </p>
                     <a
-                      href="https://one.exnesstrack.org/a/up2tpvqknx"
+                      href="https://one.toexness.com/a/ts1kvs1k"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

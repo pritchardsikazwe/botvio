@@ -33,7 +33,7 @@ import {
 // Affiliate links
 const AFFILIATE_LINKS = {
   deriv: "https://t.deriv.link?t=Y8BMQZGW5HAE",
-  exness: "https://one.exness-track.com/a/ts1kvs1k",
+  exness: "https://one.toexness.com/a/ts1kvs1k",
   binance: "https://www.binance.com/activity/referral-entry/CPA?ref=CPA_0047GJ3KHU",
 };
 

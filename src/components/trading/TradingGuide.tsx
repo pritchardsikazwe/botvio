@@ -41,7 +41,7 @@ const TRADING_STEPS = [
       "Supports MT4/MT5 platforms",
       "Regulated & trusted globally",
     ],
-    link: "https://one.exness-track.com/a/ts1kvs1k",
+    link: "https://one.toexness.com/a/ts1kvs1k",
     linkLabel: "Sign Up on Exness",
   },
   {

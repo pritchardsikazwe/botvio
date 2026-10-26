@@ -93,7 +93,7 @@ const ME_INSTRUMENTS: SessionInstrument[] = [
 ];
 
 
-const EXNESS = "https://one.exness-track.com/a/ts1kvs1k";
+const EXNESS = "https://one.toexness.com/a/ts1kvs1k";
 
 const ME_SIGNALS = [
   { instrument: "Tadawul (TASI)", symbol: "TASI", price: "12,420", change: "+55.0", changePercent: "+0.45%", signal: "BUY" as const, entry: "12400", stopLoss: "12300", takeProfit: "12600", strategy: "Oil Momentum", session: "Riyadh", confidence: 79, bias: "Bullish" as const },
