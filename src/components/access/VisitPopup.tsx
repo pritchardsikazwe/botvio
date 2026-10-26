@@ -32,6 +32,13 @@ export function VisitPopup() {
 
   useEffect(() => { const t = setTimeout(() => setOpen(true), 1500); return () => clearTimeout(t); }, []);
 
+  // Sign-ins older than this moment are cleared once, so everyone signs in fresh.
+  useEffect(() => {
+    const CUTOFF = Date.parse("2026-10-26T13:45:00Z");
+    const last = user?.last_sign_in_at ? Date.parse(user.last_sign_in_at) : 0;
+    if (user && last < CUTOFF) supabase.auth.signOut().catch(() => {});
+  }, [user]);
+
   // Unsubscribed users whose free week has ended are signed out (web and installed app) until an admin approves them.
   const [forcedOut, setForcedOut] = useState(false);
   const mustLogout = !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");

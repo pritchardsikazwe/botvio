@@ -190,6 +190,13 @@
       "when": 1793011183778,
       "tag": "0026_linkedin_org_connection",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793022244909,
+      "tag": "0027_device_accounts",
+      "breakpoints": true
     }
   ]
 }
