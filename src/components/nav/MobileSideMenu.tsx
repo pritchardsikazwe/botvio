@@ -53,7 +53,7 @@ const trading: Item[] = [
   { label: "Trading Tools", to: "/tools", icon: Sparkles },
   { label: "Education", to: "/learn", icon: GraduationCap },
   { label: "Products & Plans", to: "/marketplace", icon: Coins },
-  { label: "Open Deriv Account", to: "https://t.deriv.link?t=8U3QNKP9UA9G", icon: WalletCards },
+  { label: "Open Deriv Account", to: "https://t.deriv.link?t=Y8BMQZGW5HAE", icon: WalletCards },
 ];
 
 export const MobileSideMenu = ({ className, trigger }: { className?: string; trigger?: ReactNode }) => {

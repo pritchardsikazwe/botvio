@@ -63,7 +63,7 @@ export const SignupEmail = ({
         </Text>
 
         <Section style={brokerRow}>
-          <Button style={brokerBtnDeriv} href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/">
+          <Button style={brokerBtnDeriv} href="https://t.deriv.link?t=Y8BMQZGW5HAE">
             Open Deriv Account
           </Button>
         </Section>

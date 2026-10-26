@@ -79,7 +79,7 @@ export default function ArabicDubaiTradingGuide() {
             إذا قررت دراسة المنصة بعد قراءة الأدلة، استخدم دليل فتح الحساب لمعرفة خطوات التسجيل والتحقق والانتقال إلى الحساب التجريبي. رابط الإحالة يخص Botvio، ويجب مراجعة شروط المزود والمخاطر قبل أي إيداع.
           </p>
           <div className="mt-5">
-            <AffiliateAccountGuide broker="deriv" affiliateUrl="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" />
+            <AffiliateAccountGuide broker="deriv" affiliateUrl="https://t.deriv.link?t=Y8BMQZGW5HAE" />
           </div>
         </section>
 

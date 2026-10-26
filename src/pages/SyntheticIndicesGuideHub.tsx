@@ -4,7 +4,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Header } from "@/components/trading/Header";
 import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
 
-const DERIV_SIGNUP="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
+const DERIV_SIGNUP="https://t.deriv.link?t=Y8BMQZGW5HAE";
 const markets=[
 ["Volatility 10","volatility-10-trading-dubai"],["Volatility 25","volatility-25-trading-dubai"],["Volatility 50","volatility-50-trading-dubai"],["Volatility 75","volatility-75-dubai-guide"],["Volatility 100","volatility-100-trading-dubai"],["Volatility 150","volatility-150-trading-dubai"],["Boom 500","boom-500-trading-dubai"],["Boom 1000","boom-1000-trading-dubai"],["Crash 500","crash-500-trading-dubai"],["Crash 1000","crash-1000-trading-dubai"],["Step Index","step-index-trading-dubai"],["Synthetic Indices","synthetic-indices-dubai-guide"]
 ];

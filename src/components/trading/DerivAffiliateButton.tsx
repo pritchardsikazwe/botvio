@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
-const DERIV_AFFILIATE_LINK = "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
+const DERIV_AFFILIATE_LINK = "https://t.deriv.link?t=Y8BMQZGW5HAE";
 
 interface DerivAffiliateButtonProps {
   variant?: "default" | "outline" | "ghost" | "gold";

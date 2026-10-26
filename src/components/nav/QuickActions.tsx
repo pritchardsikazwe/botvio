@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ScanSearch, PlugZap, Signal, WalletCards, Gift, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const DERIV_AFFILIATE_URL = "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
+export const DERIV_AFFILIATE_URL = "https://t.deriv.link?t=Y8BMQZGW5HAE";
 
 export type QuickAction = { label: string; short: string; to: string; icon: LucideIcon; external?: boolean };
 

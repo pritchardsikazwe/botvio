@@ -12,7 +12,7 @@ import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGu
 import { DerivConnectionPanel } from "@/components/broker/DerivConnectionPanel";
 import { rsi, riseFallEngine } from "@/lib/signalEngines";
 
-const DERIV_SIGNUP = brokerReviews.deriv.affiliateUrl || "https://t.deriv.link?t=8U3QNKP9UA9G";
+const DERIV_SIGNUP = brokerReviews.deriv.affiliateUrl || "https://t.deriv.link?t=Y8BMQZGW5HAE";
 const EXNESS_SIGNUP = brokerReviews.exness.affiliateUrl || "https://www.exness.com/";
 
 const WATCHLIST = [

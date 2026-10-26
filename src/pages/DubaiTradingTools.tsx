@@ -5,7 +5,7 @@ import { Header } from "@/components/trading/Header";
 import { AffiliateAccountGuide } from "@/components/affiliate/AffiliateAccountGuide";
 import { Button } from "@/components/ui/button";
 
-const DERIV_SIGNUP="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/";
+const DERIV_SIGNUP="https://t.deriv.link?t=Y8BMQZGW5HAE";
 
 export default function DubaiTradingTools(){
   const [balance,setBalance]=useState("1000");

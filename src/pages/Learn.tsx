@@ -527,7 +527,7 @@ const Learn = () => {
                 </li>
               </ul>
               <a
-                href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/"
+                href="https://t.deriv.link?t=Y8BMQZGW5HAE"
                 target="_blank"
                 rel="noopener noreferrer"
               >

@@ -163,7 +163,7 @@ export function GoldCommunitySection() {
                 <ExternalLink className="h-4 w-4 mr-2" /> Open Weltrade
               </Button>
             </a>
-            <a href="https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/" target="_blank" rel="noopener noreferrer">
+            <a href="https://t.deriv.link?t=Y8BMQZGW5HAE" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="font-bold">
                 <ExternalLink className="h-4 w-4 mr-2" /> Open Deriv
               </Button>

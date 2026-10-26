@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 const BROKERS = {
   deriv: {
     name: "Deriv",
-    url: "https://track.deriv.com/_a_gq1w0BG0D1hit6RV3zsGNd7ZgqdRLk/1/",
+    url: "https://t.deriv.link?t=Y8BMQZGW5HAE",
     summary: "A starting point to research synthetic indices, Boom & Crash, and Deriv's available markets and API tools.",
     fit: ["Synthetic indices", "Boom & Crash education", "API and automation research"],
     color: "border-red-500/40",
