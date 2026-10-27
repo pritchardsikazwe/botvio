@@ -197,6 +197,13 @@
       "when": 1793022244909,
       "tag": "0027_device_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1793087234830,
+      "tag": "0028_trial_signal_unlocks_and_daily_home",
+      "breakpoints": true
     }
   ]
 }

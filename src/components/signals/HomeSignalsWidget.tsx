@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import type { ManualSignal } from "@/hooks/useManualSignals";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { nextSignalMorning } from "@/lib/signalTrial";
 
 const EXNESS_LINK = "https://one.toexness.com/a/ts1kvs1k";
 const DERIV_LINK = "https://t.deriv.link?t=Y8BMQZGW5HAE";
@@ -191,15 +192,7 @@ function riskReward(signal: any): string {
 }
 
 function homeExpiresAt(signal: { created_at: string }): Date {
-  const createdAt = new Date(signal.created_at).getTime();
-  const catCreated = new Date(createdAt + CAT_OFFSET_MS);
-  const year = catCreated.getUTCFullYear();
-  const month = catCreated.getUTCMonth();
-  const day = catCreated.getUTCDate();
-  const hour = catCreated.getUTCHours();
-  const nextPublishHour = hour < 9 ? 9 : hour < 18 ? 18 : 9;
-  const nextPublishDay = hour < 18 ? day : day + 1;
-  return new Date(Date.UTC(year, month, nextPublishDay, nextPublishHour) - CAT_OFFSET_MS);
+  return nextSignalMorning();
 }
 
 function isSignalExpired(signal: { created_at: string }): boolean {
@@ -225,13 +218,7 @@ export const HomeSignalsWidget = () => {
   const { data: signals, isLoading } = useQuery({
     queryKey: ["home-signals-with-wins"],
     queryFn: async () => {
-      const lookback = new Date(Date.now() - 36 * 60 * 60 * 1000);
-      const { data, error } = await supabase
-        .from("trading_signals")
-        .select("*")
-        .gte("created_at", lookback.toISOString())
-        .order("created_at", { ascending: false })
-        .limit(500);
+      const { data, error } = await supabase.rpc("get_home_daily_signals");
       if (error) throw error;
       return (data || []) as ManualSignal[];
     },
@@ -301,7 +288,7 @@ export const HomeSignalsWidget = () => {
   }
 
   // The homepage only displays signals from the scheduled publication windows.
-  let displaySignals = selectPublishedHomeSignals(signals || []);
+  let displaySignals = signals || [];
 
   // Apply broker filter
   if (brokerFilter !== "all") {
@@ -331,7 +318,7 @@ export const HomeSignalsWidget = () => {
             <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {brokerFilter !== "all"
                 ? `No active signals for ${BROKER_FILTERS.find(b => b.value === brokerFilter)?.label}. Select “All” or check the next publication.`
-                : "Three signals are scheduled for 09:00 and three for 18:00 Zambia time. Signal access is available to paid members only. Subscribe to unlock signals when the next batch is published."}
+                : "Daily M15 selections refresh at 06:00 Lusaka: Synthetic Indices, Gold, Bitcoin, Forex and Weltrade. A category stays empty when no real signal is available."}
             </p>
             {brokerFilter === "all" && (
               <div className="mx-auto mt-6 max-w-xl">
@@ -342,8 +329,8 @@ export const HomeSignalsWidget = () => {
                       <Crown className="h-7 w-7 text-primary-foreground" />
                     </div>
                     <div className="flex-1 text-center sm:text-left">
-                      <p className="text-lg font-extrabold sm:text-xl">Signals are for paid members</p>
-                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-base">Subscribe to a paid plan to unlock signal access. Featured batches are scheduled at 09:00 and 18:00 CAT (Zambia time).</p>
+                      <p className="text-lg font-extrabold sm:text-xl">Free Trial: 35 signals per day</p>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-base">Unlock signals in the Signals Center during your trial, or subscribe for continued access.</p>
                     </div>
                     <Button asChild size="lg" className="w-full shrink-0 text-base font-bold shadow-md transition-transform hover:scale-105 sm:w-auto motion-safe:animate-[pulse_2.5s_ease-in-out_infinite]">
                       <Link to="/billing">
@@ -376,11 +363,11 @@ export const HomeSignalsWidget = () => {
               </div>
               <div>
                 <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-bold text-foreground">🔓 Free Trial: Limited to 3 Signals Per Day</p>
+                  <p className="text-sm font-bold text-foreground">Free Trial: Limited to 35 Signals Per Day</p>
                   <Badge className="border-warning/40 bg-warning/15 text-warning motion-safe:animate-pulse">LIMITED</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Want more trading opportunities? Subscribe to a paid plan for unlimited signals, plus premium AI chart analysis and advanced market intelligence.
+                  Five daily M15 homepage selections stay until 06:00 Lusaka tomorrow. Trial members can unlock 35 signals daily in the Signals Center.
                 </p>
               </div>
             </div>
@@ -496,7 +483,7 @@ export const HomeSignalsWidget = () => {
                   <div className="flex items-center gap-1 text-xs">
                     <Clock className="h-3 w-3 text-warning" />
                     <span className="text-warning font-medium">
-                      Expires in {getTimeRemaining(signal)}
+                      Next daily selection in {getTimeRemaining(signal)}
                     </span>
                   </div>
                 </div>

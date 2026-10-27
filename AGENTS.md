@@ -1,4 +1,5 @@
 # Project architecture rules
+- Trial signal details require atomic per-user daily unlocks enforced by restrictive signal RLS; homepage IDs are stored in a shared daily batch so refreshes cannot rotate category picks or bypass the trial cap outside public selections.
 
 - Signup contact metadata is persisted by the existing profile-creation trigger before email confirmation; profile edits require saved-row readback, and WhatsApp validation is shared across signup and completion to prevent false success.
 - Admin user contact presentation is shared by mobile list entries and desktop rows, keeping WhatsApp and country visible without horizontal scrolling on phones.

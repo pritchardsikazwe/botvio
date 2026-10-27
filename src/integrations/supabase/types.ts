@@ -3265,6 +3265,24 @@ export type Database = {
           },
         ]
       }
+      home_signal_batches: {
+        Row: {
+          batch_day: string
+          created_at: string
+          signal_ids: string[]
+        }
+        Insert: {
+          batch_day: string
+          created_at?: string
+          signal_ids?: string[]
+        }
+        Update: {
+          batch_day?: string
+          created_at?: string
+          signal_ids?: string[]
+        }
+        Relationships: []
+      }
       linkedin_content_posts: {
         Row: {
           attempts: number
@@ -7328,6 +7346,35 @@ export type Database = {
           },
         ]
       }
+      trial_signal_unlocks: {
+        Row: {
+          created_at: string
+          signal_id: string
+          unlock_day: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          signal_id: string
+          unlock_day: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          signal_id?: string
+          unlock_day?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_signal_unlocks_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "trading_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unlimited_access: {
         Row: {
           created_at: string
@@ -7735,6 +7782,7 @@ export type Database = {
         Returns: Json
       }
       auto_expire_signals: { Args: never; Returns: undefined }
+      can_read_signal: { Args: { p_signal_id: string }; Returns: boolean }
       claim_chart_upload_slot: {
         Args: { _user_id: string }
         Returns: {
@@ -7771,6 +7819,53 @@ export type Database = {
         Args: { _request_id: string }
         Returns: string
       }
+      get_home_daily_signals: {
+        Args: never
+        Returns: {
+          ai_model_version: string | null
+          ai_win_probability: number | null
+          approved_at: string | null
+          approved_by: string | null
+          broker: string[] | null
+          category: string | null
+          confidence: number | null
+          created_at: string
+          direction: string
+          entry_price: number
+          expires_at: string | null
+          expiry_seconds: number | null
+          explanation_json: Json | null
+          id: string
+          is_manual: boolean | null
+          market_context_score: number | null
+          outcome: string | null
+          outcome_updated_at: string | null
+          outcome_updated_by: string | null
+          posted_by: string | null
+          reason: string | null
+          rejection_reason: string | null
+          session_fit_score: number | null
+          settled_at: string | null
+          settled_price: number | null
+          signal_lifecycle: string | null
+          status: string | null
+          stop_loss: number | null
+          strategy_name: string
+          strategy_quality_score: number | null
+          symbol: string
+          take_profit: number | null
+          timeframe: string
+          volatility_fit_score: number | null
+          zone_max: number | null
+          zone_min: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "trading_signals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_p2p_trader_stats: {
         Args: { trader_id: string }
         Returns: {
@@ -7781,11 +7876,25 @@ export type Database = {
           total_volume: number
         }[]
       }
+      get_trial_signal_catalog: {
+        Args: never
+        Returns: {
+          broker: string[]
+          category: string
+          created_at: string
+          id: string
+          status: string
+          symbol: string
+          timeframe: string
+          unlocked: boolean
+        }[]
+      }
       get_user_plan_tier: { Args: { _user_id: string }; Returns: string }
       has_open_auto_trade: {
         Args: { _display_symbol: string; _user_id: string }
         Returns: boolean
       }
+      has_paid_signal_access: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -7793,6 +7902,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_signal_trial: { Args: never; Returns: boolean }
       has_sports_betting_access: {
         Args: { _user_id: string }
         Returns: boolean
@@ -7855,6 +7965,7 @@ export type Database = {
         }
         Returns: Json
       }
+      signal_access_day: { Args: never; Returns: string }
       submit_bridge_connection_request: {
         Args: {
           _account_login: string
@@ -7872,6 +7983,7 @@ export type Database = {
         Args: { p_current_path: string; p_device_type: string }
         Returns: undefined
       }
+      unlock_trial_signal: { Args: { p_signal_id: string }; Returns: Json }
     }
     Enums: {
       app_role:
