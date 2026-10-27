@@ -40,6 +40,9 @@ import { useHasProductType } from "@/hooks/useEntitlements";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { trackBotvioEvent } from "@/components/analytics/analytics";
 import { SignalModesGuide } from "@/components/signals/SignalModesGuide";
+import { useAccessGate } from "@/hooks/useAccessGate";
+import { useTrialSignals } from "@/hooks/useTrialSignals";
+import { canUnlockTrialSignal, TRIAL_SIGNAL_DAILY_LIMIT } from "@/lib/signalTrial";
 
 const CATEGORIES = [
   { value: "all", label: "All Markets" },
@@ -136,6 +139,16 @@ const Signals = () => {
 
   const isPremium = useHasProductType("signal_pack");
   const subscription = useSubscriptionGate();
+  const access = useAccessGate();
+  const trialMode = access.isTrial && !access.isPaid && !access.isAdmin && !isSignalManager;
+  const trial = useTrialSignals(trialMode);
+  const used = trial.usage.data ?? 0;
+  const lockedSignals = (trial.catalog.data || []).filter(s => !s.unlocked &&
+    (category === "all" || s.category === category) &&
+    (broker === "all" || s.broker?.includes(broker)) &&
+    (status === "all" || s.status === status) &&
+    (timeframe === "all" || s.timeframe === timeframe) &&
+    (!search || s.symbol.toLowerCase().includes(search.toLowerCase())));
   const canUploadAiChart = isPremium || subscription.canUploadAiCharts;
 
   const { permission, requestPermission } = usePushNotifications();
@@ -172,7 +185,7 @@ const Signals = () => {
     setSearch("");
   };
 
-  if (!subscription.isLoading && !subscription.canAccessSignalsCenter && !isSignalManager) {
+  if (!subscription.isLoading && !access.isLoading && !subscription.canAccessSignalsCenter && !access.isTrial && !isSignalManager) {
     return (
       <div className="min-h-screen bg-background">
         <SEOHead seoKey="signals" title="Signals Center Access — Botvio" description="Manage your Botvio subscription to unlock the Signals Center." />
@@ -230,6 +243,13 @@ const Signals = () => {
 
 
         <SignalModesGuide compact />
+        {trialMode && (
+          <div className="mb-6 border-b border-border py-4">
+            <p className="font-semibold">Free Trial: {used} / {TRIAL_SIGNAL_DAILY_LIMIT} signals unlocked today</p>
+            <p className="text-sm text-muted-foreground">Resets at 06:00 Lusaka. Reopening a signal does not use another unlock.</p>
+            {trial.catalog.error && <p className="text-sm text-destructive">{trial.catalog.error.message}</p>}
+          </div>
+        )}
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
@@ -410,17 +430,27 @@ const Signals = () => {
                   </Card>
                 ))}
               </div>
-            ) : filteredSignals.length > 0 ? (
+            ) : filteredSignals.length > 0 || lockedSignals.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(isPremium ? filteredSignals : filteredSignals.slice(0, 3)).map((signal) => (
+                {filteredSignals.filter(s => !trialMode || trial.catalog.data?.some(item => item.id === s.id && item.unlocked)).map((signal) => (
                   <ManualSignalCard key={signal.id} signal={signal} />
                 ))}
-                {!isPremium && filteredSignals.length > 3 && (
+                {trialMode && lockedSignals.map(signal => (
+                  <Card key={signal.id}>
+                    <CardContent className="space-y-3 p-6">
+                      <h3 className="font-semibold">{signal.symbol}</h3>
+                      <Badge variant="outline">{signal.timeframe} · {signal.category}</Badge>
+                      <p className="text-sm text-muted-foreground">Unlock to see direction, entry, stop loss and take profit.</p>
+                      <Button disabled={trial.unlock.isPending || trial.usage.isLoading || !!trial.usage.error || !canUnlockTrialSignal(used, false)} onClick={() => trial.unlock.mutate(signal.id)}>Unlock signal</Button>
+                    </CardContent>
+                  </Card>
+                ))}
+                {trialMode && used >= TRIAL_SIGNAL_DAILY_LIMIT && (
                   <Card className="glass-card border-dashed border-warning/50 flex items-center justify-center min-h-[200px]">
                     <CardContent className="text-center py-8">
                       <Crown className="h-10 w-10 text-warning mx-auto mb-3" />
-                      <h3 className="font-semibold mb-1">+{filteredSignals.length - 3} More Signals</h3>
-                      <p className="text-sm text-muted-foreground mb-4">Upgrade to see all premium signals</p>
+                      <h3 className="font-semibold mb-1">35 daily trial unlocks used</h3>
+                      <p className="text-sm text-muted-foreground mb-4">Subscribe for more access or return after 06:00 Lusaka.</p>
                       <Button variant="gold" size="sm" asChild><a href="/marketplace">Unlock All</a></Button>
                     </CardContent>
                   </Card>
