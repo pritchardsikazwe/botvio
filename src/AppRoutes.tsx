@@ -79,6 +79,7 @@ import GbpUsdTradingHub from "./pages/GbpUsdTradingHub";
 import NewsTraderHub from "./pages/NewsTraderHub";
 import NewsSEOPage from "./pages/NewsSEOPage";
 import DubaiTradingGuide from "./pages/DubaiTradingGuide";
+import UAEGoldTradingCampaign from "./pages/UAEGoldTradingCampaign";
 import ArabicDubaiTradingGuide from "./pages/ArabicDubaiTradingGuide";
 import ArabicDubaiBlogPost from "./pages/ArabicDubaiBlogPost";
 import LocalizedMarketPage from "./pages/LocalizedMarketPage";
@@ -459,6 +460,7 @@ export const AppRoutes = () => {
     <Route path="ar/markets/:country" element={<LocalizedMarketPage />} />
     <Route path="markets/:country" element={<LocalizedMarketPage />} />
     <Route path="dubai" element={<DubaiTradingGuide />} />
+    <Route path="uae-gold-trading" element={<UAEGoldTradingCampaign />} />
     <Route path="dubai/tools" element={<DubaiTradingTools />} />
     <Route path="synthetic-indices" element={<SyntheticIndicesGuideHub />} />
     <Route path="synthetic-indices-guide" element={<SyntheticIndicesGuideHub />} />
