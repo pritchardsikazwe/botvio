@@ -558,7 +558,7 @@ export const AdminProfilesTab = () => {
             <DialogFooter>
               <Button variant="outline" onClick={() => setFeatureDialog({ ...featureDialog, open: false })}>Cancel</Button>
               <Button onClick={() => grantFeatureAccess.mutate()} disabled={grantFeatureAccess.isPending || !selectedProductId}>
-                {grantFeatureAccess.isPending ? "Granting..." : "Grant Access"}
+                {grantFeatureAccess.isPending ? "Activating..." : "Activate Membership"}
               </Button>
             </DialogFooter>
           </DialogContent>
