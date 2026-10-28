@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { OPEN_ACCESS } from "@/config/access";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 export interface Entitlement {
   id: string;
@@ -66,33 +67,53 @@ export function useEntitlements() {
 export function useHasEntitlement(productId: string | undefined) {
   const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const { data: entitlements } = useEntitlements();
+  const plan = useSubscriptionGate();
+  const { data: product } = useQuery({
+    queryKey: ["entitlement-product-meta", productId],
+    queryFn: async () => {
+      if (!productId) return null;
+      const { data, error } = await supabase.from("products").select("id,slug,type").eq("id", productId).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!productId && !!user,
+    staleTime: 60_000,
+  });
 
   if (!productId) return false;
   if (OPEN_ACCESS) return true;
-
-  // Staff/admin roles can inspect all premium products without purchasing each one.
   if (user && (isAdmin || isSuperAdmin || isSignalManager)) return true;
-
-  // Unauthenticated visitors get a 24-hour read-only preview.
   if (!user && hasVisitorPreview()) return true;
 
-  return entitlements?.some(
-    (e) =>
-      e.product_id === productId && isEntitlementActive(e),
-  ) ?? false;
+  // Unified membership grants included product access without separate per-product grants.
+  if (plan.isPaid && product) {
+    const slug = String(product.slug || "").toLowerCase();
+    const isHub = slug.includes("hub") || product.type === "strategy" || product.type === "hub";
+    const isRobot = product.type === "bot" && slug !== "mt5-direct";
+    if (plan.isVIP) return true;
+    if (plan.isStandardOrAbove && slug !== "mt5-direct") return true;
+    if (plan.isBasicOrAbove && isHub && plan.canAccessTradingHubs) return true;
+    if (plan.planCode?.toLowerCase() === "starter" && (slug === "synthetic-hub" || slug === "weltrade-hub")) return true;
+    if (plan.isStandardOrAbove && isRobot && plan.canUsePremiumBots) return true;
+  }
+
+  return entitlements?.some(e => e.product_id === productId && isEntitlementActive(e)) ?? false;
 }
 
 export function useHasProductType(type: string) {
   const { user, isAdmin, isSuperAdmin, isSignalManager } = useAuth();
   const { data: entitlements } = useEntitlements();
+  const plan = useSubscriptionGate();
 
   if (OPEN_ACCESS) return true;
   if (user && (isAdmin || isSuperAdmin || isSignalManager)) return true;
   if (!user && hasVisitorPreview()) return true;
-
-  return entitlements?.some(
-    (e) => e.products?.type === type && isEntitlementActive(e),
-  ) ?? false;
+  if (plan.isPaid) {
+    if ((type === "hub" || type === "strategy") && plan.canAccessTradingHubs) return true;
+    if (type === "bot" && plan.canUsePremiumBots) return true;
+    if ((type === "signal" || type === "signals") && plan.canAccessPremiumSignals) return true;
+  }
+  return entitlements?.some(e => e.products?.type === type && isEntitlementActive(e)) ?? false;
 }
 
 export function useMyProducts(type?: string) {
