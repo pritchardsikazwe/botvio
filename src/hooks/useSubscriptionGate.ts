@@ -44,6 +44,7 @@ export function useSubscriptionGate(): SubscriptionGate {
         .select("*, pricing_plans(*)")
         .eq("user_id", user!.id)
         .eq("status", "active")
+        .or("current_period_end.is.null,current_period_end.gt." + new Date().toISOString())
         .maybeSingle();
 
       if (error) throw error;
