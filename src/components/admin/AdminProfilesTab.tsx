@@ -74,7 +74,7 @@ export const AdminProfilesTab = () => {
   const { data: plans } = useQuery({
     queryKey: ["admin-all-plans"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("pricing_plans").select("id, code, name").eq("is_active", true).order("price_usd", { ascending: true });
+      const { data, error } = await supabase.from("pricing_plans").select("id, code, name").eq("is_active", true).eq("customer_visible", true).order("price_usd", { ascending: true });
       if (error) throw error;
       return data as PlanInfo[];
     },
