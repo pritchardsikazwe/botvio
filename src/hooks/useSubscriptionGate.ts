@@ -57,7 +57,7 @@ export function useSubscriptionGate(): SubscriptionGate {
   });
 
   const plan = data?.pricing_plans as any;
-  const code = plan?.code || "free";
+  const code = plan?.maps_to_tier || plan?.code || "free";
   const tier = PLAN_TIER[code] ?? 0;
   const privileged = !!user && (isAdmin || isSuperAdmin);
 
