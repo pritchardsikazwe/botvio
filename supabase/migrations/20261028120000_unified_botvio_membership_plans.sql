@@ -9,7 +9,7 @@ ALTER TABLE public.pricing_plans
 UPDATE public.pricing_plans SET
   name = 'Starter Access', price_usd = 9, maps_to_tier = 'starter', display_order = 10, customer_visible = true,
   features = '["Synthetic Hub","Weltrade Hub","Signals included with both hubs","Free courses and platform features"]'::jsonb,
-  allow_copy_trading = false, allow_premium_bots = false, allow_premium_signals = true, allow_all_courses = false, allow_trading_hubs = true
+  allow_copy_trading = false, allow_premium_bots = false, allow_premium_signals = false, allow_all_courses = false, allow_trading_hubs = true
 WHERE lower(code) IN ('starter', 'entry');
 
 UPDATE public.pricing_plans SET
