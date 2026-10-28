@@ -74,7 +74,7 @@ export const AdminProfilesTab = () => {
   const { data: plans } = useQuery({
     queryKey: ["admin-all-plans"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("pricing_plans").select("id, code, name").eq("is_active", true).order("price_usd", { ascending: true });
+      const { data, error } = await supabase.from("pricing_plans").select("id, code, name").eq("is_active", true).eq("customer_visible", true).order("price_usd", { ascending: true });
       if (error) throw error;
       return data as PlanInfo[];
     },
@@ -89,54 +89,35 @@ export const AdminProfilesTab = () => {
     },
   });
 
-  const { data: featureProducts } = useQuery({
-    queryKey: ["admin-manual-access-products"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("id, name, type, slug").eq("is_active", true).order("name");
-      if (error) throw error;
-      return data as Array<{ id: string; name: string; type: string; slug: string }>;
-    },
-    enabled: isSuperAdmin,
-  });
+
 
   const grantFeatureAccess = useMutation({
     mutationFn: async () => {
-      if (!featureDialog.userId || !selectedProductId) throw new Error("Select a feature first.");
-      const endsAt = featureExpiresAt ? new Date(`${featureExpiresAt}T23:59:59`).toISOString() : null;
-      if (endsAt && new Date(endsAt).getTime() <= Date.now()) throw new Error("Expiry must be in the future.");
-
-      const { data: existing, error: lookupError } = await supabase
-        .from("entitlements")
-        .select("id")
-        .eq("user_id", featureDialog.userId)
-        .eq("product_id", selectedProductId)
-        .maybeSingle();
-      if (lookupError) throw lookupError;
-
-      const payload = { status: "active", started_at: new Date().toISOString(), ends_at: endsAt, source_order_id: null };
-      const result = existing
-        ? await supabase.from("entitlements").update(payload).eq("id", existing.id)
-        : await supabase.from("entitlements").insert({ ...payload, user_id: featureDialog.userId, product_id: selectedProductId });
-      if (result.error) throw result.error;
-
-      const product = featureProducts?.find(p => p.id === selectedProductId);
+      if (!featureDialog.userId || !selectedProductId) throw new Error("Choose a subscription plan first.");
+      const periodEnd = featureExpiresAt ? new Date(`${featureExpiresAt}T23:59:59`).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      if (new Date(periodEnd).getTime() <= Date.now()) throw new Error("Expiry must be in the future.");
+      const { error } = await supabase.from("user_plan_subscriptions").upsert({
+        user_id: featureDialog.userId, pricing_plan_id: selectedProductId, status: "active",
+        current_period_start: new Date().toISOString(), current_period_end: periodEnd, updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+      if (error) throw error;
+      const plan = plans?.find(p => p.id === selectedProductId);
       const { error: notificationError } = await supabase.from("notifications").insert({
-        user_id: featureDialog.userId,
-        type: "success",
-        title: "Feature Access Granted",
-        message: `Access to ${product?.name || "a Botvio feature"} has been enabled by the admin.${endsAt ? ` Access ends on ${new Date(endsAt).toLocaleDateString()}.` : " Access has no expiry date."}`,
+        user_id: featureDialog.userId, type: "success", title: "Botvio Membership Activated",
+        message: `Your Botvio membership has been set to ${plan?.name || "the selected plan"} and is active until ${new Date(periodEnd).toLocaleDateString()}.`,
       });
-      if (notificationError) console.warn("Feature access granted, but notification failed:", notificationError.message);
+      if (notificationError) console.warn("Membership activated, but notification failed:", notificationError.message);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entitlements"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-manual-access-products"] });
-      toast.success("Feature access granted.");
+      queryClient.invalidateQueries({ queryKey: ["admin-all-subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["user-current-subscription-card"] });
+      toast.success("User membership activated.");
       setFeatureDialog({ open: false, userId: "", userName: "", email: null });
-      setSelectedProductId("");
-      setFeatureExpiresAt("");
+      setSelectedProductId(""); setFeatureExpiresAt("");
     },
-    onError: (e: any) => toast.error(e.message || "Could not grant feature access"),
+    onError: (e: any) => toast.error(e.message || "Could not activate membership"),
   });
 
   const openFeatureDialog = (profile: ProfileRow) => {
@@ -549,35 +530,35 @@ export const AdminProfilesTab = () => {
         <Dialog open={featureDialog.open} onOpenChange={(open) => setFeatureDialog({ ...featureDialog, open })}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2"><Key className="h-5 w-5" /> Grant Feature Access</DialogTitle>
+              <DialogTitle className="flex items-center gap-2"><Key className="h-5 w-5" /> Assign Botvio Membership</DialogTitle>
               <DialogDescription>
-                Manually activate a specific product for <strong>{featureDialog.userName}</strong>
-                {featureDialog.email ? <> ({featureDialog.email})</> : null}. Use this when payment was received outside Botvio.
+                Choose one subscription for <strong>{featureDialog.userName}</strong>
+                {featureDialog.email ? <> ({featureDialog.email})</> : null}. This activates the selected membership and all features included in it.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>Feature / Product</Label>
+                <Label>Subscription plan</Label>
                 <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                  <SelectTrigger><SelectValue placeholder="Choose feature to unlock..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Choose a membership..." /></SelectTrigger>
                   <SelectContent>
-                    {featureProducts?.map(product => (
-                      <SelectItem key={product.id} value={product.id}>{product.name} ({product.type})</SelectItem>
+                    {plans?.map(plan => (
+                      <SelectItem key={plan.id} value={plan.id}>{plan.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">Only active products are listed. Granting access does not change the user's subscription plan.</p>
+                <p className="text-xs text-muted-foreground">Only the three customer-facing memberships are listed. The selected plan automatically controls included access.</p>
               </div>
               <div className="space-y-2">
-                <Label>Access expiry (optional)</Label>
+                <Label>Membership expiry</Label>
                 <Input type="date" value={featureExpiresAt} onChange={e => setFeatureExpiresAt(e.target.value)} />
-                <p className="text-xs text-muted-foreground">Clear the date for access with no expiry. The access will be attached to this user's account, not just the email address.</p>
+                <p className="text-xs text-muted-foreground">Choose the expiry date. If left blank, access is granted for 30 days. The membership is attached to this user account.</p>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setFeatureDialog({ ...featureDialog, open: false })}>Cancel</Button>
               <Button onClick={() => grantFeatureAccess.mutate()} disabled={grantFeatureAccess.isPending || !selectedProductId}>
-                {grantFeatureAccess.isPending ? "Granting..." : "Grant Access"}
+                {grantFeatureAccess.isPending ? "Activating..." : "Activate Membership"}
               </Button>
             </DialogFooter>
           </DialogContent>

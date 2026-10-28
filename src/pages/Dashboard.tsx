@@ -11,6 +11,7 @@ import { Bot, Wallet, Users, TrendingUp, Bell, ArrowRight, Play, Pause, AlertCir
 import { Header } from "@/components/trading/Header";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { BotvioRobotSignalShortcut } from "@/components/dashboard/BotvioRobotSignalShortcut";
+import { UserSubscriptionCard } from "@/components/dashboard/UserSubscriptionCard";
 import { useEntitlements, isEntitlementActive } from "@/hooks/useEntitlements";
 import { isRestrictedOnStore } from "@/lib/mobile";
 import { useState } from "react";
@@ -79,6 +80,9 @@ const Dashboard = () => {
             Your account, connected trading accounts, active products and next steps.
           </p>
         </div>
+
+        {/* The assigned membership is the single source of feature access for this user. */}
+        <UserSubscriptionCard />
 
         {/* One-click MT5 connection + automatic Botvio Robot signal delivery */}
         <BotvioRobotSignalShortcut />
