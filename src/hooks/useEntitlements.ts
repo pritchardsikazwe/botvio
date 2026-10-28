@@ -92,7 +92,6 @@ export function useHasEntitlement(productId: string | undefined) {
     const isRobot = product.type === "bot" && slug !== "mt5-direct";
     if (plan.isVIP) return true;
     if (plan.isStandardOrAbove && slug !== "mt5-direct") return true;
-    if (plan.isBasicOrAbove && isHub && plan.canAccessTradingHubs) return true;
     if (plan.planCode?.toLowerCase() === "starter" && (slug === "synthetic-hub" || slug === "weltrade-hub")) return true;
     if (plan.isStandardOrAbove && isRobot && plan.canUsePremiumBots) return true;
   }
