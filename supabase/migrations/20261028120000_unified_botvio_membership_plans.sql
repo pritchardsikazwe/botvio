@@ -16,7 +16,10 @@ UPDATE public.pricing_plans SET
   name = 'All-Access', price_usd = 29, maps_to_tier = 'basic', display_order = 20, customer_visible = true,
   features = '["All trading hubs","Included signals","Botvio AI Robot","Botvio Gold Robot","Premium tools and eligible courses"]'::jsonb,
   allow_copy_trading = false, allow_premium_bots = true, allow_premium_signals = true, allow_all_courses = true, allow_trading_hubs = true
-WHERE lower(code) IN ('basic', 'standard', 'all_access', 'all-access');
+WHERE lower(code) IN ('standard', 'all_access', 'all-access');
+
+-- Keep the legacy Basic row for existing subscribers, but hide it from new purchases.
+UPDATE public.pricing_plans SET customer_visible = false, display_order = 90 WHERE lower(code) = 'basic';
 
 UPDATE public.pricing_plans SET
   name = 'VIP All-Access', price_usd = 39, maps_to_tier = 'vip', display_order = 30, customer_visible = true,
