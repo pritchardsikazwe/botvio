@@ -26,10 +26,10 @@ export interface SubscriptionGate {
 }
 
 const PLAN_TIER: Record<string, number> = {
-  free: 0,
-  basic: 1,
-  standard: 2,
-  vip: 3,
+  free: 0, trial: 0,
+  starter: 1, entry: 1,
+  basic: 2, standard: 2, all_access: 2, "all-access": 2,
+  vip: 3, pro: 3, elite: 3, premium: 3,
 };
 
 export function useSubscriptionGate(): SubscriptionGate {
