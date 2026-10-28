@@ -73,7 +73,7 @@ const Billing = () => {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Subscription Plans</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Start with a free trial, then upgrade to VIP for unlimited access. Strategies can be purchased individually.
+            Choose one of three memberships. Each plan automatically unlocks its included hubs, signals and tools.
           </p>
         </div>
 
@@ -149,7 +149,7 @@ const Billing = () => {
           </TabsList>
           
           <TabsContent value="plans">
-            {/* Plans Grid - Trial + VIP only */}
+            {/* Customer-facing membership plans; free/trial entries remain available only when configured. */}
             {plansLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                 <Skeleton className="h-96" />
