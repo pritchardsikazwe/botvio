@@ -90,8 +90,9 @@ export function useHasEntitlement(productId: string | undefined) {
     const slug = String(product.slug || "").toLowerCase();
     const isHub = slug.includes("hub") || product.type === "strategy" || product.type === "hub";
     const isRobot = product.type === "bot" && slug !== "mt5-direct";
+    const isIncludedPremium = isHub || isRobot || product.type === "signal" || product.type === "signals" || product.type === "tool";
     if (plan.isVIP) return true;
-    if (plan.isStandardOrAbove && slug !== "mt5-direct") return true;
+    if (plan.isStandardOrAbove && isIncludedPremium && slug !== "mt5-direct") return true;
     if (plan.planCode?.toLowerCase() === "starter" && (slug === "synthetic-hub" || slug === "weltrade-hub")) return true;
     if (plan.isStandardOrAbove && isRobot && plan.canUsePremiumBots) return true;
   }
