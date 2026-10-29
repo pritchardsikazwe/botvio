@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { EngineType } from "@/lib/signalEngines";
 import { Link } from "react-router-dom";
-import { ArrowRight, Bot, History, Home, LineChart, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowRight, Bot, History, Home, Lightbulb, LineChart, ShieldCheck, Wallet } from "lucide-react";
 
 const CONTRACTS: { styleId: string; engine: EngineType; label: string; hint: string }[] = [
   { styleId: "rise-fall-scalping", engine: "rise_fall", label: "Rise / Fall", hint: "Up or down" },
@@ -29,6 +29,18 @@ const CONTRACTS: { styleId: string; engine: EngineType; label: string; hint: str
   { styleId: "turbo", engine: "turbo", label: "Turbo", hint: "Short breakouts" },
   { styleId: "boom-crash", engine: "boom_crash", label: "Boom / Crash", hint: "Spike markets" },
 ];
+
+const TIPS: Record<string, { markets: string; timeframe: string; tips: string[] }> = {
+  "rise-fall-scalping": { markets: "Volatility 10/25/50 (1s), Volatility 75", timeframe: "5–10 ticks or 1–5 minutes", tips: ["Trade with the short-term trend: 3+ ticks in one direction before entry.", "Avoid entering right after a big spike — wait for 2–3 calm ticks.", "Use the same stake each trade; never double after a loss."] },
+  "digit-contracts": { markets: "Volatility 10 (1s), Volatility 100 (1s)", timeframe: "1 tick (Over/Under: 1–5 ticks)", tips: ["Even/Odd and Matches/Differs are close to random — keep stakes small.", "Differs pays little but wins often; Matches pays big but rarely wins.", "Over 2 / Under 7 balance win rate and payout better than extreme barriers."] },
+  "ticks": { markets: "Volatility 10/25 (1s)", timeframe: "1–5 ticks", tips: ["Shorter ticks = more noise; 5 ticks gives trends time to show.", "Only trade when the live chart shows a clear direction.", "Stop after 3 losses in a row and review."] },
+  "higher-lower": { markets: "Volatility 50/75/100", timeframe: "3–15 minutes", tips: ["Barriers further away pay more but win less often.", "Place the barrier on the side of the current trend.", "Longer durations suit higher-volatility indices."] },
+  "touch-no-touch": { markets: "Volatility 75/100, Jump indices", timeframe: "5 ticks – 5 minutes", tips: ["Touch suits high-volatility markets; No Touch suits calm ones.", "Check the recent range before setting the barrier.", "Avoid Touch on Volatility 10 — moves are too small."] },
+  "multipliers": { markets: "Volatility 75/100, Boom/Crash", timeframe: "Minutes to hours, managed by SL/TP", tips: ["Always set Stop Loss and Take Profit before buying.", "Lower multipliers (x20–x100) give price room to breathe.", "Close manually if the trend reverses — don't wait for stop out."] },
+  "accumulators": { markets: "Volatility 10/25 (calm markets)", timeframe: "Seconds; take profit early", tips: ["Use 1–2% growth rate — higher rates knock out faster.", "Take profit after a few ticks; greed is the main risk.", "Avoid during fast or spiky movement."] },
+  "turbo": { markets: "Volatility 75/100", timeframe: "15 seconds – 5 minutes", tips: ["Turbo works on clear breakouts — wait for price to leave a range.", "Barrier further away = cheaper but easier to knock out.", "Keep stakes small; turbos can lose the full stake quickly."] },
+  "boom-crash": { markets: "Boom 500/1000, Crash 500/1000", timeframe: "5-minute bias, short holds", tips: ["Boom spikes up, Crash spikes down — trade the spike direction only.", "Spikes are unpredictable in timing; never use large stakes.", "Exit after the spike; the drift between spikes runs the other way."] },
+};
 
 const AUTO_MARKETS = [
   "R_10", "R_25", "R_50", "R_75", "R_100", "1HZ10V", "1HZ25V", "1HZ50V", "1HZ75V", "1HZ100V",
@@ -123,6 +135,17 @@ export default function DerivOptionsTerminalPage() {
                       </button>
                     ))}
                   </div>
+                  {TIPS[active.styleId] && (
+                    <Card className="border-primary/20 bg-primary/5"><CardContent className="p-3 space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-bold"><Lightbulb className="h-4 w-4 text-primary" /> {active.label} tips</div>
+                      <div className="grid gap-2 sm:grid-cols-2 text-xs">
+                        <div className="rounded-lg bg-background/60 p-2"><span className="text-muted-foreground">Suggested markets</span><p className="font-semibold">{TIPS[active.styleId].markets}</p></div>
+                        <div className="rounded-lg bg-background/60 p-2"><span className="text-muted-foreground">Suggested duration</span><p className="font-semibold">{TIPS[active.styleId].timeframe}</p></div>
+                      </div>
+                      <ul className="list-disc pl-4 space-y-0.5 text-xs text-muted-foreground">{TIPS[active.styleId].tips.map(t => <li key={t}>{t}</li>)}</ul>
+                      <p className="text-[10px] text-muted-foreground">Educational guidance only — no result is guaranteed. Practise on demo first and risk only 1–2% per trade.</p>
+                    </CardContent></Card>
+                  )}
                   <DerivTradePanel key={active.styleId} styleId={active.styleId} engine={active.engine} />
                 </div>
               )}
