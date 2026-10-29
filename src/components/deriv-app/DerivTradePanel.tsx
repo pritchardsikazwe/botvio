@@ -354,8 +354,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       addLog(`${label} filled — #${result.contract_id} @ ${Number(result.buy_price).toFixed(2)}`, "success");
       toast.success(`${label} placed on ${symbolLabel}`);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Trade failed";
+      const message = friendlyDerivError(e, symbolLabel);
       setQuote(null);
+      // Re-validate markets so one Deriv no longer offers is hidden immediately.
+      if (/not offered|not available|unsupported|invalid/i.test(e instanceof Error ? e.message : "")) liveSymbols.refresh();
       addLog(message, "error"); toast.error(message);
     } finally { setBusy(false); }
   };
