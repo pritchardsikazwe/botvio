@@ -13,7 +13,10 @@ export function isWeltradeAllowedPath(path: string): boolean {
 
 export function detectWeltradeAppMode(search: string): boolean {
   try {
-    if (new URLSearchParams(search).get("app") === "weltrade") {
+    // The Play Store app (ai.botvio.weltradesignals) launches as a Trusted Web Activity,
+    // which sets document.referrer to android-app://<package>.
+    const fromApp = typeof document !== "undefined" && document.referrer.startsWith("android-app://ai.botvio.weltradesignals");
+    if (fromApp || new URLSearchParams(search).get("app") === "weltrade") {
       localStorage.setItem(KEY, "weltrade");
       return true;
     }
