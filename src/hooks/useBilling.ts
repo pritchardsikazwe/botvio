@@ -213,20 +213,24 @@ export const useActivateTrial = () => {
 
 // Upload proof of payment
 export const useUploadPaymentProof = () => {
+  const { user } = useAuth();
   return useMutation({
     mutationFn: async (file: File) => {
+      if (!user) throw new Error("Please sign in to upload payment proof");
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const { data, error } = await supabase.storage
+      // Storage rules only allow uploads inside the signed-in user's own folder.
+      const path = `${user.id}/payment-proofs/${fileName}`;
+
+      const { error } = await supabase.storage
         .from("charts")
-        .upload(`payment-proofs/${fileName}`, file);
+        .upload(path, file);
       
       if (error) throw error;
       
       const { data: urlData } = supabase.storage
         .from("charts")
-        .getPublicUrl(`payment-proofs/${fileName}`);
+        .getPublicUrl(path);
       
       return urlData.publicUrl;
     },
