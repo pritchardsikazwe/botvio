@@ -41,7 +41,9 @@ export function VisitPopup() {
 
   // Unsubscribed users whose free week has ended are signed out (web and installed app) until an admin approves them.
   const [forcedOut, setForcedOut] = useState(false);
-  const mustLogout = !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");
+  const PAY_PATHS = ["/choose-plan", "/payment", "/billing", "/marketplace", "/botvio-vip", "/pricing", "/auth", "/login", "/signup"];
+  const onPayPath = PAY_PATHS.some((p) => pathname.startsWith(p));
+  const mustLogout = !onPayPath && !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");
   useEffect(() => {
     if (!mustLogout) return;
     setForcedOut(true); setOpen(true);
@@ -50,7 +52,7 @@ export function VisitPopup() {
 
   if (loading) return null;
   if (!open && !forcedOut) return null;
-  if (!forcedOut && pathname.startsWith("/admin") || pathname.startsWith("/choose-plan") || pathname.startsWith("/payment")) return null;
+  if ((!forcedOut && pathname.startsWith("/admin")) || onPayPath) return null;
   if (user && (isAdmin || isSuperAdmin || isLoading || hasPlan)) return null;
   if (user && profile && !profile.whatsapp_number?.trim()) return null; // WhatsApp prompt comes first
 
@@ -78,7 +80,7 @@ export function VisitPopup() {
         </ol>
         <p className="mb-4 text-sm text-muted-foreground">Then send your Exness or Deriv account number to us on WhatsApp <b>+260 777 204 440</b> to activate your access.</p>
         <div className="space-y-2">
-          {member && <Button asChild className="w-full" variant="gold"><Link to="/choose-plan" onClick={() => setOpen(false)}>Subscribe now</Link></Button>}
+          {(member || forcedOut) && <Button asChild className="w-full" variant="gold"><Link to={member ? "/choose-plan" : "/auth"} onClick={() => { setOpen(false); setForcedOut(false); }}>{member ? "Subscribe now" : "Sign in to subscribe"}</Link></Button>}
           <Button asChild className="w-full" variant={member ? "outline" : "gold"}><a href={EXNESS_LINK} target="_blank" rel="noopener sponsored">Create Exness account — free access</a></Button>
           <Button asChild variant="outline" className="w-full"><a href={DERIV_LINK} target="_blank" rel="noopener sponsored">Create Deriv account — free access</a></Button>
           <Button asChild variant="outline" className="w-full"><a href={waLink} target="_blank" rel="noreferrer"><MessageCircle className="mr-2 h-4 w-4" />WhatsApp +260 777 204 440</a></Button>
