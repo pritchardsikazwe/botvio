@@ -19,6 +19,7 @@ import { AdminGlobalAccessCard } from "@/components/admin/AdminGlobalAccessCard"
 import { AdminMasterMarketsCard } from "@/components/admin/AdminMasterMarketsCard";
 import { AdminUserContact } from "@/components/admin/AdminUserContact";
 import { normalizeWhatsApp, requireSavedProfile } from "@/lib/profileContact";
+import { membershipPlanLabel } from "@/config/planEntitlements";
 import { AdminMt5LeadsCard } from "@/components/admin/AdminMt5LeadsCard";
 import { AdminBrokerVipClaimsCard } from "@/components/admin/AdminBrokerVipClaimsCard";
 import { AdminAnalyticsPanel } from "@/components/admin/AdminAnalyticsPanel";
@@ -31,13 +32,6 @@ import { Activity, BarChart3, Bell, Bot, ChevronLeft, ChevronRight, FileText, Gl
 
 type AdminUser = { user_id:string; email:string|null; display_name:string|null; country:string|null; whatsapp_number:string|null; created_at:string|null; plan:string; status:"Active"|"Inactive"; online:boolean; last_seen_at:string|null; current_path:string|null; device_type:string|null };
 const PAGE_SIZE=10;
-const membershipPlanLabel=(code?:string|null,name?:string|null)=>{
-  const normalized=String(code||"").toLowerCase();
-  if(["starter","entry"].includes(normalized))return "Starter Access";
-  if(["standard","all_access","all-access"].includes(normalized))return "All-Access";
-  if(normalized==="vip")return "VIP All-Access";
-  return name||code||"Free";
-};
 
 export default function AdminControlCenter(){
   const { user, isSuperAdmin, isAdmin }=useAuth();
@@ -111,18 +105,18 @@ export default function AdminControlCenter(){
       const [products,grants,plans,subscriptions]=await Promise.all([
         (supabase as any).from("products").select("id,name,type,slug").eq("is_active",true).order("name"),
         (supabase as any).from("entitlements").select("id,product_id,status,ends_at,products(name)").eq("user_id",u.user_id).order("started_at",{ascending:false}),
-        (supabase as any).from("pricing_plans").select("id,name,code,price_usd,is_active").eq("is_active",true).order("price_usd"),
+        (supabase as any).from("pricing_plans").select("id,name,code,price_usd,is_active").eq("is_active",true).eq("customer_visible",true).order("price_usd"),
         (supabase as any).from("user_plan_subscriptions").select("id,pricing_plan_id,status,current_period_start,current_period_end").eq("user_id",u.user_id).limit(1)
       ]);
       if(products.error)throw products.error;if(grants.error)throw grants.error;if(plans.error)throw plans.error;if(subscriptions.error)throw subscriptions.error;
       const pickPlan=(codes:string[],name:string,tier:"starter"|"all-access"|"vip")=>{
         const plan=codes.map(code=>(plans.data||[]).find((p:any)=>String(p.code||"").toLowerCase()===code)).find(Boolean);
-        return plan?{...plan,name,tier}:null;
+        return plan?{...plan,tier}:null;
       };
       const canonicalPlans=[
-        pickPlan(["starter","entry"],"Starter Access","starter"),
-        pickPlan(["standard","all_access","all-access"],"All-Access","all-access"),
-        pickPlan(["vip"],"VIP All-Access","vip")
+        pickPlan(["starter"],"Starter","starter"),
+        pickPlan(["basic"],"Basic","all-access"),
+        pickPlan(["vip"],"VIP","vip")
       ].filter(Boolean).sort((a:any,b:any)=>({starter:1,"all-access":2,vip:3}[a.tier]-({starter:1,"all-access":2,vip:3}[b.tier])));
       setAccessPlans(canonicalPlans);
       setAccessProducts(products.data||[]);

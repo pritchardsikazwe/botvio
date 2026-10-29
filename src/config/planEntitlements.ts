@@ -12,9 +12,14 @@ export const tierForPlanCode = (code?: string | null): PlanTier => (code && LEGA
 export const tierIncludes = (tier: PlanTier, required: PlanTier) => RANK[tier] >= RANK[required];
 
 export const PLAN_CATALOG = [
-  { code: "starter", name: "Starter Access", price: 9, summary: "Synthetic + Weltrade hubs, included signals and free learning resources" },
-  { code: "basic", name: "All-Access", price: 29, summary: "All hubs, included signals, AI robots, premium tools and eligible courses" },
-  { code: "vip", name: "VIP All-Access", price: 39, summary: "Everything in All-Access plus MT5 TradeCopy" },
+  { code: "starter", name: "Starter", price: 9, summary: "Synthetic + Weltrade hubs, included signals and free learning resources" },
+  { code: "basic", name: "Basic", price: 19, summary: "All hubs, included signals, AI robots, premium tools and eligible courses" },
+  { code: "vip", name: "VIP", price: 39, summary: "Everything in Basic plus MT5 TradeCopy" },
 ] as const;
+
+export const membershipPlanLabel = (code?: string | null, name?: string | null) => {
+  const tier = tierForPlanCode(code);
+  return PLAN_CATALOG.find(plan => plan.code === tier)?.name ?? name ?? "Free Trial";
+};
 
 export const conversionRate = (paid: number, registered: number) => registered > 0 ? ((paid / registered) * 100).toFixed(1) + "%" : "Data unavailable";

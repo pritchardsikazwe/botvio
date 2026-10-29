@@ -61,6 +61,7 @@ export const AdminPricingPlansTab = () => {
       const { data, error } = await supabase
         .from("pricing_plans")
         .select("*")
+        .eq("customer_visible", true)
         .order("price_usd", { ascending: true });
       if (error) throw error;
       return data as unknown as PricingPlan[];
@@ -76,7 +77,7 @@ export const AdminPricingPlansTab = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-pricing-plans"] });
-      queryClient.invalidateQueries({ queryKey: ["pricing-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["pricing_plans"] });
       toast.success("Plan created successfully");
       setEditDialog({ open: false, plan: null });
     },
@@ -96,7 +97,7 @@ export const AdminPricingPlansTab = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-pricing-plans"] });
-      queryClient.invalidateQueries({ queryKey: ["pricing-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["pricing_plans"] });
       toast.success("Plan updated successfully");
       setEditDialog({ open: false, plan: null });
     },
@@ -116,7 +117,7 @@ export const AdminPricingPlansTab = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-pricing-plans"] });
-      queryClient.invalidateQueries({ queryKey: ["pricing-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["pricing_plans"] });
       toast.success("Plan status updated");
     },
     onError: (error: Error) => {
