@@ -237,3 +237,7 @@
     animation-play-state: paused;
   }
 }
+
+/* Weltrade Android app: hide full Botvio site menus; WeltradeAppShell provides its own bar. */
+body.weltrade-app header:not(.weltrade-keep),
+body.weltrade-app [data-quick-actions] { display: none !important; }

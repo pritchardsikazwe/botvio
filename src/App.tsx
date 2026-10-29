@@ -16,6 +16,7 @@ import { WhatsAppProfileNotice } from "@/components/auth/WhatsAppProfileNotice";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { FirstVisitTour } from "@/components/onboarding/FirstVisitTour";
 import { VisitPopup } from "@/components/access/VisitPopup";
+import { WeltradeAppShell } from "@/components/weltrade/WeltradeAppShell";
 
 
 const queryClient = new QueryClient();
@@ -38,9 +39,9 @@ const App = () => (
               */}
               <LocalePrefixRouter>
                 <AnalyticsTracker />
-                <AppRoutes />
-                <SiteFooterGate />
-                <MobileBottomNav />
+                <WeltradeAppShell rest={<><SiteFooterGate /><MobileBottomNav /></>}>
+                  <AppRoutes />
+                </WeltradeAppShell>
               </LocalePrefixRouter>
 
               <CookieConsent />
