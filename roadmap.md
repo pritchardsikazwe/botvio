@@ -1,5 +1,6 @@
 # Current tasks
-- [ ] Connect user and admin membership selections to current customer-visible Starter, Basic and VIP plans; preserve legacy subscribers and verify selections.
+- [x] Connect user and admin membership selections to saved customer-visible Starter, Basic and VIP plans; preserve legacy subscribers; nine tier/price tests and visible user selection links verified.
+- [ ] Verify admin membership assignment and readback in a signed-in session (blocked: injected session signs out; requesting user has no matching account for session refresh).
 - [ ] Enforce 35 distinct trial signal unlocks daily, preserve paid access, and freeze five real M15 homepage category picks until 06:00 Lusaka; test boundaries and unlock flow.
 
 - [x] Enhance Admin Users with mobile entries, explicit WhatsApp/country labels, shared contact presentation and Update list action; sample contact browser check and three validation tests pass.
