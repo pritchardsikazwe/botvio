@@ -115,13 +115,15 @@ export default function AdminControlCenter(){
         (supabase as any).from("user_plan_subscriptions").select("id,pricing_plan_id,status,current_period_start,current_period_end").eq("user_id",u.user_id).limit(1)
       ]);
       if(products.error)throw products.error;if(grants.error)throw grants.error;if(plans.error)throw plans.error;if(subscriptions.error)throw subscriptions.error;
-      const canonicalPlans=(plans.data||[]).flatMap((p:any)=>{
-        const code=String(p.code||"").toLowerCase();
-        if(["starter","entry"].includes(code))return [{...p,name:"Starter Access",tier:"starter" as const}];
-        if(["standard","all_access","all-access"].includes(code))return [{...p,name:"All-Access",tier:"all-access" as const}];
-        if(code==="vip")return [{...p,name:"VIP All-Access",tier:"vip" as const}];
-        return [];
-      }).sort((a:any,b:any)=>({starter:1,"all-access":2,vip:3}[a.tier]-({starter:1,"all-access":2,vip:3}[b.tier])));
+      const pickPlan=(codes:string[],name:string,tier:"starter"|"all-access"|"vip")=>{
+        const plan=codes.map(code=>(plans.data||[]).find((p:any)=>String(p.code||"").toLowerCase()===code)).find(Boolean);
+        return plan?{...plan,name,tier}:null;
+      };
+      const canonicalPlans=[
+        pickPlan(["starter","entry"],"Starter Access","starter"),
+        pickPlan(["standard","all_access","all-access"],"All-Access","all-access"),
+        pickPlan(["vip"],"VIP All-Access","vip")
+      ].filter(Boolean).sort((a:any,b:any)=>({starter:1,"all-access":2,vip:3}[a.tier]-({starter:1,"all-access":2,vip:3}[b.tier])));
       setAccessPlans(canonicalPlans);
       setAccessProducts(products.data||[]);
       setAccessRows((grants.data||[]).map((r:any)=>({...r,product:{name:r.products?.name||"Feature"}})));
@@ -129,7 +131,7 @@ export default function AdminControlCenter(){
       if(subscription){
         setAccessSubscriptionId(subscription.id);setAccessSubscriptionStatus(subscription.status||"inactive");
         setAccessPlanId(canonicalPlans.some((p:any)=>p.id===subscription.pricing_plan_id)?subscription.pricing_plan_id:"");
-        if(subscription.current_period_end)setAccessExpiry(String(subscription.current_period_end).slice(0,10));
+        setAccessExpiry(subscription.current_period_end?String(subscription.current_period_end).slice(0,10):"");
       }else{
         setAccessSubscriptionId(null);setAccessSubscriptionStatus("inactive");
         setAccessPlanId(canonicalPlans.find((p:any)=>p.tier==="starter")?.id||"");
