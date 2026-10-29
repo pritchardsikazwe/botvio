@@ -41,7 +41,7 @@ export default function AdminControlCenter(){
   const [onlineCount,setOnlineCount]=useState(0),[onlineUsers,setOnlineUsers]=useState<AdminUser[]>([]);
   const [planFilter,setPlanFilter]=useState("all"),[statusFilter,setStatusFilter]=useState("all"),[countryFilter,setCountryFilter]=useState("all");
   const [page,setPage]=useState(1),[selected,setSelected]=useState<string[]>([]),[promotionOpen,setPromotionOpen]=useState(false),[sending,setSending]=useState(false),[mobileMenuOpen,setMobileMenuOpen]=useState(false);
-  const [accessUser,setAccessUser]=useState<AdminUser|null>(null),[accessDialogOpen,setAccessDialogOpen]=useState(false),[accessProducts,setAccessProducts]=useState<Array<{id:string;name:string;type:string;slug:string}>>([]),[accessRows,setAccessRows]=useState<Array<{id:string;product_id:string;status:string;ends_at:string|null;product?:{name:string}}>>([]),[accessLoading,setAccessLoading]=useState(false),[accessBusy,setAccessBusy]=useState(false),[accessProductId,setAccessProductId]=useState(""),[accessExpiry,setAccessExpiry]=useState("");
+  const [accessUser,setAccessUser]=useState<AdminUser|null>(null),[accessDialogOpen,setAccessDialogOpen]=useState(false),[accessProducts,setAccessProducts]=useState<Array<{id:string;name:string;type:string;slug:string}>>([]),[accessRows,setAccessRows]=useState<Array<{id:string;product_id:string;status:string;ends_at:string|null;product?:{name:string}}>>([]),[accessPlans,setAccessPlans]=useState<Array<{id:string;name:string;code:string;price_usd:number|null;tier:"starter"|"all-access"|"vip"}>>([]),[accessSubscriptionId,setAccessSubscriptionId]=useState<string|null>(null),[accessPlanId,setAccessPlanId]=useState(""),[accessSubscriptionStatus,setAccessSubscriptionStatus]=useState("inactive"),[accessLoading,setAccessLoading]=useState(false),[accessBusy,setAccessBusy]=useState(false),[accessExpiry,setAccessExpiry]=useState("");
   const [accessWhatsApp,setAccessWhatsApp]=useState(""),[accessWhatsAppBusy,setAccessWhatsAppBusy]=useState(false);
   const [subject,setSubject]=useState("New AI Signals & Trading Update 🚀");
   const [message,setMessage]=useState("Hi {{name}},\n\nWe’ve just released new AI trading signals and market analysis on Botvio.\n\nLog in to your dashboard to see the latest updates.\n\nTrade smarter with Botvio.");
@@ -98,35 +98,57 @@ export default function AdminControlCenter(){
   useEffect(()=>{if(page>pageCount)setPage(pageCount)},[page,pageCount]);
 
   const openUserAccess=async(u:AdminUser)=>{
-    setAccessUser(u);setAccessDialogOpen(true);setAccessLoading(true);setAccessProductId("");setAccessExpiry(new Date(Date.now()+30*86400000).toISOString().slice(0,10));
+    setAccessUser(u);setAccessDialogOpen(true);setAccessLoading(true);setAccessPlanId("");setAccessSubscriptionId(null);setAccessSubscriptionStatus("inactive");setAccessExpiry(new Date(Date.now()+30*86400000).toISOString().slice(0,10));
     setAccessWhatsApp(u.whatsapp_number||"");
     try{
-      const [products,grants]=await Promise.all([
+      const [products,grants,plans,subscriptions]=await Promise.all([
         (supabase as any).from("products").select("id,name,type,slug").eq("is_active",true).order("name"),
-        (supabase as any).from("entitlements").select("id,product_id,status,ends_at,products(name)").eq("user_id",u.user_id).order("started_at",{ascending:false})
+        (supabase as any).from("entitlements").select("id,product_id,status,ends_at,products(name)").eq("user_id",u.user_id).order("started_at",{ascending:false}),
+        (supabase as any).from("pricing_plans").select("id,name,code,price_usd,is_active").eq("is_active",true).order("price_usd"),
+        (supabase as any).from("user_plan_subscriptions").select("id,pricing_plan_id,status,current_period_start,current_period_end").eq("user_id",u.user_id).limit(1)
       ]);
-      if(products.error)throw products.error;if(grants.error)throw grants.error;
+      if(products.error)throw products.error;if(grants.error)throw grants.error;if(plans.error)throw plans.error;if(subscriptions.error)throw subscriptions.error;
+      const canonicalPlans=(plans.data||[]).flatMap((p:any)=>{
+        const code=String(p.code||"").toLowerCase();
+        if(["starter","entry"].includes(code))return [{...p,name:"Starter Access",tier:"starter" as const}];
+        if(["standard","all_access","all-access"].includes(code))return [{...p,name:"All-Access",tier:"all-access" as const}];
+        if(code==="vip")return [{...p,name:"VIP All-Access",tier:"vip" as const}];
+        return [];
+      }).sort((a:any,b:any)=>({starter:1,"all-access":2,vip:3}[a.tier]-({starter:1,"all-access":2,vip:3}[b.tier])));
+      setAccessPlans(canonicalPlans);
       setAccessProducts(products.data||[]);
       setAccessRows((grants.data||[]).map((r:any)=>({...r,product:{name:r.products?.name||"Feature"}})));
-    }catch(e:any){toast.error(e?.message||"Could not load feature access");}
+      const subscription=(subscriptions.data||[])[0];
+      if(subscription){
+        setAccessSubscriptionId(subscription.id);setAccessSubscriptionStatus(subscription.status||"inactive");
+        setAccessPlanId(subscription.pricing_plan_id||"");
+        if(subscription.current_period_end)setAccessExpiry(String(subscription.current_period_end).slice(0,10));
+      }else{
+        setAccessSubscriptionId(null);setAccessSubscriptionStatus("inactive");
+        setAccessPlanId(canonicalPlans.find((p:any)=>p.tier==="starter")?.id||"");
+      }
+    }catch(e:any){toast.error(e?.message||"Could not load subscription access");}
     finally{setAccessLoading(false);}
   };
-  const grantUserAccess=async()=>{
-    if(!accessUser||!accessProductId)return toast.error("Choose a feature first");
+  const saveUserSubscription=async()=>{
+    if(!accessUser||!accessPlanId)return toast.error("Choose one of the three membership plans");
     let endsAt:string|null=null;
     if(accessExpiry){endsAt=new Date(accessExpiry+"T23:59:59").toISOString();if(new Date(endsAt).getTime()<=Date.now())return toast.error("Expiry must be in the future");}
     setAccessBusy(true);
     try{
-      const {data:existing,error:lookupError}=await (supabase as any).from("entitlements").select("id").eq("user_id",accessUser.user_id).eq("product_id",accessProductId).maybeSingle();
-      if(lookupError)throw lookupError;
-      const payload={status:"active",started_at:new Date().toISOString(),ends_at:endsAt,source_order_id:null};
-      const result=existing?await (supabase as any).from("entitlements").update(payload).eq("id",existing.id):await (supabase as any).from("entitlements").insert({...payload,user_id:accessUser.user_id,product_id:accessProductId});
+      const now=new Date().toISOString();
+      const payload={pricing_plan_id:accessPlanId,status:"active",current_period_start:now,current_period_end:endsAt};
+      const result=accessSubscriptionId
+        ? await (supabase as any).from("user_plan_subscriptions").update(payload).eq("id",accessSubscriptionId)
+        : await (supabase as any).from("user_plan_subscriptions").insert({...payload,user_id:accessUser.user_id});
       if(result.error)throw result.error;
-      const product=accessProducts.find(p=>p.id===accessProductId);
-      const notice=await (supabase as any).from("notifications").insert({user_id:accessUser.user_id,type:"success",title:"Feature Access Approved",message:`Access to ${product?.name||"a Botvio feature"} has been approved by an administrator.${endsAt?" Access ends "+new Date(endsAt).toLocaleDateString()+".":" Access has no expiry date."}`});
-      if(notice.error)console.warn("Access enabled but user notification failed",notice.error.message);
-      toast.success("Feature access approved and enabled");await openUserAccess(accessUser);
-    }catch(e:any){toast.error(e?.message||"Could not grant feature access");}
+      const selectedPlan=accessPlans.find(p=>p.id===accessPlanId);
+      const notice=await (supabase as any).from("notifications").insert({user_id:accessUser.user_id,type:"success",title:"Botvio Membership Updated",message:`Your Botvio membership is now ${selectedPlan?.name||"active"}.${endsAt?" Access is scheduled to end on "+new Date(endsAt).toLocaleDateString()+".":" Your membership has no scheduled expiry."}`});
+      if(notice.error)console.warn("Membership saved but user notification failed",notice.error.message);
+      toast.success("Membership updated successfully");
+      await loadUsers();
+      await openUserAccess(accessUser);
+    }catch(e:any){toast.error(e?.message||"Could not update membership");}
     finally{setAccessBusy(false);}
   };
   const disableUserAccess=async(row:{id:string;product_id:string})=>{
@@ -271,8 +293,8 @@ export default function AdminControlCenter(){
     <Dialog open={accessDialogOpen} onOpenChange={setAccessDialogOpen}><DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto"><DialogHeader><DialogTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5"/>Manage User Access</DialogTitle><DialogDescription>Approve features, grant time-limited access, or disable a user's existing feature access.</DialogDescription></DialogHeader>
       {accessUser&&<div className="space-y-5"><div className="rounded-lg border bg-slate-50 p-4"><div className="font-semibold">{accessUser.display_name||"Unnamed user"}</div><div className="text-sm text-muted-foreground">{accessUser.email||"No email"} · {accessUser.plan}</div><div className="mt-2"><AdminUserContact number={accessUser.whatsapp_number} country={accessUser.country}/></div><div className="text-xs text-muted-foreground mt-1">User ID: {accessUser.user_id}</div></div>
       <section className="space-y-3"><h3 className="font-semibold flex items-center gap-2"><Phone className="h-4 w-4"/>WhatsApp number</h3><div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end"><div className="space-y-1"><Label>WhatsApp (with country code)</Label><Input value={accessWhatsApp} onChange={e=>setAccessWhatsApp(e.target.value)} placeholder="+260 97 1234567"/></div><Button onClick={saveUserWhatsApp} disabled={accessWhatsAppBusy}>{accessWhatsAppBusy?"Saving…":"Save number"}</Button></div><p className="text-xs text-muted-foreground">Saved to the user's profile and shown in the users list. Clear the field to remove the number.</p></section>
-      <section className="space-y-3"><h3 className="font-semibold">Add / approve feature access</h3><div className="grid sm:grid-cols-[1fr_180px] gap-3"><div className="space-y-1"><Label>Feature / product</Label><Select value={accessProductId} onValueChange={setAccessProductId}><SelectTrigger><SelectValue placeholder="Choose a feature"/></SelectTrigger><SelectContent>{accessProducts.map(p=><SelectItem key={p.id} value={p.id}>{p.name} ({p.type})</SelectItem>)}</SelectContent></Select></div><div className="space-y-1"><Label>Access expiry</Label><Input type="date" value={accessExpiry} onChange={e=>setAccessExpiry(e.target.value)}/></div></div><p className="text-xs text-muted-foreground">Clear the expiry date for ongoing access. This does not change the user's subscription plan.</p><Button onClick={grantUserAccess} disabled={accessBusy||accessLoading||!accessProductId}><CheckCircle2 className="h-4 w-4 mr-2"/>Approve & enable access</Button></section>
-      <section className="space-y-3"><h3 className="font-semibold">Existing feature access</h3>{accessLoading?<p className="text-sm text-muted-foreground">Loading access…</p>:accessRows.length===0?<p className="text-sm text-muted-foreground">No feature entitlements found for this user.</p>:<div className="space-y-2">{accessRows.map(r=><div key={r.id} className="flex flex-wrap items-center gap-3 justify-between rounded-lg border p-3"><div><div className="font-medium">{r.product?.name||accessProducts.find(p=>p.id===r.product_id)?.name||"Feature"}</div><div className="text-xs text-muted-foreground">Status: {r.status}{r.ends_at?" · Ends "+new Date(r.ends_at).toLocaleDateString():""}</div></div>{r.status==="active"&&(!r.ends_at||new Date(r.ends_at).getTime()>Date.now())&&<Button variant="destructive" size="sm" disabled={accessBusy} onClick={()=>disableUserAccess(r)}><Ban className="h-4 w-4 mr-1"/>Disable access</Button>}</div>)}</div>}</section></div>}
+      <section className="space-y-3 rounded-lg border p-4"><div><h3 className="font-semibold">Membership subscription</h3><p className="text-xs text-muted-foreground mt-1">Assign one plan to activate its included features. Individual bots and courses no longer need separate activation.</p></div><div className="grid gap-3 sm:grid-cols-2"><div className="space-y-1"><Label>Subscription plan</Label><Select value={accessPlanId} onValueChange={setAccessPlanId}><SelectTrigger><SelectValue placeholder="Choose membership plan"/></SelectTrigger><SelectContent>{accessPlans.map(p=><SelectItem key={p.id} value={p.id}>{p.name} · ${p.price_usd ?? 0}/month</SelectItem>)}</SelectContent></Select></div><div className="space-y-1"><Label>Membership expiry</Label><Input type="date" value={accessExpiry} onChange={e=>setAccessExpiry(e.target.value)}/></div></div><div className="flex flex-wrap items-center gap-2 text-xs"><span className="text-muted-foreground">Current status:</span><Badge variant={accessSubscriptionStatus==="active"?"default":"secondary"}>{accessSubscriptionStatus==="active"?"Active":accessSubscriptionId?accessSubscriptionStatus:"No subscription"}</Badge></div><p className="text-xs text-muted-foreground">Choose Starter Access ($9), All-Access ($29), or VIP All-Access ($39). Clear the expiry date for ongoing access. Admin assignment activates the plan but does not record a payment.</p><Button onClick={saveUserSubscription} disabled={accessBusy||accessLoading||!accessPlanId||accessPlans.length!==3}><CheckCircle2 className="h-4 w-4 mr-2"/>{accessBusy?"Saving membership…":"Save membership & enable plan features"}</Button>{accessPlans.length!==3&&!accessLoading&&<p className="text-xs text-destructive">Expected three active plans but found {accessPlans.length}. Check that the unified membership-plan migration has been applied and the Starter, All-Access, and VIP plans are active.</p>}</section>
+       <section className="space-y-3"><h3 className="font-semibold">Existing legacy individual feature grants</h3><p className="text-xs text-muted-foreground">Historical grants are shown for auditing. New access should be assigned through the membership plan above.</p>{accessLoading?<p className="text-sm text-muted-foreground">Loading access…</p>:accessRows.length===0?<p className="text-sm text-muted-foreground">No feature entitlements found for this user.</p>:<div className="space-y-2">{accessRows.map(r=><div key={r.id} className="flex flex-wrap items-center gap-3 justify-between rounded-lg border p-3"><div><div className="font-medium">{r.product?.name||accessProducts.find(p=>p.id===r.product_id)?.name||"Feature"}</div><div className="text-xs text-muted-foreground">Status: {r.status}{r.ends_at?" · Ends "+new Date(r.ends_at).toLocaleDateString():""}</div></div>{r.status==="active"&&(!r.ends_at||new Date(r.ends_at).getTime()>Date.now())&&<Button variant="destructive" size="sm" disabled={accessBusy} onClick={()=>disableUserAccess(r)}><Ban className="h-4 w-4 mr-1"/>Disable access</Button>}</div>)}</div>}</section></div>}
       <DialogFooter><Button variant="outline" onClick={()=>setAccessDialogOpen(false)}>Close</Button></DialogFooter></DialogContent></Dialog>
     <Dialog open={promotionOpen} onOpenChange={setPromotionOpen}><DialogContent className="max-w-2xl"><DialogHeader><DialogTitle>Send Botvio Promotion</DialogTitle><DialogDescription>Review before queueing the promotion.</DialogDescription></DialogHeader><div className="space-y-4"><div className="rounded-lg bg-slate-50 p-4"><div className="text-xs text-muted-foreground">Recipients</div><div className="font-semibold">{selected.length} selected users</div><div className="text-xs text-muted-foreground mt-1">Suppressed/unsubscribed addresses are skipped by the server.</div></div><div><label className="text-sm font-medium">Subject</label><Input className="mt-1" value={subject} onChange={e=>setSubject(e.target.value)}/></div><div><label className="text-sm font-medium">Message</label><Textarea className="mt-1 min-h-48" value={message} onChange={e=>setMessage(e.target.value)}/></div></div><DialogFooter><Button variant="outline" onClick={()=>setPromotionOpen(false)} disabled={sending}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600 text-slate-950" onClick={sendPromotion} disabled={sending}>{sending?<><RefreshCw className="h-4 w-4 mr-2 animate-spin"/>Queueing…</>:<><Send className="h-4 w-4 mr-2"/>Send Promotion</>}</Button></DialogFooter></DialogContent></Dialog>
   </div>
