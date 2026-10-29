@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Read daily home selections" ON public.home_signal_batches;
+CREATE POLICY "Admins read daily home selections" ON public.home_signal_batches FOR SELECT TO authenticated USING (public.is_admin());
