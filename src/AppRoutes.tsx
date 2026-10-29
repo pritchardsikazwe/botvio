@@ -41,6 +41,7 @@ import SignalsHistory from "./pages/SignalsHistory";
 import Settings from "./pages/Settings";
 import DerivOtpTester from "./pages/DerivOtpTester";
 import Marketplace from "./pages/Marketplace";
+import Payment from "./pages/Payment";
 import BotvioVIP from "./pages/BotvioVIP";
 import MyProducts from "./pages/MyProducts";
 import BinanceSettings from "./pages/BinanceSettings";
@@ -279,7 +280,7 @@ export const AppRoutes = () => {
     <Route path="bots" element={<Paid><Bots /></Paid>} />
     <Route path="billing" element={<Navigate to="/marketplace" replace />} />
     <Route path="signup" element={<Signup />} />
-    <Route path="payment" element={<Navigate to="/marketplace" replace />} />
+    <Route path="payment" element={<Payment />} />
 
     {/* Admin */}
     <Route path="admin/login" element={<ErrorBoundary><AdminLogin /></ErrorBoundary>} />
