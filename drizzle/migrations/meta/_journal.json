@@ -204,6 +204,13 @@
       "when": 1793087234830,
       "tag": "0028_trial_signal_unlocks_and_daily_home",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793284139136,
+      "tag": "0029_lock_home_signal_batches",
+      "breakpoints": true
     }
   ]
 }
