@@ -218,12 +218,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!error && data?.user) {
 
       // Assign selected plan subscription
-      if (planCode && planCode !== 'free') {
+      if (planCode && ['starter', 'basic', 'vip'].includes(planCode)) {
         const { data: planData } = await supabase
           .from("pricing_plans")
           .select("id")
           .eq("code", planCode)
           .eq("is_active", true)
+          .eq("customer_visible", true)
           .maybeSingle();
         if (planData) {
           await supabase

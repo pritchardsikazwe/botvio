@@ -39,6 +39,7 @@ export default function BotvioVIP() {
         .select("id,code,name,price_usd,is_active")
         .eq("code", "vip")
         .eq("is_active", true)
+        .eq("customer_visible", true)
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -70,7 +71,7 @@ export default function BotvioVIP() {
         user_id: user.id,
         plan_id: plan.id,
         product_id: null,
-        amount_usd: 50,
+        amount_usd: plan.price_usd ?? 0,
         currency: "USD",
         method,
         proof_upload_url: urlData.publicUrl,
@@ -90,7 +91,7 @@ export default function BotvioVIP() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead seoKey="vip" title="Botvio VIP — All-Access Trading Subscription" description="One Botvio VIP subscription for $50/month unlocks premium trading hubs, signals, AI chart analysis, courses, robots and copy trading. Access is activated after payment approval." />
+      <SEOHead seoKey="vip" title="Botvio VIP Membership" description="Botvio VIP membership includes premium trading hubs, signals, AI chart analysis, courses, robots and copy trading. Access is activated after payment approval." />
       <Header />
       <main className="container mx-auto max-w-6xl space-y-8 px-4 py-8">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
@@ -102,7 +103,7 @@ export default function BotvioVIP() {
             <h1 className="text-3xl font-black tracking-tight md:text-5xl">Botvio VIP</h1>
             <p className="mt-3 max-w-xl text-muted-foreground">One subscription. All premium features. No need to buy each hub or robot separately.</p>
             <div className="my-6 flex items-end gap-2">
-              <span className="text-5xl font-black">$50</span><span className="pb-1 text-muted-foreground">/ month</span>
+              <span className="text-5xl font-black">{plan ? `$${plan.price_usd ?? 0}` : "—"}</span><span className="pb-1 text-muted-foreground">/ month</span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {included.map((item) => <div key={item} className="flex items-start gap-2 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><span>{item}</span></div>)}
@@ -126,13 +127,13 @@ export default function BotvioVIP() {
                   <PaymentMethodSelector
                     planCode="vip"
                     planName="Botvio VIP"
-                    amount={50}
+                    amount={plan.price_usd ?? 0}
                     embedded
                     onMethodChange={setMethod}
                     onProofFileChange={setProof}
                   />
                   <Button className="w-full" disabled={submitting || !method || !proof} onClick={submit}>
-                    {submitting ? "Submitting…" : "Submit VIP payment — $50"}
+                    {submitting ? "Submitting…" : `Submit VIP payment — $${plan.price_usd ?? 0}`}
                   </Button>
                 </>
               )}
