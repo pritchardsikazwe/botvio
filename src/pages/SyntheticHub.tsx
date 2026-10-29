@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Sparkles, Rocket, Bomb, Zap, Activity, Radio, ArrowRight, Lock, Crown } from "lucide-react";
 import { DerivLiveChart } from "@/components/chart/DerivLiveChart";
 import { SyntheticSignalCard } from "@/components/synthetic/SyntheticSignalCard";
-import { SYNTHETICS, findSynthetic, type SyntheticCategory } from "@/config/synthetics";
+import { SYNTHETICS, buildLiveSynthetics, type SyntheticCategory } from "@/config/synthetics";
 import { Mt5AutoExecuteCard } from "@/components/broker/Mt5AutoExecuteCard";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +23,8 @@ const CATEGORY_META: Record<SyntheticCategory, { label: string; icon: typeof Roc
   crash: { label: "Crash", icon: Bomb, tone: "text-red-400 border-red-500/40" },
   volatility: { label: "Volatility", icon: Activity, tone: "text-blue-400 border-blue-500/40" },
   step: { label: "Step", icon: Zap, tone: "text-amber-400 border-amber-500/40" },
+  jump: { label: "Jump", icon: Sparkles, tone: "text-primary border-primary/40" },
+  other: { label: "Other", icon: BarChart3, tone: "text-muted-foreground border-border" },
 };
 
 export default function SyntheticHub() {
@@ -34,16 +36,20 @@ export default function SyntheticHub() {
   const { isAdmin, isSuperAdmin } = useAuth();
   const locked = !gateLoading && !isPaid && !isAdmin && !isSuperAdmin;
   const [liveSymbols, setLiveSymbols] = useState<{ symbol:string; name:string; capability:SymbolCapability }[]>([]);
-  useEffect(() => { let cancelled=false; (async()=>{ try { const rows=await fetchActiveSymbols(true); const candidates=Object.values(rows).filter((r:any)=>/synthetic|volatility|boom|crash|range break|step|jump/i.test(`${r.display_name??""} ${r.market??""} ${r.submarket??""}`)); const checked=await Promise.all(candidates.map(async(r:any)=>{try{const capability=await getSymbolCapability(r.symbol,true);return {symbol:r.symbol,name:r.display_name??r.symbol,capability};}catch{return null;}})); if(!cancelled)setLiveSymbols(checked.filter((x:any)=>x&&!x.capability.unverified&&!x.capability.isSuspended&&x.capability.isOpen&&Object.keys(x.capability.contracts).length>0) as any);}catch{if(!cancelled)setLiveSymbols([]);}})(); return()=>{cancelled=true}; }, []);
+  useEffect(() => { let cancelled=false; (async()=>{ try {
+    const rows=await fetchActiveSymbols(true);
+    // Show every open, non-suspended Deriv synthetic. Contract checks only remove a symbol
+    // when Deriv explicitly confirms it has no contracts (failed/rate-limited checks don't hide it).
+    const candidates=Object.values(rows).filter((r:any)=>(r.market==="synthetic_index"||/synthetic|volatility|boom|crash|range break|step|jump|dex|drift|multi step|hybrid|skew/i.test(`${r.display_name??""} ${r.market??""} ${r.submarket??""}`))&&!/basket/i.test(`${r.display_name??""} ${r.submarket??""}`)&&!r.is_trading_suspended&&r.exchange_is_open!==0&&r.exchange_is_open!==false);
+    const checked=await Promise.all(candidates.map(async(r:any)=>{let capability:any=null;try{capability=await getSymbolCapability(r.symbol);}catch{/* keep visible */} if(capability&&!capability.unverified&&(capability.isSuspended||Object.keys(capability.contracts??{}).length===0))return null; return {symbol:r.symbol,name:r.display_name??r.symbol,capability};}));
+    if(!cancelled)setLiveSymbols((checked.filter(Boolean) as any[]).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true})));
+  }catch{if(!cancelled)setLiveSymbols([]);}})(); return()=>{cancelled=true}; }, []);
 
-  const active = useMemo(() => findSynthetic(activeKey) ?? SYNTHETICS[0], [activeKey]);
+  const instruments = useMemo(() => buildLiveSynthetics(liveSymbols), [liveSymbols]);
+  const active = useMemo(() => instruments.find((s) => s.key === activeKey) ?? SYNTHETICS.find((s) => s.key === activeKey) ?? SYNTHETICS[0], [activeKey, instruments]);
   const chartSymbol = active.derivSymbol ?? null;
 
-  const liveKeys = useMemo(() => new Set(liveSymbols.map((x) => x.symbol)), [liveSymbols]);
-  const filtered = useMemo(() => {
-    const verified = SYNTHETICS.filter((s) => s.derivSymbol && liveKeys.has(s.derivSymbol));
-    return filter === "all" ? verified : verified.filter((s) => s.category === filter);
-  }, [filter, liveKeys]);
+  const filtered = useMemo(() => filter === "all" ? instruments : instruments.filter((s) => s.category === filter), [filter, instruments]);
 
   return (
       <ProductGate slug="synthetic-hub" title="Synthetic Hub subscription required" description="Unlock Synthetic Hub to access its premium signals, charts and trading intelligence.">
@@ -144,17 +150,19 @@ export default function SyntheticHub() {
 
         {/* Category filter */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-          <TabsList className="bg-card border border-border/50 h-10">
+          <TabsList className="bg-card border border-border/50 h-auto flex-wrap justify-start">
             <TabsTrigger value="all" className="text-xs gap-1.5"><BarChart3 className="h-3.5 w-3.5" /> All</TabsTrigger>
             <TabsTrigger value="boom" className="text-xs gap-1.5"><Rocket className="h-3.5 w-3.5" /> Boom</TabsTrigger>
             <TabsTrigger value="crash" className="text-xs gap-1.5"><Bomb className="h-3.5 w-3.5" /> Crash</TabsTrigger>
             <TabsTrigger value="volatility" className="text-xs gap-1.5"><Activity className="h-3.5 w-3.5" /> Volatility</TabsTrigger>
             <TabsTrigger value="step" className="text-xs gap-1.5"><Zap className="h-3.5 w-3.5" /> Step</TabsTrigger>
+            <TabsTrigger value="jump" className="text-xs gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Jump</TabsTrigger>
+            <TabsTrigger value="other" className="text-xs gap-1.5">Other</TabsTrigger>
           </TabsList>
         </Tabs>
 
         {/* Live Deriv catalogue — only verified symbols */}
-        <Card className="border-success/20 bg-card/80"><CardContent className="p-4"><div className="flex items-center justify-between gap-3 mb-3"><div><h2 className="text-sm font-extrabold flex items-center gap-2"><Radio className="h-4 w-4 text-success" /> Live Deriv Synthetic Catalogue</h2><p className="text-[11px] text-muted-foreground">Only symbols currently active, not suspended, and confirmed to have trading contracts are shown.</p></div><Badge variant="outline" className="border-success/40 text-success text-[10px]">{liveSymbols.length} verified</Badge></div><div className="flex flex-wrap gap-2">{liveSymbols.map((x)=><Badge key={x.symbol} variant="outline" className="border-success/30 text-foreground font-mono text-[10px]">{x.name} · {x.symbol}</Badge>)}{liveSymbols.length===0&&<span className="text-xs text-muted-foreground">Checking Deriv live availability…</span>}</div></CardContent></Card>
+        <Card className="border-success/20 bg-card/80"><CardContent className="p-4"><div className="flex items-center justify-between gap-3 mb-3"><div><h2 className="text-sm font-extrabold flex items-center gap-2"><Radio className="h-4 w-4 text-success" /> Live Deriv Synthetic Catalogue</h2><p className="text-[11px] text-muted-foreground">Only symbols currently active, not suspended, and not rejected by Deriv are shown.</p></div><Badge variant="outline" className="border-success/40 text-success text-[10px]">{liveSymbols.length} verified</Badge></div><div className="flex flex-wrap gap-2">{liveSymbols.map((x)=><Badge key={x.symbol} variant="outline" className="border-success/30 text-foreground font-mono text-[10px]">{x.name} · {x.symbol}</Badge>)}{liveSymbols.length===0&&<span className="text-xs text-muted-foreground">Checking Deriv live availability…</span>}</div></CardContent></Card>
 
         {/* Instrument grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">

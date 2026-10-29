@@ -11,7 +11,7 @@
  * than silently redirected to another instrument.
  */
 
-export type SyntheticCategory = "boom" | "crash" | "volatility" | "step";
+export type SyntheticCategory = "boom" | "crash" | "volatility" | "step" | "jump" | "other";
 
 export interface SyntheticInstrument {
   /** Unique key used in URLs and routing */
@@ -295,4 +295,28 @@ export const SYNTHETICS: SyntheticInstrument[] = [
 
 export function findSynthetic(key: string): SyntheticInstrument | undefined {
   return SYNTHETICS.find((s) => s.key === key);
+}
+/** Classify a live Deriv synthetic symbol that is not in the curated list. */
+export function categorizeLiveSynthetic(name: string, symbol: string): SyntheticCategory {
+  const t = `${name} ${symbol}`.toLowerCase();
+  if (t.includes("boom")) return "boom";
+  if (t.includes("crash")) return "crash";
+  if (t.includes("jump") || /\bjd\d/.test(t)) return "jump";
+  if (t.includes("step")) return "step";
+  if (t.includes("volatility") || /^(r_|1hz)/.test(symbol.toLowerCase())) return "volatility";
+  return "other";
+}
+
+/** Merge the curated catalogue with every live Deriv synthetic so no tradable symbol is hidden. */
+export function buildLiveSynthetics(live: { symbol: string; name: string }[]): SyntheticInstrument[] {
+  const bySymbol = new Map(SYNTHETICS.filter((s) => s.derivSymbol).map((s) => [s.derivSymbol as string, s]));
+  return live.map(({ symbol, name }) => bySymbol.get(symbol) ?? {
+    key: `deriv-${symbol.toLowerCase()}`,
+    label: name,
+    category: categorizeLiveSynthetic(name, symbol),
+    derivSymbol: symbol,
+    mt5Symbol: name,
+    bias: "both" as const,
+    blurb: "Live Deriv synthetic index — chart and signals from the Deriv feed.",
+  });
 }
