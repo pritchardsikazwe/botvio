@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { TickChart } from "@/components/deriv-app/TickChart";
 import { useDerivSymbols } from "@/hooks/useDerivSymbols";
 import { fetchActiveSymbols } from "@/services/deriv/derivSymbols";
-import { friendlyDerivError } from "@/lib/derivErrors";
+import { friendlyDerivError } from "@/lib/derivTradeErrors";
 import { toast } from "sonner";
 import { Activity, ArrowDownRight, ArrowUpRight, Loader2, Sparkles, UserCircle2, Bot, UserRound, RefreshCw } from "lucide-react";
 
