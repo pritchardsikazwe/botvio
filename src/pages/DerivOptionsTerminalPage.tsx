@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { EngineType } from "@/lib/signalEngines";
-import { ArrowRight, Bot, History, LineChart, ShieldCheck, Wallet } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Bot, History, Home, LineChart, ShieldCheck, Wallet } from "lucide-react";
 
 const CONTRACTS: { styleId: string; engine: EngineType; label: string; hint: string }[] = [
   { styleId: "rise-fall-scalping", engine: "rise_fall", label: "Rise / Fall", hint: "Up or down" },
@@ -58,8 +59,10 @@ export default function DerivOptionsTerminalPage() {
             <h1 className="text-2xl md:text-3xl font-black">Deriv Options</h1>
             <p className="text-sm text-muted-foreground">Connect, trade every contract type and run the bot — all on one page.</p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild size="sm" variant="outline"><Link to="/"><Home className="h-4 w-4 mr-1" /> Home</Link></Button>
           {user && (
-            <div className="flex items-center gap-2">
+            <>
               <Badge variant="outline" className={cn(isDerivConnected ? "border-success/30 bg-success/10 text-success" : "text-muted-foreground")}>
                 {isDerivConnected ? `Connected${accountId ? ` · ${accountId}` : ""}` : "Not connected"}
               </Badge>
@@ -69,8 +72,9 @@ export default function DerivOptionsTerminalPage() {
                   <Wallet className="h-4 w-4 mr-1" /> Accounts
                 </Button>
               )}
-            </div>
+            </>
           )}
+          </div>
         </div>
 
         {!user ? (

@@ -13,6 +13,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { TickChart } from "@/components/deriv-app/TickChart";
 import { useDerivSymbols } from "@/hooks/useDerivSymbols";
+import { fetchActiveSymbols } from "@/services/deriv/derivSymbols";
+import { friendlyDerivError } from "@/lib/derivTradeErrors";
 import { toast } from "sonner";
 import { Activity, ArrowDownRight, ArrowUpRight, Loader2, Sparkles, UserCircle2, Bot, UserRound, RefreshCw } from "lucide-react";
 
@@ -45,7 +47,26 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   } = useDeriv();
 
   const style = getStyleById(styleId);
-  const instruments = useMemo(() => style?.instruments ?? [], [style]);
+  const baseInstruments = useMemo(() => style?.instruments ?? [], [style]);
+  // Extra candidates from Deriv's live catalogue so every open synthetic market
+  // that supports this contract can be offered, not only the curated list.
+  const [catalogue, setCatalogue] = useState<{ symbol: string; displayName: string }[]>([]);
+  useEffect(() => {
+    if (!authorized) return;
+    let alive = true;
+    fetchActiveSymbols().then(rows => {
+      if (!alive) return;
+      setCatalogue(Object.values(rows)
+        .filter(r => r.market === "synthetic_index" && !Number(r.is_trading_suspended ?? 0) && !!Number(r.exchange_is_open ?? 1))
+        .map(r => ({ symbol: r.symbol, displayName: r.display_name }))
+        .slice(0, 40));
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, [authorized]);
+  const instruments = useMemo(() => {
+    const seen = new Set<string>();
+    return [...baseInstruments, ...catalogue].filter(i => !seen.has(i.symbol) && seen.add(i.symbol));
+  }, [baseInstruments, catalogue]);
   const contractTypes = style?.contractTypes ?? [];
   const [contractId, setContractId] = useState(contractTypes[0]?.id ?? "");
   const contractType = contractTypes.find(c => c.id === contractId) ?? contractTypes[0];
@@ -292,7 +313,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       setQuote({ id: p.id, ask: Number(p.ask_price), payout: Number(p.payout), longcode: p.longcode, createdAt: Date.now(), fingerprint: quoteFingerprint(params) });
       addLog(`Fresh quote ${Number(p.ask_price).toFixed(2)} → payout ${Number(p.payout).toFixed(2)}`, "success");
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Unable to price contract";
+      const message = friendlyDerivError(e, symbolLabel);
       setQuote(null); addLog(message, "error"); toast.error(message);
     } finally { setPricing(false); }
   };
@@ -333,8 +354,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
       addLog(`${label} filled — #${result.contract_id} @ ${Number(result.buy_price).toFixed(2)}`, "success");
       toast.success(`${label} placed on ${symbolLabel}`);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Trade failed";
+      const message = friendlyDerivError(e, symbolLabel);
       setQuote(null);
+      // Re-validate markets so one Deriv no longer offers is hidden immediately.
+      if (/not offered|not available|unsupported|invalid/i.test(e instanceof Error ? e.message : "")) liveSymbols.refresh();
       addLog(message, "error"); toast.error(message);
     } finally { setBusy(false); }
   };
@@ -530,7 +553,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
 
       <Card className="glass-card"><CardContent className="p-4 space-y-3">
         {contractTypes.length > 1 && <div className="space-y-1.5"><Label className="text-xs">Options type</Label><Select value={contractId} onValueChange={setContractId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50">{contractTypes.map(c => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}</SelectContent></Select></div>}
-        <div className="space-y-1.5"><Label className="text-xs">Market</Label><Select value={symbol} onValueChange={setSymbol}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50 max-h-72">{tradableInstruments.map(i => <SelectItem key={i.symbol} value={i.symbol}>{i.displayName}</SelectItem>)}</SelectContent></Select></div>
+        <div className="space-y-1.5"><div className="flex items-center justify-between"><Label className="text-xs">Market {!liveSymbols.loading && <span className="text-muted-foreground">· {tradableInstruments.length} supported</span>}</Label><button type="button" className="flex items-center gap-1 text-[11px] text-primary disabled:opacity-50" disabled={liveSymbols.loading} onClick={() => liveSymbols.refresh()}><RefreshCw className={cn("h-3 w-3", liveSymbols.loading && "animate-spin")} />{liveSymbols.loading ? "Checking markets…" : "Recheck"}</button></div><Select value={symbol} onValueChange={setSymbol}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-popover z-50 max-h-72">{tradableInstruments.map(i => <SelectItem key={i.symbol} value={i.symbol}>{i.displayName}</SelectItem>)}</SelectContent></Select></div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
@@ -650,7 +673,12 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
         <Button variant="outline" className="w-full" disabled={pricing || busy || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length} onClick={handlePrice}>{pricing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Get Live Price"}</Button>
 
         {liveSymbols.error && <p className="text-xs text-warning">Live Deriv capability validation is unavailable; markets remain blocked until verified.</p>}
-        {!liveSymbols.loading && !tradableInstruments.length && <p className="text-xs text-destructive">No supported live Deriv markets are available for this contract type.</p>}
+        {!liveSymbols.loading && !tradableInstruments.length && <p className="text-xs text-destructive">No supported live Deriv markets are available for this contract type. Try another contract type or tap Recheck.</p>}
+        {!liveSymbols.loading && liveSymbols.assets.some(a => a.status !== "available") && (
+          <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">Hidden markets ({liveSymbols.assets.filter(a => a.status !== "available").length}) — not offered for this contract</summary>
+            <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">{liveSymbols.assets.filter(a => a.status !== "available").map(a => <li key={a.symbol}>{a.reason}</li>)}</ul>
+          </details>
+        )}
 
         <div className="grid grid-cols-2 gap-3 pt-1">
           {buyButtons.map(btn => <Button key={btn.contractType} size="lg" disabled={busy || autoBusy || isAutoMode || !isDerivConnected || liveSymbols.loading || !tradableInstruments.length || !contractSpecs[btn.contractType]} onClick={() => handleBuy(btn.contractType, btn.label)} className={cn("h-16 text-base font-bold", btn.variant === "destructive" ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : btn.variant === "success" ? "bg-success hover:bg-success/90 text-success-foreground" : "")}>
