@@ -72,7 +72,9 @@ export function useHasEntitlement(productId: string | undefined) {
     queryKey: ["entitlement-product-meta", productId],
     queryFn: async () => {
       if (!productId) return null;
-      const { data, error } = await supabase.from("products").select("id,slug,type").eq("id", productId).maybeSingle();
+      // Gates pass either a product UUID or a slug such as "synthetic-hub".
+      const isUuid = /^[0-9a-f-]{36}$/i.test(productId);
+      const { data, error } = await supabase.from("products").select("id,slug,type").eq(isUuid ? "id" : "slug", productId).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -86,18 +88,19 @@ export function useHasEntitlement(productId: string | undefined) {
   if (!user && hasVisitorPreview()) return true;
 
   // Unified membership grants included product access without separate per-product grants.
-  if (plan.isPaid && product) {
-    const slug = String(product.slug || "").toLowerCase();
-    const isHub = slug.includes("hub") || product.type === "strategy" || product.type === "hub";
-    const isRobot = product.type === "bot" && slug !== "mt5-direct";
-    const isIncludedPremium = isHub || isRobot || product.type === "signal" || product.type === "signals" || product.type === "tool";
+  if (plan.isPaid) {
+    const slug = String(product?.slug || productId).toLowerCase();
+    const type = product?.type ?? (slug.includes("hub") ? "hub" : "");
+    const isHub = slug.includes("hub") || type === "strategy" || type === "hub";
+    const isRobot = type === "bot" && slug !== "mt5-direct";
+    const isIncludedPremium = isHub || isRobot || type === "signal" || type === "signals" || type === "tool";
     if (plan.isVIP) return true;
     if (plan.isStandardOrAbove && isIncludedPremium && slug !== "mt5-direct") return true;
     if (plan.planCode?.toLowerCase() === "starter" && (slug === "synthetic-hub" || slug === "weltrade-hub")) return true;
     if (plan.isStandardOrAbove && isRobot && plan.canUsePremiumBots) return true;
   }
 
-  return entitlements?.some(e => e.product_id === productId && isEntitlementActive(e)) ?? false;
+  return entitlements?.some(e => (e.product_id === productId || (product && e.product_id === product.id)) && isEntitlementActive(e)) ?? false;
 }
 
 export function useHasProductType(type: string) {
