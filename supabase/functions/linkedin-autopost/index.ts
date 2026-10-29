@@ -63,14 +63,16 @@ Deno.serve(async (req) => {
     `Educational content only — not financial advice. Trading involves risk of loss.\n\n` +
     `${tagFor(pick.category)}`;
 
-  // Prefer the Botvio Company Page when connected via the owner's LinkedIn app.
+  // Post to BOTH the personal profile (connector) and the Botvio Company Page (when connected).
   const { data: org } = await db.from("linkedin_org_connection")
     .select("access_token,org_urn,expires_at").eq("id", 1).maybeSingle();
   const orgReady = !!org?.access_token && !!org?.org_urn && (!org.expires_at || new Date(org.expires_at) > new Date());
 
-  let res: Response;
+  const results: Record<string, { ok: boolean; status: number; id?: string | null; details?: string }> = {};
+  const idOf = (r: Response, b: string) => r.headers.get("x-restli-id") ?? (() => { try { return JSON.parse(b).id; } catch { return null; } })();
+
   if (orgReady) {
-    res = await fetch("https://api.linkedin.com/rest/posts", {
+    const r = await fetch("https://api.linkedin.com/rest/posts", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${org!.access_token}`, "Content-Type": "application/json",
@@ -82,15 +84,19 @@ Deno.serve(async (req) => {
         lifecycleState: "PUBLISHED", isReshareDisabledByAuthor: false,
       }),
     });
+    const b = await r.text();
+    if (!r.ok) console.error(`LinkedIn company post failed [${r.status}]: ${b}`);
+    results.company_page = { ok: r.ok, status: r.status, id: r.ok ? idOf(r, b) : null, details: r.ok ? undefined : b.slice(0, 500) };
+  }
+
+  const me = await fetch(`${GATEWAY}/v2/userinfo`, { headers });
+  if (!me.ok) {
+    const b = await me.text();
+    console.error(`LinkedIn userinfo failed [${me.status}]: ${b}`);
+    results.personal = { ok: false, status: me.status, details: b.slice(0, 500) };
   } else {
-    const me = await fetch(`${GATEWAY}/v2/userinfo`, { headers });
-    if (!me.ok) {
-      const body = await me.text();
-      console.error(`LinkedIn userinfo failed [${me.status}]: ${body}`);
-      return json({ error: "LinkedIn profile lookup failed", status: me.status, details: body }, 502);
-    }
     const { sub } = await me.json();
-    res = await fetch(`${GATEWAY}/v2/ugcPosts`, {
+    const r = await fetch(`${GATEWAY}/v2/ugcPosts`, {
       method: "POST",
       headers: { ...headers, "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0" },
       body: JSON.stringify({
@@ -102,18 +108,24 @@ Deno.serve(async (req) => {
         visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
       }),
     });
+    const b = await r.text();
+    if (!r.ok) console.error(`LinkedIn personal post failed [${r.status}]: ${b}`);
+    results.personal = { ok: r.ok, status: r.status, id: r.ok ? idOf(r, b) : null, details: r.ok ? undefined : b.slice(0, 500) };
   }
-  const body = await res.text();
-  const ok = res.ok;
-  if (!ok) console.error(`LinkedIn post failed [${res.status}]: ${body}`);
+
+  const ok = Object.values(results).some((r) => r.ok);
+  const ids = Object.entries(results).filter(([, r]) => r.ok).map(([k, r]) => `${k}:${r.id ?? ""}`).join(" ");
+  const errs = Object.entries(results).filter(([, r]) => !r.ok).map(([k, r]) => `${k} [${r.status}] ${r.details ?? ""}`).join(" | ");
 
   await db.from("linkedin_posts").upsert({
     slug: pick.slug, title: pick.title, url,
     status: ok ? "posted" : "failed",
-    linkedin_post_id: ok ? (res.headers.get("x-restli-id") ?? (() => { try { return JSON.parse(body).id; } catch { return null; } })()) : null,
-    error: ok ? null : `[${res.status}] ${body.slice(0, 500)}`,
+    linkedin_post_id: ok ? ids.slice(0, 500) : null,
+    error: errs ? errs.slice(0, 500) : null,
     posted_at: new Date().toISOString(),
   }, { onConflict: "slug" });
 
-  return ok ? json({ ok: true, posted: pick.title, target: orgReady ? "company_page" : "personal" }) : json({ error: "LinkedIn post failed", status: res.status, details: body }, 502);
+  return ok
+    ? json({ ok: true, posted: pick.title, company_page_connected: orgReady, results })
+    : json({ error: "LinkedIn post failed", results }, 502);
 });
