@@ -55,6 +55,7 @@ export interface AssetAvailability {
 
 const CAPABILITY_TTL_MS = 5 * 60 * 1000;
 const SYMBOLS_TTL_MS = 5 * 60 * 1000;
+const UNVERIFIED_TTL_MS = 15 * 1000;
 
 interface ActiveSymbolRow {
   symbol: string;
@@ -127,7 +128,9 @@ export async function fetchActiveSymbols(force = false): Promise<Record<string, 
  */
 export async function getSymbolCapability(symbol: string, force = false): Promise<SymbolCapability> {
   const cached = capabilityCache.get(symbol);
-  if (!force && cached && Date.now() - cached.fetchedAt < CAPABILITY_TTL_MS) return cached;
+  // Failed lookups are retried quickly instead of blocking a market for 5 minutes.
+  const ttl = cached?.unverified ? UNVERIFIED_TTL_MS : CAPABILITY_TTL_MS;
+  if (!force && cached && Date.now() - cached.fetchedAt < ttl) return cached;
 
   const inflight = capabilityInflight.get(symbol);
   if (inflight && !force) return inflight;
@@ -155,9 +158,14 @@ export async function getSymbolCapability(symbol: string, force = false): Promis
 
     try {
       symbolDiagnostics.lastRequest = `contracts_for ${symbol}`;
-      const { data, error } = await supabase.functions.invoke("deriv-contracts-for-symbol", {
+      let { data, error } = await supabase.functions.invoke("deriv-contracts-for-symbol", {
         body: { symbol },
       });
+      if (error || (data as any)?.error) {
+        // One retry after a short pause covers transient rate limits.
+        await new Promise((r) => setTimeout(r, 800));
+        ({ data, error } = await supabase.functions.invoke("deriv-contracts-for-symbol", { body: { symbol } }));
+      }
       symbolDiagnostics.lastResponseAt = Date.now();
       if (error || (data as any)?.error) {
         throw new Error((data as any)?.error || error?.message || "contracts_for failed");
