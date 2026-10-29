@@ -13,7 +13,7 @@ async function requestDerivCached(symbol: string) {
   const hit = cache.get(symbol);
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
   try {
-    const data = await requestDerivCached(symbol);
+    const data = await requestDeriv(symbol);
     cache.set(symbol, { at: Date.now(), data });
     return data;
   } catch (e) {
