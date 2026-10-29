@@ -40,7 +40,7 @@ export default function SyntheticHub() {
     const rows=await fetchActiveSymbols(true);
     // Show every open, non-suspended Deriv synthetic. Contract checks only remove a symbol
     // when Deriv explicitly confirms it has no contracts (failed/rate-limited checks don't hide it).
-    const candidates=Object.values(rows).filter((r:any)=>(r.market==="synthetic_index"||/synthetic|volatility|boom|crash|range break|step|jump|dex|drift|multi step|hybrid|skew/i.test(`${r.display_name??""} ${r.market??""} ${r.submarket??""}`))&&!r.is_trading_suspended&&r.exchange_is_open!==0&&r.exchange_is_open!==false);
+    const candidates=Object.values(rows).filter((r:any)=>(r.market==="synthetic_index"||/synthetic|volatility|boom|crash|range break|step|jump|dex|drift|multi step|hybrid|skew/i.test(`${r.display_name??""} ${r.market??""} ${r.submarket??""}`))&&!/basket/i.test(`${r.display_name??""} ${r.submarket??""}`)&&!r.is_trading_suspended&&r.exchange_is_open!==0&&r.exchange_is_open!==false);
     const checked=await Promise.all(candidates.map(async(r:any)=>{let capability:any=null;try{capability=await getSymbolCapability(r.symbol);}catch{/* keep visible */} if(capability&&!capability.unverified&&(capability.isSuspended||Object.keys(capability.contracts??{}).length===0))return null; return {symbol:r.symbol,name:r.display_name??r.symbol,capability};}));
     if(!cancelled)setLiveSymbols((checked.filter(Boolean) as any[]).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true})));
   }catch{if(!cancelled)setLiveSymbols([]);}})(); return()=>{cancelled=true}; }, []);
