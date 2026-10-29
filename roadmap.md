@@ -1,4 +1,6 @@
 # Current tasks
+- [x] Package separate Weltrade AI Signals Android app with signed APK/AAB and its own private signing key; verify package identity, SDK and bundle signature.
+- [ ] Complete Weltrade Play Store launch (blocked: website association needs publication, Google Play app-signing fingerprint and financial/billing compliance review; device test unavailable).
 - [x] Replace Marketplace product sales with existing membership choices; verified three saved prices and Basic payment/sign-in screen; preserve existing purchases.
 - [x] Connect user and admin membership selections to saved customer-visible Starter, Basic and VIP plans; preserve legacy subscribers; nine tier/price tests and visible user selection links verified.
 - [ ] Verify admin membership assignment and readback in a signed-in session (blocked: injected session signs out; requesting user has no matching account for session refresh).

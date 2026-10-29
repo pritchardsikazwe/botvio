@@ -5,4 +5,11 @@
         "package_name": "ai.botvio.live",
         "sha256_cert_fingerprints": ["5D:AD:35:EA:34:8D:0A:09:70:B2:79:40:81:E8:98:01:D0:D5:15:3C:58:09:4E:EA:CE:67:96:EC:41:68:75:EC"]
       }
+    }, {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "ai.botvio.weltradesignals",
+        "sha256_cert_fingerprints": ["A7:B4:CA:2B:25:03:B6:20:31:6D:FF:EF:BB:A6:ED:AA:D3:96:C3:43:73:54:AD:6A:52:81:17:CD:83:FA:C9:51"]
+      }
     }]
