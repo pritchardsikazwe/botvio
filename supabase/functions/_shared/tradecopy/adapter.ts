@@ -68,27 +68,24 @@ export class TradeCopyMt5Adapter implements ExecutionAdapter {
           ? AbortSignal.timeout(this.timeoutMs)
           : undefined,
       });
-    } catch (e) {
-      throw new TradeCopyError(`TradeCopy unreachable: ${(e as Error).message}`, "network", 502);
+    } catch {
+      // Fetch errors may echo a credential-bearing URL. Never propagate upstream text.
+      throw new TradeCopyError("TradeCopy unreachable. Check the service connection and try again.", "network", 502);
     }
     const text = await res.text();
     let body: unknown = text;
     try { body = JSON.parse(text); } catch { /* plain text */ }
     if (res.status === 401 || res.status === 403) {
-      const detail = typeof body === "object" && body
-        ? JSON.stringify(redact(body)).slice(0, 300)
-        : String(text).slice(0, 300);
-      throw new TradeCopyError(`TradeCopy rejected the API key (${res.status}): ${detail}`, "auth", 502);
+      throw new TradeCopyError(`TradeCopy rejected the API key (${res.status}). Renew the key in TradeCopy API Studio and update the saved server secret.`, "auth", 502);
     }
     if (!res.ok) {
-      const msg = typeof body === "object" && body ? JSON.stringify(redact(body)).slice(0, 300) : String(text).slice(0, 300);
-      throw new TradeCopyError(`TradeCopy error ${res.status}: ${msg}`, "upstream", 502);
+      throw new TradeCopyError(`TradeCopy request failed (HTTP ${res.status}). Check the service status and account configuration.`, "upstream", 502);
     }
     // StringResponseDto may carry success=false / error message
     if (body && typeof body === "object") {
       const b = body as Record<string, unknown>;
       const ok = b.success ?? b.isSuccess ?? b.status;
-      if (ok === false) throw new TradeCopyError(`TradeCopy: ${String(b.message ?? b.error ?? "request failed").slice(0, 300)}`, "upstream", 502);
+      if (ok === false) throw new TradeCopyError("TradeCopy rejected the request. Check the account configuration in TradeCopy API Studio.", "upstream", 502);
     }
     return body;
   }
