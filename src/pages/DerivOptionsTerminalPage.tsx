@@ -57,6 +57,7 @@ export default function DerivOptionsTerminalPage() {
   const [contract, setContract] = useState(CONTRACTS[0].styleId);
   const [showAccounts, setShowAccounts] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [strategySetup,setStrategySetup]=useState<{symbol:string;duration:3|5;revision:number}|null>(null);
   const active = CONTRACTS.find(c => c.styleId === contract) ?? CONTRACTS[0];
 
   return (
@@ -136,7 +137,7 @@ export default function DerivOptionsTerminalPage() {
                       </button>
                     ))}
                   </div>
-                  {active.styleId === "rise-fall-scalping" && <BinaryStrategyWorkspace />}
+                  {active.styleId === "rise-fall-scalping" && <BinaryStrategyWorkspace onApply={(symbol,duration)=>setStrategySetup({symbol,duration,revision:Date.now()})} />}
                   {TIPS[active.styleId] && active.styleId !== "rise-fall-scalping" && (
                     <Card className="border-primary/20 bg-primary/5"><CardContent className="p-3 space-y-2">
                       <div className="flex items-center gap-2 text-sm font-bold"><Lightbulb className="h-4 w-4 text-primary" /> {active.label} tips</div>
@@ -148,10 +149,10 @@ export default function DerivOptionsTerminalPage() {
                       <p className="text-[10px] text-muted-foreground">Educational guidance only — no result is guaranteed. Practise on demo first and risk only 1–2% per trade.</p>
                     </CardContent></Card>
                   )}
-                  <DerivTradePanel key={active.styleId} styleId={active.styleId} engine={active.engine} />
+                  <DerivTradePanel key={active.styleId} styleId={active.styleId} engine={active.engine} setup={strategySetup} />
                 </div>
               )}
-              {tab === "auto" && <BinaryStrategyWorkspace automation />}
+              {tab === "auto" && <><BinaryStrategyWorkspace automation /><details className="border-t border-border pt-4"><summary className="cursor-pointer text-sm font-semibold">Existing cloud multiplier automation</summary><div className="mt-3"><AutoTradePanel scope="Deriv Options" availableAssets={AUTO_MARKETS} /></div></details></>}
               {tab === "history" && <DerivTradeHistory />}
             </ErrorBoundary>
           </>

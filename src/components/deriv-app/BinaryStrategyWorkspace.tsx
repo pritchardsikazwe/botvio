@@ -3,7 +3,7 @@ import { useDeriv } from "@/contexts/DerivContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBinaryCandleFeed } from "@/hooks/useBinaryCandleFeed";
 import { analyzeBinary, binaryRiskStop, type BinaryLimits, type BinaryResult, type BinarySetup, type BinaryStrategy } from "@/lib/binaryStrategies";
-import { fetchActiveSymbols, getSymbolCapability } from "@/services/deriv/derivSymbols";
+import { fetchActiveSymbols } from "@/services/deriv/derivSymbols";
 import { BinaryCandleChart } from "./BinaryCandleChart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ function ScanRow({symbol,name,strategy,onSelect}:{symbol:string;name:string;stra
   </Button>;
 }
 
-export function BinaryStrategyWorkspace({automation=false}:{automation?:boolean}) {
+export function BinaryStrategyWorkspace({automation=false,onApply}:{automation?:boolean;onApply?:(symbol:string,duration:3|5)=>void}) {
   const {user}=useAuth();
   const deriv=useDeriv();
   const [markets,setMarkets]=useState<{symbol:string;name:string}[]>([]);
@@ -39,9 +39,6 @@ export function BinaryStrategyWorkspace({automation=false}:{automation?:boolean}
   const [limits,setLimits]=useState<BinaryLimits>({hourly:5,consecutiveLosses:3,dailyLoss:10,quality:80});
   const [message,setMessage]=useState<string|null>(null);
   const [ledger,setLedger]=useState<{entries:number[];results:BinaryResult[];pending:number|null}>({entries:[],results:[],pending:null});
-  const busy=useRef(false), lastSetup=useRef("");
-  const armed=useRef(false);
-  armed.current=on;
   const feed=useBinaryCandleFeed(symbol,"1m");
   const displayFeed=useBinaryCandleFeed(symbol,timeframe,timeframe!=="1m");
   const precision=useMemo(()=>analyzeBinary(feed.candles,"precision"),[feed.candles]);
@@ -66,38 +63,6 @@ export function BinaryStrategyWorkspace({automation=false}:{automation?:boolean}
   const stopReason=binaryRiskStop(limits,ledger.results,ledger.entries);
   useEffect(()=>{if(on && (stopReason || !deriv.isDerivConnected || deriv.accountType!=="DEMO" || !selected.includes(symbol))) {setOn(false);setMessage(stopReason||"Account or instrument changed; automation stopped");}},[on,stopReason,deriv.isDerivConnected,deriv.accountType,selected,symbol]);
 
-  const execute=async(candidate:BinarySetup)=>{
-    if(busy.current || ledger.pending || deriv.runningTrades.length || !deriv.isDerivConnected) return;
-    if(candidate.direction==="NO TRADE" || candidate.quality<limits.quality || !candidate.time || Date.now()-candidate.time*1000>60_000) return;
-    if(stopReason || !Number.isFinite(stake) || stake<=0 || stake>Number(deriv.balance?.balance??0)) {setOn(false);setMessage(stopReason||"Stake exceeds available balance");return;}
-    busy.current=true;
-    try {
-      const capability=await getSymbolCapability(symbol);
-      if(!armed.current || deriv.accountType!=="DEMO") return;
-      const contract=candidate.direction==="RISE"?"CALL":"PUT";
-      const spec=capability.contracts[contract];
-      if(capability.unverified || !capability.isOpen || capability.isSuspended || !spec || !spec.durationUnits.includes("m")) throw new Error("Deriv has not confirmed minute-based Rise/Fall for this instrument.");
-      if((spec.minDuration!=null && candidate.duration<spec.minDuration) || (spec.maxDuration!=null&&candidate.duration>spec.maxDuration)) throw new Error("Selected strategy expiry is outside Deriv's confirmed limits.");
-      if((spec.minStake!=null&&stake<spec.minStake)||(spec.maxStake!=null&&stake>spec.maxStake)) throw new Error("Stake is outside Deriv's confirmed limits.");
-      // Reserve before requesting a quote. An ambiguous buy is never retried.
-      setLedger(old=>({...old,entries:[...old.entries,Date.now()]}));
-      const proposal=await deriv.getProposal({symbol,contract_type:contract,amount:stake,basis:"stake",currency:deriv.currency??"USD",duration:candidate.duration,duration_unit:"m"});
-      if(!armed.current) return;
-      const result=await deriv.placeTrade({symbol,contract_type:contract,amount:stake,duration:candidate.duration,duration_unit:"m"});
-      setLedger(old=>({...old,pending:result.contract_id}));
-      await deriv.subscribeContract(result.contract_id);
-      setMessage(`${candidate.direction} · ${candidate.duration} minutes · Contract #${result.contract_id}`);
-    } catch(e) {setOn(false);setMessage(e instanceof Error?e.message:"Order could not be confirmed. Check My trades before retrying.");}
-    finally {busy.current=false;}
-  };
-  useEffect(()=>{
-    if(!on || busy.current || feed.status!=="live" || ledger.pending || deriv.accountType!=="DEMO") return;
-    const candidate=both?[precision,trend].filter(s=>s.direction!=="NO TRADE").sort((a,b)=>b.quality-a.quality)[0]:setup;
-    if(!candidate || candidate.direction==="NO TRADE" || (both&&precision.direction!=="NO TRADE"&&trend.direction!=="NO TRADE"&&precision.direction!==trend.direction)) return;
-    const key=`${symbol}:${candidate.time}:${candidate.strategy}`;
-    if(lastSetup.current===key) return;
-    lastSetup.current=key; void execute(candidate);
-  },[on,feed.status,setup,precision,trend,both,ledger.pending]);
   const chartFeed=timeframe==="1m"?feed:displayFeed;
   const current=feed.candles.at(-1);
   const marketName=markets.find(m=>m.symbol===symbol)?.name??symbol;
@@ -109,12 +74,12 @@ export function BinaryStrategyWorkspace({automation=false}:{automation?:boolean}
     <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground"><span>{marketName} · {timeframe} candles · Strategy uses closed 1m candles</span><span>{current?`O ${current.open} · H ${current.high} · L ${current.low} · C ${current.close}`:"Data unavailable"}</span></div>
     <div className="grid gap-3 md:grid-cols-[1fr_2fr]"><div className="border-l-4 border-primary bg-muted/20 p-4"><p className="text-xs text-muted-foreground">{setup.duration}-minute expiry · quality, not win probability</p><h3 className={`mt-2 text-2xl font-bold ${setup.direction==="RISE"?"text-success":setup.direction==="FALL"?"text-destructive":"text-muted-foreground"}`}>{feed.status==="live"?setup.direction:"NO TRADE"}</h3><p className="mt-2 text-sm">{setup.quality}/100 · {setup.confirmations.length} confirmations</p><p className="mt-2 text-xs text-muted-foreground">{setup.time?new Date(setup.time*1000).toLocaleTimeString()+` · Entry ${setup.entry}`:setup.reason}</p></div><div className="grid grid-cols-2 gap-3">{[["Trend",setup.trend],["RSI 14",setup.rsi?.toFixed(1)??"—"],["Support",setup.support??"—"],["Resistance",setup.resistance??"—"],["M / W pattern",setup.pattern],["Trendline",setup.trendline]].map(([label,value])=><div key={label} className="border-b border-border py-2"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 break-words text-sm font-semibold">{value}</p></div>)}</div></div>
     <p className="text-sm text-muted-foreground">{feed.error||setup.reason}</p>
-    <div className="flex flex-wrap items-center gap-3"><Button variant="outline" onClick={()=>setScanner(v=>!v)}><ScanLine className="mr-2 h-4 w-4" />{scanner?"Stop scanner":"Scan selected instruments"}</Button><span className="text-xs text-muted-foreground">Up to 4 selected instruments at once</span></div>
+    <div className="flex flex-wrap items-center gap-3"><Button variant="outline" onClick={()=>setScanner(v=>!v)}><ScanLine className="mr-2 h-4 w-4" />{scanner?"Stop scanner":"Scan selected instruments"}</Button><span className="text-xs text-muted-foreground">Up to 4 selected instruments at once</span>{onApply&&<Button onClick={()=>onApply(symbol,setup.duration)}>Use {setup.duration}m setup in trade form</Button>}</div>
     <div className="flex flex-wrap gap-2">{markets.slice(0,40).map(m=><Button key={m.symbol} size="sm" variant={selected.includes(m.symbol)?"secondary":"outline"} disabled={on} onClick={()=>setSelected(old=>old.includes(m.symbol)?old.filter(s=>s!==m.symbol):old.length<4?[...old,m.symbol]:old)}>{m.name}</Button>)}</div>
     {scanner&&<div className="grid gap-3 md:grid-cols-2">{selected.map(s=><ScanRow key={s} symbol={s} name={markets.find(m=>m.symbol===s)?.name??s} strategy={strategy} onSelect={()=>{setOn(false);setSymbol(s);}} />)}</div>}
     {automation&&<section className="border-t border-border pt-4" aria-label="Strategy automation">
-      <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="flex items-center gap-2 font-bold"><ShieldCheck className="h-5 w-5 text-success" />Demo strategy automation</h3><div className="flex items-center gap-2"><Label htmlFor="binary-auto">{on?"ON":"OFF"}</Label><Switch id="binary-auto" checked={on} onCheckedChange={next=>{if(next&&(deriv.accountType!=="DEMO"||!deriv.isDerivConnected||stopReason||!selected.includes(symbol))) {setMessage(stopReason||"Connect a demo account and select this instrument first.");return;} armed.current=next;setOn(next);}} /><Button variant="destructive" size="sm" onClick={()=>{armed.current=false;setOn(false);setMessage("Stopped. Existing contracts remain visible in My trades.");}}><OctagonX className="mr-2 h-4 w-4" />Emergency STOP</Button></div></div>
-      <p className="mt-2 text-xs text-muted-foreground">Runs on the current selected instrument while this page stays open. Live automation remains disabled pending demo acceptance.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="flex items-center gap-2 font-bold"><ShieldCheck className="h-5 w-5 text-success" />Demo strategy automation</h3><div className="flex items-center gap-2"><Label htmlFor="binary-auto">OFF</Label><Switch id="binary-auto" checked={false} disabled /><Button variant="destructive" size="sm" onClick={()=>{setOn(false);setMessage("Stopped. Existing contracts remain visible in My trades.");}}><OctagonX className="mr-2 h-4 w-4" />Emergency STOP</Button></div></div>
+      <p className="mt-2 text-xs text-warning">New strategy execution is disabled until server-side risk enforcement and connected-demo acceptance are verified. These controls do not start the existing cloud multiplier bot.</p>
       <div className="mt-3 flex items-center gap-2"><Switch id="binary-both" checked={both} disabled={on} onCheckedChange={setBoth}/><Label htmlFor="binary-both">Use both strategies (conflicting directions rejected)</Label></div>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">{[{id:"stake",label:`Stake (${deriv.currency??"USD"})`,value:stake,set:setStake,min:0.35,max:100,step:0.01},{id:"hourly",label:"Max trades per hour",value:limits.hourly,set:(v:number)=>setLimits(l=>({...l,hourly:v})),min:1,max:20,step:1},{id:"loss-streak",label:"Max consecutive losses",value:limits.consecutiveLosses,set:(v:number)=>setLimits(l=>({...l,consecutiveLosses:v})),min:1,max:10,step:1},{id:"daily-loss",label:`Daily loss limit (${deriv.currency??"USD"})`,value:limits.dailyLoss,set:(v:number)=>setLimits(l=>({...l,dailyLoss:v})),min:1,max:50,step:1},{id:"quality",label:"Minimum quality",value:limits.quality,set:(v:number)=>setLimits(l=>({...l,quality:v})),min:75,max:95,step:1}].map(field=><div key={field.id}><Label htmlFor={`binary-${field.id}`} className="text-xs">{field.label}</Label><Input id={`binary-${field.id}`} type="number" inputMode="decimal" value={field.value} min={field.min} max={field.max} step={field.step} disabled={on} onChange={e=>field.set(Number(e.target.value))}/></div>)}</div>
       <p className="mt-3 text-xs text-muted-foreground">1 open contract · 20 trades/day maximum · fixed stake · no martingale · no automatic retries</p>

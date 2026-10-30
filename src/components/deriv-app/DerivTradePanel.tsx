@@ -21,6 +21,7 @@ import { Activity, ArrowDownRight, ArrowUpRight, Loader2, Sparkles, UserCircle2,
 interface DerivTradePanelProps {
   styleId: string;
   engine: EngineType;
+  setup?: {symbol:string;duration:3|5;revision:number} | null;
 }
 interface TradeLog { id: number; time: string; message: string; tone: "info" | "success" | "error"; }
 interface PriceQuote { id: string; ask: number; payout: number; longcode: string; createdAt: number; fingerprint: string; }
@@ -39,7 +40,7 @@ type DerivTradeParams = {
 
 const UNIT_LABELS: Record<string, string> = { t: "ticks", s: "seconds", m: "minutes", h: "hours", d: "days" };
 
-export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
+export const DerivTradePanel = ({ styleId, engine, setup }: DerivTradePanelProps) => {
   const {
     authorized, isDerivConnected, balance, lastTick, subscribeTicks, unsubscribeTicks,
     getProposal, buyContract, subscribeContract, sellContract, onContractUpdate, accountInfo,
@@ -113,6 +114,10 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   ) as Record<string, typeof capability extends null ? never : any>;
   const primarySpec = contractSpecs[buyButtons[0]?.contractType];
   const isRiseFall = styleId === "rise-fall-scalping" && contractId === "rise_fall";
+  useEffect(()=>{
+    if(!setup || !isRiseFall) return;
+    setSymbol(setup.symbol);setDuration(String(setup.duration));setDurationUnit("m");setQuote(null);
+  },[setup,isRiseFall]);
   const supportsAllowEquals = !!capability?.contracts?.PUTE && !!capability?.contracts?.CALLE;
   const isAutoMode = tradeMode === "auto" && isRiseFall;
   const connectedAccounts = derivTokens ?? [];
@@ -193,14 +198,14 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
   }, [supportsAllowEquals, allowEquals]);
 
   useEffect(() => {
-    if (isDigitalOptions && allowedDurationUnits.includes("t") && durationUnit !== "t") {
+    if (isDigitalOptions && !isRiseFall && allowedDurationUnits.includes("t") && durationUnit !== "t") {
       setDurationUnit("t");
       return;
     }
     if (!allowedDurationUnits.includes(durationUnit)) {
       setDurationUnit(allowedDurationUnits[0] ?? "t");
     }
-  }, [durationUnitsKey, durationUnit, isDigitalOptions]);
+  }, [durationUnitsKey, durationUnit, isDigitalOptions, isRiseFall]);
 
   useEffect(() => {
     if (!authorized || !symbol) return;
