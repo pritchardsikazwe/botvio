@@ -282,8 +282,21 @@ Deno.serve(async (req) => {
       let resolvedSymbol = requestedSymbol;
       const quote = await withConnection(admin, userId, async (session) => {
         const symbols = normalizeSymbols(await callApi("/Symbols", { id: session }));
-        resolvedSymbol = resolveBrokerSymbol(requestedSymbol, symbols);
-        return normalizeQuote(await callApi("/GetQuote", { id: session, symbol: resolvedSymbol }));
+        // Try every broker variant (e.g. "MAX PainX 1000") until one returns a real price.
+        const candidates = brokerSymbolCandidates(requestedSymbol, symbols).slice(0, 8);
+        let lastQuote: ReturnType<typeof normalizeQuote> | null = null;
+        for (const candidate of candidates) {
+          try {
+            const q = normalizeQuote(await callApi("/GetQuote", { id: session, symbol: candidate }));
+            lastQuote = q;
+            resolvedSymbol = candidate;
+            if ([q.bid, q.ask, q.last].some((v) => v != null && v > 0)) return q;
+          } catch (e) {
+            if (candidate === candidates.at(-1) && !lastQuote) throw e;
+          }
+        }
+        const available = symbols.filter((s) => normalizeSymbolKey(s).includes(normalizeSymbolKey(requestedSymbol))).slice(0, 6);
+        throw new Error(`Weltrade live quote unavailable for ${requestedSymbol}: tried ${candidates.join(", ")}. Broker variants listed: ${available.join(", ") || "none"}.`);
       });
       return json({ ok: true, quote, requestedSymbol, resolvedSymbol });
     }
