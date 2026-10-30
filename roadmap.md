@@ -1,4 +1,5 @@
 # Current tasks
+- [ ] Add real Deriv tick view, charted RSI and clear strategy confirmation diagnostics; retain NO TRADE and disabled automation safeguards.
 - [x] Handle rejected TradeCopy credentials without a page-level 502; deployed tradecopy-api, passed 25 tests and verified the real rejection inside the signed-in dashboard without runtime errors; no trades.
 - [x] Implement uploaded 3-minute Precision / 5-minute Trend Confirmation Rise/Fall rules, four-instrument scanner, candle/timeframe controls and structure overlays; live public candles verified on desktop/phone, 10 tests pass, existing contracts preserved.
 - [ ] Activate new strategy automation (blocked: connected-demo execution and server-enforced atomic risk acceptance unavailable). Settings and stop UI added but deliberately disabled; existing cloud multiplier automation stays separate. No orders sent.
