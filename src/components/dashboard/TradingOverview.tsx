@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from "@/contexts/AuthContext";
 import accessArt from "@/assets/dashboard-access.jpg";
 import "./trading-overview.css";
+import { UserSubscriptionCard } from "@/components/dashboard/UserSubscriptionCard";
 
 const links = [
   ["Overview", "/botvio-robot", House], ["My Hubs", "/my-products", Layers3], ["Trading Signals", "/signals", BarChart3],
@@ -30,7 +31,7 @@ export function TradingOverview(props: Props) {
   const pnlAvailable = verifiedPositions.length > 0 && verifiedPositions.every(p => p.pnl != null && Number.isFinite(Number(p.pnl))) && !props.positionError;
   const pnl = verifiedPositions.reduce((sum, p) => sum + Number(p.pnl ?? 0), 0);
   const metrics = [
-    { title: "Active Subscriptions", value: props.accessLoading ? "…" : props.accessError ? "—" : props.access.length, description: "Access to hubs, signals and robots", icon: Layers3, tone: "green" },
+    { title: "Included Access", value: props.accessLoading ? "…" : props.accessError ? "—" : props.access.length, description: "Membership and individual grants", icon: Layers3, tone: "green" },
     { title: "Connected Accounts", value: props.accountsLoading ? "…" : props.accountsError ? "—" : connected, description: "Deriv MT5, Weltrade MT5", icon: Link2, tone: "cyan" },
     { title: "Open Positions", value: props.positionLoading ? "…" : props.positionError ? "—" : verifiedPositions.length, description: "Live trades across all accounts", icon: BarChart3, tone: "gold" },
     { title: "Floating P/L", value: props.positionLoading ? "…" : pnlAvailable ? formatMoney(pnl) : "—", description: "Verified open positions", icon: Wallet, tone: "green" },
@@ -50,6 +51,7 @@ export function TradingOverview(props: Props) {
       <main className="overview-main">
         <div className="overview-heading"><div><h1>Trading Overview</h1><p>Your subscriptions, connections and live positions in one place.</p></div><div className="overview-date">{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}<span>UTC</span></div></div>
         {props.children || <>
+          <UserSubscriptionCard />
           <section className="overview-metrics" aria-label="Account summary">{metrics.map(({ title, value, description, icon: Icon, tone }) => <div className={`overview-metric tone-${tone}`} key={title}><span className="overview-icon"><Icon size={27} /></span><div><p>{title}</p><strong>{value}</strong><small>{description}</small></div></div>)}</section>
           <section><div className="overview-section-heading"><h2>Your trading access</h2><Button asChild variant="link"><Link to="/my-products">View all subscriptions <ArrowRight size={14} /></Link></Button></div>
             {props.accessLoading ? <p className="overview-state">Loading your subscriptions…</p> : props.accessError ? <div className="overview-state">Your access could not be loaded. <Button variant="outline" size="sm" onClick={props.retryAccess}>Retry</Button></div> : !props.access.length ? <div className="overview-state">No active subscriptions yet. <Button asChild variant="link"><Link to="/marketplace">Explore products <ArrowRight size={14} /></Link></Button></div> : <div className="overview-access-grid">{props.access.map(item => {

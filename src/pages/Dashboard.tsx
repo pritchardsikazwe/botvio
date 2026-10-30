@@ -15,9 +15,14 @@ import { UserSubscriptionCard } from "@/components/dashboard/UserSubscriptionCar
 import { useEntitlements, isEntitlementActive } from "@/hooks/useEntitlements";
 import { isRestrictedOnStore } from "@/lib/mobile";
 import { useState } from "react";
+import { useCurrentMembership } from "@/hooks/useCurrentMembership";
+import { membershipDestinations } from "@/lib/currentMembership";
+import { MembershipAccess } from "@/components/dashboard/MembershipAccess";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const membership = useCurrentMembership();
+  const membershipItems = membershipDestinations(membership.data?.pricing_plans?.maps_to_tier || membership.data?.pricing_plans?.code);
   const navigate = useNavigate();
   const { data: botInstances, isLoading: botsLoading, isError: botsError, refetch: refetchBots } = useBotInstances();
   const { data: subscriptions, isLoading: subsLoading } = useMyCopySubscriptions();
@@ -30,7 +35,7 @@ const Dashboard = () => {
   const [showAllNotifications, setShowAllNotifications] = useState(false);
 
   const activeRobots = entitlements?.filter(e => e.products?.type === "bot" && e.products?.slug !== "mt5-direct" && isEntitlementActive(e)).length || 0;
-  const activeHubs = entitlements?.filter(e => e.products?.type !== "bot" && isEntitlementActive(e)).length || 0;
+  const legacyHubs = entitlements?.filter(e => e.products?.type !== "bot" && isEntitlementActive(e)).length || 0;
   const activeSubscriptions = subscriptions?.filter(s => s.status === "active").length || 0;
   const connectedAccounts = accounts?.length || 0;
   const connectedBrokerNames = Array.from(new Set((accounts ?? []).map((a: any) => String(a.broker || "MT5").toUpperCase()))).join(" · ") || "No accounts yet";
@@ -75,14 +80,18 @@ const Dashboard = () => {
       <main className="container mx-auto px-3 py-4 md:px-4">
         {/* Welcome Section */}
         <div className="mb-4">
-          <h1 className="text-xl font-bold mb-1">Trading Dashboard</h1>
-          <p className="text-muted-foreground">
-            Your account, connected trading accounts, active products and next steps.
-          </p>
+          <h1 className="text-2xl font-bold mb-1">{profile?.display_name ? `Welcome, ${profile.display_name}` : "My Trading Dashboard"}</h1>
         </div>
 
         {/* The assigned membership is the single source of feature access for this user. */}
         <UserSubscriptionCard />
+        <MembershipAccess />
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">{[
+          { to: "/signals", label: "Current signals", icon: Signal },
+          { to: "/signals?tab=chart-analysis", label: "Analyse a chart", icon: CandlestickChart },
+          { to: "/connections", label: connectedAccounts ? "My accounts" : "Connect MT5", icon: Wallet },
+          { to: "/deriv/options", label: "Deriv Options", icon: BarChart3 },
+        ].map(({ to, label, icon: Icon }) => <Button asChild key={to} variant="secondary" className="h-auto min-h-12 whitespace-normal py-3"><Link to={to}><Icon className="mr-2 h-4 w-4 shrink-0" />{label}</Link></Button>)}</div>
 
         {/* One-click MT5 connection + automatic Botvio Robot signal delivery */}
         <BotvioRobotSignalShortcut />
@@ -91,12 +100,12 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Robots</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Configured Robots</CardTitle>
               <Bot className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
-              <div className="text-xl font-bold">{activeRobots}</div>
-              <p className="text-xs text-muted-foreground">current robot entitlements</p>
+              <div className="text-xl font-bold">{botsLoading ? <Skeleton className="h-7 w-12" /> : botsError ? "—" : botInstances?.length ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Your robot setups</p>
             </CardContent>
           </Card>
 
@@ -117,15 +126,15 @@ const Dashboard = () => {
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Hubs</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Membership Access</CardTitle>
               <BarChart3 className="h-4 w-4 text-primary" />
             </CardHeader>
-            <CardContent className="pt-1 pb-3"><div className="text-xl font-bold">{activeHubs}</div><p className="text-xs text-muted-foreground">active hub access</p></CardContent>
+            <CardContent className="pt-1 pb-3"><div className="text-xl font-bold">{membership.isLoading ? <Skeleton className="h-7 w-16" /> : membership.isError ? "—" : membership.data?.pricing_plans?.name || "No paid plan"}</div><p className="text-xs text-muted-foreground">{membershipItems.length ? "Included access shown above" : `${legacyHubs} individual grants`}</p></CardContent>
           </Card>
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 px-4 pt-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Connected Trading Accounts</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Saved Trading Accounts</CardTitle>
               <Wallet className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent className="pt-1 pb-3">
@@ -161,11 +170,11 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Current Botvio Access</CardTitle>
-                <CardDescription>Your active subscriptions and product access</CardDescription>
+                <CardTitle>Individual Access Grants</CardTitle>
+                <CardDescription>Additional or earlier purchases, separate from your membership</CardDescription>
               </div>
               <Button variant="outline" asChild>
-                <Link to="/marketplace">Open Botvio Store</Link>
+                <Link to="/marketplace">Memberships</Link>
               </Button>
             </div>
           </CardHeader>
@@ -173,7 +182,7 @@ const Dashboard = () => {
             <div className="flex flex-wrap items-center gap-2">
               {entitlementsLoading ? <Skeleton className="h-8 w-full" /> : entitlementsError ? <div className="text-sm text-destructive">Could not load access. <Button size="sm" variant="outline" onClick={() => refetchEntitlements()}>Retry</Button></div> : entitlements?.filter(isEntitlementActive).length ? entitlements.filter(isEntitlementActive).map((e) => (
                 <Button key={e.id} asChild variant="secondary" className="h-auto text-sm px-3 py-1.5"><Link to={(() => { const slug = e.products?.slug || ""; if (slug === "synthetic-hub") return "/synthetic-hub"; if (slug === "weltrade-hub") return "/weltrade"; if (slug === "mt5-direct" || slug === "mt5-direct-signals") return "/connections"; if (slug === "botvio-gold-robot") return "/apps/gold-robot"; if (slug === "botvio-synthetic-robot") return "/apps/synthetic-robot"; if (slug === "botvio-ai-robot" || slug === "botvio-robot") return "/dashboard"; return "/my-products"; })()}>{e.products?.name || "Active product"} · {e.ends_at ? new Date(e.ends_at).toLocaleDateString() : "No expiry"}</Link></Button>
-              )) : <span className="text-sm text-muted-foreground">No active Store products yet.</span>}
+              )) : <span className="text-sm text-muted-foreground">{membership.data ? "Your included membership access is shown above." : "No individual access grants."}</span>}
             </div>
             {entitlements && entitlements.some(e => !isEntitlementActive(e)) && <div className="mt-2 text-xs text-muted-foreground">Expired: {entitlements.filter(e => !isEntitlementActive(e)).map(e => e.products?.name || "Product").join(", ")}</div>}
           </CardContent>
@@ -254,7 +263,6 @@ const Dashboard = () => {
                       </Button>
                     </div>
                   ))}
-                  <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={() => setShowAllNotifications(v => !v)}>{showAllNotifications ? "Show recent" : "View all"}</Button><Button size="sm" variant="ghost" disabled={!unreadNotifications} onClick={async () => { const { error } = await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false); if (!error) refetchNotifications(); }}>Mark all read</Button></div>
                 </div>
               ) : (
                 <div className="text-center py-5">
@@ -319,6 +327,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   ))}
+                  <div className="mt-3 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => setShowAllNotifications(v => !v)}>{showAllNotifications ? "Show recent" : "View all"}</Button><Button size="sm" variant="ghost" disabled={!unreadNotifications} onClick={async () => { const { error } = await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false); if (!error) refetchNotifications(); }}>Mark all read</Button></div>
                 </div>
               ) : (
                 <div className="text-center py-5">
