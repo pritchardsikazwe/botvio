@@ -1,6 +1,6 @@
 # Current tasks
-- [ ] Implement uploaded 3-minute Precision / 5-minute Trend Confirmation Rise/Fall strategies, real-data scanner and chart overlays; preserve existing contracts and reject unclear setups.
-- [ ] Add opt-in strategy automation controls and tested limits, verify chart/scanner flow without enabling live trades.
+- [x] Implement uploaded 3-minute Precision / 5-minute Trend Confirmation Rise/Fall rules, four-instrument scanner, candle/timeframe controls and structure overlays; live public candles verified on desktop/phone, 10 tests pass, existing contracts preserved.
+- [ ] Activate new strategy automation (blocked: connected-demo execution and server-enforced atomic risk acceptance unavailable). Settings and stop UI added but deliberately disabled; existing cloud multiplier automation stays separate. No orders sent.
 - [x] Verify the reported Basic member's active access through November 29; shared membership status and included dashboard destinations verified signed-in on desktop/phone.
 - [x] Limit Signals to five days and 50-row pages; date indexes and cached paid-access RLS check eliminate observed statement timeouts. Member feed/search returned successfully; 23 regression tests pass.
 - [x] Verify and repair Weltrade app Account/sign-in navigation without broadening trading access; phone browser checks and four navigation tests pass.
