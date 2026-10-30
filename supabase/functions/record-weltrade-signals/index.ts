@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       .eq("connection_status", "connected")
       .limit(1);
 
-    if (!conn?.length) return json({ ok: false, error: "Weltrade feed not connected" }, 403);
+    if (!conn?.length) return json({ ok: false, skipped: true, reason: "not_connected", error: "Weltrade feed not connected" }, 200);
 
     const now = Date.now() / 1000;
     let inserted = 0;
