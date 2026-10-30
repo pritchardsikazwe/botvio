@@ -5,6 +5,8 @@ import { assertAutomationKey } from "../_shared/automationAuth.ts";import { load
 async function decryptSecret(enc:string,secret:string):Promise<string>{const bytes=Uint8Array.from(atob(enc.replace(/^v1:/,"")),(c)=>c.charCodeAt(0));const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:bytes.slice(0,12)},k,bytes.slice(12));return new TextDecoder().decode(pt)}
 type Candle={time:number;open:number;high:number;low:number;close:number};
 const FAMILIES=[
+{symbols:["MAX GainX"],family:"MAX GainX",bias:"SELL"},
+{symbols:["MAX PainX"],family:"MAX PainX",bias:"BUY"},
 {symbols:["GainX 400","GainX 600","GainX 800","GainX 999","GainX 1200"],family:"GainX",bias:"SELL"},
 {symbols:["PainX 400","PainX 600","PainX 800","PainX 999","PainX 1200"],family:"PainX",bias:"BUY"},
 {symbols:["FlipX 1","FlipX 2","FlipX 3","FlipX 4","FlipX 5"],family:"FlipX",bias:"BOTH"},
@@ -12,6 +14,7 @@ const FAMILIES=[
 {symbols:["BreakX 600","BreakX 1200","BreakX 1800"],family:"BreakX",bias:"BOTH"},
 {symbols:["TrendX 600","TrendX 1200","TrendX 1800"],family:"TrendX",bias:"BOTH"},
 {symbols:["FX VOL 20","FX VOL 40","FX VOL 60","FX VOL 80","FX VOL 99"],family:"FX Vol.",bias:"BOTH"},
+{symbols:["PlusX 1","FiboX","QuadX"],family:"Other SyntX",bias:"BOTH"},
 {symbols:["SFX VOL 20","SFX VOL 40","SFX VOL 60","SFX VOL 80","SFX VOL 99"],family:"SFX Vol.",bias:"BOTH"}
 ];
 const STRATEGY_BY_SYMBOL:Record<string,{min:number;stop:number;target:number;label:string}>={
@@ -147,7 +150,7 @@ let brokerSymbols:string[]=[];try{const symbolResponse=await api(base,key,"/Symb
 const families=wanted?FAMILIES.filter(f=>f.symbols.includes(wanted)):FAMILIES;
 const allSyms=families.flatMap(f=>f.symbols);const slot=Math.floor(Date.now()/300000)%4;
 // Prioritize the requested three families every run; rotate the other families.
-const priority=new Set(FAMILIES.slice(0,3).flatMap(f=>f.symbols));
+const priority=new Set(FAMILIES.slice(0,5).flatMap(f=>f.symbols));
 const pick=new Set(wanted?[wanted]:allSyms.filter((symbol,i)=>priority.has(symbol)||i%4===slot));
 const t0=Date.now();for(const f of families)for(const symbol of f.symbols){if(!pick.has(symbol))continue;if(Date.now()-t0>100000)break;
 const candidates=studioSymbolCandidates(symbol,brokerSymbols);if(!candidates.length){diag.push({symbol,error:"No matching symbol in broker Symbols"});continue}
