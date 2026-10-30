@@ -39,6 +39,6 @@ export default function Signup() {
       </div>
       <div className="space-y-2"><Label><Globe className="mr-2 inline h-4 w-4"/>Country</Label><Select value={country} onValueChange={setCountry}><SelectTrigger><SelectValue placeholder="Select your country"/></SelectTrigger><SelectContent className="max-h-60">{COUNTRIES.map(([code,name])=><SelectItem key={code} value={code}>{name}</SelectItem>)}</SelectContent></Select></div>
       <Button type="submit" disabled={loading} className="w-full" variant="gold">{loading?<><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Creating account...</>:<>Create Account <ArrowRight className="ml-2 h-4 w-4"/></>}</Button></form>
-      <p className="mt-5 text-center text-sm text-muted-foreground">Already have an account? <Link to="/" className="font-semibold text-primary">Sign in from the header</Link></p>
+      <p className="mt-5 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-semibold text-primary">Sign in</Link></p>
     </CardContent></Card></main></div>;
 }

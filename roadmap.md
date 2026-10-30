@@ -1,6 +1,6 @@
 # Current tasks
-- [ ] Verify and repair Weltrade app Account/sign-in navigation without broadening trading access.
-- [ ] Verify TradeCopy authentication rejection and remove any upstream credential exposure; key renewal requires the owner's replacement credential.
+- [x] Verify and repair Weltrade app Account/sign-in navigation without broadening trading access; phone browser checks and four navigation tests pass.
+- [ ] Restore TradeCopy authentication (blocked: provider rejects saved key; secure replacement form declined). Upstream error exposure removed in source and regression tests pass; no order sent.
 - [x] Package separate Weltrade AI Signals Android app with signed APK/AAB and its own private signing key; verify package identity, SDK and bundle signature.
 - [ ] Complete Weltrade Play Store launch (blocked: website association needs publication, Google Play app-signing fingerprint and financial/billing compliance review; device test unavailable).
 - [x] Replace Marketplace product sales with existing membership choices; verified three saved prices and Basic payment/sign-in screen; preserve existing purchases.
