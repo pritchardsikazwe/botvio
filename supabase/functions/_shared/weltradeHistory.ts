@@ -36,9 +36,11 @@ export function studioSymbols(value: unknown): string[] {
 export function studioSymbolCandidates(requested: string, symbols: string[]): string[] {
   const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
   const key = normalize(requested);
+  const words = requested.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
   return [...new Set([
     ...symbols.filter((symbol) => normalize(symbol) === key),
     ...symbols.filter((symbol) => normalize(symbol).startsWith(key)),
+    ...(words.length > 1 ? symbols.filter((symbol) => words.every((w) => normalize(symbol).includes(w))) : []),
   ])];
 }
 
