@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import type { EngineType } from "@/lib/signalEngines";
 import { Link } from "react-router-dom";
 import { ArrowRight, Bot, History, Home, Lightbulb, LineChart, ShieldCheck, Wallet } from "lucide-react";
+import { BinaryStrategyWorkspace } from "@/components/deriv-app/BinaryStrategyWorkspace";
 
 const CONTRACTS: { styleId: string; engine: EngineType; label: string; hint: string }[] = [
   { styleId: "rise-fall-scalping", engine: "rise_fall", label: "Rise / Fall", hint: "Up or down" },
@@ -135,7 +136,8 @@ export default function DerivOptionsTerminalPage() {
                       </button>
                     ))}
                   </div>
-                  {TIPS[active.styleId] && (
+                  {active.styleId === "rise-fall-scalping" && <BinaryStrategyWorkspace />}
+                  {TIPS[active.styleId] && active.styleId !== "rise-fall-scalping" && (
                     <Card className="border-primary/20 bg-primary/5"><CardContent className="p-3 space-y-2">
                       <div className="flex items-center gap-2 text-sm font-bold"><Lightbulb className="h-4 w-4 text-primary" /> {active.label} tips</div>
                       <div className="grid gap-2 sm:grid-cols-2 text-xs">
@@ -149,7 +151,7 @@ export default function DerivOptionsTerminalPage() {
                   <DerivTradePanel key={active.styleId} styleId={active.styleId} engine={active.engine} />
                 </div>
               )}
-              {tab === "auto" && <AutoTradePanel scope="Deriv Options" availableAssets={AUTO_MARKETS} />}
+              {tab === "auto" && <BinaryStrategyWorkspace automation />}
               {tab === "history" && <DerivTradeHistory />}
             </ErrorBoundary>
           </>
