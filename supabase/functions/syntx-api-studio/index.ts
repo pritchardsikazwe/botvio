@@ -71,7 +71,10 @@ function brokerSymbolCandidates(requested: string, symbols: string[]) {
     const candidate = normalizeSymbolKey(s);
     return candidate.startsWith(key) || key.startsWith(candidate);
   });
-  return [...new Set([...exact, ...normalized, ...variants, requested])];
+  // Word-order variants, e.g. "MAX GainX" listed as "GainX MAX 1000" or "MaxGainX".
+  const words = requested.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const wordMatches = words.length > 1 ? symbols.filter((s) => { const n = normalizeSymbolKey(s); return words.every((w) => n.includes(w)); }) : [];
+  return [...new Set([...exact, ...normalized, ...variants, ...wordMatches, requested])];
 }
 
 function normalizeSymbols(body: unknown): string[] {
@@ -352,7 +355,7 @@ Deno.serve(async (req) => {
         }
         resolvedSymbol = lastSymbol;
         rawSample = lastRaw.slice(0, 800);
-        throw new Error(`TradeCopy PriceHistory returned no valid candles for ${resolvedSymbol} (${timeframe}). Tried ${candidates.length} broker symbol variant(s) and multiple history windows. Response: ${rawSample}`);
+        throw new Error(`TradeCopy PriceHistory returned no valid candles for ${resolvedSymbol} (${timeframe}). Tried ${candidates.length} broker symbol variant(s) and multiple history windows. Similar broker symbols: ${symbols.filter((x) => normalizeSymbolKey(x).includes(normalizeSymbolKey(symbol).replace(/^max/, ''))).slice(0, 10).join(', ') || 'none'}. Response: ${rawSample.slice(0, 160)}`);
       });
       return json({ ok: true, candles, requestedSymbol: symbol, resolvedSymbol, ...(rawSample ? { rawSample } : {}) });
     }
