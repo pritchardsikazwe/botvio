@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { signalFeedWindow } from "@/lib/recentSignals";
+import { signalFeedWindow, SIGNAL_UNPAGED_MAX } from "@/lib/recentSignals";
 import { useAuth } from "@/contexts/AuthContext";
 
 export interface ManualSignal {
@@ -101,9 +101,20 @@ export const useManualSignals = (filters?: {
       if (filters?.status === "ACTIVE") query = query.eq("status", "ACTIVE").or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
       else if (filters?.status === "CLOSED") query = query.in("status", ["CLOSED", "EXPIRED"]);
       else if (filters?.status && filters.status !== "all") query = query.eq("status", filters.status);
-      const { data, error } = await query.range(window.from, window.to).abortSignal(signal);
-
-      if (error) throw error;
+      let data: unknown[] = [];
+      if (filters?.page !== undefined) {
+        const res = await query.range(window.from, window.to).abortSignal(signal);
+        if (res.error) throw res.error;
+        data = res.data ?? [];
+      } else {
+        // Unpaged callers (admin, broker pages) need every signal in the recent window.
+        for (let from = 0; from < SIGNAL_UNPAGED_MAX; from += 1000) {
+          const res = await query.range(from, from + 999).abortSignal(signal);
+          if (res.error) throw res.error;
+          data = data.concat(res.data ?? []);
+          if ((res.data?.length ?? 0) < 1000) break;
+        }
+      }
 
       // Process signals: auto-expire and filter
       let signals = (data as ManualSignal[]).map(signal => {
