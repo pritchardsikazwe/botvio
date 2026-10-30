@@ -1,20 +1,10 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { selectCurrentMembership, type MembershipRow } from "@/lib/currentMembership";
 
 export function useCurrentMembership() {
   const { user } = useAuth();
-  const client = useQueryClient();
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase.channel(`membership-${user.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "user_plan_subscriptions", filter: `user_id=eq.${user.id}` },
-        () => { client.invalidateQueries({ queryKey: ["current-membership", user.id] }); })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user?.id, client]);
   return useQuery({
     queryKey: ["current-membership", user?.id],
     enabled: !!user,
