@@ -168,7 +168,7 @@ export const BotvioRobotDashboard = () => {
       queryKey: ["botvio-dashboard-open-orders", account.id],
       queryFn: () => tradecopy<{ orders: Record<string, unknown>[] }>("open_orders", { account_id: account.id }),
       enabled: !!user,
-      refetchInterval: 15_000,
+      refetchInterval: (query) => query.state.error ? false : 15_000,
       staleTime: 5_000,
       retry: false,
     })),
