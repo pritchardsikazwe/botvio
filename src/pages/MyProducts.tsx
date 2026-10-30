@@ -13,6 +13,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { getProductDestination } from "@/lib/productDestination";
+import { UserSubscriptionCard } from "@/components/dashboard/UserSubscriptionCard";
+import { MembershipAccess } from "@/components/dashboard/MembershipAccess";
 
 const MyProducts = () => {
   const { user } = useAuth();
@@ -66,9 +68,9 @@ const MyProducts = () => {
       <main className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">My Products</h1>
+            <h1 className="text-2xl font-bold mb-2">My Membership & Access</h1>
             <p className="text-muted-foreground">
-              All your purchased bots, signal subscriptions, and courses
+              Membership and individual purchases
             </p>
           </div>
           <Button onClick={() => navigate("/marketplace")}>
@@ -77,6 +79,9 @@ const MyProducts = () => {
           </Button>
         </div>
 
+        <UserSubscriptionCard />
+        <MembershipAccess />
+        <h2 className="mb-3 text-base font-semibold">Individual purchases</h2>
         <Tabs value={tab} onValueChange={setTab} className="mb-6">
           <TabsList>
             <TabsTrigger value="all">All ({entitlements?.length || 0})</TabsTrigger>
@@ -128,9 +133,9 @@ const MyProducts = () => {
           <Card className="glass-card">
             <CardContent className="py-16 text-center">
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Products Yet</h3>
+              <h3 className="text-lg font-semibold mb-2">No individual purchases</h3>
               <p className="text-muted-foreground mb-4">
-                Visit the marketplace to browse and purchase trading tools
+                Membership access is separate and appears above.
               </p>
               <Button onClick={() => navigate("/marketplace")}>
                 <ShoppingCart className="h-4 w-4 mr-2" />

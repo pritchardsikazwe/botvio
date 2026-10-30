@@ -21,6 +21,8 @@ import { CopyTradingRoleGuide } from "@/components/tradecopy/CopyTradingRoleGuid
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getProductDestination } from "@/lib/productDestination";
+import { useCurrentMembership } from "@/hooks/useCurrentMembership";
+import { membershipDestinations } from "@/lib/currentMembership";
 
 const money = (value: number) => `${value >= 0 ? "+" : "-"}$${Math.abs(value).toFixed(2)}`;
 
@@ -149,6 +151,9 @@ const errorText = (error: unknown) => (error instanceof Error ? error.message : 
 
 export const BotvioRobotDashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  const membership = useCurrentMembership();
+  const membershipAccess = membershipDestinations(membership.data?.pricing_plans?.maps_to_tier || membership.data?.pricing_plans?.code)
+    .map(item => ({ ...item, endsAt: membership.data?.current_period_end ?? null }));
   const [authOpen, setAuthOpen] = useState(false);
   const { data: entitlements, isLoading: entitlementsLoading, isError: entitlementsError, refetch: refetchEntitlements } = useEntitlements();
   const { data: tradingAccounts, isLoading: tradingAccountsLoading, isError: tradingAccountsError, error: tradingAccountsErr, refetch: refetchTradingAccounts } = useTradingAccounts();
@@ -213,14 +218,14 @@ export const BotvioRobotDashboard = () => {
   }
 
   return <TradingOverview
-    access={activeEntitlements.map(item => ({ id: item.id, name: item.products?.name ?? "Active product", slug: item.products?.slug, endsAt: item.ends_at, href: getProductDestination(item.products?.slug, item.products?.type) }))}
+    access={[...membershipAccess, ...activeEntitlements.map(item => ({ id: item.id, name: item.products?.name ?? "Active product", slug: item.products?.slug, endsAt: item.ends_at, href: getProductDestination(item.products?.slug, item.products?.type) }))]}
     accounts={(tradingAccounts ?? []) as unknown as import("@/components/dashboard/TradingOverview").OverviewAccount[]}
     positions={positions}
-    accessLoading={entitlementsLoading} accountsLoading={tradingAccountsLoading} positionLoading={positionLoading}
-    accessError={entitlementsError} accountsError={tradingAccountsError ? errorText(tradingAccountsErr) : null}
+    accessLoading={entitlementsLoading || membership.isLoading} accountsLoading={tradingAccountsLoading} positionLoading={positionLoading}
+    accessError={entitlementsError || membership.isError} accountsError={tradingAccountsError ? errorText(tradingAccountsErr) : null}
     anyMock={anyMock}
     positionError={positionErrors || followerAccounts.isError || masterAccounts.isError ? <div className="overview-state"><div><p>Open positions could not be checked.</p>{failedAccounts.map(f => <p key={f.name}>{f.name}: {f.message}</p>)}{followerAccounts.isError && <p>{errorText(followerAccounts.error)}</p>}{masterAccounts.isError && <p>{errorText(masterAccounts.error)}</p>}</div><Button size="sm" variant="outline" onClick={retryPositions}>Retry</Button></div> : null}
-    retryAccess={() => { refetchEntitlements(); }} retryAccounts={() => { refetchTradingAccounts(); }} retryPositions={retryPositions}
+    retryAccess={() => { refetchEntitlements(); membership.refetch(); }} retryAccounts={() => { refetchTradingAccounts(); }} retryPositions={retryPositions}
     robotControls={<><TradeCopyAccountDashboard role="master" robot /><div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link to="/connections">Trading connections</Link></Button><Button asChild variant="outline"><Link to="/bots">AI Bots</Link></Button><Button asChild variant="outline"><Link to="/copy-trading/my">My Copy Trading</Link></Button></div><p className="text-xs text-muted-foreground">Review account mode, position sizing and copy settings before enabling live trading. A signal is not a guarantee of execution or profit.</p></>}
   />;
 };

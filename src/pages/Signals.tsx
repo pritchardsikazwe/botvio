@@ -43,6 +43,7 @@ import { SignalModesGuide } from "@/components/signals/SignalModesGuide";
 import { useAccessGate } from "@/hooks/useAccessGate";
 import { useTrialSignals } from "@/hooks/useTrialSignals";
 import { canUnlockTrialSignal, TRIAL_SIGNAL_DAILY_LIMIT } from "@/lib/signalTrial";
+import { SIGNAL_PAGE_SIZE } from "@/lib/recentSignals";
 
 const CATEGORIES = [
   { value: "all", label: "All Markets" },
@@ -100,9 +101,8 @@ const Signals = () => {
   })();
   const initialStatus = (() => {
     const s = initialParams?.get("status")?.toUpperCase();
-    return s === "ALL" || s === "ACTIVE" || s === "CLOSED" || s === "EXPIRED" ? s : "ACTIVE";
+    return s === "ALL" ? "all" : s === "ACTIVE" || s === "CLOSED" || s === "EXPIRED" ? s : "ACTIVE";
   })();
-  const showFullHistory = initialParams?.get("history") === "all";
 
   const initialDirection = (() => {
     const d = initialParams?.get("direction")?.toUpperCase();
@@ -123,6 +123,10 @@ const Signals = () => {
   const [direction, setDirection] = useState(initialDirection);
   const [timeframe, setTimeframe] = useState(initialTimeframe);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => { const timer = setTimeout(() => setDebouncedSearch(search), 300); return () => clearTimeout(timer); }, [search]);
+  useEffect(() => { setPage(0); }, [category, broker, status, direction, timeframe, debouncedSearch]);
 
   const initialTab = (() => {
     if (typeof window === "undefined") return "signals";
@@ -131,10 +135,11 @@ const Signals = () => {
   })();
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  const { data: signals, isLoading, refetch } = useManualSignals({
+  const { data: signals, isLoading, isFetching, isError, refetch } = useManualSignals({
     category,
     broker,
     status,
+    direction, timeframe, search: debouncedSearch, page,
   });
 
   const isPremium = useHasProductType("signal_pack");
@@ -144,6 +149,7 @@ const Signals = () => {
   const trial = useTrialSignals(trialMode);
   const used = trial.usage.data ?? 0;
   const lockedSignals = (trial.catalog.data || []).filter(s => !s.unlocked &&
+    Date.parse(s.created_at) >= Date.now() - 5 * 86_400_000 &&
     (category === "all" || s.category === category) &&
     (broker === "all" || s.broker?.includes(broker)) &&
     (status === "all" || s.status === status) &&
@@ -154,15 +160,19 @@ const Signals = () => {
   const { permission, requestPermission } = usePushNotifications();
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const channel = supabase
       .channel(`signals-realtime-${Math.random().toString(36).slice(2)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "trading_signals" }, () => refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trading_signals" }, () => {
+        if (!timer) timer = setTimeout(() => { timer = undefined; refetch(); }, 3000);
+      })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { if (timer) clearTimeout(timer); supabase.removeChannel(channel); };
   }, [refetch]);
 
   // Apply client-side filters for direction, timeframe, search
-  const filteredSignals = (signals || []).filter(s => {
+  const hasNextPage = (signals?.length ?? 0) > SIGNAL_PAGE_SIZE;
+  const filteredSignals = (signals || []).slice(0, SIGNAL_PAGE_SIZE).filter(s => {
     if (direction !== "all" && s.direction !== direction) return false;
     if (timeframe !== "all" && s.timeframe !== timeframe) return false;
     if (search && !s.symbol.toLowerCase().includes(search.toLowerCase())) return false;
@@ -224,14 +234,14 @@ const Signals = () => {
           ]}
           stats={[
             { icon: TrendingUp, value: String(activeCount), label: "Active in this view" },
-            { icon: Signal, value: isLoading ? "--" : String((signals || []).length), label: "Signals loaded" },
-            { icon: Crown, value: isPremium ? "Premium" : "Free tier", label: "Your signal access" },
+            { icon: Signal, value: isLoading ? "--" : String(Math.min(SIGNAL_PAGE_SIZE, (signals || []).length)), label: "Signals loaded" },
+            { icon: Crown, value: subscription.isLoading ? "Checking…" : subscription.isPaid ? subscription.planName || "Member" : isPremium ? "Premium" : "Free trial", label: "Your signal access" },
             { icon: Bell, value: permission === "granted" ? "On" : "Off", label: "Signal alerts" },
           ]}
           action={
             <>
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                <RefreshCw className="mr-2 h-4 w-4" aria-hidden />Refresh
+              <Button variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} aria-hidden />Refresh
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link to="/tools">Position size tools</Link>
@@ -278,6 +288,7 @@ const Signals = () => {
           )}
 
           <TabsContent value="signals" className="mt-6">
+            <p className="mb-4 text-sm text-muted-foreground">Last 5 days · {status === "ACTIVE" ? "Current signals" : "Recent signals"}</p>
             {/* Compact mobile filters: status + market */}
             <div className="mb-4 space-y-3 sm:hidden">
               <div className="grid grid-cols-3 gap-2" aria-label="Filter signals by status">
@@ -407,7 +418,7 @@ const Signals = () => {
             </Card>
 
             {/* Premium upsell */}
-            {!isPremium && user && (
+            {!isPremium && !subscription.isPaid && !subscription.isLoading && user && (
               <Card className="glass-card border-warning/30 mb-6">
                 <CardContent className="py-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -422,7 +433,7 @@ const Signals = () => {
             )}
 
             {/* Signals Grid */}
-            {isLoading ? (
+            {isError ? <div role="alert" className="border border-destructive/30 p-6"><p className="mb-3">Signals could not be loaded. Please try again.</p><Button variant="outline" onClick={() => refetch()}>Retry signals</Button></div> : isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <Card key={i} className="glass-card animate-pulse">
@@ -470,6 +481,8 @@ const Signals = () => {
                 </CardContent>
               </Card>
             )}
+
+            {!trialMode && (page > 0 || hasNextPage) && <nav aria-label="Signal pages" className="mt-6 flex items-center justify-center gap-4"><Button variant="outline" disabled={page === 0 || isFetching} onClick={() => setPage(p => p - 1)}>Previous</Button><span className="text-sm text-muted-foreground">Page {page + 1}</span><Button variant="outline" disabled={!hasNextPage || isFetching} onClick={() => setPage(p => p + 1)}>Next 50 signals</Button></nav>}
 
             {/* Notification prompt */}
             <Card className="glass-card mt-8 border-primary/30">

@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useGlobalAccess } from "@/hooks/useGlobalAccess";
+import { useCurrentMembership } from "@/hooks/useCurrentMembership";
 
 export interface SubscriptionGate {
   planCode: string | null;
@@ -23,6 +22,7 @@ export interface SubscriptionGate {
   maxAccounts: number;
   maxBotInstances: number;
   isLoading: boolean;
+  isError: boolean;
 }
 
 const PLAN_TIER: Record<string, number> = {
@@ -36,25 +36,7 @@ export function useSubscriptionGate(): SubscriptionGate {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const globalAccess = useGlobalAccess();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["subscription-gate", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_plan_subscriptions")
-        .select("*, pricing_plans(*)")
-        .eq("user_id", user!.id)
-        .eq("status", "active")
-        .or("current_period_end.is.null,current_period_end.gt." + new Date().toISOString())
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-    refetchOnWindowFocus: true,
-    refetchInterval: 60_000,
-    staleTime: 15_000,
-  });
+  const { data, isLoading, isError } = useCurrentMembership();
 
   const plan = data?.pricing_plans as any;
   const code = plan?.maps_to_tier || plan?.code || "free";
@@ -71,7 +53,7 @@ export function useSubscriptionGate(): SubscriptionGate {
       canCopyTrade: true, canUsePremiumBots: true, canBeProvider: true,
       canAccessPremiumSignals: true, canAccessSportsBetting: true, canAccessAllCourses: true,
       canAccessSignalsCenter: true, canUploadAiCharts: true, canAccessTradingHubs: true, canAccessLegacyBots: true,
-      maxAccounts: 99, maxBotInstances: 99, isLoading: false,
+      maxAccounts: 99, maxBotInstances: 99, isLoading: false, isError: false,
     };
   }
 
@@ -95,5 +77,6 @@ export function useSubscriptionGate(): SubscriptionGate {
     maxAccounts: plan?.max_accounts ?? 1,
     maxBotInstances: plan?.max_bot_instances ?? 0,
     isLoading,
+    isError,
   };
 }

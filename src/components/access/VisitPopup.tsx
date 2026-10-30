@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { X, Crown, Gift, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAccessGate } from "@/hooks/useAccessGate";
+import { useCurrentMembership } from "@/hooks/useCurrentMembership";
+import { sessionPredatesReset } from "@/lib/sessionFreshness";
 
 const EXNESS_LINK = "https://one.toexness.com/a/ts1kvs1k";
 const DERIV_LINK = "https://t.deriv.link?t=Y8BMQZGW5HAE";
@@ -19,31 +20,28 @@ export function VisitPopup() {
   const [open, setOpen] = useState(false);
   const gate = useAccessGate();
 
-  const { data: hasPlan, isLoading } = useQuery({
-    queryKey: ["visit-popup-plan", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase.from("user_plan_subscriptions")
-        .select("id, pricing_plans(code)").eq("user_id", user!.id).eq("status", "active").maybeSingle();
-      const code = (data?.pricing_plans as any)?.code;
-      return !!code && code !== "free";
-    },
-  });
+  const { data: membership, isLoading, isError } = useCurrentMembership();
+  const hasPlan = !!membership && membership.pricing_plans?.code !== "free";
 
   useEffect(() => { const t = setTimeout(() => setOpen(true), 1500); return () => clearTimeout(t); }, []);
 
   // Sign-ins older than this moment are cleared once, so everyone signs in fresh.
   useEffect(() => {
-    const CUTOFF = Date.parse("2026-10-26T13:45:00Z");
-    const last = user?.last_sign_in_at ? Date.parse(user.last_sign_in_at) : 0;
-    if (user && last < CUTOFF) supabase.auth.signOut().catch(() => {});
+    if (!user) return;
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!cancelled && data.session?.user.id === user.id && sessionPredatesReset(user.last_sign_in_at, data.session.access_token)) {
+        supabase.auth.signOut().catch(() => {});
+      }
+    });
+    return () => { cancelled = true; };
   }, [user]);
 
   // Unsubscribed users whose free week has ended are signed out (web and installed app) until an admin approves them.
   const [forcedOut, setForcedOut] = useState(false);
   const PAY_PATHS = ["/choose-plan", "/payment", "/billing", "/marketplace", "/botvio-vip", "/pricing", "/auth", "/login", "/signup"];
   const onPayPath = PAY_PATHS.some((p) => pathname.startsWith(p));
-  const mustLogout = !onPayPath && !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");
+  const mustLogout = !onPayPath && !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !isError && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");
   useEffect(() => {
     if (!mustLogout) return;
     setForcedOut(true); setOpen(true);
@@ -53,7 +51,7 @@ export function VisitPopup() {
   if (loading) return null;
   if (!open && !forcedOut) return null;
   if ((!forcedOut && pathname.startsWith("/admin")) || onPayPath) return null;
-  if (user && (isAdmin || isSuperAdmin || isLoading || hasPlan)) return null;
+  if (user && (isAdmin || isSuperAdmin || isLoading || isError || hasPlan)) return null;
   if (user && profile && !profile.whatsapp_number?.trim()) return null; // WhatsApp prompt comes first
 
   const member = !!user;

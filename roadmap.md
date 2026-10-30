@@ -1,6 +1,6 @@
 # Current tasks
-- [ ] Verify the reported Basic member's saved access, unify dashboard membership status, and add clear membership shortcuts without changing execution controls.
-- [ ] Limit the Signals feed to the last five days with bounded pages and calmer refreshes; test query limits and verify the member's dashboard and signals.
+- [x] Verify the reported Basic member's active access through November 29; shared membership status and included dashboard destinations verified signed-in on desktop/phone.
+- [x] Limit Signals to five days and 50-row pages; date indexes and cached paid-access RLS check eliminate observed statement timeouts. Member feed/search returned successfully; 23 regression tests pass.
 - [x] Verify and repair Weltrade app Account/sign-in navigation without broadening trading access; phone browser checks and four navigation tests pass.
 - [ ] Restore TradeCopy authentication (blocked: provider rejects saved key; secure replacement form declined). Upstream error exposure removed in source and regression tests pass; no order sent.
 - [x] Package separate Weltrade AI Signals Android app with signed APK/AAB and its own private signing key; verify package identity, SDK and bundle signature.
@@ -22,7 +22,7 @@
 - [x] Add staged fail-closed entry protections, remove stop-stripping/upward lots, test pure risk/strategy calculations, improve emergency readback and add honest Risk Centre observations; no deployment.
 - [ ] Complete persistent atomic risk, strategy execution and broker follower acceptance (blocked: TradeCopy pre-entry admission/account contract capabilities undocumented; no authenticated DEMO follower evidence). No protected/live claim; specified branch unavailable in managed sandbox.
 
-- [ ] Match the Botvio user dashboard to the supplied dark overview reference; preserve account/auth/trading behavior and verify the appearance.
+- [x] Match the Botvio user dashboard to the dark overview reference; active membership/access shown and desktop/phone appearance checked without page overflow; execution controls unchanged.
 - [x] Add responsive AI Signals & Market Analysis and Copy Trading to MT5 sections to the existing public landing page; preserve all access rules and verify links/build.
 
 - [x] Deploy repairs to the existing five-minute Weltrade maker: prioritize GainX/PainX/FlipX, validate sessions, match broker symbols/time, use closed candles and correct timeframe metadata; preserve Home and MT5 routes.
