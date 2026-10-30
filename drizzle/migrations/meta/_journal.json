@@ -218,6 +218,13 @@
       "when": 1793345100538,
       "tag": "0030_optimize_recent_signal_feed",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793393059655,
+      "tag": "0031_refer_and_earn_wallet",
+      "breakpoints": true
     }
   ]
 }
