@@ -234,7 +234,7 @@ const Signals = () => {
           ]}
           stats={[
             { icon: TrendingUp, value: String(activeCount), label: "Active in this view" },
-            { icon: Signal, value: isLoading ? "--" : String((signals || []).length), label: "Signals loaded" },
+            { icon: Signal, value: isLoading ? "--" : String(Math.min(SIGNAL_PAGE_SIZE, (signals || []).length)), label: "Signals loaded" },
             { icon: Crown, value: subscription.isLoading ? "Checking…" : subscription.isPaid ? subscription.planName || "Member" : isPremium ? "Premium" : "Free trial", label: "Your signal access" },
             { icon: Bell, value: permission === "granted" ? "On" : "Off", label: "Signal alerts" },
           ]}
