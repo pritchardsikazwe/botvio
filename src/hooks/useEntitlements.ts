@@ -114,7 +114,7 @@ export function useHasProductType(type: string) {
   if (plan.isPaid) {
     if ((type === "hub" || type === "strategy") && plan.canAccessTradingHubs) return true;
     if (type === "bot" && plan.canUsePremiumBots) return true;
-    if ((type === "signal" || type === "signals") && plan.canAccessPremiumSignals) return true;
+    if ((type === "signal" || type === "signals" || type === "signal_pack") && plan.canAccessPremiumSignals) return true;
   }
   return entitlements?.some(e => e.products?.type === type && isEntitlementActive(e)) ?? false;
 }
