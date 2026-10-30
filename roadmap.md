@@ -1,4 +1,5 @@
 # Current tasks
+- [ ] Package signed full Botvio Google Play APK/AAB using existing ai.botvio.live upload key; exclude binary-options trading and non-store payments, verify signatures and explain remaining Play Console requirements.
 - [x] Add real Deriv tick view, charted RSI and clear strategy confirmation diagnostics; 12 strategy tests pass, signed-in tick/candle/expiry controls and phone layout verified without runtime errors or orders. NO TRADE and disabled automation safeguards retained.
 - [x] Handle rejected TradeCopy credentials without a page-level 502; deployed tradecopy-api, passed 25 tests and verified the real rejection inside the signed-in dashboard without runtime errors; no trades.
 - [x] Implement uploaded 3-minute Precision / 5-minute Trend Confirmation Rise/Fall rules, four-instrument scanner, candle/timeframe controls and structure overlays; live public candles verified on desktop/phone, 10 tests pass, existing contracts preserved.
