@@ -1,4 +1,6 @@
 # Current tasks
+- [ ] Implement uploaded 3-minute Precision / 5-minute Trend Confirmation Rise/Fall strategies, real-data scanner and chart overlays; preserve existing contracts and reject unclear setups.
+- [ ] Add opt-in strategy automation controls and tested limits, verify chart/scanner flow without enabling live trades.
 - [x] Verify the reported Basic member's active access through November 29; shared membership status and included dashboard destinations verified signed-in on desktop/phone.
 - [x] Limit Signals to five days and 50-row pages; date indexes and cached paid-access RLS check eliminate observed statement timeouts. Member feed/search returned successfully; 23 regression tests pass.
 - [x] Verify and repair Weltrade app Account/sign-in navigation without broadening trading access; phone browser checks and four navigation tests pass.
