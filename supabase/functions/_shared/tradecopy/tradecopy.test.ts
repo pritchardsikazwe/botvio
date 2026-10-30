@@ -126,6 +126,31 @@ describe("API error handling & adapter selection", () => {
     expect(url.searchParams.get("accountStatus")).toBe("1");
     expect(url.searchParams.get("orderType")).toBe("BUY");
   });
+  it("never forwards upstream text through authentication errors", async () => {
+    for (const status of [401, 403]) {
+      const f = vi.fn(async () => new Response("Invalid key; apiKey test-credential; password test-password", { status }));
+      await expect(new TradeCopyMt5Adapter("test-credential", "http://x", f as unknown as typeof fetch).diagnostic(1)).rejects.toMatchObject({
+        code: "auth",
+        message: `TradeCopy rejected the API key (${status}). Renew the key in TradeCopy API Studio and update the saved server secret.`,
+      });
+    }
+  });
+  it("does not forward upstream HTTP or application failure payloads", async () => {
+    const f = vi.fn(async () => new Response(JSON.stringify({ message: "test-credential test-password" }), { status: 500 }));
+    await expect(new TradeCopyMt5Adapter("test-credential", "http://x", f as unknown as typeof fetch).diagnostic(1)).rejects.toMatchObject({
+      code: "upstream", message: "TradeCopy request failed (HTTP 500). Check the service status and account configuration.",
+    });
+    const appFailure = vi.fn(async () => new Response(JSON.stringify({ success: false, message: "test-credential test-password" })));
+    await expect(new TradeCopyMt5Adapter("test-credential", "http://x", appFailure as unknown as typeof fetch).diagnostic(1)).rejects.toMatchObject({
+      code: "upstream", message: "TradeCopy rejected the request. Check the account configuration in TradeCopy API Studio.",
+    });
+  });
+  it("does not forward credential-bearing network exceptions", async () => {
+    const f = vi.fn(async () => { throw new Error("https://x/?password=test-password&apiKey=test-credential"); });
+    await expect(new TradeCopyMt5Adapter("test-credential", "http://x", f as unknown as typeof fetch).diagnostic(1)).rejects.toMatchObject({
+      code: "network", message: "TradeCopy unreachable. Check the service connection and try again.",
+    });
+  });
   it("redacts secrets", () => {
     expect(redact({ password: "p", nested: { apiKey: "k", ok: 1 } })).toEqual({ password: "[redacted]", nested: { apiKey: "[redacted]", ok: 1 } });
   });
