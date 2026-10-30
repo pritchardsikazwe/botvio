@@ -5,8 +5,8 @@ import { assertAutomationKey } from "../_shared/automationAuth.ts";import { load
 async function decryptSecret(enc:string,secret:string):Promise<string>{const bytes=Uint8Array.from(atob(enc.replace(/^v1:/,"")),(c)=>c.charCodeAt(0));const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:bytes.slice(0,12)},k,bytes.slice(12));return new TextDecoder().decode(pt)}
 type Candle={time:number;open:number;high:number;low:number;close:number};
 const FAMILIES=[
-{symbols:["MAX GainX"],family:"MAX GainX",bias:"SELL"},
-{symbols:["MAX PainX"],family:"MAX PainX",bias:"BUY"},
+{symbols:["MAX GainX 1000","MAX GainX 2000"],family:"MAX GainX",bias:"SELL"},
+{symbols:["MAX PainX 1000","MAX PainX 2000"],family:"MAX PainX",bias:"BUY"},
 {symbols:["GainX 400","GainX 600","GainX 800","GainX 999","GainX 1200"],family:"GainX",bias:"SELL"},
 {symbols:["PainX 400","PainX 600","PainX 800","PainX 999","PainX 1200"],family:"PainX",bias:"BUY"},
 {symbols:["FlipX 1","FlipX 2","FlipX 3","FlipX 4","FlipX 5"],family:"FlipX",bias:"BOTH"},
