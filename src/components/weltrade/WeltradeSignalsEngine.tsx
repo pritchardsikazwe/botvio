@@ -174,10 +174,11 @@ export const WeltradeSignalsEngine = () => {
       });
 
       if (error) {
-        console.error("Weltrade signal publish failed:", error);
+        console.warn("Weltrade signal publish skipped:", error.message);
         return;
       }
-      if (data?.ok) sessionStorage.setItem(cacheKey, key);
+      // Viewers without their own Weltrade connection only display signals.
+      if (data?.ok || data?.skipped) sessionStorage.setItem(cacheKey, key);
     }, 1500);
 
     return () => clearTimeout(t);
