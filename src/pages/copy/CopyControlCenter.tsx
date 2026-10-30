@@ -150,7 +150,7 @@ export const ProviderCommandCenter = () => (
 const errorText = (error: unknown) => (error instanceof Error ? error.message : "Request failed");
 
 export const BotvioRobotDashboard = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isSuperAdmin } = useAuth();
   const membership = useCurrentMembership();
   const membershipAccess = membershipDestinations(membership.data?.pricing_plans?.maps_to_tier || membership.data?.pricing_plans?.code)
     .map(item => ({ ...item, endsAt: membership.data?.current_period_end ?? null }));
@@ -226,7 +226,7 @@ export const BotvioRobotDashboard = () => {
     anyMock={anyMock}
     positionError={positionErrors || followerAccounts.isError || masterAccounts.isError ? <div className="overview-state"><div><p>Open positions could not be checked.</p>{failedAccounts.map(f => <p key={f.name}>{f.name}: {f.message}</p>)}{followerAccounts.isError && <p>{errorText(followerAccounts.error)}</p>}{masterAccounts.isError && <p>{errorText(masterAccounts.error)}</p>}</div><Button size="sm" variant="outline" onClick={retryPositions}>Retry</Button></div> : null}
     retryAccess={() => { refetchEntitlements(); membership.refetch(); }} retryAccounts={() => { refetchTradingAccounts(); }} retryPositions={retryPositions}
-    robotControls={<><TradeCopyAccountDashboard role="master" robot /><div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link to="/connections">Trading connections</Link></Button><Button asChild variant="outline"><Link to="/bots">AI Bots</Link></Button><Button asChild variant="outline"><Link to="/copy-trading/my">My Copy Trading</Link></Button></div><p className="text-xs text-muted-foreground">Review account mode, position sizing and copy settings before enabling live trading. A signal is not a guarantee of execution or profit.</p></>}
+    robotControls={<>{isSuperAdmin && <TradeCopyAccountDashboard role="master" robot />}<div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link to="/connections">Trading connections</Link></Button><Button asChild variant="outline"><Link to="/bots">AI Bots</Link></Button><Button asChild variant="outline"><Link to="/copy-trading/my">My Copy Trading</Link></Button></div><p className="text-xs text-muted-foreground">Review account mode, position sizing and copy settings before enabling live trading. A signal is not a guarantee of execution or profit.</p></>}
   />;
 };
 
