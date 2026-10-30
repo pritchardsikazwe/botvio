@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { PaymentRequestsPanel } from "@/components/admin/PaymentRequestsPanel";
+import { AdminAffiliateWalletsCard } from "@/components/admin/AdminAffiliateWalletsCard";
 import { AdminMonetizationTab } from "@/components/admin/AdminMonetizationTab";
 import { AdminGlobalAccessCard } from "@/components/admin/AdminGlobalAccessCard";
 import { AdminMasterMarketsCard } from "@/components/admin/AdminMasterMarketsCard";
@@ -278,6 +279,7 @@ export default function AdminControlCenter(){
           <AdminMonetizationSummary />
           <AdminMonetizationTab />
           <PaymentRequestsPanel />
+          <AdminAffiliateWalletsCard />
           <SubscriptionFeatureMatrix />
         </>}
         {section==="signals"&&<>

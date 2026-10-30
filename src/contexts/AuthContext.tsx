@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { readStoredReferralCode, REFERRAL_STORAGE_KEY } from "@/lib/referEarn";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { trackBotvioEvent } from "@/components/analytics/analytics";
@@ -317,6 +318,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSettings((prev) => (prev ? { ...prev, ...data } : null));
     }
   };
+
+  // Attribute a stored referral link to the signed-in account once (server validates it).
+  useEffect(() => {
+    if (!user?.id) return;
+    const code = readStoredReferralCode();
+    if (!code) return;
+    supabase.rpc("claim_referral", { p_code: code }).then(({ error }) => {
+      if (!error) localStorage.removeItem(REFERRAL_STORAGE_KEY);
+    });
+  }, [user?.id]);
 
   // Keep a lightweight heartbeat for authenticated users so Admin can distinguish
   // registered users who are actually connected from users who merely have an account.

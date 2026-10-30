@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useCurrentMembership } from "@/hooks/useCurrentMembership";
 import { membershipDestinations } from "@/lib/currentMembership";
 import { MembershipAccess } from "@/components/dashboard/MembershipAccess";
+import { ReferEarnCard } from "@/components/dashboard/ReferEarnCard";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
@@ -86,6 +87,7 @@ const Dashboard = () => {
         {/* The assigned membership is the single source of feature access for this user. */}
         <UserSubscriptionCard />
         <MembershipAccess />
+        <ReferEarnCard />
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">{[
           { to: "/signals", label: "Current signals", icon: Signal },
           { to: "/signals?tab=chart-analysis", label: "Analyse a chart", icon: CandlestickChart },

@@ -43,16 +43,7 @@ export const useCreateAffiliateProfile = () => {
     mutationFn: async () => {
       if (!user) throw new Error("Not authenticated");
       
-      const code = generateAffiliateCode();
-      const { data, error } = await supabase
-        .from("affiliate_profiles")
-        .insert({
-          user_id: user.id,
-          affiliate_code: code,
-        })
-        .select()
-        .single();
-
+      const { data, error } = await supabase.rpc("ensure_my_affiliate");
       if (error) throw error;
       return data;
     },
@@ -301,18 +292,11 @@ export const useRequestPayout = () => {
   return useMutation({
     mutationFn: async (params: { amount_usd: number; method_id: string }) => {
       if (!user) throw new Error("Not authenticated");
-      if (params.amount_usd < 2) throw new Error("Minimum payout is $2");
-
-      const { data, error } = await supabase
-        .from("payout_requests")
-        .insert({
-          user_id: user.id,
-          amount_usd: params.amount_usd,
-          method_id: params.method_id,
-        })
-        .select()
-        .single();
-
+      const { data: method } = await supabase.from("payout_methods").select("*").eq("id", params.method_id).maybeSingle();
+      if (!method) throw new Error("Choose a payout method");
+      const destination = method.type === "crypto" ? `${method.crypto_network || ""} ${method.crypto_address || ""}` : `${method.mobile_network || ""} ${method.mobile_number || ""}`;
+      // The server pays out the full wallet balance (minimum $5).
+      const { data, error } = await supabase.rpc("request_affiliate_payout", { p_channel: method.type, p_destination: destination.trim() });
       if (error) throw error;
       return data;
     },

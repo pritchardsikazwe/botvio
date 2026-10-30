@@ -121,6 +121,7 @@ export type Database = {
           earning_type: string
           id: string
           order_id: string | null
+          payment_request_id: string | null
           referred_user_id: string | null
           referrer_user_id: string
           rule_id: string | null
@@ -133,6 +134,7 @@ export type Database = {
           earning_type: string
           id?: string
           order_id?: string | null
+          payment_request_id?: string | null
           referred_user_id?: string | null
           referrer_user_id: string
           rule_id?: string | null
@@ -145,6 +147,7 @@ export type Database = {
           earning_type?: string
           id?: string
           order_id?: string | null
+          payment_request_id?: string | null
           referred_user_id?: string | null
           referrer_user_id?: string
           rule_id?: string | null
@@ -4782,6 +4785,8 @@ export type Database = {
           created_at: string
           id: string
           method_id: string
+          payout_channel: string | null
+          payout_destination: string | null
           processed_at: string | null
           processed_by: string | null
           status: string
@@ -4794,6 +4799,8 @@ export type Database = {
           created_at?: string
           id?: string
           method_id: string
+          payout_channel?: string | null
+          payout_destination?: string | null
           processed_at?: string | null
           processed_by?: string | null
           status?: string
@@ -4806,6 +4813,8 @@ export type Database = {
           created_at?: string
           id?: string
           method_id?: string
+          payout_channel?: string | null
+          payout_destination?: string | null
           processed_at?: string | null
           processed_by?: string | null
           status?: string
@@ -7772,16 +7781,52 @@ export type Database = {
         Returns: Json
       }
       admin_analytics_summary: { Args: { p_days?: number }; Returns: Json }
+      admin_list_affiliate_wallets: {
+        Args: never
+        Returns: {
+          affiliate_code: string
+          balance: number
+          display_name: string
+          email: string
+          lifetime: number
+          paying: number
+          pending_amount: number
+          pending_channel: string
+          pending_destination: string
+          pending_request_id: string
+          referred: number
+          user_id: string
+          whatsapp_number: string
+        }[]
+      }
       admin_monetization_summary: { Args: never; Returns: Json }
       admin_review_broker_vip_claim: {
         Args: { p_action: string; p_claim_id: string; p_note?: string }
+        Returns: Json
+      }
+      admin_settle_affiliate_wallet: {
+        Args: {
+          p_channel: string
+          p_note?: string
+          p_reference: string
+          p_user_id: string
+        }
         Returns: Json
       }
       admin_upsert_app_setting: {
         Args: { p_description?: string; p_key: string; p_value: Json }
         Returns: Json
       }
+      affiliate_wallet_balance: { Args: { p_user_id: string }; Returns: number }
       auto_expire_signals: { Args: never; Returns: undefined }
+      award_referral_commission: {
+        Args: {
+          p_amount: number
+          p_payment_request_id: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       can_read_signal: { Args: { p_signal_id: string }; Returns: boolean }
       claim_chart_upload_slot: {
         Args: { _user_id: string }
@@ -7795,6 +7840,7 @@ export type Database = {
           trial_expired: boolean
         }[]
       }
+      claim_referral: { Args: { p_code: string }; Returns: Json }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -7804,6 +7850,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      ensure_my_affiliate: { Args: never; Returns: string }
       finalize_stream: { Args: { p_stream_id: string }; Returns: undefined }
       get_auto_trade_today_pnl: {
         Args: { _user_id: string }
@@ -7865,6 +7912,17 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_my_affiliate_wallet: { Args: never; Returns: Json }
+      get_my_referrals: {
+        Args: never
+        Returns: {
+          display_name: string
+          earned_usd: number
+          joined_at: string
+          masked_email: string
+          status: string
+        }[]
       }
       get_p2p_trader_stats: {
         Args: { trader_id: string }
@@ -7957,6 +8015,10 @@ export type Database = {
         Returns: undefined
       }
       register_device: { Args: { p_device_id: string }; Returns: number }
+      request_affiliate_payout: {
+        Args: { p_channel: string; p_destination: string }
+        Returns: Json
+      }
       review_payment_atomic: {
         Args: {
           p_action: string
