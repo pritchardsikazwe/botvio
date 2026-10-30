@@ -1,4 +1,5 @@
 # Project architecture rules
+- Google Play packages compile the store-only native route restrictions, including current Deriv terminal aliases and web checkout; website routes remain unchanged and signing materials stay only in private release artifacts.
 - Trial signal details require atomic per-user daily unlocks enforced by restrictive signal RLS; homepage IDs are stored in a shared daily batch so refreshes cannot rotate category picks or bypass the trial cap outside public selections.
 
 - Signup contact metadata is persisted by the existing profile-creation trigger before email confirmation; profile edits require saved-row readback, and WhatsApp validation is shared across signup and completion to prevent false success.

@@ -5,12 +5,12 @@ export const mobileAuthRedirect = () =>
   isNativeMobile() ? "botvio://auth/callback" : window.location.origin;
 
 export const STORE_RESTRICTED_ROUTES = new Set([
-  "/binary-options", "/deriv-options", "/rise-fall", "/sports-betting",
+  "/binary-options", "/deriv-options", "/deriv/options", "/deriv-options-terminal", "/options", "/rise-fall", "/sports-betting",
   "/weltrade-trade", "/deriv-app", "/connections", "/bridge-request", "/accounts",
   "/copy-trading", "/providers", "/provider-dashboard", "/botvio-robot", "/bots",
   "/auto-trade", "/auto", "/trading", "/trade-modes",
   "/bots/binance", "/binance", "/settings/binance",
-  "/billing", "/marketplace", "/my-products",
+  "/billing", "/marketplace", "/my-products", "/payment", "/choose-plan", "/pricing", "/botvio-vip", "/broker-onboarding", "/apps",
 ]);
 
 export const STORE_FREE_ROUTES = new Set([
