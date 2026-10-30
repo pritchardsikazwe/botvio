@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAccessGate } from "@/hooks/useAccessGate";
 import { useCurrentMembership } from "@/hooks/useCurrentMembership";
 import { sessionPredatesReset } from "@/lib/sessionFreshness";
+import { isNativeMobile, isStoreBuild } from "@/lib/mobile";
 
 const EXNESS_LINK = "https://one.toexness.com/a/ts1kvs1k";
 const DERIV_LINK = "https://t.deriv.link?t=Y8BMQZGW5HAE";
@@ -19,6 +20,7 @@ export function VisitPopup() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const gate = useAccessGate();
+  const storeEdition = isNativeMobile() && isStoreBuild();
 
   const { data: membership, isLoading, isError } = useCurrentMembership();
   const hasPlan = !!membership && membership.pricing_plans?.code !== "free";
@@ -27,7 +29,7 @@ export function VisitPopup() {
 
   // Sign-ins older than this moment are cleared once, so everyone signs in fresh.
   useEffect(() => {
-    if (!user) return;
+    if (!user || storeEdition) return;
     let cancelled = false;
     supabase.auth.getSession().then(({ data }) => {
       if (!cancelled && data.session?.user.id === user.id && sessionPredatesReset(user.last_sign_in_at, data.session.access_token)) {
@@ -35,20 +37,20 @@ export function VisitPopup() {
       }
     });
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, storeEdition]);
 
   // Unsubscribed users whose free week has ended are signed out (web and installed app) until an admin approves them.
   const [forcedOut, setForcedOut] = useState(false);
   const PAY_PATHS = ["/choose-plan", "/payment", "/billing", "/marketplace", "/botvio-vip", "/pricing", "/auth", "/login", "/signup"];
   const onPayPath = PAY_PATHS.some((p) => pathname.startsWith(p));
-  const mustLogout = !onPayPath && !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !isError && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");
+  const mustLogout = !storeEdition && !onPayPath && !!user && !loading && !gate.isLoading && !gate.hasAccess && !isLoading && !isError && !hasPlan && !isAdmin && !isSuperAdmin && !pathname.startsWith("/admin");
   useEffect(() => {
     if (!mustLogout) return;
     setForcedOut(true); setOpen(true);
     supabase.auth.signOut().catch(() => {});
   }, [mustLogout]);
 
-  if (loading) return null;
+  if (loading || storeEdition) return null;
   if (!open && !forcedOut) return null;
   if ((!forcedOut && pathname.startsWith("/admin")) || onPayPath) return null;
   if (user && (isAdmin || isSuperAdmin || isLoading || isError || hasPlan)) return null;
