@@ -69,6 +69,8 @@ export function analyzeBinary(candles: NormalizedCandle[], strategy: BinaryStrat
     if (breakoutUp) rise.push("Resistance breakout"); if (breakoutDown) fall.push("Support breakdown");
     if (r>=50 && r<=68 && r>priorR) rise.push("Trend-safe RSI");
     if (r>=32 && r<=50 && r<priorR) fall.push("Trend-safe RSI");
+    if (bull && last.close>prev.close) rise.push("Bullish close confirmation");
+    if (bear && last.close<prev.close) fall.push("Bearish close confirmation");
   }
   const required = strategy === "precision" ? 3 : 4;
   const riseStructure = w || supportBounce || lineUp || (strategy === "trend" && breakoutUp);

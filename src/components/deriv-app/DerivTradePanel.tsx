@@ -519,7 +519,7 @@ export const DerivTradePanel = ({ styleId, engine }: DerivTradePanelProps) => {
                 <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-2.5">
                   <div className="grid grid-cols-2 gap-1 rounded-lg bg-background/70 p-1">
                     <Button size="sm" variant={tradeMode === "manual" ? "default" : "ghost"} onClick={() => setTradeMode("manual")} className="h-8 text-[10px]"><UserRound className="mr-1 h-3.5 w-3.5" /> Manual</Button>
-                    <Button size="sm" variant={tradeMode === "auto" ? "default" : "ghost"} onClick={() => setTradeMode("auto")} className="h-8 text-[10px]"><Bot className="mr-1 h-3.5 w-3.5" /> Auto</Button>
+                    <Button size="sm" variant="ghost" disabled title="Use Auto bot for confirmed 3m / 5m strategies and risk limits" className="h-8 text-[10px]"><Bot className="mr-1 h-3.5 w-3.5" /> Auto bot tab</Button>
                   </div>
                   <div className="mt-2 flex items-center justify-between text-[10px]">
                     <span className="text-muted-foreground">RSI trigger</span>
