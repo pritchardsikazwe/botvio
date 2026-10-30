@@ -225,6 +225,13 @@
       "when": 1793393059655,
       "tag": "0031_refer_and_earn_wallet",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793393078376,
+      "tag": "0032_affiliate_code_generator_portable",
+      "breakpoints": true
     }
   ]
 }
