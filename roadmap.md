@@ -1,10 +1,11 @@
 # Current tasks
+- [x] Handle rejected TradeCopy credentials without a page-level 502; deployed tradecopy-api, passed 25 tests and verified the real rejection inside the signed-in dashboard without runtime errors; no trades.
 - [x] Implement uploaded 3-minute Precision / 5-minute Trend Confirmation Rise/Fall rules, four-instrument scanner, candle/timeframe controls and structure overlays; live public candles verified on desktop/phone, 10 tests pass, existing contracts preserved.
 - [ ] Activate new strategy automation (blocked: connected-demo execution and server-enforced atomic risk acceptance unavailable). Settings and stop UI added but deliberately disabled; existing cloud multiplier automation stays separate. No orders sent.
 - [x] Verify the reported Basic member's active access through November 29; shared membership status and included dashboard destinations verified signed-in on desktop/phone.
 - [x] Limit Signals to five days and 50-row pages; date indexes and cached paid-access RLS check eliminate observed statement timeouts. Member feed/search returned successfully; 23 regression tests pass.
 - [x] Verify and repair Weltrade app Account/sign-in navigation without broadening trading access; phone browser checks and four navigation tests pass.
-- [ ] Restore TradeCopy authentication (blocked: provider rejects saved key; secure replacement form declined). Upstream error exposure removed in source and regression tests pass; no order sent.
+- [ ] Restore TradeCopy authentication (blocked: provider rejects saved key; renewed TradeCopy API Studio key required through secure replacement form). Upstream error exposure removed; no order sent.
 - [x] Package separate Weltrade AI Signals Android app with signed APK/AAB and its own private signing key; verify package identity, SDK and bundle signature.
 - [ ] Complete Weltrade Play Store launch (blocked: website association needs publication, Google Play app-signing fingerprint and financial/billing compliance review; device test unavailable).
 - [x] Replace Marketplace product sales with existing membership choices; verified three saved prices and Basic payment/sign-in screen; preserve existing purchases.
