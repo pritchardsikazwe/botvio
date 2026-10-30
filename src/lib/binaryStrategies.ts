@@ -3,6 +3,12 @@ import type { NormalizedCandle } from "@/lib/marketData/types";
 
 export type BinaryStrategy = "precision" | "trend";
 export interface Pivot { index: number; time: number; price: number }
+export function binaryRsiSeries(candles: NormalizedCandle[], now = Date.now()) {
+  const closed = candles.filter(c => (c.time + 60) * 1000 <= now);
+  if (closed.some((c,i)=>![c.time,c.close].every(Number.isFinite)||(i>0&&c.time<=closed[i-1].time))) return [];
+  const values = RSI.calculate({ values: closed.map(c=>c.close), period: 14 });
+  return values.map((value,i)=>({time:closed[i+14].time,value}));
+}
 export interface BinarySetup {
   strategy: BinaryStrategy; duration: 3 | 5; direction: "RISE" | "FALL" | "NO TRADE";
   quality: number; rsi: number | null; trend: "Bullish" | "Bearish" | "Sideways";
@@ -76,10 +82,14 @@ export function analyzeBinary(candles: NormalizedCandle[], strategy: BinaryStrat
   const riseStructure = w || supportBounce || lineUp || (strategy === "trend" && breakoutUp);
   const fallStructure = m || resistanceReject || lineDown || (strategy === "trend" && breakoutDown);
   let direction: BinarySetup["direction"] = rise.length>=required && riseStructure ? "RISE" : fall.length>=required && fallStructure ? "FALL" : "NO TRADE";
-  if ((riseStructure && fallStructure) || last.high-last.low>atr*2.5 || Math.abs(last.close-fast)>atr*1.5 || r>78 || r<22) direction="NO TRADE";
+  const conflict = riseStructure && fallStructure;
+  const extended = last.high-last.low>atr*2.5 || Math.abs(last.close-fast)>atr*1.5 || r>78 || r<22;
+  if (conflict || extended) direction="NO TRADE";
   if (strategy==="trend" && ((direction==="RISE" && !up) || (direction==="FALL" && !down))) direction="NO TRADE";
   const confirmations = direction==="FALL" ? fall : direction==="RISE" ? rise : rise.length>=fall.length ? rise : fall;
-  return { ...base, direction, quality: direction==="NO TRADE" ? 0 : Math.min(95, 55+confirmations.length*8), rsi:r, trend:up?"Bullish":down?"Bearish":"Sideways", support,resistance, pattern:w?"W confirmed":m?"M confirmed":"None confirmed", trendline:lineUp||lineDown?"Rejection confirmed":breakoutUp||breakoutDown?"Break confirmed":"No confirmation", confirmations, reason:direction==="NO TRADE"?"Weak, conflicting or extended setup":confirmations.join(" · "), entry:last.close, time:last.time+60, line:linePivots };
+  const structure = rise.length>=fall.length ? riseStructure : fallStructure;
+  const reason = conflict ? "Conflicting price structures; wait for a clear direction" : extended ? "Price or RSI is extended; wait for a pullback" : !structure ? "Waiting for a support/resistance reaction, confirmed M/W pattern or trendline setup" : confirmations.length<required ? `Waiting for ${required-confirmations.length} more confirmation${required-confirmations.length===1?"":"s"} (${confirmations.length}/${required})` : strategy==="trend" && direction==="NO TRADE" ? "Waiting for EMA trend alignment" : confirmations.join(" · ");
+  return { ...base, direction, quality: direction==="NO TRADE" ? Math.min(74, Math.round(confirmations.length/required*70)) : Math.min(95, 55+confirmations.length*8), rsi:r, trend:up?"Bullish":down?"Bearish":"Sideways", support,resistance, pattern:w?"W confirmed":m?"M confirmed":"None confirmed", trendline:lineUp||lineDown?"Rejection confirmed":breakoutUp||breakoutDown?"Break confirmed":"No confirmation", confirmations, reason, entry:last.close, time:last.time+60, line:linePivots };
 }
 
 export interface BinaryLimits { hourly: number; consecutiveLosses: number; dailyLoss: number; quality: number }

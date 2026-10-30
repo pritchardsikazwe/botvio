@@ -1,8 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { analyzeBinary, binaryRiskStop, detectDoublePattern } from "@/lib/binaryStrategies";
+import { analyzeBinary, binaryRsiSeries, binaryRiskStop, detectDoublePattern } from "@/lib/binaryStrategies";
 const limits={hourly:5,consecutiveLosses:3,dailyLoss:10,quality:80};
 const now=Date.parse("2026-10-30T07:33:00Z");
 describe("binary strategy rules",()=>{
+  it("plots RSI 14 from closed candles only",()=>{
+    const candles=Array.from({length:20},(_,i)=>({time:now/1000-(20-i)*60,open:100+i,close:101+i,high:102+i,low:99+i}));
+    const points=binaryRsiSeries([...candles,{time:now/1000,open:120,high:120,low:0,close:0}],now);
+    expect(points).toHaveLength(6);
+    expect(points.at(-1)).toEqual({time:now/1000-60,value:100});
+  });
+  it("does not fabricate a signal when RSI is extended",()=>{
+    const candles=Array.from({length:90},(_,i)=>({time:now/1000-(90-i)*60,open:100+i,close:101+i,high:102+i,low:99+i}));
+    const setup=analyzeBinary(candles,"precision",now);
+    expect(setup.direction).toBe("NO TRADE");
+    expect(setup.reason).toContain("extended");
+    expect(setup.quality).toBeLessThan(75);
+  });
   it("uses a 3-minute Precision expiry",()=>expect(analyzeBinary([],"precision",now).duration).toBe(3));
   it("uses a 5-minute Trend Confirmation expiry",()=>expect(analyzeBinary([],"trend",now).duration).toBe(5));
   it("rejects insufficient data rather than inventing signals",()=>expect(analyzeBinary([],"precision",now).direction).toBe("NO TRADE"));
