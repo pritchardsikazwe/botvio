@@ -1,4 +1,5 @@
 # Current tasks
+- [ ] Handle rejected TradeCopy credentials without a page-level 502, verify the dashboard error state, and request secure replacement of the saved key; no trades.
 - [x] Implement uploaded 3-minute Precision / 5-minute Trend Confirmation Rise/Fall rules, four-instrument scanner, candle/timeframe controls and structure overlays; live public candles verified on desktop/phone, 10 tests pass, existing contracts preserved.
 - [ ] Activate new strategy automation (blocked: connected-demo execution and server-enforced atomic risk acceptance unavailable). Settings and stop UI added but deliberately disabled; existing cloud multiplier automation stays separate. No orders sent.
 - [x] Verify the reported Basic member's active access through November 29; shared membership status and included dashboard destinations verified signed-in on desktop/phone.
