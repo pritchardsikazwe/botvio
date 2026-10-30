@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { signalFeedWindow } from "@/lib/recentSignals";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface ManualSignal {
   id: string;
@@ -66,34 +68,40 @@ function isSignalExpired(signal: ManualSignal): boolean {
   return expiresAt < now;
 }
 
-// Helper to check if signal is too old for history (2 days)
-function isSignalTooOldForHistory(signal: ManualSignal): boolean {
-  const now = new Date();
-  const createdAt = new Date(signal.created_at);
-  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-  return createdAt < twoDaysAgo;
-}
-
 export const useManualSignals = (filters?: {
   category?: string;
   broker?: string;
   status?: string;
   includeHistory?: boolean;
+  page?: number;
+  direction?: string;
+  timeframe?: string;
+  search?: string;
 }) => {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ["manual-signals", filters],
-    queryFn: async () => {
-      // Show all signals (both manual and automated)
+    queryKey: ["manual-signals", user?.id, filters],
+    queryFn: async ({ signal }) => {
+      const window = signalFeedWindow(filters?.page);
       let query = supabase
         .from("trading_signals")
         .select("*")
-        .order("created_at", { ascending: false });
+        .gte("created_at", window.since)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false });
 
       if (filters?.category && filters.category !== "all") {
         query = query.eq("category", filters.category);
       }
 
-      const { data, error } = await query;
+      if (filters?.broker && filters.broker !== "all") query = query.contains("broker", [filters.broker]);
+      if (filters?.direction && filters.direction !== "all") query = query.eq("direction", filters.direction);
+      if (filters?.timeframe && filters.timeframe !== "all") query = query.eq("timeframe", filters.timeframe);
+      if (filters?.search) query = query.ilike("symbol", `%${filters.search.replace(/[%_]/g, "")}%`);
+      if (filters?.status === "ACTIVE") query = query.eq("status", "ACTIVE").or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+      else if (filters?.status === "CLOSED") query = query.in("status", ["CLOSED", "EXPIRED"]);
+      else if (filters?.status && filters.status !== "all") query = query.eq("status", filters.status);
+      const { data, error } = await query.range(window.from, window.to).abortSignal(signal);
 
       if (error) throw error;
 
@@ -106,21 +114,16 @@ export const useManualSignals = (filters?: {
         return signal;
       });
 
-      // Filter out signals older than 2 days from history
-      signals = signals.filter(signal => !isSignalTooOldForHistory(signal));
-
       // Apply status filter
       if (filters?.status && filters.status !== "all") {
         signals = filters.status === "CLOSED" ? signals.filter(s => s.status === "CLOSED" || s.status === "EXPIRED") : signals.filter(s => s.status === filters.status);
       }
 
-      // Apply broker filter
-      if (filters?.broker && filters.broker !== "all") {
-        signals = signals.filter(s => s.broker?.includes(filters.broker!));
-      }
-
       return signals;
     },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
   });
 };
 
