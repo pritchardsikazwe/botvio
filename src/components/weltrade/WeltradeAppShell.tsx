@@ -1,11 +1,13 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { Activity, LayoutGrid, User } from "lucide-react";
-import { detectWeltradeAppMode, isWeltradeAllowedPath } from "@/lib/weltradeAppMode";
+import { detectWeltradeAppMode, weltradeAppRedirect } from "@/lib/weltradeAppMode";
+import { useAuth } from "@/contexts/AuthContext";
 
 /** Restricts the Weltrade Android app to Weltrade-only screens. Normal website visitors are unaffected. */
 export function WeltradeAppShell({ children, rest }: { children: ReactNode; rest: ReactNode }) {
   const { pathname, search } = useLocation();
+  const { user } = useAuth();
   const [on] = useState(() => detectWeltradeAppMode(search));
 
   useEffect(() => {
@@ -13,12 +15,13 @@ export function WeltradeAppShell({ children, rest }: { children: ReactNode; rest
   }, [on]);
 
   if (!on) return <>{children}{rest}</>;
-  if (!isWeltradeAllowedPath(pathname)) return <Navigate to="/weltrade" replace />;
+  const redirect = weltradeAppRedirect(pathname, search);
+  if (redirect) return <Navigate to={redirect} replace />;
 
   const tabs = [
     { to: "/weltrade", label: "Hub", icon: LayoutGrid, active: pathname === "/weltrade" },
     { to: "/weltrade/signals", label: "Signals", icon: Activity, active: pathname.startsWith("/weltrade/") },
-    { to: "/profile", label: "Account", icon: User, active: pathname.startsWith("/profile") },
+    { to: user ? "/settings" : "/auth?next=%2Fsettings", label: "Account", icon: User, active: ["/settings", "/auth", "/login", "/signup"].some((path) => pathname === path || pathname.startsWith(path + "/")) },
   ];
 
   return (
