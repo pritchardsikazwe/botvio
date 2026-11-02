@@ -10,12 +10,29 @@ import {
 } from "./analytics";
 
 const PREV_KEY = "botvio_previous_path";
+const ATTRIBUTION_KEY = "botvio_session_attribution";
 const CONSENT_EVENT = "botvio:cookie-consent-updated";
 
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
     dataLayer?: Array<Record<string, unknown>>;
+  }
+}
+
+function readSessionValue(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionValue(key: string, value: string) {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    // Analytics remains best-effort when browser storage is restricted.
   }
 }
 
@@ -46,12 +63,36 @@ export function AnalyticsTracker() {
 
     const { visitorId, sessionId } = getAnalyticsIdentity();
     const currentPath = location.pathname + location.search;
-    const previousPath = sessionStorage.getItem(PREV_KEY);
+    const previousPath = readSessionValue(PREV_KEY);
     const query = new URLSearchParams(location.search);
     const externalReferrer = document.referrer || "";
-    const source = query.get("utm_source") || sourceFrom(externalReferrer);
-    const campaign = query.get("utm_campaign");
-    const medium = query.get("utm_medium");
+    const storedAttribution = (() => {
+      try {
+        return JSON.parse(readSessionValue(ATTRIBUTION_KEY) || "null") as
+          | { source?: string; medium?: string | null; campaign?: string | null }
+          | null;
+      } catch {
+        return null;
+      }
+    })();
+    const hasCampaignParams = query.has("utm_source") || query.has("utm_medium") || query.has("utm_campaign");
+    const attribution = hasCampaignParams
+      ? {
+          source: query.get("utm_source") || sourceFrom(externalReferrer),
+          medium: query.get("utm_medium"),
+          campaign: query.get("utm_campaign"),
+        }
+      : storedAttribution || {
+          source: sourceFrom(externalReferrer),
+          medium: null,
+          campaign: null,
+        };
+    if (!storedAttribution || hasCampaignParams) {
+      writeSessionValue(ATTRIBUTION_KEY, JSON.stringify(attribution));
+    }
+    const source = attribution.source || "Direct";
+    const campaign = attribution.campaign || null;
+    const medium = attribution.medium || null;
     const startedAt = Date.now();
 
     const baseEvent = {
@@ -68,7 +109,7 @@ export function AnalyticsTracker() {
       ? new URL(previousPath, window.location.origin).toString()
       : externalReferrer;
 
-    sessionStorage.setItem(PREV_KEY, currentPath);
+    writeSessionValue(PREV_KEY, currentPath);
 
     // Send one canonical virtual page_view per React Router navigation.
     void insertAnalyticsEvent({
