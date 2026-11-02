@@ -36,7 +36,7 @@ function loadConsentTags() {
   if (gaId && !document.getElementById("ga4-loader")) {
     window.dataLayer = window.dataLayer || [];
     window.gtag = function (...args: unknown[]) {
-      window.dataLayer!.push({ event: "gtag.command", args });
+      window.dataLayer!.push(args as unknown as Record<string, unknown>);
     };
     window.gtag("js", new Date());
     // SPA pageviews are sent by AnalyticsTracker after each route transition.
