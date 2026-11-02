@@ -70,7 +70,7 @@ export const CookieConsent = () => {
             onClick={() => persist("accepted")}
             className="flex-1 md:flex-none"
           >
-            Accept analytics
+            Accept all
           </Button>
           <Button
             type="button"
