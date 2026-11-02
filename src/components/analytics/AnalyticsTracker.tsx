@@ -10,8 +10,14 @@ import {
 } from "./analytics";
 
 const PREV_KEY = "botvio_previous_path";
-const START_KEY = "botvio_page_started_at";
 const CONSENT_EVENT = "botvio:cookie-consent-updated";
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: Array<Record<string, unknown>>;
+  }
+}
 
 async function insertAnalyticsEvent(payload: Record<string, unknown>) {
   try {
@@ -41,53 +47,57 @@ export function AnalyticsTracker() {
     const { visitorId, sessionId } = getAnalyticsIdentity();
     const currentPath = location.pathname + location.search;
     const previousPath = sessionStorage.getItem(PREV_KEY);
-    const previousStartedAt = Number(sessionStorage.getItem(START_KEY) || Date.now());
-    const startedAt = Date.now();
     const query = new URLSearchParams(location.search);
     const externalReferrer = document.referrer || "";
     const source = query.get("utm_source") || sourceFrom(externalReferrer);
+    const campaign = query.get("utm_campaign");
+    const medium = query.get("utm_medium");
+    const startedAt = Date.now();
+
     const baseEvent = {
       visitor_id: visitorId,
       session_id: sessionId,
       user_id: userRef.current || null,
-      referrer: previousPath
-        ? new URL(previousPath, window.location.origin).toString()
-        : externalReferrer,
       source,
-      medium: query.get("utm_medium"),
-      campaign: query.get("utm_campaign"),
+      medium,
+      campaign,
       device_type: deviceType(),
     };
 
-    let durationRecorded = false;
-    const recordPreviousPageTime = () => {
-      if (!previousPath || durationRecorded) return;
-      durationRecorded = true;
-      void insertAnalyticsEvent({
-        ...baseEvent,
-        event_name: "page_time",
-        path: previousPath.split("?")[0],
-        metadata: { duration_seconds: Math.max(0, Math.round((startedAt - previousStartedAt) / 1000)) },
-      });
-    };
-
-    if (previousPath && previousPath !== currentPath) recordPreviousPageTime();
+    const pageReferrer = previousPath
+      ? new URL(previousPath, window.location.origin).toString()
+      : externalReferrer;
 
     sessionStorage.setItem(PREV_KEY, currentPath);
-    sessionStorage.setItem(START_KEY, String(startedAt));
 
+    // Send one canonical virtual page_view per React Router navigation.
     void insertAnalyticsEvent({
       ...baseEvent,
       event_name: "page_view",
       path: location.pathname,
-      referrer: previousPath
-        ? new URL(previousPath, window.location.origin).toString()
-        : externalReferrer,
+      referrer: pageReferrer,
       metadata: {
         title: document.title,
         page_location: window.location.href,
         landing_page: !previousPath,
       },
+    });
+
+    // GA4's automatic page_view is disabled in the tag config. We own SPA
+    // pageviews here; disable GA4 Enhanced Measurement's browser-history
+    // pageviews in the web stream to prevent duplicate events.
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "page_view", {
+        page_title: document.title,
+        page_location: window.location.href,
+        page_referrer: pageReferrer,
+      });
+    }
+    window.dataLayer?.push({
+      event: "botvio_virtual_page_view",
+      page_title: document.title,
+      page_location: window.location.href,
+      page_referrer: pageReferrer,
     });
 
     const autoEvent = location.pathname.startsWith("/brokers/")
@@ -106,15 +116,28 @@ export function AnalyticsTracker() {
         ...baseEvent,
         event_name: autoEvent,
         path: location.pathname,
+        referrer: pageReferrer,
         metadata: { title: document.title },
       });
     }
 
-    const onPageHide = () => recordPreviousPageTime();
-    window.addEventListener("pagehide", onPageHide);
+    let durationRecorded = false;
+    const recordCurrentPageTime = () => {
+      if (durationRecorded) return;
+      durationRecorded = true;
+      void insertAnalyticsEvent({
+        ...baseEvent,
+        event_name: "page_time",
+        path: location.pathname,
+        referrer: pageReferrer,
+        metadata: { duration_seconds: Math.max(0, Math.round((Date.now() - startedAt) / 1000)) },
+      });
+    };
+
+    window.addEventListener("pagehide", recordCurrentPageTime);
     return () => {
-      window.removeEventListener("pagehide", onPageHide);
-      recordPreviousPageTime();
+      window.removeEventListener("pagehide", recordCurrentPageTime);
+      recordCurrentPageTime();
     };
   }, [location.pathname, location.search, consentRevision]);
 
