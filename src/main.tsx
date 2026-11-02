@@ -8,10 +8,15 @@ import { initAppUpdates, isBusy, markUpdatePending } from "./services/appUpdateS
 
 enforceCanonicalDomain();
 
-// Analytics is deliberately deferred until the visitor accepts optional cookies.
-// This keeps the website's first-party analytics and Google tags consent-aware.
 const CONSENT_KEY = "botvio:cookie-consent:v1";
 const CONSENT_EVENT = "botvio:cookie-consent-updated";
+
+declare global {
+  interface Window {
+    dataLayer?: Array<Record<string, unknown>>;
+    gtag?: (...args: unknown[]) => void;
+  }
+}
 
 function hasAcceptedAnalyticsCookies() {
   try {
@@ -21,18 +26,21 @@ function hasAcceptedAnalyticsCookies() {
   }
 }
 
-function loadAnalyticsTags() {
+// Optional analytics/advertising tags are not requested until consent is given.
+function loadConsentTags() {
+  if (!hasAcceptedAnalyticsCookies()) return;
+
   const gaId = import.meta.env.VITE_GA_ID;
   const gtmId = import.meta.env.VITE_GTM_ID;
 
-  if (!hasAcceptedAnalyticsCookies()) return;
-
   if (gaId && !document.getElementById("ga4-loader")) {
-    // Initialise the queue before the async library can execute.
-    const init = document.createElement("script");
-    init.id = "ga4-init";
-    init.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config','${gaId}',{anonymize_ip:true});`;
-    document.head.appendChild(init);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function (...args: unknown[]) {
+      window.dataLayer!.push({ event: "gtag.command", args });
+    };
+    window.gtag("js", new Date());
+    // SPA pageviews are sent by AnalyticsTracker after each route transition.
+    window.gtag("config", gaId, { anonymize_ip: true, send_page_view: false });
 
     const loader = document.createElement("script");
     loader.id = "ga4-loader";
@@ -42,16 +50,27 @@ function loadAnalyticsTags() {
   }
 
   if (gtmId && !document.getElementById("gtm-loader")) {
+    window.dataLayer = window.dataLayer || [];
     const loader = document.createElement("script");
     loader.id = "gtm-loader";
     loader.text = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`;
     document.head.appendChild(loader);
   }
+
+  const adsenseId = "ca-pub-8741937856196827";
+  if (!document.getElementById("adsense-loader")) {
+    const adsense = document.createElement("script");
+    adsense.id = "adsense-loader";
+    adsense.async = true;
+    adsense.crossOrigin = "anonymous";
+    adsense.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`;
+    document.head.appendChild(adsense);
+  }
 }
 
-loadAnalyticsTags();
+loadConsentTags();
 window.addEventListener(CONSENT_EVENT, (event) => {
-  if ((event as CustomEvent<{ value?: string }>).detail?.value === "accepted") loadAnalyticsTags();
+  if ((event as CustomEvent<{ value?: string }>).detail?.value === "accepted") loadConsentTags();
 });
 
 declare global {
