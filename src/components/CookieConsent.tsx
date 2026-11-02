@@ -44,7 +44,7 @@ export const CookieConsent = () => {
         <Cookie className="w-5 h-5 text-primary shrink-0 mt-0.5" aria-hidden />
         <p className="text-xs md:text-sm text-muted-foreground flex-1">
           We use essential storage to operate Botvio. With your permission, we
-          also use analytics cookies to measure anonymous visits and improve the
+          also use analytics and advertising cookies to measure visits and improve the
           platform. See our{" "}
           <Link to="/privacy" className="text-primary underline">
             Privacy Policy
