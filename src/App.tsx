@@ -16,6 +16,7 @@ import { WhatsAppProfileNotice } from "@/components/auth/WhatsAppProfileNotice";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { FirstVisitTour } from "@/components/onboarding/FirstVisitTour";
 import { VisitPopup } from "@/components/access/VisitPopup";
+import { MembersOnlyNotice } from "@/components/access/MembersOnlyNotice";
 import { WeltradeAppShell } from "@/components/weltrade/WeltradeAppShell";
 
 
@@ -47,6 +48,7 @@ const App = () => (
               <CookieConsent />
               <WhatsAppProfileNotice />
               <VisitPopup />
+              <MembersOnlyNotice />
               <FirstVisitTour />
             </BrowserRouter>
           </DerivProvider>
