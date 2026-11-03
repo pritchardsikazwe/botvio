@@ -131,12 +131,18 @@ export function PaidRouteGuard({ children }: Props) {
 
   if (isFreeOnStore(location.pathname)) return <>{children}</>;
 
-  if (isPublicSeoPath(location.pathname)) {
+  // Market pages (Gold, Synthetic Hub, indices…) are now members-only; visitors see the sign-up panel.
+  if (isPublicSeoPath(location.pathname) && !gate.isLoading && !gate.isAuthenticated) {
     return (
-      <>
-        {children}
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 pt-10 text-center">
+          <Lock className="mx-auto h-8 w-8 text-primary" />
+          <h1 className="mt-3 text-2xl font-extrabold">Members-only market</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Sign up for a free 7-day trial, then subscribe to keep access.</p>
+        </main>
         <PublicConversionPanel />
-      </>
+      </div>
     );
   }
 
