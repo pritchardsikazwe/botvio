@@ -4,11 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Cookie, X } from "lucide-react";
 
 const STORAGE_KEY = "botvio:cookie-consent:v1";
+const CONSENT_EVENT = "botvio:cookie-consent-updated";
 
-/**
- * GDPR/AdSense-friendly cookie banner. Required for AdSense approval
- * (functional cookie consent for EU traffic) and improves trust signals.
- */
 export const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
@@ -17,7 +14,7 @@ export const CookieConsent = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) setVisible(true);
     } catch {
-      // ignore (private mode etc.)
+      setVisible(true);
     }
   }, []);
 
@@ -28,8 +25,9 @@ export const CookieConsent = () => {
         JSON.stringify({ value, at: new Date().toISOString() })
       );
     } catch {
-      // ignore
+      // Consent cannot be persisted when browser storage is unavailable.
     }
+    window.dispatchEvent(new CustomEvent(CONSENT_EVENT, { detail: { value } }));
     setVisible(false);
   };
 
@@ -39,14 +37,15 @@ export const CookieConsent = () => {
     <div
       role="dialog"
       aria-label="Cookie consent"
+      aria-modal="false"
       className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-[100] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-lg border border-border bg-card/95 shadow-2xl backdrop-blur-md md:bottom-4"
     >
       <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4">
         <Cookie className="w-5 h-5 text-primary shrink-0 mt-0.5" aria-hidden />
         <p className="text-xs md:text-sm text-muted-foreground flex-1">
-          We use cookies to power core features, measure traffic and personalise
-          content (including ads from third parties such as Google AdSense). See
-          our{" "}
+          We use essential storage to operate Botvio. With your permission, we
+          also use analytics and advertising cookies to measure visits and improve the
+          platform. See our{" "}
           <Link to="/privacy" className="text-primary underline">
             Privacy Policy
           </Link>{" "}
@@ -77,7 +76,7 @@ export const CookieConsent = () => {
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Dismiss cookie banner"
+            aria-label="Reject analytics cookies"
             onClick={() => persist("rejected")}
             className="h-8 w-8 shrink-0 md:hidden"
           >
