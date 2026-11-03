@@ -61,6 +61,21 @@ const HomeMockup = () => {
   const goldLive = useDerivLiveSignal("XAU/USD", 300);
   const { isMarketOpen } = useMarketSession("XAUUSD");
   const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
+  const [trendingMarketsNoticeOpen, setTrendingMarketsNoticeOpen] = useState(false);
+
+  useEffect(() => {
+    // Show the discovery popup once per browser session; users can dismiss it.
+    if (typeof window === "undefined") return;
+    if (window.sessionStorage.getItem("botvio-trending-markets-notice-dismissed") !== "1") {
+      const timer = window.setTimeout(() => setTrendingMarketsNoticeOpen(true), 1800);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
+
+  const dismissTrendingMarketsNotice = () => {
+    window.sessionStorage.setItem("botvio-trending-markets-notice-dismissed", "1");
+    setTrendingMarketsNoticeOpen(false);
+  };
 
   useEffect(() => {
     const sections = document.querySelectorAll("[data-reveal]");
@@ -85,7 +100,7 @@ const HomeMockup = () => {
             <div className="leading-none"><div className="text-lg font-black tracking-tight">BOTVIO</div><div className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">AI Trading Intelligence</div></div>
           </Link>
           <nav className="mx-auto hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
-            {[['Markets','/markets'],['AI Analysis','/chart/XAUUSD'],['Signals','/signals'],['Copy Trading','/copy-trading'],['Bots','/bots'],['Brokers','/brokers'],['Learn','/learn']].map(([label,to]) => <Link key={to} to={to} className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground">{label}</Link>)}
+            {[['Markets','/markets'],['Trending Markets','/trending-markets'],['AI Analysis','/chart/XAUUSD'],['Signals','/signals'],['Copy Trading','/copy-trading'],['Bots','/bots'],['Brokers','/brokers'],['Learn','/learn']].map(([label,to]) => <Link key={to} to={to} className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground">{label}</Link>)}
           </nav>
           <div className="ml-auto flex items-center gap-2">
             {user ? <Button size="sm" asChild className="font-bold"><Link to="/dashboard">Dashboard</Link></Button> : <><Button variant="ghost" size="sm" onClick={start} className="hidden sm:inline-flex">Log in</Button><Button size="sm" onClick={start} className="font-bold">Start Free</Button></>}
@@ -159,6 +174,18 @@ const HomeMockup = () => {
         </section>
 
         <section className="border-b border-border/50 bg-card/20"><div className="container mx-auto px-4 py-5"><div className="mb-3 flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Explore markets</p><Link to="/markets" className="text-xs font-semibold text-primary">All markets <ChevronRight className="inline h-3 w-3" /></Link></div><div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">{markets.map((m,i) => <Link key={m.to} to={m.to} className="group rounded-xl border border-border/60 bg-card/70 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${i*70}ms` }}><div className="flex items-center justify-between"><span className="text-sm font-bold">{m.name}</span><Badge variant="outline" className="text-[8px]">{m.tag}</Badge></div><p className="mt-1 truncate text-[10px] text-muted-foreground">{m.symbol}</p><div className="mt-3 flex items-center gap-1 text-[10px] font-semibold text-primary">Open hub <ArrowRight className="h-3 w-3" /></div></Link>)}</div></div></section>
+
+        <section className="border-b border-border/50 bg-card/10">
+          <div className="container mx-auto px-4 py-4">
+            <Link to="/trending-markets" onClick={() => trackBotvioEvent("trending_markets_open", { source: "home_shortcut" })} className="group flex flex-col gap-3 rounded-2xl border border-primary/35 bg-gradient-to-r from-primary/10 via-card to-card p-4 transition hover:border-primary/60 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary"><LineChart className="h-5 w-5" /></div>
+                <div><p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">NEW · LIVE MARKET WATCHLIST</p><h2 className="mt-1 text-sm font-black sm:text-base">Trending Markets</h2><p className="mt-0.5 text-[11px] leading-5 text-muted-foreground">Explore market prices, direction and setup context across supported feeds.</p></div>
+              </div>
+              <span className="inline-flex items-center text-xs font-black text-primary">Check it out <ArrowRight className="ml-1 h-4 w-4 transition group-hover:translate-x-1" /></span>
+            </Link>
+          </div>
+        </section>
 
         <section className="border-b border-border/50 bg-card/10">
           <div className="container mx-auto px-4 py-4">
@@ -250,6 +277,24 @@ const HomeMockup = () => {
       </main>
 
       <footer className="border-t border-border/60 bg-card/20"><div className="container mx-auto flex flex-col gap-4 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between"><div><span className="font-bold text-foreground">BOTVIO</span> · AI Trading Intelligence</div><div className="flex flex-wrap gap-4"><Link to="/about">About</Link><Link to="/affiliate-disclosure">Affiliate Disclosure</Link><Link to="/disclaimer">Risk Disclaimer</Link><Link to="/privacy">Privacy</Link><Link to="/contact">Contact</Link></div></div></footer>
+
+      {trendingMarketsNoticeOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="trending-markets-notice-title">
+          <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-primary/30 bg-card p-6 shadow-2xl">
+            <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-primary/15 blur-3xl" />
+            <div className="relative">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-primary"><LineChart className="h-6 w-6" /></div>
+              <Badge className="mt-4 bg-primary/10 text-primary hover:bg-primary/10">NEW ON BOTVIO</Badge>
+              <h2 id="trending-markets-notice-title" className="mt-3 text-2xl font-black">Have you checked Trending Markets?</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Take a look at the market watchlist for live feed status, prices and technical direction. Explore the data and make your own informed decisions.</p>
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button variant="ghost" onClick={dismissTrendingMarketsNotice}>Maybe later</Button>
+                <Button asChild onClick={dismissTrendingMarketsNotice}><Link to="/trending-markets" onClick={() => trackBotvioEvent("trending_markets_open", { source: "home_popup" })}>Check it out <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <FloatingWhatsAppSupport />
     </div>

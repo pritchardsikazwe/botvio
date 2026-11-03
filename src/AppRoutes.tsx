@@ -143,6 +143,7 @@ import BrokerPage from "./pages/BrokerPage";
 import StartTrading from "./pages/StartTrading";
 import BrokerOnboarding from "./pages/BrokerOnboarding";
 import ChoosePlan from "./pages/ChoosePlan";
+import TrendingMarkets from "./pages/TrendingMarkets";
 import BrokersIndex from "./pages/BrokersIndex";
 import BinaryOptions from "./pages/BinaryOptions";
 import DerivOptionsTerminalPage from "./pages/DerivOptionsTerminalPage";
@@ -257,6 +258,7 @@ export const AppRoutes = () => {
     <Route path="start-trading" element={<StartTrading />} />
     <Route path="broker-onboarding" element={<BrokerOnboarding />} />
     <Route path="choose-plan" element={<ChoosePlan />} />
+    <Route path="trending-markets" element={<Paid><TrendingMarkets /></Paid>} />
     <Route path="install" element={<Install />} />
     <Route path="apps" element={<StandaloneAppsHub />} />
     <Route path="apps/gold-robot" element={<StandaloneApp appId="gold-robot" />} />
