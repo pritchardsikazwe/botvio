@@ -33,8 +33,17 @@ const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
           {name ? `Welcome aboard, ${name}! 🚀` : 'Welcome aboard! 🚀'}
         </Heading>
         <Text style={text}>
-          You've joined thousands of traders using Botvio for AI-powered trading
-          tools, education, and market insights. Here's everything waiting for you:
+          Your Botvio account is ready to explore. Start with the steps below, then use the tools that fit your learning and trading goals. Trading involves risk; signals and analysis are informational, not guaranteed outcomes.
+        </Text>
+
+        <Heading style={h2}>✅ Your first steps</Heading>
+        <Text style={text}>
+          1. Confirm your email using the separate Botvio verification message before signing in (check Spam/Junk if it is missing).{"\n"}
+          2. Sign in at botvio.live and complete your profile.{"\n"}
+          3. Explore Trending Markets for live Deriv market data and technical bias.{"\n"}
+          4. Open AI Chart Analysis to review a chart and learn the key levels.{"\n"}
+          5. Visit Signals and courses to study setups before making any trading decision.{"\n"}
+          6. Review your subscription and broker onboarding options if you want access to additional tools.
         </Text>
 
         <Heading style={h2}>📊 Subscription Plans</Heading>
@@ -47,8 +56,7 @@ const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
         <Heading style={h2}>📈 AI Chart Analysis</Heading>
         <Text style={text}>
           Upload any chart screenshot and get instant AI-powered analysis with
-          key levels, market structure, and trade ideas. Free users get 1 scan
-          per day — upgrade for more.
+          key levels, market structure, and trade ideas. Your available daily scan allowance depends on your plan; check the plan page for current limits.
         </Text>
 
         <Heading style={h2}>🎓 Trading Courses</Heading>
