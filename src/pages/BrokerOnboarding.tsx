@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, ExternalLink, ShieldCheck, Clock3, LockKeyhole, GraduationCap, ChartNoAxesCombined, Users, RefreshCw } from "lucide-react";
+import { ArrowRight, CheckCircle2, ExternalLink, ShieldCheck, Clock3, LockKeyhole, GraduationCap, ChartNoAxesCombined, Users, RefreshCw, Copy } from "lucide-react";
 import { Header } from "@/components/trading/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +66,19 @@ export default function BrokerOnboarding() {
       attribution_status: "not_verified",
     });
     setStatus("review_requested");
+  };
+
+  const copyExistingAccountMessage = async () => {
+    const message = broker === "deriv"
+      ? "Hello Amy, I already have a Deriv account and would like to ask whether it can be linked/tagged to my Botvio partner account. My Botvio referral link is https://t.deriv.link?t=Y8BMQZGW5HAE. Could you please check whether attribution can be added under the applicable partner rules? I understand this is subject to approval."
+      : "Hello Exness Support, I already have an Exness account and use Botvio. Could you please check whether my existing account can be attributed to the Botvio partner link https://one.toexness.com/a/ts1kvs1k? Please advise if this is permitted and what verification is required. I understand attribution is subject to Exness partner rules.";
+    try {
+      await navigator.clipboard.writeText(message);
+      recordOnboardingEvent("existing_broker_message_copied", broker, { attribution_status: "not_verified" });
+      setStatus("review_requested");
+    } catch {
+      setStatus("review_requested");
+    }
   };
 
   return (
@@ -145,11 +158,32 @@ export default function BrokerOnboarding() {
                 <p className="text-sm text-muted-foreground">
                   Existing accounts can only be attributed when {selectedBroker.name}'s partner rules and approved verification process allow it. Botvio cannot promise retroactive reassignment.
                 </p>
-                <Button variant="outline" className="w-full" onClick={requestExistingAccountReview}><RefreshCw className="mr-2 h-4 w-4" />Start eligibility review</Button>
+                {broker === "deriv" ? (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+                    <p className="font-semibold">Already registered with Deriv?</p>
+                    <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted-foreground">
+                      <li>Contact Amy, if she is your Deriv partner representative, and ask whether your existing account can be tagged to the Botvio partner account.</li>
+                      <li>Share the Botvio referral link below and ask her to confirm eligibility and the approved tagging process.</li>
+                      <li>Never share your Deriv password, one-time code, or trading credentials.</li>
+                    </ol>
+                    <Button variant="outline" className="mt-3 w-full" onClick={copyExistingAccountMessage}><Copy className="mr-2 h-4 w-4" />Copy message to Amy</Button>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+                    <p className="font-semibold">Already registered with Exness?</p>
+                    <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted-foreground">
+                      <li>Sign in to your Exness Personal Area and contact Exness Support through its official support/live-chat option.</li>
+                      <li>Ask whether your existing account can be attributed to Botvio and whether the partner team can tag it.</li>
+                      <li>Share the Botvio referral link below only if support requests it. Approval depends on Exness rules.</li>
+                    </ol>
+                    <Button variant="outline" className="mt-3 w-full" onClick={copyExistingAccountMessage}><Copy className="mr-2 h-4 w-4" />Copy message to Exness Support</Button>
+                  </div>
+                )}
+                <Button variant="outline" className="w-full" onClick={requestExistingAccountReview}><RefreshCw className="mr-2 h-4 w-4" />Record that I contacted support</Button>
                 {status === "review_requested" && (
                   <div role="status" className="rounded-lg border p-3 text-sm">
-                    <p className="font-semibold">Eligibility review requested</p>
-                    <p className="mt-1 text-muted-foreground">No account has been verified or linked yet. Contact the broker's official partner support if they must confirm or change attribution. Botvio will unlock eligible free tools only after trusted confirmation is available.</p>
+                    <p className="font-semibold">Next step: wait for broker confirmation</p>
+                    <p className="mt-1 text-muted-foreground">This action does not contact the broker or verify attribution. Return to Botvio after the broker confirms and follow the verification process.</p>
                   </div>
                 )}
               </div>
