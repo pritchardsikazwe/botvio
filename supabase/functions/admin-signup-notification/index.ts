@@ -32,6 +32,37 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: email or user_id");
     }
 
+    // Verify the supplied identity against Auth before triggering email.
+    const { data: authUserData, error: authUserError } = await supabase.auth.admin.getUserById(user_id);
+    const registeredEmail = authUserData?.user?.email?.trim().toLowerCase();
+    if (authUserError || !registeredEmail || registeredEmail !== email.trim().toLowerCase()) {
+      return new Response(JSON.stringify({ error: "Signup identity could not be verified" }), {
+        status: 403, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Queue welcome email from this trusted server context. Unconfirmed signup
+    // clients cannot invoke the JWT-protected transactional mailer themselves.
+    const welcomeResponse = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseServiceKey,
+        "Authorization": `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        templateName: "welcome-email",
+        recipientEmail: registeredEmail,
+        idempotencyKey: `welcome-${user_id}`,
+        templateData: { name: authUserData.user.user_metadata?.display_name || authUserData.user.user_metadata?.full_name || undefined },
+      }),
+    });
+    if (!welcomeResponse.ok) {
+      console.error("Welcome email could not be queued", await welcomeResponse.text());
+    } else {
+      console.log("Welcome email queued for new account", user_id);
+    }
+
     // Find the super admin's user_id by email
     const { data: adminProfile } = await supabase
       .from("profiles")
