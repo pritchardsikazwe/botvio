@@ -75,6 +75,32 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Admin in-app notification created for new user:", email);
 
+    // Queue a separate inbox email for the admin using the existing transactional
+    // mailer. This is best-effort and never blocks the new user's signup.
+    try {
+      const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": supabaseServiceKey,
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+        },
+        body: JSON.stringify({
+          templateName: "admin-new-signup",
+          recipientEmail: SUPER_ADMIN_EMAIL,
+          idempotencyKey: `admin-signup-${user_id}`,
+          templateData: { newUserEmail: email, newUserId: user_id, signupDate },
+        }),
+      });
+      if (!emailResponse.ok) {
+        console.error("Admin signup email could not be queued", await emailResponse.text());
+      } else {
+        console.log("Admin signup inbox email queued");
+      }
+    } catch (emailError) {
+      console.error("Admin signup inbox email request failed", emailError);
+    }
+
     return new Response(
       JSON.stringify({ success: true, message: "Admin notified via in-app notification" }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
