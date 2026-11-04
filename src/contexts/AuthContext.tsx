@@ -251,15 +251,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       }).catch(() => {});
 
-      // Send welcome email (fire and forget)
-      supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "welcome-email",
-          recipientEmail: email,
-          idempotencyKey: `welcome-${data.user.id}`,
-          templateData: { name: displayName || undefined },
-        },
-      }).catch(() => {});
+      // The signup-notification Edge Function uses the service role to queue
+      // welcome + admin emails. The browser's unconfirmed session cannot call
+      // the JWT-protected transactional mailer directly.
+
     }
 
     if (!error) trackBotvioEvent("signup_completed", { selected_plan: planCode || "free", country: country || "unknown" });
