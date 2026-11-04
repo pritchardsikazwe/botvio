@@ -24,11 +24,11 @@ const weltrade: Market[] = [
   { symbol: "AUDUSD", name: "Aussie / USD", source: "weltrade-api-studio", feedSymbol: "AUDUSD" },
 ];
 const forex: Market[] = [
-  { symbol: "EURUSD", name: "Euro / USD", source: "weltrade-api-studio", feedSymbol: "EURUSD" },
-  { symbol: "GBPUSD", name: "Pound / USD", source: "weltrade-api-studio", feedSymbol: "GBPUSD" },
-  { symbol: "USDJPY", name: "USD / Yen", source: "weltrade-api-studio", feedSymbol: "USDJPY" },
-  { symbol: "AUDUSD", name: "Aussie / USD", source: "weltrade-api-studio", feedSymbol: "AUDUSD" },
-  { symbol: "USDCAD", name: "USD / CAD", source: "weltrade-api-studio", feedSymbol: "USDCAD" },
+  { symbol: "EURUSD", name: "Euro / USD", source: "deriv", feedSymbol: "frxEURUSD" },
+  { symbol: "GBPUSD", name: "Pound / USD", source: "deriv", feedSymbol: "frxGBPUSD" },
+  { symbol: "USDJPY", name: "USD / Yen", source: "deriv", feedSymbol: "frxUSDJPY" },
+  { symbol: "AUDUSD", name: "Aussie / USD", source: "deriv", feedSymbol: "frxAUDUSD" },
+  { symbol: "USDCAD", name: "USD / CAD", source: "deriv", feedSymbol: "frxUSDCAD" },
 ];
 const all = [...synthetic, ...weltrade, ...forex];
 const statusLabel: Record<FeedStatus, string> = { idle: "Idle", connecting: "Connecting", live: "LIVE", reconnecting: "Reconnecting", delayed: "Delayed", unavailable: "Unavailable", error: "Feed error" };
@@ -85,7 +85,7 @@ export default function TrendingMarkets() {
     <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm text-muted-foreground">Subscription <span className="mx-2">›</span> Trending Markets</p><h1 className="mt-2 flex items-center gap-2 text-2xl font-bold md:text-3xl"><Flame className="h-7 w-7 text-amber-500"/>Live Trending Markets</h1><p className="mt-1 text-sm text-muted-foreground">Streaming quotes and candle-derived trend bias. Signals are technical indicators, not guarantees.</p></div><Button variant="outline" size="sm" onClick={()=>setRefreshKey(k=>k+1)}><RefreshCw className="mr-2 h-4 w-4"/>Reconnect feeds</Button></div>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Live feeds</p><p className="text-2xl font-bold">{liveCount}<span className="text-sm font-normal text-muted-foreground"> / {filtered.length}</span></p></CardContent></Card><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Live BUY bias</p><p className="text-2xl font-bold text-emerald-500">{buys}</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Live SELL bias</p><p className="text-2xl font-bold text-rose-500">{sells}</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Last update</p><p className="text-base font-semibold">{filtered.reduce((n,m)=>Math.max(n,m.lastUpdate??0),0)?new Date(filtered.reduce((n,m)=>Math.max(n,m.lastUpdate??0),0)).toLocaleTimeString():"Waiting…"}</p></CardContent></Card></div>
     <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-2">{groups.map(g=><Button key={g.label} size="sm" variant={group===g.label?"default":"outline"} onClick={()=>setGroup(g.label)}>{g.label}</Button>)}</div><div className="flex items-center gap-2 text-sm text-muted-foreground">Timeframe {(["1H","4H","1D"] as Timeframe[]).map(t=><Button key={t} size="sm" variant={timeframe===t?"default":"outline"} onClick={()=>setTimeframe(t)}>{t}</Button>)}</div></div>
-    <div className="grid gap-4 xl:grid-cols-3"><MarketTable title="Synthetic Indices · Live" markets={group==="All Markets"||group==="Synthetic Indices"?byMarkets(synthetic):filtered.slice(0,5)}/><MarketTable title="Weltrade MT5 · Live" markets={group==="All Markets"||group==="Weltrade (MT5)"?byMarkets(weltrade):filtered.slice(0,5)}/><MarketTable title="Major FX · Live" markets={group==="All Markets"||group==="Major Currencies"?byMarkets(forex):filtered.slice(0,5)}/></div>
+    <div className="grid gap-4 xl:grid-cols-3"><MarketTable title="Synthetic Indices · Live" markets={group==="All Markets"||group==="Synthetic Indices"?byMarkets(synthetic):filtered.slice(0,5)}/><MarketTable title="Weltrade MT5 · Live" markets={group==="All Markets"||group==="Weltrade (MT5)"?byMarkets(weltrade):filtered.slice(0,5)}/><MarketTable title="Major FX · Deriv Live" markets={group==="All Markets"||group==="Major Currencies"?byMarkets(forex):filtered.slice(0,5)}/></div>
     <p className="text-xs text-muted-foreground">Feed status is sourced from the connected market-data adapter. BUY/SELL bias is computed from the latest received candles (EMA 9/21/50); unavailable symbols remain visibly unavailable. Prices and signals may be delayed by the broker or network.</p>
   </main></div>;
 }
