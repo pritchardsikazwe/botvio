@@ -16,21 +16,19 @@ const synthetic: Market[] = [
   { symbol: "Volatility 25", name: "V25 Index", source: "deriv", feedSymbol: "R_25" },
   { symbol: "Step Index", name: "Step Index", source: "deriv", feedSymbol: "stpRNG" },
 ];
-const weltrade: Market[] = [
-  { symbol: "XAUUSD", name: "Gold", source: "weltrade-api-studio", feedSymbol: "XAUUSD" },
-  { symbol: "USOIL", name: "WTI Crude", source: "weltrade-api-studio", feedSymbol: "USOIL" },
-  { symbol: "NAS100", name: "Nasdaq 100", source: "weltrade-api-studio", feedSymbol: "NAS100" },
-  { symbol: "BTCUSD", name: "Bitcoin", source: "weltrade-api-studio", feedSymbol: "BTCUSD" },
-  { symbol: "AUDUSD", name: "Aussie / USD", source: "weltrade-api-studio", feedSymbol: "AUDUSD" },
-];
 const forex: Market[] = [
   { symbol: "EURUSD", name: "Euro / USD", source: "deriv", feedSymbol: "frxEURUSD" },
   { symbol: "GBPUSD", name: "Pound / USD", source: "deriv", feedSymbol: "frxGBPUSD" },
   { symbol: "USDJPY", name: "USD / Yen", source: "deriv", feedSymbol: "frxUSDJPY" },
   { symbol: "AUDUSD", name: "Aussie / USD", source: "deriv", feedSymbol: "frxAUDUSD" },
   { symbol: "USDCAD", name: "USD / CAD", source: "deriv", feedSymbol: "frxUSDCAD" },
+  { symbol: "USDCHF", name: "USD / Swiss Franc", source: "deriv", feedSymbol: "frxUSDCHF" },
+  { symbol: "NZDUSD", name: "Kiwi / USD", source: "deriv", feedSymbol: "frxNZDUSD" },
+  { symbol: "EURGBP", name: "Euro / Pound", source: "deriv", feedSymbol: "frxEURGBP" },
+  { symbol: "EURJPY", name: "Euro / Yen", source: "deriv", feedSymbol: "frxEURJPY" },
+  { symbol: "GBPJPY", name: "Pound / Yen", source: "deriv", feedSymbol: "frxGBPJPY" },
 ];
-const all = [...synthetic, ...weltrade, ...forex];
+const all = [...synthetic, ...forex];
 const statusLabel: Record<FeedStatus, string> = { idle: "Idle", connecting: "Connecting", live: "LIVE", reconnecting: "Reconnecting", delayed: "Delayed", unavailable: "Unavailable", error: "Feed error" };
 function analyze(candles: NormalizedCandle[]) {
   if (candles.length < 50) return { direction: "WAIT" as const, strength: null, setup: "Collecting candles", note: "Need at least 50 live-feed candles" };
@@ -75,7 +73,7 @@ export default function TrendingMarkets() {
     });
     return ()=>{mounted=false;adapters.forEach(a=>a.stop());};
   },[timeframe,refreshKey]);
-  const groups = [{ label: "All Markets", data: all }, { label: "Synthetic Indices", data: synthetic }, { label: "Weltrade (MT5)", data: weltrade }, { label: "Major Currencies", data: forex }];
+  const groups = [{ label: "All Markets", data: all }, { label: "Synthetic Indices", data: synthetic }, { label: "Major Currencies · Deriv", data: forex }];
   const filtered = useMemo(()=>live.filter(m=>group==="All Markets"||groups.find(g=>g.label===group)?.data.some(x=>x.feedSymbol===m.feedSymbol&&x.source===m.source)),[group,live]);
   const buys=filtered.filter(m=>analyze(m.candles).direction==="BUY").length;
   const sells=filtered.filter(m=>analyze(m.candles).direction==="SELL").length;
@@ -85,7 +83,7 @@ export default function TrendingMarkets() {
     <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm text-muted-foreground">Subscription <span className="mx-2">›</span> Trending Markets</p><h1 className="mt-2 flex items-center gap-2 text-2xl font-bold md:text-3xl"><Flame className="h-7 w-7 text-amber-500"/>Live Trending Markets</h1><p className="mt-1 text-sm text-muted-foreground">Streaming quotes and candle-derived trend bias. Signals are technical indicators, not guarantees.</p></div><Button variant="outline" size="sm" onClick={()=>setRefreshKey(k=>k+1)}><RefreshCw className="mr-2 h-4 w-4"/>Reconnect feeds</Button></div>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Live feeds</p><p className="text-2xl font-bold">{liveCount}<span className="text-sm font-normal text-muted-foreground"> / {filtered.length}</span></p></CardContent></Card><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Live BUY bias</p><p className="text-2xl font-bold text-emerald-500">{buys}</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Live SELL bias</p><p className="text-2xl font-bold text-rose-500">{sells}</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Last update</p><p className="text-base font-semibold">{filtered.reduce((n,m)=>Math.max(n,m.lastUpdate??0),0)?new Date(filtered.reduce((n,m)=>Math.max(n,m.lastUpdate??0),0)).toLocaleTimeString():"Waiting…"}</p></CardContent></Card></div>
     <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-2">{groups.map(g=><Button key={g.label} size="sm" variant={group===g.label?"default":"outline"} onClick={()=>setGroup(g.label)}>{g.label}</Button>)}</div><div className="flex items-center gap-2 text-sm text-muted-foreground">Timeframe {(["1H","4H","1D"] as Timeframe[]).map(t=><Button key={t} size="sm" variant={timeframe===t?"default":"outline"} onClick={()=>setTimeframe(t)}>{t}</Button>)}</div></div>
-    <div className="grid gap-4 xl:grid-cols-3"><MarketTable title="Synthetic Indices · Live" markets={group==="All Markets"||group==="Synthetic Indices"?byMarkets(synthetic):filtered.slice(0,5)}/><MarketTable title="Weltrade MT5 · Live" markets={group==="All Markets"||group==="Weltrade (MT5)"?byMarkets(weltrade):filtered.slice(0,5)}/><MarketTable title="Major FX · Deriv Live" markets={group==="All Markets"||group==="Major Currencies"?byMarkets(forex):filtered.slice(0,5)}/></div>
+    <div className="grid gap-4 xl:grid-cols-2"><MarketTable title="Synthetic Indices · Deriv Live" markets={group==="All Markets"||group==="Synthetic Indices"?byMarkets(synthetic):filtered.filter(m=>synthetic.some(x=>x.feedSymbol===m.feedSymbol))}/><MarketTable title="Major Currencies · Deriv Live" markets={group==="All Markets"||group==="Major Currencies · Deriv"?byMarkets(forex):filtered.filter(m=>forex.some(x=>x.feedSymbol===m.feedSymbol))}/></div>
     <p className="text-xs text-muted-foreground">Feed status is sourced from the connected market-data adapter. BUY/SELL bias is computed from the latest received candles (EMA 9/21/50); unavailable symbols remain visibly unavailable. Prices and signals may be delayed by the broker or network.</p>
   </main></div>;
 }
