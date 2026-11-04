@@ -31,7 +31,20 @@ export default function Auth() {
     setLoading(true);
     const { error } = await signIn(email.trim(), password);
     setLoading(false);
-    if (error) toast.error(error.message || "Sign in failed");
+    if (error) {
+      if (error.message?.toLowerCase().includes("email not confirmed")) {
+        toast.error("Email not confirmed. Check your inbox and Spam/Junk for Botvio's confirmation link. You can resend it below.");
+      } else {
+        toast.error(error.message || "Sign in failed");
+      }
+    }
+  };
+
+  const resendConfirmation = async () => {
+    if (!email.trim()) { toast.error("Enter your email first"); return; }
+    const { error } = await supabase.auth.resend({ type: "signup", email: email.trim(), options: { emailRedirectTo: window.location.origin } });
+    if (error) toast.error(error.message);
+    else toast.success("Confirmation email requested. Check your inbox and Spam/Junk.");
   };
 
   const google = async () => {
@@ -63,7 +76,7 @@ export default function Auth() {
             </form>
             <Button variant="outline" className="mt-3 w-full" onClick={google}>Continue with Google</Button>
             <div className="mt-4 flex justify-between text-sm">
-              <button type="button" onClick={reset} className="text-muted-foreground underline">Forgot password?</button>
+              <div className="flex flex-wrap gap-3"><button type="button" onClick={reset} className="text-muted-foreground underline">Forgot password?</button><button type="button" onClick={resendConfirmation} className="text-muted-foreground underline">Resend confirmation</button></div>
               <Link to="/signup" className="font-semibold text-primary">Create account</Link>
             </div>
           </CardContent>
