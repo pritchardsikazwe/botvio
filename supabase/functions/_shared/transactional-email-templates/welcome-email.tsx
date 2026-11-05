@@ -16,7 +16,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const LOGO_URL = 'https://tqqkzeblmjapgbnsbtgw.supabase.co/storage/v1/object/public/email-assets/botvio-logo.png'
-const SITE_NAME = 'Botvio – Forex Signals, AI Chart Analysis & Gold Trading Mentorship'
+const SITE_NAME = 'Botvio'
 
 interface WelcomeEmailProps {
   name?: string
@@ -33,7 +33,7 @@ const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
           {name ? `Welcome aboard, ${name}! 🚀` : 'Welcome aboard! 🚀'}
         </Heading>
         <Text style={text}>
-          Your Botvio account is ready to explore. Start with the steps below, then use the tools that fit your learning and trading goals. Trading involves risk; signals and analysis are informational, not guaranteed outcomes.
+          Your Botvio account is ready. You get a 7-day free trial with up to 35 signals a day. Start with the steps below, then use the tools that fit your learning and trading goals. Trading involves risk; signals and analysis are informational, not guaranteed outcomes.
         </Text>
 
         <Heading style={h2}>✅ Your first steps</Heading>
